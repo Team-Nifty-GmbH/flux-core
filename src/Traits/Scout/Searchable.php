@@ -47,7 +47,7 @@ trait Searchable
             ];
 
             // Drop hits scoring below the configured relevance threshold; 0 disables the cut.
-            if ($search->semantic_score_threshold > 0) {
+            if (($search->semantic_score_threshold ?? 0) > 0) {
                 $options['rankingScoreThreshold'] = $search->semantic_score_threshold;
             }
 
