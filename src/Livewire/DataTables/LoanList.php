@@ -17,13 +17,16 @@ class LoanList extends BaseDataTable
         'contact.invoice_address.name',
         'amount',
         'remaining_principal',
+        'total_interest',
         'number_of_installments',
         'starts_at',
     ];
 
     public array $formatters = [
-        'amount' => 'money',
-        'remaining_principal' => 'money',
+        'amount' => 'coloredMoney',
+        'interest_rate' => 'percentage',
+        'remaining_principal' => 'coloredMoney',
+        'total_interest' => 'coloredMoney',
         'starts_at' => 'date',
     ];
 
@@ -42,6 +45,7 @@ class LoanList extends BaseDataTable
             ->withSum(
                 ['installments as remaining_principal' => fn (Builder $query) => $query->where('is_paid', false)],
                 'principal_amount'
-            );
+            )
+            ->withSum('installments as total_interest', 'interest_amount');
     }
 }

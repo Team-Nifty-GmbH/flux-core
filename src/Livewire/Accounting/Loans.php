@@ -7,7 +7,9 @@ use FluxErp\Actions\Loan\DeleteLoan;
 use FluxErp\Actions\Loan\UpdateLoan;
 use FluxErp\Livewire\DataTables\LoanList;
 use FluxErp\Livewire\Forms\LoanForm;
+use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Models\Loan;
+use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -15,9 +17,13 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Loans extends LoanList
 {
+    use WithFileUploads;
+
     public ?string $includeBefore = 'flux::livewire.accounting.loans';
 
     public LoanForm $loan;
+
+    public MediaUploadForm $contract;
 
     public array $installments = [];
 
@@ -80,10 +86,12 @@ class Loans extends LoanList
     public function edit(?Loan $loan = null): void
     {
         $this->loan->reset();
+        $this->contract->reset();
         $this->installments = [];
 
         if ($loan?->exists) {
             $this->loan->fill($loan);
+            $this->contract->fill($loan->getFirstMedia('contract') ?? []);
             $this->installments = $this->buildSchedule($loan);
         }
 
@@ -98,6 +106,18 @@ class Loans extends LoanList
             exception_to_notifications($e, $this);
 
             return false;
+        }
+
+        $this->contract->model_type = app(Loan::class)->getMorphClass();
+        $this->contract->model_id = $this->loan->id;
+        $this->contract->collection_name = 'contract';
+
+        if ($this->contract->stagedFiles || $this->contract->id) {
+            try {
+                $this->contract->save();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
         }
 
         $this->loadData();

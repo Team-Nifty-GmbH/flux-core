@@ -5,6 +5,7 @@ use FluxErp\Livewire\Accounting\Loans;
 use FluxErp\Models\Contact;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Loan;
+use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -36,7 +37,7 @@ test('can create a loan with its schedule', function (): void {
         ->set('loan.ledger_account_id', $this->ledgerAccount->getKey())
         ->set('loan.name', 'Machine financing')
         ->set('loan.amount', 12000)
-        ->set('loan.interest_rate', 0.06)
+        ->set('loan.interest_rate', 6)
         ->set('loan.repayment_type_enum', RepaymentTypeEnum::Annuity->value)
         ->set('loan.number_of_installments', 12)
         ->set('loan.starts_at', '2026-01-01')
@@ -44,8 +45,25 @@ test('can create a loan with its schedule', function (): void {
         ->assertOk()
         ->assertHasNoErrors();
 
-    $this->assertDatabaseHas('loans', ['name' => 'Machine financing']);
+    $this->assertDatabaseHas('loans', [
+        'name' => 'Machine financing',
+        'interest_rate' => 0.06,
+    ]);
     $this->assertDatabaseCount('loan_installments', 12);
+});
+
+test('edit shows the interest rate as a percentage', function (): void {
+    $loan = Loan::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'contact_id' => $this->contact->getKey(),
+        'ledger_account_id' => $this->ledgerAccount->getKey(),
+        'interest_rate' => 0.02299,
+    ]);
+
+    Livewire::test(Loans::class)
+        ->call('edit', $loan->getKey())
+        ->assertOk()
+        ->assertSet('loan.interest_rate', 2.299);
 });
 
 test('edit populates the schedule for an existing loan', function (): void {
@@ -74,6 +92,59 @@ test('edit populates the schedule for an existing loan', function (): void {
         ->assertOk()
         ->assertSet('loan.id', $loan->getKey())
         ->assertCount('installments', 2);
+});
+
+test('the list sums the total interest over the whole term', function (): void {
+    $loan = Loan::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'contact_id' => $this->contact->getKey(),
+        'ledger_account_id' => $this->ledgerAccount->getKey(),
+        'amount' => 12000,
+        'number_of_installments' => 2,
+    ]);
+    $loan->installments()->create([
+        'sequence' => 1,
+        'due_date' => '2026-02-01',
+        'principal_amount' => 6000,
+        'interest_amount' => 60,
+    ]);
+    $loan->installments()->create([
+        'sequence' => 2,
+        'due_date' => '2026-03-01',
+        'principal_amount' => 6000,
+        'interest_amount' => 30,
+        'is_paid' => true,
+    ]);
+
+    $data = Livewire::test(Loans::class)
+        ->call('loadData')
+        ->assertOk()
+        ->instance()
+        ->getDataForTesting();
+
+    expect(data_get($data, 'data.0.total_interest.raw'))->toEqual(90)
+        ->and(data_get($data, 'data.0.total_interest.display'))->toContain('text-green-600')
+        ->and(data_get($data, 'data.0.remaining_principal.raw'))->toEqual(6000);
+});
+
+test('can attach a contract to a loan', function (): void {
+    $loan = Loan::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'contact_id' => $this->contact->getKey(),
+        'ledger_account_id' => $this->ledgerAccount->getKey(),
+    ]);
+
+    Livewire::test(Loans::class)
+        ->call('edit', $loan->getKey())
+        ->set('contract.file', [UploadedFile::fake()->image('contract.jpg')])
+        ->call('save')
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    $media = $loan->refresh()->getMedia('contract');
+
+    expect($media)->toHaveCount(1)
+        ->and($media->first()->file_name)->toBe('contract.jpg');
 });
 
 test('can delete a loan', function (): void {
