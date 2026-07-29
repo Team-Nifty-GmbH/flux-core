@@ -22,7 +22,9 @@ class RepaymentScheduleGenerator
         Carbon $startsAt,
     ): array {
         $amount = $this->normalize($amount);
-        $periodRate = bcdiv($this->normalize($interestRate ?? 0), '12', $this->rateScale);
+        // the rate keeps its own scale, rounding it to the money scale would
+        // collapse anything below a full percent
+        $periodRate = bcdiv($this->normalize($interestRate ?? 0, $this->rateScale), '12', $this->rateScale);
 
         $principals = $repaymentType === RepaymentTypeEnum::Annuity
             ? $this->annuityPrincipals($amount, $periodRate, $numberOfInstallments)
@@ -32,7 +34,7 @@ class RepaymentScheduleGenerator
         $balance = $amount;
 
         foreach ($principals as $index => $principal) {
-            $interest = bcmul($balance, $periodRate, $this->scale);
+            $interest = $this->interest($balance, $periodRate);
             $balance = bcsub($balance, $principal, $this->scale);
 
             $installments[] = [
@@ -58,9 +60,12 @@ class RepaymentScheduleGenerator
         }
 
         $onePlusRatePowN = bcpow(bcadd('1', $periodRate, $this->rateScale), (string) $count, $this->rateScale);
-        $payment = bcdiv(
-            bcmul($amount, bcmul($periodRate, $onePlusRatePowN, $this->rateScale), $this->rateScale),
-            bcsub($onePlusRatePowN, '1', $this->rateScale),
+        $payment = bcround(
+            bcdiv(
+                bcmul($amount, bcmul($periodRate, $onePlusRatePowN, $this->rateScale), $this->rateScale),
+                bcsub($onePlusRatePowN, '1', $this->rateScale),
+                $this->rateScale
+            ),
             $this->scale
         );
 
@@ -68,13 +73,23 @@ class RepaymentScheduleGenerator
         $balance = $amount;
 
         for ($i = 0; $i < $count; $i++) {
-            $interest = bcmul($balance, $periodRate, $this->scale);
+            $interest = $this->interest($balance, $periodRate);
             $principal = bcsub($payment, $interest, $this->scale);
             $balance = bcsub($balance, $principal, $this->scale);
             $principals[] = $principal;
         }
 
         return $this->withRemainderOnLast($principals, $amount);
+    }
+
+    /**
+     * Interest on the balance, rounded to the money scale. Multiplying at the
+     * rate scale first keeps the cent from being lost to the repeating decimal
+     * of the period rate.
+     */
+    protected function interest(string $balance, string $periodRate): string
+    {
+        return bcround(bcmul($balance, $periodRate, $this->rateScale), $this->scale);
     }
 
     /**
@@ -87,9 +102,14 @@ class RepaymentScheduleGenerator
         return $this->withRemainderOnLast(array_fill(0, $count, $principal), $amount);
     }
 
-    protected function normalize(string|float|int $value): string
+    protected function normalize(string|float|int $value, ?int $scale = null): string
     {
-        return bcadd((string) $value, '0', $this->scale);
+        // floats would reach bcadd in scientific notation for very small rates
+        return bcadd(
+            is_float($value) ? sprintf('%.10F', $value) : (string) $value,
+            '0',
+            $scale ?? $this->scale
+        );
     }
 
     /**

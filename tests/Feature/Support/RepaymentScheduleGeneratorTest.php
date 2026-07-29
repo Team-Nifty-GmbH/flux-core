@@ -68,6 +68,31 @@ test('linear schedule keeps the principal constant while the installment decline
     expect(sumPrincipals($schedule))->toBe('12000.00');
 });
 
+test('the interest rate keeps its decimals instead of being rounded to full percent', function (): void {
+    $precise = app(RepaymentScheduleGenerator::class)->generate(
+        amount: 12000,
+        interestRate: 0.1298,
+        numberOfInstallments: 12,
+        repaymentType: RepaymentTypeEnum::Annuity,
+        startsAt: Carbon::parse('2026-01-01'),
+    );
+
+    $rounded = app(RepaymentScheduleGenerator::class)->generate(
+        amount: 12000,
+        interestRate: 0.12,
+        numberOfInstallments: 12,
+        repaymentType: RepaymentTypeEnum::Annuity,
+        startsAt: Carbon::parse('2026-01-01'),
+    );
+
+    // 12.98 % must cost more interest than 12 %: 12000 * 0.1298 / 12 = 129.80
+    // exactly, so the repeating period rate must not cost the last cent.
+    expect(bccomp($precise[0]['interest_amount'], $rounded[0]['interest_amount'], 2))->toBe(1)
+        ->and($precise[0]['interest_amount'])->toBe('129.80')
+        ->and($rounded[0]['interest_amount'])->toBe('120.00')
+        ->and(sumPrincipals($precise))->toBe('12000.00');
+});
+
 test('zero rate schedule is pure principal', function (): void {
     $schedule = app(RepaymentScheduleGenerator::class)->generate(
         amount: 12000,
