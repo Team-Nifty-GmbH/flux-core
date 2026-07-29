@@ -67,16 +67,21 @@ const measureTopEdge = () => {
         const style = getComputedStyle(element);
 
         if (
-            (style.position !== 'fixed' && style.position !== 'sticky')
-            || style.pointerEvents === 'none'
-            || style.visibility === 'hidden'
+            (style.position !== 'fixed' && style.position !== 'sticky') ||
+            style.pointerEvents === 'none' ||
+            style.visibility === 'hidden'
         ) {
             return;
         }
 
         const rect = element.getBoundingClientRect();
 
-        if (rect.top <= 1 && rect.bottom > 1 && rect.height <= limit && rect.width > 200) {
+        if (
+            rect.top <= 1 &&
+            rect.bottom > 1 &&
+            rect.height <= limit &&
+            rect.width > 200
+        ) {
             edge = Math.max(edge, rect.bottom);
         }
     });
@@ -88,14 +93,21 @@ const measureTopEdge = () => {
  * set off while nothing beneath it moves.
  */
 const followsPage = (table) => {
-    for (let node = table.parentElement; node && node !== document.body; node = node.parentElement) {
+    for (
+        let node = table.parentElement;
+        node && node !== document.body;
+        node = node.parentElement
+    ) {
         const style = getComputedStyle(node);
 
         if (style.position === 'fixed') {
             return false;
         }
 
-        if (style.overflowY !== 'visible' && node.scrollHeight > node.clientHeight + 1) {
+        if (
+            style.overflowY !== 'visible' &&
+            node.scrollHeight > node.clientHeight + 1
+        ) {
             return false;
         }
     }
@@ -107,7 +119,7 @@ const measure = (table) => {
     const head = table.querySelector('thead');
     const body = table.querySelector('tbody');
 
-    if (! head || ! body) {
+    if (!head || !body) {
         return;
     }
 
@@ -116,11 +128,11 @@ const measure = (table) => {
     // away like everything else.
     const labels = head.rows[0];
 
-    if (! labels) {
+    if (!labels) {
         return;
     }
 
-    if (! followsPage(table)) {
+    if (!followsPage(table)) {
         labels.style.setProperty('--flux-head-travel', '0px');
 
         return;
@@ -167,7 +179,9 @@ const measureAll = () => {
     const run = () => {
         queued = false;
 
-        document.querySelectorAll('[tall-datatable]').forEach((table) => measure(table));
+        document
+            .querySelectorAll('[tall-datatable]')
+            .forEach((table) => measure(table));
     };
 
     document.hidden ? setTimeout(run) : requestAnimationFrame(run);
@@ -190,8 +204,12 @@ if (CSS.supports('animation-timeline: scroll(root block)')) {
     document.addEventListener('livewire:initialized', start);
     document.addEventListener('livewire:navigated', start);
 
-    window.addEventListener('resize', () => {
-        measureTopEdge();
-        measureAll();
-    }, { passive: true });
+    window.addEventListener(
+        'resize',
+        () => {
+            measureTopEdge();
+            measureAll();
+        },
+        { passive: true },
+    );
 }
