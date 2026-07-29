@@ -19,6 +19,8 @@ class SearchSettings extends FluxSettings
 
     public float $semantic_ratio = 0.5;
 
+    public float $semantic_score_threshold = 0;
+
     public static function group(): string
     {
         return 'search';

@@ -90,3 +90,29 @@ test('adds no hybrid options when semantic search disabled', function (): void {
 
     expect(data_get(Country::search('berlin')->options, 'hybrid'))->toBeNull();
 });
+
+test('adds the ranking score threshold to hybrid options when configured', function (): void {
+    config(['scout.driver' => 'meilisearch']);
+
+    SearchSettings::fake([
+        'semantic_search_enabled' => true,
+        'embedder_url' => 'https://litellm.test/v1/embeddings',
+        'semantic_ratio' => 0.5,
+        'semantic_score_threshold' => 0.78,
+    ]);
+
+    expect(data_get(Country::search('berlin')->options, 'rankingScoreThreshold'))->toBe(0.78);
+});
+
+test('omits the ranking score threshold when it is zero', function (): void {
+    config(['scout.driver' => 'meilisearch']);
+
+    SearchSettings::fake([
+        'semantic_search_enabled' => true,
+        'embedder_url' => 'https://litellm.test/v1/embeddings',
+        'semantic_ratio' => 0.5,
+        'semantic_score_threshold' => 0,
+    ]);
+
+    expect(data_get(Country::search('berlin')->options, 'rankingScoreThreshold'))->toBeNull();
+});
