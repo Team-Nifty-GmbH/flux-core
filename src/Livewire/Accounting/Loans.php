@@ -108,7 +108,7 @@ class Loans extends LoanList
             return false;
         }
 
-        $this->contract->model_type = app(Loan::class)->getMorphClass();
+        $this->contract->model_type = morph_alias(Loan::class);
         $this->contract->model_id = $this->loan->id;
         $this->contract->collection_name = 'contract';
 

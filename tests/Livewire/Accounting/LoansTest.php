@@ -52,6 +52,27 @@ test('can create a loan with its schedule', function (): void {
     $this->assertDatabaseCount('loan_installments', 12);
 });
 
+test('a tiny interest rate does not reach bcmath in scientific notation', function (): void {
+    Livewire::test(Loans::class)
+        ->call('edit')
+        ->set('loan.contact_id', $this->contact->getKey())
+        ->set('loan.ledger_account_id', $this->ledgerAccount->getKey())
+        ->set('loan.name', 'Almost free money')
+        ->set('loan.amount', 12000)
+        ->set('loan.interest_rate', 0.00001)
+        ->set('loan.repayment_type_enum', RepaymentTypeEnum::Annuity->value)
+        ->set('loan.number_of_installments', 12)
+        ->set('loan.starts_at', '2026-01-01')
+        ->call('save')
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    $this->assertDatabaseHas('loans', [
+        'name' => 'Almost free money',
+        'interest_rate' => 0.0000001,
+    ]);
+});
+
 test('edit shows the interest rate as a percentage', function (): void {
     $loan = Loan::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
