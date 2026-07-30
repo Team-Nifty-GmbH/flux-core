@@ -5,6 +5,8 @@ namespace FluxErp\Rulesets\LedgerBooking;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\LedgerBooking;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\MorphClassExists;
+use FluxErp\Rules\MorphExists;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
 
@@ -41,6 +43,18 @@ class UpdateLedgerBookingRuleset extends FluxRuleset
             'booking_date' => 'sometimes|required|date',
             'booking_text' => 'string|max:255|nullable',
             'note' => 'string|max:255|nullable',
+            'source_type' => [
+                'string',
+                'nullable',
+                'required_with:source_id',
+                app(MorphClassExists::class),
+            ],
+            'source_id' => [
+                'integer',
+                'nullable',
+                'required_with:source_type',
+                app(MorphExists::class, ['modelAttribute' => 'source_type']),
+            ],
         ];
     }
 }
