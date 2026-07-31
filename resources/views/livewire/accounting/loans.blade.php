@@ -1,4 +1,4 @@
-<x-modal id="edit-loan-modal" :title="__('Loan')" size="xl">
+<x-modal id="edit-loan-modal" :title="__('Loan')" size="6xl">
     <div class="flex flex-col gap-1.5">
         <x-input wire:model="loan.name" :label="__('Name')" required />
         <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
@@ -48,8 +48,10 @@
                 <x-number
                     wire:model="loan.interest_rate"
                     :label="__('Interest Rate')"
-                    step="0.0001"
-                    placeholder="0.0000"
+                    suffix="%"
+                    min="0"
+                    step="0.001"
+                    placeholder="0.000"
                 />
             </div>
             <div class="grid grid-cols-1 gap-1.5 md:grid-cols-3">
@@ -69,8 +71,15 @@
             </div>
         </div>
 
+        <x-flux::features.media.upload-form-object
+            :label="__('Contract')"
+            wire:model="contract"
+            :multiple="false"
+            accept="application/pdf, image/jpeg, image/png"
+        />
+
         @if ($installments)
-            <div class="mt-4">
+            <div class="mt-4 max-h-96 overflow-y-auto">
                 <x-table>
                     <x-slot:header>
                         <table.row>
