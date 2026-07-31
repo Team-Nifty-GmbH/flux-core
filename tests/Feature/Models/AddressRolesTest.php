@@ -3,11 +3,6 @@
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 
-// The roles of a contact are single assignment: an address does not give one up
-// by being switched off, it loses it when another address takes it over. A
-// deleted address hands its roles to the one that survives it, but it used to
-// keep claiming them on its own row, so restoring it left the contact with two
-// main addresses and no way back, because both toggles lock once they are on.
 test('a deleted address gives up the roles it hands over', function (): void {
     $contact = Contact::factory()->create();
     $main = Address::factory()->create([

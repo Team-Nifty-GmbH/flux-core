@@ -280,16 +280,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
                 $mainAddress->update($addressUpdates);
 
-                // A role belongs to exactly one address, and the address that
-                // just handed it over has to give up its own claim on it.
-                // Keeping the flag left the role on two rows as soon as the
-                // deleted address was restored, and neither of them could be
-                // switched over any more, because a role is taken by turning it
-                // on somewhere else and both were already on.
-                resolve_static(Address::class, 'query')
-                    ->withTrashed()
-                    ->whereKey($address->getKey())
-                    ->update(array_fill_keys(array_keys($addressUpdates), false));
+                $address->updateQuietly(array_fill_keys(array_keys($addressUpdates), false));
             }
         });
     }
