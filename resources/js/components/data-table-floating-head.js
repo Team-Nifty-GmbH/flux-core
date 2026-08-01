@@ -141,6 +141,16 @@ const measure = (table) => {
     const headRect = head.getBoundingClientRect();
     const bodyRect = body.getBoundingClientRect();
 
+    // A table that fits between the bar and the lower edge of the screen has
+    // nothing that could scroll underneath its labels. Letting them travel
+    // anyway would only lay the row over the few rows there are, and with a
+    // single one it covers the entire table.
+    if (bodyRect.bottom - headRect.top <= window.innerHeight - edge) {
+        labels.style.setProperty('--flux-head-travel', '0px');
+
+        return;
+    }
+
     // The row is shifted, the head around it is not: its top edge is where the
     // row would sit without the shift.
     const height = labels.offsetHeight;
