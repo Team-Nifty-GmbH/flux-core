@@ -448,13 +448,15 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     }
 
     /**
-     * The address snapshots are plain JSON, so nothing stops a caller from storing the
-     * translated salutation label instead of the enum value. Replicating such an order
-     * later fails validation, because the ruleset only accepts the enum value. Map a
-     * known label back to its case and leave anything unknown untouched.
+     * A snapshot holding the translated label instead of the enum value fails
+     * validation on every replication of the order.
      */
-    protected static function normalizeSnapshotSalutation(?array $address): ?array
+    protected static function normalizeSnapshotSalutation(mixed $address): mixed
     {
+        if (! is_array($address)) {
+            return $address;
+        }
+
         $salutation = data_get($address, 'salutation');
 
         if (! $salutation || resolve_static(SalutationEnum::class, 'tryFrom', ['value' => $salutation])) {

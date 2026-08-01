@@ -41,7 +41,6 @@ beforeEach(function (): void {
         'is_locked' => false,
     ]);
 
-    // Legacy rows carry the snapshot as stored, so bypass the model to seed them.
     $this->seedSnapshot = function (array $address): Order {
         Order::query()->whereKey($this->order->getKey())->update([
             'address_invoice' => json_encode($address),
@@ -54,7 +53,6 @@ beforeEach(function (): void {
         return $order->refresh();
     };
 
-    // JSON translation lines live under the "*" namespace and group.
     app('translator')->addLines(['*.company' => 'Firma'], app()->getLocale());
 });
 
@@ -89,4 +87,15 @@ test('assigning a label to an existing order normalizes it on save', function ()
     $this->order->save();
 
     expect(data_get($this->order->refresh()->address_invoice, 'salutation'))->toBe('company');
+});
+
+test('a snapshot that is not an array is left alone', function (): void {
+    Order::query()->whereKey($this->order->getKey())->update([
+        'address_invoice' => json_encode('Firma'),
+    ]);
+
+    $order = $this->order->fresh();
+    $order->save();
+
+    expect($order->refresh()->address_invoice)->toBe('Firma');
 });
