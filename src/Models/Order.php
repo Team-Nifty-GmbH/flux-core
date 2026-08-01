@@ -16,6 +16,7 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Enums\PaymentRunTypeEnum;
+use FluxErp\Enums\SalutationEnum;
 use FluxErp\Events\Order\OrderApprovalRequestEvent;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\OrderPaymentRun;
@@ -76,6 +77,7 @@ use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Number;
+use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Conditionable;
 use RoundingMode;
 use Spatie\MediaLibrary\HasMedia;
@@ -143,6 +145,10 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                 && ! $order->address_delivery
             ) {
                 $order->address_delivery = $order->addressDelivery()->with('country')->first();
+            }
+
+            foreach (['address_invoice', 'address_delivery'] as $addressSnapshot) {
+                $order->{$addressSnapshot} = static::normalizeSnapshotSalutation($order->{$addressSnapshot});
             }
 
             // reset to original
@@ -439,6 +445,32 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                 ]
             ),
         ];
+    }
+
+    /**
+     * The address snapshots are plain JSON, so nothing stops a caller from storing the
+     * translated salutation label instead of the enum value. Replicating such an order
+     * later fails validation, because the ruleset only accepts the enum value. Map a
+     * known label back to its case and leave anything unknown untouched.
+     */
+    protected static function normalizeSnapshotSalutation(?array $address): ?array
+    {
+        $salutation = data_get($address, 'salutation');
+
+        if (! $salutation || resolve_static(SalutationEnum::class, 'tryFrom', ['value' => $salutation])) {
+            return $address;
+        }
+
+        $case = Arr::first(
+            resolve_static(SalutationEnum::class, 'cases'),
+            fn (object $case): bool => in_array(
+                $salutation,
+                [__(Str::headline($case->value)), __($case->value)],
+                true
+            )
+        );
+
+        return $case ? data_set($address, 'salutation', $case->value) : $address;
     }
 
     protected function casts(): array
