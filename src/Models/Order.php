@@ -447,10 +447,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         ];
     }
 
-    /**
-     * A snapshot holding the translated label instead of the enum value fails
-     * validation on every replication of the order.
-     */
     protected static function normalizeSnapshotSalutation(mixed $address): mixed
     {
         if (! is_array($address)) {
