@@ -93,6 +93,28 @@ test('the migration leaves a snapshot without a salutation untouched', function 
         ->and($order->address_delivery)->toBeNull();
 });
 
+test('the migration maps a label that has no translation of its own', function (): void {
+    DB::table('orders')->where('id', $this->order->getKey())->update([
+        'address_invoice' => json_encode(['salutation' => 'No Salutation']),
+    ]);
+
+    $this->migration->up();
+
+    expect(data_get($this->order->refresh()->address_invoice, 'salutation'))->toBe('no_salutation');
+});
+
+test('the migration leaves a label alone that two cases share', function (): void {
+    app('translator')->addLines(['*.Mr' => 'Anrede', '*.Mrs' => 'Anrede'], app()->getLocale());
+
+    DB::table('orders')->where('id', $this->order->getKey())->update([
+        'address_invoice' => json_encode(['salutation' => 'Anrede']),
+    ]);
+
+    $this->migration->up();
+
+    expect(data_get($this->order->refresh()->address_invoice, 'salutation'))->toBe('Anrede');
+});
+
 test('updating an order rejects a translated salutation in the invoice snapshot', function (): void {
     UpdateOrder::make([
         'id' => $this->order->getKey(),

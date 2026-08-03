@@ -18,6 +18,8 @@ return new class() extends Migration
 
         DB::table('orders')
             ->select(['id', 'address_invoice', 'address_delivery'])
+            ->whereNotNull('address_invoice')
+            ->orWhereNotNull('address_delivery')
             ->orderBy('id')
             ->chunk(500, function (Collection $orders) use ($labels): void {
                 foreach ($orders as $order) {
@@ -47,10 +49,7 @@ return new class() extends Migration
             });
     }
 
-    public function down(): void
-    {
-        //
-    }
+    public function down(): void {}
 
     protected function labels(): array
     {
@@ -59,21 +58,25 @@ return new class() extends Migration
             resolve_static(SalutationEnum::class, 'cases')
         );
 
-        $labels = [];
+        $locales = $this->locales();
+        $candidates = [];
 
-        foreach ($this->locales() as $locale) {
-            foreach ($values as $value) {
-                foreach ([Str::headline($value), $value] as $key) {
-                    $label = trans($key, [], $locale);
+        foreach ($values as $value) {
+            foreach ([Str::headline($value), $value] as $key) {
+                $candidates[$key][] = $value;
 
-                    if ($label !== $key && ! in_array($label, $values, true)) {
-                        $labels[$label] = $value;
-                    }
+                foreach ($locales as $locale) {
+                    $candidates[trans($key, [], $locale)][] = $value;
                 }
             }
         }
 
-        return $labels;
+        return collect($candidates)
+            ->except($values)
+            ->map(fn (array $mapped): array => array_unique($mapped))
+            ->filter(fn (array $mapped): bool => count($mapped) === 1)
+            ->map(fn (array $mapped): string => reset($mapped))
+            ->all();
     }
 
     protected function locales(): array
