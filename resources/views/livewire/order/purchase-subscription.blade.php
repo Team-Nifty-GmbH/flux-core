@@ -63,7 +63,6 @@
             >
                 <x-time
                     :label="__('Time')"
-                    format="24"
                     wire:model="schedule.cron.parameters.basic.0"
                     x-on:change="$wire.previewSchedule()"
                 />
@@ -90,7 +89,6 @@
                 />
                 <x-time
                     :label="__('Time')"
-                    format="24"
                     wire:model="schedule.cron.parameters.basic.1"
                     x-on:change="$wire.previewSchedule()"
                 />
@@ -113,7 +111,6 @@
                 />
                 <x-time
                     :label="__('Time')"
-                    format="24"
                     wire:model="schedule.cron.parameters.basic.1"
                     x-on:change="$wire.previewSchedule()"
                 />
@@ -141,7 +138,6 @@
                 </div>
                 <x-time
                     :label="__('Time')"
-                    format="24"
                     wire:model="schedule.cron.parameters.basic.2"
                     x-on:change="$wire.previewSchedule()"
                 />
@@ -189,7 +185,6 @@
                 />
                 <x-time
                     :label="__('Time')"
-                    format="24"
                     wire:model="schedule.cron.parameters.basic.2"
                     x-on:change="$wire.previewSchedule()"
                 />
