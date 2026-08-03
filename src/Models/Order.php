@@ -148,7 +148,17 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             }
 
             foreach (['address_invoice', 'address_delivery'] as $addressSnapshot) {
-                $order->{$addressSnapshot} = static::normalizeSnapshotSalutation($order->{$addressSnapshot});
+                $address = $order->{$addressSnapshot};
+
+                if (! is_array($address)) {
+                    continue;
+                }
+
+                $normalized = static::normalizeSnapshotSalutation($address);
+
+                if ($normalized !== $address) {
+                    $order->{$addressSnapshot} = $normalized;
+                }
             }
 
             // reset to original
@@ -447,12 +457,8 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         ];
     }
 
-    protected static function normalizeSnapshotSalutation(mixed $address): mixed
+    protected static function normalizeSnapshotSalutation(array $address): array
     {
-        if (! is_array($address)) {
-            return $address;
-        }
-
         $salutation = data_get($address, 'salutation');
 
         if (! $salutation || resolve_static(SalutationEnum::class, 'tryFrom', ['value' => $salutation])) {
