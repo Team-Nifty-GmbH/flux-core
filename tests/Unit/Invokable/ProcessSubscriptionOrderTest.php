@@ -308,6 +308,79 @@ test('process subscription order uses real month-end for lastDayOfMonth schedule
         ->and($newOrder->system_delivery_date_end->format('Y-m-d'))->toBe('2026-02-28');
 });
 
+test('process subscription order heals a drifted anchor for lastDayOfMonth schedule', function (): void {
+    // Periods created before the lastDayOfMonth fix ended a day short of the real month
+    // end, so the next period starts on the last day of a month. endOfMonth() would then
+    // return the start date itself and collapse the period to a single day.
+    $this->subscriptionOrder->update([
+        'order_date' => Carbon\Carbon::create(2026, 6, 1),
+        'system_delivery_date' => Carbon\Carbon::create(2026, 6, 1),
+        'system_delivery_date_end' => null,
+    ]);
+
+    $driftedChild = Order::factory()->create([
+        'tenant_id' => $this->tenant->getKey(),
+        'contact_id' => $this->contact->getKey(),
+        'address_invoice_id' => $this->address->getKey(),
+        'order_type_id' => $this->targetOrderType->getKey(),
+        'currency_id' => $this->currency->getKey(),
+        'language_id' => $this->language->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+        'payment_type_id' => $this->paymentType->getKey(),
+        'created_from_id' => $this->subscriptionOrder->getKey(),
+        'parent_id' => null,
+        'system_delivery_date' => Carbon\Carbon::create(2026, 5, 31),
+        'system_delivery_date_end' => Carbon\Carbon::create(2026, 6, 29),
+    ]);
+
+    $schedule = Schedule::create([
+        'uuid' => Illuminate\Support\Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'lastDayOfMonth',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => ['00:00'],
+                'dayConstraint' => [],
+                'timeConstraint' => [],
+            ],
+        ],
+        'cron_expression' => '0 0 30 * *',
+        'is_active' => true,
+        'parameters' => [
+            'orderId' => $this->subscriptionOrder->getKey(),
+            'orderTypeId' => $this->targetOrderType->getKey(),
+        ],
+    ]);
+
+    $this->subscriptionOrder->schedules()->attach($schedule->getKey());
+
+    $processor = new ProcessSubscriptionOrder();
+
+    $result = $processor(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    expect($result)->toBeTrue();
+
+    $newOrder = Order::query()
+        ->where('created_from_id', $this->subscriptionOrder->getKey())
+        ->whereKeyNot($driftedChild->getKey())
+        ->first();
+
+    // The period must span to the next real month end instead of collapsing, which
+    // puts the following period back on the first of a month.
+    expect($newOrder)->not->toBeNull()
+        ->and($newOrder->system_delivery_date->format('Y-m-d'))->toBe('2026-06-30')
+        ->and($newOrder->system_delivery_date_end->format('Y-m-d'))->toBe('2026-07-31');
+});
+
 test('process subscription order sets correct performance period for quarterly schedule', function (): void {
     $orderDate = now()->startOfQuarter();
 
