@@ -103,8 +103,10 @@ class Loan extends Component
 
     public function resetForm(): void
     {
+        $loan = $this->loadLoan($this->loan->id);
+
         $this->loan->reset();
-        $this->loan->fill($this->loadLoan($this->loan->id));
+        $this->loan->fill($loan);
     }
 
     #[Renderless]

@@ -141,6 +141,15 @@ test('moving an installment in time does not touch the loan', function (): void 
         ->not->toBe('2020-01-01 00:00:00');
 });
 
+test('resetting the form restores the stored values', function (): void {
+    Livewire::test(Loan::class, ['id' => $this->loan->getKey()])
+        ->set('loan.name', 'Discarded')
+        ->call('resetForm')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertSet('loan.name', 'Machine financing');
+});
+
 test('can delete the loan', function (): void {
     Livewire::test(Loan::class, ['id' => $this->loan->getKey()])
         ->call('delete')
