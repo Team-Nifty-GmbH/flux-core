@@ -101,6 +101,7 @@ class Loan extends Component
         ];
     }
 
+    #[Renderless]
     public function resetForm(): void
     {
         $loan = $this->loadLoan($this->loan->id);
