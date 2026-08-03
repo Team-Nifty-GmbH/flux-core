@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Order;
 
 use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\Order\DeleteOrder;
+use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Forms\CollectiveOrderForm;
@@ -15,6 +16,8 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Tenant;
+use FluxErp\States\Order\PaymentState\Paid;
+use FluxErp\Support\Bus\BulkExecutor;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -71,6 +74,15 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
                 ->text(__('Create Documents'))
                 ->color('indigo')
                 ->wireClick('openCreateDocumentsModal()'),
+            DataTableButton::make()
+                ->icon('banknotes')
+                ->text(__('Mark as paid'))
+                ->color('indigo')
+                ->when(fn () => resolve_static(UpdateLockedOrder::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'markAsPaid()',
+                    'wire:flux-confirm.type.warning' => __('Mark the selected orders as paid?'),
+                ]),
             DataTableButton::make()
                 ->icon('trash')
                 ->text(__('Delete'))
@@ -147,6 +159,47 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         $this->order->payment_type_id = $contact->payment_type_id ?? $this->order->payment_type_id;
         $this->order->address_invoice_id = $contact->invoice_address_id ?? $this->order->address_invoice_id;
         $this->order->address_delivery_id = $contact->delivery_address_id ?? $this->order->address_delivery_id;
+    }
+
+    /**
+     * Settling invoices by hand is a bulk job in practice, so it runs as a
+     * monitored batch instead of blocking the request.
+     */
+    #[Renderless]
+    public function markAsPaid(): void
+    {
+        $orderIds = resolve_static(Order::class, 'query')
+            ->whereIntegerInRaw('id', $this->getSelectedValues())
+            ->whereNotState('payment_state', Paid::class)
+            ->pluck('id');
+
+        if ($orderIds->isEmpty()) {
+            $this->toast()
+                ->warning(__('No order to mark as paid.'))
+                ->send();
+
+            return;
+        }
+
+        try {
+            BulkExecutor::make(
+                UpdateLockedOrder::class,
+                $orderIds
+                    ->map(fn (int $orderId): array => [
+                        'id' => $orderId,
+                        'payment_state' => Paid::class,
+                    ])
+                    ->all()
+            )
+                ->name(__('Marking orders as paid'))
+                ->dispatch();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->reset('selected');
     }
 
     #[Renderless]
