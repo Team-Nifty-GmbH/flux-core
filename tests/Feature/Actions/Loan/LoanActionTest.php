@@ -30,11 +30,24 @@ function baseLoanData(array $overrides = []): array
     ], $overrides);
 }
 
+test('create loan persists the remaining principal and the total interest', function (): void {
+    $loan = CreateLoan::make(baseLoanData())->validate()->execute();
+
+    $this->assertDatabaseHas('loans', [
+        'id' => $loan->getKey(),
+        'remaining' => 12000,
+    ]);
+
+    expect($loan->refresh()->total_interest)
+        ->toEqual($loan->installments()->sum('interest_amount'))
+        ->and((float) $loan->total_interest)->toBeGreaterThan(0);
+});
+
 test('create loan generates the full repayment schedule', function (): void {
     $loan = CreateLoan::make(baseLoanData())->validate()->execute();
 
     expect($loan->installments()->count())->toBe(12);
-    expect($loan->remaining)->toBe('12000.00');
+    expect($loan->remaining)->toEqual(12000);
     expect($loan->ends_at->toDateString())->toBe('2027-01-01');
 
     $this->assertDatabaseCount('loan_installments', 12);
@@ -54,11 +67,14 @@ test('create loan rejects a foreign tenant contact', function (): void {
 test('remaining drops after an installment is settled', function (): void {
     $loan = CreateLoan::make(baseLoanData(['interest_rate' => 0]))->validate()->execute();
 
-    expect($loan->remaining)->toBe('12000.00');
+    expect($loan->remaining)->toEqual(12000)
+        ->and((float) $loan->progress)->toEqual(0.0);
 
     $loan->installments()->orderBy('sequence')->first()->update(['is_paid' => true]);
 
-    expect($loan->refresh()->remaining)->toBe('11000.00');
+    // one of twelve installments repaid
+    expect($loan->refresh()->remaining)->toEqual(11000)
+        ->and(round((float) $loan->progress, 4))->toEqual(0.0833);
 });
 
 test('update loan', function (): void {
@@ -107,4 +123,18 @@ test('delete loan soft deletes', function (): void {
     DeleteLoan::make(['id' => $loan->getKey()])->validate()->execute();
 
     $this->assertSoftDeleted('loans', ['id' => $loan->getKey()]);
+});
+
+test('deleting an installment updates every derived column', function (): void {
+    $loan = CreateLoan::make(baseLoanData(['number_of_installments' => 2, 'interest_rate' => 0.12]))
+        ->validate()
+        ->execute();
+
+    $lastInstallment = $loan->installments()->orderByDesc('sequence')->first();
+    $expectedInterest = bcsub((string) $loan->total_interest, (string) $lastInstallment->interest_amount, 2);
+
+    $lastInstallment->delete();
+
+    expect($loan->refresh()->total_interest)->toEqual($expectedInterest)
+        ->and($loan->remaining)->toEqual($loan->installments()->sum('principal_amount'));
 });

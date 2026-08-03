@@ -11,7 +11,6 @@ use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\SoftDeletes;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
@@ -27,6 +26,8 @@ class Loan extends FluxModel implements HasMedia
             'amount' => Money::class,
             'repayment_type_enum' => RepaymentTypeEnum::class,
             'installment_amount' => Money::class,
+            'remaining' => Money::class,
+            'total_interest' => Money::class,
             'starts_at' => 'date',
             'ends_at' => 'date',
         ];
@@ -60,17 +61,40 @@ class Loan extends FluxModel implements HasMedia
             ->singleFile();
     }
 
-    // Attributes
-    protected function remaining(): Attribute
+    // Public methods
+    /**
+     * The repaid share of the loan, between 0 and 1.
+     */
+    public function calculateProgress(): static
     {
-        return Attribute::get(
-            fn (): string => bcadd(
-                (string) $this->installments()
-                    ->where('is_paid', false)
-                    ->sum('principal_amount'),
-                '0',
-                2
-            )
+        $this->progress = bccomp((string) $this->amount, '0', 10) === 1
+            ? bcdiv(bcsub((string) $this->amount, (string) $this->remaining, 10), (string) $this->amount, 10)
+            : 0;
+
+        return $this;
+    }
+
+    public function calculateRemaining(): static
+    {
+        $this->remaining = bcround(
+            (string) $this->installments()->where('is_paid', false)->sum('principal_amount'),
+            2
         );
+
+        return $this;
+    }
+
+    /**
+     * The interest over the whole term. The schedule is locked once the loan
+     * exists, so this only moves when an installment is added or removed.
+     */
+    public function calculateTotalInterest(): static
+    {
+        $this->total_interest = bcround(
+            (string) $this->installments()->sum('interest_amount'),
+            2
+        );
+
+        return $this;
     }
 }

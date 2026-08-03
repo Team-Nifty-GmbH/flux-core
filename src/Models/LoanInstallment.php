@@ -14,6 +14,25 @@ class LoanInstallment extends FluxModel
 {
     use Filterable, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
+    protected static function booted(): void
+    {
+        static::saved(function (LoanInstallment $loanInstallment): void {
+            $loanInstallment->loan
+                ?->calculateRemaining()
+                ->calculateTotalInterest()
+                ->calculateProgress()
+                ->save();
+        });
+
+        static::deleted(function (LoanInstallment $loanInstallment): void {
+            $loanInstallment->loan
+                ?->calculateRemaining()
+                ->calculateTotalInterest()
+                ->calculateProgress()
+                ->save();
+        });
+    }
+
     protected function casts(): array
     {
         return [

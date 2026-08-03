@@ -137,6 +137,9 @@ test('the list sums the total interest over the whole term', function (): void {
         'is_paid' => true,
     ]);
 
+    // the schedule was created without the action, so the loan has to catch up once
+    $loan->calculateTotalInterest()->save();
+
     $data = Livewire::test(Loans::class)
         ->call('loadData')
         ->assertOk()
@@ -145,7 +148,7 @@ test('the list sums the total interest over the whole term', function (): void {
 
     expect(data_get($data, 'data.0.total_interest.raw'))->toEqual(90)
         ->and(data_get($data, 'data.0.total_interest.display'))->toContain('text-green-600')
-        ->and(data_get($data, 'data.0.remaining_principal.raw'))->toEqual(6000);
+        ->and(data_get($data, 'data.0.remaining.raw'))->toEqual(6000);
 });
 
 test('can attach a contract to a loan', function (): void {
