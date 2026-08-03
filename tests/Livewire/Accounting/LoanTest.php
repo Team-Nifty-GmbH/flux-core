@@ -6,6 +6,7 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Loan as LoanModel;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -106,11 +107,38 @@ test('can save the loan', function (): void {
 test('can attach a contract', function (): void {
     Livewire::test(Loan::class, ['id' => $this->loan->getKey()])
         ->set('contract.file', [UploadedFile::fake()->image('contract.jpg')])
-        ->call('save')
+        ->call('saveContract')
         ->assertOk()
         ->assertHasNoErrors();
 
     expect($this->loan->refresh()->getMedia('contract'))->toHaveCount(1);
+});
+
+test('saving the loan leaves the contract untouched', function (): void {
+    Livewire::test(Loan::class, ['id' => $this->loan->getKey()])
+        ->set('loan.name', 'Renamed loan')
+        ->call('save')
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    expect($this->loan->refresh()->getMedia('contract'))->toHaveCount(0);
+});
+
+test('moving an installment in time does not touch the loan', function (): void {
+    $installment = $this->loan->installments()->orderBy('sequence')->first();
+
+    // a recalculation would write the loan and move its timestamp
+    DB::table('loans')->where('id', $this->loan->getKey())->update(['updated_at' => '2020-01-01 00:00:00']);
+
+    $installment->update(['due_date' => '2026-04-01', 'sequence' => 7]);
+
+    expect(DB::table('loans')->where('id', $this->loan->getKey())->value('updated_at'))
+        ->toBe('2020-01-01 00:00:00');
+
+    $installment->update(['is_paid' => true]);
+
+    expect(DB::table('loans')->where('id', $this->loan->getKey())->value('updated_at'))
+        ->not->toBe('2020-01-01 00:00:00');
 });
 
 test('can delete the loan', function (): void {

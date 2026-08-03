@@ -8,9 +8,9 @@
     <x-slot:footer>
         <x-button
             color="indigo"
-            loading="save"
             :text="__('Save')"
-            x-on:click="$wire.save()"
+            loading="saveContract"
+            x-on:click="$wire.saveContract()"
         />
     </x-slot:footer>
 </x-card>

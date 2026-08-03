@@ -17,6 +17,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Number;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -29,6 +30,10 @@ class Loan extends Component
 
     public MediaUploadForm $contract;
 
+    #[Locked]
+    public string $currencyIso = 'EUR';
+
+    #[Locked]
     public array $installments = [];
 
     public LoanForm $loan;
@@ -39,21 +44,22 @@ class Loan extends Component
 
     public string $tab = 'loan.general';
 
+    #[Locked]
     public array $totals = [];
-
-    protected ?string $currencyIso = null;
 
     public function mount(string $id): void
     {
-        $loan = resolve_static(LoanModel::class, 'query')
-            ->whereKey($id)
-            ->firstOrFail();
-
         try {
             $this->getTabButton($this->tab);
         } catch (Throwable) {
             throw new NotFoundHttpException('Tab not found');
         }
+
+        $this->currencyIso = resolve_static(Currency::class, 'query')
+            ->where('is_default', true)
+            ->value('iso') ?? 'EUR';
+
+        $loan = $this->loadLoan($id);
 
         $this->loan->fill($loan);
         $this->contract->fill($loan->getFirstMedia('contract') ?? []);
@@ -66,10 +72,9 @@ class Loan extends Component
         return view('flux::livewire.accounting.loan');
     }
 
+    #[Renderless]
     public function delete(): void
     {
-        $this->skipRender();
-
         try {
             DeleteLoan::make(['id' => $this->loan->id])
                 ->checkPermission()
@@ -81,20 +86,7 @@ class Loan extends Component
             return;
         }
 
-        $this->redirect(route('accounting.loans'));
-    }
-
-    #[Computed]
-    public function scheduleHeaders(): array
-    {
-        return [
-            ['index' => 'sequence', 'label' => __('Sequence')],
-            ['index' => 'due_date', 'label' => __('Due Date')],
-            ['index' => 'principal_amount', 'label' => __('Principal')],
-            ['index' => 'interest_amount', 'label' => __('Interest')],
-            ['index' => 'remaining', 'label' => __('Remaining')],
-            ['index' => 'is_paid', 'label' => __('Paid')],
-        ];
+        $this->redirect(route('accounting.loans'), navigate: true);
     }
 
     public function getTabs(): array
@@ -111,12 +103,8 @@ class Loan extends Component
 
     public function resetForm(): void
     {
-        $loan = resolve_static(LoanModel::class, 'query')
-            ->whereKey($this->loan->id)
-            ->firstOrFail();
-
         $this->loan->reset();
-        $this->loan->fill($loan);
+        $this->loan->fill($this->loadLoan($this->loan->id));
     }
 
     #[Renderless]
@@ -130,23 +118,46 @@ class Loan extends Component
             return false;
         }
 
-        $this->contract->model_type = morph_alias(LoanModel::class);
-        $this->contract->model_id = $this->loan->id;
-        $this->contract->collection_name = 'contract';
-
-        if ($this->contract->stagedFiles || $this->contract->id) {
-            try {
-                $this->contract->save();
-            } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
-            }
-        }
-
         $this->toast()
             ->success(__(':model saved', ['model' => __('Loan')]))
             ->send();
 
         return true;
+    }
+
+    #[Renderless]
+    public function saveContract(): bool
+    {
+        $this->contract->model_type = morph_alias(LoanModel::class);
+        $this->contract->model_id = $this->loan->id;
+        $this->contract->collection_name = 'contract';
+
+        try {
+            $this->contract->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->toast()
+            ->success(__(':model saved', ['model' => __('Contract')]))
+            ->send();
+
+        return true;
+    }
+
+    #[Computed]
+    public function scheduleHeaders(): array
+    {
+        return [
+            ['index' => 'sequence', 'label' => __('Sequence')],
+            ['index' => 'due_date', 'label' => __('Due Date')],
+            ['index' => 'principal_amount', 'label' => __('Principal')],
+            ['index' => 'interest_amount', 'label' => __('Interest')],
+            ['index' => 'remaining', 'label' => __('Remaining')],
+            ['index' => 'is_paid', 'label' => __('Paid')],
+        ];
     }
 
     /**
@@ -180,10 +191,16 @@ class Loan extends Component
      */
     protected function buildTotals(LoanModel $loan): array
     {
-        $principal = (string) $loan->installments()->sum('principal_amount');
-        $interest = (string) $loan->installments()->sum('interest_amount');
-        $paidPrincipal = (string) $loan->installments()->where('is_paid', true)->sum('principal_amount');
-        $paidInterest = (string) $loan->installments()->where('is_paid', true)->sum('interest_amount');
+        $principal = (string) $loan->installments()
+            ->sum('principal_amount');
+        $interest = (string) $loan->installments()
+            ->sum('interest_amount');
+        $paidPrincipal = (string) $loan->installments()
+            ->where('is_paid', true)
+            ->sum('principal_amount');
+        $paidInterest = (string) $loan->installments()
+            ->where('is_paid', true)
+            ->sum('interest_amount');
 
         return [
             'principal_amount' => $this->money($principal),
@@ -201,6 +218,18 @@ class Loan extends Component
         ];
     }
 
+    protected function loadLoan(int|string $id): LoanModel
+    {
+        return resolve_static(LoanModel::class, 'query')
+            ->whereKey($id)
+            ->firstOrFail();
+    }
+
+    protected function money(string|float|int|null $value): string
+    {
+        return Number::currency((float) $value, $this->currencyIso, app()->getLocale());
+    }
+
     protected function share(string $part, string $of): string
     {
         return Number::percentage(
@@ -208,17 +237,5 @@ class Loan extends Component
             1,
             locale: app()->getLocale()
         );
-    }
-
-    protected function currencyIso(): string
-    {
-        return $this->currencyIso ??= resolve_static(Currency::class, 'query')
-            ->where('is_default', true)
-            ->value('iso') ?? 'EUR';
-    }
-
-    protected function money(string|float|int|null $value): string
-    {
-        return Number::currency((float) $value, $this->currencyIso(), app()->getLocale());
     }
 }

@@ -25,18 +25,18 @@ class LoanList extends BaseDataTable
     public array $formatters = [
         'amount' => 'coloredMoney',
         'interest_rate' => 'percentage',
-        'progress' => 'progressPercentage',
         'remaining' => 'coloredMoney',
         'total_interest' => 'coloredMoney',
+        'progress' => 'progressPercentage',
         'starts_at' => 'date',
     ];
 
     public array $sortable = [
         'name',
         'amount',
-        'progress',
         'remaining',
         'total_interest',
+        'progress',
         'starts_at',
     ];
 

@@ -58,6 +58,46 @@ class Loan extends FluxModel implements HasMedia, InteractsWithDataTables
         return $this->belongsTo(Order::class);
     }
 
+    // Public methods
+    /**
+     * The repaid share of the loan, between 0 and 1.
+     */
+    public function calculateProgress(): static
+    {
+        $this->progress = bccomp((string) $this->amount, '0', 10) === 1
+            ? bcdiv(bcsub((string) $this->amount, (string) $this->remaining, 10), (string) $this->amount, 10)
+            : 0;
+
+        return $this;
+    }
+
+    public function calculateRemaining(): static
+    {
+        $this->remaining = bcround(
+            (string) $this->installments()
+                ->where('is_paid', false)
+                ->sum('principal_amount'),
+            2
+        );
+
+        return $this;
+    }
+
+    /**
+     * The interest over the whole term. The schedule is locked once the loan
+     * exists, so this only moves when an installment is added or removed.
+     */
+    public function calculateTotalInterest(): static
+    {
+        $this->total_interest = bcround(
+            (string) $this->installments()
+                ->sum('interest_amount'),
+            2
+        );
+
+        return $this;
+    }
+
     public function getAvatarUrl(): ?string
     {
         return null;
@@ -83,42 +123,5 @@ class Loan extends FluxModel implements HasMedia, InteractsWithDataTables
         $this->addMediaCollection('contract')
             ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png'])
             ->singleFile();
-    }
-
-    // Public methods
-    /**
-     * The repaid share of the loan, between 0 and 1.
-     */
-    public function calculateProgress(): static
-    {
-        $this->progress = bccomp((string) $this->amount, '0', 10) === 1
-            ? bcdiv(bcsub((string) $this->amount, (string) $this->remaining, 10), (string) $this->amount, 10)
-            : 0;
-
-        return $this;
-    }
-
-    public function calculateRemaining(): static
-    {
-        $this->remaining = bcround(
-            (string) $this->installments()->where('is_paid', false)->sum('principal_amount'),
-            2
-        );
-
-        return $this;
-    }
-
-    /**
-     * The interest over the whole term. The schedule is locked once the loan
-     * exists, so this only moves when an installment is added or removed.
-     */
-    public function calculateTotalInterest(): static
-    {
-        $this->total_interest = bcround(
-            (string) $this->installments()->sum('interest_amount'),
-            2
-        );
-
-        return $this;
     }
 }

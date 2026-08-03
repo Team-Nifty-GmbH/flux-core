@@ -60,6 +60,7 @@
             @canAction(\FluxErp\Actions\Loan\DeleteLoan::class)
                 <x-button
                     color="red"
+                    loading="delete"
                     :text="__('Delete')"
                     x-cloak
                     x-show="!isEditing"

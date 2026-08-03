@@ -33,7 +33,7 @@ return new class() extends Migration
                 )
         SQL);
 
-        DB::statement('UPDATE loans SET progress = (amount - remaining) / amount WHERE amount > 0');
+        DB::statement('UPDATE loans SET progress = (amount - COALESCE(remaining, 0)) / amount WHERE amount > 0');
     }
 
     public function down(): void
