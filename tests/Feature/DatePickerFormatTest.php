@@ -51,3 +51,19 @@ test('keeps a time format that was passed explicitly', function (): void {
 
     expect($html)->not->toContain('AM');
 });
+
+test('renders the time picker with meridiem when the locale writes it in lower case', function (): void {
+    app()->setLocale('si');
+
+    $html = Blade::render('<x-time />');
+
+    expect($html)->toContain('AM');
+});
+
+test('renders the time picker without meridiem when the locale only has one in a literal', function (): void {
+    app()->setLocale('lb');
+
+    $html = Blade::render('<x-time />');
+
+    expect($html)->not->toContain('AM');
+});

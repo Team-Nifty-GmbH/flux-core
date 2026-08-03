@@ -162,7 +162,11 @@ class EventServiceProvider extends ServiceProvider
 
             $format = $this->localeFormat('LT');
 
-            if ($format && ! str_contains($format, 'A')) {
+            if (! $format) {
+                return;
+            }
+
+            if (! str_contains(preg_replace('/\[[^\]]*\]/', '', $format), 'h')) {
                 $component->format = '24';
             }
         });
