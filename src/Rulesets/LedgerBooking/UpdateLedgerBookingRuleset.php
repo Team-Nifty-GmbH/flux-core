@@ -35,14 +35,6 @@ class UpdateLedgerBookingRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => LedgerAccount::class]),
             ],
-            'amount' => [
-                'sometimes',
-                'required',
-                app(Numeric::class, ['min' => 0.01]),
-            ],
-            'booking_date' => 'sometimes|required|date',
-            'booking_text' => 'string|max:255|nullable',
-            'note' => 'string|max:255|nullable',
             'source_type' => [
                 'string',
                 'nullable',
@@ -55,6 +47,14 @@ class UpdateLedgerBookingRuleset extends FluxRuleset
                 'required_with:source_type',
                 app(MorphExists::class, ['modelAttribute' => 'source_type']),
             ],
+            'amount' => [
+                'sometimes',
+                'required',
+                app(Numeric::class, ['min' => 0.01]),
+            ],
+            'booking_date' => 'sometimes|required|date',
+            'booking_text' => 'string|max:255|nullable',
+            'note' => 'string|max:255|nullable',
         ];
     }
 }

@@ -11,7 +11,6 @@ use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Collection;
 
 class LedgerBooking extends FluxModel
 {
@@ -19,14 +18,33 @@ class LedgerBooking extends FluxModel
 
     protected static function booted(): void
     {
-        $recalculateSettledOrders = function (LedgerBooking $ledgerBooking): void {
-            $ledgerBooking->settledOrders()->each(
-                fn (Order $order) => $order->calculatePaymentState()->save()
-            );
-        };
+        static::saved(function (LedgerBooking $ledgerBooking): void {
+            if ($ledgerBooking->wasChanged(['source_type', 'source_id'])) {
+                static::recalculateSettledOrder(
+                    $ledgerBooking->getOriginal('source_type'),
+                    $ledgerBooking->getOriginal('source_id')
+                );
+            }
 
-        static::saved($recalculateSettledOrders);
-        static::deleted($recalculateSettledOrders);
+            static::recalculateSettledOrder($ledgerBooking->source_type, $ledgerBooking->source_id);
+        });
+
+        static::deleted(function (LedgerBooking $ledgerBooking): void {
+            static::recalculateSettledOrder($ledgerBooking->source_type, $ledgerBooking->source_id);
+        });
+    }
+
+    protected static function recalculateSettledOrder(?string $sourceType, int|string|null $sourceId): void
+    {
+        if (! $sourceId || $sourceType !== morph_alias(Order::class)) {
+            return;
+        }
+
+        resolve_static(Order::class, 'query')
+            ->whereKey($sourceId)
+            ->first()
+            ?->calculatePaymentState()
+            ->save();
     }
 
     protected function casts(): array
@@ -51,21 +69,5 @@ class LedgerBooking extends FluxModel
     public function source(): MorphTo
     {
         return $this->morphTo();
-    }
-
-    /**
-     * The orders whose payment state depends on this booking: the one it points at
-     * now and, when the source was moved, the one it pointed at before.
-     */
-    public function settledOrders(): Collection
-    {
-        return collect([
-            [$this->getOriginal('source_type'), $this->getOriginal('source_id')],
-            [$this->source_type, $this->source_id],
-        ])
-            ->filter(fn (array $source) => $source[1] && is_a(morphed_model($source[0]) ?? '', Order::class, true))
-            ->unique(fn (array $source) => $source[1])
-            ->map(fn (array $source) => resolve_static(Order::class, 'query')->whereKey($source[1])->first())
-            ->filter();
     }
 }

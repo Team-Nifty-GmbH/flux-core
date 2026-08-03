@@ -2,6 +2,7 @@
 
 use FluxErp\Actions\LedgerBooking\CreateLedgerBooking;
 use FluxErp\Actions\LedgerBooking\DeleteLedgerBooking;
+use FluxErp\Actions\LedgerBooking\UpdateLedgerBooking;
 use FluxErp\Enums\LedgerAccountTypeEnum;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
@@ -137,4 +138,24 @@ test('a ledger booking without a source leaves orders untouched', function (): v
         ->execute();
 
     expect((float) $order->refresh()->balance)->toBe(-52320.0);
+});
+
+test('moving the source recalculates the order it left and the one it reached', function (): void {
+    $from = ($this->createOrder)(OrderTypeEnum::Purchase, -52320);
+    $to = ($this->createOrder)(OrderTypeEnum::Purchase, -52320);
+
+    $booking = ($this->book)($from, 52320);
+
+    UpdateLedgerBooking::make([
+        'id' => $booking->getKey(),
+        'source_type' => $to->getMorphClass(),
+        'source_id' => $to->getKey(),
+    ])
+        ->validate()
+        ->execute();
+
+    expect((float) $from->refresh()->balance)->toBe(-52320.0)
+        ->and($from->payment_state)->toBeInstanceOf(Open::class)
+        ->and((float) $to->refresh()->balance)->toBe(0.0)
+        ->and($to->payment_state)->toBeInstanceOf(Paid::class);
 });

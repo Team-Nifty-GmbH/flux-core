@@ -35,13 +35,6 @@ class CreateLedgerBookingRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Tenant::class]),
             ],
-            'amount' => [
-                'required',
-                app(Numeric::class, ['min' => 0.01]),
-            ],
-            'booking_date' => 'required|date',
-            'booking_text' => 'string|max:255|nullable',
-            'note' => 'string|max:255|nullable',
             'source_type' => [
                 'string',
                 'nullable',
@@ -54,6 +47,13 @@ class CreateLedgerBookingRuleset extends FluxRuleset
                 'required_with:source_type',
                 app(MorphExists::class, ['modelAttribute' => 'source_type']),
             ],
+            'amount' => [
+                'required',
+                app(Numeric::class, ['min' => 0.01]),
+            ],
+            'booking_date' => 'required|date',
+            'booking_text' => 'string|max:255|nullable',
+            'note' => 'string|max:255|nullable',
         ];
     }
 }
