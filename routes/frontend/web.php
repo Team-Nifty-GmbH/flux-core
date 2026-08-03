@@ -12,6 +12,7 @@ use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\AbsenceRequest\AbsenceRequest;
 use FluxErp\Livewire\Accounting\DirectDebit;
 use FluxErp\Livewire\Accounting\LedgerBookings;
+use FluxErp\Livewire\Accounting\Loan;
 use FluxErp\Livewire\Accounting\Loans;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
 use FluxErp\Livewire\Accounting\PaymentReminderRun;
@@ -275,6 +276,7 @@ Route::middleware('web')
                         Route::get('/commissions', CommissionList::class)->name('commissions');
                         Route::get('/ledger-bookings', LedgerBookings::class)->name('ledger-bookings');
                         Route::get('/loans', Loans::class)->name('loans');
+                        Route::get('/loans/{id}', Loan::class)->where('id', '[0-9]+')->name('loans.id');
                         Route::get('/payment-reminder-run', PaymentReminderRun::class)->name('payment-reminder-run');
                         Route::get('/purchase-invoices', PurchaseInvoiceList::class)->name('purchase-invoices');
                         Route::get('/transactions', TransactionList::class)->name('transactions');

@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Casts\Money;
 use FluxErp\Enums\RepaymentTypeEnum;
 use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasFrontendAttributes;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasTenantAssignment;
 use FluxErp\Traits\Model\HasUserModification;
@@ -14,11 +15,14 @@ use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
+use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Loan extends FluxModel implements HasMedia
+class Loan extends FluxModel implements HasMedia, InteractsWithDataTables
 {
-    use Filterable, HasPackageFactory, HasTenantAssignment, HasUserModification, HasUuid, InteractsWithMedia,
-        SoftDeletes;
+    use Filterable, HasFrontendAttributes, HasPackageFactory, HasTenantAssignment, HasUserModification, HasUuid,
+        InteractsWithMedia, SoftDeletes;
+
+    protected ?string $detailRouteName = 'accounting.loans.id';
 
     protected function casts(): array
     {
@@ -52,6 +56,26 @@ class Loan extends FluxModel implements HasMedia
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        return null;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->number;
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->name;
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->detailRoute();
     }
 
     public function registerMediaCollections(): void
