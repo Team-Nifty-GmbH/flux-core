@@ -31,7 +31,15 @@ class Schedule extends FluxModel
         $start = Carbon::instance($start);
 
         if (data_get($cron, 'methods.basic') === FrequenciesEnum::LastDayOfMonth->value) {
-            return $start->endOfMonth();
+            $end = $start->copy()->endOfMonth();
+
+            // A period inherited from before this calculation existed can start on the last
+            // day of a month, which would collapse it to that single day. Billing the next
+            // month end instead keeps the period non-empty and puts the following one back
+            // on the first of a month.
+            return $end->isSameDay($start)
+                ? $start->copy()->addMonthNoOverflow()->endOfMonth()
+                : $end;
         }
 
         if ($cronExpression) {
