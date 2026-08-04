@@ -163,6 +163,23 @@ document.addEventListener('livewire:init', () => {
                 .wireable(component.id)
                 [type](title, description)
                 .confirm(confirmLabel, () => {
+                    // Livewire 4's own evaluator resolves unknown identifiers
+                    // against $wire, which breaks expressions like
+                    // addTag($nuxbe.promptValue()). Evaluate through Alpine
+                    // instead, where $wire, magics and x-for scope all work.
+                    const expression = el.getAttribute('wire:click');
+
+                    if (expression) {
+                        window.Alpine.evaluate(
+                            el,
+                            expression.trimStart().startsWith('$wire.')
+                                ? expression
+                                : '$wire.' + expression,
+                        );
+
+                        return;
+                    }
+
                     action();
                 })
                 .cancel(cancelLabel)

@@ -279,6 +279,8 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     ->update($contactUpdates);
 
                 $mainAddress->update($addressUpdates);
+
+                $address->updateQuietly(array_fill_keys(array_keys($addressUpdates), false));
             }
         });
     }

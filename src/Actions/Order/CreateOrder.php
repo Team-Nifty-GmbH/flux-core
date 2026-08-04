@@ -236,6 +236,18 @@ class CreateOrder extends FluxAction
             }
         }
 
+        if (
+            ! is_null($this->getData('contract_total_amount'))
+            && ! resolve_static(OrderType::class, 'query')
+                ->whereKey($this->getData('order_type_id'))
+                ->value('order_type_enum')
+                ?->isSubscription()
+        ) {
+            $errors += [
+                'contract_total_amount' => ['Only subscription orders can carry a contract total amount.'],
+            ];
+        }
+
         if ($errors) {
             throw ValidationException::withMessages($errors)
                 ->errorBag('createOrder');

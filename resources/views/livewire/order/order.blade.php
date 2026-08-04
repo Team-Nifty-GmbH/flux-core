@@ -1443,6 +1443,7 @@
                                             :without-time="true"
                                             :label="__('Payment Reminder Next Date')"
                                         />
+                                        @stack('order-detail-order-dates-fields')
                                     @show
                                 </div>
                             </x-card>

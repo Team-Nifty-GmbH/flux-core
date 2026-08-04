@@ -45,6 +45,9 @@ use FluxErp\Models\Lead;
 use FluxErp\Models\LeadLossReason;
 use FluxErp\Models\LeadState;
 use FluxErp\Models\LedgerAccount;
+use FluxErp\Models\LedgerBooking;
+use FluxErp\Models\Loan;
+use FluxErp\Models\LoanInstallment;
 use FluxErp\Models\Location;
 use FluxErp\Models\Log;
 use FluxErp\Models\MailAccount;
@@ -202,6 +205,9 @@ class MorphMapServiceProvider extends ServiceProvider
             'lead_loss_reason' => LeadLossReason::class,
             'lead_state' => LeadState::class,
             'ledger_account' => LedgerAccount::class,
+            'ledger_booking' => LedgerBooking::class,
+            'loan' => Loan::class,
+            'loan_installment' => LoanInstallment::class,
             'location' => Location::class,
             'log' => Log::class,
             'mail_account' => MailAccount::class,

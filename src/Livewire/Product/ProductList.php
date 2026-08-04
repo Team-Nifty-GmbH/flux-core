@@ -46,6 +46,7 @@ class ProductList extends BaseProductList
         parent::mount();
 
         $this->vatRates = resolve_static(VatRate::class, 'query')
+            ->where('is_sales', true)
             ->get(['id', 'name', 'rate_percentage'])
             ->toArray();
         $priceList = resolve_static(PriceList::class, 'default')?->toArray() ?? [];
@@ -204,6 +205,7 @@ class ProductList extends BaseProductList
                     ->get(['id', 'name'])
                     ->toArray(),
                 'vatRates' => resolve_static(VatRate::class, 'query')
+                    ->where('is_sales', true)
                     ->get(['id', 'name', 'rate_percentage'])
                     ->toArray(),
                 'roundingMethods' => resolve_static(RoundingMethodEnum::class, 'valuesLocalized'),

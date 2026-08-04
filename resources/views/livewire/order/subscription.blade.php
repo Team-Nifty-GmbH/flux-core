@@ -687,13 +687,7 @@
 
 @section('actions')
     @parent
-    <x-button
-        color="indigo"
-        class="w-full"
-        icon="clock"
-        x-on:click="$tsui.open.modal('edit-schedule')"
-        :text="__('Schedule')"
-    />
+    <x-flux::order.contract-card :order="$order" />
     <x-button
         color="amber"
         class="w-full"

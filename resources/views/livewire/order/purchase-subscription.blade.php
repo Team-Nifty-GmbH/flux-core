@@ -63,7 +63,6 @@
             >
                 <x-time
                     :label="__('Time')"
-                    format="24"
                     wire:model="schedule.cron.parameters.basic.0"
                     x-on:change="$wire.previewSchedule()"
                 />
@@ -90,7 +89,6 @@
                 />
                 <x-time
                     :label="__('Time')"
-                    format="24"
                     wire:model="schedule.cron.parameters.basic.1"
                     x-on:change="$wire.previewSchedule()"
                 />
@@ -113,7 +111,6 @@
                 />
                 <x-time
                     :label="__('Time')"
-                    format="24"
                     wire:model="schedule.cron.parameters.basic.1"
                     x-on:change="$wire.previewSchedule()"
                 />
@@ -141,7 +138,6 @@
                 </div>
                 <x-time
                     :label="__('Time')"
-                    format="24"
                     wire:model="schedule.cron.parameters.basic.2"
                     x-on:change="$wire.previewSchedule()"
                 />
@@ -189,7 +185,6 @@
                 />
                 <x-time
                     :label="__('Time')"
-                    format="24"
                     wire:model="schedule.cron.parameters.basic.2"
                     x-on:change="$wire.previewSchedule()"
                 />
@@ -284,11 +279,5 @@
 
 @section('actions')
     @parent
-    <x-button
-        color="indigo"
-        class="w-full"
-        icon="clock"
-        x-on:click="$tsui.open.modal('edit-schedule')"
-        :text="__('Schedule')"
-    />
+    <x-flux::order.contract-card :order="$order" />
 @endsection

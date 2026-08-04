@@ -136,3 +136,14 @@ test('rejects demoting a variant parent while active variants exist', function (
         ->validate()
         ->execute();
 })->throws(Illuminate\Validation\ValidationException::class);
+test('create product rejects a purchase-only vat rate', function (): void {
+    $purchaseOnlyVatRate = VatRate::factory()->create([
+        'is_purchase' => true,
+        'is_sales' => false,
+    ]);
+
+    CreateProduct::assertValidationErrors([
+        'name' => 'Test Widget',
+        'vat_rate_id' => $purchaseOnlyVatRate->getKey(),
+    ], 'vat_rate_id');
+});

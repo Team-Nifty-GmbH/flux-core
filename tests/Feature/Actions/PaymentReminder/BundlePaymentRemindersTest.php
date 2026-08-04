@@ -26,7 +26,9 @@ beforeEach(function (): void {
     ]);
     $paymentType = PaymentType::factory()
         ->hasAttached($this->dbTenant, relationship: 'tenants')
-        ->create();
+        ->create([
+            'is_direct_debit' => false,
+        ]);
 
     $this->order = Order::factory()->create([
         'order_type_id' => $orderType->getKey(),

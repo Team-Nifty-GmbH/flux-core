@@ -107,6 +107,7 @@ class VariantList extends ProductList
         ];
     }
 
+    #[Renderless]
     public function loadOptions(ProductOptionGroup $optionGroup): void
     {
         $this->productOptions = $optionGroup

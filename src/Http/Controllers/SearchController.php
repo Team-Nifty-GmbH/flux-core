@@ -43,8 +43,6 @@ class SearchController extends Controller
                 ? $query->whereIn($optionValue, Arr::wrap($selected))
                 : $query->where($optionValue, $selected);
 
-            $this->applyRequestConstraints($query, $request, $model);
-
             return $this->formatAndDispatch($query->get(), $model, $request);
         } elseif ($request->has('search') && $isSearchable && ! $request->input('searchFields')) {
             /** @var Builder $perPageSearch */

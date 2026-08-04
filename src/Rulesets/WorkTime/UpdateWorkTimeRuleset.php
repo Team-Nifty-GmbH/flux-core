@@ -29,17 +29,17 @@ class UpdateWorkTimeRuleset extends FluxRuleset
                 'nullable',
                 'required_if:is_billable,true',
                 'integer',
-                app(ModelExists::class, ['model' => Contact::class]),
+                app(ModelExists::class, ['model' => Contact::class, 'subject' => WorkTime::class]),
             ],
             'order_position_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => OrderPosition::class]),
+                app(ModelExists::class, ['model' => OrderPosition::class, 'subject' => WorkTime::class]),
             ],
             'work_time_type_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => WorkTimeType::class]),
+                app(ModelExists::class, ['model' => WorkTimeType::class, 'subject' => WorkTime::class]),
             ],
             'trackable_type' => [
                 'required_with:trackable_id',
