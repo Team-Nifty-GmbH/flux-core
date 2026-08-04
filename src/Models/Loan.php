@@ -75,7 +75,7 @@ class Loan extends FluxModel implements HasMedia, InteractsWithDataTables
     {
         $this->remaining = bcround(
             (string) $this->installments()
-                ->where('is_paid', false)
+                ->unsettled()
                 ->sum('principal_amount'),
             2
         );
