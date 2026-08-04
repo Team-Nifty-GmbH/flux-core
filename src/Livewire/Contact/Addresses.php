@@ -2,6 +2,8 @@
 
 namespace FluxErp\Livewire\Contact;
 
+use FluxErp\Actions\Address\DetachAddress;
+use FluxErp\Actions\Address\MoveAddress;
 use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\AddressForm;
@@ -39,6 +41,8 @@ class Addresses extends Component
     public ContactForm $contact;
 
     public bool $edit = false;
+
+    public ?int $moveToContactId = null;
 
     public string $tab = 'address.address';
 
@@ -149,6 +153,23 @@ class Addresses extends Component
     }
 
     #[Renderless]
+    public function detach(): void
+    {
+        try {
+            $address = DetachAddress::make(['id' => $this->addressId])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->redirect($address->contact->getUrl(), true);
+    }
+
+    #[Renderless]
     public function evaluate(): void {}
 
     #[Renderless]
@@ -240,6 +261,28 @@ class Addresses extends Component
         }
 
         $this->addresses = $addresses->toArray();
+    }
+
+    #[Renderless]
+    public function move(): void
+    {
+        try {
+            $address = MoveAddress::make([
+                'id' => $this->addressId,
+                'contact_id' => $this->moveToContactId,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->reset('moveToContactId');
+
+        $this->redirect($address->contact->getUrl(), true);
     }
 
     #[Renderless]
