@@ -287,30 +287,6 @@
                                 </div>
                             @endcanAction
 
-                            @canAction(\FluxErp\Actions\Address\MoveAddress::class)
-                                <div x-cloak x-show="!$wire.edit">
-                                    <x-button
-                                        color="secondary"
-                                        light
-                                        x-on:click="$modalOpen('move-address')"
-                                        :text="__('Move To Contact')"
-                                    />
-                                </div>
-                            @endcanAction
-
-                            @canAction(\FluxErp\Actions\Address\DetachAddress::class)
-                                <div x-cloak x-show="!$wire.edit">
-                                    <x-button
-                                        wire:flux-confirm.type.warning="{{ __('wire:confirm.detach_address') }}"
-                                        wire:click="detach()"
-                                        loading="detach()"
-                                        color="secondary"
-                                        light
-                                        :text="__('Move To New Contact')"
-                                    />
-                                </div>
-                            @endcanAction
-
                             @canAction(\FluxErp\Actions\Address\DeleteAddress::class)
                                 <div
                                     x-cloak
@@ -332,36 +308,4 @@
             <x-flux::tabs wire:model.live="tab" :$tabs wire:ignore />
         </x-card>
     </div>
-
-    @canAction(\FluxErp\Actions\Address\MoveAddress::class)
-        <x-modal id="move-address" :title="__('Move To Contact')">
-            <x-select.styled
-                wire:model="moveToContactId"
-                :label="__('Contact')"
-                select="label:label|value:id"
-                required
-                unfiltered
-                :request="[
-                    'url' => route('search', \FluxErp\Models\Contact::class),
-                    'method' => 'POST',
-                ]"
-            />
-            <x-slot:footer>
-                <div class="flex justify-end gap-1.5">
-                    <x-button
-                        color="secondary"
-                        flat
-                        :text="__('Cancel')"
-                        x-on:click="$modalClose('move-address')"
-                    />
-                    <x-button
-                        color="indigo"
-                        :text="__('Move')"
-                        wire:click="move()"
-                        loading="move()"
-                    />
-                </div>
-            </x-slot:footer>
-        </x-modal>
-    @endcanAction
 </div>

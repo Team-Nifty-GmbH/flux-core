@@ -4,8 +4,6 @@
     "action.address-type.update": "Update an address type",
     "action.address.create": "Create a new address",
     "action.address.delete": "Delete an address",
-    "action.address.detach": "Move an address into a new contact",
-    "action.address.move": "Move an address to another contact",
     "action.address.update": "Update an address",
     "action.bank-connection.create": "Create a new bank connection",
     "action.bank-connection.delete": "Delete a bank connection",
