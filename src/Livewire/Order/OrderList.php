@@ -169,7 +169,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     public function markAsPaid(): void
     {
         $orderIds = resolve_static(Order::class, 'query')
-            ->whereIntegerInRaw('id', $this->getSelectedValues())
+            ->whereKey($this->getSelectedValues())
             ->whereNotState('payment_state', Paid::class)
             ->pluck('id');
 
