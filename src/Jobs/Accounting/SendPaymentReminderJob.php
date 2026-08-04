@@ -14,6 +14,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use RuntimeException;
 
 class SendPaymentReminderJob implements ShouldQueue
 {
@@ -142,6 +143,15 @@ class SendPaymentReminderJob implements ShouldQueue
             $reason,
             $to,
         );
+
+        // Fail the batch job so the finished-batch toast reports the delivery
+        // failure instead of telling the user every reminder went out.
+        $this->fail(new RuntimeException(
+            __('Payment reminder for invoice :invoice_number could not be sent: :reason', [
+                'invoice_number' => $order->invoice_number,
+                'reason' => $reason ?? __('Unknown error'),
+            ])
+        ));
     }
 
     protected function cleanup(

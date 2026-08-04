@@ -281,9 +281,7 @@ class PaymentReminderRun extends Component
         $groupIds = array_column($group['orders'], 'id');
         $orderIds = array_values(array_intersect($groupIds, $this->selectedOrders)) ?: $groupIds;
 
-        if ($this->sendBundle($orderIds)) {
-            $this->markAsSent($orderIds);
-        }
+        $this->handleSendResult($this->sendBundle($orderIds), $orderIds);
 
         $this->loadData();
     }
@@ -294,9 +292,7 @@ class PaymentReminderRun extends Component
             return;
         }
 
-        if ($this->sendBundle($this->selectedOrders)) {
-            $this->markAsSent($this->selectedOrders);
-        }
+        $this->handleSendResult($this->sendBundle($this->selectedOrders), $this->selectedOrders);
 
         $this->loadData();
     }
@@ -383,6 +379,43 @@ class PaymentReminderRun extends Component
         return array_filter(Arr::wrap($email));
     }
 
+    /**
+     * Only the invoices that actually made it into the send batch may disappear from
+     * the run. The rest stay listed together with the reason they were held back, so
+     * a misconfigured reminder level can no longer look like a completed run.
+     */
+    protected function handleSendResult(?array $result, array $orderIds): void
+    {
+        if (is_null($result)) {
+            return;
+        }
+
+        $unsendable = data_get($result, 'unsendable') ?? [];
+        $unsendableIds = array_column($unsendable, 'id');
+
+        $this->markAsSent(array_values(array_diff(array_map('intval', $orderIds), $unsendableIds)));
+
+        if (! $unsendable) {
+            return;
+        }
+
+        $this->toast()
+            ->warning(
+                __(':count of :total reminders were not sent', [
+                    'count' => count($unsendable),
+                    'total' => count($orderIds),
+                ]),
+                collect($unsendable)
+                    ->groupBy('reason')
+                    ->map(fn (Collection $entries, string $reason) => $reason . ' ('
+                        . trans_choice('{1} :count invoice|[2,*] :count invoices', $entries->count())
+                        . ')'
+                    )
+                    ->implode(' ')
+            )
+            ->send();
+    }
+
     protected function markAsSent(array $orderIds): void
     {
         $this->sentOrderIds = array_values(array_unique(array_merge(
@@ -396,10 +429,10 @@ class PaymentReminderRun extends Component
         ));
     }
 
-    protected function sendBundle(array $orderIds): bool
+    protected function sendBundle(array $orderIds): ?array
     {
         if (! $orderIds) {
-            return false;
+            return null;
         }
 
         $orderIds = array_map('intval', $orderIds);
@@ -423,18 +456,16 @@ class PaymentReminderRun extends Component
 
         try {
             // Fans the sends out as a monitored batch; the batch progress toast
-            // gives the user feedback, so no extra toast is raised here.
-            BundlePaymentReminders::make(['orders' => $orders])
+            // reports the deliveries, so only the held-back invoices are toasted here.
+            return BundlePaymentReminders::make(['orders' => $orders])
                 ->checkPermission()
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
-            return false;
+            return null;
         }
-
-        return true;
     }
 
     protected function sortGroups(Collection $groups): Collection
