@@ -564,6 +564,11 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return $this->belongsTo(Language::class);
     }
 
+    public function ledgerBookings(): MorphMany
+    {
+        return $this->morphMany(LedgerBooking::class, 'source');
+    }
+
     public function lead(): BelongsTo
     {
         return $this->belongsTo(Lead::class);
@@ -802,7 +807,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     public function calculatePaymentState(): static
     {
-        if (! $this->transactions()->exists()) {
+        if (! $this->transactions()->exists() && ! $this->ledgerBookings()->exists()) {
             // Don't reset to Open if order is in a payment run state
             // Payment run lifecycle manages InOpenPaymentRun and InPayment
             if (
@@ -1330,7 +1335,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     public function totalPaid(): string|float|int
     {
-        return $this->transactions()
+        $paid = $this->transactions()
             ->withPivot(['amount', 'order_currency_amount'])
             ->get()
             ->reduce(
@@ -1341,6 +1346,22 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                 ),
                 '0'
             );
+
+        return bcadd($paid, $this->totalSettledByLedgerBookings(), 9);
+    }
+
+    /**
+     * Ledger bookings pointing at this order settle it without a bank transaction,
+     * e.g. an invoice paid directly by a loan. Their amount is always positive, so
+     * the order type decides the direction it settles in.
+     */
+    public function totalSettledByLedgerBookings(): string
+    {
+        return bcmul(
+            (string) $this->ledgerBookings()->sum('amount'),
+            $this->orderType?->order_type_enum?->multiplier() ?? '1',
+            9
+        );
     }
 
     public function toCalendarEvent(?array $info = null): array

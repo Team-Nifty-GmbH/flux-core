@@ -35,6 +35,10 @@ class UpdateOrderRuleset extends FluxRuleset
             resolve_static(BankConnectionRuleset::class, 'getRules'),
             Arr::prependKeysWith(
                 resolve_static(PostalAddressRuleset::class, 'getRules'),
+                'address_invoice.'
+            ),
+            Arr::prependKeysWith(
+                resolve_static(PostalAddressRuleset::class, 'getRules'),
                 'address_delivery.'
             ),
             resolve_static(AddressRuleset::class, 'getRules'),

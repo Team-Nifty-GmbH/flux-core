@@ -5,6 +5,8 @@ namespace FluxErp\Rulesets\LedgerBooking;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\LedgerBooking;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\MorphClassExists;
+use FluxErp\Rules\MorphExists;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
 
@@ -32,6 +34,18 @@ class UpdateLedgerBookingRuleset extends FluxRuleset
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => LedgerAccount::class]),
+            ],
+            'source_type' => [
+                'string',
+                'nullable',
+                'required_with:source_id',
+                app(MorphClassExists::class),
+            ],
+            'source_id' => [
+                'integer',
+                'nullable',
+                'required_with:source_type',
+                app(MorphExists::class, ['modelAttribute' => 'source_type']),
             ],
             'amount' => [
                 'sometimes',

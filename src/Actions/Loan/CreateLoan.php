@@ -52,7 +52,10 @@ class CreateLoan extends FluxAction
                     : null),
             'ends_at' => $this->getData('ends_at') ?? $lastInstallment['due_date'] ?? null,
         ]);
-        $loan->save();
+        $loan->calculateRemaining()
+            ->calculateTotalInterest()
+            ->calculateProgress()
+            ->save();
 
         return $loan->refresh();
     }
