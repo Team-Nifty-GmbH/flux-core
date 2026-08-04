@@ -22,10 +22,10 @@ class MoveAddress extends FluxAction
     public function performAction(): Address
     {
         $address = resolve_static(Address::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
 
-        $address->contact_id = $this->data['contact_id'];
+        $address->contact_id = $this->getData('contact_id');
         $address->save();
 
         // Leaving a contact strips the main address flag, and it does so with a
@@ -35,7 +35,7 @@ class MoveAddress extends FluxAction
         $address->refresh();
 
         if (! resolve_static(Address::class, 'query')
-            ->where('contact_id', $this->data['contact_id'])
+            ->where('contact_id', $this->getData('contact_id'))
             ->where('is_main_address', true)
             ->exists()
         ) {
@@ -56,7 +56,7 @@ class MoveAddress extends FluxAction
 
         if ($currentContactId === $this->getData('contact_id')) {
             throw ValidationException::withMessages([
-                'contact_id' => [__('The address already belongs to this contact.')],
+                'contact_id' => ['The address already belongs to this contact.'],
             ])
                 ->errorBag('moveAddress');
         }

@@ -22,7 +22,7 @@ class MoveAddressRuleset extends FluxRuleset
             'contact_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Contact::class, 'subject' => Address::class]),
+                app(ModelExists::class, ['model' => Contact::class]),
             ],
         ];
     }

@@ -23,7 +23,7 @@ class DetachAddress extends FluxAction
     public function performAction(): Address
     {
         $address = resolve_static(Address::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->with('contact.tenants:id')
             ->first();
 
@@ -59,12 +59,12 @@ class DetachAddress extends FluxAction
             ->first(['id', 'contact_id']);
 
         if (resolve_static(Address::class, 'query')
-            ->where('contact_id', $address->contact_id)
             ->whereKeyNot($address->getKey())
+            ->where('contact_id', $address->contact_id)
             ->doesntExist()
         ) {
             throw ValidationException::withMessages([
-                'id' => [__('The contact would be left without an address.')],
+                'id' => ['The contact would be left without an address.'],
             ])
                 ->errorBag('detachAddress');
         }
