@@ -13,6 +13,7 @@ use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\View\Printing\PaymentReminder\PaymentReminderView;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 use Laravel\SerializableClosure\SerializableClosure;
@@ -242,6 +243,10 @@ class PaymentReminderRun extends Component
             ->first();
 
         if (! $order) {
+            $this->toast()
+                ->warning(__('This order can no longer be reminded.'))
+                ->send();
+
             return;
         }
 
@@ -317,7 +322,10 @@ class PaymentReminderRun extends Component
         $invoice = $item->order->invoice();
 
         return $invoice
-            ? ['id' => $invoice->getKey(), 'name' => $invoice->file_name]
+            ? [
+                'id' => $invoice->getKey(),
+                'name' => $invoice->file_name,
+            ]
             : [];
     }
 
@@ -341,7 +349,7 @@ class PaymentReminderRun extends Component
 
     protected function getCommunicatableType(OffersPrinting $item): string
     {
-        return app(Order::class)->getMorphClass();
+        return morph_alias(Order::class);
     }
 
     protected function getDefaultTemplateId(OffersPrinting $item): ?int
@@ -372,7 +380,7 @@ class PaymentReminderRun extends Component
         $email = data_get($this->recipientEmails, $groupKey)
             ?: $item->order->resolveMailablePaymentReminderAddress()?->email_primary;
 
-        return array_filter([$email]);
+        return array_filter(Arr::wrap($email));
     }
 
     protected function markAsSent(array $orderIds): void
