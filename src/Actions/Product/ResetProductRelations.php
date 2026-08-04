@@ -39,7 +39,7 @@ class ResetProductRelations extends FluxAction
         return ResetProductRelationsRuleset::class;
     }
 
-    public function performAction(): int
+    public function performAction(): Product
     {
         $parent = resolve_static(Product::class, 'query')
             ->whereKey($this->getData('parent_id'))
@@ -48,12 +48,12 @@ class ResetProductRelations extends FluxAction
         $variantIds = $parent->children()
             ->when(
                 $this->getData('variant_ids'),
-                fn (Builder $query, array $ids) => $query->whereIntegerInRaw('id', $ids)
+                fn (Builder $query, array $ids) => $query->whereKey($ids)
             )
             ->pluck('id');
 
         if ($variantIds->isEmpty()) {
-            return 0;
+            return $parent;
         }
 
         $touched = 0;
@@ -79,7 +79,7 @@ class ResetProductRelations extends FluxAction
             resolve_static(PivotInheritanceSync::class, 'propagateToChildren', ['parent' => $parent]);
         }
 
-        return $touched;
+        return $parent->refresh();
     }
 
     protected function resetRelation(Product $parent, array $variantIds, string $relation, mixed $relatedId): int
@@ -118,7 +118,7 @@ class ResetProductRelations extends FluxAction
             ->when(
                 ! is_null($relatedId),
                 fn (Builder $query) => $query
-                    ->where($this->resolveRelatedIdColumn($relation), $relatedId)
+                    ->where(static::relatedIdColumns()[$relation], $relatedId)
             );
 
         $touched = $query
@@ -131,11 +131,6 @@ class ResetProductRelations extends FluxAction
         return $touched;
     }
 
-    protected function resolveRelatedIdColumn(string $relation): string
-    {
-        return static::relatedIdColumns()[$relation];
-    }
-
     protected function validateData(): void
     {
         parent::validateData();
@@ -143,18 +138,18 @@ class ResetProductRelations extends FluxAction
         $this->validateVariantParentage('resetProductRelations');
 
         $product = app(Product::class);
+        $errors = [];
 
         foreach ($this->getData('relations') as $index => $reset) {
             $relation = data_get($reset, 'relation');
             $relationInstance = $product->{'own' . ucfirst($relation)}();
 
             if (! $relationInstance instanceof BelongsToMany && ! $relationInstance instanceof HasMany) {
-                throw ValidationException::withMessages([
-                    'relations.' . $index . '.relation' => [
-                        'Unsupported relation type for reset: [' . $relation . '].',
-                    ],
-                ])
-                    ->errorBag('resetProductRelations');
+                $errors['relations.' . $index . '.relation'] = [
+                    'Unsupported relation type for reset: [' . $relation . '].',
+                ];
+
+                continue;
             }
 
             if (
@@ -162,13 +157,16 @@ class ResetProductRelations extends FluxAction
                 && $relationInstance instanceof HasMany
                 && ! array_key_exists($relation, static::relatedIdColumns())
             ) {
-                throw ValidationException::withMessages([
-                    'relations.' . $index . '.related_id' => [
-                        'No related id column mapping for [' . $relation . '].',
-                    ],
-                ])
-                    ->errorBag('resetProductRelations');
+                $errors['relations.' . $index . '.related_id'] = [
+                    'No related id column mapping for [' . $relation . '].',
+                ];
             }
+        }
+
+        // one response carrying every offending entry instead of stopping at the first
+        if ($errors) {
+            throw ValidationException::withMessages($errors)
+                ->errorBag('resetProductRelations');
         }
     }
 }

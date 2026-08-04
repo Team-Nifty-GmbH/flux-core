@@ -16,7 +16,7 @@ test('removes pivot rows on every variant for the relation', function (): void {
     $variantB = Product::factory()->create(['parent_id' => $parent->getKey()]);
     $variantB->ownCategories()->attach([$category->getKey()]);
 
-    $touched = ResetProductRelations::make([
+    ResetProductRelations::make([
         'parent_id' => $parent->getKey(),
         'relations' => [
             [
@@ -28,7 +28,8 @@ test('removes pivot rows on every variant for the relation', function (): void {
         ->validate()
         ->execute();
 
-    expect($touched)->toBe(2);
+    expect($variantA->ownCategories()->count())->toBe(0)
+        ->and($variantB->ownCategories()->count())->toBe(0);
 });
 
 test('resets a single variant when variant_ids are given', function (): void {
@@ -39,7 +40,7 @@ test('resets a single variant when variant_ids are given', function (): void {
     $sibling = Product::factory()->create(['parent_id' => $parent->getKey()]);
     $sibling->ownCategories()->attach([$category->getKey()]);
 
-    $touched = ResetProductRelations::make([
+    ResetProductRelations::make([
         'parent_id' => $parent->getKey(),
         'relations' => [
             ['relation' => 'categories'],
@@ -49,8 +50,7 @@ test('resets a single variant when variant_ids are given', function (): void {
         ->validate()
         ->execute();
 
-    expect($touched)->toBe(1)
-        ->and($variant->ownCategories()->count())->toBe(0)
+    expect($variant->ownCategories()->count())->toBe(0)
         ->and($sibling->ownCategories()->count())->toBe(1);
 });
 
@@ -67,7 +67,7 @@ test('resets multiple relations in one call', function (): void {
         'is_inherited' => false,
     ]);
 
-    $touched = ResetProductRelations::make([
+    ResetProductRelations::make([
         'parent_id' => $parent->getKey(),
         'relations' => [
             ['relation' => 'categories'],
@@ -77,8 +77,7 @@ test('resets multiple relations in one call', function (): void {
         ->validate()
         ->execute();
 
-    expect($touched)->toBe(2)
-        ->and($variant->ownCategories()->count())->toBe(0)
+    expect($variant->ownCategories()->count())->toBe(0)
         ->and($variant->ownPrices()->count())->toBe(0);
 });
 
