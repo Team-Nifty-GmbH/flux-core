@@ -26,7 +26,8 @@ class ResetProductRelationsRuleset extends FluxRuleset
                 'string',
                 Rule::in(app(Product::class)->getInheritableRelations()),
             ],
-            'relations.*.related_id' => 'integer|nullable',
+            'relations.*.related_ids' => 'array|nullable',
+            'relations.*.related_ids.*' => 'required|integer',
             'variant_ids' => 'array|nullable',
             'variant_ids.*' => [
                 'required',

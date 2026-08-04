@@ -21,7 +21,7 @@ test('removes pivot rows on every variant for the relation', function (): void {
         'relations' => [
             [
                 'relation' => 'categories',
-                'related_id' => $category->getKey(),
+                'related_ids' => [$category->getKey()],
             ],
         ],
     ])
@@ -30,6 +30,34 @@ test('removes pivot rows on every variant for the relation', function (): void {
 
     expect($variantA->ownCategories()->count())->toBe(0)
         ->and($variantB->ownCategories()->count())->toBe(0);
+});
+
+test('resets several related records in one relation entry', function (): void {
+    $categoryA = Category::factory()->create(['model_type' => morph_alias(Product::class)]);
+    $categoryB = Category::factory()->create(['model_type' => morph_alias(Product::class)]);
+    $categoryC = Category::factory()->create(['model_type' => morph_alias(Product::class)]);
+    $parent = Product::factory()->create();
+    $variant = Product::factory()->create(['parent_id' => $parent->getKey()]);
+    $variant->ownCategories()->attach([
+        $categoryA->getKey(),
+        $categoryB->getKey(),
+        $categoryC->getKey(),
+    ]);
+
+    ResetProductRelations::make([
+        'parent_id' => $parent->getKey(),
+        'relations' => [
+            [
+                'relation' => 'categories',
+                'related_ids' => [$categoryA->getKey(), $categoryB->getKey()],
+            ],
+        ],
+    ])
+        ->validate()
+        ->execute();
+
+    // the third one was not named, so it stays
+    expect($variant->ownCategories()->pluck('id')->all())->toBe([$categoryC->getKey()]);
 });
 
 test('resets a single variant when variant_ids are given', function (): void {
@@ -97,7 +125,7 @@ test('re-copies the parents current category as an inherited row on every reset 
         'relations' => [
             [
                 'relation' => 'categories',
-                'related_id' => $category->getKey(),
+                'related_ids' => [$category->getKey()],
             ],
         ],
     ])
@@ -146,7 +174,7 @@ test('re-copies the parents current price as an inherited row on every reset var
         'relations' => [
             [
                 'relation' => 'prices',
-                'related_id' => $priceList->getKey(),
+                'related_ids' => [$priceList->getKey()],
             ],
         ],
     ])

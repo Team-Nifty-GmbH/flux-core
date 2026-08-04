@@ -25,7 +25,7 @@ class ResetProductRelations extends FluxAction
 
     /**
      * Maps a HasMany relation to the column carrying the related id, so a reset can be
-     * narrowed down to a single related record.
+     * narrowed down to single related records.
      */
     protected static function relatedIdColumns(): array
     {
@@ -63,7 +63,7 @@ class ResetProductRelations extends FluxAction
                 $parent,
                 $variantIds->all(),
                 data_get($reset, 'relation'),
-                data_get($reset, 'related_id')
+                data_get($reset, 'related_ids') ?? []
             );
         }
 
@@ -82,7 +82,7 @@ class ResetProductRelations extends FluxAction
         return $parent->refresh();
     }
 
-    protected function resetRelation(Product $parent, array $variantIds, string $relation, mixed $relatedId): int
+    protected function resetRelation(Product $parent, array $variantIds, string $relation, array $relatedIds): int
     {
         // The relation instance is only used for its metadata, so reuse the already
         // loaded parent instead of querying a variant per relation.
@@ -98,8 +98,9 @@ class ResetProductRelations extends FluxAction
                         ->where($relationInstance->getMorphType(), $relationInstance->getMorphClass())
                 )
                 ->when(
-                    ! is_null($relatedId),
-                    fn (QueryBuilder $query) => $query->where($relationInstance->getRelatedPivotKeyName(), $relatedId)
+                    $relatedIds,
+                    fn (QueryBuilder $query) => $query
+                        ->whereIntegerInRaw($relationInstance->getRelatedPivotKeyName(), $relatedIds)
                 );
 
             $touched = $query
@@ -116,9 +117,9 @@ class ResetProductRelations extends FluxAction
         $query = $relationInstance->getRelated()::query()
             ->whereIntegerInRaw($relationInstance->getForeignKeyName(), $variantIds)
             ->when(
-                ! is_null($relatedId),
+                $relatedIds,
                 fn (Builder $query) => $query
-                    ->where(static::relatedIdColumns()[$relation], $relatedId)
+                    ->whereIntegerInRaw(static::relatedIdColumns()[$relation], $relatedIds)
             );
 
         $touched = $query
@@ -153,11 +154,11 @@ class ResetProductRelations extends FluxAction
             }
 
             if (
-                ! is_null(data_get($reset, 'related_id'))
+                data_get($reset, 'related_ids')
                 && $relationInstance instanceof HasMany
                 && ! array_key_exists($relation, static::relatedIdColumns())
             ) {
-                $errors['relations.' . $index . '.related_id'] = [
+                $errors['relations.' . $index . '.related_ids'] = [
                     'No related id column mapping for [' . $relation . '].',
                 ];
             }
