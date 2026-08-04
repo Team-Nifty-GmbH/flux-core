@@ -16,6 +16,37 @@ class LedgerBooking extends FluxModel
 {
     use Filterable, HasPackageFactory, HasTenantAssignment, HasUserModification, HasUuid, SoftDeletes;
 
+    protected static function booted(): void
+    {
+        static::saved(function (LedgerBooking $ledgerBooking): void {
+            if ($ledgerBooking->wasChanged(['source_type', 'source_id'])) {
+                static::recalculateSettledOrder(
+                    $ledgerBooking->getOriginal('source_type'),
+                    $ledgerBooking->getOriginal('source_id')
+                );
+            }
+
+            static::recalculateSettledOrder($ledgerBooking->source_type, $ledgerBooking->source_id);
+        });
+
+        static::deleted(function (LedgerBooking $ledgerBooking): void {
+            static::recalculateSettledOrder($ledgerBooking->source_type, $ledgerBooking->source_id);
+        });
+    }
+
+    protected static function recalculateSettledOrder(?string $sourceType, int|string|null $sourceId): void
+    {
+        if (! $sourceId || $sourceType !== morph_alias(Order::class)) {
+            return;
+        }
+
+        resolve_static(Order::class, 'query')
+            ->whereKey($sourceId)
+            ->first()
+            ?->calculatePaymentState()
+            ->save();
+    }
+
     protected function casts(): array
     {
         return [
