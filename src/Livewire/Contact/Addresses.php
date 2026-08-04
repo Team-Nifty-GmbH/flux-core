@@ -267,7 +267,7 @@ class Addresses extends Component
     public function move(): void
     {
         try {
-            MoveAddress::make([
+            $address = MoveAddress::make([
                 'id' => $this->addressId,
                 'contact_id' => $this->moveToContactId,
             ])
@@ -280,13 +280,9 @@ class Addresses extends Component
             return;
         }
 
-        $target = resolve_static(Contact::class, 'query')
-            ->whereKey($this->moveToContactId)
-            ->first();
-
         $this->reset('moveToContactId');
 
-        $this->redirect($target->getUrl(), true);
+        $this->redirect($address->contact->getUrl(), true);
     }
 
     #[Renderless]
