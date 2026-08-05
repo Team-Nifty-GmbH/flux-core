@@ -9,6 +9,7 @@ use FluxErp\Actions\FluxAction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class Helper
@@ -104,6 +105,27 @@ class Helper
 
             return class_exists($class) ? get_class(app($class)) : false;
         }
+    }
+
+    public static function getMaxUploadSizeInBytes(): int
+    {
+        $rules = config('livewire.temporary_file_upload.rules');
+        $rules = is_array($rules) ? $rules : explode('|', (string) ($rules ?: 'file|max:12288'));
+
+        $limits = [
+            static::parseIniSizeToBytes(ini_get('upload_max_filesize')),
+            static::parseIniSizeToBytes(ini_get('post_max_size')),
+        ];
+
+        foreach ($rules as $rule) {
+            if (is_string($rule) && str_starts_with($rule, 'max:')) {
+                $limits[] = ((int) Str::after($rule, 'max:')) * 1024;
+            }
+        }
+
+        $limits = array_filter($limits, fn (int $limit) => $limit > 0);
+
+        return $limits ? min($limits) : 12288 * 1024;
     }
 
     public static function getHtmlInputFieldTypes(): array
@@ -319,5 +341,20 @@ class Helper
                 }
             }
         }
+    }
+
+    protected static function parseIniSizeToBytes(string|false|null $size): int
+    {
+        if (! preg_match('/^(\d+)\s*([KMGT]?)B?$/i', trim((string) $size), $matches)) {
+            return 0;
+        }
+
+        return (int) $matches[1] * match (strtoupper($matches[2])) {
+            'K' => 1024,
+            'M' => 1024 ** 2,
+            'G' => 1024 ** 3,
+            'T' => 1024 ** 4,
+            default => 1,
+        };
     }
 }
