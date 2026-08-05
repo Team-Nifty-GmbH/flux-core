@@ -17,6 +17,11 @@ use FluxErp\Models\Transaction;
 use FluxErp\Settings\AccountingSettings;
 
 beforeEach(function (): void {
+    AccountingSettings::fake([
+        'auto_accept_secure_transaction_matches' => false,
+        'auto_send_reminders' => false,
+    ]);
+
     $this->creditorIban = 'DE02120300000000202051';
 
     $this->contact = Contact::factory()
@@ -97,7 +102,10 @@ test('a match stays a suggestion while the setting is off', function (): void {
 });
 
 test('a secure match is accepted on its own', function (): void {
-    app(AccountingSettings::class)->fill(['auto_accept_secure_transaction_matches' => true])->save();
+    AccountingSettings::fake([
+        'auto_accept_secure_transaction_matches' => true,
+        'auto_send_reminders' => false,
+    ]);
 
     $transaction = repayment();
 
@@ -116,7 +124,10 @@ test('an amount that is not the installment amount is not matched on the iban al
 });
 
 test('a partial payment naming the loan stays a suggestion', function (): void {
-    app(AccountingSettings::class)->fill(['auto_accept_secure_transaction_matches' => true])->save();
+    AccountingSettings::fake([
+        'auto_accept_secure_transaction_matches' => true,
+        'auto_send_reminders' => false,
+    ]);
 
     $transaction = repayment([
         'amount' => -5000,
@@ -131,7 +142,10 @@ test('a partial payment naming the loan stays a suggestion', function (): void {
 });
 
 test('a booking date far from the due date stays a suggestion', function (): void {
-    app(AccountingSettings::class)->fill(['auto_accept_secure_transaction_matches' => true])->save();
+    AccountingSettings::fake([
+        'auto_accept_secure_transaction_matches' => true,
+        'auto_send_reminders' => false,
+    ]);
 
     $transaction = repayment(['booking_date' => now()->subDays(40)->toDateString()]);
 
