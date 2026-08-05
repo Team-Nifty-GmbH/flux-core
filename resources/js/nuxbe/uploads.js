@@ -1,3 +1,5 @@
+import { getLocale } from './format.js';
+
 export function formatFileSize(bytes) {
     const units = ['B', 'KB', 'MB', 'GB'];
     let size = Number(bytes) || 0;
@@ -10,13 +12,10 @@ export function formatFileSize(bytes) {
 
     const decimals = size < 10 && unit > 0 ? 1 : 0;
 
-    const formatted = new Intl.NumberFormat(
-        document.documentElement.lang || 'de',
-        {
-            minimumFractionDigits: decimals,
-            maximumFractionDigits: decimals,
-        },
-    ).format(size);
+    const formatted = new Intl.NumberFormat(getLocale(), {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+    }).format(size);
 
     return `${formatted} ${units[unit]}`;
 }
@@ -58,9 +57,13 @@ function matchesAccept(file, patterns) {
     }
 
     return patterns.some((pattern) => {
-        if (pattern.startsWith('.')) return name.endsWith(pattern);
-        if (pattern.endsWith('/*'))
+        if (pattern.startsWith('.')) {
+            return name.endsWith(pattern);
+        }
+
+        if (pattern.endsWith('/*')) {
             return type.startsWith(pattern.slice(0, -1));
+        }
 
         return type === pattern;
     });
@@ -80,7 +83,11 @@ export function validateFiles(files, { maxSize = 0, accept = '' } = {}) {
         }
 
         if (patterns.length && !matchesAccept(file, patterns)) {
-            return { file, reason: 'type', accept: patterns.join(', ') };
+            return {
+                file,
+                reason: 'type',
+                accept: patterns.join(', '),
+            };
         }
     }
 

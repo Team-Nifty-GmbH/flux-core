@@ -107,27 +107,6 @@ class Helper
         }
     }
 
-    public static function getMaxUploadSizeInBytes(): int
-    {
-        $rules = config('livewire.temporary_file_upload.rules');
-        $rules = is_array($rules) ? $rules : explode('|', (string) ($rules ?: 'file|max:12288'));
-
-        $limits = [
-            static::parseIniSizeToBytes(ini_get('upload_max_filesize')),
-            static::parseIniSizeToBytes(ini_get('post_max_size')),
-        ];
-
-        foreach ($rules as $rule) {
-            if (is_string($rule) && str_starts_with($rule, 'max:')) {
-                $limits[] = ((int) Str::after($rule, 'max:')) * 1024;
-            }
-        }
-
-        $limits = array_filter($limits, fn (int $limit) => $limit > 0);
-
-        return $limits ? min($limits) : 12288 * 1024;
-    }
-
     public static function getHtmlInputFieldTypes(): array
     {
         return [
@@ -147,6 +126,27 @@ class Helper
             'checkbox',
             'select',
         ];
+    }
+
+    public static function getMaxUploadSizeInBytes(): int
+    {
+        $rules = config('livewire.temporary_file_upload.rules');
+        $rules = is_array($rules) ? $rules : explode('|', (string) ($rules ?: 'file|max:12288'));
+
+        $limits = [
+            static::parseIniSizeToBytes(ini_get('upload_max_filesize')),
+            static::parseIniSizeToBytes(ini_get('post_max_size')),
+        ];
+
+        foreach ($rules as $rule) {
+            if (is_string($rule) && str_starts_with($rule, 'max:')) {
+                $limits[] = ((int) Str::after($rule, 'max:')) * 1024;
+            }
+        }
+
+        $limits = array_filter($limits, fn (int $limit) => $limit > 0);
+
+        return $limits ? min($limits) : 12288 * 1024;
     }
 
     public static function getRepetitions(array|Model $repeatable, string $periodStart, string $periodEnd): array
