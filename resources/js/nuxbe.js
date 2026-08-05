@@ -1,10 +1,6 @@
 import * as format from './nuxbe/format.js';
 import { parseNumber, openDetailModal } from './nuxbe/utils.js';
-import {
-    validateFiles,
-    formatFileSize,
-    escapeHtml,
-} from './nuxbe/uploads.js';
+import { validateFiles, formatFileSize, escapeHtml } from './nuxbe/uploads.js';
 import { lightbox, openLightbox } from './nuxbe/lightbox.js';
 import './nuxbe/lightbox/handlers/image.js';
 import './nuxbe/lightbox/handlers/pdf.js';
