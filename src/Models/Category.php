@@ -10,6 +10,7 @@ use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Model\SortableTrait;
 use FluxErp\Traits\Scout\Searchable;
@@ -19,12 +20,19 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 use Spatie\EloquentSortable\Sortable;
+use Spatie\MediaLibrary\HasMedia;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Category extends FluxModel implements InteractsWithDataTables, Sortable
+/**
+ * Categories carry images in every shop-facing project (a banner, a tile, a
+ * teaser). Media has to sit on this class and not on a bound subclass: the media
+ * library builds the owner from the morph map with `new $modelName`, so it always
+ * lands on the base model and would miss a trait a subclass added.
+ */
+class Category extends FluxModel implements HasMedia, InteractsWithDataTables, Sortable
 {
     use Filterable, HasAttributeTranslations, HasPackageFactory, HasParentChildRelations, HasUserModification, HasUuid,
-        LogsActivity, SortableTrait;
+        InteractsWithMedia, LogsActivity, SortableTrait;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
