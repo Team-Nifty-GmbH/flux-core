@@ -23,13 +23,21 @@ class UpdateLoanInstallmentTransactionRuleset extends FluxRuleset
                 'sometimes',
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => LoanInstallment::class]),
+                app(ModelExists::class, [
+                    'model' => LoanInstallment::class,
+                    'subject' => LoanInstallmentTransaction::class,
+                    'subjectKeyName' => 'pivot_id',
+                ]),
             ],
             'transaction_id' => [
                 'sometimes',
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Transaction::class]),
+                app(ModelExists::class, [
+                    'model' => Transaction::class,
+                    'subject' => LoanInstallmentTransaction::class,
+                    'subjectKeyName' => 'pivot_id',
+                ]),
             ],
             'amount' => [
                 'sometimes',

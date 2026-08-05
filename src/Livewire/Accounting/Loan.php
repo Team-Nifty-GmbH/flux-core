@@ -285,7 +285,7 @@ class Loan extends Component
             $interest = bcadd($interest, (string) $installment->interest_amount, 2);
 
             if ($installment->is_paid
-                || bccomp($this->coveredAmount($installment), $installment->getTotalAmount(), 2) > -1
+                || bccomp($this->coveredAmount($installment), $installment->getTotalAmount(), 2) !== -1
             ) {
                 $paidPrincipal = bcadd($paidPrincipal, (string) $installment->principal_amount, 2);
                 $paidInterest = bcadd($paidInterest, (string) $installment->interest_amount, 2);

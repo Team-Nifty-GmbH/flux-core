@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Casts\Money;
 use FluxErp\Models\Pivots\LoanInstallmentTransaction;
+use FluxErp\Models\Scopes\LoanInstallmentTenantScope;
 use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasUserModification;
@@ -27,10 +28,7 @@ class LoanInstallment extends FluxModel implements InteractsWithDataTables
 
     protected static function booted(): void
     {
-        static::addGlobalScope(
-            'tenant',
-            fn (Builder $query) => $query->whereHas('loan')
-        );
+        static::addGlobalScope(app(LoanInstallmentTenantScope::class));
 
         static::saved(function (LoanInstallment $loanInstallment): void {
             if (! $loanInstallment->wasRecentlyCreated
@@ -86,12 +84,12 @@ class LoanInstallment extends FluxModel implements InteractsWithDataTables
 
     public function getDescription(): ?string
     {
-        return trans('Due Date') . ' ' . $this->due_date?->locale(app()->getLocale())->isoFormat('L');
+        return __('Due Date') . ' ' . $this->due_date?->locale(app()->getLocale())->isoFormat('L');
     }
 
     public function getLabel(): ?string
     {
-        return trim(($this->loan?->name ?? '') . ' ' . trans('Sequence') . ' ' . $this->sequence);
+        return trim(($this->loan?->name ?? '') . ' ' . __('Sequence') . ' ' . $this->sequence);
     }
 
     public function getUrl(): ?string
@@ -115,18 +113,18 @@ class LoanInstallment extends FluxModel implements InteractsWithDataTables
     }
 
     // Scopes
-    public function scopeOverdue(Builder $query): void
+    protected function scopeOverdue(Builder $query): void
     {
         $query->unsettled()
             ->whereDate('due_date', '<', now()->toDateString());
     }
 
-    public function scopeCovered(Builder $query): void
+    protected function scopeCovered(Builder $query): void
     {
         $query->whereRaw(static::coverageSql() . ' > 0');
     }
 
-    public function scopeSettled(Builder $query): void
+    protected function scopeSettled(Builder $query): void
     {
         $query->where(function (Builder $query): void {
             $query->where('is_paid', true)
@@ -134,7 +132,7 @@ class LoanInstallment extends FluxModel implements InteractsWithDataTables
         });
     }
 
-    public function scopeUnsettled(Builder $query): void
+    protected function scopeUnsettled(Builder $query): void
     {
         $query->where('is_paid', false)
             ->whereRaw(static::coverageSql() . ' < ROUND(principal_amount + interest_amount, 2)');

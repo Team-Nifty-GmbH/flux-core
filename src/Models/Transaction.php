@@ -74,16 +74,16 @@ class Transaction extends FluxModel implements HasMedia, InteractsWithDataTables
         return $this->hasMany(LedgerAccountTransaction::class);
     }
 
-    public function loanInstallmentTransactions(): HasMany
-    {
-        return $this->hasMany(LoanInstallmentTransaction::class);
-    }
-
     public function loanInstallments(): BelongsToMany
     {
         return $this->belongsToMany(LoanInstallment::class)
             ->using(LoanInstallmentTransaction::class)
             ->withPivot(['pivot_id', 'amount', 'note', 'is_accepted']);
+    }
+
+    public function loanInstallmentTransactions(): HasMany
+    {
+        return $this->hasMany(LoanInstallmentTransaction::class);
     }
 
     public function orders(): BelongsToMany

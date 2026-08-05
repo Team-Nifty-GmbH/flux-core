@@ -47,17 +47,27 @@ class LoanInstallmentTransaction extends FluxPivot
     {
         $previousInstallmentId = $this->getOriginal('loan_installment_id');
 
-        if (! is_null($previousInstallmentId) && $previousInstallmentId !== $this->loan_installment_id) {
+        if (! is_null($previousInstallmentId)
+            && $previousInstallmentId !== $this->loan_installment_id
+        ) {
             resolve_static(LoanInstallment::class, 'query')
                 ->whereKey($previousInstallmentId)
                 ->first()
                 ?->recalculateLoan();
         }
 
-        $this->loanInstallment()->first()?->recalculateLoan();
+        $this->loanInstallment()
+            ->first()
+            ?->recalculateLoan();
 
-        if ($this->is_accepted || $this->wasChanged('is_accepted') || ! $this->exists) {
-            $this->transaction()->first()?->calculateBalance()->save();
+        if ($this->is_accepted
+            || $this->wasChanged('is_accepted')
+            || ! $this->exists
+        ) {
+            $this->transaction()
+                ->first()
+                ?->calculateBalance()
+                ->save();
         }
     }
 }

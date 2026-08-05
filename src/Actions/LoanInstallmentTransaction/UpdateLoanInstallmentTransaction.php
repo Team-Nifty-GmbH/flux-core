@@ -23,6 +23,7 @@ class UpdateLoanInstallmentTransaction extends FluxAction
         $loanInstallmentTransaction = resolve_static(LoanInstallmentTransaction::class, 'query')
             ->whereKey($this->getData('pivot_id'))
             ->first();
+
         $loanInstallmentTransaction->fill($this->getData());
         $loanInstallmentTransaction->save();
 
