@@ -43,16 +43,21 @@ class LoanInstallmentTransaction extends FluxPivot
         return $this->belongsTo(Transaction::class);
     }
 
-    /**
-     * The installment decides the loan key figures, the transaction only counts
-     * an assignment against its balance once it is accepted.
-     */
     public function recalculate(): void
     {
-        $this->loanInstallment?->recalculateLoan();
+        $previousInstallmentId = $this->getOriginal('loan_installment_id');
 
-        if ($this->is_accepted) {
-            $this->transaction?->calculateBalance()->save();
+        if (! is_null($previousInstallmentId) && $previousInstallmentId !== $this->loan_installment_id) {
+            resolve_static(LoanInstallment::class, 'query')
+                ->whereKey($previousInstallmentId)
+                ->first()
+                ?->recalculateLoan();
+        }
+
+        $this->loanInstallment()->first()?->recalculateLoan();
+
+        if ($this->is_accepted || $this->wasChanged('is_accepted') || ! $this->exists) {
+            $this->transaction()->first()?->calculateBalance()->save();
         }
     }
 }

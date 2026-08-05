@@ -58,7 +58,7 @@ test('every tab renders', function (string $tab): void {
         ->set('tab', $tab)
         ->assertOk()
         ->assertNoRedirect();
-})->with(['loan.general', 'loan.installments', 'loan.documents']);
+})->with(['loan.general', 'loan.installments', 'loan.payments', 'loan.documents']);
 
 test('the schedule tab formats amounts and dates for the locale', function (): void {
     app()->setLocale('de');
@@ -102,6 +102,69 @@ test('can save the loan', function (): void {
         'id' => $this->loan->getKey(),
         'name' => 'Renamed loan',
     ]);
+});
+
+test('the payments tab lists the assigned transactions', function (): void {
+    $transaction = FluxErp\Models\Transaction::factory()->create([
+        'bank_connection_id' => FluxErp\Models\BankConnection::factory()->create()->getKey(),
+        'amount' => -6060,
+        'purpose' => 'Rate 1 DARL-1',
+    ]);
+
+    FluxErp\Models\Pivots\LoanInstallmentTransaction::create([
+        'loan_installment_id' => $this->loan->installments()->orderBy('sequence')->value('id'),
+        'transaction_id' => $transaction->getKey(),
+        'amount' => -6060,
+        'is_accepted' => true,
+    ]);
+
+    Livewire::test(Loan::class, ['id' => $this->loan->getKey()])
+        ->set('tab', 'loan.payments')
+        ->assertOk()
+        ->assertCount('payments', 1)
+        ->assertSet('payments.0.purpose', 'Rate 1 DARL-1')
+        ->assertSet('payments.0.is_accepted', true)
+        ->assertSee('Rate 1 DARL-1');
+});
+
+test('the totals count an installment settled by a transaction', function (): void {
+    $transaction = FluxErp\Models\Transaction::factory()->create([
+        'bank_connection_id' => FluxErp\Models\BankConnection::factory()->create()->getKey(),
+        'amount' => -6060,
+    ]);
+
+    FluxErp\Models\Pivots\LoanInstallmentTransaction::create([
+        'loan_installment_id' => $this->loan->installments()->orderBy('sequence')->value('id'),
+        'transaction_id' => $transaction->getKey(),
+        'amount' => -6060,
+        'is_accepted' => true,
+    ]);
+
+    app()->setLocale('de');
+
+    Livewire::test(Loan::class, ['id' => $this->loan->getKey()])
+        ->assertOk()
+        ->assertSet('totals.paid_principal_amount', fn (string $value) => str_contains($value, '6.000,00'))
+        ->assertSet('totals.paid_interest_amount', fn (string $value) => str_contains($value, '60,00'));
+});
+
+test('a settled installment shows its status in the schedule', function (): void {
+    $transaction = FluxErp\Models\Transaction::factory()->create([
+        'bank_connection_id' => FluxErp\Models\BankConnection::factory()->create()->getKey(),
+        'amount' => -6060,
+    ]);
+
+    FluxErp\Models\Pivots\LoanInstallmentTransaction::create([
+        'loan_installment_id' => $this->loan->installments()->orderBy('sequence')->value('id'),
+        'transaction_id' => $transaction->getKey(),
+        'amount' => -6060,
+        'is_accepted' => true,
+    ]);
+
+    Livewire::test(Loan::class, ['id' => $this->loan->getKey()])
+        ->assertOk()
+        ->assertSet('installments.0.status', __('Settled'))
+        ->assertSet('installments.1.status', __('Overdue'));
 });
 
 test('can attach a contract', function (): void {

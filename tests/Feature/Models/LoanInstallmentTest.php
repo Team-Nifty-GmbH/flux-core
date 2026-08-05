@@ -36,10 +36,6 @@ beforeEach(function (): void {
     $this->bankConnection = BankConnection::factory()->create();
 });
 
-/**
- * Repaying is an outgoing payment, so the amounts are negative. A returned
- * direct debit comes back positive on the same installment.
- */
 function assignToInstallment(int $installmentId, string $amount, bool $accepted = true): void
 {
     LoanInstallmentTransaction::create([

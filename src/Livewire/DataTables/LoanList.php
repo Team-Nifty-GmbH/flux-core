@@ -9,6 +9,7 @@ class LoanList extends BaseDataTable
 {
     public array $columnLabels = [
         'contact.invoice_address.name' => 'Contact',
+        'overdue_installments_count' => 'Overdue Installments',
     ];
 
     public array $enabledCols = [
@@ -18,6 +19,7 @@ class LoanList extends BaseDataTable
         'remaining',
         'total_interest',
         'progress',
+        'overdue_installments_count',
         'number_of_installments',
         'starts_at',
     ];
@@ -44,6 +46,10 @@ class LoanList extends BaseDataTable
 
     public function getBuilder(Builder $builder): Builder
     {
-        return $builder->with('contact.invoiceAddress:id,contact_id,name');
+        return $builder
+            ->with('contact.invoiceAddress:id,contact_id,name')
+            ->withCount([
+                'installments as overdue_installments_count' => fn (Builder $query) => $query->overdue(),
+            ]);
     }
 }
