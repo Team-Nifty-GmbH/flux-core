@@ -13,6 +13,7 @@ class LoanInstallmentTransactionFactory extends Factory
     {
         return [
             'amount' => fake()->randomFloat(2, -10000, 0),
+            'note' => fake()->sentence(),
             'is_accepted' => fake()->boolean(),
         ];
     }
