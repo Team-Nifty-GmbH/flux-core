@@ -2768,6 +2768,8 @@
     "The debit and credit account must differ.": "Sollkonto und Habenkonto müssen sich unterscheiden.",
     "The default mail account must be one of the selected mail accounts.": "Das Standard-Mailkonto muss eines der ausgewählten Mailkonten sein.",
     "The employee is already assigned to this work time model": "Der Mitarbeiter ist bereits diesem Arbeitszeitmodell zugewiesen",
+    "The file :name is :size. The maximum upload size is :max.": "Die Datei :name ist :size groß. Die maximale Uploadgröße beträgt :max.",
+    "The file type of :name is not accepted. Allowed types: :types.": "Der Dateityp von :name wird nicht akzeptiert. Erlaubte Typen: :types.",
     "The given columns must be unique.": "Jede Spalte darf nur einmal angegeben werden.",
     "The given data was invalid.": "Die übermittelten Daten waren ungültig.",
     "The given order already has a parent.": "Der Auftrag ist bereits einem anderen Auftrag untergeordnet.",
