@@ -502,7 +502,7 @@
     "Basic Settings": "Grundeinstellungen",
     "Basic Unit": "Grundeinheit",
     "Basic unit": "Grundeinheit",
-    "BASIC works with any debtor, private or business, and the debtor can charge it back within eight weeks. B2B is for business debtors only, gives them no chargeback right, and needs their bank to know the mandate beforehand.": "BASIC geht mit jedem Zahlungspflichtigen, privat wie geschäftlich, und er kann den Einzug acht Wochen lang zurückholen. B2B geht nur mit Firmenkunden, gibt ihnen kein Rückgaberecht und setzt voraus, dass ihre Bank das Mandat vorher kennt.",
+    "BASIC works with any debtor and stays reversible for eight weeks. B2B is for business debtors only, gives them no right of return, and needs their bank to know the mandate beforehand.": "BASIC geht mit jedem Zahlungspflichtigen und ist acht Wochen lang zurückholbar. B2B geht nur mit Firmenkunden, gibt ihnen kein Rückgaberecht und setzt voraus, dass ihre Bank das Mandat vorher kennt.",
     "Batch Uuid": "Batch-UUID",
     "Bcc": "BCC",
     "Bcc Mail": "BCC-Mail",

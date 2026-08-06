@@ -70,7 +70,7 @@
                 ></div>
             </div>
             <hr class="py-4" />
-            <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-6">
                 @section('payment-properties')
                     <x-select.styled
                         wire:model="paymentRunForm.bank_connection_id"
@@ -96,21 +96,31 @@
                         <x-select.styled
                             wire:model="paymentRunForm.sepa_mandate_type_enum"
                             :label="__('Direct debit type')"
-                            :hint="__('BASIC works with any debtor, private or business, and the debtor can charge it back within eight weeks. B2B is for business debtors only, gives them no chargeback right, and needs their bank to know the mandate beforehand.')"
+                            :hint="__('BASIC works with any debtor and stays reversible for eight weeks. B2B is for business debtors only, gives them no right of return, and needs their bank to know the mandate beforehand.')"
                             :options="\FluxErp\Enums\SepaMandateTypeEnum::valuesLocalized()"
                         />
                     </div>
-                    <x-toggle
-                        wire:model="paymentRunForm.is_collective"
-                        :label="__('Collective')"
-                        :hint="__('Send all positions to the bank as one order instead of submitting each on its own.')"
-                    />
-                    <x-toggle
-                        x-bind:disabled="!$wire.paymentRunForm.is_collective"
-                        wire:model="paymentRunForm.is_single_booking"
-                        :label="__('Single Booking')"
-                        :hint="__('Bank lists every position separately on the statement. Only possible together with a collective order.')"
-                    />
+                    <div class="flex flex-col gap-1">
+                        <x-toggle
+                            wire:model="paymentRunForm.is_collective"
+                            :label="__('Collective')"
+                        />
+                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ __('Send all positions to the bank as one order instead of submitting each on its own.') }}
+                        </span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <x-toggle
+                            x-bind:disabled="
+                                !$wire.paymentRunForm.is_collective
+                            "
+                            wire:model="paymentRunForm.is_single_booking"
+                            :label="__('Single Booking')"
+                        />
+                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ __('Bank lists every position separately on the statement. Only possible together with a collective order.') }}
+                        </span>
+                    </div>
                     <div
                         x-cloak
                         x-show="
@@ -118,11 +128,17 @@
                             'money_transfer'
                         "
                     >
-                        <x-toggle
-                            wire:model="paymentRunForm.is_instant_payment"
-                            :label="__('Is Instant Payment')"
-                            :hint="__('Money reaches the recipient within seconds.')"
-                        />
+                        <div class="flex flex-col gap-1">
+                            <x-toggle
+                                wire:model="paymentRunForm.is_instant_payment"
+                                :label="__('Is Instant Payment')"
+                            />
+                            <span
+                                class="text-xs text-gray-500 dark:text-gray-400"
+                            >
+                                {{ __('Money reaches the recipient within seconds.') }}
+                            </span>
+                        </div>
                     </div>
                 @show
             </div>
