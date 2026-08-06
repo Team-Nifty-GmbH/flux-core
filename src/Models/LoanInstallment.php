@@ -4,7 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Casts\Money;
 use FluxErp\Models\Pivots\LoanInstallmentTransaction;
-use FluxErp\Models\Scopes\LoanInstallmentTenantScope;
+use FluxErp\Models\Scopes\LoanInstallmentInheritsLoanTenantScope;
 use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasUserModification;
@@ -28,7 +28,7 @@ class LoanInstallment extends FluxModel implements InteractsWithDataTables
 
     protected static function booted(): void
     {
-        static::addGlobalScope(app(LoanInstallmentTenantScope::class));
+        static::addGlobalScope(app(LoanInstallmentInheritsLoanTenantScope::class));
 
         static::saved(function (LoanInstallment $loanInstallment): void {
             if (! $loanInstallment->wasRecentlyCreated
