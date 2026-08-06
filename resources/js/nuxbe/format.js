@@ -31,7 +31,7 @@ const badgeClasses = {
 };
 
 export function getLocale() {
-    return document.documentElement.lang || 'de';
+    return document.documentElement.lang || 'en';
 }
 
 function getCurrencyCode() {
