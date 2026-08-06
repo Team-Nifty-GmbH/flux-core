@@ -198,15 +198,22 @@ Route::middleware('web')
                     });
                 Route::get(
                     '/address/{address}',
-                    fn (Address $address) => redirect()
-                        ->route(
-                            'contacts.id?',
-                            [
-                                'id' => $address->contact_id,
-                                'address' => $address->getKey(),
-                            ]
-                        )
+                    function (int $address) {
+                        $address = resolve_static(Address::class, 'query')
+                            ->whereKey($address)
+                            ->firstOrFail();
+
+                        return redirect()
+                            ->route(
+                                'contacts.id?',
+                                [
+                                    'id' => $address->contact_id,
+                                    'address' => $address->getKey(),
+                                ]
+                            );
+                    }
                 )
+                    ->whereNumber('address')
                     ->name('address.id');
 
                 Route::name('sales.')
@@ -365,9 +372,13 @@ Route::middleware('web')
 
             Route::post('/push-subscription', UpsertPushSubscription::class);
 
-            Route::get('/media/{media}/{filename}', function (Media $media) {
-                return $media;
-            })->name('media');
+            Route::get('/media/{media}/{filename}', function (int $media) {
+                return resolve_static(Media::class, 'query')
+                    ->whereKey($media)
+                    ->firstOrFail();
+            })
+                ->whereNumber('media')
+                ->name('media');
         });
 
         Route::middleware('auth:web')->group(function (): void {
@@ -390,7 +401,11 @@ Route::middleware('web')
             Route::get('/media-private/{media}/{filename}', PrivateMediaController::class)
                 ->name('media.private');
 
-            Route::get('/media/{media}', function (Media $media) {
+            Route::get('/media/{media}', function (int $media) {
+                $media = resolve_static(Media::class, 'query')
+                    ->whereKey($media)
+                    ->firstOrFail();
+
                 $disposition = ContentDisposition::make(
                     request()->boolean('download')
                         ? HeaderUtils::DISPOSITION_ATTACHMENT
@@ -417,6 +432,7 @@ Route::middleware('web')
                     ['Content-Disposition' => $disposition],
                 );
             })
+                ->whereNumber('media')
                 ->name('media.show');
         });
 
