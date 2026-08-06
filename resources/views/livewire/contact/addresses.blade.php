@@ -292,7 +292,9 @@
                                     <x-button
                                         color="secondary"
                                         light
-                                        x-on:click="$modalOpen('move-address')"
+                                        x-on:click="
+                                            $tsui.open.modal('move-address')
+                                        "
                                         :text="__('Move To Contact')"
                                     />
                                 </div>
@@ -352,7 +354,7 @@
                         color="secondary"
                         flat
                         :text="__('Cancel')"
-                        x-on:click="$modalClose('move-address')"
+                        x-on:click="$tsui.close.modal('move-address')"
                     />
                     <x-button
                         color="indigo"
