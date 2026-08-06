@@ -106,6 +106,9 @@
         @persist('record-merging')
             <livewire:record-merging lazy />
         @endpersist
+        @persist('layout-global-components')
+            @stack('layout-global-components')
+        @endpersist
     @endauth
 
     <x-flux::layout>
