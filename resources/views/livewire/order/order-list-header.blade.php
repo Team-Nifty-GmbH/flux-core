@@ -529,6 +529,19 @@
                         />
                     @show
                     @stack('order-edit-position-modal-fields')
+                    @section('order-position-detail-modal.content.activities')
+                        <div
+                            id="order-position-activities"
+                            x-cloak
+                            x-show="$wire.orderPosition.id"
+                        >
+                            <x-card :header="__('Activities')" minimize="mount">
+                                <div class="px-2 py-5">
+                                    <livewire:order-position.activities />
+                                </div>
+                            </x-card>
+                        </div>
+                    @show
                 </div>
                 <x-errors />
             </div>
