@@ -3,6 +3,7 @@
 use FluxErp\Actions\Loan\CreateLoan;
 use FluxErp\Actions\Loan\DeleteLoan;
 use FluxErp\Actions\Loan\UpdateLoan;
+use FluxErp\Enums\InstallmentIntervalEnum;
 use FluxErp\Enums\RepaymentTypeEnum;
 use FluxErp\Models\Contact;
 use FluxErp\Models\LedgerAccount;
@@ -51,6 +52,49 @@ test('create loan generates the full repayment schedule', function (): void {
     expect($loan->ends_at->toDateString())->toBe('2027-01-01');
 
     $this->assertDatabaseCount('loan_installments', 12);
+});
+
+test('create loan spaces a quarterly schedule and delays it by the grace period', function (): void {
+    $loan = CreateLoan::make(baseLoanData([
+        'name' => 'Development loan',
+        'amount' => 120000,
+        'interest_rate' => 0.0346,
+        'repayment_type_enum' => RepaymentTypeEnum::Linear->value,
+        'number_of_installments' => 20,
+        'installment_interval_enum' => InstallmentIntervalEnum::Quarterly->value,
+        'grace_period_installments' => 8,
+        'starts_at' => '2024-12-30',
+    ]))->validate()->execute();
+
+    expect($loan->installments()->count())->toBe(28)
+        ->and($loan->ends_at->toDateString())->toBe('2031-12-30')
+        ->and($loan->remaining)->toEqual(120000)
+        // the installment amount skips the interest only installments
+        ->and($loan->installment_amount)->toEqual(7038);
+});
+
+test('create loan keeps a fixed installment amount and settles the rest on the last one', function (): void {
+    $loan = CreateLoan::make(baseLoanData([
+        'name' => 'Car loan',
+        'amount' => 16800,
+        'interest_rate' => 0.0275,
+        'number_of_installments' => 61,
+        'installment_amount' => 300,
+        'starts_at' => '2021-08-30',
+    ]))->validate()->execute();
+
+    $installments = $loan->installments()->orderBy('sequence')->get();
+
+    expect($installments)->toHaveCount(61)
+        ->and($loan->installment_amount)->toEqual(300);
+
+    $lastPayment = bcadd(
+        $installments->last()->principal_amount,
+        $installments->last()->interest_amount,
+        2
+    );
+
+    expect(bccomp($lastPayment, '300.00', 2))->toBe(-1);
 });
 
 test('create loan rejects a foreign tenant contact', function (): void {

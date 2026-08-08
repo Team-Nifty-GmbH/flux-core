@@ -178,8 +178,24 @@
                                         x-text="file.name"
                                     ></span>
                                 </div>
-                                <template x-if="file.id">
-                                    <div>
+                                <div class="flex shrink-0 items-center gap-1.5">
+                                    <template x-if="file.lightbox_url">
+                                        <x-button
+                                            color="indigo"
+                                            icon="eye"
+                                            :title="__('Preview')"
+                                            x-on:click="
+                                                $nuxbe.openLightbox(
+                                                    file.lightbox_url,
+                                                    {
+                                                        mime: file.mime_type,
+                                                        title: file.name,
+                                                    },
+                                                )
+                                            "
+                                        />
+                                    </template>
+                                    <template x-if="file.id">
                                         <x-button
                                             color="indigo"
                                             icon="arrow-down-tray"
@@ -188,8 +204,8 @@
                                                     $wire.download(file.id)
                                             "
                                         />
-                                    </div>
-                                </template>
+                                    </template>
+                                </div>
                                 <div class="flex shrink-0 px-4">
                                     <x-button
                                         color="red"
