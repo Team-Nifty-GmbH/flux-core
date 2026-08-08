@@ -47,6 +47,7 @@ use FluxErp\Models\LeadState;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\LedgerBooking;
 use FluxErp\Models\Loan;
+use FluxErp\Models\LoanExtraRepayment;
 use FluxErp\Models\LoanInstallment;
 use FluxErp\Models\Location;
 use FluxErp\Models\Log;
@@ -208,6 +209,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'ledger_account' => LedgerAccount::class,
             'ledger_booking' => LedgerBooking::class,
             'loan' => Loan::class,
+            'loan_extra_repayment' => LoanExtraRepayment::class,
             'loan_installment' => LoanInstallment::class,
             'location' => Location::class,
             'log' => Log::class,
