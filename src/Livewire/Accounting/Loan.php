@@ -4,11 +4,13 @@ namespace FluxErp\Livewire\Accounting;
 
 use FluxErp\Actions\Loan\DeleteLoan;
 use FluxErp\Htmlables\TabButton;
+use FluxErp\Livewire\Forms\FinanceOrderForm;
 use FluxErp\Livewire\Forms\LoanForm;
 use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Loan as LoanModel;
 use FluxErp\Models\LoanInstallment;
+use FluxErp\Models\Order as OrderModel;
 use FluxErp\Models\Transaction as TransactionModel;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
@@ -32,6 +34,8 @@ class Loan extends Component
     use Actions, WithFileUploads, WithTabs;
 
     public MediaUploadForm $contract;
+
+    public FinanceOrderForm $financeOrder;
 
     #[Locked]
     public string $currencyIso = 'EUR';
@@ -70,6 +74,8 @@ class Loan extends Component
         $loan = $this->loadLoan($id);
 
         $this->loan->fill($loan);
+        $this->financeOrder->loan_id = $loan->getKey();
+        $this->financeOrder->booking_date = now()->toDateString();
         $this->contract->fill($loan->getFirstMedia('contract') ?? []);
         $this->installments = $this->buildSchedule($loan);
         $this->payments = $this->buildPayments($loan);
@@ -110,6 +116,48 @@ class Loan extends Component
             TabButton::make('loan.documents')
                 ->text(__('Documents')),
         ];
+    }
+
+    #[Renderless]
+    public function changedFinancedOrder(int $orderId): void
+    {
+        $order = resolve_static(OrderModel::class, 'query')
+            ->with('contact:id,expense_ledger_account_id')
+            ->whereKey($orderId)
+            ->first();
+
+        if (! $order) {
+            return;
+        }
+
+        $this->financeOrder->debit_ledger_account_id = $order->contact?->expense_ledger_account_id;
+        $this->financeOrder->amount = (float) bcround(abs((float) $order->balance), 2);
+    }
+
+    public function financeOrder(): bool
+    {
+        try {
+            $this->financeOrder->create();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $loan = $this->loadLoan($this->loan->id);
+
+        $this->loan->reset();
+        $this->loan->fill($loan);
+
+        $this->financeOrder->reset();
+        $this->financeOrder->loan_id = $loan->getKey();
+        $this->financeOrder->booking_date = now()->toDateString();
+
+        $this->toast()
+            ->success(__(':model saved', ['model' => __('Loan')]))
+            ->send();
+
+        return true;
     }
 
     #[Renderless]
