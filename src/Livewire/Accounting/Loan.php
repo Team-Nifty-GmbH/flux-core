@@ -2,14 +2,19 @@
 
 namespace FluxErp\Livewire\Accounting;
 
+use Carbon\Carbon;
 use FluxErp\Actions\Loan\DeleteLoan;
+use FluxErp\Enums\ScheduleAdjustmentTypeEnum;
 use FluxErp\Htmlables\TabButton;
+use FluxErp\Livewire\Forms\LoanExtraRepaymentForm;
 use FluxErp\Livewire\Forms\LoanForm;
 use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Loan as LoanModel;
+use FluxErp\Models\LoanExtraRepayment as LoanExtraRepaymentModel;
 use FluxErp\Models\LoanInstallment;
 use FluxErp\Models\Transaction as TransactionModel;
+use FluxErp\Support\Calculation\ExtraRepaymentScheduler;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use FluxErp\Traits\Livewire\WithTabs;
@@ -18,6 +23,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Number;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -41,6 +47,14 @@ class Loan extends Component
 
     #[Locked]
     public array $payments = [];
+
+    #[Locked]
+    public array $allowance = [];
+
+    public LoanExtraRepaymentForm $extraRepayment;
+
+    #[Locked]
+    public array $extraRepayments = [];
 
     public LoanForm $loan;
 
@@ -74,6 +88,11 @@ class Loan extends Component
         $this->installments = $this->buildSchedule($loan);
         $this->payments = $this->buildPayments($loan);
         $this->totals = $this->buildTotals($loan);
+        $this->extraRepayments = $this->buildExtraRepayments($loan);
+        $this->allowance = $this->buildAllowance($loan);
+
+        $this->extraRepayment->loan_id = $loan->getKey();
+        $this->extraRepayment->executed_at = today()->toDateString();
     }
 
     public function render(): View|Factory|Application
@@ -107,6 +126,8 @@ class Loan extends Component
                 ->text(__('Repayment Schedule')),
             TabButton::make('loan.payments')
                 ->text(__('Payments')),
+            TabButton::make('loan.extra-repayments')
+                ->text(__('Extra Repayments')),
             TabButton::make('loan.documents')
                 ->text(__('Documents')),
         ];
@@ -159,6 +180,81 @@ class Loan extends Component
             ->send();
 
         return true;
+    }
+
+    // not renderless, the schedule and the totals have to show the new plan
+    public function saveExtraRepayment(): bool
+    {
+        try {
+            $this->extraRepayment->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->toast()
+            ->success(__(':model saved', ['model' => __('Extra Repayment')]))
+            ->send();
+
+        $this->reloadLoan();
+
+        return true;
+    }
+
+    #[Computed]
+    public function extraRepaymentHeaders(): array
+    {
+        return [
+            ['index' => 'executed_at', 'label' => __('Executed At')],
+            ['index' => 'amount', 'label' => __('Amount')],
+            ['index' => 'schedule_adjustment_type', 'label' => __('Schedule Adjustment')],
+            ['index' => 'interest_saved', 'label' => __('Interest Saved')],
+            ['index' => 'installments_saved', 'label' => __('Installments Saved')],
+            ['index' => 'note', 'label' => __('Note')],
+        ];
+    }
+
+    /**
+     * What the extra repayment being entered would save, so the effect is
+     * visible before it is booked.
+     */
+    #[Computed]
+    public function extraRepaymentPreview(): array
+    {
+        $amount = (float) $this->extraRepayment->amount;
+
+        if ($amount <= 0) {
+            return [];
+        }
+
+        $loan = $this->loadLoan($this->loan->id);
+        $scheduler = app(ExtraRepaymentScheduler::class);
+        $open = $scheduler->openInstallments($loan);
+
+        if ($open->isEmpty() || bccomp((string) $amount, (string) $loan->remaining, 2) === 1) {
+            return [];
+        }
+
+        $schedule = $scheduler->reschedule(
+            $loan,
+            $amount,
+            ScheduleAdjustmentTypeEnum::from($this->extraRepayment->schedule_adjustment_type_enum),
+            $open
+        );
+        $savings = $scheduler->savings($schedule, $open);
+        $lastInstallment = array_last($schedule);
+
+        return [
+            'interest_saved' => $this->money($savings['interest_saved']),
+            'installments_saved' => $savings['installments_saved'],
+            'remaining' => $this->money(bcsub((string) $loan->remaining, (string) $amount, 2)),
+            'ends_at' => $lastInstallment
+                ? Carbon::parse($lastInstallment['due_date'])
+                    ->locale(app()->getLocale())
+                    ->isoFormat('L')
+                : __('Settled'),
+        ];
     }
 
     #[Computed]
@@ -306,6 +402,64 @@ class Loan extends Component
                 bcadd($principal, $interest, 2)
             ),
         ];
+    }
+
+    protected function buildAllowance(LoanModel $loan): array
+    {
+        $year = today()->year;
+        $allowance = $loan->extraRepaymentAllowance();
+
+        return [
+            'is_allowed' => (bool) $loan->allows_extra_repayments,
+            'is_capped' => ! is_null($allowance),
+            'year' => $year,
+            'allowance' => is_null($allowance) ? null : $this->money($allowance),
+            'used' => $this->money($loan->usedExtraRepayments($year)),
+            'remaining' => is_null($allowance)
+                ? null
+                : $this->money($loan->remainingExtraRepaymentAllowance($year)),
+        ];
+    }
+
+    protected function buildExtraRepayments(LoanModel $loan): array
+    {
+        return $loan->extraRepayments()
+            ->orderByDesc('executed_at')
+            ->get()
+            ->map(fn (LoanExtraRepaymentModel $extraRepayment): array => [
+                'id' => $extraRepayment->getKey(),
+                'executed_at' => $extraRepayment->executed_at
+                    ?->locale(app()->getLocale())
+                    ->isoFormat('L'),
+                'amount' => $this->money($extraRepayment->amount),
+                'schedule_adjustment_type' => __(
+                    Str::headline($extraRepayment->schedule_adjustment_type_enum->value)
+                ),
+                'interest_saved' => $this->money($extraRepayment->interest_saved),
+                'installments_saved' => $extraRepayment->installments_saved,
+                'note' => $extraRepayment->note,
+            ])
+            ->toArray();
+    }
+
+    protected function reloadLoan(): void
+    {
+        $this->loadedInstallments = null;
+
+        $loan = $this->loadLoan($this->loan->id);
+
+        $this->loan->fill($loan);
+        $this->installments = $this->buildSchedule($loan);
+        $this->payments = $this->buildPayments($loan);
+        $this->totals = $this->buildTotals($loan);
+        $this->extraRepayments = $this->buildExtraRepayments($loan);
+        $this->allowance = $this->buildAllowance($loan);
+
+        $this->extraRepayment->reset('amount', 'note');
+        $this->extraRepayment->loan_id = $loan->getKey();
+        $this->extraRepayment->executed_at = today()->toDateString();
+
+        unset($this->extraRepaymentPreview);
     }
 
     protected function loadLoan(int|string $id): LoanModel

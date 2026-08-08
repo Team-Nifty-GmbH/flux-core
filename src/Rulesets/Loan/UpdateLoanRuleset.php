@@ -7,6 +7,7 @@ use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Loan;
 use FluxErp\Models\Order;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
 
 class UpdateLoanRuleset extends FluxRuleset
@@ -43,6 +44,15 @@ class UpdateLoanRuleset extends FluxRuleset
             ],
             'name' => 'sometimes|required|string|max:255',
             'number' => 'string|max:255|nullable',
+            'allows_extra_repayments' => 'sometimes|boolean',
+            'extra_repayment_allowance_percentage' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0, 'max' => 1]),
+            ],
+            'extra_repayment_allowance_amount' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0]),
+            ],
         ];
     }
 }
