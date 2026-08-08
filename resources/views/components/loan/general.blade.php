@@ -37,6 +37,27 @@
             ]"
         />
         <x-input wire:model="loan.number" :label="__('Number')" />
+        <div class="grid grid-cols-1 gap-1.5 md:grid-cols-3">
+            <x-toggle
+                wire:model="loan.allows_extra_repayments"
+                :label="__('Allows Extra Repayments')"
+            />
+            <x-number
+                wire:model="loan.extra_repayment_allowance_percentage"
+                :label="__('Extra Repayment Allowance Percentage')"
+                step="0.001"
+                min="0"
+                max="1"
+                :hint="__('Share of the original amount per calendar year')"
+            />
+            <x-number
+                wire:model="loan.extra_repayment_allowance_amount"
+                :label="__('Extra Repayment Allowance Amount')"
+                step="0.01"
+                min="0"
+                :hint="__('Leave empty for an uncapped allowance')"
+            />
+        </div>
     </div>
 
     <x-slot:footer>
