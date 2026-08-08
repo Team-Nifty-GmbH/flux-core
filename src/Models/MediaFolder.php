@@ -17,6 +17,12 @@ class MediaFolder extends FluxModel implements HasMedia
 
     protected static function booted(): void
     {
+        static::saving(function (MediaFolder $model): void {
+            if ($model->parent_id) {
+                $model->collection_name = null;
+            }
+        });
+
         static::creating(function (MediaFolder $model): void {
             $model->slug ??= Str::of($model->name)
                 ->replace('.', '_')
@@ -25,32 +31,14 @@ class MediaFolder extends FluxModel implements HasMedia
         });
 
         static::created(function (MediaFolder $model): void {
-            $model->slug = implode('.',
-                array_filter([
-                    $model->parent?->slug,
-                    Str::of($model->name)
-                        ->replace('.', '_')
-                        ->snake()
-                        ->append('|' . $model->getKey())
-                        ->toString(),
-                ])
-            );
+            $model->slug = $model->buildSlug();
 
             $model->saveQuietly();
         });
 
         static::updating(function (MediaFolder $model): void {
-            if ($model->isDirty(['parent_id', 'name'])) {
-                $model->slug = implode('.',
-                    array_filter([
-                        $model->parent?->slug,
-                        Str::of($model->name)
-                            ->replace('.', '_')
-                            ->snake()
-                            ->append('|' . $model->getKey())
-                            ->toString(),
-                    ])
-                );
+            if ($model->isDirty(['parent_id', 'collection_name', 'name'])) {
+                $model->slug = $model->buildSlug();
             }
         });
 
@@ -79,5 +67,19 @@ class MediaFolder extends FluxModel implements HasMedia
             'mime_types' => 'array',
             'is_readonly' => 'boolean',
         ];
+    }
+
+    public function buildSlug(): string
+    {
+        return implode('.',
+            array_filter([
+                $this->parent?->slug ?? $this->collection_name,
+                Str::of($this->name)
+                    ->replace('.', '_')
+                    ->snake()
+                    ->append('|' . $this->getKey())
+                    ->toString(),
+            ])
+        );
     }
 }
