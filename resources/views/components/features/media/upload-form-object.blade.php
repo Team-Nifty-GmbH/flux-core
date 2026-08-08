@@ -178,9 +178,7 @@
                                         x-text="file.name"
                                     ></span>
                                 </div>
-                                <div
-                                    class="flex shrink-0 items-center gap-1.5"
-                                >
+                                <div class="flex shrink-0 items-center gap-1.5">
                                     <template x-if="file.lightbox_url">
                                         <x-button
                                             color="indigo"
