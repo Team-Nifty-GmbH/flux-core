@@ -68,6 +68,24 @@
                 />
                 <x-date wire:model="loan.starts_at" :label="__('Starts At')" />
             </div>
+            <div class="grid grid-cols-1 gap-1.5 md:grid-cols-3">
+                <x-select.styled
+                    wire:model="loan.installment_interval_enum"
+                    :label="__('Installment Interval')"
+                    select="label:label|value:value"
+                    :options="\FluxErp\Enums\InstallmentIntervalEnum::valuesLocalized()"
+                />
+                <x-number
+                    wire:model="loan.grace_period_installments"
+                    :label="__('Grace Period Installments')"
+                    step="1"
+                />
+                <x-number
+                    wire:model="loan.installment_amount"
+                    :label="__('Installment Amount')"
+                    step="0.01"
+                />
+            </div>
         </div>
     </x-slot:footer>
 </x-card>

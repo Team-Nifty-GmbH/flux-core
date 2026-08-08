@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Casts\Money;
+use FluxErp\Enums\InstallmentIntervalEnum;
 use FluxErp\Enums\RepaymentTypeEnum;
 use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasFrontendAttributes;
@@ -29,6 +30,7 @@ class Loan extends FluxModel implements HasMedia, InteractsWithDataTables
         return [
             'amount' => Money::class,
             'repayment_type_enum' => RepaymentTypeEnum::class,
+            'installment_interval_enum' => InstallmentIntervalEnum::class,
             'installment_amount' => Money::class,
             'remaining' => Money::class,
             'total_interest' => Money::class,

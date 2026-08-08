@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Loan;
 
 use Carbon\Carbon;
 use FluxErp\Actions\FluxAction;
+use FluxErp\Enums\InstallmentIntervalEnum;
 use FluxErp\Models\Contact;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Loan;
@@ -36,19 +37,26 @@ class CreateLoan extends FluxAction
             $this->getData('number_of_installments'),
             $loan->repayment_type_enum,
             Carbon::parse($this->getData('starts_at')),
+            $loan->installment_interval_enum,
+            $this->getData('grace_period_installments') ?? 0,
+            $this->getData('installment_amount'),
         );
 
         foreach ($schedule as $installment) {
             $loan->installments()->create($installment);
         }
 
-        $firstInstallment = array_first($schedule);
+        // the grace period installments carry interest only, the repayment
+        // rate is the first one that pays off principal
+        $firstRepayment = array_first(
+            array_filter($schedule, fn (array $installment): bool => bccomp($installment['principal_amount'], '0', 2) === 1)
+        );
         $lastInstallment = array_last($schedule);
 
         $loan->fill([
             'installment_amount' => $this->getData('installment_amount')
-                ?? ($firstInstallment
-                    ? bcadd($firstInstallment['principal_amount'], $firstInstallment['interest_amount'], 2)
+                ?? ($firstRepayment
+                    ? bcadd($firstRepayment['principal_amount'], $firstRepayment['interest_amount'], 2)
                     : null),
             'ends_at' => $this->getData('ends_at') ?? $lastInstallment['due_date'] ?? null,
         ]);
@@ -63,6 +71,8 @@ class CreateLoan extends FluxAction
     protected function prepareForValidation(): void
     {
         $this->data['tenant_id'] ??= resolve_static(Tenant::class, 'default')->getKey();
+        $this->data['installment_interval_enum'] ??= InstallmentIntervalEnum::Monthly->value;
+        $this->data['grace_period_installments'] ??= 0;
     }
 
     protected function validateData(): void

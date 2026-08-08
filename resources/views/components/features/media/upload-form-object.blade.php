@@ -178,6 +178,24 @@
                                         x-text="file.name"
                                     ></span>
                                 </div>
+                                <template x-if="file.lightbox_url">
+                                    <div>
+                                        <x-button
+                                            color="indigo"
+                                            icon="eye"
+                                            :title="__('Preview')"
+                                            x-on:click="
+                                                $nuxbe.openLightbox(
+                                                    file.lightbox_url,
+                                                    {
+                                                        mime: file.mime_type,
+                                                        title: file.name,
+                                                    },
+                                                )
+                                            "
+                                        />
+                                    </div>
+                                </template>
                                 <template x-if="file.id">
                                     <div>
                                         <x-button

@@ -107,7 +107,11 @@ class MediaUploadForm extends MediaForm
                 'id' => $file->getKey(),
                 'name' => $file->name,
                 'file_name' => $file->file_name,
+                'mime_type' => $file->mime_type,
                 'preview_url' => $file->getFullUrl(),
+                // the preview falls back to an icon for anything without a
+                // thumbnail, the lightbox still opens the file itself
+                'lightbox_url' => $file->getFullUrl(),
             ];
         }
 
@@ -115,7 +119,9 @@ class MediaUploadForm extends MediaForm
             'name' => $file->getClientOriginalName(),
             'temporary_filename' => $file->getFilename(),
             'file_name' => $file->getClientOriginalName(),
+            'mime_type' => $file->getMimeType(),
             'preview_url' => $file->isPreviewable() ? $file->temporaryUrl() : route('icons', ['name' => 'document']),
+            'lightbox_url' => $file->isPreviewable() ? $file->temporaryUrl() : null,
             'media' => $file->getRealPath(),
         ];
     }
