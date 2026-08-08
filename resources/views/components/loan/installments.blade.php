@@ -63,14 +63,16 @@
         :rows="$this->installments"
         striped
     >
-        @interact('column_is_paid', $row)
-            <x-icon
-                :name="$row['is_paid'] ? 'check' : 'x-mark'"
-                @class([
-                    'h-5 w-5',
-                    'text-green-600' => $row['is_paid'],
-                    'text-gray-400' => ! $row['is_paid'],
-                ])
+        @interact('column_status', $row)
+            <x-badge
+                :text="$row['status']"
+                :color="match ($row['status']) {
+                    __('Settled') => 'green',
+                    __('Overdue') => 'red',
+                    __('Partially Paid') => 'amber',
+                    default => 'gray',
+                }"
+                sm
             />
         @endinteract
     </x-table>

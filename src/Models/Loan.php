@@ -58,6 +58,11 @@ class Loan extends FluxModel implements HasMedia, InteractsWithDataTables
         return $this->belongsTo(Order::class);
     }
 
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
     // Public methods
     /**
      * The repaid share of the loan, between 0 and 1.
@@ -75,7 +80,7 @@ class Loan extends FluxModel implements HasMedia, InteractsWithDataTables
     {
         $this->remaining = bcround(
             (string) $this->installments()
-                ->where('is_paid', false)
+                ->unsettled()
                 ->sum('principal_amount'),
             2
         );

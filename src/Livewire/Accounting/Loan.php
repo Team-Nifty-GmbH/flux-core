@@ -8,12 +8,15 @@ use FluxErp\Livewire\Forms\LoanForm;
 use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Loan as LoanModel;
+use FluxErp\Models\LoanInstallment;
+use FluxErp\Models\Transaction as TransactionModel;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Number;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
@@ -36,6 +39,9 @@ class Loan extends Component
     #[Locked]
     public array $installments = [];
 
+    #[Locked]
+    public array $payments = [];
+
     public LoanForm $loan;
 
     public array $queryString = [
@@ -46,6 +52,8 @@ class Loan extends Component
 
     #[Locked]
     public array $totals = [];
+
+    protected ?Collection $loadedInstallments = null;
 
     public function mount(string $id): void
     {
@@ -64,6 +72,7 @@ class Loan extends Component
         $this->loan->fill($loan);
         $this->contract->fill($loan->getFirstMedia('contract') ?? []);
         $this->installments = $this->buildSchedule($loan);
+        $this->payments = $this->buildPayments($loan);
         $this->totals = $this->buildTotals($loan);
     }
 
@@ -96,6 +105,8 @@ class Loan extends Component
                 ->text(__('General')),
             TabButton::make('loan.installments')
                 ->text(__('Repayment Schedule')),
+            TabButton::make('loan.payments')
+                ->text(__('Payments')),
             TabButton::make('loan.documents')
                 ->text(__('Documents')),
         ];
@@ -159,51 +170,127 @@ class Loan extends Component
             ['index' => 'principal_amount', 'label' => __('Principal')],
             ['index' => 'interest_amount', 'label' => __('Interest')],
             ['index' => 'remaining', 'label' => __('Remaining')],
-            ['index' => 'is_paid', 'label' => __('Paid')],
+            ['index' => 'covered_amount', 'label' => __('Paid')],
+            ['index' => 'status', 'label' => __('Status')],
         ];
     }
 
-    /**
-     * The stored installments plus a running remaining balance, formatted for
-     * display because the table renders the values as they are.
-     */
+    #[Computed]
+    public function paymentHeaders(): array
+    {
+        return [
+            ['index' => 'booking_date', 'label' => __('Booking Date')],
+            ['index' => 'sequence', 'label' => __('Sequence')],
+            ['index' => 'purpose', 'label' => __('Purpose')],
+            ['index' => 'note', 'label' => __('Note')],
+            ['index' => 'amount', 'label' => __('Transaction Amount')],
+            ['index' => 'is_accepted', 'label' => __('Accepted')],
+        ];
+    }
+
     protected function buildSchedule(LoanModel $loan): array
     {
         $remaining = $loan->amount;
         $schedule = [];
 
-        foreach ($loan->installments()->orderBy('sequence')->get() as $installment) {
+        foreach ($this->loadInstallments($loan) as $installment) {
             $remaining = bcsub($remaining, $installment->principal_amount, 2);
+            $covered = $this->coveredAmount($installment);
 
             $schedule[] = [
                 'sequence' => $installment->sequence,
                 'due_date' => $installment->due_date->locale(app()->getLocale())->isoFormat('L'),
                 'principal_amount' => $this->money($installment->principal_amount),
                 'interest_amount' => $this->money($installment->interest_amount),
-                'is_paid' => $installment->is_paid,
                 'remaining' => $this->money($remaining),
+                'covered_amount' => $this->money($covered),
+                'status' => $this->status($installment, $covered),
             ];
         }
 
         return $schedule;
     }
 
-    /**
-     * The sums above the schedule: what has to be repaid over the whole term
-     * and how much of it is settled already.
-     */
+    protected function buildPayments(LoanModel $loan): array
+    {
+        $payments = [];
+
+        foreach ($this->loadInstallments($loan) as $installment) {
+            foreach ($installment->transactions as $transaction) {
+                $payments[] = [
+                    'sequence' => $installment->sequence,
+                    'booking_date' => $transaction->booking_date
+                        ?->locale(app()->getLocale())
+                        ->isoFormat('L'),
+                    'purpose' => $transaction->purpose,
+                    'note' => $transaction->pivot->note,
+                    'amount' => $this->money($transaction->pivot->amount),
+                    'is_accepted' => (bool) $transaction->pivot->is_accepted,
+                    'transaction_id' => $transaction->getKey(),
+                ];
+            }
+        }
+
+        return $payments;
+    }
+
+    protected function coveredAmount(LoanInstallment $installment): string
+    {
+        $sum = $installment->transactions
+            ->where('pivot.is_accepted', true)
+            ->reduce(
+                fn (string $carry, TransactionModel $transaction) => bcadd(
+                    $carry,
+                    (string) $transaction->pivot->amount,
+                    2
+                ),
+                '0'
+            );
+
+        return bccomp($sum, '0', 2) === -1 ? bcabs($sum) : '0.00';
+    }
+
+    protected function loadInstallments(LoanModel $loan): Collection
+    {
+        return $this->loadedInstallments ??= $loan->installments()
+            ->with('transactions')
+            ->orderBy('sequence')
+            ->get();
+    }
+
+    protected function status(LoanInstallment $installment, string $covered): string
+    {
+        if ($installment->is_paid || bccomp($covered, $installment->getTotalAmount(), 2) !== -1) {
+            return __('Settled');
+        }
+
+        if ($installment->due_date->isBefore(today())) {
+            return __('Overdue');
+        }
+
+        return bccomp($covered, '0', 2) === 1
+            ? __('Partially Paid')
+            : __('Open');
+    }
+
     protected function buildTotals(LoanModel $loan): array
     {
-        $principal = (string) $loan->installments()
-            ->sum('principal_amount');
-        $interest = (string) $loan->installments()
-            ->sum('interest_amount');
-        $paidPrincipal = (string) $loan->installments()
-            ->where('is_paid', true)
-            ->sum('principal_amount');
-        $paidInterest = (string) $loan->installments()
-            ->where('is_paid', true)
-            ->sum('interest_amount');
+        $principal = '0';
+        $interest = '0';
+        $paidPrincipal = '0';
+        $paidInterest = '0';
+
+        foreach ($this->loadInstallments($loan) as $installment) {
+            $principal = bcadd($principal, (string) $installment->principal_amount, 2);
+            $interest = bcadd($interest, (string) $installment->interest_amount, 2);
+
+            if ($installment->is_paid
+                || bccomp($this->coveredAmount($installment), $installment->getTotalAmount(), 2) !== -1
+            ) {
+                $paidPrincipal = bcadd($paidPrincipal, (string) $installment->principal_amount, 2);
+                $paidInterest = bcadd($paidInterest, (string) $installment->interest_amount, 2);
+            }
+        }
 
         return [
             'principal_amount' => $this->money($principal),

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Laravel\Scout\SearchableScope;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
@@ -62,7 +63,14 @@ class SearchController extends Controller
             $query = resolve_static($model, 'query');
             $query->where(function (Builder $query) use ($request): void {
                 foreach (Arr::wrap($request->input('searchFields')) as $field) {
-                    $query->orWhere($field, 'like', '%' . $request->input('search') . '%');
+                    str_contains($field, '.')
+                        ? $query->orWhereRelation(
+                            Str::beforeLast($field, '.'),
+                            Str::afterLast($field, '.'),
+                            'like',
+                            '%' . $request->input('search') . '%'
+                        )
+                        : $query->orWhere($field, 'like', '%' . $request->input('search') . '%');
                 }
             });
         } else {
