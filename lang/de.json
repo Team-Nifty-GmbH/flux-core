@@ -2791,6 +2791,7 @@
     "The given order already has a parent.": "Der Auftrag ist bereits einem anderen Auftrag untergeordnet.",
     "The given route does not exist.": "Die angegebene Route existiert nicht.",
     "The given route is missing required parameters.": "Der angegebenen Route fehlen erforderliche Parameter.",
+    "The installment amount does not cover the interest of the loan.": "Die Ratenhöhe deckt die Zinsen des Darlehens nicht.",
     "The ledger accounts must belong to the booking tenant.": "Die Buchungskonten müssen zum Mandanten der Buchung gehören.",
     "The login link is invalid or has expired.": "Der Anmeldelink ist ungültig oder abgelaufen.",
     "The mail data is no longer available, please try again.": "Die E-Mail-Daten sind nicht mehr verfügbar, bitte versuche es erneut.",

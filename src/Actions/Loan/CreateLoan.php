@@ -13,6 +13,7 @@ use FluxErp\Models\Tenant;
 use FluxErp\Rulesets\Loan\CreateLoanRuleset;
 use FluxErp\Support\Calculation\RepaymentScheduleGenerator;
 use Illuminate\Validation\ValidationException;
+use InvalidArgumentException;
 
 class CreateLoan extends FluxAction
 {
@@ -31,16 +32,22 @@ class CreateLoan extends FluxAction
         $loan = app(Loan::class, ['attributes' => $this->getData()]);
         $loan->save();
 
-        $schedule = app(RepaymentScheduleGenerator::class)->generate(
-            $this->getData('amount'),
-            $this->getData('interest_rate'),
-            $this->getData('number_of_installments'),
-            $loan->repayment_type_enum,
-            Carbon::parse($this->getData('starts_at')),
-            $loan->installment_interval_enum,
-            $this->getData('grace_period_installments') ?? 0,
-            $this->getData('installment_amount'),
-        );
+        try {
+            $schedule = app(RepaymentScheduleGenerator::class)->generate(
+                $this->getData('amount'),
+                $this->getData('interest_rate'),
+                $this->getData('number_of_installments'),
+                $loan->repayment_type_enum,
+                Carbon::parse($this->getData('starts_at')),
+                $loan->installment_interval_enum,
+                $this->getData('grace_period_installments') ?? 0,
+                $this->getData('installment_amount'),
+            );
+        } catch (InvalidArgumentException $e) {
+            throw ValidationException::withMessages([
+                'installment_amount' => [$e->getMessage()],
+            ]);
+        }
 
         foreach ($schedule as $installment) {
             $loan->installments()->create($installment);

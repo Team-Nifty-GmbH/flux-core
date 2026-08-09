@@ -182,3 +182,19 @@ test('deleting an installment updates every derived column', function (): void {
     expect($loan->refresh()->total_interest)->toEqual($expectedInterest)
         ->and($loan->remaining)->toEqual($loan->installments()->sum('principal_amount'));
 });
+
+test('a fixed installment amount is rejected for a linear loan', function (): void {
+    CreateLoan::assertValidationErrors(baseLoanData([
+        'repayment_type_enum' => RepaymentTypeEnum::Linear->value,
+        'installment_amount' => 300,
+    ]), 'installment_amount');
+});
+
+test('an installment amount below the interest fails validation instead of erroring out', function (): void {
+    expect(fn () => CreateLoan::make(baseLoanData([
+        'amount' => 100000,
+        'interest_rate' => 0.12,
+        'number_of_installments' => 120,
+        'installment_amount' => 10,
+    ]))->validate()->execute())->toThrow(ValidationException::class);
+});
