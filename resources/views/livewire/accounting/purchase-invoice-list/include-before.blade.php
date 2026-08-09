@@ -160,6 +160,44 @@
                             />
                         </div>
                     </div>
+                    @if ($this->assignableOrders)
+                        <div
+                            x-data="{ assignedOrderTotal: null }"
+                            x-cloak
+                            x-show="!$wire.purchaseInvoiceForm.order_id"
+                            class="flex flex-col gap-1.5"
+                        >
+                            <x-select.styled
+                                :label="__('Book Onto Existing Order')"
+                                :hint="__('The invoice takes over the chosen order instead of creating a new one.')"
+                                wire:model.number="assignToOrderId"
+                                x-on:select="
+                                    assignedOrderTotal =
+                                        $event.detail.select
+                                            ?.total_gross_price ?? null
+                                "
+                                select="label:label|value:value|description:description"
+                                :options="$this->assignableOrders"
+                            />
+                            <div
+                                x-cloak
+                                x-show="
+                                    assignedOrderTotal !== null &&
+                                    Math.abs(
+                                        assignedOrderTotal -
+                                            Number(
+                                                $wire.purchaseInvoiceForm
+                                                    .total_gross_price,
+                                            ),
+                                    ) > 0.005
+                                "
+                            >
+                                <x-alert color="amber" light>
+                                    {{ __('The invoice amount differs from the planned amount of the chosen order. The order will be overwritten with the invoice amount.') }}
+                                </x-alert>
+                            </div>
+                        </div>
+                    @endif
                     <div class="grid grid-cols-2 gap-4">
                         <x-input
                             x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
