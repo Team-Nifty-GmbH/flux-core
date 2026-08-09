@@ -12,6 +12,8 @@ use Illuminate\Validation\ValidationException;
 
 class FinanceOrder extends FluxAction
 {
+    protected ?Loan $loan = null;
+
     public static function models(): array
     {
         return [Loan::class];
@@ -24,7 +26,7 @@ class FinanceOrder extends FluxAction
 
     public function performAction(): Loan
     {
-        $loan = resolve_static(Loan::class, 'query')
+        $loan = $this->loan ?? resolve_static(Loan::class, 'query')
             ->whereKey($this->getData('loan_id'))
             ->firstOrFail();
 
@@ -54,7 +56,7 @@ class FinanceOrder extends FluxAction
     {
         parent::validateData();
 
-        $loan = resolve_static(Loan::class, 'query')
+        $loan = $this->loan = resolve_static(Loan::class, 'query')
             ->whereKey($this->getData('loan_id'))
             ->firstOrFail();
 

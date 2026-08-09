@@ -122,11 +122,23 @@ class Loan extends Component
     public function changedFinancedOrder(int $orderId): void
     {
         $order = resolve_static(OrderModel::class, 'query')
-            ->with('contact:id,expense_ledger_account_id')
+            ->with(['contact:id,expense_ledger_account_id', 'orderType:id,order_type_enum'])
             ->whereKey($orderId)
             ->first();
 
         if (! $order) {
+            return;
+        }
+
+        if ($order->tenant_id !== $this->loan->tenant_id
+            || ! $order->orderType?->order_type_enum?->isPurchase()
+        ) {
+            $this->financeOrder->order_id = null;
+
+            $this->notification()
+                ->error(__('Only purchase orders can be financed.'))
+                ->send();
+
             return;
         }
 

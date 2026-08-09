@@ -309,3 +309,39 @@ test('selecting an order prefills the creditor account and the open amount', fun
         ->assertSet('financeOrder.debit_ledger_account_id', $creditorAccount->getKey())
         ->assertSet('financeOrder.amount', 1750.5);
 });
+
+test('selecting a sales order is rejected right away', function (): void {
+    $address = Address::factory()->create([
+        'contact_id' => $this->contact->getKey(),
+        'is_main_address' => true,
+        'is_invoice_address' => true,
+    ]);
+    $orderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+    ]);
+    $order = Order::factory()->create([
+        'order_type_id' => $orderType->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $this->contact->getKey(),
+        'payment_type_id' => PaymentType::factory()
+            ->hasAttached($this->dbTenant, relationship: 'tenants')
+            ->create()
+            ->getKey(),
+        'price_list_id' => PriceList::factory()->create()->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'total_gross_price' => 500,
+        'balance' => 500,
+        'is_locked' => false,
+    ]);
+
+    Livewire::actingAs($this->user)
+        ->test(Loan::class, ['id' => $this->loan->getKey()])
+        ->set('financeOrder.order_id', $order->getKey())
+        ->call('changedFinancedOrder', $order->getKey())
+        ->assertOk()
+        ->assertSet('financeOrder.order_id', null)
+        ->assertSet('financeOrder.amount', null);
+});
