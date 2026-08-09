@@ -183,13 +183,13 @@
                                 x-cloak
                                 x-show="
                                     assignedOrderTotal !== null &&
-                                    Math.abs(
-                                        assignedOrderTotal -
+                                    Math.round(assignedOrderTotal * 100) !==
+                                        Math.round(
                                             Number(
                                                 $wire.purchaseInvoiceForm
                                                     .total_gross_price,
-                                            ),
-                                    ) > 0.005
+                                            ) * 100,
+                                        )
                                 "
                             >
                                 <x-alert color="amber" light>

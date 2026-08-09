@@ -223,9 +223,9 @@ class PurchaseInvoiceList extends BaseDataTable
                         ->map(fn (OrderTypeEnum $case) => $case->value)
                 )
             )
-            ->with('createdFrom.orderType:id,order_type_enum')
+            ->with(['createdFrom.orderType:id,order_type_enum', 'currency:id,iso'])
             ->latest('id')
-            ->get(['id', 'created_from_id', 'order_number', 'order_date', 'total_gross_price'])
+            ->get(['id', 'created_from_id', 'currency_id', 'order_number', 'order_date', 'total_gross_price'])
             ->groupBy(
                 fn (Order $order) => $order->createdFrom?->orderType?->order_type_enum?->isSubscription()
                     ? 'rates'
@@ -244,7 +244,7 @@ class PurchaseInvoiceList extends BaseDataTable
                         'label' => trim($order->order_number . ' ' . $order->getLabel()),
                         'description' => Number::currency(
                             (float) abs((float) $order->total_gross_price),
-                            resolve_static(Currency::class, 'default')?->iso ?? 'EUR',
+                            $order->currency?->iso ?? resolve_static(Currency::class, 'default')?->iso ?? 'EUR',
                             app()->getLocale()
                         ),
                         'value' => $order->getKey(),
