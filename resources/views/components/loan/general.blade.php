@@ -78,6 +78,7 @@
                 <x-number
                     wire:model="loan.grace_period_installments"
                     :label="__('Grace Period Installments')"
+                    min="0"
                     step="1"
                 />
                 <x-number
