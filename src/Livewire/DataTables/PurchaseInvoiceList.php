@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\ComponentAttributeBag;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Renderless;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -33,6 +34,7 @@ class PurchaseInvoiceList extends BaseDataTable
 {
     use WithDocumentScanning, WithFilePond, WithFileUploads;
 
+    #[Locked]
     public ?int $assignToOrderId = null;
 
     public bool $positiveEmptyState = true;

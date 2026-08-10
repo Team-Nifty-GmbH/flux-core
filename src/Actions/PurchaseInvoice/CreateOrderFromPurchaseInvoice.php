@@ -111,33 +111,6 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
         $this->data['invoice_date'] ??= now()->toDateString();
     }
 
-    protected function validateChosenOrder(int $orderId): array
-    {
-        $order = resolve_static(Order::class, 'query')
-            ->whereKey($orderId)
-            ->first(['id', 'contact_id', 'invoice_number', 'is_locked', 'tenant_id']);
-
-        if (! $order) {
-            return ['order_id' => [__('validation.exists', ['attribute' => 'order_id'])]];
-        }
-
-        if ($order->tenant_id !== $this->getData('tenant_id')
-            || $order->contact_id !== $this->getData('contact_id')
-        ) {
-            return ['order_id' => ['The order must belong to the supplier of the purchase invoice.']];
-        }
-
-        if ($order->invoice_number) {
-            return ['order_id' => ['The order is already invoiced.']];
-        }
-
-        if ($order->is_locked) {
-            return ['order_id' => ['The order is locked.']];
-        }
-
-        return [];
-    }
-
     protected function takeOverOrder(): Order
     {
         $order = UpdateOrder::make(
@@ -164,6 +137,29 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
         }
 
         return $order;
+    }
+
+    protected function validateChosenOrder(int $orderId): array
+    {
+        $order = resolve_static(Order::class, 'query')
+            ->whereKey($orderId)
+            ->first(['id', 'tenant_id', 'contact_id', 'invoice_number', 'is_locked']);
+
+        if ($order->tenant_id !== $this->getData('tenant_id')
+            || $order->contact_id !== $this->getData('contact_id')
+        ) {
+            return ['order_id' => ['The order must belong to the supplier of the purchase invoice.']];
+        }
+
+        if (! blank($order->invoice_number)) {
+            return ['order_id' => ['The order is already invoiced.']];
+        }
+
+        if ($order->is_locked) {
+            return ['order_id' => ['The order is locked.']];
+        }
+
+        return [];
     }
 
     protected function validateData(): void
