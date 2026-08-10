@@ -15,10 +15,14 @@ class LoanForm extends FluxForm
 
     public ?string $ends_at = null;
 
+    public ?int $grace_period_installments = null;
+
     #[Locked]
     public ?int $id = null;
 
     public ?float $installment_amount = null;
+
+    public ?string $installment_interval_enum = null;
 
     public ?float $interest_rate = null;
 
