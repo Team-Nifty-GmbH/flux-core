@@ -263,7 +263,7 @@ test('can finance a purchase order from the loan', function (): void {
         ->set('financeOrder.debit_ledger_account_id', $creditorAccount->getKey())
         ->set('financeOrder.amount', 2500)
         ->set('financeOrder.booking_date', '2026-09-01')
-        ->call('financeOrder')
+        ->call('finance')
         ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('loan.order_id', $order->getKey());
