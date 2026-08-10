@@ -136,9 +136,9 @@
             <x-button
                 :text="__('Save')"
                 color="indigo"
-                loading="financeOrder"
+                loading="finance"
                 x-on:click="
-                    $wire.financeOrder().then((success) => {
+                    $wire.finance().then((success) => {
                         if (success) $tsui.close.modal('finance-order');
                     })
                 "

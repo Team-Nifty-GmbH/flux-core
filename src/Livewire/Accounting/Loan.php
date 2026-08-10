@@ -145,8 +145,10 @@ class Loan extends Component
         $this->financeOrder->amount = (float) bcround(abs((float) $order->balance), 2);
     }
 
-    public function financeOrder(): bool
+    public function finance(): bool
     {
+        $this->resetErrorBag();
+
         try {
             $this->financeOrder->create();
         } catch (ValidationException|UnauthorizedException $e) {
