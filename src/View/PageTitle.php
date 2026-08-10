@@ -2,7 +2,7 @@
 
 namespace FluxErp\View;
 
-use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Str;
 
@@ -16,38 +16,36 @@ class PageTitle
             return $appName;
         }
 
-        $model = static::model($route);
-        $section = $route->getMetadata('title')
-            ?: ($model
-                ? class_basename($model)
-                : Str::afterLast(rtrim($route->getName() ?? '', '.'), '.'));
+        $alias = $route->getMetadata('model');
 
         return collect([
-            $section ? __(Str::headline($section)) : null,
-            static::record($route, $model),
+            static::section($route, $alias),
+            static::recordLabel($route, $alias),
             $appName,
         ])
             ->filter()
             ->implode(' / ');
     }
 
-    protected static function model(Route $route): ?string
+    protected static function section(Route $route, ?string $alias): ?string
     {
-        $model = $route->getMetadata('model');
+        $section = $route->getMetadata('title')
+            ?: class_basename($alias ? morphed_model($alias) ?? '' : '')
+            ?: Str::afterLast(rtrim($route->getName() ?? '', '.'), '.');
 
-        return $model
-            ? Relation::getMorphedModel($model) ?? $model
-            : null;
+        return $section ? __(Str::headline($section)) : null;
     }
 
-    protected static function record(Route $route, ?string $model): ?string
+    protected static function recordLabel(Route $route, ?string $alias): ?string
     {
-        if (! $model || ! $key = $route->parameter('id')) {
-            return null;
-        }
+        $parameter = collect($route->parameters())->first();
 
-        $record = resolve_static($model, 'query')->whereKey($key)->first();
+        $record = $parameter instanceof Model
+            ? $parameter
+            : ($alias && $parameter ? morph_to($alias, (int) $parameter) : null);
 
-        return $record && method_exists($record, 'getLabel') ? $record->getLabel() : null;
+        return $record && method_exists($record, 'getLabel')
+            ? $record->getLabel()
+            : null;
     }
 }
