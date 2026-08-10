@@ -2,6 +2,7 @@
 
 namespace FluxErp\Rulesets\Loan;
 
+use FluxErp\Enums\InstallmentIntervalEnum;
 use FluxErp\Enums\RepaymentTypeEnum;
 use FluxErp\Models\Contact;
 use FluxErp\Models\LedgerAccount;
@@ -56,8 +57,14 @@ class CreateLoanRuleset extends FluxRuleset
                 app(EnumRule::class, ['type' => RepaymentTypeEnum::class]),
             ],
             'number_of_installments' => 'required|integer|min:1',
+            'installment_interval_enum' => [
+                'nullable',
+                app(EnumRule::class, ['type' => InstallmentIntervalEnum::class]),
+            ],
+            'grace_period_installments' => 'nullable|integer|min:0',
             'installment_amount' => [
                 'nullable',
+                'prohibited_unless:repayment_type_enum,' . RepaymentTypeEnum::Annuity->value,
                 app(Numeric::class, ['min' => 0]),
             ],
             'starts_at' => 'required|date',

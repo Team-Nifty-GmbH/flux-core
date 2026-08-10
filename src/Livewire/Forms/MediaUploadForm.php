@@ -49,7 +49,6 @@ class MediaUploadForm extends MediaForm
 
     public function force(): static
     {
-        // this allows saving of media to read-only collections
         $this->force = true;
 
         return $this;
@@ -107,7 +106,9 @@ class MediaUploadForm extends MediaForm
                 'id' => $file->getKey(),
                 'name' => $file->name,
                 'file_name' => $file->file_name,
+                'mime_type' => $file->mime_type,
                 'preview_url' => $file->getFullUrl(),
+                'lightbox_url' => $file->getFullUrl(),
             ];
         }
 
@@ -115,7 +116,9 @@ class MediaUploadForm extends MediaForm
             'name' => $file->getClientOriginalName(),
             'temporary_filename' => $file->getFilename(),
             'file_name' => $file->getClientOriginalName(),
+            'mime_type' => $file->getMimeType(),
             'preview_url' => $file->isPreviewable() ? $file->temporaryUrl() : route('icons', ['name' => 'document']),
+            'lightbox_url' => $file->isPreviewable() ? $file->temporaryUrl() : null,
             'media' => $file->getRealPath(),
         ];
     }
