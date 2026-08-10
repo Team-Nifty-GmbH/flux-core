@@ -66,7 +66,7 @@
                         >
                             <x-number
                                 :step="0.01"
-                                :label="__('Amount')"
+                                :label="__('Quantity')"
                                 wire:model="orderPosition.amount"
                             />
                         </div>
