@@ -179,7 +179,7 @@
                                     border-bottom: 2px solid black;
                                 "
                             >
-                                {{ __('Amount') }}
+                                {{ __('Quantity') }}
                             </th>
                             <th
                                 style="

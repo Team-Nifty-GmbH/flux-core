@@ -104,7 +104,7 @@
                                     <x-input
                                         type="number"
                                         min="0"
-                                        :label="__('Amount')"
+                                        :label="__('Quantity')"
                                         wire:model="orderPosition.amount"
                                     />
                                 </div>
@@ -221,7 +221,7 @@
                                     <x-input
                                         type="number"
                                         min="0"
-                                        :label="__('Amount')"
+                                        :label="__('Quantity')"
                                         wire:model="orderPosition.amount"
                                         x-ref="amount"
                                     />
