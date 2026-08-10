@@ -44,7 +44,7 @@
         "prettier-plugin-tailwindcss": "^0.8.0",
         "pusher-js": "^8.4.0-rc2",
         "qs": "^6.15.3",
-        "signature_pad": "^5.0.1",
+        "signature_pad": "^5.1.4",
         "tailwindcss": "^4.3.2",
         "uuid": "^14.0.1",
         "vite": "^8.1.4"
