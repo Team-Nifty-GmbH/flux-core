@@ -10,7 +10,6 @@ use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Livewire\Forms\PurchaseInvoiceForm;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
-use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PurchaseInvoice;
@@ -22,10 +21,9 @@ use FluxErp\Traits\Livewire\WithFilePond;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Number;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\ComponentAttributeBag;
-use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Renderless;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -144,6 +142,8 @@ class PurchaseInvoiceList extends BaseDataTable
             $this->fillEditFormFromPurchaseInvoice($purchaseInvoice);
         }
 
+        $this->refreshAssignableOrders();
+
         $this->js(<<<'JS'
             $tsui.open.modal('edit-purchase-invoice-modal');
         JS);
@@ -156,8 +156,11 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->purchaseInvoiceForm->reset();
         $this->mediaForm->reset();
         $this->reset('assignToOrderId');
+
+        $this->refreshAssignableOrders();
     }
 
+    #[Renderless]
     public function fillFromSelectedContact(Contact $contact): void
     {
         $bankConnection = $contact->contactBankConnections()->latest()->first();
@@ -174,6 +177,8 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->purchaseInvoiceForm->iban = $bankConnection?->iban;
 
         $this->purchaseInvoiceForm->findMostUsedLedgerAccountId();
+
+        $this->refreshAssignableOrders();
     }
 
     #[Renderless]
@@ -203,58 +208,21 @@ class PurchaseInvoiceList extends BaseDataTable
         return true;
     }
 
-    #[Computed]
-    public function assignableOrders(): array
+    #[Renderless]
+    public function refreshAssignableOrders(): void
     {
-        if (! $this->purchaseInvoiceForm->contact_id) {
-            return [];
-        }
+        $this->dispatch(
+            'assignable-orders.load',
+            contactId: $this->purchaseInvoiceForm->contact_id,
+            invoiceTotal: $this->purchaseInvoiceForm->total_gross_price,
+        );
+    }
 
-        $orders = resolve_static(Order::class, 'query')
-            ->where('contact_id', $this->purchaseInvoiceForm->contact_id)
-            ->whereNull('invoice_number')
-            ->where('is_locked', false)
-            ->whereHas(
-                'orderType',
-                fn (Builder $query) => $query->whereIn(
-                    'order_type_enum',
-                    collect(OrderTypeEnum::cases())
-                        ->filter(fn (OrderTypeEnum $case) => $case->isPurchase())
-                        ->map(fn (OrderTypeEnum $case) => $case->value)
-                )
-            )
-            ->with(['createdFrom.orderType:id,order_type_enum', 'currency:id,iso'])
-            ->latest('id')
-            ->get(['id', 'created_from_id', 'currency_id', 'order_number', 'order_date', 'total_gross_price'])
-            ->groupBy(
-                fn (Order $order) => $order->createdFrom?->orderType?->order_type_enum?->isSubscription()
-                    ? 'rates'
-                    : 'orders'
-            );
-
-        return collect([
-            'rates' => __('Subscription Rates'),
-            'orders' => __('Orders'),
-        ])
-            ->filter(fn (string $label, string $group) => $orders->has($group))
-            ->map(fn (string $label, string $group) => [
-                'label' => $label,
-                'value' => $orders->get($group)
-                    ->map(fn (Order $order) => [
-                        'label' => trim($order->order_number . ' ' . $order->getLabel()),
-                        'description' => Number::currency(
-                            (float) abs((float) $order->total_gross_price),
-                            $order->currency?->iso ?? resolve_static(Currency::class, 'default')?->iso ?? 'EUR',
-                            app()->getLocale()
-                        ),
-                        'value' => $order->getKey(),
-                        'total_gross_price' => (float) abs((float) $order->total_gross_price),
-                    ])
-                    ->values()
-                    ->all(),
-            ])
-            ->values()
-            ->all();
+    #[Renderless]
+    #[On('assignable-orders.selected')]
+    public function assignableOrderSelected(?int $orderId = null): void
+    {
+        $this->assignToOrderId = $orderId;
     }
 
     #[Renderless]
@@ -269,6 +237,7 @@ class PurchaseInvoiceList extends BaseDataTable
         }
 
         $this->reset('assignToOrderId');
+        $this->refreshAssignableOrders();
         $this->loadData();
 
         return true;
