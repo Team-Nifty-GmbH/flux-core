@@ -7,7 +7,6 @@ use FluxErp\Actions\LedgerBooking\CreateLedgerBooking;
 use FluxErp\Models\Loan;
 use FluxErp\Models\Order;
 use FluxErp\Rulesets\Loan\FinanceOrderRuleset;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class FinanceOrder extends FluxAction
@@ -30,26 +29,24 @@ class FinanceOrder extends FluxAction
             ->whereKey($this->getData('loan_id'))
             ->firstOrFail();
 
-        return DB::transaction(function () use ($loan): Loan {
-            CreateLedgerBooking::make([
-                'tenant_id' => $loan->tenant_id,
-                'debit_ledger_account_id' => $this->getData('debit_ledger_account_id'),
-                'credit_ledger_account_id' => $loan->ledger_account_id,
-                'source_type' => morph_alias(Order::class),
-                'source_id' => $this->getData('order_id'),
-                'amount' => $this->getData('amount'),
-                'booking_date' => $this->getData('booking_date'),
-                'booking_text' => $this->getData('booking_text'),
-                'note' => $this->getData('note'),
-            ])
-                ->validate()
-                ->execute();
+        CreateLedgerBooking::make([
+            'tenant_id' => $loan->tenant_id,
+            'debit_ledger_account_id' => $this->getData('debit_ledger_account_id'),
+            'credit_ledger_account_id' => $loan->ledger_account_id,
+            'source_type' => morph_alias(Order::class),
+            'source_id' => $this->getData('order_id'),
+            'amount' => $this->getData('amount'),
+            'booking_date' => $this->getData('booking_date'),
+            'booking_text' => $this->getData('booking_text'),
+            'note' => $this->getData('note'),
+        ])
+            ->validate()
+            ->execute();
 
-            $loan->order_id = $this->getData('order_id');
-            $loan->save();
+        $loan->order_id = $this->getData('order_id');
+        $loan->save();
 
-            return $loan->refresh();
-        });
+        return $loan->refresh();
     }
 
     protected function validateData(): void
@@ -84,8 +81,8 @@ class FinanceOrder extends FluxAction
         }
 
         if (bccomp(
-            bcround($this->getData('amount'), 2),
-            bcround(abs((float) $order->balance), 2),
+            bcround((string) $this->getData('amount'), 2),
+            bcround((string) abs((float) $order->balance), 2),
             2
         ) === 1) {
             throw ValidationException::withMessages([

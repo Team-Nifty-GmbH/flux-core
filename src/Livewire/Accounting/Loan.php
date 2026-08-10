@@ -74,8 +74,7 @@ class Loan extends Component
         $loan = $this->loadLoan($id);
 
         $this->loan->fill($loan);
-        $this->financeOrder->loan_id = $loan->getKey();
-        $this->financeOrder->booking_date = now()->toDateString();
+        $this->resetFinanceOrderForm($loan);
         $this->contract->fill($loan->getFirstMedia('contract') ?? []);
         $this->installments = $this->buildSchedule($loan);
         $this->payments = $this->buildPayments($loan);
@@ -124,7 +123,7 @@ class Loan extends Component
         $order = resolve_static(OrderModel::class, 'query')
             ->with(['contact:id,expense_ledger_account_id', 'orderType:id,order_type_enum'])
             ->whereKey($orderId)
-            ->first();
+            ->first(['id', 'tenant_id', 'contact_id', 'order_type_id', 'balance']);
 
         if (! $order) {
             return;
@@ -161,12 +160,10 @@ class Loan extends Component
         $this->loan->reset();
         $this->loan->fill($loan);
 
-        $this->financeOrder->reset();
-        $this->financeOrder->loan_id = $loan->getKey();
-        $this->financeOrder->booking_date = now()->toDateString();
+        $this->resetFinanceOrderForm($loan);
 
         $this->toast()
-            ->success(__(':model saved', ['model' => __('Loan')]))
+            ->success(__('Order financed'))
             ->send();
 
         return true;
@@ -246,6 +243,13 @@ class Loan extends Component
             ['index' => 'amount', 'label' => __('Transaction Amount')],
             ['index' => 'is_accepted', 'label' => __('Accepted')],
         ];
+    }
+
+    protected function resetFinanceOrderForm(LoanModel $loan): void
+    {
+        $this->financeOrder->reset();
+        $this->financeOrder->loan_id = $loan->getKey();
+        $this->financeOrder->booking_date = now()->toDateString();
     }
 
     protected function buildSchedule(LoanModel $loan): array
