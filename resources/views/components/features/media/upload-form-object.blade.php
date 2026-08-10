@@ -178,18 +178,33 @@
                                         x-text="file.name"
                                     ></span>
                                 </div>
-                                <template x-if="file.id">
-                                    <div>
-                                        <x-button
-                                            color="indigo"
-                                            icon="arrow-down-tray"
-                                            x-on:click="
-                                                file?.id &&
-                                                    $wire.download(file.id)
-                                            "
-                                        />
-                                    </div>
-                                </template>
+                                <div class="flex shrink-0 items-center gap-1.5">
+                                    <x-button
+                                        color="indigo"
+                                        icon="eye"
+                                        :title="__('Preview')"
+                                        x-cloak
+                                        x-show="file.lightbox_url"
+                                        x-on:click="
+                                            $nuxbe.openLightbox(
+                                                file.lightbox_url,
+                                                {
+                                                    mime: file.mime_type,
+                                                    title: file.name,
+                                                },
+                                            )
+                                        "
+                                    />
+                                    <x-button
+                                        color="indigo"
+                                        icon="arrow-down-tray"
+                                        x-cloak
+                                        x-show="file.id"
+                                        x-on:click="
+                                            file?.id && $wire.download(file.id)
+                                        "
+                                    />
+                                </div>
                                 <div class="flex shrink-0 px-4">
                                     <x-button
                                         color="red"
