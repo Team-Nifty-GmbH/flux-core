@@ -41,7 +41,7 @@
         "playwright": "^1.62.1",
         "prettier": "^3.9.5",
         "prettier-plugin-blade": "^3.2.2",
-        "prettier-plugin-tailwindcss": "^0.8.0",
+        "prettier-plugin-tailwindcss": "^0.8.1",
         "pusher-js": "^8.4.0-rc2",
         "qs": "^6.15.3",
         "signature_pad": "^5.0.1",
