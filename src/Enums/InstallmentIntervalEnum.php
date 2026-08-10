@@ -16,10 +16,6 @@ enum InstallmentIntervalEnum: string
 
     case Annual = 'annual';
 
-    /**
-     * The months between two installments, the unit the schedule is spaced and
-     * the annual interest rate is scaled by.
-     */
     public function months(): int
     {
         return match ($this) {

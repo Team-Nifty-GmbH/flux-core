@@ -69,7 +69,6 @@ test('create loan spaces a quarterly schedule and delays it by the grace period'
     expect($loan->installments()->count())->toBe(28)
         ->and($loan->ends_at->toDateString())->toBe('2031-12-30')
         ->and($loan->remaining)->toEqual(120000)
-        // the installment amount skips the interest only installments
         ->and($loan->installment_amount)->toEqual(7038);
 });
 
@@ -116,7 +115,6 @@ test('remaining drops after an installment is settled', function (): void {
 
     $loan->installments()->orderBy('sequence')->first()->update(['is_paid' => true]);
 
-    // one of twelve installments repaid
     expect($loan->refresh()->remaining)->toEqual(11000)
         ->and(round((float) $loan->progress, 4))->toEqual(0.0833);
 });

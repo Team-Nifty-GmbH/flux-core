@@ -1,6 +1,5 @@
 <?php
 
-use FluxErp\Enums\InstallmentIntervalEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,7 +10,7 @@ return new class() extends Migration
     {
         Schema::table('loans', function (Blueprint $table): void {
             $table->string('installment_interval_enum')
-                ->default(InstallmentIntervalEnum::Monthly->value)
+                ->default('monthly')
                 ->after('number_of_installments');
             $table->unsignedInteger('grace_period_installments')
                 ->default(0)

@@ -53,8 +53,6 @@ class CreateLoan extends FluxAction
             $loan->installments()->create($installment);
         }
 
-        // the grace period installments carry interest only, the repayment
-        // rate is the first one that pays off principal
         $firstRepayment = array_first(
             array_filter($schedule, fn (array $installment): bool => bccomp($installment['principal_amount'], '0', 2) === 1)
         );
@@ -89,8 +87,6 @@ class CreateLoan extends FluxAction
         $tenantId = $this->getData('tenant_id');
         $errors = [];
 
-        // Contacts are shared across tenants through the contact_tenant pivot,
-        // while ledger accounts and orders carry a tenant_id column.
         if (resolve_static(Contact::class, 'query')
             ->whereKey($this->getData('contact_id'))
             ->whereHasTenant($tenantId)
