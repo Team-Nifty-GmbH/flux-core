@@ -182,7 +182,6 @@ class Loan extends Component
         return true;
     }
 
-    // not renderless, the schedule and the totals have to show the new plan
     public function saveExtraRepayment(): bool
     {
         try {
@@ -215,10 +214,6 @@ class Loan extends Component
         ];
     }
 
-    /**
-     * What the extra repayment being entered would save, so the effect is
-     * visible before it is booked.
-     */
     #[Computed]
     public function extraRepaymentPreview(): array
     {

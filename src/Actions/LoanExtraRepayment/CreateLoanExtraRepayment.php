@@ -49,15 +49,11 @@ class CreateLoanExtraRepayment extends FluxAction
         }
 
         $lastInstallment = array_last($schedule);
-        // the grace period installments carry interest only, the repayment rate
-        // is the first one that pays off principal
         $firstRepayment = array_first(
             array_filter($schedule, fn (array $installment): bool => bccomp($installment['principal_amount'], '0', 2) === 1)
         );
 
         $loan->fill([
-            // the shortened term keeps the installment, the reduced one takes
-            // the installment the new tail was calculated with
             'installment_amount' => $firstRepayment
                 ? bcadd($firstRepayment['principal_amount'], $firstRepayment['interest_amount'], 2)
                 : $loan->installment_amount,

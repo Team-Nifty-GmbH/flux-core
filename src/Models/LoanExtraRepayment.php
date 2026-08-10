@@ -26,13 +26,11 @@ class LoanExtraRepayment extends FluxModel implements InteractsWithDataTables
         ];
     }
 
-    // Relations
     public function loan(): BelongsTo
     {
         return $this->belongsTo(Loan::class);
     }
 
-    // Public methods
     public function getAvatarUrl(): ?string
     {
         return null;

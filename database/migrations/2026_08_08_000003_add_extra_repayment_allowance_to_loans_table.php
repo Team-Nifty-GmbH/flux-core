@@ -9,9 +9,6 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('loans', function (Blueprint $table): void {
-            // no allowance at all, an unlimited one, or a yearly cap: the flag
-            // says whether extra repayments are possible, the two amounts cap
-            // them per calendar year when set
             $table->boolean('allows_extra_repayments')
                 ->default(true)
                 ->after('grace_period_installments');

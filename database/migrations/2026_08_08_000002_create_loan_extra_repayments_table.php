@@ -18,7 +18,6 @@ return new class() extends Migration
             $table->decimal('amount', 40, 10);
             $table->string('schedule_adjustment_type_enum');
             $table->string('note')->nullable();
-            // what the reschedule saved compared to the untouched plan
             $table->decimal('interest_saved', 40, 10)->nullable();
             $table->unsignedInteger('installments_saved')->nullable();
             $table->timestamp('created_at')->nullable();

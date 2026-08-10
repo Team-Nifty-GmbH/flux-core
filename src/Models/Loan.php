@@ -74,13 +74,6 @@ class Loan extends FluxModel implements HasMedia, InteractsWithDataTables
     }
 
     // Public methods
-    /**
-     * The repaid share of the loan, between 0 and 1.
-     */
-    /**
-     * What the contract allows as an extra repayment in a calendar year, null
-     * when it does not cap them. A loan that allows none returns zero.
-     */
     public function extraRepaymentAllowance(): ?string
     {
         if (! $this->allows_extra_repayments) {
@@ -153,10 +146,6 @@ class Loan extends FluxModel implements HasMedia, InteractsWithDataTables
         return $this;
     }
 
-    /**
-     * The interest over the whole term. The schedule is locked once the loan
-     * exists, so this only moves when an installment is added or removed.
-     */
     public function calculateTotalInterest(): static
     {
         $this->total_interest = bcround(

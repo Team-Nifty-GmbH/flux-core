@@ -54,7 +54,6 @@ test('an annuity extra repayment keeps the installment and ends the schedule ear
         ->and($extraRepayment->installments_saved)->toBeGreaterThan(0)
         ->and((float) $extraRepayment->interest_saved)->toBeGreaterThan(0);
 
-    // the installment the contract fixed stays untouched but for the last stub
     $payment = bcadd($installments->first()->principal_amount, $installments->first()->interest_amount, 2);
     expect((float) $payment)->toEqualWithDelta((float) $installment, 0.01);
 });
@@ -83,7 +82,6 @@ test('a linear extra repayment keeps the principal share and drops installments'
     extraRepaymentFor($loan, ['amount' => 3000]);
     $loan->refresh();
 
-    // 1000 principal per installment, 9000 left, so nine installments remain
     expect($loan->installments()->count())->toBe(9)
         ->and($loan->remaining)->toEqual(9000)
         ->and((float) $loan->installments()->orderBy('sequence')->first()->principal_amount)
@@ -125,7 +123,6 @@ test('an extra repayment during the grace period keeps the interest only install
 
     expect($gracePeriod->every(fn ($installment): bool => (float) $installment->principal_amount === 0.0))
         ->toBeTrue()
-        // 96000 left after the extra repayment, 0.0346 / 4 on the full balance
         ->and((float) $gracePeriod->first()->interest_amount)->toEqualWithDelta(830.4, 0.01)
         ->and($loan->remaining)->toEqual(96000)
         ->and($installments->count())->toBe(24);
@@ -151,7 +148,6 @@ test('an extra repayment is rejected when the loan allows none', function (): vo
 test('an extra repayment is rejected beyond the yearly allowance', function (): void {
     $loan = loanFor(['extra_repayment_allowance_percentage' => 0.05]);
 
-    // five percent of 12000 is 600
     expect($loan->extraRepaymentAllowance())->toBe('600.00');
 
     extraRepaymentFor($loan, ['amount' => 601]);
@@ -164,7 +160,6 @@ test('the yearly allowance counts what was already used', function (): void {
     $loan->refresh();
 
     expect($loan->remainingExtraRepaymentAllowance(2026))->toBe('600.00')
-        // the next year starts over
         ->and($loan->remainingExtraRepaymentAllowance(2027))->toBe('1000.00');
 
     extraRepaymentFor($loan, ['amount' => 601, 'executed_at' => '2026-06-15']);
@@ -198,6 +193,5 @@ test('settled installments and their sequence survive the reschedule', function 
 
     expect($installments->take(2)->every(fn ($installment): bool => $installment->is_paid))->toBeTrue()
         ->and($installments->first()->sequence)->toBe(1)
-        // the tail continues where the settled installments stop
         ->and($installments->get(2)->sequence)->toBe(3);
 });
