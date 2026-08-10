@@ -17,12 +17,14 @@ class PageTitle
         }
 
         $alias = $route->getMetadata('model');
+        $section = static::section($route, $alias);
+        $record = static::recordLabel($route, $alias);
 
-        return collect([
-            static::section($route, $alias),
-            static::recordLabel($route, $alias),
-            $appName,
-        ])
+        if ($section && $record && str_starts_with($record, $section)) {
+            $section = null;
+        }
+
+        return collect([$section, $record, $appName])
             ->filter()
             ->implode(' / ');
     }
@@ -38,7 +40,9 @@ class PageTitle
 
     protected static function recordLabel(Route $route, ?string $alias): ?string
     {
-        $parameter = collect($route->parameters())->first();
+        $parameter = $route->hasParameters()
+            ? collect($route->parameters())->first()
+            : null;
 
         $record = $parameter instanceof Model
             ? $parameter

@@ -222,7 +222,8 @@ Route::middleware('web')
                     ->prefix('orders')
                     ->group(function (): void {
                         Route::get('/list', OrderList::class)->name('orders');
-                        Route::get('/list/{orderType}', OrderListByOrderType::class)->name('order-type');
+                        Route::get('/list/{orderType}', OrderListByOrderType::class)->name('order-type')
+                            ->metadata(['title' => 'Orders', 'model' => 'order_type']);
                         Route::get('/order-positions/list', OrderPositionList::class)->name('order-positions');
                         Route::get('/create-child-order', CreateChildOrder::class)->name('create-child-order');
                         Route::get('/{id}', Order::class)->where('id', '[0-9]+')->name('id')

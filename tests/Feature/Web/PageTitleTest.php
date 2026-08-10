@@ -11,6 +11,7 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
 use FluxErp\View\Layouts\App;
+use FluxErp\View\PageTitle;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -62,6 +63,18 @@ test('a detail page carries the record it shows', function (): void {
         ->toBe(__('Order') . ' / ' . e($this->order->getLabel()) . ' / ' . config('app.name'));
 });
 
+test('a record that repeats its section drops the section', function (): void {
+    $this->order->orderType->update(['name' => __('Order') . ' XY']);
+    $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'web'));
+
+    $response = $this->actingAs($this->user, 'web')
+        ->get('/orders/' . $this->order->id)
+        ->assertOk();
+
+    expect(renderedTitle($response))
+        ->toBe(e($this->order->fresh()->getLabel()) . ' / ' . config('app.name'));
+});
+
 test('a title passed in wins over the route', function (): void {
     Route::get('/page-title-explicit', fn () => '')
         ->name('orders.id')
@@ -76,4 +89,12 @@ test('a page without a route falls back to the application name', function (): v
     Request::setRouteResolver(fn () => null);
 
     expect((new App())->title)->toBe(config('app.name'));
+});
+
+test('a route that was never bound to a request still yields a title', function (): void {
+    $route = Route::get('/page-title-unbound/{id}', fn () => '')
+        ->name('page-title-unbound')
+        ->metadata(['title' => 'Order', 'model' => 'order']);
+
+    expect(PageTitle::forRoute($route))->toBe(__('Order') . ' / ' . config('app.name'));
 });
