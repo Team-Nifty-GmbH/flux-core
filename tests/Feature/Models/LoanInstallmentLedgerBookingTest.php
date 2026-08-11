@@ -95,6 +95,23 @@ test('deleting a repayment removes its booking', function (): void {
     expect(LedgerBooking::query()->whereKey($bookingId)->exists())->toBeFalse();
 });
 
+test('changing the amount updates the booking instead of adding one', function (): void {
+    $assignment = LoanInstallmentTransaction::create([
+        'loan_installment_id' => $this->installment->getKey(),
+        'transaction_id' => $this->transaction->getKey(),
+        'amount' => -6060,
+        'is_accepted' => true,
+    ]);
+    $bookingId = $assignment->ledgerBooking()->first()->getKey();
+
+    $assignment->update(['amount' => -3000]);
+
+    expect(LedgerBooking::query()->where('source_id', $assignment->getKey())->count())->toEqual(1)
+        ->and($assignment->ledgerBooking()->first())
+        ->getKey()->toEqual($bookingId)
+        ->amount->toEqual(3000);
+});
+
 test('a chargeback books the debt back', function (): void {
     $chargeback = Transaction::factory()->create([
         'bank_connection_id' => $this->bankConnection->getKey(),

@@ -2,6 +2,9 @@
 
 namespace FluxErp\Models\Pivots;
 
+use FluxErp\Actions\LedgerBooking\CreateLedgerBooking;
+use FluxErp\Actions\LedgerBooking\DeleteLedgerBooking;
+use FluxErp\Actions\LedgerBooking\UpdateLedgerBooking;
 use FluxErp\Models\LedgerBooking;
 use FluxErp\Models\LoanInstallment;
 use FluxErp\Models\Transaction;
@@ -26,7 +29,7 @@ class LoanInstallmentTransaction extends FluxPivot
 
         static::deleted(function (LoanInstallmentTransaction $loanInstallmentTransaction): void {
             $loanInstallmentTransaction->recalculate();
-            $loanInstallmentTransaction->ledgerBooking()->delete();
+            $loanInstallmentTransaction->deleteLedgerBooking();
         });
     }
 
@@ -82,6 +85,7 @@ class LoanInstallmentTransaction extends FluxPivot
 
     public function syncLedgerBooking(): void
     {
+        $ledgerBooking = $this->ledgerBooking()->first();
         $loan = $this->loanInstallment()->first()?->loan;
         $transaction = $this->transaction()->first();
         $bankLedgerAccountId = $transaction?->bankConnection?->ledger_account_id;
@@ -93,21 +97,51 @@ class LoanInstallmentTransaction extends FluxPivot
             || $loan->ledger_account_id === $bankLedgerAccountId
             || bccomp($amount, '0', 2) === 0
         ) {
-            $this->ledgerBooking()->delete();
+            $this->deleteLedgerBooking($ledgerBooking);
 
             return;
         }
 
         $isRepayment = bccomp($amount, '0', 2) === -1;
 
-        $this->ledgerBooking()->updateOrCreate([], [
-            'tenant_id' => $loan->tenant_id,
+        $data = [
             'debit_ledger_account_id' => $isRepayment ? $loan->ledger_account_id : $bankLedgerAccountId,
             'credit_ledger_account_id' => $isRepayment ? $bankLedgerAccountId : $loan->ledger_account_id,
             'amount' => ltrim($amount, '-'),
-            'booking_date' => $transaction->booking_date,
+            'booking_date' => $transaction->booking_date?->toDateString(),
             'booking_text' => $loan->name,
             'note' => $this->note,
-        ]);
+        ];
+
+        if ($ledgerBooking) {
+            UpdateLedgerBooking::make(array_merge($data, ['id' => $ledgerBooking->getKey()]))
+                ->validate()
+                ->execute();
+
+            return;
+        }
+
+        CreateLedgerBooking::make(
+            array_merge($data, [
+                'tenant_id' => $loan->tenant_id,
+                'source_type' => morph_alias(static::class),
+                'source_id' => $this->getKey(),
+            ])
+        )
+            ->validate()
+            ->execute();
+    }
+
+    public function deleteLedgerBooking(?LedgerBooking $ledgerBooking = null): void
+    {
+        $ledgerBooking ??= $this->ledgerBooking()->first();
+
+        if (! $ledgerBooking) {
+            return;
+        }
+
+        DeleteLedgerBooking::make(['id' => $ledgerBooking->getKey()])
+            ->validate()
+            ->execute();
     }
 }
