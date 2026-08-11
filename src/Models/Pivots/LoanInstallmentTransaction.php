@@ -2,10 +2,12 @@
 
 namespace FluxErp\Models\Pivots;
 
+use FluxErp\Models\LedgerBooking;
 use FluxErp\Models\LoanInstallment;
 use FluxErp\Models\Transaction;
 use FluxErp\Traits\Model\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class LoanInstallmentTransaction extends FluxPivot
 {
@@ -19,10 +21,12 @@ class LoanInstallmentTransaction extends FluxPivot
     {
         static::saved(function (LoanInstallmentTransaction $loanInstallmentTransaction): void {
             $loanInstallmentTransaction->recalculate();
+            $loanInstallmentTransaction->syncLedgerBooking();
         });
 
         static::deleted(function (LoanInstallmentTransaction $loanInstallmentTransaction): void {
             $loanInstallmentTransaction->recalculate();
+            $loanInstallmentTransaction->ledgerBooking()->delete();
         });
     }
 
@@ -31,6 +35,11 @@ class LoanInstallmentTransaction extends FluxPivot
         return [
             'is_accepted' => 'boolean',
         ];
+    }
+
+    public function ledgerBooking(): MorphOne
+    {
+        return $this->morphOne(LedgerBooking::class, 'source');
     }
 
     public function loanInstallment(): BelongsTo
@@ -69,5 +78,36 @@ class LoanInstallmentTransaction extends FluxPivot
                 ?->calculateBalance()
                 ->save();
         }
+    }
+
+    public function syncLedgerBooking(): void
+    {
+        $loan = $this->loanInstallment()->first()?->loan;
+        $transaction = $this->transaction()->first();
+        $bankLedgerAccountId = $transaction?->bankConnection?->ledger_account_id;
+        $amount = bcround((string) $this->amount, 2);
+
+        if (! $this->is_accepted
+            || ! $loan?->ledger_account_id
+            || ! $bankLedgerAccountId
+            || $loan->ledger_account_id === $bankLedgerAccountId
+            || bccomp($amount, '0', 2) === 0
+        ) {
+            $this->ledgerBooking()->delete();
+
+            return;
+        }
+
+        $isRepayment = bccomp($amount, '0', 2) === -1;
+
+        $this->ledgerBooking()->updateOrCreate([], [
+            'tenant_id' => $loan->tenant_id,
+            'debit_ledger_account_id' => $isRepayment ? $loan->ledger_account_id : $bankLedgerAccountId,
+            'credit_ledger_account_id' => $isRepayment ? $bankLedgerAccountId : $loan->ledger_account_id,
+            'amount' => ltrim($amount, '-'),
+            'booking_date' => $transaction->booking_date,
+            'booking_text' => $loan->name,
+            'note' => $this->note,
+        ]);
     }
 }
