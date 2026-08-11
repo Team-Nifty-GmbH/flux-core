@@ -4,11 +4,13 @@ namespace FluxErp\Livewire\Accounting;
 
 use FluxErp\Actions\Loan\DeleteLoan;
 use FluxErp\Htmlables\TabButton;
+use FluxErp\Livewire\Forms\FinanceOrderForm;
 use FluxErp\Livewire\Forms\LoanForm;
 use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Loan as LoanModel;
 use FluxErp\Models\LoanInstallment;
+use FluxErp\Models\Order as OrderModel;
 use FluxErp\Models\Transaction as TransactionModel;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
@@ -32,6 +34,8 @@ class Loan extends Component
     use Actions, WithFileUploads, WithTabs;
 
     public MediaUploadForm $contract;
+
+    public FinanceOrderForm $financeOrder;
 
     #[Locked]
     public string $currencyIso = 'EUR';
@@ -70,6 +74,7 @@ class Loan extends Component
         $loan = $this->loadLoan($id);
 
         $this->loan->fill($loan);
+        $this->resetFinanceOrderForm($loan);
         $this->contract->fill($loan->getFirstMedia('contract') ?? []);
         $this->installments = $this->buildSchedule($loan);
         $this->payments = $this->buildPayments($loan);
@@ -110,6 +115,60 @@ class Loan extends Component
             TabButton::make('loan.documents')
                 ->text(__('Documents')),
         ];
+    }
+
+    #[Renderless]
+    public function changedFinancedOrder(int $orderId): void
+    {
+        $order = resolve_static(OrderModel::class, 'query')
+            ->with(['contact:id,expense_ledger_account_id', 'orderType:id,order_type_enum'])
+            ->whereKey($orderId)
+            ->first(['id', 'tenant_id', 'contact_id', 'order_type_id', 'balance']);
+
+        if (! $order) {
+            return;
+        }
+
+        if ($order->tenant_id !== $this->loan->tenant_id
+            || ! $order->orderType?->order_type_enum?->isPurchase()
+        ) {
+            $this->financeOrder->order_id = null;
+
+            $this->notification()
+                ->error(__('Only purchase orders can be financed.'))
+                ->send();
+
+            return;
+        }
+
+        $this->financeOrder->debit_ledger_account_id = $order->contact?->expense_ledger_account_id;
+        $this->financeOrder->amount = (float) bcround(abs((float) $order->balance), 2);
+    }
+
+    public function finance(): bool
+    {
+        $this->resetErrorBag();
+
+        try {
+            $this->financeOrder->create();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $loan = $this->loadLoan($this->loan->id);
+
+        $this->loan->reset();
+        $this->loan->fill($loan);
+
+        $this->resetFinanceOrderForm($loan);
+
+        $this->toast()
+            ->success(__('Order financed'))
+            ->send();
+
+        return true;
     }
 
     #[Renderless]
@@ -186,6 +245,13 @@ class Loan extends Component
             ['index' => 'amount', 'label' => __('Transaction Amount')],
             ['index' => 'is_accepted', 'label' => __('Accepted')],
         ];
+    }
+
+    protected function resetFinanceOrderForm(LoanModel $loan): void
+    {
+        $this->financeOrder->reset();
+        $this->financeOrder->loan_id = $loan->getKey();
+        $this->financeOrder->booking_date = now()->toDateString();
     }
 
     protected function buildSchedule(LoanModel $loan): array
