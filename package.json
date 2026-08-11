@@ -28,7 +28,7 @@
         "@tiptap/starter-kit": "^3.29.2",
         "@wireui/alpinejs-hold-directive": "^1.0.1",
         "alpinejs": "^3.15.12",
-        "apexcharts": "^5.16.0",
+        "apexcharts": "^6.8.0",
         "axios": "^1.18.1",
         "dayjs": "^1.11.21",
         "filepond": "^4.31.3",
@@ -51,7 +51,7 @@
     },
     "dependencies": {
         "@simplewebauthn/browser": "^13.3.0",
-        "@techstark/opencv-js": "^4.12.0-release.1",
+        "@techstark/opencv-js": "^5.0.0-release.1",
         "fullcalendar": "^7.0.1",
         "temporal-polyfill": "^1.0.1"
     }
