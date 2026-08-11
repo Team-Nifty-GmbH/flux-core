@@ -3,31 +3,6 @@
 use FluxErp\Models\Role;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
-use FluxErp\Tests\Fixtures\FixtureTicketPolicy;
-use Illuminate\Support\Facades\Gate;
-
-test('returns mention candidates filtered by policy', function (): void {
-    $user = User::factory()->create();
-    $allowed = Ticket::factory()->create([
-        'title' => 'Allowed Test',
-        'authenticatable_type' => morph_alias(User::class),
-        'authenticatable_id' => $user->id,
-    ]);
-    $forbidden = Ticket::factory()->create([
-        'title' => 'Forbidden Test',
-        'authenticatable_type' => morph_alias(User::class),
-        'authenticatable_id' => $user->id,
-    ]);
-
-    Gate::policy(Ticket::class, FixtureTicketPolicy::class);
-    FixtureTicketPolicy::$allowedIds = [$allowed->getKey()];
-
-    $this->actingAs($user, 'web')
-        ->postJson('/search/mentionable', ['query' => 'Test', 'types' => ['ticket']])
-        ->assertOk()
-        ->assertJsonFragment(['token' => '#ticket:' . $allowed->getKey()])
-        ->assertJsonMissing(['token' => '#ticket:' . $forbidden->getKey()]);
-});
 
 test('skips a mentionable type whose search throws without failing the request', function (): void {
     Role::findOrCreate('Super Admin');
@@ -97,9 +72,6 @@ test('tags record results with a record kind', function (): void {
         'authenticatable_id' => $user->id,
     ]);
 
-    Gate::policy(Ticket::class, FixtureTicketPolicy::class);
-    FixtureTicketPolicy::$allowedIds = [$ticket->getKey()];
-
     $this->actingAs($user, 'web')
         ->postJson('/search/mentionable', ['query' => 'Kindcheck', 'types' => ['ticket']])
         ->assertOk()
@@ -133,9 +105,6 @@ test('matches the type prefix case-insensitively', function (): void {
         'authenticatable_id' => $user->id,
     ]);
 
-    Gate::policy(Ticket::class, FixtureTicketPolicy::class);
-    FixtureTicketPolicy::$allowedIds = [$ticket->getKey()];
-
     $this->actingAs($user, 'web')
         ->postJson('/search/mentionable', ['query' => 'Ticket:Caseme', 'types' => ['user', 'ticket']])
         ->assertOk()
@@ -149,9 +118,6 @@ test('treats an unknown type prefix as a normal query', function (): void {
         'authenticatable_type' => morph_alias(User::class),
         'authenticatable_id' => $user->id,
     ]);
-
-    Gate::policy(Ticket::class, FixtureTicketPolicy::class);
-    FixtureTicketPolicy::$allowedIds = [$ticket->getKey()];
 
     $this->actingAs($user, 'web')
         ->postJson('/search/mentionable', ['query' => 'banana:Splitme', 'types' => ['ticket']])

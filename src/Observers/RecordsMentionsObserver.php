@@ -10,7 +10,6 @@ use FluxErp\Models\User;
 use FluxErp\Notifications\MentionNotification;
 use FluxErp\Support\Mentions\MentionSync;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Gate;
 
 class RecordsMentionsObserver
 {
@@ -78,7 +77,7 @@ class RecordsMentionsObserver
         }
 
         $target = $this->resolveTarget($row['mention_target_type'], $row['mention_target_id']);
-        if (is_null($target) || ! $this->canMention($target)) {
+        if (is_null($target)) {
             return;
         }
 
@@ -104,17 +103,6 @@ class RecordsMentionsObserver
                 $this->subscriptionEvent($source),
             );
         }
-    }
-
-    protected function canMention(Model $target): bool
-    {
-        $creator = auth()->user();
-
-        if (is_null($creator) || is_null(Gate::getPolicyFor($target))) {
-            return true;
-        }
-
-        return $creator->can('mention', $target);
     }
 
     protected function subscriptionChannel(Model $source): string

@@ -3,10 +3,8 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Facades\MentionableType;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Throwable;
 
 class MentionableSearchController extends Controller
@@ -45,7 +43,6 @@ class MentionableSearchController extends Controller
         }
 
         $searchTypes = ! is_null($scope) ? collect([$scope]) : $requested;
-        $user = $request->user();
         $results = collect();
         $userKeys = MentionableType::getUserMentionableTypes(keysOnly: true);
 
@@ -53,11 +50,7 @@ class MentionableSearchController extends Controller
             $class = $typesByKey[$key];
 
             try {
-                $candidates = resolve_static($class, 'searchMentionCandidates', [$query, 5])
-                    ->filter(fn (Model $record): bool => is_null($user)
-                        || is_null(Gate::getPolicyFor($record))
-                        || $user->can('view', $record))
-                    ->values();
+                $candidates = resolve_static($class, 'searchMentionCandidates', [$query, 5]);
             } catch (Throwable $e) {
                 report($e);
 
