@@ -78,7 +78,7 @@ class MentionableTypeManager
      */
     public function all(bool $keysOnly = false): array
     {
-        $types = $this->record + $this->user;
+        $types = array_merge($this->record, $this->user);
 
         return $keysOnly ? array_keys($types) : $types;
     }
