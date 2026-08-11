@@ -15,6 +15,7 @@ use FluxErp\Livewire\Accounting\LedgerBookings;
 use FluxErp\Livewire\Accounting\Loan;
 use FluxErp\Livewire\Accounting\Loans;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
+use FluxErp\Livewire\Accounting\OutstandingItems;
 use FluxErp\Livewire\Accounting\PaymentReminderRun;
 use FluxErp\Livewire\Accounting\PaymentRunPreview;
 use FluxErp\Livewire\Accounting\TransactionAssignments;
@@ -292,6 +293,7 @@ Route::middleware('web')
                         Route::get('/loans', Loans::class)->name('loans');
                         Route::get('/loans/{id}', Loan::class)->where('id', '[0-9]+')->name('loans.id')
                             ->metadata(['model' => 'loan']);
+                        Route::get('/outstanding-items', OutstandingItems::class)->name('outstanding-items');
                         Route::get('/payment-reminder-run', PaymentReminderRun::class)->name('payment-reminder-run');
                         Route::get('/purchase-invoices', PurchaseInvoiceList::class)->name('purchase-invoices');
                         Route::get('/transactions', TransactionList::class)->name('transactions');
