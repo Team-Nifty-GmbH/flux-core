@@ -394,17 +394,23 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         $reminders = collect();
         foreach ($orders as $order) {
             try {
-                $reminders->push(
-                    CreatePaymentReminder::make([
-                        'order_id' => $order->getKey(),
-                        'reminder_level' => (int) $order->payment_reminder_current_level + 1,
-                    ])
-                        ->validate()
-                        ->execute()
-                );
+                $reminder = CreatePaymentReminder::make([
+                    'order_id' => $order->getKey(),
+                    'reminder_level' => (int) $order->payment_reminder_current_level + 1,
+                ])
+                    ->validate()
+                    ->execute();
             } catch (ValidationException $e) {
                 exception_to_notifications($e, $this);
+
+                continue;
             }
+
+            // The action returns a fresh model, so the document hooks would query
+            // the order again for every single reminder.
+            $reminder->setRelation('order', $order);
+
+            $reminders->push($reminder);
         }
 
         $this->createDocumentFromItems($reminders);
