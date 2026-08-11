@@ -15,6 +15,6 @@ class MailAccountPolicy
     {
         return $mailAccount->relationLoaded('users')
             ? $mailAccount->users->contains($user)
-            : $mailAccount->users()->whereKey($user)->exists();
+            : $mailAccount->users()->whereKey($user->getKey())->exists();
     }
 }
