@@ -413,6 +413,7 @@ class PaymentReminderRun extends Component
                     )
                     ->implode(' ')
             )
+            ->persistent()
             ->send();
     }
 
