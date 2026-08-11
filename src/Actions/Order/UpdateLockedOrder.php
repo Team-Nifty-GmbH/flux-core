@@ -2,7 +2,8 @@
 
 namespace FluxErp\Actions\Order;
 
-use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\DispatchableFluxAction;
+use FluxErp\Contracts\SupportsBulkExecution;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
 use FluxErp\Models\Order;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
-class UpdateLockedOrder extends FluxAction
+class UpdateLockedOrder extends DispatchableFluxAction implements SupportsBulkExecution
 {
     public static function description(): ?string
     {

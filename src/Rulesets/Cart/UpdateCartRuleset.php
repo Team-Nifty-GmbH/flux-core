@@ -22,7 +22,7 @@ class UpdateCartRuleset extends FluxRuleset
             'payment_type_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => PaymentType::class])
+                app(ModelExists::class, ['model' => PaymentType::class, 'subject' => Cart::class])
                     ->where('is_active', true)
                     ->where('is_sales', true),
             ],

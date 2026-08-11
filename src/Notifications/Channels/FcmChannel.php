@@ -63,9 +63,14 @@ class FcmChannel
                     'error' => $e->getMessage(),
                 ]);
 
+                $message = strtolower($e->getMessage());
+
                 if (
-                    str_contains($e->getMessage(), 'not-found')
-                    || str_contains($e->getMessage(), 'invalid-registration-token')
+                    str_contains($message, 'not-found')
+                    || str_contains($message, 'invalid-registration-token')
+                    || str_contains($message, 'notregistered')
+                    || str_contains($message, 'not-registered')
+                    || str_contains($message, 'unregistered')
                 ) {
                     $deviceToken->update(['is_active' => false]);
                 }

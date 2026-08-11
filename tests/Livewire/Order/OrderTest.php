@@ -1527,6 +1527,50 @@ test('refresh delivery address updates address from address model', function ():
     expect($refreshedOrder->address_delivery['city'])->toEqual('Delivery City');
 });
 
+test('refresh invoice address switches to the contacts invoice address', function (): void {
+    $newInvoiceAddress = Address::factory()->create([
+        'contact_id' => $this->contact->id,
+        'company' => 'New Invoice Company',
+        'street' => 'Invoice Street 1',
+        'city' => 'Invoice City',
+        'is_invoice_address' => true,
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('refreshAddress', 'invoice')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertSet('order.address_invoice_id', $newInvoiceAddress->id);
+
+    $refreshedOrder = $this->order->fresh();
+    expect($refreshedOrder->address_invoice_id)->toEqual($newInvoiceAddress->id);
+    expect($refreshedOrder->address_invoice['company'])->toEqual('New Invoice Company');
+    expect($refreshedOrder->address_invoice['street'])->toEqual('Invoice Street 1');
+    expect($refreshedOrder->address_invoice['city'])->toEqual('Invoice City');
+});
+
+test('refresh delivery address switches to the contacts delivery address', function (): void {
+    $newDeliveryAddress = Address::factory()->create([
+        'contact_id' => $this->contact->id,
+        'company' => 'New Delivery Company',
+        'street' => 'Delivery Street 1',
+        'city' => 'Delivery City',
+        'is_delivery_address' => true,
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('refreshAddress', 'delivery')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertSet('order.address_delivery_id', $newDeliveryAddress->id);
+
+    $refreshedOrder = $this->order->fresh();
+    expect($refreshedOrder->address_delivery_id)->toEqual($newDeliveryAddress->id);
+    expect($refreshedOrder->address_delivery['company'])->toEqual('New Delivery Company');
+    expect($refreshedOrder->address_delivery['street'])->toEqual('Delivery Street 1');
+    expect($refreshedOrder->address_delivery['city'])->toEqual('Delivery City');
+});
+
 test('refresh invoice address on locked order fails', function (): void {
     $this->order->update(['is_locked' => true]);
 

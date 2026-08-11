@@ -22,7 +22,7 @@
             <div class="min-w-48 flex-1">
                 <x-input
                     wire:model.live.debounce.300ms="search"
-                    :placeholder="__('Invoice or customer number')"
+                    :placeholder="__('Name, invoice or customer number')"
                     icon="magnifying-glass"
                     size="sm"
                 />
@@ -215,6 +215,15 @@
                                             loading="preview({{ $order['id'] }})"
                                             wire:click="preview({{ $order['id'] }})"
                                         />
+                                        <x-button
+                                            icon="pencil-square"
+                                            color="secondary"
+                                            size="sm"
+                                            flat
+                                            :title="__('Edit mail and send')"
+                                            loading="editMail({{ $order['id'] }})"
+                                            wire:click="editMail({{ $order['id'] }})"
+                                        />
                                     </div>
                                 @endforeach
                             </div>
@@ -237,4 +246,6 @@
             ></iframe>
         @endif
     </x-modal>
+
+    {{ $this->renderCreateDocumentsModal() }}
 </div>

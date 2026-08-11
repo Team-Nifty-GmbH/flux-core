@@ -37,34 +37,34 @@ class UpdateLeadRuleset extends FluxRuleset
                 'sometimes',
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Address::class]),
+                app(ModelExists::class, ['model' => Address::class, 'subject' => Lead::class]),
             ],
             'lead_loss_reason_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => LeadLossReason::class]),
+                app(ModelExists::class, ['model' => LeadLossReason::class, 'subject' => Lead::class]),
             ],
             'lead_state_id' => [
                 'sometimes',
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => LeadState::class]),
+                app(ModelExists::class, ['model' => LeadState::class, 'subject' => Lead::class]),
             ],
             'recommended_by_address_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Address::class]),
+                app(ModelExists::class, ['model' => Address::class, 'subject' => Lead::class]),
             ],
             'record_origin_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => RecordOrigin::class])
+                app(ModelExists::class, ['model' => RecordOrigin::class, 'subject' => Lead::class])
                     ->where('model_type', morph_alias(Lead::class)),
             ],
             'user_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => User::class]),
+                app(ModelExists::class, ['model' => User::class, 'subject' => Lead::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',

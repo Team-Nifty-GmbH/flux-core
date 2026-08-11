@@ -253,6 +253,33 @@ abstract class Comments extends Component
         }
     }
 
+    #[Renderless]
+    public function updateComment(int $id, string $comment): ?array
+    {
+        $this->commentForm->reset();
+        $this->commentForm->fill([
+            'id' => $id,
+            'comment' => $comment,
+        ]);
+
+        try {
+            $this->commentForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return null;
+        }
+
+        $comment = $this->commentForm->getActionResult();
+        $this->refreshMentionPills($comment, app(MentionPillRefresher::class));
+
+        return [
+            'id' => $comment->getKey(),
+            'comment' => $comment->comment,
+            'edited_at' => $comment->edited_at,
+        ];
+    }
+
     protected function refreshMentionPills(Comment $comment, MentionPillRefresher $refresher): void
     {
         if (is_string($comment->comment)) {

@@ -270,7 +270,12 @@ class Order extends Component
 
         $address = resolve_static(Address::class, 'query')
             ->with('country:id,name')
-            ->whereKey($this->order->{$addressKey . '_id'})
+            ->whereKey(
+                resolve_static(Contact::class, 'query')
+                    ->whereKey($this->order->contact_id)
+                    ->value($type . '_address_id')
+                    ?? $this->order->{$addressKey . '_id'}
+            )
             ->first();
 
         if ($address) {
@@ -279,12 +284,14 @@ class Order extends Component
             try {
                 $updatedOrder = UpdateOrder::make([
                     'id' => $this->order->id,
+                    $addressKey . '_id' => $address->getKey(),
                     $addressKey => $addressArray,
                 ])
                     ->checkPermission()
                     ->validate()
                     ->execute();
 
+                $this->order->{$addressKey . '_id'} = $updatedOrder->{$addressKey . '_id'};
                 $this->order->{$addressKey} = $updatedOrder->{$addressKey};
             } catch (ValidationException|UnauthorizedException $e) {
                 exception_to_notifications($e, $this);

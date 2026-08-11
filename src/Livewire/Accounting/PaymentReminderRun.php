@@ -4,23 +4,29 @@ namespace FluxErp\Livewire\Accounting;
 
 use Carbon\Carbon;
 use FluxErp\Actions\PaymentReminder\BundlePaymentReminders;
+use FluxErp\Actions\PaymentReminder\CreatePaymentReminder;
+use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentReminder;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\View\Printing\PaymentReminder\PaymentReminderView;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
+use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Throwable;
 
 class PaymentReminderRun extends Component
 {
-    use Actions;
+    use Actions, CreatesDocuments;
 
     #[Locked]
     public array $groups = [];
@@ -51,6 +57,14 @@ class PaymentReminderRun extends Component
     public ?string $previewSrc = null;
 
     public bool $showPreview = false;
+
+    /**
+     * The invoice currently being mailed one by one. Editing the mail text before
+     * it goes out only works for a single reminder, never for the bulk run, so the
+     * mail dialog always operates on exactly this order.
+     */
+    #[Locked]
+    public ?int $documentOrderId = null;
 
     public function mount(): void
     {
@@ -109,6 +123,14 @@ class PaymentReminderRun extends Component
                             'contact',
                             fn (Builder $query) => $query
                                 ->where('customer_number', 'like', '%' . $this->search . '%')
+                        )
+                        ->orWhereHas(
+                            'contact.addresses',
+                            fn (Builder $query) => $query
+                                ->where('company', 'like', '%' . $this->search . '%')
+                                ->orWhere('name', 'like', '%' . $this->search . '%')
+                                ->orWhere('firstname', 'like', '%' . $this->search . '%')
+                                ->orWhere('lastname', 'like', '%' . $this->search . '%')
                         )
                 )
             )
@@ -192,6 +214,62 @@ class PaymentReminderRun extends Component
         }
     }
 
+    /**
+     * Opens the mail dialog for one invoice so the user can adjust the text before
+     * sending. Deliberately single invoice only: the bulk run sends one mail per
+     * invoice without user interaction, which leaves nothing to edit.
+     */
+    #[Renderless]
+    public function editMail(int $orderId): void
+    {
+        try {
+            resolve_static(CreatePaymentReminder::class, 'canPerformAction', [true]);
+        } catch (UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->documentOrderId = $orderId;
+
+        $this->openCreateDocumentsModal();
+    }
+
+    public function createDocuments(): void
+    {
+        $order = resolve_static(Order::class, 'query')
+            ->whereKey($this->documentOrderId)
+            ->wherePaymentReminderEligible()
+            ->first();
+
+        if (! $order) {
+            $this->toast()
+                ->warning(__('This order can no longer be reminded.'))
+                ->send();
+
+            return;
+        }
+
+        try {
+            $reminder = CreatePaymentReminder::make([
+                'order_id' => $order->getKey(),
+                'reminder_level' => (int) $order->payment_reminder_current_level + 1,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->createDocumentFromItems($reminder);
+
+        $this->markAsSent([$order->getKey()]);
+        $this->loadData();
+    }
+
     public function sendGroup(string $key): void
     {
         $group = collect($this->groups)->firstWhere('key', $key);
@@ -203,9 +281,7 @@ class PaymentReminderRun extends Component
         $groupIds = array_column($group['orders'], 'id');
         $orderIds = array_values(array_intersect($groupIds, $this->selectedOrders)) ?: $groupIds;
 
-        if ($this->sendBundle($orderIds)) {
-            $this->markAsSent($orderIds);
-        }
+        $this->handleSendResult($this->sendBundle($orderIds), $orderIds);
 
         $this->loadData();
     }
@@ -216,9 +292,7 @@ class PaymentReminderRun extends Component
             return;
         }
 
-        if ($this->sendBundle($this->selectedOrders)) {
-            $this->markAsSent($this->selectedOrders);
-        }
+        $this->handleSendResult($this->sendBundle($this->selectedOrders), $this->selectedOrders);
 
         $this->loadData();
     }
@@ -239,6 +313,109 @@ class PaymentReminderRun extends Component
             : array_values(array_unique(array_merge($this->selectedOrders, $groupIds)));
     }
 
+    protected function getAttachments(OffersPrinting $item): array
+    {
+        $invoice = $item->order->invoice();
+
+        return $invoice
+            ? [
+                'id' => $invoice->getKey(),
+                'name' => $invoice->file_name,
+            ]
+            : [];
+    }
+
+    protected function getBladeParameters(OffersPrinting $item): array|SerializableClosure|null
+    {
+        $reminderId = $item->getKey();
+
+        return new SerializableClosure(
+            fn (): array => [
+                'paymentReminder' => resolve_static(PaymentReminder::class, 'query')
+                    ->whereKey($reminderId)
+                    ->first(),
+            ]
+        );
+    }
+
+    protected function getCommunicatableId(OffersPrinting $item): int
+    {
+        return $item->order_id;
+    }
+
+    protected function getCommunicatableType(OffersPrinting $item): string
+    {
+        return morph_alias(Order::class);
+    }
+
+    protected function getDefaultTemplateId(OffersPrinting $item): ?int
+    {
+        return $item->getPaymentReminderText()?->email_template_id;
+    }
+
+    protected function getPreferredLanguageId(OffersPrinting $item): ?int
+    {
+        return $item->order->language_id;
+    }
+
+    protected function getPrintLayouts(): array
+    {
+        return app(PaymentReminder::class)->resolvePrintViews();
+    }
+
+    protected function getSubject(OffersPrinting $item, array $documents): ?string
+    {
+        return $item->getPaymentReminderText()?->reminder_subject
+            ?? __('Reminder Level') . ' ' . $item->reminder_level;
+    }
+
+    /** The group recipient stays editable, so it wins over the resolved address. */
+    protected function getTo(OffersPrinting $item, array $documents): array
+    {
+        $groupKey = $item->order->contact_id . '-' . $item->reminder_level;
+        $email = data_get($this->recipientEmails, $groupKey)
+            ?: $item->order->resolveMailablePaymentReminderAddress()?->email_primary;
+
+        return array_filter(Arr::wrap($email));
+    }
+
+    /**
+     * Only the invoices that actually made it into the send batch may disappear from
+     * the run. The rest stay listed together with the reason they were held back, so
+     * a misconfigured reminder level can no longer look like a completed run.
+     */
+    protected function handleSendResult(?array $result, array $orderIds): void
+    {
+        if (is_null($result)) {
+            return;
+        }
+
+        $unsendable = data_get($result, 'unsendable') ?? [];
+        $unsendableIds = array_column($unsendable, 'id');
+
+        $this->markAsSent(array_values(array_diff(array_map('intval', $orderIds), $unsendableIds)));
+
+        if (! $unsendable) {
+            return;
+        }
+
+        $this->toast()
+            ->warning(
+                __(':count of :total reminders were not sent', [
+                    'count' => count($unsendable),
+                    'total' => count($orderIds),
+                ]),
+                collect($unsendable)
+                    ->groupBy('reason')
+                    ->map(fn (Collection $entries, string $reason) => $reason . ' ('
+                        . trans_choice('{1} :count invoice|[2,*] :count invoices', $entries->count())
+                        . ')'
+                    )
+                    ->implode(' ')
+            )
+            ->send();
+    }
+
     protected function markAsSent(array $orderIds): void
     {
         $this->sentOrderIds = array_values(array_unique(array_merge(
@@ -252,10 +429,10 @@ class PaymentReminderRun extends Component
         ));
     }
 
-    protected function sendBundle(array $orderIds): bool
+    protected function sendBundle(array $orderIds): ?array
     {
         if (! $orderIds) {
-            return false;
+            return null;
         }
 
         $orderIds = array_map('intval', $orderIds);
@@ -279,18 +456,16 @@ class PaymentReminderRun extends Component
 
         try {
             // Fans the sends out as a monitored batch; the batch progress toast
-            // gives the user feedback, so no extra toast is raised here.
-            BundlePaymentReminders::make(['orders' => $orders])
+            // reports the deliveries, so only the held-back invoices are toasted here.
+            return BundlePaymentReminders::make(['orders' => $orders])
                 ->checkPermission()
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
-            return false;
+            return null;
         }
-
-        return true;
     }
 
     protected function sortGroups(Collection $groups): Collection

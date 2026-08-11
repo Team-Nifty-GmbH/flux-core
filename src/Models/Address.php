@@ -219,6 +219,17 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     ->where('contact_id', $address->contact_id)
                     ->update($addressesUpdates);
             }
+
+            if ($address->is_main_address
+                && ($address->wasRecentlyCreated
+                    || $address->wasChanged(['name', 'company', 'firstname', 'lastname', 'is_main_address'])
+                )
+            ) {
+                resolve_static(Contact::class, 'query')
+                    ->whereKey($address->contact_id)
+                    ->first()
+                    ?->searchable();
+            }
         });
 
         static::deleted(function (Address $address): void {
@@ -280,6 +291,8 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     ->update($contactUpdates);
 
                 $mainAddress->update($addressUpdates);
+
+                $address->updateQuietly(array_fill_keys(array_keys($addressUpdates), false));
             }
         });
     }

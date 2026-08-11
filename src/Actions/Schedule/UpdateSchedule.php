@@ -32,7 +32,10 @@ class UpdateSchedule extends FluxAction
             $repeatable = Repeatable::get($schedule->name);
 
             // Remove empty class parameters
-            $this->data['parameters'] = array_merge($repeatable['parameters'], $this->data['parameters'] ?? []);
+            $this->data['parameters'] = array_merge(
+                data_get($repeatable, 'parameters', []),
+                $this->data['parameters'] ?? []
+            );
             $this->data['parameters'] = array_filter($this->data['parameters']);
         }
 

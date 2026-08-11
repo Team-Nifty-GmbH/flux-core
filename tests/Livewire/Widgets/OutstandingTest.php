@@ -185,6 +185,14 @@ test('redirect to over due', function (): void {
         ->assertOk();
 });
 
+test('redirect to payment reminders', function (): void {
+    Livewire::test(Outstanding::class)
+        ->call('showPaymentReminders')
+        ->assertRedirect(route('accounting.payment-reminder-run'))
+        ->assertHasNoErrors()
+        ->assertOk();
+});
+
 test('renders successfully', function (): void {
     createData(collect(), $this->dbTenant, $this->currency);
 

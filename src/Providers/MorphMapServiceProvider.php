@@ -45,6 +45,9 @@ use FluxErp\Models\Lead;
 use FluxErp\Models\LeadLossReason;
 use FluxErp\Models\LeadState;
 use FluxErp\Models\LedgerAccount;
+use FluxErp\Models\LedgerBooking;
+use FluxErp\Models\Loan;
+use FluxErp\Models\LoanInstallment;
 use FluxErp\Models\Location;
 use FluxErp\Models\Log;
 use FluxErp\Models\MailAccount;
@@ -87,6 +90,7 @@ use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
 use FluxErp\Models\Pivots\HolidayLocation;
 use FluxErp\Models\Pivots\JobBatchable;
 use FluxErp\Models\Pivots\LedgerAccountTransaction;
+use FluxErp\Models\Pivots\LoanInstallmentTransaction;
 use FluxErp\Models\Pivots\LocationVacationBlackout;
 use FluxErp\Models\Pivots\MailAccountUser;
 use FluxErp\Models\Pivots\MediaFolderModel;
@@ -202,6 +206,9 @@ class MorphMapServiceProvider extends ServiceProvider
             'lead_loss_reason' => LeadLossReason::class,
             'lead_state' => LeadState::class,
             'ledger_account' => LedgerAccount::class,
+            'ledger_booking' => LedgerBooking::class,
+            'loan' => Loan::class,
+            'loan_installment' => LoanInstallment::class,
             'location' => Location::class,
             'log' => Log::class,
             'mail_account' => MailAccount::class,
@@ -288,6 +295,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'holiday_location' => HolidayLocation::class,
             'job_batchable' => JobBatchable::class,
             'ledger_account_transaction' => LedgerAccountTransaction::class,
+            'loan_installment_transaction' => LoanInstallmentTransaction::class,
             'location_vacation_blackout' => LocationVacationBlackout::class,
             'mail_account_user' => MailAccountUser::class,
             'media_folder_model' => MediaFolderModel::class,

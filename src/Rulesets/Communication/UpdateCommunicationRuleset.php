@@ -34,7 +34,7 @@ class UpdateCommunicationRuleset extends FluxRuleset
                 'exclude_unless:communication_type_enum,mail',
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => MailFolder::class]),
+                app(ModelExists::class, ['model' => MailFolder::class, 'subject' => Communication::class]),
             ],
             'message_uid' => 'nullable|string|max:255',
             'from' => 'nullable|string|max:255',

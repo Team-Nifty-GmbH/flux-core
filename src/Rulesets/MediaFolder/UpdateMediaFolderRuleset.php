@@ -24,7 +24,7 @@ class UpdateMediaFolderRuleset extends FluxRuleset
             'parent_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => MediaFolder::class]),
+                app(ModelExists::class, ['model' => MediaFolder::class, 'subject' => MediaFolder::class]),
             ],
             'name' => [
                 'sometimes',

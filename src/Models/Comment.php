@@ -29,6 +29,15 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable, MentionsCon
         'model_type',
     ];
 
+    protected static function booted(): void
+    {
+        static::updating(function (Comment $comment): void {
+            if ($comment->isDirty('comment')) {
+                $comment->edited_at = now();
+            }
+        });
+    }
+
     // Public static methods
     public static function getGenericChannelEvents(): array
     {
@@ -45,6 +54,7 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable, MentionsCon
         return [
             'is_internal' => 'boolean',
             'is_sticky' => 'boolean',
+            'edited_at' => 'datetime',
         ];
     }
 

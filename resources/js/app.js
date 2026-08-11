@@ -14,6 +14,7 @@ import nuxbeAppBridge, {
 // Import all modules into single bundle
 import './components/alpine.js';
 import './components/apex-charts.js';
+import './components/data-table-floating-head.js';
 
 window.nuxbeAppBridge = nuxbeAppBridge;
 window.nuxbeShareTarget = { loadSharedFiles, clearSharedFiles };

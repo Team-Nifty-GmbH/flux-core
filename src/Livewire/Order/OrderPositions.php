@@ -363,6 +363,8 @@ class OrderPositions extends OrderPositionList
             $this->orderPosition->vat_rate_id ??= resolve_static(VatRate::class, 'default')?->getKey();
         }
 
+        $this->dispatch('load-order-position-activities', orderPositionId: $this->orderPosition->id);
+
         $this->js(<<<'JS'
             $tsui.open.modal('edit-order-position');
         JS);
