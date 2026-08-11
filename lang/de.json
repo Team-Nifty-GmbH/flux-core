@@ -1561,6 +1561,7 @@
     "Leave empty to generate a new :attribute.": "Leer lassen, um eine neue :attribute zu erzeugen.",
     "Leave empty to send to the customer.": "Leer lassen, um an den Kunden zu senden.",
     "Leave empty to use the default from settings.": "Leer lassen, um den Standardwert aus den Einstellungen zu verwenden.",
+    "Leave empty to use the period of the order.": "Leer lassen, dann gilt der Zeitraum des Auftrags.",
     "Ledger Account": "Buchungskonto",
     "Ledger Account Id": "Buchungskonto-ID",
     "Ledger Account Type": "Buchungskonto-Typ",
