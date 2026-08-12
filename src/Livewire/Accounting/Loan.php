@@ -8,12 +8,9 @@ use FluxErp\Livewire\Forms\FinanceOrderForm;
 use FluxErp\Livewire\Forms\LoanForm;
 use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Models\Currency;
-use FluxErp\Models\LedgerAccount;
-use FluxErp\Models\LedgerBooking;
 use FluxErp\Models\Loan as LoanModel;
 use FluxErp\Models\LoanInstallment;
 use FluxErp\Models\Order as OrderModel;
-use FluxErp\Models\Pivots\LoanInstallmentTransaction;
 use FluxErp\Models\Transaction as TransactionModel;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
@@ -21,7 +18,6 @@ use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Number;
 use Illuminate\Validation\ValidationException;
@@ -43,9 +39,6 @@ class Loan extends Component
 
     #[Locked]
     public string $currencyIso = 'EUR';
-
-    #[Locked]
-    public array $bookings = [];
 
     #[Locked]
     public array $installments = [];
@@ -85,7 +78,6 @@ class Loan extends Component
         $this->contract->fill($loan->getFirstMedia('contract') ?? []);
         $this->installments = $this->buildSchedule($loan);
         $this->payments = $this->buildPayments($loan);
-        $this->bookings = $this->buildBookings($loan);
         $this->totals = $this->buildTotals($loan);
     }
 
@@ -245,19 +237,6 @@ class Loan extends Component
     }
 
     #[Computed]
-    public function bookingHeaders(): array
-    {
-        return [
-            ['index' => 'booking_date', 'label' => __('Booking Date')],
-            ['index' => 'debit', 'label' => __('Debit Account')],
-            ['index' => 'credit', 'label' => __('Credit Account')],
-            ['index' => 'amount', 'label' => __('Amount')],
-            ['index' => 'booking_text', 'label' => __('Booking Text')],
-            ['index' => 'origin', 'label' => __('Origin')],
-        ];
-    }
-
-    #[Computed]
     public function paymentHeaders(): array
     {
         return [
@@ -321,50 +300,6 @@ class Loan extends Component
         }
 
         return $payments;
-    }
-
-    protected function buildBookings(LoanModel $loan): array
-    {
-        $assignmentIds = resolve_static(LoanInstallmentTransaction::class, 'query')
-            ->whereIn(
-                'loan_installment_id',
-                $loan->installments()->select('id')
-            )
-            ->pluck('pivot_id');
-
-        return resolve_static(LedgerBooking::class, 'query')
-            ->with(['debitLedgerAccount:id,name,number', 'creditLedgerAccount:id,name,number'])
-            ->where(function (Builder $query) use ($loan, $assignmentIds): void {
-                $query->where('debit_ledger_account_id', $loan->ledger_account_id)
-                    ->orWhere('credit_ledger_account_id', $loan->ledger_account_id)
-                    ->orWhere(function (Builder $query) use ($assignmentIds): void {
-                        $query->where('source_type', morph_alias(LoanInstallmentTransaction::class))
-                            ->whereIn('source_id', $assignmentIds);
-                    });
-            })
-            ->orderBy('booking_date')
-            ->orderBy('id')
-            ->get()
-            ->map(fn (LedgerBooking $booking) => [
-                'booking_date' => $booking->booking_date
-                    ?->locale(app()->getLocale())
-                    ->isoFormat('L'),
-                'debit' => $this->accountLabel($booking->debitLedgerAccount),
-                'credit' => $this->accountLabel($booking->creditLedgerAccount),
-                'amount' => $this->money($booking->amount),
-                'booking_text' => $booking->booking_text,
-                'origin' => $booking->source_type === morph_alias(LoanInstallmentTransaction::class)
-                    ? __('Repayment')
-                    : __('Manual'),
-            ])
-            ->all();
-    }
-
-    protected function accountLabel(?LedgerAccount $ledgerAccount): ?string
-    {
-        return $ledgerAccount
-            ? trim($ledgerAccount->number . ' ' . $ledgerAccount->name)
-            : null;
     }
 
     protected function coveredAmount(LoanInstallment $installment): string
