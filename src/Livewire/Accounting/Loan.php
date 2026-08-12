@@ -21,7 +21,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Number;
 use Illuminate\Validation\ValidationException;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
@@ -39,9 +38,6 @@ class Loan extends Component
 
     #[Locked]
     public string $currencyIso = 'EUR';
-
-    #[Locked]
-    public array $installments = [];
 
     public LoanForm $loan;
 
@@ -73,7 +69,6 @@ class Loan extends Component
         $this->loan->fill($loan);
         $this->resetFinanceOrderForm($loan);
         $this->contract->fill($loan->getFirstMedia('contract') ?? []);
-        $this->installments = $this->buildSchedule($loan);
         $this->totals = $this->buildTotals($loan);
     }
 
@@ -218,48 +213,11 @@ class Loan extends Component
         return true;
     }
 
-    #[Computed]
-    public function scheduleHeaders(): array
-    {
-        return [
-            ['index' => 'sequence', 'label' => __('Sequence')],
-            ['index' => 'due_date', 'label' => __('Due Date')],
-            ['index' => 'principal_amount', 'label' => __('Principal')],
-            ['index' => 'interest_amount', 'label' => __('Interest')],
-            ['index' => 'remaining', 'label' => __('Remaining')],
-            ['index' => 'covered_amount', 'label' => __('Paid')],
-            ['index' => 'status', 'label' => __('Status')],
-        ];
-    }
-
     protected function resetFinanceOrderForm(LoanModel $loan): void
     {
         $this->financeOrder->reset();
         $this->financeOrder->loan_id = $loan->getKey();
         $this->financeOrder->booking_date = now()->toDateString();
-    }
-
-    protected function buildSchedule(LoanModel $loan): array
-    {
-        $remaining = $loan->amount;
-        $schedule = [];
-
-        foreach ($this->loadInstallments($loan) as $installment) {
-            $remaining = bcsub($remaining, $installment->principal_amount, 2);
-            $covered = $this->coveredAmount($installment);
-
-            $schedule[] = [
-                'sequence' => $installment->sequence,
-                'due_date' => $installment->due_date->locale(app()->getLocale())->isoFormat('L'),
-                'principal_amount' => $this->money($installment->principal_amount),
-                'interest_amount' => $this->money($installment->interest_amount),
-                'remaining' => $this->money($remaining),
-                'covered_amount' => $this->money($covered),
-                'status' => $this->status($installment, $covered),
-            ];
-        }
-
-        return $schedule;
     }
 
     protected function coveredAmount(LoanInstallment $installment): string
@@ -284,21 +242,6 @@ class Loan extends Component
             ->with('transactions')
             ->orderBy('sequence')
             ->get();
-    }
-
-    protected function status(LoanInstallment $installment, string $covered): string
-    {
-        if ($installment->is_paid || bccomp($covered, $installment->getTotalAmount(), 2) !== -1) {
-            return __('Settled');
-        }
-
-        if ($installment->due_date->isBefore(today())) {
-            return __('Overdue');
-        }
-
-        return bccomp($covered, '0', 2) === 1
-            ? __('Partially Paid')
-            : __('Open');
     }
 
     protected function buildTotals(LoanModel $loan): array
