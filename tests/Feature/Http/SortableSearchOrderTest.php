@@ -3,8 +3,6 @@
 use FluxErp\Models\Category;
 use FluxErp\Models\Product;
 
-// A select offered its options newest first, so the order a sortable model
-// carries was worth nothing the moment it was offered for picking.
 test('a sortable model is offered in its own order', function (): void {
     $model = morph_alias(Product::class);
 

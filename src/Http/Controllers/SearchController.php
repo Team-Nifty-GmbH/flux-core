@@ -95,13 +95,9 @@ class SearchController extends Controller
 
         $this->applyRequestConstraints($query, $request, $model);
 
-        // A model that carries an order of its own is offered in that order,
-        // and only falls back to the newest first when it has none. Without
-        // this a select handed out its options in creation order, which is the
-        // order nobody ever chose.
         $result = $query
             ->when(
-                app($model) instanceof Sortable,
+                is_a(resolve_static($model, 'class'), Sortable::class, true),
                 fn (Builder $query): Builder => $query->ordered()
             )
             ->latest()

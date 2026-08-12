@@ -89,12 +89,6 @@ class Categories extends CategoryList
         JS);
     }
 
-    /**
-     * A row is dragged inside the tree that is on screen, so the whole list is
-     * renumbered in the order it now reads. Roots and children are numbered
-     * from the same run, which keeps a child between its own siblings once the
-     * tree is built again.
-     */
     #[Renderless]
     public function sortRows(int|string $recordId, int $newPosition): void
     {
@@ -106,15 +100,16 @@ class Categories extends CategoryList
             return;
         }
 
-        $ids = array_column($this->data['data'] ?? [], 'id');
-        $currentPosition = array_search($recordId, $ids);
+        $ids = array_map('strval', array_column($this->data['data'] ?? [], 'id'));
+        $recordId = (string) $recordId;
+        $currentPosition = array_search($recordId, $ids, true);
 
         if ($currentPosition === false) {
             return;
         }
 
         array_splice($ids, $currentPosition, 1);
-        array_splice($ids, $newPosition, 0, [$recordId]);
+        array_splice($ids, max(0, min($newPosition, count($ids))), 0, [$recordId]);
 
         resolve_static(Category::class, 'setNewOrder', ['ids' => $ids]);
     }

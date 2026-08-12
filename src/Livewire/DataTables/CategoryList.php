@@ -35,8 +35,6 @@ class CategoryList extends BaseDataTable
         // then load the tree with recursive children via familyTree()
         $rootIds = $query->pluck($this->modelTable . '.' . $this->modelKeyName);
 
-        // whereKey() drops the order the ids were plucked in, so the tree says
-        // for itself how it is sorted, roots here and children on the relation.
         $categories = resolve_static(Category::class, 'familyTree')
             ->whereKey($rootIds)
             ->ordered()

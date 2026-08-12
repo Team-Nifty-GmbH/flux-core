@@ -29,9 +29,6 @@ function categoryTree(): array
     ];
 }
 
-/**
- * @return array<int, int>
- */
 function renderedOrderOf(Categories $categories, array $tree): array
 {
     $categories->loadData(true);
@@ -44,8 +41,6 @@ function renderedOrderOf(Categories $categories, array $tree): array
     ));
 }
 
-// The children arrived in whatever order the database held them, so the order a
-// category carries was invisible everywhere the tree is read.
 test('the children of a category come back in their own order', function (): void {
     [$area, $spilled, $solvent] = categoryTree();
 
@@ -55,8 +50,6 @@ test('the children of a category come back in their own order', function (): voi
         ->toBe(['Loesungsmittel leer', 'Ausgelaufen']);
 });
 
-// Dragging a row renumbers the list in the order it now reads, roots and
-// children from the same run, so a child keeps its place among its siblings.
 test('dragging a child to the front puts it before its sibling', function (): void {
     $tree = categoryTree();
     [$area, $spilled, $solvent] = $tree;

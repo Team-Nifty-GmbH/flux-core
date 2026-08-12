@@ -93,11 +93,6 @@ class Category extends FluxModel implements HasMedia, InteractsWithDataTables, S
     }
 
     // Relations
-    /**
-     * A category is sortable, and that order is what the tree below it is read
-     * in. Without it the children arrived in whatever order the database held
-     * them, so dragging a child into place changed nothing that could be seen.
-     */
     public function children(): HasMany
     {
         return $this->baseChildren()->ordered();
