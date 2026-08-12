@@ -13,6 +13,7 @@ use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\LogsActivity;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\DB;
 
 class PaymentRun extends FluxModel
 {
@@ -38,9 +39,14 @@ class PaymentRun extends FluxModel
 
     public function recalculateTotalAmount(): static
     {
-        $this->total_amount = $this->orders()->sum('order_payment_run.amount');
-
-        $this->saveQuietly();
+        static::query()
+            ->whereKey($this->getKey())
+            ->update([
+                'total_amount' => DB::raw(
+                    '(select coalesce(sum(`amount`), 0) from `order_payment_run` '
+                    . 'where `order_payment_run`.`payment_run_id` = `payment_runs`.`id`)'
+                ),
+            ]);
 
         return $this;
     }
