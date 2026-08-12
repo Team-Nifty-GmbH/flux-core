@@ -56,9 +56,7 @@ use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
-use ReflectionClass;
 use Spatie\LaravelPasskeys\Http\Controllers\AuthenticateUsingPasskeyController as BaseAuthenticateUsingPasskeyController;
-use Spatie\LaravelSettings\Settings;
 use Spatie\LaravelSettings\SettingsContainer;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
@@ -236,19 +234,6 @@ class FluxServiceProvider extends ServiceProvider
         ], 'flux-docker');
     }
 
-    /**
-     * @return array<int, class-string<Settings>>
-     */
-    protected function settingsClasses(): array
-    {
-        return collect(glob(__DIR__ . '/Settings/*.php') ?: [])
-            ->map(fn (string $file): string => __NAMESPACE__ . '\\Settings\\' . basename($file, '.php'))
-            ->filter(fn (string $class): bool => is_subclass_of($class, Settings::class)
-                && ! (new ReflectionClass($class))->isAbstract())
-            ->values()
-            ->all();
-    }
-
     protected function registerConfig(): void
     {
         config([
@@ -260,28 +245,15 @@ class FluxServiceProvider extends ServiceProvider
             'ts-ui.components.slide.1.z-index' => 'z-30',
         ]);
 
-        // Settings are only discovered below the application path, so the
-        // settings of this package were never registered in the container.
-        // Every resolution built a fresh instance that read its group from the
-        // database again, and the cache the package offers was never consulted
-        // because nothing ever put the class in the container. Done while
-        // booting so it does not depend on which provider registers first.
+        $this->replaceConfigRecursivelyFrom(__DIR__ . '/../config/settings.php', 'settings');
+
         $this->app->booting(function (): void {
-            $settings = $this->settingsClasses();
             $container = app(SettingsContainer::class);
+            $settings = config('settings.settings', []);
 
-            if ($container->getSettingClasses()->intersect($settings)->count() === count($settings)) {
-                return;
+            if ($container->getSettingClasses()->intersect($settings)->count() !== count($settings)) {
+                $container->clearCache()->registerBindings();
             }
-
-            config([
-                'settings.settings' => array_values(array_unique(array_merge(
-                    config('settings.settings', []),
-                    $settings,
-                ))),
-            ]);
-
-            $container->clearCache()->registerBindings();
         });
 
         $this->booted(function (): void {
