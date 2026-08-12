@@ -17,7 +17,6 @@ class LoanPayments extends BaseDataTable
         'loan_installment.sequence' => 'Sequence',
         'transaction.booking_date' => 'Booking Date',
         'transaction.purpose' => 'Purpose',
-        'amount' => 'Transaction Amount',
         'is_accepted' => 'Accepted',
     ];
 
