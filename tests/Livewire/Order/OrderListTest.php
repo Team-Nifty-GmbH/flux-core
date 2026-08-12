@@ -8,6 +8,7 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
+use FluxErp\Models\PaymentReminder;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\States\Order\PaymentState\Open;
@@ -16,7 +17,6 @@ use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
-use FluxErp\Models\PaymentReminder;
 
 test('renders successfully', function (): void {
     Livewire::test(OrderList::class)
