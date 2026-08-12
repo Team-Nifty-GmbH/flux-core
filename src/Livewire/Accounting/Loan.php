@@ -112,6 +112,8 @@ class Loan extends Component
                 ->text(__('Repayment Schedule')),
             TabButton::make('loan.payments')
                 ->text(__('Payments')),
+            TabButton::make('loan.bookings')
+                ->text(__('Bookings')),
             TabButton::make('loan.documents')
                 ->text(__('Documents')),
         ];

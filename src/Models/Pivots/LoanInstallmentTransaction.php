@@ -6,11 +6,12 @@ use FluxErp\Actions\LedgerBooking\CreateLedgerBooking;
 use FluxErp\Actions\LedgerBooking\DeleteLedgerBooking;
 use FluxErp\Actions\LedgerBooking\UpdateLedgerBooking;
 use FluxErp\Models\LedgerBooking;
+use FluxErp\Models\Loan;
 use FluxErp\Models\LoanInstallment;
 use FluxErp\Models\Transaction;
 use FluxErp\Traits\Model\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class LoanInstallmentTransaction extends FluxPivot
 {
@@ -29,7 +30,7 @@ class LoanInstallmentTransaction extends FluxPivot
 
         static::deleted(function (LoanInstallmentTransaction $loanInstallmentTransaction): void {
             $loanInstallmentTransaction->recalculate();
-            $loanInstallmentTransaction->deleteLedgerBooking();
+            $loanInstallmentTransaction->deleteLedgerBookings();
         });
     }
 
@@ -40,9 +41,9 @@ class LoanInstallmentTransaction extends FluxPivot
         ];
     }
 
-    public function ledgerBooking(): MorphOne
+    public function ledgerBookings(): MorphMany
     {
-        return $this->morphOne(LedgerBooking::class, 'source');
+        return $this->morphMany(LedgerBooking::class, 'source');
     }
 
     public function loanInstallment(): BelongsTo
@@ -85,8 +86,8 @@ class LoanInstallmentTransaction extends FluxPivot
 
     public function syncLedgerBooking(): void
     {
-        $ledgerBooking = $this->ledgerBooking()->first();
-        $loan = $this->loanInstallment()->first()?->loan;
+        $installment = $this->loanInstallment()->first();
+        $loan = $installment?->loan;
         $transaction = $this->transaction()->first();
         $bankLedgerAccountId = $transaction?->bankConnection?->ledger_account_id;
         $amount = bcround((string) $this->amount, 2);
@@ -94,54 +95,112 @@ class LoanInstallmentTransaction extends FluxPivot
         if (! $this->is_accepted
             || ! $loan?->ledger_account_id
             || ! $bankLedgerAccountId
-            || $loan->ledger_account_id === $bankLedgerAccountId
             || bccomp($amount, '0', 2) === 0
         ) {
-            $this->deleteLedgerBooking($ledgerBooking);
+            $this->deleteLedgerBookings();
 
             return;
         }
 
         $isRepayment = bccomp($amount, '0', 2) === -1;
+        $loanSideColumn = $isRepayment ? 'debit_ledger_account_id' : 'credit_ledger_account_id';
+        $shares = $this->ledgerShares($installment, $loan, ltrim($amount, '-'));
 
-        $data = [
-            'debit_ledger_account_id' => $isRepayment ? $loan->ledger_account_id : $bankLedgerAccountId,
-            'credit_ledger_account_id' => $isRepayment ? $bankLedgerAccountId : $loan->ledger_account_id,
-            'amount' => ltrim($amount, '-'),
-            'booking_date' => $transaction->booking_date?->toDateString(),
-            'booking_text' => $loan->name,
-            'note' => $this->note,
-        ];
+        foreach ($shares as $ledgerAccountId => $share) {
+            if ($ledgerAccountId === $bankLedgerAccountId) {
+                continue;
+            }
 
-        if ($ledgerBooking) {
-            UpdateLedgerBooking::make(array_merge($data, ['id' => $ledgerBooking->getKey()]))
+            $data = [
+                'debit_ledger_account_id' => $isRepayment ? $ledgerAccountId : $bankLedgerAccountId,
+                'credit_ledger_account_id' => $isRepayment ? $bankLedgerAccountId : $ledgerAccountId,
+                'amount' => $share,
+                'booking_date' => $transaction->booking_date?->toDateString(),
+                'booking_text' => $loan->name,
+                'note' => $this->note,
+            ];
+
+            $ledgerBooking = $this->ledgerBookings()
+                ->where($loanSideColumn, $ledgerAccountId)
+                ->first();
+
+            if ($ledgerBooking) {
+                UpdateLedgerBooking::make(array_merge($data, ['id' => $ledgerBooking->getKey()]))
+                    ->validate()
+                    ->execute();
+
+                continue;
+            }
+
+            CreateLedgerBooking::make(
+                array_merge($data, [
+                    'tenant_id' => $loan->tenant_id,
+                    'source_type' => morph_alias(static::class),
+                    'source_id' => $this->getKey(),
+                ])
+            )
                 ->validate()
                 ->execute();
-
-            return;
         }
 
-        CreateLedgerBooking::make(
-            array_merge($data, [
-                'tenant_id' => $loan->tenant_id,
-                'source_type' => morph_alias(static::class),
-                'source_id' => $this->getKey(),
-            ])
-        )
+        $this->ledgerBookings()
+            ->whereNotIn($loanSideColumn, array_keys($shares))
+            ->get()
+            ->each(fn (LedgerBooking $ledgerBooking) => $this->deleteLedgerBooking($ledgerBooking));
+    }
+
+    public function deleteLedgerBookings(): void
+    {
+        $this->ledgerBookings()
+            ->get()
+            ->each(fn (LedgerBooking $ledgerBooking) => $this->deleteLedgerBooking($ledgerBooking));
+    }
+
+    protected function deleteLedgerBooking(LedgerBooking $ledgerBooking): void
+    {
+        DeleteLedgerBooking::make(['id' => $ledgerBooking->getKey()])
             ->validate()
             ->execute();
     }
 
-    public function deleteLedgerBooking(?LedgerBooking $ledgerBooking = null): void
+    protected function ledgerShares(LoanInstallment $installment, Loan $loan, string $absolute): array
     {
-        $ledgerBooking ??= $this->ledgerBooking()->first();
+        $interest = bcround((string) $installment->interest_amount, 2);
 
-        if (! $ledgerBooking) {
-            return;
+        if (! $loan->interest_ledger_account_id
+            || $loan->interest_ledger_account_id === $loan->ledger_account_id
+            || bccomp($interest, '0', 2) < 1
+        ) {
+            return [$loan->ledger_account_id => $absolute];
         }
 
-        DeleteLedgerBooking::make(['id' => $ledgerBooking->getKey()])
-            ->validate()
-            ->execute();
+        $covered = bcround(
+            (string) $this->newQuery()
+                ->where('loan_installment_id', $installment->getKey())
+                ->whereKeyNot($this->getKey())
+                ->where('is_accepted', true)
+                ->sum('amount'),
+            2
+        );
+        $covered = ltrim($covered, '-');
+
+        $openInterest = bccomp($covered, $interest, 2) === -1
+            ? bcsub($interest, $covered, 2)
+            : '0.00';
+
+        $interestShare = bccomp($absolute, $openInterest, 2) === 1 ? $openInterest : $absolute;
+        $principalShare = bcsub($absolute, $interestShare, 2);
+
+        $shares = [];
+
+        if (bccomp($interestShare, '0', 2) === 1) {
+            $shares[$loan->interest_ledger_account_id] = $interestShare;
+        }
+
+        if (bccomp($principalShare, '0', 2) === 1) {
+            $shares[$loan->ledger_account_id] = $principalShare;
+        }
+
+        return $shares;
     }
 }

@@ -45,7 +45,7 @@ test('an accepted repayment books against the loan ledger account', function ():
         'is_accepted' => true,
     ]);
 
-    $booking = $assignment->ledgerBooking()->first();
+    $booking = $assignment->ledgerBookings()->first();
 
     expect($booking)->not->toBeNull()
         ->and($booking->debit_ledger_account_id)->toEqual($this->loanLedgerAccount->getKey())
@@ -63,7 +63,7 @@ test('an unaccepted repayment books nothing', function (): void {
         'is_accepted' => false,
     ]);
 
-    expect($assignment->ledgerBooking()->exists())->toBeFalse();
+    expect($assignment->ledgerBookings()->exists())->toBeFalse();
 });
 
 test('un-accepting a repayment removes its booking', function (): void {
@@ -74,11 +74,11 @@ test('un-accepting a repayment removes its booking', function (): void {
         'is_accepted' => true,
     ]);
 
-    expect($assignment->ledgerBooking()->exists())->toBeTrue();
+    expect($assignment->ledgerBookings()->exists())->toBeTrue();
 
     $assignment->update(['is_accepted' => false]);
 
-    expect($assignment->ledgerBooking()->exists())->toBeFalse();
+    expect($assignment->ledgerBookings()->exists())->toBeFalse();
 });
 
 test('deleting a repayment removes its booking', function (): void {
@@ -88,7 +88,7 @@ test('deleting a repayment removes its booking', function (): void {
         'amount' => -6060,
         'is_accepted' => true,
     ]);
-    $bookingId = $assignment->ledgerBooking()->first()->getKey();
+    $bookingId = $assignment->ledgerBookings()->first()->getKey();
 
     $assignment->delete();
 
@@ -102,12 +102,12 @@ test('changing the amount updates the booking instead of adding one', function (
         'amount' => -6060,
         'is_accepted' => true,
     ]);
-    $bookingId = $assignment->ledgerBooking()->first()->getKey();
+    $bookingId = $assignment->ledgerBookings()->first()->getKey();
 
     $assignment->update(['amount' => -3000]);
 
     expect(LedgerBooking::query()->where('source_id', $assignment->getKey())->count())->toEqual(1)
-        ->and($assignment->ledgerBooking()->first())
+        ->and($assignment->ledgerBookings()->first())
         ->getKey()->toEqual($bookingId)
         ->amount->toEqual(3000);
 });
@@ -128,7 +128,7 @@ test('a chargeback books the debt back', function (): void {
         'is_accepted' => true,
     ]);
 
-    $booking = $assignment->ledgerBooking()->first();
+    $booking = $assignment->ledgerBookings()->first();
 
     expect($booking->debit_ledger_account_id)->toEqual($this->bankLedgerAccount->getKey())
         ->and($booking->credit_ledger_account_id)->toEqual($this->loanLedgerAccount->getKey())
@@ -150,5 +150,5 @@ test('a bank connection without a ledger account books nothing', function (): vo
         'is_accepted' => true,
     ]);
 
-    expect($assignment->ledgerBooking()->exists())->toBeFalse();
+    expect($assignment->ledgerBookings()->exists())->toBeFalse();
 });
