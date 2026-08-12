@@ -2,6 +2,7 @@
 
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Accounting\Loan;
+use FluxErp\Livewire\Accounting\LoanInstallments;
 use FluxErp\Livewire\Accounting\LoanLedgerBookings;
 use FluxErp\Livewire\Accounting\LoanPayments;
 use FluxErp\Models\Address;
@@ -61,7 +62,6 @@ test('renders successfully', function (): void {
     Livewire::test(Loan::class, ['id' => $this->loan->getKey()])
         ->assertOk()
         ->assertSet('loan.id', $this->loan->getKey())
-        ->assertCount('installments', 2)
         // stored as a factor, shown as a percentage
         ->assertSet('loan.interest_rate', 2.299);
 });
@@ -76,11 +76,18 @@ test('every tab renders', function (string $tab): void {
 test('the schedule tab formats amounts and dates for the locale', function (): void {
     app()->setLocale('de');
 
+    $data = Livewire::test(LoanInstallments::class, ['loanId' => $this->loan->getKey()])
+        ->call('loadData')
+        ->assertOk()
+        ->instance()
+        ->getDataForTesting();
+
+    expect(data_get($data, 'data.0.due_date.display'))->toEqual('01.02.2026')
+        ->and(data_get($data, 'data.0.principal_amount.display'))->toContain('6.000,00');
+
     Livewire::test(Loan::class, ['id' => $this->loan->getKey()])
         ->set('tab', 'loan.installments')
         ->assertOk()
-        ->assertSee('01.02.2026')
-        ->assertSee('6.000,00')
         ->assertSet('totals.principal_amount', fn (string $value) => str_contains($value, '12.000,00'))
         ->assertSet('totals.interest_amount', fn (string $value) => str_contains($value, '90,00'))
         ->assertSet('totals.total', fn (string $value) => str_contains($value, '12.090,00'));
@@ -200,10 +207,17 @@ test('a settled installment shows its status in the schedule', function (): void
         'is_accepted' => true,
     ]);
 
-    Livewire::test(Loan::class, ['id' => $this->loan->getKey()])
+    $data = Livewire::test(LoanInstallments::class, ['loanId' => $this->loan->getKey()])
+        ->call('loadData')
         ->assertOk()
-        ->assertSet('installments.0.status', __('Settled'))
-        ->assertSet('installments.1.status', __('Overdue'));
+        ->instance()
+        ->getDataForTesting();
+
+    expect(data_get($data, 'data.0.status.raw'))->toEqual('Settled')
+        ->and(data_get($data, 'data.1.status.raw'))->toEqual('Overdue')
+        ->and(data_get($data, 'data.0.covered_amount.raw'))->toEqual(6060)
+        ->and(data_get($data, 'data.0.remaining.raw'))->toEqual(6000)
+        ->and(data_get($data, 'data.1.remaining.raw'))->toEqual(0);
 });
 
 test('can attach a contract', function (): void {
