@@ -406,8 +406,6 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
                 continue;
             }
 
-            // The action returns a fresh model, so the document hooks would query
-            // the order again for every single reminder.
             $reminder->setRelation('order', $order);
 
             $reminders->push($reminder);
