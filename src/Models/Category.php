@@ -16,6 +16,7 @@ use FluxErp\Traits\Model\SortableTrait;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
@@ -31,8 +32,11 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
  */
 class Category extends FluxModel implements HasMedia, InteractsWithDataTables, Sortable
 {
-    use Filterable, HasAttributeTranslations, HasPackageFactory, HasParentChildRelations, HasUserModification, HasUuid,
+    use Filterable, HasAttributeTranslations, HasPackageFactory, HasUserModification, HasUuid,
         InteractsWithMedia, LogsActivity, SortableTrait;
+    use HasParentChildRelations {
+        HasParentChildRelations::children as baseChildren;
+    }
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -89,6 +93,16 @@ class Category extends FluxModel implements HasMedia, InteractsWithDataTables, S
     }
 
     // Relations
+    /**
+     * A category is sortable, and that order is what the tree below it is read
+     * in. Without it the children arrived in whatever order the database held
+     * them, so dragging a child into place changed nothing that could be seen.
+     */
+    public function children(): HasMany
+    {
+        return $this->baseChildren()->ordered();
+    }
+
     public function discounts(): BelongsToMany
     {
         return $this->belongsToMany(Discount::class, 'category_price_list')

@@ -89,6 +89,36 @@ class Categories extends CategoryList
         JS);
     }
 
+    /**
+     * A row is dragged inside the tree that is on screen, so the whole list is
+     * renumbered in the order it now reads. Roots and children are numbered
+     * from the same run, which keeps a child between its own siblings once the
+     * tree is built again.
+     */
+    #[Renderless]
+    public function sortRows(int|string $recordId, int $newPosition): void
+    {
+        try {
+            resolve_static(UpdateCategory::class, 'canPerformAction');
+        } catch (UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $ids = array_column($this->data['data'] ?? [], 'id');
+        $currentPosition = array_search($recordId, $ids);
+
+        if ($currentPosition === false) {
+            return;
+        }
+
+        array_splice($ids, $currentPosition, 1);
+        array_splice($ids, $newPosition, 0, [$recordId]);
+
+        resolve_static(Category::class, 'setNewOrder', ['ids' => $ids]);
+    }
+
     #[Renderless]
     public function save(): bool
     {
@@ -110,5 +140,10 @@ class Categories extends CategoryList
         return array_merge(parent::getViewData(), [
             'models' => get_models_with_trait(Categorizable::class),
         ]);
+    }
+
+    protected function isSortable(): bool
+    {
+        return true;
     }
 }
