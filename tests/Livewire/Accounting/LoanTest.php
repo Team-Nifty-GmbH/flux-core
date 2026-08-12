@@ -345,3 +345,45 @@ test('selecting a sales order is rejected right away', function (): void {
         ->assertSet('financeOrder.order_id', null)
         ->assertSet('financeOrder.amount', null);
 });
+
+test('the bookings tab lists everything that touches the loan account', function (): void {
+    $bankLedgerAccount = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
+    $bankConnection = FluxErp\Models\BankConnection::factory()->create([
+        'ledger_account_id' => $bankLedgerAccount->getKey(),
+    ]);
+    $transaction = FluxErp\Models\Transaction::factory()->create([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'amount' => -6060,
+        'balance' => -6060,
+        'booking_date' => '2026-02-01',
+        'is_ignored' => false,
+    ]);
+
+    FluxErp\Models\Pivots\LoanInstallmentTransaction::create([
+        'loan_installment_id' => $this->loan->installments()->orderBy('sequence')->first()->getKey(),
+        'transaction_id' => $transaction->getKey(),
+        'amount' => -6060,
+        'is_accepted' => true,
+    ]);
+
+    FluxErp\Models\LedgerBooking::create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'debit_ledger_account_id' => $this->ledgerAccount->getKey(),
+        'credit_ledger_account_id' => $bankLedgerAccount->getKey(),
+        'amount' => 12000,
+        'booking_date' => '2026-01-02',
+        'booking_text' => 'Auszahlung',
+    ]);
+
+    $component = Livewire::test(Loan::class, ['id' => $this->loan->getKey()])
+        ->assertOk()
+        ->set('tab', 'loan.bookings')
+        ->assertOk();
+
+    $bookings = $component->get('bookings');
+
+    expect($bookings)->toHaveCount(2)
+        ->and($bookings[0]['booking_text'])->toEqual('Auszahlung')
+        ->and($bookings[0]['origin'])->toEqual(__('Manual'))
+        ->and($bookings[1]['origin'])->toEqual(__('Repayment'));
+});
