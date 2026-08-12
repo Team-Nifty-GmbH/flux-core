@@ -18,6 +18,7 @@ class LoanPayments extends BaseDataTable
         'transaction.booking_date' => 'Booking Date',
         'transaction.purpose' => 'Purpose',
         'amount' => 'Transaction Amount',
+        'is_accepted' => 'Accepted',
     ];
 
     public array $enabledCols = [
