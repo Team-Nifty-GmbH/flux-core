@@ -43,9 +43,6 @@ class Loan extends Component
     #[Locked]
     public array $installments = [];
 
-    #[Locked]
-    public array $payments = [];
-
     public LoanForm $loan;
 
     public array $queryString = [
@@ -77,7 +74,6 @@ class Loan extends Component
         $this->resetFinanceOrderForm($loan);
         $this->contract->fill($loan->getFirstMedia('contract') ?? []);
         $this->installments = $this->buildSchedule($loan);
-        $this->payments = $this->buildPayments($loan);
         $this->totals = $this->buildTotals($loan);
     }
 
@@ -236,19 +232,6 @@ class Loan extends Component
         ];
     }
 
-    #[Computed]
-    public function paymentHeaders(): array
-    {
-        return [
-            ['index' => 'booking_date', 'label' => __('Booking Date')],
-            ['index' => 'sequence', 'label' => __('Sequence')],
-            ['index' => 'purpose', 'label' => __('Purpose')],
-            ['index' => 'note', 'label' => __('Note')],
-            ['index' => 'amount', 'label' => __('Transaction Amount')],
-            ['index' => 'is_accepted', 'label' => __('Accepted')],
-        ];
-    }
-
     protected function resetFinanceOrderForm(LoanModel $loan): void
     {
         $this->financeOrder->reset();
@@ -277,29 +260,6 @@ class Loan extends Component
         }
 
         return $schedule;
-    }
-
-    protected function buildPayments(LoanModel $loan): array
-    {
-        $payments = [];
-
-        foreach ($this->loadInstallments($loan) as $installment) {
-            foreach ($installment->transactions as $transaction) {
-                $payments[] = [
-                    'sequence' => $installment->sequence,
-                    'booking_date' => $transaction->booking_date
-                        ?->locale(app()->getLocale())
-                        ->isoFormat('L'),
-                    'purpose' => $transaction->purpose,
-                    'note' => $transaction->pivot->note,
-                    'amount' => $this->money($transaction->pivot->amount),
-                    'is_accepted' => (bool) $transaction->pivot->is_accepted,
-                    'transaction_id' => $transaction->getKey(),
-                ];
-            }
-        }
-
-        return $payments;
     }
 
     protected function coveredAmount(LoanInstallment $installment): string
