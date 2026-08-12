@@ -241,7 +241,7 @@ class FluxServiceProvider extends ServiceProvider
      */
     protected function settingsClasses(): array
     {
-        return collect(glob(__DIR__ . '/Settings/*.php'))
+        return collect(glob(__DIR__ . '/Settings/*.php') ?: [])
             ->map(fn (string $file): string => __NAMESPACE__ . '\\Settings\\' . basename($file, '.php'))
             ->filter(fn (string $class): bool => is_subclass_of($class, Settings::class)
                 && ! (new ReflectionClass($class))->isAbstract())
@@ -267,14 +267,21 @@ class FluxServiceProvider extends ServiceProvider
         // because nothing ever put the class in the container. Done while
         // booting so it does not depend on which provider registers first.
         $this->app->booting(function (): void {
+            $settings = $this->settingsClasses();
+            $container = app(SettingsContainer::class);
+
+            if ($container->getSettingClasses()->intersect($settings)->count() === count($settings)) {
+                return;
+            }
+
             config([
                 'settings.settings' => array_values(array_unique(array_merge(
                     config('settings.settings', []),
-                    $this->settingsClasses(),
+                    $settings,
                 ))),
             ]);
 
-            app(SettingsContainer::class)->clearCache()->registerBindings();
+            $container->clearCache()->registerBindings();
         });
 
         $this->booted(function (): void {
