@@ -420,3 +420,76 @@ test('rescale uses positive previous amount as baseline only', function (): void
 
     expect($child->refresh()->amount)->toEqual(16.0);
 });
+
+test('the performance period falls back to the order', function (): void {
+    $this->order->update([
+        'system_delivery_date' => '2026-07-01',
+        'system_delivery_date_end' => '2026-07-31',
+    ]);
+
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'name' => 'Ohne eigenen Zeitraum',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 1,
+        'unit_price' => 50.00,
+    ])->validate()->execute();
+
+    expect($position->system_delivery_date)->toBeNull()
+        ->and($position->performance_period_start->toDateString())->toBe('2026-07-01')
+        ->and($position->performance_period_end->toDateString())->toBe('2026-07-31');
+});
+
+test('an own performance period wins over the order', function (): void {
+    $this->order->update([
+        'system_delivery_date' => '2026-07-01',
+        'system_delivery_date_end' => '2026-07-31',
+    ]);
+
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'name' => 'Mit eigenem Zeitraum',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 1,
+        'unit_price' => 50.00,
+        'system_delivery_date' => '2026-09-01',
+        'system_delivery_date_end' => '2026-09-30',
+    ])->validate()->execute();
+
+    expect($position->performance_period_start->toDateString())->toBe('2026-09-01')
+        ->and($position->performance_period_end->toDateString())->toBe('2026-09-30');
+});
+
+test('an own start without an end does not borrow the end of the order', function (): void {
+    $this->order->update([
+        'system_delivery_date' => '2026-07-01',
+        'system_delivery_date_end' => '2026-07-31',
+    ]);
+
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'name' => 'Nur Startdatum',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 1,
+        'unit_price' => 50.00,
+        'system_delivery_date' => '2026-09-01',
+    ])->validate()->execute();
+
+    expect($position->performance_period_start->toDateString())->toBe('2026-09-01')
+        ->and($position->performance_period_end)->toBeNull();
+});
+
+test('the performance period end may not precede its start', function (): void {
+    CreateOrderPosition::assertValidationErrors(
+        [
+            'order_id' => $this->order->getKey(),
+            'name' => 'Falscher Zeitraum',
+            'vat_rate_id' => $this->vatRate->getKey(),
+            'amount' => 1,
+            'unit_price' => 50.00,
+            'system_delivery_date' => '2026-09-30',
+            'system_delivery_date_end' => '2026-09-01',
+        ],
+        'system_delivery_date_end'
+    );
+});

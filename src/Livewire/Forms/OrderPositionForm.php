@@ -69,6 +69,10 @@ class OrderPositionForm extends FluxForm
 
     public ?string $possible_delivery_date = null;
 
+    public ?string $system_delivery_date = null;
+
+    public ?string $system_delivery_date_end = null;
+
     public ?int $post_on_credit_account = null;
 
     public ?int $price_id = null;

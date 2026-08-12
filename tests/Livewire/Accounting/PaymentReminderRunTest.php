@@ -413,7 +413,8 @@ test('orders that cannot be sent stay in the list instead of looking sent', func
         ->assertSet('groups', fn (array $groups) => count($groups) === 1)
         ->call('sendSelected')
         ->assertSet('groups', fn (array $groups) => count($groups) === 1)
-        ->assertSet('sentOrderIds', []);
+        ->assertSet('sentOrderIds', [])
+        ->assertDispatched('ts-ui:toast', type: 'warning', persistent: true);
 
     Queue::assertNotPushed(SendPaymentReminderJob::class);
 });

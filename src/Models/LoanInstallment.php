@@ -45,7 +45,7 @@ class LoanInstallment extends FluxModel implements InteractsWithDataTables
         });
     }
 
-    protected static function coverageSql(): string
+    public static function coverageSql(): string
     {
         return '(SELECT GREATEST(-COALESCE(SUM(amount), 0), 0)
             FROM loan_installment_transaction lit

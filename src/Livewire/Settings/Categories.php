@@ -90,6 +90,31 @@ class Categories extends CategoryList
     }
 
     #[Renderless]
+    public function sortRows(int|string $recordId, int $newPosition): void
+    {
+        try {
+            resolve_static(UpdateCategory::class, 'canPerformAction');
+        } catch (UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $ids = array_map('strval', array_column($this->data['data'] ?? [], 'id'));
+        $recordId = (string) $recordId;
+        $currentPosition = array_search($recordId, $ids, true);
+
+        if ($currentPosition === false) {
+            return;
+        }
+
+        array_splice($ids, $currentPosition, 1);
+        array_splice($ids, max(0, min($newPosition, count($ids))), 0, [$recordId]);
+
+        resolve_static(Category::class, 'setNewOrder', ['ids' => $ids]);
+    }
+
+    #[Renderless]
     public function save(): bool
     {
         try {
@@ -110,5 +135,10 @@ class Categories extends CategoryList
         return array_merge(parent::getViewData(), [
             'models' => get_models_with_trait(Categorizable::class),
         ]);
+    }
+
+    protected function isSortable(): bool
+    {
+        return true;
     }
 }

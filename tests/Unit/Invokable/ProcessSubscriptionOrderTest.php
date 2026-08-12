@@ -670,3 +670,119 @@ test('schedule preview period matches the actual ProcessSubscriptionOrder output
         ->and($preview[0]['system_delivery_date_end'])->toBe($newOrder->system_delivery_date_end->toDateString())
         ->and($preview[0]['system_delivery_date_end'])->toBe('2026-02-28');
 });
+
+test('a position without an own period falls back to the period of the rate', function (): void {
+    $this->subscriptionOrder->update([
+        'system_delivery_date' => '2026-07-01',
+        'system_delivery_date_end' => '2026-07-31',
+    ]);
+
+    FluxErp\Models\OrderPosition::factory()->create([
+        'order_id' => $this->subscriptionOrder->getKey(),
+        'tenant_id' => $this->tenant->getKey(),
+        'vat_rate_id' => FluxErp\Models\VatRate::factory()->create()->getKey(),
+        'name' => 'Wartung',
+        'amount' => 1,
+        'unit_net_price' => '100.00',
+        'total_net_price' => '100.00',
+        'total_base_net_price' => '100.00',
+        'system_delivery_date' => null,
+        'system_delivery_date_end' => null,
+    ]);
+
+    (new ProcessSubscriptionOrder())(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    $newOrder = Order::query()
+        ->where('created_from_id', $this->subscriptionOrder->getKey())
+        ->with('orderPositions')
+        ->first();
+
+    $position = $newOrder->orderPositions->first();
+
+    expect($position->system_delivery_date)->toBeNull()
+        ->and($position->performance_period_start->toDateString())
+        ->toBe($newOrder->system_delivery_date->toDateString());
+});
+
+test('a position with an own period is carried forward like the order', function (): void {
+    $schedule = Schedule::create([
+        'uuid' => Illuminate\Support\Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'monthly',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => [],
+                'dayConstraint' => [],
+                'timeConstraint' => [],
+            ],
+        ],
+        'cron_expression' => '0 0 1 * *',
+        'is_active' => true,
+        'parameters' => [
+            'orderId' => $this->subscriptionOrder->getKey(),
+            'orderTypeId' => $this->targetOrderType->getKey(),
+        ],
+    ]);
+
+    $this->subscriptionOrder->schedules()->attach($schedule->getKey());
+
+    $this->subscriptionOrder->update([
+        'system_delivery_date' => '2026-07-01',
+        'system_delivery_date_end' => '2026-07-31',
+    ]);
+
+    $contractPosition = FluxErp\Models\OrderPosition::factory()->create([
+        'order_id' => $this->subscriptionOrder->getKey(),
+        'tenant_id' => $this->tenant->getKey(),
+        'vat_rate_id' => FluxErp\Models\VatRate::factory()->create()->getKey(),
+        'name' => 'Wartung',
+        'amount' => 1,
+        'unit_net_price' => '100.00',
+        'total_net_price' => '100.00',
+        'total_base_net_price' => '100.00',
+        'system_delivery_date' => '2026-07-01',
+        'system_delivery_date_end' => '2026-07-31',
+    ]);
+
+    (new ProcessSubscriptionOrder())(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    $firstRate = Order::query()
+        ->where('created_from_id', $this->subscriptionOrder->getKey())
+        ->with('orderPositions')
+        ->latest('id')
+        ->first();
+
+    expect($firstRate->orderPositions->first()->system_delivery_date->toDateString())->toBe('2026-07-01');
+
+    (new ProcessSubscriptionOrder())(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    $secondRate = Order::query()
+        ->where('created_from_id', $this->subscriptionOrder->getKey())
+        ->whereKeyNot($firstRate->getKey())
+        ->with('orderPositions')
+        ->latest('id')
+        ->first();
+
+    $secondPosition = $secondRate->orderPositions->first();
+
+    expect($secondPosition->created_from_id)->toBe($contractPosition->getKey())
+        ->and($secondPosition->system_delivery_date->toDateString())
+        ->toBe($firstRate->orderPositions->first()->system_delivery_date_end->addDay()->toDateString())
+        ->and($secondPosition->system_delivery_date->toDateString())
+        ->toBe($secondRate->system_delivery_date->toDateString());
+});

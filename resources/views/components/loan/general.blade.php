@@ -27,15 +27,22 @@
                 ]"
             />
         </div>
-        <x-select.styled
-            :label="__('Order')"
-            wire:model.number="loan.order_id"
-            select="label:label|value:id"
-            :request="[
-                'url' => route('search', \FluxErp\Models\Order::class),
-                'method' => 'POST',
-            ]"
-        />
+        <div
+            x-bind:class="
+                $wire.loan.order_id && 'pointer-events-none opacity-60'
+            "
+        >
+            <x-select.styled
+                :label="__('Order')"
+                wire:model.number="loan.order_id"
+                x-bind:readonly="$wire.loan.order_id"
+                select="label:label|value:id"
+                :request="[
+                    'url' => route('search', \FluxErp\Models\Order::class),
+                    'method' => 'POST',
+                ]"
+            />
+        </div>
         <x-input wire:model="loan.number" :label="__('Number')" />
         <div class="grid grid-cols-1 gap-1.5 md:grid-cols-3">
             <x-toggle
