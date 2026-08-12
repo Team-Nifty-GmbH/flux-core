@@ -3,6 +3,7 @@
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Accounting\Loan;
 use FluxErp\Livewire\Accounting\LoanLedgerBookings;
+use FluxErp\Livewire\Accounting\LoanPayments;
 use FluxErp\Models\Address;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
@@ -130,13 +131,39 @@ test('the payments tab lists the assigned transactions', function (): void {
         'is_accepted' => true,
     ]);
 
-    Livewire::test(Loan::class, ['id' => $this->loan->getKey()])
-        ->set('tab', 'loan.payments')
+    $foreign = LoanModel::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'contact_id' => $this->contact->getKey(),
+        'ledger_account_id' => $this->ledgerAccount->getKey(),
+        'amount' => 500,
+        'number_of_installments' => 1,
+    ]);
+    $foreignInstallment = $foreign->installments()->create([
+        'sequence' => 1,
+        'due_date' => '2026-02-01',
+        'principal_amount' => 500,
+        'interest_amount' => 0,
+    ]);
+    LoanInstallmentTransaction::create([
+        'loan_installment_id' => $foreignInstallment->getKey(),
+        'transaction_id' => Transaction::factory()->create([
+            'bank_connection_id' => BankConnection::factory()->create()->getKey(),
+            'amount' => -500,
+            'purpose' => 'Fremde Rate',
+        ])->getKey(),
+        'amount' => -500,
+        'is_accepted' => true,
+    ]);
+
+    $data = Livewire::test(LoanPayments::class, ['loanId' => $this->loan->getKey()])
+        ->call('loadData')
         ->assertOk()
-        ->assertCount('payments', 1)
-        ->assertSet('payments.0.purpose', 'Rate 1 DARL-1')
-        ->assertSet('payments.0.is_accepted', true)
-        ->assertSee('Rate 1 DARL-1');
+        ->instance()
+        ->getDataForTesting();
+
+    expect(data_get($data, 'data'))->toHaveCount(1)
+        ->and(data_get($data, 'data.0')['transaction.purpose'])->toEqual('Rate 1 DARL-1')
+        ->and(data_get($data, 'data.0')['loan_installment.sequence'] ?? null)->not->toBeNull();
 });
 
 test('the totals count an installment settled by a transaction', function (): void {
