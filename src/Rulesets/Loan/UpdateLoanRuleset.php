@@ -30,6 +30,11 @@ class UpdateLoanRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Contact::class]),
             ],
+            'interest_ledger_account_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => LedgerAccount::class]),
+            ],
             'ledger_account_id' => [
                 'sometimes',
                 'required',
