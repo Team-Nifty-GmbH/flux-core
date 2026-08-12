@@ -144,10 +144,10 @@ test('the payments tab lists the assigned transactions', function (): void {
         'principal_amount' => 500,
         'interest_amount' => 0,
     ]);
-    FluxErp\Models\Pivots\LoanInstallmentTransaction::create([
+    LoanInstallmentTransaction::create([
         'loan_installment_id' => $foreignInstallment->getKey(),
-        'transaction_id' => FluxErp\Models\Transaction::factory()->create([
-            'bank_connection_id' => FluxErp\Models\BankConnection::factory()->create()->getKey(),
+        'transaction_id' => Transaction::factory()->create([
+            'bank_connection_id' => BankConnection::factory()->create()->getKey(),
             'amount' => -500,
             'purpose' => 'Fremde Rate',
         ])->getKey(),
