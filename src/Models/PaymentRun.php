@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Casts\Money;
 use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Enums\SepaMandateTypeEnum;
 use FluxErp\Models\Pivots\OrderPaymentRun;
@@ -25,6 +26,7 @@ class PaymentRun extends FluxModel
             'sepa_mandate_type_enum' => SepaMandateTypeEnum::class,
             'instructed_execution_date' => 'date',
             'is_instant_payment' => 'boolean',
+            'total_amount' => Money::class,
         ];
     }
 
@@ -32,6 +34,15 @@ class PaymentRun extends FluxModel
     public function bankConnection(): BelongsTo
     {
         return $this->belongsTo(BankConnection::class);
+    }
+
+    public function recalculateTotalAmount(): static
+    {
+        $this->total_amount = $this->orders()->sum('order_payment_run.amount');
+
+        $this->saveQuietly();
+
+        return $this;
     }
 
     public function orders(): BelongsToMany
