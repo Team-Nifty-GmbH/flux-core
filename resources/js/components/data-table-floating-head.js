@@ -16,14 +16,22 @@
  * Only the three numbers behind it come from JavaScript: from where, to where,
  * how far. Those change when rows arrive or the window resizes, not while
  * scrolling.
+ *
+ * Where that timeline is missing, the same three numbers drive the shift from a
+ * scroll listener instead. It is the lagging variant described above, and it
+ * stays the second choice for that reason, but a head that trails by a frame is
+ * still a head, whereas the animation alone leaves nothing at all: a browser
+ * drops a property it cannot parse without a word, so the labels would simply
+ * scroll away and no one would know why.
  */
+const hasScrollTimeline = CSS.supports(
+    'animation-timeline: scroll(root block)',
+);
+
 const STYLES = `
     [tall-datatable] thead tr:first-child {
         position: relative;
         z-index: 9;
-        animation: flux-table-head linear both;
-        animation-timeline: scroll(root block);
-        animation-range: var(--flux-head-start, 0px) var(--flux-head-end, 0px);
     }
 
     /*
@@ -39,6 +47,19 @@ const STYLES = `
 
     .dark [tall-datatable] thead tr:first-child > * {
         box-shadow: inset 0 -1px 0 var(--color-secondary-700);
+    }
+`;
+
+/*
+ * Only ever handed to a browser that has the timeline. The animation carries no
+ * duration, so anywhere else it would count as finished the moment it starts
+ * and park the head at the far end of its travel, in the middle of the table.
+ */
+const TIMELINE_STYLES = `
+    [tall-datatable] thead tr:first-child {
+        animation: flux-table-head linear both;
+        animation-timeline: scroll(root block);
+        animation-range: var(--flux-head-start, 0px) var(--flux-head-end, 0px);
     }
 
     @keyframes flux-table-head {
@@ -189,12 +210,76 @@ const measureAll = () => {
     const run = () => {
         queued = false;
 
-        document
-            .querySelectorAll('[tall-datatable]')
-            .forEach((table) => measure(table));
+        document.querySelectorAll('[tall-datatable]').forEach((table) => {
+            measure(table);
+
+            // Rows can arrive long after the page was scrolled down. With the
+            // timeline the animation places the head by itself, without it the
+            // fresh numbers have to be applied once.
+            if (!hasScrollTimeline) {
+                shift(table);
+            }
+        });
     };
 
     document.hidden ? setTimeout(run) : requestAnimationFrame(run);
+};
+
+/**
+ * The fallback. Reads the numbers measure() left behind and turns the page's
+ * scroll position into the same translation the animation would perform.
+ */
+const shift = (table) => {
+    const labels = table.querySelector('thead')?.rows[0];
+
+    if (!labels) {
+        return;
+    }
+
+    const travel = parseFloat(
+        labels.style.getPropertyValue('--flux-head-travel'),
+    );
+
+    // A table that fits on screen is measured to a travel of zero. Its head
+    // belongs where the table put it, so anything left over has to go.
+    if (!travel) {
+        labels.style.removeProperty('transform');
+
+        return;
+    }
+
+    const from =
+        parseFloat(labels.style.getPropertyValue('--flux-head-start')) || 0;
+    const to =
+        parseFloat(labels.style.getPropertyValue('--flux-head-end')) || 0;
+    const progress =
+        to > from
+            ? Math.min(1, Math.max(0, (window.scrollY - from) / (to - from)))
+            : 0;
+
+    labels.style.transform = `translateY(${progress * travel}px)`;
+};
+
+/**
+ * Scroll events arrive in bursts, and each one would read layout again. At most
+ * one pass per frame therefore, the same bundling the measurements use.
+ */
+let shifting = false;
+
+const shiftAll = () => {
+    if (shifting) {
+        return;
+    }
+
+    shifting = true;
+
+    requestAnimationFrame(() => {
+        shifting = false;
+
+        document
+            .querySelectorAll('[tall-datatable]')
+            .forEach((table) => shift(table));
+    });
 };
 
 // Rows arrive, groups unfold, filters open: all of that moves the table without
@@ -208,18 +293,23 @@ const start = () => {
     observer.observe(document.body, { childList: true, subtree: true });
 };
 
-if (CSS.supports('animation-timeline: scroll(root block)')) {
-    document.head.insertAdjacentHTML('beforeend', `<style>${STYLES}</style>`);
+document.head.insertAdjacentHTML(
+    'beforeend',
+    `<style>${STYLES}${hasScrollTimeline ? TIMELINE_STYLES : ''}</style>`,
+);
 
-    document.addEventListener('livewire:initialized', start);
-    document.addEventListener('livewire:navigated', start);
+document.addEventListener('livewire:initialized', start);
+document.addEventListener('livewire:navigated', start);
 
-    window.addEventListener(
-        'resize',
-        () => {
-            measureTopEdge();
-            measureAll();
-        },
-        { passive: true },
-    );
+window.addEventListener(
+    'resize',
+    () => {
+        measureTopEdge();
+        measureAll();
+    },
+    { passive: true },
+);
+
+if (!hasScrollTimeline) {
+    window.addEventListener('scroll', shiftAll, { passive: true });
 }
