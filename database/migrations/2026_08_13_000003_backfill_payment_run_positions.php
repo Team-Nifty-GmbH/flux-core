@@ -19,11 +19,11 @@ class BackfillPaymentRunPositions extends Migration
         DB::table('payment_run_positions')->delete();
     }
 
-    public function backfill(): void
+    public function backfill(int $chunkSize = 1000): void
     {
         DB::table('order_payment_run')
             ->whereNull('payment_run_position_id')
-            ->orderBy('pivot_id')
+            ->lazyById($chunkSize, 'pivot_id')
             ->each(function (object $pivot): void {
                 $order = resolve_static(Order::class, 'query')
                     ->with('contactBankConnection:id,iban,bic,account_holder')
