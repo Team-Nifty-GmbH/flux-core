@@ -384,3 +384,33 @@ test('a position that nets to zero is rejected without a clearing account', func
         ],
     ], ['positions.0.orders']);
 });
+
+test('a position that nets to zero is rejected when one contact has no expense ledger account', function (): void {
+    [$bankConnection, $invoice] = createOrderForPaymentRun($this);
+    [, $creditNote] = createOrderForPaymentRun($this);
+
+    $clearing = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
+    $creditor = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
+
+    app(AccountingSettings::class)->fill(['clearing_ledger_account_id' => $clearing->getKey()])->save();
+
+    Contact::query()
+        ->whereKey($invoice->contact_id)
+        ->update(['expense_ledger_account_id' => $creditor->getKey()]);
+
+    CreatePaymentRun::assertValidationErrors([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'payment_run_type_enum' => 'money_transfer',
+        'positions' => [
+            [
+                'contact_id' => $invoice->contact_id,
+                'orders' => [
+                    ['order_id' => $invoice->getKey(), 'amount' => -500],
+                    ['order_id' => $creditNote->getKey(), 'amount' => 500],
+                ],
+            ],
+        ],
+    ], ['positions.0.orders']);
+
+    expect(LedgerBooking::query()->count())->toBe(0);
+});
