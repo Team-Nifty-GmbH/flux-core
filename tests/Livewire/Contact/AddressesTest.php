@@ -157,3 +157,14 @@ test('survives the deletion of the last address', function (): void {
         ->assertOk()
         ->assertHasNoErrors();
 });
+
+// Deleting from the detail pane takes the same route to the next address, so
+// deleting the only one there is lands in the same place.
+test('survives deleting the only address from the pane', function (): void {
+    Livewire::actingAs($this->user)
+        ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm])
+        ->set('addressId', $this->addressForm->id)
+        ->call('delete')
+        ->assertOk()
+        ->assertHasNoErrors();
+});

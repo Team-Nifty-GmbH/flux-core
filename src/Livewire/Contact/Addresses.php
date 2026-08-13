@@ -144,10 +144,7 @@ class Addresses extends Component
             fn ($address) => $address['id'] !== $this->addressId
         ));
 
-        $address = resolve_static(Address::class, 'query')
-            ->whereKey($this->addresses[0]['id'])
-            ->first();
-        $this->select($address);
+        $this->selectFirstAddress();
 
         $this->edit = false;
     }
@@ -302,19 +299,7 @@ class Addresses extends Component
     public function reloadAddress(): void
     {
         if (! $this->address->id) {
-            // Whichever address is first takes over the detail pane once the
-            // shown one is deleted. Deleting the contact deletes them all
-            // though, and then there is no first one and nothing left to take
-            // over: reading it demanded a row that is gone, and the selection
-            // demanded an address where the query had already found none.
-            $replacement = resolve_static(Address::class, 'query')
-                ->whereKey(data_get($this->addresses, '0.id'))
-                ->with('contactOptions')
-                ->first();
-
-            if ($replacement) {
-                $this->select($replacement);
-            }
+            $this->selectFirstAddress();
 
             return;
         }
@@ -389,5 +374,24 @@ class Addresses extends Component
         $this->address->fill($address);
 
         $this->addressId = $this->address->id;
+    }
+
+    /**
+     * Whichever address is first takes over the detail pane once the shown one
+     * is gone. There is not always one: deleting the contact deletes all of its
+     * addresses, and the broadcast for each of them still arrives. Reading the
+     * first of none demanded a row that is gone, and where a stale entry was
+     * still listed the selection demanded an address the query had not found.
+     */
+    private function selectFirstAddress(): void
+    {
+        $address = resolve_static(Address::class, 'query')
+            ->whereKey(data_get($this->addresses, '0.id'))
+            ->with('contactOptions')
+            ->first();
+
+        if ($address) {
+            $this->select($address);
+        }
     }
 }
