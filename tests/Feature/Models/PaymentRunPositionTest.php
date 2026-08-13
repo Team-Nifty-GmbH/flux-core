@@ -76,3 +76,21 @@ test('every existing pivot row gets its own position', function (): void {
         ->and($position->amount)->toEqual('-250.00')
         ->and($position->end_to_end_id)->toBe('RE-1');
 });
+
+test('the backfill covers every page, not just the first', function (): void {
+    $order = createOrderForPaymentRunPosition($this);
+
+    foreach (range(1, 5) as $i) {
+        DB::table('order_payment_run')->insert([
+            'order_id' => $order->getKey(),
+            'payment_run_id' => PaymentRun::factory()->create()->getKey(),
+            'payment_run_position_id' => null,
+            'amount' => "-{$i}00.00",
+        ]);
+    }
+
+    (new BackfillPaymentRunPositions())->backfill(2);
+
+    expect(DB::table('order_payment_run')->whereNull('payment_run_position_id')->count())->toBe(0)
+        ->and(PaymentRunPosition::query()->count())->toBe(5);
+});
