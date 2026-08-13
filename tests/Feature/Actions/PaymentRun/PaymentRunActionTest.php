@@ -8,10 +8,13 @@ use FluxErp\Models\Address;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
+use FluxErp\Models\LedgerAccount;
+use FluxErp\Models\LedgerBooking;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Settings\AccountingSettings;
 use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
 use FluxErp\States\Order\PaymentState\InPayment;
 use FluxErp\States\Order\PaymentState\Open;
@@ -323,4 +326,61 @@ test('delete payment run transitions InPayment orders to Open', function (): voi
     $order->refresh();
 
     expect($order->payment_state)->toBeInstanceOf(Open::class);
+});
+
+test('a position that nets to zero is settled by ledger bookings', function (): void {
+    [$bankConnection, $invoice] = createOrderForPaymentRun($this);
+    [, $creditNote] = createOrderForPaymentRun($this);
+
+    $clearing = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
+    $creditor = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
+
+    app(AccountingSettings::class)->fill(['clearing_ledger_account_id' => $clearing->getKey()])->save();
+
+    Contact::query()
+        ->whereKey($invoice->contact_id)
+        ->update(['expense_ledger_account_id' => $creditor->getKey()]);
+    Contact::query()
+        ->whereKey($creditNote->contact_id)
+        ->update(['expense_ledger_account_id' => $creditor->getKey()]);
+
+    $run = CreatePaymentRun::make([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'payment_run_type_enum' => 'money_transfer',
+        'positions' => [
+            [
+                'contact_id' => $invoice->contact_id,
+                'iban' => 'DE89370400440532013000',
+                'orders' => [
+                    ['order_id' => $invoice->getKey(), 'amount' => -500],
+                    ['order_id' => $creditNote->getKey(), 'amount' => 500],
+                ],
+            ],
+        ],
+    ])->validate()->execute();
+
+    expect($run->positions()->first()->amount)->toEqual('0.00')
+        ->and(LedgerBooking::query()->count())->toBe(2)
+        ->and($invoice->fresh()->payment_state)->not->toBeInstanceOf(InOpenPaymentRun::class);
+});
+
+test('a position that nets to zero is rejected without a clearing account', function (): void {
+    [$bankConnection, $invoice] = createOrderForPaymentRun($this);
+    [, $creditNote] = createOrderForPaymentRun($this);
+
+    app(AccountingSettings::class)->fill(['clearing_ledger_account_id' => null])->save();
+
+    CreatePaymentRun::assertValidationErrors([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'payment_run_type_enum' => 'money_transfer',
+        'positions' => [
+            [
+                'contact_id' => $invoice->contact_id,
+                'orders' => [
+                    ['order_id' => $invoice->getKey(), 'amount' => -500],
+                    ['order_id' => $creditNote->getKey(), 'amount' => 500],
+                ],
+            ],
+        ],
+    ], ['positions.0.orders']);
 });

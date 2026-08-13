@@ -3,13 +3,16 @@
 namespace FluxErp\Actions\PaymentRun;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\LedgerBooking\CreateLedgerBooking;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Models\PaymentRunPosition;
 use FluxErp\Rulesets\PaymentRun\CreatePaymentRunRuleset;
+use FluxErp\Settings\AccountingSettings;
 use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 
 class CreatePaymentRun extends FluxAction
 {
@@ -21,6 +24,35 @@ class CreatePaymentRun extends FluxAction
     protected function getRulesets(): string|array
     {
         return CreatePaymentRunRuleset::class;
+    }
+
+    public function validateData(): void
+    {
+        parent::validateData();
+
+        if (app(AccountingSettings::class)->clearing_ledger_account_id) {
+            return;
+        }
+
+        $errors = [];
+
+        foreach ($this->getData('positions') ?? [] as $index => $position) {
+            $amount = array_reduce(
+                data_get($position, 'orders', []),
+                fn (string $carry, array $order) => bcadd($carry, (string) data_get($order, 'amount'), 9),
+                '0'
+            );
+
+            if (bccomp($amount, '0', 2) === 0) {
+                $errors['positions.' . $index . '.orders'] = [
+                    'Set a clearing ledger account before offsetting a credit note in full.',
+                ];
+            }
+        }
+
+        if ($errors) {
+            throw ValidationException::withMessages($errors);
+        }
     }
 
     public function performAction(): Model
@@ -57,9 +89,15 @@ class CreatePaymentRun extends FluxAction
                     'payment_run_id' => $paymentRun->getKey(),
                     'amount' => data_get($order, 'amount'),
                 ]);
-
-                $orderIds[] = data_get($order, 'order_id');
             }
+
+            if (bccomp($amount, '0', 2) === 0) {
+                $this->settleByClearingAccount($position);
+
+                continue;
+            }
+
+            $orderIds = array_merge($orderIds, array_column($orders, 'order_id'));
         }
 
         resolve_static(Order::class, 'query')
@@ -71,6 +109,34 @@ class CreatePaymentRun extends FluxAction
             });
 
         return $paymentRun->fresh();
+    }
+
+    protected function settleByClearingAccount(PaymentRunPosition $position): void
+    {
+        $clearingLedgerAccountId = app(AccountingSettings::class)->clearing_ledger_account_id;
+
+        foreach ($position->orders as $order) {
+            $ledgerAccountId = $order->contact?->expense_ledger_account_id;
+
+            if (! $ledgerAccountId) {
+                continue;
+            }
+
+            $isCredit = bccomp((string) $order->pivot->amount, '0', 2) > 0;
+
+            CreateLedgerBooking::make([
+                'credit_ledger_account_id' => $isCredit ? $ledgerAccountId : $clearingLedgerAccountId,
+                'debit_ledger_account_id' => $isCredit ? $clearingLedgerAccountId : $ledgerAccountId,
+                'tenant_id' => $order->tenant_id,
+                'source_type' => morph_alias(Order::class),
+                'source_id' => $order->getKey(),
+                'amount' => bcabs(bcround((string) $order->pivot->amount, 2)),
+                'booking_date' => now()->format('Y-m-d'),
+                'booking_text' => __('Offset within payment run :run', ['run' => $position->payment_run_id]),
+            ])
+                ->validate()
+                ->execute();
+        }
     }
 
     protected function prepareForValidation(): void
