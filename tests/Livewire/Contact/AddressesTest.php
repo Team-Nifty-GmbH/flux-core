@@ -139,3 +139,21 @@ test('can lift an address into a new contact', function (): void {
     expect($secondary->refresh()->contact_id)->not->toBe($this->contactForm->id)
         ->and($secondary->is_main_address)->toBeTrue();
 });
+
+// Whichever address is first takes over the detail pane once the shown one is
+// deleted. Deleting the contact deletes them all though, and the broadcast for
+// each one still arrives: there is no first address left to take over, and both
+// reading it and selecting it ended the request.
+test('survives the deletion of the last address', function (): void {
+    $address = Address::query()->whereKey($this->addressForm->id)->first();
+
+    $component = Livewire::actingAs($this->user)
+        ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm]);
+
+    $address->forceDelete();
+
+    $component
+        ->call('addressDeleted', ['model' => ['id' => $this->addressForm->id]])
+        ->assertOk()
+        ->assertHasNoErrors();
+});

@@ -302,12 +302,19 @@ class Addresses extends Component
     public function reloadAddress(): void
     {
         if (! $this->address->id) {
-            $this->select(
-                resolve_static(Address::class, 'query')
-                    ->whereKey($this->addresses[0]['id'])
-                    ->with('contactOptions')
-                    ->first()
-            );
+            // Whichever address is first takes over the detail pane once the
+            // shown one is deleted. Deleting the contact deletes them all
+            // though, and then there is no first one and nothing left to take
+            // over: reading it demanded a row that is gone, and the selection
+            // demanded an address where the query had already found none.
+            $replacement = resolve_static(Address::class, 'query')
+                ->whereKey(data_get($this->addresses, '0.id'))
+                ->with('contactOptions')
+                ->first();
+
+            if ($replacement) {
+                $this->select($replacement);
+            }
 
             return;
         }
