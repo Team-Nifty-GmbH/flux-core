@@ -243,6 +243,60 @@ test('delete payment run transitions orders to Open', function (): void {
     expect($order->payment_state)->toBeInstanceOf(Open::class);
 });
 
+test('create payment run with a netted position', function (): void {
+    [$bankConnection, $invoice] = createOrderForPaymentRun($this);
+    [, $creditNote] = createOrderForPaymentRun($this);
+
+    $run = CreatePaymentRun::make([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'payment_run_type_enum' => 'money_transfer',
+        'positions' => [
+            [
+                'contact_id' => $invoice->contact_id,
+                'iban' => 'DE89370400440532013000',
+                'account_holder' => 'Muster GmbH',
+                'purpose' => 'RE-1, GS-1',
+                'orders' => [
+                    ['order_id' => $invoice->getKey(), 'amount' => -1000],
+                    ['order_id' => $creditNote->getKey(), 'amount' => 200],
+                ],
+            ],
+        ],
+    ])->validate()->execute();
+
+    $position = $run->positions()->first();
+
+    expect($run->positions()->count())->toBe(1)
+        ->and($position->amount)->toEqual('-800.00')
+        ->and($position->end_to_end_id)->toBe('PR' . $run->getKey() . '-' . $position->getKey())
+        ->and($position->orders()->count())->toBe(2)
+        ->and($invoice->fresh()->payment_state)->toBeInstanceOf(InOpenPaymentRun::class)
+        ->and($creditNote->fresh()->payment_state)->toBeInstanceOf(InOpenPaymentRun::class);
+});
+
+test('create payment run still accepts the flat orders payload', function (): void {
+    [$bankConnection, $order] = createOrderForPaymentRun($this);
+    $order->update([
+        'iban' => 'DE89370400440532013000',
+        'invoice_number' => 'RE-2024-001',
+    ]);
+
+    $run = CreatePaymentRun::make([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'payment_run_type_enum' => 'money_transfer',
+        'orders' => [
+            ['order_id' => $order->getKey(), 'amount' => 100.00],
+        ],
+    ])->validate()->execute();
+
+    $position = $run->positions()->first();
+
+    expect($run->positions()->count())->toBe(1)
+        ->and($position->amount)->toEqual('100.00')
+        ->and($position->iban)->toBe($order->fresh()->iban)
+        ->and($position->purpose)->toBe($order->fresh()->invoice_number);
+});
+
 test('delete payment run transitions InPayment orders to Open', function (): void {
     [$bankConnection, $order] = createOrderForPaymentRun($this);
 
