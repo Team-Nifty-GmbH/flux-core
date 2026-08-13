@@ -30,22 +30,38 @@ class CreatePaymentRun extends FluxAction
     {
         parent::validateData();
 
-        if (app(AccountingSettings::class)->clearing_ledger_account_id) {
-            return;
-        }
+        $clearingLedgerAccountId = app(AccountingSettings::class)->clearing_ledger_account_id;
 
         $errors = [];
 
         foreach ($this->getData('positions') ?? [] as $index => $position) {
+            $orders = data_get($position, 'orders', []);
             $amount = array_reduce(
-                data_get($position, 'orders', []),
+                $orders,
                 fn (string $carry, array $order) => bcadd($carry, (string) data_get($order, 'amount'), 9),
                 '0'
             );
 
-            if (bccomp($amount, '0', 2) === 0) {
+            if (bccomp($amount, '0', 2) !== 0) {
+                continue;
+            }
+
+            if (! $clearingLedgerAccountId) {
                 $errors['positions.' . $index . '.orders'] = [
                     'Set a clearing ledger account before offsetting a credit note in full.',
+                ];
+
+                continue;
+            }
+
+            $hasMissingExpenseAccount = resolve_static(Order::class, 'query')
+                ->whereIntegerInRaw('id', array_column($orders, 'order_id'))
+                ->whereDoesntHave('contact', fn ($query) => $query->whereNotNull('expense_ledger_account_id'))
+                ->exists();
+
+            if ($hasMissingExpenseAccount) {
+                $errors['positions.' . $index . '.orders'] = [
+                    'Set an expense ledger account on every contact of a fully offset position.',
                 ];
             }
         }
@@ -117,10 +133,6 @@ class CreatePaymentRun extends FluxAction
 
         foreach ($position->orders as $order) {
             $ledgerAccountId = $order->contact?->expense_ledger_account_id;
-
-            if (! $ledgerAccountId) {
-                continue;
-            }
 
             $isCredit = bccomp((string) $order->pivot->amount, '0', 2) > 0;
 
