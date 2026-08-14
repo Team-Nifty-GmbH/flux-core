@@ -25,7 +25,6 @@ class SettingsManager
             return;
         }
 
-        // Spatie caches the discovered settings classes on its own, a scan would be discarded.
         if (! app()->runningInConsole()
             && file_exists(config('settings.discovered_settings_cache_path') . '/settings.php')
         ) {
