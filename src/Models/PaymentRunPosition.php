@@ -9,14 +9,16 @@ use FluxErp\Traits\Model\Communicatable;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\Printable;
 use FluxErp\View\Printing\PaymentRun\PaymentAdvice;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\MediaLibrary\HasMedia;
 
-class PaymentRunPosition extends FluxModel implements OffersPrinting
+class PaymentRunPosition extends FluxModel implements HasMedia, OffersPrinting
 {
-    use Communicatable, HasPackageFactory, HasUserModification, HasUuid, Printable;
+    use Communicatable, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, Printable;
 
     protected function casts(): array
     {

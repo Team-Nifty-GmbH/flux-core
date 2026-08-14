@@ -8,6 +8,8 @@ use Illuminate\Support\Collection;
 
 class PaymentRunPositionBuilder
 {
+    public const PLACEHOLDER_END_TO_END_ID = 'PR000-000';
+
     public function build(Collection $orders, Collection $creditNotes): array
     {
         return $orders
@@ -87,7 +89,7 @@ class PaymentRunPositionBuilder
             }
         }
 
-        return mb_substr($this->purposeTail(count($invoiceNumbers), $endToEndId), 0, 140);
+        return $this->purposeTail(count($invoiceNumbers), $endToEndId);
     }
 
     protected function purposeTail(int $omitted, ?string $endToEndId): string
@@ -133,7 +135,7 @@ class PaymentRunPositionBuilder
             'account_holder' => $first->account_holder
                 ?: $first->contactBankConnection?->account_holder
                     ?: $first->addressInvoice?->name,
-            'purpose' => $this->purpose(array_column($rows, 'invoice_number')),
+            'purpose' => $this->purpose(array_column($rows, 'invoice_number'), self::PLACEHOLDER_END_TO_END_ID),
             'amount' => $this->total($rows),
             'orders' => $rows,
         ];

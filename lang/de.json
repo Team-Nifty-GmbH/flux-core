@@ -2195,6 +2195,7 @@
     "Payment type with id: \\':paymentTypeId\\' doesnt match with the associated tenants": "Zahlungsart mit id: \\':paymentTypeId\\' passt nicht zu den zugewiesenen Mandanten",
     "Payment Type: :name": "Zahlart: :name",
     "Payment Types": "Zahlarten",
+    "payment-advice": "Zahlungsavis",
     "payment-reminder": "Zahlungserinnerung",
     "payment-reminders": "Zahlungserinnerungen",
     "Payments": "Zahlungen",

@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\PaymentRun;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Jobs\Accounting\SendPaymentAdviceJob;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentRun;
@@ -16,6 +17,7 @@ use FluxErp\States\PaymentRun\Pending;
 use FluxErp\States\PaymentRun\Successful;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\DB;
 
 class UpdatePaymentRun extends FluxAction
 {
@@ -84,6 +86,10 @@ class UpdatePaymentRun extends FluxAction
             return;
         }
 
+        if ($paymentRun->payment_run_type_enum !== PaymentRunTypeEnum::MoneyTransfer) {
+            return;
+        }
+
         $enteredPayment = in_array($newState, [Pending::$name, Successful::$name], true);
         $wasAlreadyInPayment = in_array($oldState, [Pending::$name, Successful::$name], true);
 
@@ -92,15 +98,18 @@ class UpdatePaymentRun extends FluxAction
         }
 
         $jobs = $paymentRun->positions()
+            ->where('amount', '!=', 0)
             ->pluck('id')
             ->map(fn (int $positionId) => app(SendPaymentAdviceJob::class, ['positionId' => $positionId]))
             ->all();
 
-        if ($jobs) {
-            Bus::monitoredBatch($jobs)
-                ->name(__('Payment Advices'))
-                ->allowFailures()
-                ->dispatch();
+        if (! $jobs) {
+            return;
         }
+
+        DB::afterCommit(fn () => Bus::monitoredBatch($jobs)
+            ->name(__('Payment Advices'))
+            ->allowFailures()
+            ->dispatch());
     }
 }

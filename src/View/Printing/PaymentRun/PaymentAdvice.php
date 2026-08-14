@@ -9,6 +9,8 @@ use Illuminate\Contracts\View\View;
 
 class PaymentAdvice extends PrintableView
 {
+    public const MEDIA_COLLECTION = 'payment-advice';
+
     public PaymentRunPosition $model;
 
     public function __construct(PaymentRunPosition $paymentRunPosition)
@@ -40,6 +42,6 @@ class PaymentAdvice extends PrintableView
 
     protected function getCollectionName(): string
     {
-        return 'payment-advices';
+        return self::MEDIA_COLLECTION;
     }
 }
