@@ -11,7 +11,13 @@
 >
     <x-slot:right-block>
         <table style="border-collapse: separate; border-spacing: 8px 0">
-            <tbody style="vertical-align: text-top; font-size: 12px; line-height: 1">
+            <tbody
+                style="
+                    vertical-align: text-top;
+                    font-size: 12px;
+                    line-height: 1;
+                "
+            >
                 <tr>
                     <td style="padding: 0; text-align: left; font-weight: 600">
                         {{ __('Iban') }}
@@ -103,7 +109,9 @@
                     <td style="padding: 4px 32px 4px 0">
                         {{ $order->invoice_number }}
                         @if ($isCredit)
-                            <span style="color: #b91c1c">({{ __('Credit note') }})</span>
+                            <span style="color: #b91c1c"
+                                >({{ __('Credit note') }})</span
+                            >
                         @endif
                     </td>
                     <td style="padding: 4px 32px 4px 0">
@@ -122,11 +130,21 @@
             <tr style="font-weight: 700">
                 <td
                     colspan="3"
-                    style="padding-top: 8px; text-align: right; border-top: 2px solid black"
+                    style="
+                        padding-top: 8px;
+                        text-align: right;
+                        border-top: 2px solid black;
+                    "
                 >
                     {{ __('Transfer Amount') }}
                 </td>
-                <td style="padding-top: 8px; text-align: right; border-top: 2px solid black">
+                <td
+                    style="
+                        padding-top: 8px;
+                        text-align: right;
+                        border-top: 2px solid black;
+                    "
+                >
                     {{ Number::currency(bcmul((string) $model->amount, (string) $sign, 2)) }}
                 </td>
             </tr>
