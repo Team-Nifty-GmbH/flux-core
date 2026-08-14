@@ -21,6 +21,41 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 
+function createPayableOrderForPreview(object $test, OrderType $orderType, string $balance, ?int $contactId = null): Order
+{
+    $contact = $contactId
+        ? resolve_static(Contact::class, 'query')->findOrFail($contactId)
+        : Contact::factory()->create();
+
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $paymentType = PaymentType::factory()->create([
+        'is_direct_debit' => false,
+        'requires_manual_transfer' => true,
+    ]);
+
+    $order = Order::factory()->create([
+        'tenant_id' => $test->dbTenant->id,
+        'contact_id' => $contact->getKey(),
+        'order_type_id' => $orderType->getKey(),
+        'payment_type_id' => $paymentType->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'price_list_id' => PriceList::factory()->create()->getKey(),
+        'currency_id' => Currency::factory()->create()->getKey(),
+    ]);
+
+    $order->update([
+        'invoice_number' => 'INV-' . $order->getKey(),
+        'balance' => $balance,
+        'total_gross_price' => $balance,
+    ]);
+
+    return $order->fresh();
+}
+
 function toastTypesOf(Testable $component): array
 {
     return collect($component->effects['dispatches'] ?? [])
@@ -90,8 +125,8 @@ beforeEach(function (): void {
 });
 
 test('orders of the same recipient end up in one group', function (): void {
-    $first = createPayableOrder($this, $this->purchaseType, '-1000.00');
-    $second = createPayableOrder($this, $this->purchaseType, '-500.00', $first->contact_id);
+    $first = createPayableOrderForPreview($this, $this->purchaseType, '-1000.00');
+    $second = createPayableOrderForPreview($this, $this->purchaseType, '-500.00', $first->contact_id);
 
     session(['payment_run_preview_orders' => [$first->getKey(), $second->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -102,8 +137,8 @@ test('orders of the same recipient end up in one group', function (): void {
 });
 
 test('an open credit note of the same contact is suggested and deducted', function (): void {
-    $invoice = createPayableOrder($this, $this->purchaseType, '-1000.00');
-    $creditNote = createPayableOrder($this, $this->refundType, '200.00', $invoice->contact_id);
+    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-1000.00');
+    $creditNote = createPayableOrderForPreview($this, $this->refundType, '200.00', $invoice->contact_id);
 
     session(['payment_run_preview_orders' => [$invoice->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -116,8 +151,8 @@ test('an open credit note of the same contact is suggested and deducted', functi
 });
 
 test('a credit note larger than the invoices is capped', function (): void {
-    $invoice = createPayableOrder($this, $this->purchaseType, '-300.00');
-    $creditNote = createPayableOrder($this, $this->refundType, '500.00', $invoice->contact_id);
+    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-300.00');
+    $creditNote = createPayableOrderForPreview($this, $this->refundType, '500.00', $invoice->contact_id);
 
     session(['payment_run_preview_orders' => [$invoice->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -130,9 +165,9 @@ test('a credit note larger than the invoices is capped', function (): void {
 });
 
 test('a second credit note beyond the payable stays visible with a zero amount', function (): void {
-    $invoice = createPayableOrder($this, $this->purchaseType, '-300.00');
-    $firstCreditNote = createPayableOrder($this, $this->refundType, '300.00', $invoice->contact_id);
-    $secondCreditNote = createPayableOrder($this, $this->refundType, '150.00', $invoice->contact_id);
+    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-300.00');
+    $firstCreditNote = createPayableOrderForPreview($this, $this->refundType, '300.00', $invoice->contact_id);
+    $secondCreditNote = createPayableOrderForPreview($this, $this->refundType, '150.00', $invoice->contact_id);
 
     session(['payment_run_preview_orders' => [$invoice->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -147,8 +182,8 @@ test('a second credit note beyond the payable stays visible with a zero amount',
 });
 
 test('a manual amount above the payable is clamped', function (): void {
-    $invoice = createPayableOrder($this, $this->purchaseType, '-300.00');
-    $creditNote = createPayableOrder($this, $this->refundType, '500.00', $invoice->contact_id);
+    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-300.00');
+    $creditNote = createPayableOrderForPreview($this, $this->refundType, '500.00', $invoice->contact_id);
 
     session(['payment_run_preview_orders' => [$invoice->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -163,7 +198,7 @@ test('a manual amount above the payable is clamped', function (): void {
 });
 
 test('an amount above the invoice own balance is clamped to that balance', function (): void {
-    $invoice = createPayableOrder($this, $this->purchaseType, '-500.00');
+    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-500.00');
 
     session(['payment_run_preview_orders' => [$invoice->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -178,9 +213,9 @@ test('an amount above the invoice own balance is clamped to that balance', funct
 });
 
 test('an amount above the credit note own balance is clamped to that balance, not the payable sum', function (): void {
-    $invoice = createPayableOrder($this, $this->purchaseType, '-1000.00');
-    $secondInvoice = createPayableOrder($this, $this->purchaseType, '-500.00', $invoice->contact_id);
-    $creditNote = createPayableOrder($this, $this->refundType, '200.00', $invoice->contact_id);
+    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-1000.00');
+    $secondInvoice = createPayableOrderForPreview($this, $this->purchaseType, '-500.00', $invoice->contact_id);
+    $creditNote = createPayableOrderForPreview($this, $this->refundType, '200.00', $invoice->contact_id);
 
     session(['payment_run_preview_orders' => [$invoice->getKey(), $secondInvoice->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -196,7 +231,7 @@ test('an amount above the credit note own balance is clamped to that balance, no
 });
 
 test('typing a positive value into a payable row keeps it negative', function (): void {
-    $invoice = createPayableOrder($this, $this->purchaseType, '-500.00');
+    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-500.00');
 
     session(['payment_run_preview_orders' => [$invoice->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -211,8 +246,8 @@ test('typing a positive value into a payable row keeps it negative', function ()
 });
 
 test('typing a negative value into a credit note row keeps it positive', function (): void {
-    $invoice = createPayableOrder($this, $this->purchaseType, '-1000.00');
-    $creditNote = createPayableOrder($this, $this->refundType, '500.00', $invoice->contact_id);
+    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-1000.00');
+    $creditNote = createPayableOrderForPreview($this, $this->refundType, '500.00', $invoice->contact_id);
 
     session(['payment_run_preview_orders' => [$invoice->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -226,8 +261,8 @@ test('typing a negative value into a credit note row keeps it positive', functio
 });
 
 test('a payable row reports a negative amount and a credit note a positive one', function (): void {
-    $invoice = createPayableOrder($this, $this->purchaseType, '-1000.00');
-    $creditNote = createPayableOrder($this, $this->refundType, '200.00', $invoice->contact_id);
+    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-1000.00');
+    $creditNote = createPayableOrderForPreview($this, $this->refundType, '200.00', $invoice->contact_id);
 
     session(['payment_run_preview_orders' => [$invoice->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -241,10 +276,10 @@ test('a payable row reports a negative amount and a credit note a positive one',
 });
 
 test('a row carries total gross price and balance with their natural sign, surviving a recap', function (): void {
-    $invoice = createPayableOrder($this, $this->purchaseType, '-300.00');
+    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-300.00');
     $invoice->update(['total_gross_price' => '-1000.00']);
 
-    $creditNote = createPayableOrder($this, $this->refundType, '150.00', $invoice->contact_id);
+    $creditNote = createPayableOrderForPreview($this, $this->refundType, '150.00', $invoice->contact_id);
     $creditNote->update(['total_gross_price' => '500.00']);
 
     session(['payment_run_preview_orders' => [$invoice->getKey()]]);
@@ -271,8 +306,8 @@ test('a row carries total gross price and balance with their natural sign, survi
 });
 
 test('the group total equals the sum of the signed row amounts', function (): void {
-    $invoice = createPayableOrder($this, $this->purchaseType, '-1000.00');
-    createPayableOrder($this, $this->refundType, '200.00', $invoice->contact_id);
+    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-1000.00');
+    createPayableOrderForPreview($this, $this->refundType, '200.00', $invoice->contact_id);
 
     session(['payment_run_preview_orders' => [$invoice->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -286,8 +321,8 @@ test('the group total equals the sum of the signed row amounts', function (): vo
 });
 
 test('the payload sent to CreatePaymentRun sums to zero or negative for a normal grouped run', function (): void {
-    $invoice = createPayableOrder($this, $this->purchaseType, '-1000.00');
-    createPayableOrder($this, $this->refundType, '200.00', $invoice->contact_id);
+    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-1000.00');
+    createPayableOrderForPreview($this, $this->refundType, '200.00', $invoice->contact_id);
 
     session(['payment_run_preview_orders' => [$invoice->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -302,8 +337,8 @@ test('the payload sent to CreatePaymentRun sums to zero or negative for a normal
 });
 
 test('editing a credit note above the payable still caps against it and sets capped_from', function (): void {
-    $invoice = createPayableOrder($this, $this->purchaseType, '-300.00');
-    $creditNote = createPayableOrder($this, $this->refundType, '500.00', $invoice->contact_id);
+    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-300.00');
+    $creditNote = createPayableOrderForPreview($this, $this->refundType, '500.00', $invoice->contact_id);
 
     session(['payment_run_preview_orders' => [$invoice->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -319,8 +354,8 @@ test('editing a credit note above the payable still caps against it and sets cap
 });
 
 test('apply balance amount on a capped credit note does not raise the group above the payable', function (): void {
-    $invoice = createPayableOrder($this, $this->purchaseType, '-300.00');
-    $creditNote = createPayableOrder($this, $this->refundType, '500.00', $invoice->contact_id);
+    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-300.00');
+    $creditNote = createPayableOrderForPreview($this, $this->refundType, '500.00', $invoice->contact_id);
 
     session(['payment_run_preview_orders' => [$invoice->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -335,8 +370,8 @@ test('apply balance amount on a capped credit note does not raise the group abov
 });
 
 test('removing the invoice row leaves a capped credit note from raising the total above zero', function (): void {
-    $invoice = createPayableOrder($this, $this->purchaseType, '-300.00');
-    createPayableOrder($this, $this->refundType, '500.00', $invoice->contact_id);
+    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-300.00');
+    createPayableOrderForPreview($this, $this->refundType, '500.00', $invoice->contact_id);
 
     session(['payment_run_preview_orders' => [$invoice->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -348,8 +383,8 @@ test('removing the invoice row leaves a capped credit note from raising the tota
 });
 
 test('removing a suggested credit note raises the transfer again', function (): void {
-    $invoice = createPayableOrder($this, $this->purchaseType, '-1000.00');
-    $creditNote = createPayableOrder($this, $this->refundType, '200.00', $invoice->contact_id);
+    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-1000.00');
+    $creditNote = createPayableOrderForPreview($this, $this->refundType, '200.00', $invoice->contact_id);
 
     session(['payment_run_preview_orders' => [$invoice->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -361,8 +396,8 @@ test('removing a suggested credit note raises the transfer again', function (): 
 });
 
 test('creating the run sends one position per group', function (): void {
-    $first = createPayableOrder($this, $this->purchaseType, '-1000.00');
-    $second = createPayableOrder($this, $this->purchaseType, '-500.00', $first->contact_id);
+    $first = createPayableOrderForPreview($this, $this->purchaseType, '-1000.00');
+    $second = createPayableOrderForPreview($this, $this->purchaseType, '-500.00', $first->contact_id);
 
     session(['payment_run_preview_orders' => [$first->getKey(), $second->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -376,8 +411,8 @@ test('creating the run sends one position per group', function (): void {
 });
 
 test('a group holding only credit notes is skipped instead of killing the whole run', function (): void {
-    $invoice = createPayableOrder($this, $this->purchaseType, '-1000.00');
-    $lonelyCreditNote = createPayableOrder($this, $this->refundType, '200.00');
+    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-1000.00');
+    $lonelyCreditNote = createPayableOrderForPreview($this, $this->refundType, '200.00');
 
     session(['payment_run_preview_orders' => [$invoice->getKey(), $lonelyCreditNote->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -396,7 +431,7 @@ test('a group holding only credit notes is skipped instead of killing the whole 
 });
 
 test('a run made of nothing but a lonely credit note is not created at all', function (): void {
-    $lonelyCreditNote = createPayableOrder($this, $this->refundType, '200.00');
+    $lonelyCreditNote = createPayableOrderForPreview($this, $this->refundType, '200.00');
 
     session(['payment_run_preview_orders' => [$lonelyCreditNote->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -411,8 +446,8 @@ test('a run made of nothing but a lonely credit note is not created at all', fun
 });
 
 test('a credit note already in another payment run is not suggested', function (): void {
-    $invoice = createPayableOrder($this, $this->purchaseType, '-1000.00');
-    $creditNote = createPayableOrder($this, $this->refundType, '200.00', $invoice->contact_id);
+    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-1000.00');
+    $creditNote = createPayableOrderForPreview($this, $this->refundType, '200.00', $invoice->contact_id);
 
     $position = PaymentRunPosition::factory()->create();
     $position->orders()->attach($creditNote->getKey(), [
