@@ -60,12 +60,7 @@ function createNettedPaymentRun(object $testContext): array
     $clearing = LedgerAccount::factory()->create(['tenant_id' => $testContext->dbTenant->getKey()]);
     $creditor = LedgerAccount::factory()->create(['tenant_id' => $testContext->dbTenant->getKey()]);
 
-    AccountingSettings::fake([
-        'auto_accept_secure_transaction_matches' => false,
-        'auto_send_payment_advice' => false,
-        'auto_send_reminders' => false,
-        'clearing_ledger_account_id' => $clearing->getKey(),
-    ]);
+    app(AccountingSettings::class)->clearing_ledger_account_id = $clearing->getKey();
 
     Contact::query()
         ->whereKey([$invoice->contact_id, $creditNote->contact_id])
@@ -432,12 +427,7 @@ test('a position that nets to zero is settled by ledger bookings', function (): 
     $clearing = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
     $creditor = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
 
-    AccountingSettings::fake([
-        'auto_accept_secure_transaction_matches' => false,
-        'auto_send_payment_advice' => false,
-        'auto_send_reminders' => false,
-        'clearing_ledger_account_id' => $clearing->getKey(),
-    ]);
+    app(AccountingSettings::class)->clearing_ledger_account_id = $clearing->getKey();
 
     Contact::query()
         ->whereKey($invoice->contact_id)
@@ -470,13 +460,6 @@ test('a position that nets to zero is rejected without a clearing account', func
     [$bankConnection, $invoice] = createOrderForPaymentRun($this);
     [, $creditNote] = createOrderForPaymentRun($this);
 
-    AccountingSettings::fake([
-        'auto_accept_secure_transaction_matches' => false,
-        'auto_send_payment_advice' => false,
-        'auto_send_reminders' => false,
-        'clearing_ledger_account_id' => null,
-    ]);
-
     CreatePaymentRun::assertValidationErrors([
         'bank_connection_id' => $bankConnection->getKey(),
         'payment_run_type_enum' => 'money_transfer',
@@ -499,12 +482,7 @@ test('a position that nets to zero is rejected when one contact has no expense l
     $clearing = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
     $creditor = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
 
-    AccountingSettings::fake([
-        'auto_accept_secure_transaction_matches' => false,
-        'auto_send_payment_advice' => false,
-        'auto_send_reminders' => false,
-        'clearing_ledger_account_id' => $clearing->getKey(),
-    ]);
+    app(AccountingSettings::class)->clearing_ledger_account_id = $clearing->getKey();
 
     Contact::query()
         ->whereKey($invoice->contact_id)
