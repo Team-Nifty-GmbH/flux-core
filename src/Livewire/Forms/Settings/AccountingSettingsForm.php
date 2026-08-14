@@ -11,6 +11,9 @@ class AccountingSettingsForm extends SettingsForm
     public bool $auto_accept_secure_transaction_matches = false;
 
     #[RenderAs('Toggle')]
+    public bool $auto_send_payment_advice = false;
+
+    #[RenderAs('Toggle')]
     public bool $auto_send_reminders = false;
 
     #[RenderAs(

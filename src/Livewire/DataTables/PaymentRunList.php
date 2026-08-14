@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Actions\Order\UpdateLockedOrder;
+use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\Forms\PaymentRunForm;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Order;
@@ -11,14 +12,19 @@ use FluxErp\Models\PaymentRunPosition;
 use FluxErp\Models\Pivots\OrderPaymentRun;
 use FluxErp\States\Order\PaymentState\Open;
 use FluxErp\Support\PaymentRunPositionBuilder;
+use FluxErp\Traits\Livewire\CreatesDocuments;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class PaymentRunList extends BaseDataTable
 {
+    use CreatesDocuments;
+
     public array $accounts = [];
 
     public array $enabledCols = [
@@ -31,6 +37,9 @@ class PaymentRunList extends BaseDataTable
     public ?string $includeBefore = 'flux::livewire.accounting.payment-run.include-before';
 
     public PaymentRunForm $paymentRunForm;
+
+    #[Locked]
+    public ?int $documentPositionId = null;
 
     protected string $model = PaymentRun::class;
 
@@ -93,6 +102,28 @@ class PaymentRunList extends BaseDataTable
         $this->loadData();
 
         return true;
+    }
+
+    #[Renderless]
+    public function openPaymentAdviceModal(int $positionId): void
+    {
+        $this->documentPositionId = $positionId;
+
+        $this->openCreateDocumentsModal();
+    }
+
+    public function createDocuments(): void
+    {
+        $position = resolve_static(PaymentRunPosition::class, 'query')
+            ->whereKey($this->documentPositionId)
+            ->with(['contact.invoiceAddress', 'contact.mainAddress'])
+            ->first();
+
+        if (! $position) {
+            return;
+        }
+
+        $this->createDocumentFromItems($position);
     }
 
     public function removeOrder(int $id): bool
@@ -178,6 +209,25 @@ class PaymentRunList extends BaseDataTable
         $this->loadPaymentRun($paymentRun);
 
         return false;
+    }
+
+    protected function getPrintLayouts(): array
+    {
+        return app(PaymentRunPosition::class)->resolvePrintViews();
+    }
+
+    protected function getSubject(OffersPrinting $item, array $documents): ?string
+    {
+        return __('Payment Advice') . ' ' . $item->end_to_end_id;
+    }
+
+    protected function getTo(OffersPrinting $item, array $documents): array
+    {
+        $address = filled($item->contact?->invoiceAddress?->email_primary)
+            ? $item->contact->invoiceAddress
+            : $item->contact?->mainAddress;
+
+        return array_filter(Arr::wrap($address?->email_primary));
     }
 
     protected function loadPaymentRun(PaymentRun $paymentRun): void
