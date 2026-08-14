@@ -376,16 +376,14 @@ class Addresses extends Component
         $this->addressId = $this->address->id;
     }
 
-    private function selectFirstAddress(): void
+    protected function selectFirstAddress(): void
     {
         $address = resolve_static(Address::class, 'query')
-            ->whereKey(data_get($this->addresses, '0.id'))
+            ->whereKey(data_get(array_first($this->addresses ?? []), 'id'))
             ->with('contactOptions')
             ->first();
 
-        // Deleting the contact takes all of its addresses with it, so there is
-        // nothing left here to show.
-        if (! $address) {
+        if (is_null($address)) {
             $this->redirectRoute('contacts.contacts', navigate: true);
 
             return;

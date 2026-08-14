@@ -140,8 +140,6 @@ test('can lift an address into a new contact', function (): void {
         ->and($secondary->is_main_address)->toBeTrue();
 });
 
-// Deleting the contact deletes all of its addresses, and the broadcast for each
-// one still arrives. Nothing is left to show, so the list is where to go.
 test('goes back to the contacts when the last address is gone', function (): void {
     $address = Address::query()->whereKey($this->addressForm->id)->first();
 
