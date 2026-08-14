@@ -58,13 +58,6 @@ function createOrderWithContact(object $testContext, string $invoiceNumber, ?str
 test('with the setting off, moving a run to pending sends nothing', function (): void {
     Queue::fake();
 
-    AccountingSettings::fake([
-        'auto_accept_secure_transaction_matches' => false,
-        'auto_send_payment_advice' => false,
-        'auto_send_reminders' => false,
-        'clearing_ledger_account_id' => null,
-    ]);
-
     [$bankConnection, $order] = createOrderWithContact($this, 'RE-1', 'supplier@example.com');
 
     $run = CreatePaymentRun::make([
@@ -88,12 +81,7 @@ test('with the setting on, it sends one advice per position and reports a positi
     config(['queue.default' => 'sync']);
     Mail::fake();
 
-    AccountingSettings::fake([
-        'auto_accept_secure_transaction_matches' => false,
-        'auto_send_payment_advice' => true,
-        'auto_send_reminders' => false,
-        'clearing_ledger_account_id' => null,
-    ]);
+    app(AccountingSettings::class)->auto_send_payment_advice = true;
 
     [$bankConnection, $orderWithEmail] = createOrderWithContact($this, 'RE-1', 'supplier@example.com');
     [, $orderWithoutEmail] = createOrderWithContact($this, 'RE-2', null);
@@ -140,12 +128,7 @@ test('with the setting on, it sends one advice per position and reports a positi
 test('a direct debit run sends nothing even with the setting on', function (): void {
     Queue::fake();
 
-    AccountingSettings::fake([
-        'auto_accept_secure_transaction_matches' => false,
-        'auto_send_payment_advice' => true,
-        'auto_send_reminders' => false,
-        'clearing_ledger_account_id' => null,
-    ]);
+    app(AccountingSettings::class)->auto_send_payment_advice = true;
 
     [$bankConnection, $order] = createOrderWithContact($this, 'RE-1', 'supplier@example.com');
 
@@ -169,21 +152,11 @@ test('a direct debit run sends nothing even with the setting on', function (): v
 test('a position netted to zero is skipped for the payment advice', function (): void {
     Queue::fake();
 
-    AccountingSettings::fake([
-        'auto_accept_secure_transaction_matches' => false,
-        'auto_send_payment_advice' => true,
-        'auto_send_reminders' => false,
-        'clearing_ledger_account_id' => null,
-    ]);
+    app(AccountingSettings::class)->auto_send_payment_advice = true;
 
     $clearing = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
     $creditor = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
-    AccountingSettings::fake([
-        'auto_accept_secure_transaction_matches' => false,
-        'auto_send_payment_advice' => false,
-        'auto_send_reminders' => false,
-        'clearing_ledger_account_id' => $clearing->getKey(),
-    ]);
+    app(AccountingSettings::class)->clearing_ledger_account_id = $clearing->getKey();
 
     [$bankConnection, $invoice] = createOrderWithContact($this, 'RE-1', 'supplier@example.com');
     [, $creditNote] = createOrderWithContact($this, 'GS-1', 'supplier@example.com');
@@ -219,12 +192,7 @@ test('a second transition into pending does not resend the payment advice', func
     config(['queue.default' => 'sync']);
     Mail::fake();
 
-    AccountingSettings::fake([
-        'auto_accept_secure_transaction_matches' => false,
-        'auto_send_payment_advice' => true,
-        'auto_send_reminders' => false,
-        'clearing_ledger_account_id' => null,
-    ]);
+    app(AccountingSettings::class)->auto_send_payment_advice = true;
 
     [$bankConnection, $order] = createOrderWithContact($this, 'RE-1', 'supplier@example.com');
 
