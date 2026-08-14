@@ -36,6 +36,7 @@ use FluxErp\Providers\MenuServiceProvider;
 use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\RepeatableServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
+use FluxErp\Providers\SettingsServiceProvider;
 use FluxErp\Providers\TestServiceProvider;
 use FluxErp\Providers\ViewServiceProvider;
 use FluxErp\Providers\WidgetServiceProvider;
@@ -147,6 +148,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->app->register(WidgetServiceProvider::class);
         $this->app->register(EditorServiceProvider::class);
         $this->app->register(MenuServiceProvider::class);
+        $this->app->register(SettingsServiceProvider::class);
 
         if ($this->app->runningUnitTests()) {
             $this->app->register(TestServiceProvider::class);
