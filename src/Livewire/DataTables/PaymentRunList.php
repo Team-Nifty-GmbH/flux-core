@@ -7,7 +7,10 @@ use FluxErp\Livewire\Forms\PaymentRunForm;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentRun;
+use FluxErp\Models\PaymentRunPosition;
+use FluxErp\Models\Pivots\OrderPaymentRun;
 use FluxErp\States\Order\PaymentState\Open;
+use FluxErp\Support\PaymentRunPositionBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -103,6 +106,24 @@ class PaymentRunList extends BaseDataTable
             ->select(['id', 'payment_state'])
             ->whereKey($id)
             ->first();
+        $positionId = resolve_static(OrderPaymentRun::class, 'query')
+            ->where('payment_run_id', $paymentRunId)
+            ->where('order_id', $id)
+            ->value('payment_run_position_id');
+
+        $position = $positionId
+            ? resolve_static(PaymentRunPosition::class, 'query')
+                ->whereKey($positionId)
+                ->first()
+            : null;
+
+        if ($position && bccomp((string) $position->amount, '0', 2) === 0) {
+            $this->toast()
+                ->error(__('This position was already offset and cannot be changed.'))
+                ->send();
+
+            return false;
+        }
 
         $paymentRun->orders()->detach($id);
 
@@ -119,11 +140,35 @@ class PaymentRunList extends BaseDataTable
             }
         }
 
+        if ($position) {
+            $remaining = resolve_static(OrderPaymentRun::class, 'query')
+                ->where('payment_run_position_id', $positionId)
+                ->get(['order_id', 'amount']);
+
+            $amount = $remaining->reduce(
+                fn (string $carry, OrderPaymentRun $row) => bcadd($carry, (string) $row->amount, 9),
+                '0'
+            );
+
+            if ($remaining->isEmpty()
+                || bccomp($amount, '0', 2) !== $paymentRun->payment_run_type_enum->expectedSign()
+            ) {
+                $paymentRun->orders()->detach($remaining->pluck('order_id')->all());
+                $position->delete();
+            } else {
+                $position->amount = $amount;
+                $position->purpose = app(PaymentRunPositionBuilder::class)->purpose(
+                    $position->orders()->pluck('orders.invoice_number')->all()
+                );
+                $position->save();
+            }
+        }
+
         $paymentRun = resolve_static(PaymentRun::class, 'query')
             ->whereKey($paymentRunId)
             ->first();
 
-        if ($paymentRun->orders()->doesntExist()) {
+        if ($paymentRun->positions()->doesntExist()) {
             $this->delete();
 
             return true;
@@ -138,7 +183,7 @@ class PaymentRunList extends BaseDataTable
     {
         $paymentRun
             ->load([
-                'orders' => fn (BelongsToMany $query) => $query
+                'positions.orders' => fn (BelongsToMany $query) => $query
                     ->select([
                         'orders.id',
                         'orders.invoice_number',
@@ -146,11 +191,10 @@ class PaymentRunList extends BaseDataTable
                         'orders.address_invoice_id',
                         'orders.iban',
                     ])
-                    ->with(['contactBankConnection:id,iban', 'addressInvoice:id,name'])
-                    ->withPivot('amount'),
+                    ->with(['contactBankConnection:id,iban', 'addressInvoice:id,name']),
             ]);
 
         $this->paymentRunForm->fill($paymentRun);
-        $this->paymentRunForm->orders = $paymentRun->orders->toArray();
+        $this->paymentRunForm->positions = $paymentRun->positions->toArray();
     }
 }

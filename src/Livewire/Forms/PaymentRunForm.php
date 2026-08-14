@@ -23,10 +23,10 @@ class PaymentRunForm extends FluxForm
     public ?bool $is_single_booking = true;
 
     #[Locked]
-    public array $orders = [];
+    public ?string $payment_run_type_enum = null;
 
     #[Locked]
-    public ?string $payment_run_type_enum = null;
+    public array $positions = [];
 
     public ?string $sepa_mandate_type_enum = 'BASIC';
 
