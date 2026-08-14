@@ -36,6 +36,7 @@ use FluxErp\Providers\MenuServiceProvider;
 use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\RepeatableServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
+use FluxErp\Providers\SettingsServiceProvider;
 use FluxErp\Providers\TestServiceProvider;
 use FluxErp\Providers\ViewServiceProvider;
 use FluxErp\Providers\WidgetServiceProvider;
@@ -57,7 +58,6 @@ use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Spatie\LaravelPasskeys\Http\Controllers\AuthenticateUsingPasskeyController as BaseAuthenticateUsingPasskeyController;
-use Spatie\LaravelSettings\SettingsContainer;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Symfony\Component\Finder\Finder;
@@ -148,6 +148,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->app->register(WidgetServiceProvider::class);
         $this->app->register(EditorServiceProvider::class);
         $this->app->register(MenuServiceProvider::class);
+        $this->app->register(SettingsServiceProvider::class);
 
         if ($this->app->runningUnitTests()) {
             $this->app->register(TestServiceProvider::class);
@@ -244,17 +245,6 @@ class FluxServiceProvider extends ServiceProvider
             'ts-ui.components.modal.1.z-index' => 'z-30',
             'ts-ui.components.slide.1.z-index' => 'z-30',
         ]);
-
-        $this->replaceConfigRecursivelyFrom(__DIR__ . '/../config/settings.php', 'settings');
-
-        $this->app->booting(function (): void {
-            $container = app(SettingsContainer::class);
-            $settings = config('settings.settings', []);
-
-            if ($container->getSettingClasses()->intersect($settings)->count() !== count($settings)) {
-                $container->clearCache()->registerBindings();
-            }
-        });
 
         $this->booted(function (): void {
             config(['permission.models.role' => resolve_static(Role::class, 'class')]);
