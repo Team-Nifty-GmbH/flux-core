@@ -242,6 +242,7 @@ class FluxServiceProvider extends ServiceProvider
             'ts-ui.components.dialog.1.blur' => 'md',
             'ts-ui.components.modal.1.z-index' => 'z-30',
             'ts-ui.components.slide.1.z-index' => 'z-30',
+            'permission.register_octane_reset_listener' => true,
         ]);
 
         $this->booted(function (): void {
