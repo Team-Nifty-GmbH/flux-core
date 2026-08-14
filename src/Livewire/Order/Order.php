@@ -1090,6 +1090,7 @@ class Order extends Component
             $this->order->invoice = [
                 'url' => $invoice->getUrl(),
                 'mime_type' => $invoice->mime_type,
+                'name' => $invoice->name,
             ];
         }
 
