@@ -321,6 +321,36 @@ test('create payment run with a netted position', function (): void {
         ->and($creditNote->fresh()->payment_state)->toBeInstanceOf(InOpenPaymentRun::class);
 });
 
+test('the stored purpose of a created payment run contains the position end_to_end_id once the documents overflow the limit', function (): void {
+    $bankConnection = BankConnection::factory()->create();
+
+    $orders = collect(range(1, 30))->map(function (int $i) {
+        [, $order] = createOrderForPaymentRun($this, OrderTypeEnum::Purchase, '-100.00');
+        $order->update(['invoice_number' => 'RE-2026-' . str_pad((string) $i, 6, '0', STR_PAD_LEFT)]);
+
+        return $order;
+    });
+
+    $run = CreatePaymentRun::make([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'payment_run_type_enum' => 'money_transfer',
+        'positions' => [
+            [
+                'contact_id' => $orders->first()->contact_id,
+                'iban' => 'DE89370400440532013000',
+                'orders' => $orders
+                    ->map(fn (Order $order) => ['order_id' => $order->getKey(), 'amount' => -100.00])
+                    ->all(),
+            ],
+        ],
+    ])->validate()->execute();
+
+    $position = $run->positions()->sole();
+
+    expect($position->purpose)->toContain($position->end_to_end_id)
+        ->and(mb_strlen($position->purpose))->toBeLessThanOrEqual(140);
+});
+
 test('a money transfer position pointing the wrong way is rejected', function (): void {
     [$bankConnection, $order] = createOrderForPaymentRun($this);
 

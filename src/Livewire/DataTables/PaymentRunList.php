@@ -158,7 +158,8 @@ class PaymentRunList extends BaseDataTable
             } else {
                 $position->amount = $amount;
                 $position->purpose = app(PaymentRunPositionBuilder::class)->purpose(
-                    $position->orders()->pluck('orders.invoice_number')->all()
+                    $position->orders()->pluck('orders.invoice_number')->all(),
+                    $position->end_to_end_id,
                 );
                 $position->save();
             }

@@ -11,6 +11,7 @@ use FluxErp\Models\PaymentRunPosition;
 use FluxErp\Rulesets\PaymentRun\CreatePaymentRunRuleset;
 use FluxErp\Settings\AccountingSettings;
 use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
+use FluxErp\Support\PaymentRunPositionBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
@@ -128,15 +129,19 @@ class CreatePaymentRun extends FluxAction
             ]);
             $position->save();
 
-            $position->end_to_end_id = 'PR' . $paymentRun->getKey() . '-' . $position->getKey();
-            $position->save();
-
             foreach ($orders as $order) {
                 $position->orders()->attach(data_get($order, 'order_id'), [
                     'payment_run_id' => $paymentRun->getKey(),
                     'amount' => data_get($order, 'amount'),
                 ]);
             }
+
+            $position->end_to_end_id = 'PR' . $paymentRun->getKey() . '-' . $position->getKey();
+            $position->purpose = app(PaymentRunPositionBuilder::class)->purpose(
+                $position->orders()->pluck('orders.invoice_number')->all(),
+                $position->end_to_end_id,
+            );
+            $position->save();
 
             if (bccomp($amount, '0', 2) === 0) {
                 $this->settleByClearingAccount($position);
