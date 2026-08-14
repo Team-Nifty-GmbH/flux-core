@@ -6,7 +6,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class BackfillPaymentRunPositions extends Migration
+return new class() extends Migration
 {
     public function up(): void
     {
@@ -50,6 +50,4 @@ class BackfillPaymentRunPositions extends Migration
                     ->update(['payment_run_position_id' => $position->getKey()]);
             });
     }
-}
-
-return new BackfillPaymentRunPositions();
+};
