@@ -3,9 +3,11 @@
 namespace FluxErp\Actions\PaymentRun;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Jobs\Accounting\SendPaymentAdviceJob;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Rulesets\PaymentRun\UpdatePaymentRunRuleset;
+use FluxErp\Settings\AccountingSettings;
 use FluxErp\States\Order\PaymentState\InPayment;
 use FluxErp\States\Order\PaymentState\Open;
 use FluxErp\States\PaymentRun\Discarded;
@@ -13,6 +15,7 @@ use FluxErp\States\PaymentRun\NotSuccessful;
 use FluxErp\States\PaymentRun\Pending;
 use FluxErp\States\PaymentRun\Successful;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Bus;
 
 class UpdatePaymentRun extends FluxAction
 {
@@ -41,6 +44,7 @@ class UpdatePaymentRun extends FluxAction
 
         if ($oldState !== $newState && $newState) {
             $this->propagateStateToOrders($payment, $newState);
+            $this->sendPaymentAdvices($payment, $oldState, $newState);
         }
 
         return $payment->withoutRelations()->fresh();
@@ -72,5 +76,31 @@ class UpdatePaymentRun extends FluxAction
         resolve_static(Order::class, 'query')
             ->whereIntegerInRaw('id', $settledOrderIds)
             ->each(fn (Order $order) => $order->calculatePaymentState()->save());
+    }
+
+    protected function sendPaymentAdvices(PaymentRun $paymentRun, ?string $oldState, string $newState): void
+    {
+        if (! app(AccountingSettings::class)->auto_send_payment_advice) {
+            return;
+        }
+
+        $enteredPayment = in_array($newState, [Pending::$name, Successful::$name], true);
+        $wasAlreadyInPayment = in_array($oldState, [Pending::$name, Successful::$name], true);
+
+        if (! $enteredPayment || $wasAlreadyInPayment) {
+            return;
+        }
+
+        $jobs = $paymentRun->positions()
+            ->pluck('id')
+            ->map(fn (int $positionId) => app(SendPaymentAdviceJob::class, ['positionId' => $positionId]))
+            ->all();
+
+        if ($jobs) {
+            Bus::monitoredBatch($jobs)
+                ->name(__('Payment Advices'))
+                ->allowFailures()
+                ->dispatch();
+        }
     }
 }
