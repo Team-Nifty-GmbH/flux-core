@@ -45,19 +45,27 @@
                             </div>
                         </div>
                         <template x-for="order in position.orders">
-                            <x-flux::list-item class="flex justify-between" :item="[]">
+                            <x-flux::list-item
+                                class="flex justify-between"
+                                :item="[]"
+                            >
                                 <x-slot:value>
                                     <div x-text="order.invoice_number"></div>
                                 </x-slot:value>
                                 <x-slot:sub-value>
                                     <div
                                         x-html="
-                                            $nuxbe.format.money(order.pivot.amount, {
-                                                colored: true,
-                                            })
+                                            $nuxbe.format.money(
+                                                order.pivot.amount,
+                                                {
+                                                    colored: true,
+                                                },
+                                            )
                                         "
                                     ></div>
-                                    <div x-text="order.address_invoice.name"></div>
+                                    <div
+                                        x-text="order.address_invoice.name"
+                                    ></div>
                                     <div
                                         x-text="
                                             order.iban ||

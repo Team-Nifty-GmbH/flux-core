@@ -27,12 +27,17 @@
             <x-slot:header>
                 <div>
                     <div class="font-medium" x-text="group.contact_name"></div>
-                    <div class="text-xs text-gray-500" x-text="group.iban"></div>
+                    <div
+                        class="text-xs text-gray-500"
+                        x-text="group.iban"
+                    ></div>
                 </div>
             </x-slot:header>
             <div class="flex flex-col gap-2">
                 <template x-for="row in group.orders" :key="row.id">
-                    <div class="flex flex-col gap-1 border-b py-2 last:border-0">
+                    <div
+                        class="flex flex-col gap-1 border-b py-2 last:border-0"
+                    >
                         <div class="flex items-center justify-between gap-4">
                             <div class="flex flex-col gap-0.5">
                                 <div class="flex items-center gap-2">
@@ -50,21 +55,39 @@
                                         :text="__('Automatically suggested')"
                                     />
                                 </div>
-                                <div class="flex items-center gap-3 text-xs text-gray-500">
+                                <div
+                                    class="flex items-center gap-3 text-xs text-gray-500"
+                                >
                                     <span>
                                         {{ __('Total Gross Price') }}:
-                                        <span x-html="$nuxbe.format.money(row.total_gross_price)"></span>
+                                        <span
+                                            x-html="
+                                                $nuxbe.format.money(
+                                                    row.total_gross_price,
+                                                )
+                                            "
+                                        ></span>
                                     </span>
                                     <span>
                                         {{ __('Balance') }}:
-                                        <span x-html="$nuxbe.format.money(row.balance)"></span>
+                                        <span
+                                            x-html="
+                                                $nuxbe.format.money(row.balance)
+                                            "
+                                        ></span>
                                     </span>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
                                 <x-number
                                     x-model="row.amount"
-                                    x-on:input.debounce.400ms="$wire.applyAmount(group.key, row.id, row.amount)"
+                                    x-on:input.debounce.400ms="
+                                        $wire.applyAmount(
+                                            group.key,
+                                            row.id,
+                                            row.amount,
+                                        )
+                                    "
                                     step="0.01"
                                     class="w-28"
                                 />
@@ -77,13 +100,17 @@
                                     xs
                                     color="primary"
                                     :text="__('Apply Discount Amount')"
-                                    x-on:click="$wire.applyDiscount(group.key, row.id)"
+                                    x-on:click="
+                                        $wire.applyDiscount(group.key, row.id)
+                                    "
                                 />
                                 <x-button
                                     xs
                                     color="secondary"
                                     :text="__('Apply Balance Amount')"
-                                    x-on:click="$wire.applyBalance(group.key, row.id)"
+                                    x-on:click="
+                                        $wire.applyBalance(group.key, row.id)
+                                    "
                                 />
                                 <x-button
                                     xs
@@ -109,7 +136,11 @@
                 <div class="flex justify-end border-t pt-2">
                     <div
                         class="w-28 text-right font-bold"
-                        x-html="$nuxbe.format.money(groupTotal(group), { colored: true })"
+                        x-html="
+                            $nuxbe.format.money(groupTotal(group), {
+                                colored: true,
+                            })
+                        "
                     ></div>
                 </div>
             </div>
@@ -123,9 +154,7 @@
     </template>
     <x-card>
         <div class="flex items-center justify-between">
-            <div
-                x-text="transfersLabel(($wire.groups || []).length)"
-            ></div>
+            <div x-text="transfersLabel(($wire.groups || []).length)"></div>
             <div
                 class="text-lg font-bold"
                 x-html="$nuxbe.format.money(grandTotal, { colored: true })"
