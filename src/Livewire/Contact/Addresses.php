@@ -144,10 +144,7 @@ class Addresses extends Component
             fn ($address) => $address['id'] !== $this->addressId
         ));
 
-        $address = resolve_static(Address::class, 'query')
-            ->whereKey($this->addresses[0]['id'])
-            ->first();
-        $this->select($address);
+        $this->selectFirstAddress();
 
         $this->edit = false;
     }
@@ -302,12 +299,7 @@ class Addresses extends Component
     public function reloadAddress(): void
     {
         if (! $this->address->id) {
-            $this->select(
-                resolve_static(Address::class, 'query')
-                    ->whereKey($this->addresses[0]['id'])
-                    ->with('contactOptions')
-                    ->first()
-            );
+            $this->selectFirstAddress();
 
             return;
         }
@@ -382,5 +374,21 @@ class Addresses extends Component
         $this->address->fill($address);
 
         $this->addressId = $this->address->id;
+    }
+
+    protected function selectFirstAddress(): void
+    {
+        $address = resolve_static(Address::class, 'query')
+            ->whereKey(data_get(array_first($this->addresses ?? []), 'id'))
+            ->with('contactOptions')
+            ->first();
+
+        if (is_null($address)) {
+            $this->redirectRoute('contacts.contacts', navigate: true);
+
+            return;
+        }
+
+        $this->select($address);
     }
 }
