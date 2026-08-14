@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Accounting;
 
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Models\OrderType;
 use FluxErp\States\Order\PaymentState\Open;
@@ -18,6 +19,7 @@ class MoneyTransfer extends DirectDebit
         'payment_discount_target_date',
         'contact.customer_number',
         'address_invoice.name',
+        'order_type.name',
         'total_gross_price',
         'balance',
         'balance_due_discount',
@@ -28,25 +30,43 @@ class MoneyTransfer extends DirectDebit
 
     protected function getBuilder(Builder $builder): Builder
     {
-        [$outgoingOrderTypes, $incomingOrderTypes] = resolve_static(OrderType::class, 'query')
+        $activeOrderTypes = resolve_static(OrderType::class, 'query')
             ->where('is_active', true)
-            ->get(['id', 'order_type_enum'])
+            ->get(['id', 'order_type_enum']);
+
+        [$outgoingOrderTypes, $incomingOrderTypes] = $activeOrderTypes
             ->partition(fn (OrderType $orderType) => $orderType->order_type_enum->multiplier() < 0)
             ->map(fn (Collection $orderTypes) => $orderTypes->pluck('id'));
 
+        $refundOrderTypes = $activeOrderTypes
+            ->filter(fn (OrderType $orderType) => $orderType->order_type_enum === OrderTypeEnum::PurchaseRefund)
+            ->pluck('id');
+
         return $builder
-            ->where('balance', '<', 0)
             ->whereNotNull('invoice_number')
             ->where(fn (Builder $query) => $query
-                ->whereIntegerInRaw('order_type_id', $outgoingOrderTypes)
-                ->whereState('payment_state', Open::class)
-                ->whereHas('paymentType', function (Builder $query): void {
-                    $query->where('is_direct_debit', false)
-                        ->where('requires_manual_transfer', true);
-                })
+                ->where(fn (Builder $query) => $query
+                    ->whereIntegerInRaw('order_type_id', $outgoingOrderTypes)
+                    ->where('balance', '<', 0)
+                    ->whereState('payment_state', Open::class)
+                    ->whereHas('paymentType', function (Builder $query): void {
+                        $query->where('is_direct_debit', false)
+                            ->where('requires_manual_transfer', true);
+                    })
+                )
                 ->orWhere(fn (Builder $query) => $query
                     ->whereIntegerInRaw('order_type_id', $incomingOrderTypes)
+                    ->where('balance', '<', 0)
                     ->whereState('payment_state', [Open::class, Overpaid::class])
+                )
+                ->orWhere(fn (Builder $query) => $query
+                    ->whereIntegerInRaw('order_type_id', $refundOrderTypes)
+                    ->where('balance', '>', 0)
+                    ->whereState('payment_state', Open::class)
+                    ->whereHas('paymentType', function (Builder $query): void {
+                        $query->where('is_direct_debit', false)
+                            ->where('requires_manual_transfer', true);
+                    })
                 )
             );
     }
