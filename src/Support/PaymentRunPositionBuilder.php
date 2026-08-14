@@ -80,9 +80,17 @@ class PaymentRunPositionBuilder
             return $full;
         }
 
+        $budgetedId = $endToEndId !== null ? self::PLACEHOLDER_END_TO_END_ID : null;
+
         for ($fit = count($invoiceNumbers) - 1; $fit >= 0; $fit--) {
-            $tail = $this->purposeTail(count($invoiceNumbers) - $fit, $endToEndId);
-            $candidate = trim(implode(', ', array_slice($invoiceNumbers, 0, $fit)) . ' ' . $tail);
+            $omitted = count($invoiceNumbers) - $fit;
+            $list = implode(', ', array_slice($invoiceNumbers, 0, $fit));
+
+            if (mb_strlen(trim($list . ' ' . $this->purposeTail($omitted, $budgetedId))) > 140) {
+                continue;
+            }
+
+            $candidate = trim($list . ' ' . $this->purposeTail($omitted, $endToEndId));
 
             if (mb_strlen($candidate) <= 140) {
                 return $candidate;

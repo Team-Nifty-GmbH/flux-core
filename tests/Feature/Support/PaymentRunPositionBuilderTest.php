@@ -1,7 +1,9 @@
 <?php
 
+use FluxErp\Actions\PaymentRun\CreatePaymentRun;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
+use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
@@ -63,7 +65,7 @@ test('a position with few documents produces the plain list with no tail', funct
     expect($purpose)->toBe('RE-1, RE-2, RE-3');
 });
 
-test('the preview purpose lists the same documents as the final one once the reference lengths match', function (): void {
+test('the preview purpose lists the same documents as the stored one even though the real reference is shorter than the budget', function (): void {
     $contact = Contact::factory()->create();
     $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
     $orderType = OrderType::factory()->create([
@@ -72,6 +74,7 @@ test('the preview purpose lists the same documents as the final one once the ref
         'is_hidden' => false,
     ]);
     $paymentType = PaymentType::factory()->hasAttached($this->dbTenant, relationship: 'tenants')->create();
+    $bankConnection = BankConnection::factory()->create();
 
     $orders = collect(range(1, 30))->map(fn (int $i) => Order::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
@@ -83,21 +86,35 @@ test('the preview purpose lists the same documents as the final one once the ref
         'currency_id' => Currency::factory()->create()->getKey(),
         'language_id' => $this->defaultLanguage->getKey(),
         'iban' => 'DE89370400440532013000',
-        'invoice_number' => 'RE-2026-' . str_pad((string) $i, 6, '0', STR_PAD_LEFT),
+        'invoice_number' => sprintf('A%02d', $i),
         'balance' => '-100.00',
         'total_gross_price' => '100.00',
     ]));
 
     $builder = new PaymentRunPositionBuilder();
     $groups = $builder->build($orders, collect());
-
     [$previewList] = explode(' +', $groups[0]['purpose'], 2);
 
-    $invoiceNumbers = $orders->pluck('invoice_number')->all();
-    $finalPurpose = $builder->purpose($invoiceNumbers, 'PR123-456');
-    [$finalList] = explode(' +', $finalPurpose, 2);
+    $run = CreatePaymentRun::make([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'payment_run_type_enum' => 'money_transfer',
+        'positions' => [
+            [
+                'contact_id' => $contact->getKey(),
+                'iban' => 'DE89370400440532013000',
+                'orders' => $orders
+                    ->map(fn (Order $order) => ['order_id' => $order->getKey(), 'amount' => -100.00])
+                    ->all(),
+            ],
+        ],
+    ])->validate()->execute();
 
-    expect(mb_strlen(PaymentRunPositionBuilder::PLACEHOLDER_END_TO_END_ID))->toBe(mb_strlen('PR123-456'))
-        ->and($previewList)->toBe($finalList)
-        ->and($finalPurpose)->toContain('PR123-456');
+    $position = $run->positions()->sole();
+
+    expect(mb_strlen($position->end_to_end_id))
+        ->toBeLessThan(mb_strlen(PaymentRunPositionBuilder::PLACEHOLDER_END_TO_END_ID));
+
+    [$finalList] = explode(' +', $position->purpose, 2);
+
+    expect($previewList)->toBe($finalList);
 });
