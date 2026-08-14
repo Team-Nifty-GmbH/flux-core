@@ -182,6 +182,31 @@ test('create documents', function (): void {
     expect($invoice?->getPath())->not->toBeNull();
 });
 
+test('the invoice preview carries what the lightbox needs', function (): void {
+    Storage::fake();
+
+    $this->order->update(['is_locked' => false, 'invoice_number' => null]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('openCreateDocumentsModal')
+        ->set([
+            'selectedPrintLayouts' => [
+                'download' => ['invoice'],
+            ],
+        ])
+        ->call('createDocuments')
+        ->assertHasNoErrors();
+
+    $invoice = $this->order->invoice();
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertSet('order.invoice', [
+            'url' => $invoice->getUrl(),
+            'mime_type' => $invoice->mime_type,
+            'name' => $invoice->name,
+        ]);
+});
+
 test('create documents with delivery lock fails', function (): void {
     $this->order->update(['is_locked' => false, 'invoice_number' => null]);
     $this->contact->update(['has_delivery_lock' => true, 'credit_line' => 1]);
