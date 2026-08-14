@@ -69,9 +69,32 @@ class PaymentRunPositionBuilder
         );
     }
 
-    public function purpose(array $invoiceNumbers): string
+    public function purpose(array $invoiceNumbers, ?string $endToEndId = null): string
     {
-        return mb_substr(implode(', ', $invoiceNumbers), 0, 140);
+        $invoiceNumbers = array_values(array_filter($invoiceNumbers));
+        $full = implode(', ', $invoiceNumbers);
+
+        if (mb_strlen($full) <= 140) {
+            return $full;
+        }
+
+        for ($fit = count($invoiceNumbers) - 1; $fit >= 0; $fit--) {
+            $tail = $this->purposeTail(count($invoiceNumbers) - $fit, $endToEndId);
+            $candidate = trim(implode(', ', array_slice($invoiceNumbers, 0, $fit)) . ' ' . $tail);
+
+            if (mb_strlen($candidate) <= 140) {
+                return $candidate;
+            }
+        }
+
+        return mb_substr($this->purposeTail(count($invoiceNumbers), $endToEndId), 0, 140);
+    }
+
+    protected function purposeTail(int $omitted, ?string $endToEndId): string
+    {
+        return $endToEndId
+            ? __('+:count more, advice :reference', ['count' => $omitted, 'reference' => $endToEndId])
+            : __('+:count more', ['count' => $omitted]);
     }
 
     protected function groupKey(Order $order): string

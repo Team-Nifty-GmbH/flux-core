@@ -3,6 +3,8 @@
     "':foreignKey' and ':morphType' must be from the same record.": "':foreignKey' und ':morphType' müssen aus dem gleichen Datensatz stammen.",
     "(Or drag a file to the page)": "(Oder ziehe eine Datei auf diese Seite)",
     "(Or drag files to the page)": "(Oder ziehe Dateien auf diese Seite)",
+    "+:count more": "+:count weitere",
+    "+:count more, advice :reference": "+:count weitere, Avis :reference",
     ":amount of :full offset, the rest stays open": ":amount von :full verrechnet, Rest bleibt offen",
     ":count :model rows": ":count :model-Zeilen",
     ":count document(s) could not be uploaded.": ":count Dokument(e) konnten nicht hochgeladen werden.",
