@@ -16,6 +16,7 @@ use FluxErp\Models\PaymentRunPosition;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Settings\AccountingSettings;
+use FluxErp\View\Printing\PaymentRun\PaymentAdvice;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
 use Spatie\Activitylog\Models\Activity;
@@ -211,4 +212,34 @@ test('a second transition into pending does not resend the payment advice', func
     UpdatePaymentRun::make(['id' => $run->getKey(), 'state' => 'pending'])->validate()->execute();
 
     Mail::assertSentTimes(GenericMail::class, 1);
+});
+
+test('a failed send leaves no marker and a retry tries again', function (): void {
+    [$bankConnection, $order] = createOrderWithContact($this, 'RE-1', 'supplier@example.com');
+
+    $run = CreatePaymentRun::make([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'payment_run_type_enum' => 'money_transfer',
+        'iban' => 'DE89370400440532013000',
+        'orders' => [
+            ['order_id' => $order->getKey(), 'amount' => -100.00],
+        ],
+    ])->validate()->execute();
+
+    $position = $run->positions()->sole();
+
+    $pendingMail = Mockery::mock();
+    $pendingMail->shouldReceive('to', 'cc', 'bcc')->andReturnSelf();
+    $pendingMail->shouldReceive('send')
+        ->twice()
+        ->andThrow(new RuntimeException('SMTP connection refused'));
+    Mail::shouldReceive('mailer')->andReturn($pendingMail);
+
+    (new SendPaymentAdviceJob($position->getKey()))->handle();
+
+    expect($position->fresh()->getMedia(PaymentAdvice::MEDIA_COLLECTION))->toBeEmpty();
+
+    (new SendPaymentAdviceJob($position->getKey()))->handle();
+
+    expect($position->fresh()->getMedia(PaymentAdvice::MEDIA_COLLECTION))->toBeEmpty();
 });

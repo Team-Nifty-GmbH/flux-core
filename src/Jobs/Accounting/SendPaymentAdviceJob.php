@@ -9,6 +9,7 @@ use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Mail\Attachment;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use RuntimeException;
@@ -46,7 +47,7 @@ class SendPaymentAdviceJob implements ShouldQueue
             return;
         }
 
-        $media = PaymentAdvice::make($position)->print()->attachToModel($position);
+        $printed = PaymentAdvice::make($position)->print();
 
         $result = SendMail::make([
             'to' => [$to],
@@ -56,7 +57,7 @@ class SendPaymentAdviceJob implements ShouldQueue
                 ['reference' => $position->end_to_end_id]
             ),
             'attachments' => [
-                ['id' => $media->getKey(), 'name' => $media->file_name],
+                Attachment::fromData(fn () => $printed->pdf->output(), $printed->getFileName()),
             ],
             'communicatables' => [
                 [
@@ -70,7 +71,11 @@ class SendPaymentAdviceJob implements ShouldQueue
 
         if (! data_get($result, 'success', false)) {
             $this->abort($position, data_get($result, 'error') ?? data_get($result, 'message'), [$to]);
+
+            return;
         }
+
+        $printed->attachToModel($position);
     }
 
     protected function abort(PaymentRunPosition $position, ?string $reason, ?array $to = null): void
