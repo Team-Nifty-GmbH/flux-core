@@ -140,11 +140,9 @@ test('can lift an address into a new contact', function (): void {
         ->and($secondary->is_main_address)->toBeTrue();
 });
 
-// Whichever address is first takes over the detail pane once the shown one is
-// deleted. Deleting the contact deletes them all though, and the broadcast for
-// each one still arrives: there is no first address left to take over, and both
-// reading it and selecting it ended the request.
-test('survives the deletion of the last address', function (): void {
+// Deleting the contact deletes all of its addresses, and the broadcast for each
+// one still arrives. Nothing is left to show, so the list is where to go.
+test('goes back to the contacts when the last address is gone', function (): void {
     $address = Address::query()->whereKey($this->addressForm->id)->first();
 
     $component = Livewire::actingAs($this->user)
@@ -155,16 +153,16 @@ test('survives the deletion of the last address', function (): void {
     $component
         ->call('addressDeleted', ['model' => ['id' => $this->addressForm->id]])
         ->assertOk()
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertRedirect(route('contacts.contacts'));
 });
 
-// Deleting from the detail pane takes the same route to the next address, so
-// deleting the only one there is lands in the same place.
-test('survives deleting the only address from the pane', function (): void {
+test('goes back to the contacts when the only address is deleted from the pane', function (): void {
     Livewire::actingAs($this->user)
         ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm])
         ->set('addressId', $this->addressForm->id)
         ->call('delete')
         ->assertOk()
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertRedirect(route('contacts.contacts'));
 });

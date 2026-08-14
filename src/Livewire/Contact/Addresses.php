@@ -376,13 +376,6 @@ class Addresses extends Component
         $this->addressId = $this->address->id;
     }
 
-    /**
-     * Whichever address is first takes over the detail pane once the shown one
-     * is gone. There is not always one: deleting the contact deletes all of its
-     * addresses, and the broadcast for each of them still arrives. Reading the
-     * first of none demanded a row that is gone, and where a stale entry was
-     * still listed the selection demanded an address the query had not found.
-     */
     private function selectFirstAddress(): void
     {
         $address = resolve_static(Address::class, 'query')
@@ -390,8 +383,14 @@ class Addresses extends Component
             ->with('contactOptions')
             ->first();
 
-        if ($address) {
-            $this->select($address);
+        // Deleting the contact takes all of its addresses with it, so there is
+        // nothing left here to show.
+        if (! $address) {
+            $this->redirectRoute('contacts.contacts', navigate: true);
+
+            return;
         }
+
+        $this->select($address);
     }
 }
