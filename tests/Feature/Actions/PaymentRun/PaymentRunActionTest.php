@@ -60,7 +60,11 @@ function createNettedPaymentRun(object $testContext): array
     $clearing = LedgerAccount::factory()->create(['tenant_id' => $testContext->dbTenant->getKey()]);
     $creditor = LedgerAccount::factory()->create(['tenant_id' => $testContext->dbTenant->getKey()]);
 
-    app(AccountingSettings::class)->fill(['clearing_ledger_account_id' => $clearing->getKey()])->save();
+    $settings = app(AccountingSettings::class);
+
+    $settings->clearing_ledger_account_id = $clearing->getKey();
+
+    app()->instance(AccountingSettings::class, $settings);
 
     Contact::query()
         ->whereKey([$invoice->contact_id, $creditNote->contact_id])
@@ -427,7 +431,11 @@ test('a position that nets to zero is settled by ledger bookings', function (): 
     $clearing = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
     $creditor = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
 
-    app(AccountingSettings::class)->fill(['clearing_ledger_account_id' => $clearing->getKey()])->save();
+    $settings = app(AccountingSettings::class);
+
+    $settings->clearing_ledger_account_id = $clearing->getKey();
+
+    app()->instance(AccountingSettings::class, $settings);
 
     Contact::query()
         ->whereKey($invoice->contact_id)
@@ -460,7 +468,11 @@ test('a position that nets to zero is rejected without a clearing account', func
     [$bankConnection, $invoice] = createOrderForPaymentRun($this);
     [, $creditNote] = createOrderForPaymentRun($this);
 
-    app(AccountingSettings::class)->fill(['clearing_ledger_account_id' => null])->save();
+    $settings = app(AccountingSettings::class);
+
+    $settings->clearing_ledger_account_id = null;
+
+    app()->instance(AccountingSettings::class, $settings);
 
     CreatePaymentRun::assertValidationErrors([
         'bank_connection_id' => $bankConnection->getKey(),
@@ -484,7 +496,11 @@ test('a position that nets to zero is rejected when one contact has no expense l
     $clearing = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
     $creditor = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
 
-    app(AccountingSettings::class)->fill(['clearing_ledger_account_id' => $clearing->getKey()])->save();
+    $settings = app(AccountingSettings::class);
+
+    $settings->clearing_ledger_account_id = $clearing->getKey();
+
+    app()->instance(AccountingSettings::class, $settings);
 
     Contact::query()
         ->whereKey($invoice->contact_id)

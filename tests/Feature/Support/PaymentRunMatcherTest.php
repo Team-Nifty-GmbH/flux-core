@@ -186,7 +186,11 @@ test('a collective booking leaves a netted position untouched', function (): voi
     $clearing = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
     $creditor = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
 
-    app(AccountingSettings::class)->fill(['clearing_ledger_account_id' => $clearing->getKey()])->save();
+    $settings = app(AccountingSettings::class);
+
+    $settings->clearing_ledger_account_id = $clearing->getKey();
+
+    app()->instance(AccountingSettings::class, $settings);
 
     $payable = createOrderForPaymentRunMatcher($this, OrderTypeEnum::Purchase, '-800.00');
     $invoice = createOrderForPaymentRunMatcher($this, OrderTypeEnum::Purchase, '-500.00');
