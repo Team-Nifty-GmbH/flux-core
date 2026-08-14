@@ -42,4 +42,9 @@ return [
     'fcm' => [
         'credentials' => env('FCM_CREDENTIALS_PATH'),
     ],
+
+    'settings' => [
+        'cache' => env('SETTINGS_CACHE_ENABLED', true),
+        'memo' => env('SETTINGS_CACHE_MEMO', true),
+    ],
 ];

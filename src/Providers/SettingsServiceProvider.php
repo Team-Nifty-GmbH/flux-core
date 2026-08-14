@@ -10,6 +10,11 @@ class SettingsServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        config([
+            'settings.cache.enabled' => config('flux.settings.cache'),
+            'settings.cache.memo' => config('flux.settings.memo'),
+        ]);
+
         $manager = $this->app->make(SettingsManager::class);
 
         $manager->autoDiscover(flux_path('src/Settings'), 'FluxErp\Settings');

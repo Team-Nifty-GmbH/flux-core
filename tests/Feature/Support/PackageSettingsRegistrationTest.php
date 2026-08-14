@@ -28,3 +28,17 @@ test('another package registers the settings of its own directory', function ():
     expect(Settings::all())->toContain(PackageSettings::class)
         ->and(app()->bound(PackageSettings::class))->toBeTrue();
 });
+
+test('the settings cache is on without anyone asking for it', function (): void {
+    expect(config('settings.cache.enabled'))->toBeTrue()
+        ->and(config('settings.cache.memo'))->toBeTrue();
+});
+
+test('the environment still decides', function (): void {
+    config(['flux.settings.cache' => false, 'flux.settings.memo' => false]);
+
+    (new FluxErp\Providers\SettingsServiceProvider(app()))->boot();
+
+    expect(config('settings.cache.enabled'))->toBeFalse()
+        ->and(config('settings.cache.memo'))->toBeFalse();
+});
