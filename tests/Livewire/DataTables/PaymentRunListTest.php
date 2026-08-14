@@ -496,7 +496,11 @@ test('an already offset position cannot be changed from the execute dialog', fun
     $clearing = LedgerAccount::factory()->create(['tenant_id' => Tenant::default()->getKey()]);
     $creditor = LedgerAccount::factory()->create(['tenant_id' => Tenant::default()->getKey()]);
 
-    app(AccountingSettings::class)->fill(['clearing_ledger_account_id' => $clearing->getKey()])->save();
+    $settings = app(AccountingSettings::class);
+
+    $settings->clearing_ledger_account_id = $clearing->getKey();
+
+    app()->instance(AccountingSettings::class, $settings);
 
     $invoice = createOrderForPaymentRunList('RE-1', OrderTypeEnum::Purchase, '-500.00');
     $creditNote = createOrderForPaymentRunList('GS-1', OrderTypeEnum::PurchaseRefund, '500.00');

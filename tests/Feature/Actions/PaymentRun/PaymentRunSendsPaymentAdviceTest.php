@@ -158,7 +158,9 @@ test('a position netted to zero is skipped for the payment advice', function ():
 
     $clearing = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
     $creditor = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
-    app(AccountingSettings::class)->fill(['clearing_ledger_account_id' => $clearing->getKey()])->save();
+    $settings = app(AccountingSettings::class);
+    $settings->clearing_ledger_account_id = $clearing->getKey();
+    app()->instance(AccountingSettings::class, $settings);
 
     [$bankConnection, $invoice] = createOrderWithContact($this, 'RE-1', 'supplier@example.com');
     [, $creditNote] = createOrderWithContact($this, 'GS-1', 'supplier@example.com');
