@@ -40,6 +40,7 @@ class UpdateTransactionRuleset extends FluxRuleset
                 app(Numeric::class),
             ],
             'purpose' => 'string|nullable',
+            'end_to_end_reference' => 'nullable|string|max:255',
             'type' => 'string|max:255|nullable',
             'counterpart_name' => 'string|max:255|nullable',
             'counterpart_account_number' => 'string|max:255|nullable',
