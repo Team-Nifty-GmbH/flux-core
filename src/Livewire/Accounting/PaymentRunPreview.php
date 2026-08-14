@@ -190,7 +190,6 @@ class PaymentRunPreview extends Component
                 'iban' => data_get($group, 'iban'),
                 'bic' => data_get($group, 'bic'),
                 'account_holder' => data_get($group, 'account_holder'),
-                'purpose' => data_get($group, 'purpose'),
                 'type' => data_get($group, 'type', '__NO_TYPE__'),
                 'orders' => collect(data_get($group, 'orders', []))
                     ->map(fn (array $row) => [

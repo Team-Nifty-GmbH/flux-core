@@ -22,7 +22,6 @@ class OrderRuleset extends FluxRuleset
             'positions.*.iban' => ['nullable', app(Iban::class)],
             'positions.*.bic' => 'nullable|string|max:255',
             'positions.*.account_holder' => 'nullable|string|max:255',
-            'positions.*.purpose' => 'nullable|string|max:140',
             'positions.*.orders' => 'required|array|min:1',
             'positions.*.orders.*.order_id' => [
                 'required',

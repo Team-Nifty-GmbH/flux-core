@@ -208,7 +208,6 @@ class CreatePaymentRun extends FluxAction
                         'bic' => $model?->bic ?: $model?->contactBankConnection?->bic,
                         'account_holder' => $model?->account_holder
                             ?: $model?->contactBankConnection?->account_holder,
-                        'purpose' => $model?->invoice_number,
                         'orders' => [$order],
                     ];
                 },

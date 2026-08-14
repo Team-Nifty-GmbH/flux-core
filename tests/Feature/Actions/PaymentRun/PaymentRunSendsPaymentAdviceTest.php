@@ -9,6 +9,7 @@ use FluxErp\Models\Address;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
+use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentRunPosition;
@@ -123,4 +124,91 @@ test('with the setting on, it sends one advice per position and reports a positi
         ->exists();
 
     expect($logged)->toBeTrue();
+});
+
+test('a direct debit run sends nothing even with the setting on', function (): void {
+    Queue::fake();
+
+    AccountingSettings::fake(['auto_send_payment_advice' => true]);
+
+    [$bankConnection, $order] = createOrderWithContact($this, 'RE-1', 'supplier@example.com');
+
+    $run = CreatePaymentRun::make([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'payment_run_type_enum' => 'direct_debit',
+        'iban' => 'DE89370400440532013000',
+        'orders' => [
+            ['order_id' => $order->getKey(), 'amount' => 100.00],
+        ],
+    ])->validate()->execute();
+
+    UpdatePaymentRun::make([
+        'id' => $run->getKey(),
+        'state' => 'pending',
+    ])->validate()->execute();
+
+    Queue::assertNotPushed(SendPaymentAdviceJob::class);
+});
+
+test('a position netted to zero is skipped for the payment advice', function (): void {
+    Queue::fake();
+
+    AccountingSettings::fake(['auto_send_payment_advice' => true]);
+
+    $clearing = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
+    $creditor = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
+    app(AccountingSettings::class)->fill(['clearing_ledger_account_id' => $clearing->getKey()])->save();
+
+    [$bankConnection, $invoice] = createOrderWithContact($this, 'RE-1', 'supplier@example.com');
+    [, $creditNote] = createOrderWithContact($this, 'GS-1', 'supplier@example.com');
+
+    Contact::query()
+        ->whereKey([$invoice->contact_id, $creditNote->contact_id])
+        ->update(['expense_ledger_account_id' => $creditor->getKey()]);
+
+    $run = CreatePaymentRun::make([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'payment_run_type_enum' => 'money_transfer',
+        'positions' => [
+            [
+                'contact_id' => $invoice->contact_id,
+                'iban' => 'DE89370400440532013000',
+                'orders' => [
+                    ['order_id' => $invoice->getKey(), 'amount' => -500],
+                    ['order_id' => $creditNote->getKey(), 'amount' => 500],
+                ],
+            ],
+        ],
+    ])->validate()->execute();
+
+    UpdatePaymentRun::make([
+        'id' => $run->getKey(),
+        'state' => 'pending',
+    ])->validate()->execute();
+
+    Queue::assertNotPushed(SendPaymentAdviceJob::class);
+});
+
+test('a second transition into pending does not resend the payment advice', function (): void {
+    config(['queue.default' => 'sync']);
+    Mail::fake();
+
+    AccountingSettings::fake(['auto_send_payment_advice' => true]);
+
+    [$bankConnection, $order] = createOrderWithContact($this, 'RE-1', 'supplier@example.com');
+
+    $run = CreatePaymentRun::make([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'payment_run_type_enum' => 'money_transfer',
+        'iban' => 'DE89370400440532013000',
+        'orders' => [
+            ['order_id' => $order->getKey(), 'amount' => -100.00],
+        ],
+    ])->validate()->execute();
+
+    UpdatePaymentRun::make(['id' => $run->getKey(), 'state' => 'pending'])->validate()->execute();
+    UpdatePaymentRun::make(['id' => $run->getKey(), 'state' => 'not_successful'])->validate()->execute();
+    UpdatePaymentRun::make(['id' => $run->getKey(), 'state' => 'pending'])->validate()->execute();
+
+    Mail::assertSentTimes(GenericMail::class, 1);
 });

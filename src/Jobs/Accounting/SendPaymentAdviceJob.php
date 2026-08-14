@@ -4,6 +4,7 @@ namespace FluxErp\Jobs\Accounting;
 
 use FluxErp\Actions\MailMessage\SendMail;
 use FluxErp\Models\PaymentRunPosition;
+use FluxErp\View\Printing\PaymentRun\PaymentAdvice;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -29,6 +30,10 @@ class SendPaymentAdviceJob implements ShouldQueue
             return;
         }
 
+        if ($position->getMedia(PaymentAdvice::MEDIA_COLLECTION)->isNotEmpty()) {
+            return;
+        }
+
         $address = filled($position->contact?->invoiceAddress?->email_primary)
             ? $position->contact->invoiceAddress
             : $position->contact?->mainAddress;
@@ -41,6 +46,8 @@ class SendPaymentAdviceJob implements ShouldQueue
             return;
         }
 
+        $media = PaymentAdvice::make($position)->print()->attachToModel($position);
+
         $result = SendMail::make([
             'to' => [$to],
             'subject' => __('Payment Advice') . ' ' . $position->end_to_end_id,
@@ -49,11 +56,7 @@ class SendPaymentAdviceJob implements ShouldQueue
                 ['reference' => $position->end_to_end_id]
             ),
             'attachments' => [
-                [
-                    'model_type' => $position->getMorphClass(),
-                    'model_id' => $position->getKey(),
-                    'view' => 'payment-advice',
-                ],
+                ['id' => $media->getKey(), 'name' => $media->file_name],
             ],
             'communicatables' => [
                 [
