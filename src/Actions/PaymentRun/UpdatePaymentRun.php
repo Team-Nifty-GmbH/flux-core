@@ -58,12 +58,19 @@ class UpdatePaymentRun extends FluxAction
             return;
         }
 
+        $settledOrderIds = $paymentRun->settledPositionOrderIds();
+
         $paymentRun->orders()
             ->select(['orders.id', 'orders.payment_state'])
+            ->whereIntegerNotInRaw('orders.id', $settledOrderIds)
             ->each(function (Order $order) use ($targetState): void {
                 if ($order->payment_state->canTransitionTo($targetState)) {
                     $order->payment_state->transitionTo($targetState);
                 }
             });
+
+        resolve_static(Order::class, 'query')
+            ->whereIntegerInRaw('id', $settledOrderIds)
+            ->each(fn (Order $order) => $order->calculatePaymentState()->save());
     }
 }

@@ -4,6 +4,7 @@ namespace FluxErp\Actions\PaymentRun;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\LedgerBooking\CreateLedgerBooking;
+use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Models\PaymentRunPosition;
@@ -31,11 +32,31 @@ class CreatePaymentRun extends FluxAction
         parent::validateData();
 
         $clearingLedgerAccountId = app(AccountingSettings::class)->clearing_ledger_account_id;
+        $paymentRunTypeEnum = $this->getData('payment_run_type_enum');
+        $paymentRunTypeEnum = $paymentRunTypeEnum instanceof PaymentRunTypeEnum
+            ? $paymentRunTypeEnum
+            : PaymentRunTypeEnum::from($paymentRunTypeEnum);
 
         $errors = [];
+        $seenOrderIds = [];
 
         foreach ($this->getData('positions') ?? [] as $index => $position) {
             $orders = data_get($position, 'orders', []);
+
+            foreach ($orders as $orderIndex => $order) {
+                $orderId = data_get($order, 'order_id');
+
+                if (in_array($orderId, $seenOrderIds, true)) {
+                    $errors['positions.' . $index . '.orders.' . $orderIndex . '.order_id'] = [
+                        'An order must not appear twice in a payment run.',
+                    ];
+
+                    continue;
+                }
+
+                $seenOrderIds[] = $orderId;
+            }
+
             $amount = array_reduce(
                 $orders,
                 fn (string $carry, array $order) => bcadd($carry, (string) data_get($order, 'amount'), 9),
@@ -43,6 +64,16 @@ class CreatePaymentRun extends FluxAction
             );
 
             if (bccomp($amount, '0', 2) !== 0) {
+                $pointsAgainstRunDirection = $paymentRunTypeEnum === PaymentRunTypeEnum::DirectDebit
+                    ? bccomp($amount, '0', 2) < 0
+                    : bccomp($amount, '0', 2) > 0;
+
+                if ($pointsAgainstRunDirection) {
+                    $errors['positions.' . $index . '.orders'] = [
+                        'A payment run position must not point against the direction of the run.',
+                    ];
+                }
+
                 continue;
             }
 

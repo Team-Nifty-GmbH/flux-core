@@ -53,6 +53,17 @@ class PaymentRun extends FluxModel
         return $this;
     }
 
+    public function settledPositionOrderIds(): array
+    {
+        return resolve_static(OrderPaymentRun::class, 'query')
+            ->whereIn(
+                'payment_run_position_id',
+                $this->positions()->where('amount', 0)->select('id')
+            )
+            ->pluck('order_id')
+            ->all();
+    }
+
     public function orders(): BelongsToMany
     {
         return $this->belongsToMany(Order::class, 'order_payment_run')

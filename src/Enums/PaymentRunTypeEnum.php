@@ -10,4 +10,12 @@ enum PaymentRunTypeEnum: string
     case DirectDebit = 'direct_debit';
 
     case MoneyTransfer = 'money_transfer';
+
+    public function expectedSign(): int
+    {
+        return match ($this) {
+            self::DirectDebit => 1,
+            self::MoneyTransfer => -1,
+        };
+    }
 }

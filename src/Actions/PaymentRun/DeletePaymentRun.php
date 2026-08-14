@@ -26,13 +26,20 @@ class DeletePaymentRun extends FluxAction
             ->whereKey($this->getData('id'))
             ->first();
 
+        $settledOrderIds = $paymentRun->settledPositionOrderIds();
+
         $paymentRun->orders()
             ->select(['orders.id', 'orders.payment_state'])
+            ->whereIntegerNotInRaw('orders.id', $settledOrderIds)
             ->each(function (Order $order): void {
                 if ($order->payment_state->canTransitionTo(Open::class)) {
                     $order->payment_state->transitionTo(Open::class);
                 }
             });
+
+        resolve_static(Order::class, 'query')
+            ->whereIntegerInRaw('id', $settledOrderIds)
+            ->each(fn (Order $order) => $order->calculatePaymentState()->save());
 
         return $paymentRun->delete();
     }

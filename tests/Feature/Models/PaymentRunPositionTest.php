@@ -29,6 +29,11 @@ function createOrderForPaymentRunPosition(object $test, array $attributes = []):
     ], $attributes));
 }
 
+beforeEach(function (): void {
+    $this->migration = require __DIR__
+        . '/../../../database/migrations/2026_08_13_000003_backfill_payment_run_positions.php';
+});
+
 test('a payment run has positions and a position has orders', function (): void {
     $paymentRun = PaymentRun::factory()->create();
     $position = PaymentRunPosition::factory()->create([
@@ -67,7 +72,7 @@ test('every existing pivot row gets its own position', function (): void {
         'amount' => '-250.00',
     ]);
 
-    (new BackfillPaymentRunPositions())->backfill();
+    $this->migration->backfill();
 
     $pivot = DB::table('order_payment_run')->where('order_id', $order->getKey())->first();
     $position = PaymentRunPosition::query()->find($pivot->payment_run_position_id);
@@ -89,7 +94,7 @@ test('the backfill covers every page, not just the first', function (): void {
         ]);
     }
 
-    (new BackfillPaymentRunPositions())->backfill(2);
+    $this->migration->backfill(2);
 
     expect(DB::table('order_payment_run')->whereNull('payment_run_position_id')->count())->toBe(0)
         ->and(PaymentRunPosition::query()->count())->toBe(5);
