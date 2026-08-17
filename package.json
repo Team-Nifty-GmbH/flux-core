@@ -22,7 +22,7 @@
         "@tiptap/extension-mention": "^3.29.2",
         "@tiptap/extension-table": "^3.29.2",
         "@tiptap/extension-text-align": "^3.29.2",
-        "@tiptap/extension-text-style": "^3.29.2",
+        "@tiptap/extension-text-style": "^3.30.1",
         "@tiptap/extension-underline": "^3.29.2",
         "@tiptap/pm": "^3.29.2",
         "@tiptap/starter-kit": "^3.29.2",
