@@ -206,7 +206,23 @@ class Calendar extends Component
                 window.dispatchEvent(new CustomEvent('sync-calendar-event', {
                     detail: JSON.parse(JSON.stringify($wire.event))
                 }));
-                $tsui.open.modal('edit-event-modal');
+                setTimeout(() => {
+                    const openEditEventModal = () => $tsui.open.modal('edit-event-modal');
+
+                    if (document.getElementById('edit-event-modal')) {
+                        openEditEventModal();
+
+                        return;
+                    }
+
+                    const editComponent = window.Livewire.all().find(
+                        (component) => component.name.endsWith('calendar.calendar-event-edit')
+                    );
+
+                    editComponent
+                        ? editComponent.$wire.$refresh().then(() => setTimeout(openEditEventModal, 80))
+                        : openEditEventModal();
+                }, 250);
             JS);
         } else {
             $this->js(<<<'JS'
