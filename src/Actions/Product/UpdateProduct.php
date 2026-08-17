@@ -37,10 +37,14 @@ class UpdateProduct extends FluxAction
         $productCrossSellings = Arr::pull($this->data, 'product_cross_sellings');
         $tenants = Arr::pull($this->data, 'tenants');
 
-        $productProperties = Arr::mapWithKeys(
-            Arr::pull($this->data, 'product_properties', []),
-            fn ($item, $key) => [$item['id'] => ['value' => $item['value']]]
-        );
+        // No default here. With one, an update that never mentions the properties would sync an
+        // empty array and silently detach every property the product has.
+        $productProperties = is_null($properties = Arr::pull($this->data, 'product_properties'))
+            ? null
+            : Arr::mapWithKeys(
+                $properties,
+                fn ($item, $key) => [$item['id'] => ['value' => $item['value']]]
+            );
         $bundleProducts = Arr::pull($this->data, 'bundle_products', false);
         $prices = Arr::pull($this->data, 'prices', false);
         $suppliers = Arr::pull($this->data, 'suppliers');
