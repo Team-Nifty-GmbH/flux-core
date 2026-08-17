@@ -130,7 +130,6 @@ class Calendar extends Component
 
         if ($trigger === 'event-change' && ! $isEditable) {
             $this->skipRender();
-            CalendarEventEdit::$skipNextRender = true;
 
             return;
         }
@@ -170,7 +169,6 @@ class Calendar extends Component
 
         if ($trigger === 'event-change') {
             $this->skipRender();
-            CalendarEventEdit::$skipNextRender = true;
 
             if ($this->event->was_repeatable) {
                 $this->js(<<<'JS'
@@ -200,7 +198,6 @@ class Calendar extends Component
             }
         } elseif ($previousEditComponent === $this->event->edit_component) {
             $this->skipRender();
-            CalendarEventEdit::$skipNextRender = true;
 
             $this->js(<<<'JS'
                 window.dispatchEvent(new CustomEvent('sync-calendar-event', {
