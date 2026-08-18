@@ -25,8 +25,6 @@ class UpdateScheduleRuleset extends FluxRuleset
             'description' => 'string|nullable',
             'cron' => 'sometimes|required|array',
             'cron.methods' => 'sometimes|required|array',
-            // Without a basic frequency the schedule is silently skipped by the scheduler,
-            // so an update that carries a cron must carry a frequency with it.
             'cron.methods.basic' => [
                 'required_with:cron',
                 Rule::in(FrequenciesEnum::getBasicFrequencies()),
