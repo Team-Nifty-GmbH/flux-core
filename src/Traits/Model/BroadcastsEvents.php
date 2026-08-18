@@ -2,10 +2,11 @@
 
 namespace FluxErp\Traits\Model;
 
+use FluxErp\Events\BroadcastableModelEventOccurred;
+use FluxErp\Providers\BroadcastServiceProvider;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\PendingBroadcast;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Database\Eloquent\BroadcastableModelEventOccurred;
 use Illuminate\Support\Str;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents as BaseBroadcastsEvents;
 
@@ -75,6 +76,11 @@ trait BroadcastsEvents
         );
     }
 
+    public function broadcastConnection(): ?string
+    {
+        return BroadcastServiceProvider::QUEUE_CONNECTION;
+    }
+
     public function broadcastWith(): array
     {
         return static::getBroadcastOnlyKey() && method_exists($this, 'getKey')
@@ -88,9 +94,14 @@ trait BroadcastsEvents
         $channels = null
     ): ?PendingBroadcast {
         if ($event === 'deleted'
+            && $instance instanceof BroadcastableModelEventOccurred
             && method_exists($this, 'isForceDeleting')
             && $this->isForceDeleting()
         ) {
+            $instance->broadcastNow();
+
+            defer(fn () => $this->baseBroadcastIfBroadcastChannelsExistForEvent($instance, $event, $channels));
+
             return null;
         }
 
