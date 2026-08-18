@@ -5,13 +5,7 @@
             wire:model="schedule.cron.methods.basic"
             required
             select="label:label|value:value"
-            x-on:select="
-                $wire.schedule.cron.parameters.basic =
-                    $event.detail.select.value === 'yearlyOn'
-                        ? [1, 1, '00:00']
-                        : [1, '00:00'];
-                $wire.previewSchedule();
-            "
+            x-on:select="$wire.previewSchedule()"
             :options="[
                 ['value' => 'monthlyOn', 'label' => __('Monthly On')],
                 ['value' => 'quarterlyOn', 'label' => __('Quarterly On')],

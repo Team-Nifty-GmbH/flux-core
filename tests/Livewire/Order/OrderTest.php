@@ -761,6 +761,35 @@ test('subscription schedule functionality', function (): void {
     ]);
 });
 
+test('reselecting the same frequency keeps month and day', function (): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Subscription,
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    $schedule = Schedule::query()->create([
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => 'invokable',
+        'cron' => [
+            'methods' => ['basic' => 'yearlyOn', 'dayConstraint' => null, 'timeConstraint' => null],
+            'parameters' => ['basic' => [1, 24, '06:00'], 'dayConstraint' => [], 'timeConstraint' => []],
+        ],
+        'parameters' => ['orderId' => $this->order->id],
+        'is_active' => true,
+    ]);
+
+    $schedule->orders()->attach($this->order->id);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertSet('schedule.cron.parameters.basic', [1, 24, '06:00'])
+        ->set('schedule.cron.methods.basic', 'yearlyOn')
+        ->assertSet('schedule.cron.parameters.basic', [1, 24, '06:00'])
+        ->set('schedule.cron.methods.basic', 'monthlyOn')
+        ->assertSet('schedule.cron.parameters.basic', [1, '00:00']);
+});
+
 test('cancel subscription immediately deactivates schedule', function (): void {
     $subscriptionOrderType = OrderType::factory()->create([
         'order_type_enum' => OrderTypeEnum::Subscription,

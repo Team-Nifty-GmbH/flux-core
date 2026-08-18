@@ -884,6 +884,25 @@ class Order extends Component
         $this->schedule->nextExecutionDates = $this->schedule->getNextExecutionDates();
     }
 
+    public function updatingScheduleCronMethodsBasic(?string $value): void
+    {
+        $defaults = [
+            FrequenciesEnum::WeeklyOn->value => [1, '00:00'],
+            FrequenciesEnum::MonthlyOn->value => [1, '00:00'],
+            FrequenciesEnum::QuarterlyOn->value => [1, '00:00'],
+            FrequenciesEnum::YearlyOn->value => [1, 1, '00:00'],
+        ];
+
+        if (
+            $value === data_get($this->schedule->cron, 'methods.basic')
+            || ! array_key_exists($value, $defaults)
+        ) {
+            return;
+        }
+
+        $this->schedule->cron['parameters']['basic'] = $defaults[$value];
+    }
+
     #[Renderless]
     public function updatedScheduleDueAt(): void
     {
