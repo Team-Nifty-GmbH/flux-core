@@ -3,6 +3,7 @@
         <x-select.styled
             :label="__('Repeat')"
             wire:model="schedule.cron.methods.basic"
+            required
             select="label:label|value:value"
             x-on:select="
                 $wire.schedule.cron.parameters.basic =
