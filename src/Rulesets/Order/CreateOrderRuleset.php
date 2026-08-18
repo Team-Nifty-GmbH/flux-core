@@ -158,7 +158,6 @@ class CreateOrderRuleset extends FluxRuleset
             'address_delivery.id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Address::class]),
             ],
 
             'delivery_state' => [

@@ -1376,3 +1376,42 @@ test('replicates with null agent_id when contact agent was deleted', function (O
     'retoure' => OrderTypeEnum::Retoure,
     'split order' => OrderTypeEnum::SplitOrder,
 ]);
+
+test('replicates an order whose address snapshot points at a deleted address', function (): void {
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
+
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $deletedAddress = Address::factory()->create(['contact_id' => $contact->getKey()]);
+    $snapshot = ['id' => $deletedAddress->getKey(), 'company' => $deletedAddress->company];
+    $deletedAddress->delete();
+
+    $orderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+    ]);
+
+    $order = Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'address_delivery_id' => $address->getKey(),
+        'address_delivery' => $snapshot,
+        'address_invoice' => $snapshot,
+        'contact_id' => $contact->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => $orderType->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
+
+    $replicated = ReplicateOrder::make($order)
+        ->validate()
+        ->execute();
+
+    expect($replicated->exists)->toBeTrue()
+        ->and($replicated->getKey())->not->toBe($order->getKey());
+});

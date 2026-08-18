@@ -136,7 +136,6 @@ class UpdateOrderRuleset extends FluxRuleset
             ],
             'address_delivery.id' => [
                 'integer',
-                app(ModelExists::class, ['model' => Address::class]),
             ],
 
             'state' => [
