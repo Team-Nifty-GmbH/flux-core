@@ -14,6 +14,7 @@ trait BroadcastsEvents
     use BaseBroadcastsEvents {
         BaseBroadcastsEvents::broadcastWith as protected baseBroadcastWith;
         BaseBroadcastsEvents::bootBroadcastsEvents as protected baseBootBroadcastsEvents;
+        BaseBroadcastsEvents::broadcastIfBroadcastChannelsExistForEvent as protected baseBroadcastIfBroadcastChannelsExistForEvent;
     }
 
     protected static bool $broadcastOnlyKey = true;
@@ -79,6 +80,21 @@ trait BroadcastsEvents
         return static::getBroadcastOnlyKey() && method_exists($this, 'getKey')
             ? ['model' => [$this->getKeyName() => $this->getKey()]]
             : $this->baseBroadcastWith();
+    }
+
+    protected function broadcastIfBroadcastChannelsExistForEvent(
+        $instance,
+        $event,
+        $channels = null
+    ): ?PendingBroadcast {
+        if ($event === 'deleted'
+            && method_exists($this, 'isForceDeleting')
+            && $this->isForceDeleting()
+        ) {
+            return null;
+        }
+
+        return $this->baseBroadcastIfBroadcastChannelsExistForEvent($instance, $event, $channels);
     }
 
     protected function broadcastToEveryone(): bool
