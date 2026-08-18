@@ -3,7 +3,6 @@
 namespace FluxErp\Traits\Model;
 
 use FluxErp\Events\BroadcastableModelEventOccurred;
-use FluxErp\Providers\BroadcastServiceProvider;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\PendingBroadcast;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -76,11 +75,6 @@ trait BroadcastsEvents
         );
     }
 
-    public function broadcastConnection(): ?string
-    {
-        return BroadcastServiceProvider::QUEUE_CONNECTION;
-    }
-
     public function broadcastWith(): array
     {
         return static::getBroadcastOnlyKey() && method_exists($this, 'getKey')
@@ -93,19 +87,13 @@ trait BroadcastsEvents
         $event,
         $channels = null
     ): ?PendingBroadcast {
-        if ($event === 'deleted'
-            && $instance instanceof BroadcastableModelEventOccurred
-            && method_exists($this, 'isForceDeleting')
-            && $this->isForceDeleting()
-        ) {
+        if ($instance instanceof BroadcastableModelEventOccurred) {
             $instance->broadcastNow();
-
-            defer(fn () => $this->baseBroadcastIfBroadcastChannelsExistForEvent($instance, $event, $channels));
-
-            return null;
         }
 
-        return $this->baseBroadcastIfBroadcastChannelsExistForEvent($instance, $event, $channels);
+        defer(fn () => $this->baseBroadcastIfBroadcastChannelsExistForEvent($instance, $event, $channels));
+
+        return null;
     }
 
     protected function broadcastToEveryone(): bool
