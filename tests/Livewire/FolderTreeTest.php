@@ -556,3 +556,48 @@ test('can delete real media folder', function (): void {
     // Verify folder is deleted
     expect(MediaFolder::whereKey($folder->getKey())->exists())->toBeFalse();
 });
+
+test('can rename media', function (): void {
+    Storage::fake('local');
+
+    $permission = Permission::findOrCreate('action.media.update', 'web');
+    $this->user->givePermissionTo($permission);
+
+    $media = $this->contact
+        ->addMedia(UploadedFile::fake()->image('test.jpg'))
+        ->toMediaCollection('attachments');
+
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+        ->call('saveMedia', [
+            'id' => $media->getKey(),
+            'name' => 'Renamed file',
+            'file_name' => $media->file_name,
+            'collection_name' => $media->collection_name,
+        ])
+        ->assertReturned(fn (mixed $returned): bool => data_get($returned, 'name') === 'Renamed file');
+
+    expect($media->refresh())
+        ->name->toBe('Renamed file')
+        ->file_name->toBe('Renamed-file.jpg');
+});
+
+test('cannot rename media of another model', function (): void {
+    Storage::fake('local');
+
+    $permission = Permission::findOrCreate('action.media.update', 'web');
+    $this->user->givePermissionTo($permission);
+
+    $foreignContact = Contact::factory()->create();
+    $media = $foreignContact
+        ->addMedia(UploadedFile::fake()->image('test.jpg'))
+        ->toMediaCollection('attachments');
+
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+        ->call('saveMedia', [
+            'id' => $media->getKey(),
+            'name' => 'Renamed file',
+        ])
+        ->assertReturned(false);
+
+    expect($media->refresh()->name)->not->toBe('Renamed file');
+});
