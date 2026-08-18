@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Support;
 use Exception;
 use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Actions\Media\DeleteMediaCollection;
+use FluxErp\Actions\Media\UpdateMedia;
 use FluxErp\Actions\MediaFolder\DeleteMediaFolder;
 use FluxErp\Actions\MediaFolder\UpdateMediaFolder;
 use FluxErp\Livewire\Forms\MediaFolderForm;
@@ -233,6 +234,35 @@ abstract class FolderTree extends Component
                 )
                 ?? false
             );
+    }
+
+    #[Renderless]
+    public function saveMedia(array $media): false|array
+    {
+        if ($this->isReadonly || ! $this->findMedia((int) data_get($media, 'id'))) {
+            return false;
+        }
+
+        try {
+            $updated = UpdateMedia::make([
+                'id' => data_get($media, 'id'),
+                'name' => data_get($media, 'name'),
+                'file_name' => data_get($media, 'name'),
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        return array_merge(
+            $media,
+            $updated->only(['name', 'file_name']),
+            ['original_url' => $updated->getFullUrl()]
+        );
     }
 
     #[Renderless]
