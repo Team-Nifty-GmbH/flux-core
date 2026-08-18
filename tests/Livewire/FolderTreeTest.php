@@ -578,7 +578,7 @@ test('can rename media', function (): void {
 
     expect($media->refresh())
         ->name->toBe('Renamed file')
-        ->file_name->toBe('Renamed-file.jpg');
+        ->file_name->toBe('test.jpg');
 });
 
 test('cannot rename media of another model', function (): void {

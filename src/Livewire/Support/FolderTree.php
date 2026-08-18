@@ -324,7 +324,6 @@ abstract class FolderTree extends Component
             $updated = UpdateMedia::make([
                 'id' => $mediaId,
                 'name' => data_get($media, 'name'),
-                'file_name' => data_get($media, 'name'),
             ])
                 ->checkPermission()
                 ->validate()
@@ -335,11 +334,7 @@ abstract class FolderTree extends Component
             return false;
         }
 
-        return array_merge(
-            $media,
-            $updated->only(['name', 'file_name']),
-            ['original_url' => $updated->getFullUrl()]
-        );
+        return array_merge($media, $updated->only(['name']));
     }
 
     protected function resolveSubjectPath(array $subject, ?string $subjectPath): ?string
