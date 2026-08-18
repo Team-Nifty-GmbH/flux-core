@@ -38,15 +38,15 @@ class Localization
                 ->first(fn (string $lang) => $availableLocales->contains($lang));
         }
 
-        app()->setLocale(
-            $locale
+        $locale = $locale
             ?? resolve_static(Language::class, 'default')?->language_code
-            ?? config('app.locale')
-        );
+            ?? config('app.locale');
 
-        Number::useLocale(app()->getLocale());
-        Carbon::setLocale(app()->getLocale());
-        BaseCarbon::setLocale(app()->getLocale());
+        app()->setLocale(strstr($locale, '_', true) ?: $locale);
+
+        Number::useLocale($locale);
+        Carbon::setLocale($locale);
+        BaseCarbon::setLocale($locale);
 
         return $next($request);
     }

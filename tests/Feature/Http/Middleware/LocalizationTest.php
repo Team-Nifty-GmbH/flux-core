@@ -126,3 +126,17 @@ test('passes request to next middleware', function (): void {
     expect($called)->toBeTrue();
     expect($response->getContent())->toBe('ok');
 });
+
+test('strips the region for translations but keeps it for formatting', function (): void {
+    $language = languageWithCode('en_US');
+
+    $this->user->update(['language_id' => $language->getKey()]);
+    $this->user->load('language');
+
+    $request = Request::create('/test', 'GET');
+
+    app(Localization::class)->handle($request, function (): void {});
+
+    expect(app()->getLocale())->toBe('en')
+        ->and(Carbon::getLocale())->toBe('en_US');
+});
