@@ -13,10 +13,10 @@
                 $wire.previewSchedule();
             "
             :options="[
-                ['value' => 'monthlyOn', 'label' => __('Monthly')],
-                ['value' => 'quarterlyOn', 'label' => __('Quarterly')],
-                ['value' => 'yearlyOn', 'label' => __('Yearly')],
-                ['value' => 'weeklyOn', 'label' => __('Weekly')],
+                ['value' => 'monthlyOn', 'label' => __('Monthly On')],
+                ['value' => 'quarterlyOn', 'label' => __('Quarterly On')],
+                ['value' => 'yearlyOn', 'label' => __('Yearly On')],
+                ['value' => 'weeklyOn', 'label' => __('Weekly On')],
             ]"
         />
         <x-date
