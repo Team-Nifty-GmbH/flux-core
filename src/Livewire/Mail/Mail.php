@@ -199,7 +199,19 @@ class Mail extends CommunicationList
     {
         return $builder
             ->where('communication_type_enum', 'mail')
-            ->whereIntegerInRaw('mail_account_id', array_column($this->mailAccounts, 'id'))
+            ->where(function (Builder $builder): void {
+                $builder
+                    ->whereIntegerInRaw('mail_account_id', array_column($this->mailAccounts, 'id'))
+                    ->orWhere(function (Builder $builder): void {
+                        $builder
+                            ->whereNull('mail_account_id')
+                            ->where(function (Builder $builder): void {
+                                $builder
+                                    ->whereNull('created_by')
+                                    ->orWhere('created_by', auth()->user()?->getMorphClass() . ':' . auth()->id());
+                            });
+                    });
+            })
             ->when($this->folderId, function (Builder $builder): void {
                 $builder->whereIntegerInRaw('mail_folder_id', $this->selectedFolderIds);
             });
