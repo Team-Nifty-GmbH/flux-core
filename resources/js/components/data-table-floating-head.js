@@ -136,6 +136,12 @@ const followsPage = (table) => {
     return true;
 };
 
+const stand = (labels) => {
+    labels.style.setProperty('--flux-head-travel', '0px');
+    labels.style.removeProperty('--flux-head-start');
+    labels.style.removeProperty('--flux-head-end');
+};
+
 const measure = (table) => {
     const head = table.querySelector('thead');
     const body = table.querySelector('tbody');
@@ -154,7 +160,7 @@ const measure = (table) => {
     }
 
     if (!followsPage(table)) {
-        labels.style.setProperty('--flux-head-travel', '0px');
+        stand(labels);
 
         return;
     }
@@ -173,7 +179,7 @@ const measure = (table) => {
         pageTravel <= 0 &&
         bodyRect.bottom - headRect.top <= window.innerHeight - edge
     ) {
-        labels.style.setProperty('--flux-head-travel', '0px');
+        stand(labels);
 
         return;
     }
@@ -290,13 +296,24 @@ const shiftAll = () => {
 
 // Rows arrive, groups unfold, filters open: all of that moves the table without
 // anyone scrolling.
-const observer = new MutationObserver(measureAll);
+const observer = new MutationObserver((records) => {
+    if (records.every((record) => record.target.closest?.('[tall-datatable] thead'))) {
+        return;
+    }
+
+    measureAll();
+});
 
 const start = () => {
     measureTopEdge();
     measureAll();
     observer.disconnect();
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, {
+        attributeFilter: ['class', 'hidden', 'style'],
+        attributes: true,
+        childList: true,
+        subtree: true,
+    });
 };
 
 document.head.insertAdjacentHTML(
