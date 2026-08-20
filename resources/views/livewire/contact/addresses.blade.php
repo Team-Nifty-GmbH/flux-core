@@ -105,6 +105,14 @@
                                                     color="amber"
                                                     :text="__('Invoice Address')"
                                                 />
+                                                <template
+                                                    x-for="badge in addressItem.badges ?? []"
+                                                    x-bind:key="badge"
+                                                >
+                                                    <x-badge color="gray" light>
+                                                        <span x-text="badge"></span>
+                                                    </x-badge>
+                                                </template>
                                             @show
                                         </div>
                                     </div>
