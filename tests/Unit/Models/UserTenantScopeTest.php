@@ -6,7 +6,7 @@ use FluxErp\Models\Scopes\UserTenantScope;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
 
-it('does not cause ambiguous column when filtering by unqualified shared column', function (): void {
+test('does not cause ambiguous column when filtering by unqualified shared column', function (): void {
     $tenant = Tenant::factory()->create();
 
     $user = User::factory()->create();
@@ -36,7 +36,7 @@ it('does not cause ambiguous column when filtering by unqualified shared column'
         ->and($result->first()->getKey())->toBe($address->getKey());
 });
 
-it('does not cause ambiguous column when plucking shared column', function (): void {
+test('does not cause ambiguous column when plucking shared column', function (): void {
     $tenant = Tenant::factory()->create();
 
     $user = User::factory()->create();
@@ -60,7 +60,7 @@ it('does not cause ambiguous column when plucking shared column', function (): v
         ->and($contactIds->first())->toBe($contact->getKey());
 });
 
-it('returns addresses for authenticated user tenant', function (): void {
+test('returns addresses for authenticated user tenant', function (): void {
     $tenant = Tenant::factory()->create();
 
     $user = User::factory()->create();
@@ -84,7 +84,7 @@ it('returns addresses for authenticated user tenant', function (): void {
         ->and($addresses->first()->getKey())->toBe($address->getKey());
 });
 
-it('includes addresses without tenant assignment', function (): void {
+test('includes addresses without tenant assignment', function (): void {
     $tenant = Tenant::factory()->create();
 
     $user = User::factory()->create();
@@ -105,7 +105,7 @@ it('includes addresses without tenant assignment', function (): void {
     expect($addresses)->toHaveCount(1);
 });
 
-it('does not apply scope when user is not authenticated', function (): void {
+test('does not apply scope when user is not authenticated', function (): void {
     $tenant = Tenant::factory()->create();
 
     $contact = Contact::factory()

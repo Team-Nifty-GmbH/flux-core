@@ -5,7 +5,10 @@ import { TextAlignConfig } from './tiptap-text-align-handler.js';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import { ResizableImage } from './tiptap-resizable-image.js';
-import { MentionConfig } from './tiptap-mention-handler.js';
+import {
+    UserMentionConfig,
+    RecordMentionConfig,
+} from './tiptap-mention-handler.js';
 import { BladeVariableConfig } from './tiptap-blade-variable.js';
 import { computePosition, flip, shift, offset } from '@floating-ui/dom';
 import { Table } from './tiptap-table.js';
@@ -15,7 +18,7 @@ export default function (
     propertyName = null,
     live = false,
     debounceDelay = 0,
-    searchModel = ['user', 'role'],
+    mentionable = ['user'],
 ) {
     return () => {
         let _editor;
@@ -148,7 +151,8 @@ export default function (
                         LiteralTab,
                         TextAlignConfig,
                         Table,
-                        MentionConfig(searchModel, element),
+                        UserMentionConfig(element),
+                        RecordMentionConfig(mentionable, element),
                         BladeVariableConfig(),
                         ...customExtensions,
                     ],

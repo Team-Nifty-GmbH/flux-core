@@ -9,6 +9,7 @@ use FluxErp\Models\Ticket;
 use FluxErp\Models\Unit;
 use FluxErp\Models\User;
 use FluxErp\Notifications\Comment\CommentCreatedNotification;
+use FluxErp\Notifications\MentionNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Sanctum\Sanctum;
@@ -114,23 +115,15 @@ test('create comment sends notification', function (): void {
     ]);
     $user->save();
 
-    $address = Address::factory()
-        ->for(Contact::factory()->create())
-        ->create([
-            'is_main_address' => true,
-        ]);
-
     $ticket = Ticket::factory()->create([
-        'authenticatable_type' => morph_alias(Address::class),
-        'authenticatable_id' => $address->id,
+        'authenticatable_type' => morph_alias(User::class),
+        'authenticatable_id' => $this->user->id,
     ]);
-    $address->subscribeNotificationChannel($ticket->broadcastChannel());
 
     $comment = [
         'model_id' => $ticket->id,
         'model_type' => morph_alias(Ticket::class),
-        'comment' => 'test comment <span class="mention" data-type="mention" data-id="user:'
-            . $user->id . '">@firstname_notification_user lastname</span>',
+        'comment' => 'test comment @user:' . $user->id,
         'is_active' => true,
         'is_internal' => true,
     ];
@@ -141,14 +134,7 @@ test('create comment sends notification', function (): void {
     $response = $this->actingAs($this->user)->post('/api/comments', $comment);
     $response->assertCreated();
 
-    $this->assertDatabaseHas('event_subscriptions', [
-        'channel' => $ticket->broadcastChannel(),
-        'subscribable_type' => morph_alias(User::class),
-        'subscribable_id' => $user->id,
-    ]);
-
-    Notification::assertSentTo($user, CommentCreatedNotification::class);
-    Notification::assertNothingSentTo($address);
+    Notification::assertSentTo($user, MentionNotification::class);
     Notification::assertNothingSentTo($this->user);
 });
 
