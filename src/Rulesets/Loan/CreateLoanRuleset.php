@@ -67,6 +67,15 @@ class CreateLoanRuleset extends FluxRuleset
                 app(EnumRule::class, ['type' => InstallmentIntervalEnum::class]),
             ],
             'grace_period_installments' => 'nullable|integer|min:0',
+            'allows_extra_repayments' => 'nullable|boolean',
+            'extra_repayment_allowance_percentage' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0, 'max' => 1]),
+            ],
+            'extra_repayment_allowance_amount' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0]),
+            ],
             'installment_amount' => [
                 'nullable',
                 'prohibited_unless:repayment_type_enum,' . RepaymentTypeEnum::Annuity->value,
