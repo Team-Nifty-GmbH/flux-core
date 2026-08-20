@@ -173,7 +173,12 @@ const stickyIsBound = (table) => {
     ) {
         const style = getComputedStyle(node);
 
-        if (style.overflowX !== 'visible' || style.overflowY !== 'visible') {
+        // `clip` is the exception: it cuts the overflow away without becoming a
+        // scroll container, so sticky binds straight past it.
+        if (
+            (style.overflowX !== 'visible' && style.overflowX !== 'clip') ||
+            (style.overflowY !== 'visible' && style.overflowY !== 'clip')
+        ) {
             return true;
         }
     }
