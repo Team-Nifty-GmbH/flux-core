@@ -54,9 +54,13 @@ pest()
             'is_default' => true,
         ]);
 
-        $this->defaultLanguage = Language::default() ?? Language::factory()->create([
-            'is_default' => true,
-        ]);
+        $this->defaultLanguage = Language::default() ?? tap(
+            Language::query()->firstOrCreate(
+                ['language_code' => 'en'],
+                Language::factory()->make(['language_code' => 'en'])->toArray()
+            ),
+            fn (Language $language) => $language->update(['is_default' => true])
+        );
 
         VatRate::default() ?? VatRate::factory()->create([
             'is_default' => true,
