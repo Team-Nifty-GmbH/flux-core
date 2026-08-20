@@ -107,8 +107,12 @@ class QueueMonitor extends FluxModel
     // Public methods
     public function broadcastWith(): array
     {
-        // This ensures the payload doesnt get too large
-        return ['model' => Arr::except($this->withoutRelations()->toArray(), ['exception'])];
+        return [
+            'model' => Arr::except(
+                $this->withoutRelations()->toArray(),
+                ['exception', 'exception_message', 'data', 'accept', 'reject']
+            ),
+        ];
     }
 
     public function canBeRetried(): bool
