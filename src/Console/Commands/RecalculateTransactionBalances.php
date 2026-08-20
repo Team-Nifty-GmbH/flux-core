@@ -16,6 +16,7 @@ class RecalculateTransactionBalances extends Command
         $drifted = [];
 
         resolve_static(Transaction::class, 'query')
+            ->where('is_ignored', false)
             ->whereNull('contact_bank_connection_id')
             ->chunkById(500, function ($transactions) use (&$drifted): void {
                 foreach ($transactions as $transaction) {
