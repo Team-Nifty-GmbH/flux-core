@@ -142,9 +142,9 @@ const stand = (labels) => {
     labels.style.removeProperty('transform');
 };
 
-const stickyIsBound = (table) => {
+const stickyIsBound = (labels) => {
     for (
-        let node = table.parentElement;
+        let node = labels.parentElement;
         node && node !== document.body;
         node = node.parentElement
     ) {
@@ -178,7 +178,7 @@ const measure = (table) => {
         return;
     }
 
-    if (!followsPage(table) || !stickyIsBound(table)) {
+    if (!followsPage(table) || !stickyIsBound(labels)) {
         stand(labels);
 
         return;

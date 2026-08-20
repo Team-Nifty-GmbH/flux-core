@@ -39,35 +39,28 @@ it('leaves the labels alone where sticky can hold them', function (): void {
     $result = $page->script(<<<'JS'
         async () => {
             const table = document.querySelector('[tall-datatable]');
+            const body = table.querySelector('tbody');
             const labels = table.querySelector('thead').rows[0];
-
-            let bound = false;
-            for (let node = table.parentElement; node && node !== document.body; node = node.parentElement) {
-                const s = getComputedStyle(node);
-                if (s.overflowX !== 'visible' || s.overflowY !== 'visible') {
-                    bound = true;
-                    break;
-                }
-            }
+            const cell = [...labels.cells].find(el => getComputedStyle(el).position === 'sticky');
 
             window.scrollTo(0, 600);
             await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
+            const rows = body.getBoundingClientRect();
+
             return {
-                stickyIsBound: bound,
-                transform: getComputedStyle(labels).transform,
-                travel: labels.style.getPropertyValue('--flux-head-travel'),
-                animationName: getComputedStyle(labels).animationName,
+                rowsStillVisible: rows.bottom > 0 && rows.top < window.innerHeight,
+                cellTop: Math.round(cell.getBoundingClientRect().top),
+                rowTransform: getComputedStyle(labels).transform,
+                rowAnimation: getComputedStyle(labels).animationName,
             };
         }
     JS);
 
     $data = is_array($result) ? ($result[0] ?? $result) : $result;
 
-    if ($data['stickyIsBound'] === false) {
-        expect($data['transform'])->toBe('none')
-            ->and($data['animationName'])->toBe('none');
-    } else {
-        expect($data['travel'])->not->toBe('0px');
-    }
+    expect($data['rowsStillVisible'])->toBeTrue()
+        ->and($data['cellTop'])->toBeGreaterThanOrEqual(0)
+        ->and($data['rowTransform'])->toBe('none')
+        ->and($data['rowAnimation'])->toBe('none');
 });
