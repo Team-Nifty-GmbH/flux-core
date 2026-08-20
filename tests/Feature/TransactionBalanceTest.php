@@ -75,6 +75,21 @@ test('an unaccepted assignment does not count towards the balance', function ():
     expect($this->transaction->refresh()->balance)->toEqual(-100);
 });
 
+test('an assignment of a deleted order does not count towards the balance', function (): void {
+    OrderTransaction::query()->create([
+        'order_id' => $this->order->getKey(),
+        'transaction_id' => $this->transaction->getKey(),
+        'amount' => -100,
+        'is_accepted' => true,
+    ]);
+
+    expect($this->transaction->refresh()->balance)->toEqual(0);
+
+    $this->order->delete();
+
+    expect($this->transaction->calculateBalance()->balance)->toEqual(-100);
+});
+
 test('taking the acceptance back gives the amount back to the balance', function (): void {
     $assignment = OrderTransaction::query()->create([
         'order_id' => $this->order->getKey(),
