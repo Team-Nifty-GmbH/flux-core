@@ -166,7 +166,13 @@ const measure = (table) => {
     // nothing that could scroll underneath its labels. Letting them travel
     // anyway would only lay the row over the few rows there are, and with a
     // single one it covers the entire table.
-    if (bodyRect.bottom - headRect.top <= window.innerHeight - edge) {
+    const pageTravel =
+        document.documentElement.scrollHeight - window.innerHeight;
+
+    if (
+        pageTravel <= 0 &&
+        bodyRect.bottom - headRect.top <= window.innerHeight - edge
+    ) {
         labels.style.setProperty('--flux-head-travel', '0px');
 
         return;
