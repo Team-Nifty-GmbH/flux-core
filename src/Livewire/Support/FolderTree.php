@@ -239,11 +239,12 @@ abstract class FolderTree extends Component
     public function saveFolder(array $attributes): false|array
     {
         $isNew = data_get($attributes, 'is_new', false);
-        $hasStringParent = is_string(data_get($attributes, 'parent_id'));
+        $parentId = data_get($attributes, 'parent_id');
+        $hasStringParent = is_string($parentId);
         $hasStringId = is_string(data_get($attributes, 'id'));
 
         // Handle virtual folder updates (renaming collections)
-        if (($hasStringParent || $hasStringId) && ! $isNew) {
+        if ($hasStringId && ! $isNew) {
             $attributes['slug'] = Str::of(data_get($attributes, 'name') ?? '')
                 ->lower()
                 ->replace('.', '')
@@ -268,7 +269,8 @@ abstract class FolderTree extends Component
             return $attributes;
         }
 
-        if ($isNew && $hasStringParent) {
+        // a collection is not a record, the folder is positioned by its path instead
+        if ($hasStringParent) {
             $attributes['parent_id'] = null;
         }
 
@@ -276,9 +278,6 @@ abstract class FolderTree extends Component
         if ($hasStringId) {
             unset($attributes['id']);
         }
-
-        $this->folder->reset();
-        $this->folder->fill($attributes);
 
         try {
             $this->folder->reset();
@@ -293,13 +292,14 @@ abstract class FolderTree extends Component
             return false;
         }
 
-        return array_merge(
-            ['children' => []],
+        $folder = array_merge(
+            ['children' => data_get($attributes, 'children') ?? []],
             array_intersect_key(
                 $this->folder->getActionResult()->toArray(),
                 array_flip([
                     'id',
                     'parent_id',
+                    'collection_name',
                     'name',
                     'slug',
                     'is_readonly',
@@ -308,6 +308,12 @@ abstract class FolderTree extends Component
                 ])
             )
         );
+
+        if ($hasStringParent) {
+            $folder['parent_id'] = $parentId;
+        }
+
+        return $folder;
     }
 
     protected function resolveSubjectPath(array $subject, ?string $subjectPath): ?string

@@ -22,6 +22,7 @@ class CreateMediaFolderRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => MediaFolder::class]),
             ],
+            'collection_name' => 'nullable|string|max:255',
             'name' => 'required|string|max:255',
             'max_files' => 'nullable|integer|min:0',
             'mime_types' => 'nullable|array',

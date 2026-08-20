@@ -14,8 +14,62 @@ use Livewire\Livewire;
 beforeEach(function (): void {
     $this->contact = Contact::factory()->create();
 
-    $permission = Permission::findOrCreate('action.media-folder.update', 'web');
-    $this->user->givePermissionTo($permission);
+    $this->user->givePermissionTo([
+        Permission::findOrCreate('action.media-folder.create', 'web'),
+        Permission::findOrCreate('action.media-folder.update', 'web'),
+    ]);
+});
+
+test('can create a folder below a collection', function (): void {
+    Storage::fake('local');
+
+    $this->contact
+        ->addMedia(UploadedFile::fake()->image('test.jpg'))
+        ->toMediaCollection('attachments');
+
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+        ->call('saveFolder', [
+            'parent_id' => Str::uuid()->toString(),
+            'collection_name' => 'attachments',
+            'name' => 'New folder',
+            'is_new' => true,
+            'children' => [],
+        ]);
+
+    $folder = MediaFolder::query()
+        ->where('name', 'New folder')
+        ->firstOrFail();
+
+    expect($folder->collection_name)->toBe('attachments')
+        ->and($folder->slug)->toBe('attachments.new_folder|' . $folder->getKey());
+
+    $collectionNode = collect($this->contact->refresh()->getMediaAsTree())
+        ->firstWhere('slug', 'attachments');
+
+    expect(data_get($collectionNode, 'children.*.id'))->toContain($folder->getKey());
+});
+
+test('can rename a folder below a collection', function (): void {
+    $folder = MediaFolder::create([
+        'name' => 'New folder',
+        'collection_name' => 'attachments',
+        'model_type' => morph_alias(Contact::class),
+        'model_id' => $this->contact->getKey(),
+    ]);
+    $this->contact->mediaFolders()->attach($folder->getKey());
+
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+        ->call('saveFolder', [
+            'id' => $folder->getKey(),
+            'parent_id' => Str::uuid()->toString(),
+            'name' => 'Renamed folder',
+            'slug' => $folder->slug,
+            'children' => [],
+        ]);
+
+    expect($folder->refresh()->name)->toBe('Renamed folder')
+        ->and($folder->collection_name)->toBe('attachments')
+        ->and($folder->slug)->toBe('attachments.renamed_folder|' . $folder->getKey());
 });
 
 test('renders successfully', function (): void {

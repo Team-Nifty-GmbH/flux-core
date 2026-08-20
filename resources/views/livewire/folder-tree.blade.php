@@ -209,6 +209,7 @@
                                             $wire
                                                 .saveFolder({
                                                     parent_id: selection.id,
+                                                    collection_name: getNodePath(selectionProxy, 'slug'),
                                                     name: '{{ __('New folder') }}',
                                                     is_new: true,
                                                     children: [],
