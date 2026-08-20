@@ -14,7 +14,6 @@ use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Arr;
 use Spatie\MediaLibrary\HasMedia;
 
 class Comment extends FluxModel implements HasMedia, IsSubscribable
@@ -87,14 +86,6 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable
     public function broadcastChannel(): string
     {
         return $this->model_type . '.' . $this->model_id;
-    }
-
-    public function broadcastWith(): array
-    {
-        $data = Arr::except($this->toArray(), ['comment']);
-        $data['user'] = $this->user;
-
-        return ['model' => $data];
     }
 
     // Attributes
