@@ -12,7 +12,11 @@ use FluxErp\Models\PriceList;
 beforeEach(function (): void {
     $contact = Contact::factory()->create();
     $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
-    $orderType = OrderType::factory()->create(['order_type_enum' => OrderTypeEnum::Order, 'is_active' => true, 'is_hidden' => false]);
+    $orderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
     $paymentType = PaymentType::factory()->hasAttached($this->dbTenant, relationship: 'tenants')->create();
     $priceList = PriceList::factory()->create();
     $currency = Currency::factory()->create();
@@ -29,7 +33,7 @@ beforeEach(function (): void {
     ]);
 });
 
-it('leaves the labels alone where sticky can hold them', function (): void {
+test('leaves the labels alone where sticky can hold them', function (): void {
     $page = waitForDataTable(
         visit(route('orders.orders'))
             ->assertRoute('orders.orders')
@@ -65,7 +69,7 @@ it('leaves the labels alone where sticky can hold them', function (): void {
         ->and($data['rowAnimation'])->toBe('none');
 });
 
-it('keeps carrying the labels of a table too wide to fit', function (): void {
+test('keeps carrying the labels of a table too wide to fit', function (): void {
     $page = waitForDataTable(
         visit(route('orders.orders'))
             ->assertRoute('orders.orders')
