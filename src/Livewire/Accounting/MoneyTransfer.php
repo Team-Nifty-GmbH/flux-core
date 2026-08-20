@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Accounting;
 
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Models\OrderType;
 use FluxErp\States\Order\PaymentState\Open;
@@ -16,6 +17,7 @@ class MoneyTransfer extends DirectDebit
         'payment_discount_target_date',
         'contact.customer_number',
         'address_invoice.name',
+        'order_type.name',
         'total_gross_price',
         'balance',
         'balance_due_discount',
@@ -26,10 +28,16 @@ class MoneyTransfer extends DirectDebit
 
     protected function getBuilder(Builder $builder): Builder
     {
-        $orderTypes = resolve_static(OrderType::class, 'query')
+        $activeOrderTypes = resolve_static(OrderType::class, 'query')
             ->where('is_active', true)
-            ->get(['id', 'order_type_enum'])
+            ->get(['id', 'order_type_enum']);
+
+        $payableTypeIds = $activeOrderTypes
             ->filter(fn (OrderType $orderType) => $orderType->order_type_enum->multiplier() < 0)
+            ->pluck('id');
+
+        $refundTypeIds = $activeOrderTypes
+            ->filter(fn (OrderType $orderType) => $orderType->order_type_enum === OrderTypeEnum::PurchaseRefund)
             ->pluck('id');
 
         return $builder
@@ -38,8 +46,16 @@ class MoneyTransfer extends DirectDebit
                     ->where('requires_manual_transfer', true);
             })
             ->whereState('payment_state', Open::class)
-            ->where('balance', '<', 0)
             ->whereNotNull('invoice_number')
-            ->whereIntegerInRaw('order_type_id', $orderTypes);
+            ->where(function (Builder $query) use ($payableTypeIds, $refundTypeIds): void {
+                $query->where(function (Builder $query) use ($payableTypeIds): void {
+                    $query->whereIntegerInRaw('order_type_id', $payableTypeIds)
+                        ->where('balance', '<', 0);
+                })
+                    ->orWhere(function (Builder $query) use ($refundTypeIds): void {
+                        $query->whereIntegerInRaw('order_type_id', $refundTypeIds)
+                            ->where('balance', '>', 0);
+                    });
+            });
     }
 }
