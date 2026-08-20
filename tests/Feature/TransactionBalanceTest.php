@@ -3,6 +3,7 @@
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
+use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
@@ -43,6 +44,50 @@ beforeEach(function (): void {
         'balance' => -100,
         'contact_bank_connection_id' => null,
     ]);
+});
+
+test('a transaction of a contact bank connection keeps a balance of zero', function (): void {
+    $contactBankConnection = ContactBankConnection::factory()->create([
+        'contact_id' => $this->order->contact_id,
+    ]);
+
+    $transaction = Transaction::factory()->create([
+        'amount' => -100,
+        'balance' => 0,
+        'contact_bank_connection_id' => $contactBankConnection->getKey(),
+    ]);
+
+    $assignment = OrderTransaction::query()->create([
+        'order_id' => $this->order->getKey(),
+        'transaction_id' => $transaction->getKey(),
+        'amount' => -100,
+        'is_accepted' => true,
+    ]);
+
+    expect($transaction->refresh()->balance)->toEqual(0);
+
+    $assignment->delete();
+
+    expect($transaction->refresh()->balance)->toEqual(0);
+});
+
+test('ignoring a transaction does not change how its balance is calculated', function (): void {
+    $this->transaction->update(['is_ignored' => true]);
+
+    $assignment = OrderTransaction::query()->create([
+        'order_id' => $this->order->getKey(),
+        'transaction_id' => $this->transaction->getKey(),
+        'amount' => -100,
+        'is_accepted' => false,
+    ]);
+
+    expect($this->transaction->refresh()->balance)->toEqual(-100)
+        ->and($this->transaction->is_ignored)->toBeTrue();
+
+    $assignment->delete();
+
+    expect($this->transaction->refresh()->balance)->toEqual(-100)
+        ->and($this->transaction->is_ignored)->toBeTrue();
 });
 
 test('deleting an accepted assignment gives the amount back to the balance', function (): void {
