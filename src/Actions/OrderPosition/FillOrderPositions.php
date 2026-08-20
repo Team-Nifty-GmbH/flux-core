@@ -18,6 +18,8 @@ use Illuminate\Validation\ValidationException;
 
 class FillOrderPositions extends FluxAction
 {
+    protected ?int $orderTenantId = null;
+
     public static function models(): array
     {
         return [OrderPosition::class, Order::class];
@@ -67,12 +69,29 @@ class FillOrderPositions extends FluxAction
         return $orderPositions;
     }
 
+    /**
+     * The order's tenant, read once per run: a fill carries many positions and
+     * they all belong to the same order.
+     */
+    protected function orderTenantId(): ?int
+    {
+        return $this->orderTenantId ??= resolve_static(Order::class, 'query')
+            ->whereKey($this->getData('order_id'))
+            ->value('tenant_id');
+    }
+
     protected function prepareForValidation(): void
     {
         // An omitted or false simulate never survived into the validated data,
         // so performAction() passed null into a bool parameter and the whole
         // request died with a TypeError. Filling positions is the default.
-        $this->data['simulate'] = (bool) ($this->data['simulate'] ?? false);
+        // filter_var, not a cast: a request carries "false" as a string, which
+        // every cast would read as true and silently skip the write.
+        $this->data['simulate'] = filter_var(
+            $this->data['simulate'] ?? false,
+            FILTER_VALIDATE_BOOLEAN,
+            FILTER_NULL_ON_FAILURE
+        ) ?? false;
     }
 
     protected function validateData(): void
@@ -146,9 +165,7 @@ class FillOrderPositions extends FluxAction
 
         // A position belongs to its order's tenant. CreateOrderPosition derives
         // it the same way; without it the insert hits a NOT NULL column.
-        $orderPosition->tenant_id ??= resolve_static(Order::class, 'query')
-            ->whereKey($this->data['order_id'])
-            ->value('tenant_id');
+        $orderPosition->tenant_id ??= $this->orderTenantId();
 
         // Fill product info if not already filled
         if ($orderPosition->product) {
