@@ -64,3 +64,51 @@ it('leaves the labels alone where sticky can hold them', function (): void {
         ->and($data['rowTransform'])->toBe('none')
         ->and($data['rowAnimation'])->toBe('none');
 });
+
+it('keeps carrying the labels of a table too wide to fit', function (): void {
+    $page = waitForDataTable(
+        visit(route('orders.orders'))
+            ->assertRoute('orders.orders')
+            ->assertNoSmoke()
+    );
+
+    $result = $page->script(<<<'JS'
+        async () => {
+            const root = document.querySelector('[tall-datatable]');
+            const table = root.querySelector('table');
+            const wrapper = table.parentElement;
+            const labels = table.querySelector('thead').rows[0];
+            const settle = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+            wrapper.style.width = '500px';
+            table.style.width = '1600px';
+
+            table.querySelectorAll('tbody tr').forEach((row) => {
+                row.style.height = '120px';
+            });
+
+            const filler = document.createElement('div');
+            filler.style.height = '10px';
+            document.body.appendChild(filler);
+            await settle();
+            await new Promise(r => setTimeout(r, 400));
+
+            const head = table.querySelector('thead').getBoundingClientRect();
+            const body = table.querySelector('tbody').getBoundingClientRect();
+
+            return {
+                tallerThanScreen: (body.bottom - head.top) > window.innerHeight,
+                boundByWrapper: wrapper.scrollWidth > wrapper.clientWidth,
+                wrapperOverflowX: getComputedStyle(wrapper).overflowX,
+                travel: labels.style.getPropertyValue('--flux-head-travel'),
+            };
+        }
+    JS);
+
+    $data = is_array($result) ? ($result[0] ?? $result) : $result;
+
+    expect($data['tallerThanScreen'])->toBeTrue()
+        ->and($data['boundByWrapper'])->toBeTrue()
+        ->and($data['wrapperOverflowX'])->toBe('auto')
+        ->and($data['travel'])->not->toBe('0px');
+});
