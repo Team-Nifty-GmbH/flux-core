@@ -2,6 +2,7 @@
 
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Actions\OrderPosition\DeleteOrderPosition;
+use FluxErp\Actions\OrderPosition\FillOrderPositions;
 use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
 use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\OrderTypeEnum;
@@ -492,4 +493,39 @@ test('the performance period end may not precede its start', function (): void {
         ],
         'system_delivery_date_end'
     );
+});
+
+test('fill order positions defaults simulate to filling them', function (): void {
+    // Omitting simulate left it null, and performAction() passed that null into
+    // a bool parameter — the whole request died with a TypeError before a single
+    // position was written.
+    $result = FillOrderPositions::make([
+        'order_id' => $this->order->getKey(),
+        'order_positions' => [[
+            'order_id' => $this->order->getKey(),
+            'name' => 'Chili con Carne',
+            'vat_rate_id' => $this->vatRate->getKey(),
+            'amount' => 2,
+            'unit_price' => 4.90,
+        ]],
+    ])->validate()->execute();
+
+    expect($result)->toBeArray()
+        ->and(OrderPosition::query()->where('order_id', $this->order->getKey())->count())->toBe(1);
+});
+
+test('fill order positions still simulates when asked to', function (): void {
+    FillOrderPositions::make([
+        'order_id' => $this->order->getKey(),
+        'simulate' => true,
+        'order_positions' => [[
+            'order_id' => $this->order->getKey(),
+            'name' => 'Chili con Carne',
+            'vat_rate_id' => $this->vatRate->getKey(),
+            'amount' => 2,
+            'unit_price' => 4.90,
+        ]],
+    ])->validate()->execute();
+
+    expect(OrderPosition::query()->where('order_id', $this->order->getKey())->count())->toBe(0);
 });

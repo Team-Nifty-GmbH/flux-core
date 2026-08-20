@@ -67,6 +67,14 @@ class FillOrderPositions extends FluxAction
         return $orderPositions;
     }
 
+    protected function prepareForValidation(): void
+    {
+        // An omitted or false simulate never survived into the validated data,
+        // so performAction() passed null into a bool parameter and the whole
+        // request died with a TypeError. Filling positions is the default.
+        $this->data['simulate'] = (bool) ($this->data['simulate'] ?? false);
+    }
+
     protected function validateData(): void
     {
         parent::validateData();
@@ -136,6 +144,12 @@ class FillOrderPositions extends FluxAction
             $orderPosition->parent_id = $parentId;
         }
 
+        // A position belongs to its order's tenant. CreateOrderPosition derives
+        // it the same way; without it the insert hits a NOT NULL column.
+        $orderPosition->tenant_id ??= resolve_static(Order::class, 'query')
+            ->whereKey($this->data['order_id'])
+            ->value('tenant_id');
+
         // Fill product info if not already filled
         if ($orderPosition->product) {
             $orderPosition->ean_code = $orderPosition->ean_code ?: $orderPosition->product->ean;
@@ -153,7 +167,10 @@ class FillOrderPositions extends FluxAction
         // If simulate = false, save order position, keep track of saved ids
         if (! $simulate) {
             $discounts = $orderPosition->discounts;
-            unset($orderPosition->discounts);
+            // unit_price is an input the price calculation reads, not a column.
+            // CreateOrderPosition drops it before saving; leaving it on here
+            // made every free-text position fail on an unknown column.
+            unset($orderPosition->discounts, $orderPosition->unit_price);
             $orderPosition->save();
 
             $existingDiscounts = $discounts->filter(fn ($discount) => $discount['id'] ?? false)->toArray();
