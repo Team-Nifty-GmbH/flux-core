@@ -135,6 +135,7 @@ class UpdateOrderRuleset extends FluxRuleset
                 'nullable',
             ],
             'address_delivery.id' => [
+                'nullable',
                 'integer',
             ],
 

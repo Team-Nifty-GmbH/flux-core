@@ -1398,7 +1398,6 @@ test('replicates an order whose address snapshot points at a deleted address', f
         'address_invoice_id' => $address->getKey(),
         'address_delivery_id' => $address->getKey(),
         'address_delivery' => $snapshot,
-        'address_invoice' => $snapshot,
         'contact_id' => $contact->getKey(),
         'currency_id' => Currency::default()->getKey(),
         'language_id' => $this->defaultLanguage->getKey(),
