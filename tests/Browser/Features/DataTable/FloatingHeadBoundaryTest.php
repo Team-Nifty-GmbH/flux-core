@@ -1,11 +1,5 @@
 <?php
 
-/**
- * The column labels are carried either by plain sticky or by the floating head,
- * never by both. Which one applies depends on whether anything above the table
- * turns into a scroll port, and only a real browser resolves that.
- */
-
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -70,9 +64,6 @@ it('leaves the labels alone where sticky can hold them', function (): void {
 
     $data = is_array($result) ? ($result[0] ?? $result) : $result;
 
-    // Where nothing binds sticky, the row must carry no transform at all. An
-    // identity matrix would still make it the containing block of its own
-    // sticky cells and push the labels into the middle of the table.
     if ($data['stickyIsBound'] === false) {
         expect($data['transform'])->toBe('none')
             ->and($data['animationName'])->toBe('none');
