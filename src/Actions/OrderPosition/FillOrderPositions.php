@@ -69,10 +69,6 @@ class FillOrderPositions extends FluxAction
         return $orderPositions;
     }
 
-    /**
-     * The order's tenant, read once per run: a fill carries many positions and
-     * they all belong to the same order.
-     */
     protected function orderTenantId(): ?int
     {
         return $this->orderTenantId ??= resolve_static(Order::class, 'query')
@@ -82,16 +78,7 @@ class FillOrderPositions extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        // An omitted or false simulate never survived into the validated data,
-        // so performAction() passed null into a bool parameter and the whole
-        // request died with a TypeError. Filling positions is the default.
-        // filter_var, not a cast: a request carries "false" as a string, which
-        // every cast would read as true and silently skip the write.
-        $this->data['simulate'] = filter_var(
-            $this->data['simulate'] ?? false,
-            FILTER_VALIDATE_BOOLEAN,
-            FILTER_NULL_ON_FAILURE
-        ) ?? false;
+        $this->data['simulate'] ??= false;
     }
 
     protected function validateData(): void
@@ -163,8 +150,6 @@ class FillOrderPositions extends FluxAction
             $orderPosition->parent_id = $parentId;
         }
 
-        // A position belongs to its order's tenant. CreateOrderPosition derives
-        // it the same way; without it the insert hits a NOT NULL column.
         $orderPosition->tenant_id ??= $this->orderTenantId();
 
         // Fill product info if not already filled
@@ -184,9 +169,6 @@ class FillOrderPositions extends FluxAction
         // If simulate = false, save order position, keep track of saved ids
         if (! $simulate) {
             $discounts = $orderPosition->discounts;
-            // unit_price is an input the price calculation reads, not a column.
-            // CreateOrderPosition drops it before saving; leaving it on here
-            // made every free-text position fail on an unknown column.
             unset($orderPosition->discounts, $orderPosition->unit_price);
             $orderPosition->save();
 

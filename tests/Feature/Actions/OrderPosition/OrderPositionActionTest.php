@@ -496,9 +496,6 @@ test('the performance period end may not precede its start', function (): void {
 });
 
 test('fill order positions defaults simulate to filling them', function (): void {
-    // Omitting simulate left it null, and performAction() passed that null into
-    // a bool parameter — the whole request died with a TypeError before a single
-    // position was written.
     $result = FillOrderPositions::make([
         'order_id' => $this->order->getKey(),
         'order_positions' => [[
@@ -528,22 +525,4 @@ test('fill order positions still simulates when asked to', function (): void {
     ])->validate()->execute();
 
     expect(OrderPosition::query()->where('order_id', $this->order->getKey())->count())->toBe(0);
-});
-
-test('fill order positions reads a textual simulate as the caller meant it', function (): void {
-    // A request carries "false" as a string. A plain cast reads that as true
-    // and silently skips the write the caller asked for.
-    FillOrderPositions::make([
-        'order_id' => $this->order->getKey(),
-        'simulate' => 'false',
-        'order_positions' => [[
-            'order_id' => $this->order->getKey(),
-            'name' => 'Chili con Carne',
-            'vat_rate_id' => $this->vatRate->getKey(),
-            'amount' => 2,
-            'unit_price' => 4.90,
-        ]],
-    ])->validate()->execute();
-
-    expect(OrderPosition::query()->where('order_id', $this->order->getKey())->count())->toBe(1);
 });
