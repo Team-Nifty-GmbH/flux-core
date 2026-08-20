@@ -1,11 +1,19 @@
 /**
- * Keeps a table's column labels in view while the page scrolls.
+ * Keeps a table's column labels in view while the page scrolls, for the tables
+ * that plain sticky cannot serve.
  *
- * Plain sticky cannot do it: a sticky element binds to its nearest scrolling
- * ancestor, and that is the overflow-x wrapper around the table. The wrapper
- * only ever scrolls sideways, so the head would stick to something that never
- * moves vertically. Dropping that overflow would move the table's horizontal
- * scrolling onto the page, taking the toolbar out of view to the right.
+ * Sticky binds to the nearest scrolling ancestor, and a table wide enough to
+ * need horizontal scrolling has one: its wrapper. That wrapper only ever
+ * scrolls sideways, so the head would stick to something that never moves
+ * vertically. Dropping the overflow is no answer either, it would move the
+ * table's horizontal scrolling onto the page and take the toolbar out of view
+ * to the right.
+ *
+ * A table that fits has no such wrapper to bind to, and there sticky holds the
+ * head by itself. Running both would not add up, it would fight: the shift
+ * below puts a transform on the row, a transform makes that row the containing
+ * block of its own sticky cells, and the head ends up somewhere in the middle
+ * of the table. So this only takes over where sticky cannot reach.
  *
  * Nudging the head on every scroll event is no good either: the events arrive
  * after the frame has been painted, so the head visibly trails one frame
@@ -136,6 +144,43 @@ const followsPage = (table) => {
     return true;
 };
 
+/**
+ * Leaves the row where the table put it.
+ *
+ * A travel of zero is not enough to achieve that: the animation still runs and
+ * still writes a transform, an identity matrix. That is a transform all the
+ * same, and it is enough to make the row the containing block of its own sticky
+ * cells, which is exactly what has to be avoided here. So the animation comes
+ * off the row rather than being handed a zero.
+ */
+const stand = (labels) => {
+    labels.style.setProperty('--flux-head-travel', '0px');
+    labels.style.setProperty('animation-name', 'none');
+    labels.style.removeProperty('transform');
+};
+
+/**
+ * Whether anything above the table turns into a scroll port. That is what
+ * decides who carries the head: with a scroll port sticky binds to a box that
+ * never moves vertically and cannot hold, without one it binds to the page and
+ * holds the head on its own.
+ */
+const stickyIsBound = (table) => {
+    for (
+        let node = table.parentElement;
+        node && node !== document.body;
+        node = node.parentElement
+    ) {
+        const style = getComputedStyle(node);
+
+        if (style.overflowX !== 'visible' || style.overflowY !== 'visible') {
+            return true;
+        }
+    }
+
+    return false;
+};
+
 const measure = (table) => {
     const head = table.querySelector('thead');
     const body = table.querySelector('tbody');
@@ -153,8 +198,10 @@ const measure = (table) => {
         return;
     }
 
-    if (!followsPage(table)) {
-        labels.style.setProperty('--flux-head-travel', '0px');
+    // Nothing to do where the table sits in a scroll area of its own, and
+    // nothing to do where sticky already holds the head.
+    if (!followsPage(table) || !stickyIsBound(table)) {
+        stand(labels);
 
         return;
     }
@@ -167,7 +214,7 @@ const measure = (table) => {
     // anyway would only lay the row over the few rows there are, and with a
     // single one it covers the entire table.
     if (bodyRect.bottom - headRect.top <= window.innerHeight - edge) {
-        labels.style.setProperty('--flux-head-travel', '0px');
+        stand(labels);
 
         return;
     }
@@ -184,6 +231,7 @@ const measure = (table) => {
     // whatever comes next.
     const travel = bodyRect.bottom - height - headRect.top;
 
+    labels.style.removeProperty('animation-name');
     labels.style.setProperty('--flux-head-start', `${start}px`);
     labels.style.setProperty('--flux-head-end', `${start + travel}px`);
     labels.style.setProperty('--flux-head-travel', `${travel}px`);
