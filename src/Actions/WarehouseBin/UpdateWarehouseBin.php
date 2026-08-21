@@ -40,9 +40,23 @@ class UpdateWarehouseBin extends FluxAction
             ->whereKey($this->data['id'])
             ->first();
 
+        $warehouseId = $this->data['warehouse_id'] ?? $warehouseBin->warehouse_id;
+        $parentId = $this->data['parent_id'] ?? $warehouseBin->parent_id;
+
+        if ($parentId
+            && resolve_static(WarehouseBin::class, 'query')
+                ->whereKey($parentId)
+                ->where('warehouse_id', '!=', $warehouseId)
+                ->exists()
+        ) {
+            throw ValidationException::withMessages([
+                'parent_id' => ['The parent bin belongs to a different warehouse'],
+            ])->errorBag('updateWarehouseBin');
+        }
+
         if (resolve_static(WarehouseBin::class, 'query')
             ->whereKeyNot($warehouseBin->getKey())
-            ->where('warehouse_id', $this->data['warehouse_id'] ?? $warehouseBin->warehouse_id)
+            ->where('warehouse_id', $warehouseId)
             ->where('code', $this->data['code'] ?? $warehouseBin->code)
             ->exists()
         ) {

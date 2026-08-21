@@ -71,9 +71,32 @@ test('update warehouse bin rejects a duplicate code in the same warehouse', func
     WarehouseBin::factory()->create(['warehouse_id' => $this->warehouse->getKey(), 'code' => 'A-01']);
     $bin = WarehouseBin::factory()->create(['warehouse_id' => $this->warehouse->getKey(), 'code' => 'A-02']);
 
-    expect(fn () => UpdateWarehouseBin::make(['id' => $bin->getKey(), 'code' => 'A-01'])
-        ->validate()->execute())
-        ->toThrow(Illuminate\Validation\ValidationException::class);
+    UpdateWarehouseBin::assertValidationErrors(['id' => $bin->getKey(), 'code' => 'A-01'], 'code');
+});
+
+test('update warehouse bin rejects a parent from another warehouse', function (): void {
+    $other = Warehouse::factory()->create();
+    $foreignParent = WarehouseBin::factory()->create(['warehouse_id' => $other->getKey()]);
+    $bin = WarehouseBin::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+
+    UpdateWarehouseBin::assertValidationErrors([
+        'id' => $bin->getKey(),
+        'parent_id' => $foreignParent->getKey(),
+    ], 'parent_id');
+});
+
+test('update warehouse bin rejects moving to another warehouse while its parent stays behind', function (): void {
+    $parent = WarehouseBin::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+    $bin = WarehouseBin::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'parent_id' => $parent->getKey(),
+    ]);
+    $other = Warehouse::factory()->create();
+
+    UpdateWarehouseBin::assertValidationErrors([
+        'id' => $bin->getKey(),
+        'warehouse_id' => $other->getKey(),
+    ], 'parent_id');
 });
 
 test('delete warehouse bin', function (): void {
