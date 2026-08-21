@@ -377,5 +377,8 @@ test('a fifo withdrawal inherits the serial number of its layer without touching
     expect(bccomp($withdrawal->posting, '-1', 10))->toBe(0)
         ->and($withdrawal->parent_id)->toBe($layer->getKey())
         ->and($withdrawal->serial_number_id)->toBe($serialNumber->getKey())
+        // StockPosting declares no serialNumber() relation, so CreateStockPosting::performAction()'s
+        // serialNumber gate never fires and this assertion holds by accident. A red result means
+        // that gate is now reachable and the negative-quantity address_serial_number write needs handling.
         ->and($serialNumber->addresses()->count())->toBe(0);
 });

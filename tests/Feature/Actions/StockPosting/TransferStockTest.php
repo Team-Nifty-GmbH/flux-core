@@ -233,6 +233,20 @@ test('a transfer restricted to a lot that cannot cover the amount is rejected', 
     ], 'amount');
 });
 
+test('a transfer naming a lot from a different product is rejected', function (): void {
+    $otherProduct = Product::factory()->create();
+    $lot = Lot::factory()->create(['product_id' => $otherProduct->getKey()]);
+
+    TransferStock::assertValidationErrors([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'from_warehouse_bin_id' => $this->from->getKey(),
+        'to_warehouse_bin_id' => $this->to->getKey(),
+        'lot_id' => $lot->getKey(),
+        'amount' => 1,
+    ], 'lot_id');
+});
+
 test('an allocation that falls short between validation and execution is rejected', function (): void {
     StockPosting::factory()->create([
         'warehouse_id' => $this->warehouse->getKey(),

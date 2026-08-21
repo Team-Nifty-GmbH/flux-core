@@ -7,6 +7,7 @@ use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Warehouse;
 use FluxErp\Models\WarehouseBin;
+use FluxErp\Rules\ExistsWithForeign;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
@@ -43,6 +44,10 @@ class TransferStockRuleset extends FluxRuleset
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => Lot::class]),
+                app(ExistsWithForeign::class, [
+                    'foreignAttribute' => 'product_id',
+                    'table' => 'lots',
+                ]),
             ],
             'amount' => [
                 'required',
