@@ -150,6 +150,7 @@ use FluxErp\Models\VacationBlackout;
 use FluxErp\Models\VacationCarryoverRule;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
+use FluxErp\Models\WarehouseBin;
 use FluxErp\Models\Widget;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeModel;
@@ -263,6 +264,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'vacation_carryover_rule' => VacationCarryoverRule::class,
             'vat_rate' => VatRate::class,
             'warehouse' => Warehouse::class,
+            'warehouse_bin' => WarehouseBin::class,
             'widget' => Widget::class,
             'work_time' => WorkTime::class,
             'work_time_model' => WorkTimeModel::class,
