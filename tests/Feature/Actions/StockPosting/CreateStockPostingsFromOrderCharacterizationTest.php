@@ -124,8 +124,10 @@ test('a sales order consumes layers in id order and decrements remaining stock',
     expect($withdrawals)->toHaveCount(2)
         ->and(bccomp($withdrawals[0]->posting, '-10', 10))->toBe(0)
         ->and($withdrawals[0]->parent_id)->toBe($first->getKey())
+        ->and(bccomp($withdrawals[0]->purchase_price, $first->purchase_price, 10))->toBe(0)
         ->and(bccomp($withdrawals[1]->posting, '-5', 10))->toBe(0)
         ->and($withdrawals[1]->parent_id)->toBe($second->getKey())
+        ->and(bccomp($withdrawals[1]->purchase_price, $second->purchase_price, 10))->toBe(0)
         ->and(bccomp($first->fresh()->remaining_stock, '0', 10))->toBe(0)
         ->and(bccomp($second->fresh()->remaining_stock, '5', 10))->toBe(0);
 });
@@ -185,6 +187,35 @@ test('a never out of stock product posts beyond the available layers', function 
 
     expect(bccomp($posting->posting, '-3', 10))->toBe(0)
         ->and($posting->parent_id)->toBeNull();
+});
+
+test('a never out of stock product draws down the layer then overflows unparented', function (): void {
+    $nosProduct = Product::factory()->create(['is_nos' => true]);
+    $layer = StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $nosProduct->getKey(),
+        'posting' => 2,
+        'purchase_price' => 5,
+    ]);
+
+    $order = ($this->makeOrder)(OrderTypeEnum::Order);
+    $position = ($this->addPosition)($order, 5, $nosProduct);
+
+    CreateStockPostingsFromOrder::make(['id' => $order->getKey()])
+        ->validate()
+        ->execute();
+
+    $withdrawals = StockPosting::query()
+        ->where('order_position_id', $position->getKey())
+        ->orderBy('id')
+        ->get();
+
+    expect($withdrawals)->toHaveCount(2)
+        ->and(bccomp($withdrawals[0]->posting, '-2', 10))->toBe(0)
+        ->and($withdrawals[0]->parent_id)->toBe($layer->getKey())
+        ->and(bccomp($withdrawals[1]->posting, '-3', 10))->toBe(0)
+        ->and($withdrawals[1]->parent_id)->toBeNull()
+        ->and(bccomp($layer->fresh()->remaining_stock, '0', 10))->toBe(0);
 });
 
 test('insufficient stock on a normal product is rejected', function (): void {
