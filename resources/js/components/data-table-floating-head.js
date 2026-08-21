@@ -191,16 +191,19 @@ const measure = (table) => {
     // Past this point the row would have left the top of the screen.
     const start = Math.max(0, headRect.top + window.scrollY - edge);
 
-    if (start >= pageTravel) {
+    // And this is how far it may travel: until its bottom edge meets the end of
+    // the table. After that it leaves with the table instead of hovering over
+    // whatever comes next.
+    const travel = Math.min(
+        bodyRect.bottom - height - headRect.top,
+        pageTravel - start,
+    );
+
+    if (travel <= 0) {
         stand(labels);
 
         return;
     }
-
-    // And this is how far it may travel: until its bottom edge meets the end of
-    // the table. After that it leaves with the table instead of hovering over
-    // whatever comes next.
-    const travel = bodyRect.bottom - height - headRect.top;
 
     labels.style.setProperty('--flux-head-start', `${start}px`);
     labels.style.setProperty('--flux-head-end', `${start + travel}px`);
