@@ -8,16 +8,19 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
+use FluxErp\Models\Lot;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\SerialNumber;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
+use FluxErp\Models\WarehouseBin;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Validation\ValidationException;
 
@@ -155,7 +158,14 @@ test('reserving moves remaining stock into reserved stock and writes the pivot',
 });
 
 test('posting after reserving consumes the reservation', function (): void {
-    $layer = ($this->layer)(10);
+    $bin = WarehouseBin::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+    $layer = StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'warehouse_bin_id' => $bin->getKey(),
+        'posting' => 10,
+        'purchase_price' => 5,
+    ]);
 
     $order = ($this->makeOrder)(OrderTypeEnum::Order);
     $position = ($this->addPosition)($order, 4);
@@ -168,10 +178,12 @@ test('posting after reserving consumes the reservation', function (): void {
         ->execute();
 
     $layer->refresh();
+    $withdrawal = $position->stockPostings()->first();
 
     expect(bccomp($layer->reserved_stock, '0', 10))->toBe(0)
         ->and(bccomp((string) $position->stockPostings()->sum('posting'), '-4', 10))->toBe(0)
-        ->and($position->reservedStock()->count())->toBe(0);
+        ->and($position->reservedStock()->count())->toBe(0)
+        ->and($withdrawal->warehouse_bin_id)->toBe($bin->getKey());
 });
 
 test('a never out of stock product posts beyond the available layers', function (): void {
@@ -265,4 +277,105 @@ test('posting a grown order after a partial reservation consumes the reservation
         ->and(bccomp($layer->remaining_stock, '1', 10))->toBe(0)
         ->and(bccomp($layer->reserved_stock, '0', 10))->toBe(0)
         ->and($position->reservedStock()->count())->toBe(0);
+});
+
+test('stock sitting in an inactive bin does not count as available', function (): void {
+    $bin = WarehouseBin::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'is_active' => false,
+    ]);
+    StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'warehouse_bin_id' => $bin->getKey(),
+        'posting' => 10,
+        'purchase_price' => 5,
+    ]);
+
+    $order = ($this->makeOrder)(OrderTypeEnum::Order);
+    $position = ($this->addPosition)($order, 5);
+
+    expect(fn () => CreateStockPostingsFromOrder::make(['id' => $order->getKey()])
+        ->validate()
+        ->execute())
+        ->toThrow(ValidationException::class);
+
+    expect($position->stockPostings()->count())->toBe(0);
+});
+
+test('stock sitting on a blocked lot does not count as available', function (): void {
+    $lot = Lot::factory()->create([
+        'product_id' => $this->product->getKey(),
+        'blocked_at' => now(),
+    ]);
+    StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'lot_id' => $lot->getKey(),
+        'posting' => 10,
+        'purchase_price' => 5,
+    ]);
+
+    $order = ($this->makeOrder)(OrderTypeEnum::Order);
+    $position = ($this->addPosition)($order, 5);
+
+    expect(fn () => CreateStockPostingsFromOrder::make(['id' => $order->getKey()])
+        ->validate()
+        ->execute())
+        ->toThrow(ValidationException::class);
+
+    expect($position->stockPostings()->count())->toBe(0);
+});
+
+test('reserving against stock in an inactive bin is rejected', function (): void {
+    $bin = WarehouseBin::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'is_active' => false,
+    ]);
+    StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'warehouse_bin_id' => $bin->getKey(),
+        'posting' => 10,
+        'purchase_price' => 5,
+    ]);
+
+    $order = ($this->makeOrder)(OrderTypeEnum::Order);
+    $position = ($this->addPosition)($order, 5);
+
+    expect(fn () => CreateStockPostingsFromOrder::make([
+        'id' => $order->getKey(),
+        'only_reserve_stock' => true,
+    ])
+        ->validate()
+        ->execute())
+        ->toThrow(ValidationException::class);
+
+    expect($position->reservedStock()->count())->toBe(0);
+});
+
+test('a fifo withdrawal inherits the serial number of its layer without touching the address pivot', function (): void {
+    $serialNumber = SerialNumber::factory()->create();
+    $layer = StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'serial_number_id' => $serialNumber->getKey(),
+        'posting' => 1,
+        'purchase_price' => 5,
+    ]);
+
+    $order = ($this->makeOrder)(OrderTypeEnum::Order);
+    $order->update(['address_delivery_id' => $this->address->getKey()]);
+    $position = ($this->addPosition)($order, 1);
+
+    CreateStockPostingsFromOrder::make(['id' => $order->getKey()])
+        ->validate()
+        ->execute();
+
+    $withdrawal = $position->stockPostings()->first();
+
+    expect(bccomp($withdrawal->posting, '-1', 10))->toBe(0)
+        ->and($withdrawal->parent_id)->toBe($layer->getKey())
+        ->and($withdrawal->serial_number_id)->toBe($serialNumber->getKey())
+        ->and($serialNumber->addresses()->count())->toBe(0);
 });
