@@ -95,6 +95,7 @@ class CreateStockPosting extends FluxAction
                 ->whereKey($this->data['parent_id'])
                 ->first();
 
+            // reserved_stock is included because reservations move stock out of remaining_stock before it is withdrawn
             $drawable = bcadd((string) $parent->remaining_stock, (string) $parent->reserved_stock, 10);
 
             if (bccomp(bcabs($posting), $drawable, 10) === 1) {
