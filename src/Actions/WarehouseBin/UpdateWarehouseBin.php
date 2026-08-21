@@ -63,7 +63,7 @@ class UpdateWarehouseBin extends FluxAction
             ])->errorBag('updateWarehouseBin');
         }
 
-        if ((int) $warehouseId !== (int) $warehouseBin->warehouse_id && $warehouseBin->descendantKeys()) {
+        if ((int) $warehouseId !== (int) $warehouseBin->warehouse_id && $warehouseBin->getAllDescendantsQuery()->exists()) {
             throw ValidationException::withMessages([
                 'warehouse_id' => ['The given warehouse bin has child bins in its current warehouse'],
             ])->errorBag('updateWarehouseBin');

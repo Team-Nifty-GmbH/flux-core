@@ -41,9 +41,9 @@ class DeleteWarehouseBin extends FluxAction
             ])->errorBag('deleteWarehouseBin');
         }
 
-        if ($warehouseBin->descendantKeys()) {
+        if ($warehouseBin->getAllDescendantsQuery()->exists()) {
             throw ValidationException::withMessages([
-                'id' => ['The given warehouse bin has child bins'],
+                'children' => ['The given warehouse bin has child bins'],
             ])->errorBag('deleteWarehouseBin');
         }
     }

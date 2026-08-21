@@ -200,5 +200,33 @@ test('delete warehouse bin refuses while it has child bins', function (): void {
         'parent_id' => $parent->getKey(),
     ]);
 
-    DeleteWarehouseBin::assertValidationErrors(['id' => $parent->getKey()], 'id');
+    DeleteWarehouseBin::assertValidationErrors(['id' => $parent->getKey()], 'children');
+});
+
+test('delete warehouse bin succeeds when its only child bin is soft-deleted', function (): void {
+    $parent = WarehouseBin::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+    $child = WarehouseBin::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'parent_id' => $parent->getKey(),
+    ]);
+    $child->delete();
+
+    expect(DeleteWarehouseBin::make(['id' => $parent->getKey()])->validate()->execute())->toBeTrue();
+});
+
+test('update warehouse bin allows moving to another warehouse when its only child bin is soft-deleted', function (): void {
+    $parent = WarehouseBin::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+    $child = WarehouseBin::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'parent_id' => $parent->getKey(),
+    ]);
+    $child->delete();
+    $other = Warehouse::factory()->create();
+
+    $updated = UpdateWarehouseBin::make([
+        'id' => $parent->getKey(),
+        'warehouse_id' => $other->getKey(),
+    ])->validate()->execute();
+
+    expect($updated->warehouse_id)->toBe($other->getKey());
 });
