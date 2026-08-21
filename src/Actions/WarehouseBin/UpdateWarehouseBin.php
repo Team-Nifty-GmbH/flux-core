@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\WarehouseBin;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Helpers\Helper;
 use FluxErp\Models\WarehouseBin;
 use FluxErp\Rulesets\WarehouseBin\UpdateWarehouseBinRuleset;
 use Illuminate\Database\Eloquent\Model;
@@ -54,7 +55,22 @@ class UpdateWarehouseBin extends FluxAction
             ])->errorBag('updateWarehouseBin');
         }
 
+        if (($this->data['parent_id'] ?? false)
+            && Helper::checkCycle(WarehouseBin::class, $warehouseBin, $this->data['parent_id'])
+        ) {
+            throw ValidationException::withMessages([
+                'parent_id' => ['Cycle detected'],
+            ])->errorBag('updateWarehouseBin');
+        }
+
+        if ((int) $warehouseId !== (int) $warehouseBin->warehouse_id && $warehouseBin->descendantKeys()) {
+            throw ValidationException::withMessages([
+                'warehouse_id' => ['The given warehouse bin has child bins in its current warehouse'],
+            ])->errorBag('updateWarehouseBin');
+        }
+
         if (resolve_static(WarehouseBin::class, 'query')
+            ->withTrashed()
             ->whereKeyNot($warehouseBin->getKey())
             ->where('warehouse_id', $warehouseId)
             ->where('code', $this->data['code'] ?? $warehouseBin->code)

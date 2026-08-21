@@ -99,6 +99,58 @@ test('update warehouse bin rejects moving to another warehouse while its parent 
     ], 'parent_id');
 });
 
+test('create warehouse bin rejects a code held by a trashed bin', function (): void {
+    WarehouseBin::factory()
+        ->create(['warehouse_id' => $this->warehouse->getKey(), 'code' => 'A-01'])
+        ->delete();
+
+    CreateWarehouseBin::assertValidationErrors([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'code' => 'A-01',
+        'warehouse_bin_type_enum' => WarehouseBinTypeEnum::Bin->value,
+    ], 'code');
+});
+
+test('update warehouse bin rejects a parent from its own subtree', function (): void {
+    $bin = WarehouseBin::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+    $child = WarehouseBin::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'parent_id' => $bin->getKey(),
+    ]);
+    $grandChild = WarehouseBin::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'parent_id' => $child->getKey(),
+    ]);
+
+    UpdateWarehouseBin::assertValidationErrors([
+        'id' => $bin->getKey(),
+        'parent_id' => $grandChild->getKey(),
+    ], 'parent_id');
+});
+
+test('update warehouse bin rejects itself as its own parent', function (): void {
+    $bin = WarehouseBin::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+
+    UpdateWarehouseBin::assertValidationErrors([
+        'id' => $bin->getKey(),
+        'parent_id' => $bin->getKey(),
+    ], 'parent_id');
+});
+
+test('update warehouse bin rejects moving to another warehouse while its children stay behind', function (): void {
+    $parent = WarehouseBin::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+    WarehouseBin::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'parent_id' => $parent->getKey(),
+    ]);
+    $other = Warehouse::factory()->create();
+
+    UpdateWarehouseBin::assertValidationErrors([
+        'id' => $parent->getKey(),
+        'warehouse_id' => $other->getKey(),
+    ], 'warehouse_id');
+});
+
 test('delete warehouse bin', function (): void {
     $bin = WarehouseBin::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
 
@@ -116,6 +168,37 @@ test('delete warehouse bin refuses while stock remains', function (): void {
         'posting' => 10,
     ]);
 
-    expect(fn () => DeleteWarehouseBin::make(['id' => $bin->getKey()])->validate()->execute())
-        ->toThrow(Illuminate\Validation\ValidationException::class);
+    DeleteWarehouseBin::assertValidationErrors(['id' => $bin->getKey()], 'stock_postings');
+});
+
+test('delete warehouse bin refuses while stock postings reference it after netting to zero', function (): void {
+    $bin = WarehouseBin::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+    $product = Product::factory()->create();
+
+    $layer = StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $product->getKey(),
+        'warehouse_bin_id' => $bin->getKey(),
+        'posting' => 10,
+    ]);
+
+    StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $product->getKey(),
+        'warehouse_bin_id' => $bin->getKey(),
+        'parent_id' => $layer->getKey(),
+        'posting' => -10,
+    ]);
+
+    DeleteWarehouseBin::assertValidationErrors(['id' => $bin->getKey()], 'stock_postings');
+});
+
+test('delete warehouse bin refuses while it has child bins', function (): void {
+    $parent = WarehouseBin::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+    WarehouseBin::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'parent_id' => $parent->getKey(),
+    ]);
+
+    DeleteWarehouseBin::assertValidationErrors(['id' => $parent->getKey()], 'id');
 });

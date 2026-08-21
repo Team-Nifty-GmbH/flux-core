@@ -31,15 +31,19 @@ class DeleteWarehouseBin extends FluxAction
     {
         parent::validateData();
 
-        $stock = resolve_static(WarehouseBin::class, 'query')
+        $warehouseBin = resolve_static(WarehouseBin::class, 'query')
             ->whereKey($this->data['id'])
-            ->first()
-            ->stockPostings()
-            ->sum('posting');
+            ->first();
 
-        if (bccomp((string) $stock, '0', 10) !== 0) {
+        if ($warehouseBin->stockPostings()->count() > 0) {
             throw ValidationException::withMessages([
-                'stock_postings' => ['The given warehouse bin still holds stock'],
+                'stock_postings' => ['The given warehouse bin has stock postings'],
+            ])->errorBag('deleteWarehouseBin');
+        }
+
+        if ($warehouseBin->descendantKeys()) {
+            throw ValidationException::withMessages([
+                'id' => ['The given warehouse bin has child bins'],
             ])->errorBag('deleteWarehouseBin');
         }
     }

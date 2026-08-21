@@ -45,6 +45,7 @@ class CreateWarehouseBin extends FluxAction
         }
 
         if (resolve_static(WarehouseBin::class, 'query')
+            ->withTrashed()
             ->where('warehouse_id', $this->data['warehouse_id'])
             ->where('code', $this->data['code'])
             ->exists()
