@@ -42,7 +42,7 @@ test('the labels keep carrying after a block above the table shrinks', function 
     $result = $page->script(<<<'JS'
         () => new Promise((resolve) => {
             const table = document.querySelector('[tall-datatable]');
-            const labels = table.querySelector('table thead').rows[0];
+            const labels = () => table.querySelector('table thead').rows[0];
             const filler = document.createElement('div');
 
             filler.id = 'shrinking-block';
@@ -58,7 +58,7 @@ test('the labels keep carrying after a block above the table shrinks', function 
                 const next = steps.shift();
 
                 if (! next) {
-                    const style = labels.getAttribute('style') || '';
+                    const style = labels().getAttribute('style') || '';
                     const read = (name) => {
                         const match = style.match(
                             new RegExp('--flux-head-' + name + ':\\s*([-\\d.]+)')
@@ -69,13 +69,13 @@ test('the labels keep carrying after a block above the table shrinks', function 
 
                     resolve({
                         atBottom: measured.atBottom,
-                        atTop: Math.round(labels.getBoundingClientRect().top),
+                        atTop: Math.round(labels().getBoundingClientRect().top),
                         viewport: measured.viewport,
                         end: read('end'),
                         maxScroll: document.documentElement.scrollHeight
                             - document.documentElement.clientHeight,
                         start: read('start'),
-                        transformAtTop: getComputedStyle(labels).transform,
+                        transformAtTop: getComputedStyle(labels()).transform,
                     });
 
                     return;
@@ -91,7 +91,7 @@ test('the labels keep carrying after a block above the table shrinks', function 
                 toBottom,
                 toBottom,
                 () => {
-                    measured.atBottom = Math.round(labels.getBoundingClientRect().top);
+                    measured.atBottom = Math.round(labels().getBoundingClientRect().top);
                     measured.viewport = window.innerHeight;
                 },
                 () => window.scrollTo(0, 0),
@@ -119,7 +119,7 @@ test('the measured range never reaches past what the page can scroll', function 
     $result = $page->script(<<<'JS'
         () => new Promise((resolve) => {
             const table = document.querySelector('[tall-datatable]');
-            const labels = table.querySelector('table thead').rows[0];
+            const labels = () => table.querySelector('table thead').rows[0];
             const filler = document.createElement('div');
 
             filler.id = 'shrinking-block';
@@ -132,7 +132,7 @@ test('the measured range never reaches past what the page can scroll', function 
                 const next = steps.shift();
 
                 if (! next) {
-                    const style = labels.getAttribute('style') || '';
+                    const style = labels().getAttribute('style') || '';
                     const read = (name) => {
                         const match = style.match(
                             new RegExp('--flux-head-' + name + ':\\s*([-\\d.]+)')
