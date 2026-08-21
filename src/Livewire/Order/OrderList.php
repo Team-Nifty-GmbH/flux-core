@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 use Laravel\SerializableClosure\SerializableClosure;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -271,8 +272,8 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         JS);
     }
 
-    #[Renderless]
-    public function getOrdersWithoutCoordinatesCount(): int
+    #[Computed]
+    public function ordersWithoutCoordinatesCount(): int
     {
         return $this->buildSearch()
             ->where(function (Builder $query): void {
