@@ -114,3 +114,25 @@ test('action broadcasts leave without a queue job', function () use ($captureBro
     expect(collect($captured->getArrayCopy())->pluck('event'))
         ->toContain('BroadcastingCreateLeadStateExecuted');
 });
+
+test('executing an action broadcasts without a return value', function () use ($captureBroadcasts, $invokeDeferred): void {
+    $captured = new ArrayObject();
+    $captureBroadcasts($captured);
+
+    Queue::fake();
+
+    // The executed hook calls broadcastExecuted() and discards its return value,
+    // which is null since the broadcast is deferred.
+    $leadState = BroadcastingCreateLeadState::make(['name' => 'executed through an action'])
+        ->validate()
+        ->execute();
+
+    expect($leadState)->toBeInstanceOf(LeadState::class);
+
+    $invokeDeferred();
+
+    Queue::assertNothingPushed();
+
+    expect(collect($captured->getArrayCopy())->pluck('event'))
+        ->toContain('BroadcastingCreateLeadStateExecuted');
+});

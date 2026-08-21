@@ -33,7 +33,7 @@ trait BroadcastsActionEvents
         //
     }
 
-    public function broadcastExecuted(Channel|HasBroadcastChannel|array|null $channels = null): PendingBroadcast
+    public function broadcastExecuted(Channel|HasBroadcastChannel|array|null $channels = null): ?PendingBroadcast
     {
         return $this->broadcastEvent('executed', $channels);
     }
