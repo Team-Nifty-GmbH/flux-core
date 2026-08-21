@@ -50,6 +50,7 @@ use FluxErp\Models\Loan;
 use FluxErp\Models\LoanInstallment;
 use FluxErp\Models\Location;
 use FluxErp\Models\Log;
+use FluxErp\Models\Lot;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use FluxErp\Models\Media;
@@ -212,6 +213,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'loan_installment' => LoanInstallment::class,
             'location' => Location::class,
             'log' => Log::class,
+            'lot' => Lot::class,
             'mail_account' => MailAccount::class,
             'mail_folder' => MailFolder::class,
             'media' => Media::class,
