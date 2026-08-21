@@ -3,6 +3,7 @@
 namespace FluxErp\Rulesets\Product;
 
 use FluxErp\Enums\BundleTypeEnum;
+use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Facades\ProductType;
 use FluxErp\Models\Product;
@@ -122,6 +123,12 @@ class CreateProductRuleset extends FluxRuleset
             'has_serial_numbers' => 'boolean',
             'is_nos' => 'boolean',
             'is_active_export_to_web_shop' => 'boolean',
+            'is_lot_tracked' => 'boolean',
+            'stock_removal_strategy_enum' => [
+                'nullable',
+                Rule::enum(StockRemovalStrategyEnum::class),
+            ],
+            'min_shelf_life_days' => 'nullable|integer|min:0',
         ];
     }
 }

@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use Exception;
 use FluxErp\Contracts\HasMediaForeignKey;
 use FluxErp\Enums\BundleTypeEnum;
+use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Models\Pivots\BundleProductProduct;
@@ -101,6 +102,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         return [
             'bundle_type_enum' => BundleTypeEnum::class,
             'time_unit_enum' => TimeUnitEnum::class,
+            'stock_removal_strategy_enum' => StockRemovalStrategyEnum::class,
             'search_aliases' => 'array',
             'is_active' => 'boolean',
             'is_highlight' => 'boolean',
@@ -110,6 +112,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             'has_serial_numbers' => 'boolean',
             'is_nos' => 'boolean',
             'is_active_export_to_web_shop' => 'boolean',
+            'is_lot_tracked' => 'boolean',
         ];
     }
 
