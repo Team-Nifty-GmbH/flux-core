@@ -136,6 +136,12 @@ const followsPage = (table) => {
     return true;
 };
 
+const restart = (labels) => {
+    labels.style.setProperty('animation-name', 'none');
+
+    requestAnimationFrame(() => labels.style.removeProperty('animation-name'));
+};
+
 const stand = (labels) => {
     labels.style.setProperty('--flux-head-travel', '0px');
     labels.style.removeProperty('--flux-head-start');
@@ -205,9 +211,18 @@ const measure = (table) => {
         return;
     }
 
+    if (labels.style.getPropertyValue('--flux-head-start') === `${start}px`) {
+        labels.style.setProperty('--flux-head-end', `${start + travel}px`);
+        labels.style.setProperty('--flux-head-travel', `${travel}px`);
+
+        return;
+    }
+
     labels.style.setProperty('--flux-head-start', `${start}px`);
     labels.style.setProperty('--flux-head-end', `${start + travel}px`);
     labels.style.setProperty('--flux-head-travel', `${travel}px`);
+
+    restart(labels);
 };
 
 /**
