@@ -303,7 +303,11 @@ const shiftAll = () => {
 // Rows arrive, groups unfold, filters open: all of that moves the table without
 // anyone scrolling.
 const observer = new MutationObserver((records) => {
-    if (records.every((record) => record.target.closest?.('[tall-datatable] thead'))) {
+    if (
+        records.every((record) =>
+            record.target.closest?.('[tall-datatable] thead'),
+        )
+    ) {
         return;
     }
 
