@@ -98,7 +98,17 @@ test('a transfer spanning several layers creates one pair per layer', function (
         'amount' => 5,
     ])->validate()->execute();
 
-    expect(StockPosting::query()->where('warehouse_bin_id', $this->to->getKey())->count())->toBe(2);
+    $incoming = StockPosting::query()
+        ->where('warehouse_bin_id', $this->to->getKey())
+        ->orderBy('id')
+        ->get();
+
+    expect($incoming)->toHaveCount(2)
+        ->and(bccomp($incoming->get(0)->posting, '3', 10))->toBe(0)
+        ->and(bccomp($incoming->get(1)->posting, '2', 10))->toBe(0)
+        ->and(bccomp((string) StockPosting::query()
+            ->where('warehouse_bin_id', $this->to->getKey())
+            ->sum('posting'), '5', 10))->toBe(0);
 });
 
 test('transferring more than the source bin holds is rejected', function (): void {
