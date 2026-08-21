@@ -245,3 +245,29 @@ function waitForCondition(PendingAwaitablePage|AwaitableWebpage $page, string $c
 
     return $page;
 }
+
+class CountingPermissionRegistrar extends Spatie\Permission\PermissionRegistrar
+{
+    public static int $scans = 0;
+
+    public function getPermissions(array $params = [], bool $onlyOne = false): Illuminate\Database\Eloquent\Collection
+    {
+        static::$scans++;
+
+        return parent::getPermissions($params, $onlyOne);
+    }
+}
+
+function countRegistrarScans(callable $callback): int
+{
+    app()->forgetInstance(Spatie\Permission\PermissionRegistrar::class);
+    app()->singleton(
+        Spatie\Permission\PermissionRegistrar::class,
+        fn ($app) => new CountingPermissionRegistrar($app->make(Illuminate\Cache\CacheManager::class))
+    );
+
+    CountingPermissionRegistrar::$scans = 0;
+    $callback();
+
+    return CountingPermissionRegistrar::$scans;
+}

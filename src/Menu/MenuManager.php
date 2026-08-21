@@ -3,20 +3,16 @@
 namespace FluxErp\Menu;
 
 use Closure;
-use Illuminate\Contracts\Auth\Authenticatable;
+use FluxErp\Support\Auth\PermissionSet;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
-use Spatie\Permission\PermissionRegistrar;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 class MenuManager
 {
     use Macroable;
-
-    public const BLANKET_PERMISSION_PROBE = 'flux.menu.blanket-permission-probe';
 
     protected array $registered = [];
 
@@ -48,14 +44,11 @@ class MenuManager
     {
         $this->resolve();
 
-        $user = auth()->user();
-        $known = $ignorePermissions ? [] : $this->permissionNames($guard);
-        $granted = $ignorePermissions ? [] : $this->grantedPermissionNames($user);
-        $grantsEverything = ! $ignorePermissions && $this->grantsEveryPermission($user);
+        $permissions = $ignorePermissions ? null : PermissionSet::make(guard: $guard);
 
         $menuItems = $this->sortMultiDimensional(
             $this->resolved,
-            function (array $value) use ($guard, $ignorePermissions, $known, $granted, $grantsEverything) {
+            function (array $value) use ($guard, $permissions) {
                 $routeName = data_get($value, 'route_name');
                 if ($routeName && ($when = data_get($this->whenCallbacks, $routeName)) && ! $when()) {
                     return false;
@@ -66,12 +59,8 @@ class MenuManager
                 }
 
                 $permission = data_get($value, 'permission');
-                if ($permission && ! $ignorePermissions) {
-                    if (! array_key_exists($permission, $known)) {
-                        return true;
-                    }
-
-                    return $grantsEverything || array_key_exists($permission, $granted);
+                if ($permission && $permissions) {
+                    return $permissions->allows($permission);
                 }
 
                 return true;
@@ -138,30 +127,6 @@ class MenuManager
     public function unregister(string $name): void
     {
         unset($this->resolved[$name]);
-    }
-
-    protected function grantedPermissionNames(?Authenticatable $user): array
-    {
-        if (! method_exists($user, 'getAllPermissions')) {
-            return [];
-        }
-
-        return array_flip($user->getAllPermissions()->pluck('name')->all());
-    }
-
-    protected function grantsEveryPermission(?Authenticatable $user): bool
-    {
-        return $user && Gate::forUser($user)->allows(static::BLANKET_PERMISSION_PROBE);
-    }
-
-    protected function permissionNames(string $guard): array
-    {
-        return array_flip(
-            app(PermissionRegistrar::class)
-                ->getPermissions(['guard_name' => $guard])
-                ->pluck('name')
-                ->all()
-        );
     }
 
     protected function resolve(): void
