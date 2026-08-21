@@ -139,6 +139,11 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         return $this->belongsTo(Media::class, 'cover_media_id');
     }
 
+    public function lots(): HasMany
+    {
+        return $this->hasMany(Lot::class, 'product_id');
+    }
+
     public function orderPositions(): HasMany
     {
         return $this->hasMany(OrderPosition::class);

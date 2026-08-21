@@ -27,9 +27,18 @@ test('a bin reports its stock and its available stock', function (): void {
 
     $layer->update(['remaining_stock' => 6]);
 
+    $reservedLayer = StockPosting::factory()->create([
+        'warehouse_id' => $warehouse->getKey(),
+        'product_id' => $product->getKey(),
+        'warehouse_bin_id' => $bin->getKey(),
+        'posting' => 5,
+    ]);
+
+    $reservedLayer->update(['remaining_stock' => 0]);
+
     $result = WarehouseBin::query()->withBinStock()->whereKey($bin->getKey())->first();
 
-    expect(bccomp($result->stock, '6', 10))->toBe(0)
+    expect(bccomp($result->stock, '11', 10))->toBe(0)
         ->and(bccomp($result->available_stock, '6', 10))->toBe(0);
 });
 

@@ -31,4 +31,9 @@ class Warehouse extends FluxModel
     {
         return $this->hasMany(StockPosting::class, 'warehouse_id');
     }
+
+    public function warehouseBins(): HasMany
+    {
+        return $this->hasMany(WarehouseBin::class, 'warehouse_id');
+    }
 }

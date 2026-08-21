@@ -48,6 +48,7 @@ class WarehouseBin extends FluxModel
         return $this->belongsTo(Warehouse::class, 'warehouse_id');
     }
 
+    // Scopes
     public function scopeWithBinStock(Builder $query): void
     {
         $query->withSum('stockPostings as stock', 'posting')
