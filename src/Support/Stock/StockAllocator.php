@@ -6,16 +6,21 @@ use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Warehouse;
+use FluxErp\Traits\Makeable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class StockAllocator
 {
+    use Makeable;
+
     protected ?int $productId = null;
 
     protected ?int $warehouseId = null;
 
     protected ?array $binIds = null;
+
+    protected ?int $lotId = null;
 
     protected ?StockRemovalStrategyEnum $strategy = null;
 
@@ -36,6 +41,13 @@ class StockAllocator
     public function inBins(array $binIds): static
     {
         $this->binIds = $binIds;
+
+        return $this;
+    }
+
+    public function forLot(?int $lotId): static
+    {
+        $this->lotId = $lotId;
 
         return $this;
     }
@@ -66,6 +78,10 @@ class StockAllocator
             $query->whereIn('stock_postings.warehouse_bin_id', $this->binIds);
         }
 
+        if (! is_null($this->lotId)) {
+            $query->where('stock_postings.lot_id', $this->lotId);
+        }
+
         return match ($this->resolveStrategy()) {
             StockRemovalStrategyEnum::Lifo => $query->orderByDesc('stock_postings.id'),
             StockRemovalStrategyEnum::Fefo => $query
@@ -78,6 +94,9 @@ class StockAllocator
         };
     }
 
+    /**
+     * @return Collection<int, array{stockPosting: StockPosting, amount: string}>
+     */
     public function allocate(string|int|float $amount): Collection
     {
         $open = is_float($amount) ? sprintf('%.10F', $amount) : (string) $amount;

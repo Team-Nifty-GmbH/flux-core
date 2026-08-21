@@ -26,6 +26,16 @@ class TransferStock extends FluxAction
         $description = $this->data['description'] ?? __('Stock transfer');
 
         $allocation = $this->allocator()->allocate($this->data['amount']);
+        $allocated = $allocation->reduce(
+            fn (string $carry, array $item) => bcadd($carry, $item['amount'], 10),
+            '0'
+        );
+
+        if (bccomp($allocated, (string) $this->data['amount'], 10) === -1) {
+            throw ValidationException::withMessages([
+                'amount' => ['The source bin does not hold enough stock'],
+            ])->errorBag('transferStock');
+        }
 
         foreach ($allocation as $item) {
             $stockPosting = $item['stockPosting'];
@@ -117,6 +127,7 @@ class TransferStock extends FluxAction
         return app(StockAllocator::class)
             ->forProduct($this->data['product_id'])
             ->inWarehouse($this->data['warehouse_id'])
-            ->inBins([$this->data['from_warehouse_bin_id']]);
+            ->inBins([$this->data['from_warehouse_bin_id']])
+            ->forLot($this->data['lot_id'] ?? null);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Rulesets\StockPosting;
 
+use FluxErp\Models\Lot;
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Warehouse;
@@ -37,6 +38,11 @@ class TransferStockRuleset extends FluxRuleset
                 'integer',
                 'different:from_warehouse_bin_id',
                 app(ModelExists::class, ['model' => WarehouseBin::class]),
+            ],
+            'lot_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Lot::class]),
             ],
             'amount' => [
                 'required',
