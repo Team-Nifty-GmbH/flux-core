@@ -76,6 +76,13 @@ test('the labels keep carrying after a block above the table shrinks', function 
                             - document.documentElement.clientHeight,
                         start: read('start'),
                         transformAtTop: getComputedStyle(labels()).transform,
+                        diagnose: {
+                            versteckt: document.hidden,
+                            timeline: CSS.supports('animation-timeline: scroll(root block)'),
+                            zeilen: table.querySelectorAll('tbody tr').length,
+                            tabellenHoehe: Math.round(table.getBoundingClientRect().height),
+                            dokumentHoehe: document.documentElement.scrollHeight,
+                        },
                     });
 
                     return;
@@ -99,9 +106,11 @@ test('the labels keep carrying after a block above the table shrinks', function 
         })
     JS);
 
+    $belege = json_encode($result);
+
     expect($result['maxScroll'])->toBeGreaterThan(0)
-        ->and($result['atBottom'])->toBeGreaterThanOrEqual(0)
-        ->and($result['atBottom'])->toBeLessThan($result['viewport'])
+        ->and($result['atBottom'])->toBeGreaterThanOrEqual(0, $belege)
+        ->and($result['atBottom'])->toBeLessThan($result['viewport'], $belege)
         ->and($result['transformAtTop'])->toBeIn(['none', 'matrix(1, 0, 0, 1, 0, 0)'])
         ->and($result['atTop'])->toBeGreaterThan(0);
 
