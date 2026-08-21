@@ -8,6 +8,7 @@ use Illuminate\Broadcasting\PendingBroadcast;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Support\Str;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents as BaseBroadcastsEvents;
+use function Illuminate\Support\defer;
 
 trait BroadcastsEvents
 {
