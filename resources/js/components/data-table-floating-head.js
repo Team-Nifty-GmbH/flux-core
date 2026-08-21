@@ -191,6 +191,12 @@ const measure = (table) => {
     // Past this point the row would have left the top of the screen.
     const start = Math.max(0, headRect.top + window.scrollY - edge);
 
+    if (start >= pageTravel) {
+        stand(labels);
+
+        return;
+    }
+
     // And this is how far it may travel: until its bottom edge meets the end of
     // the table. After that it leaves with the table instead of hovering over
     // whatever comes next.
