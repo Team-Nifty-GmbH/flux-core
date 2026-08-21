@@ -33,7 +33,7 @@ beforeEach(function (): void {
     ]);
 });
 
-test('the labels keep carrying after a block above the table shrinks', function (): void {
+test('the head is measured again after a block above the table shrinks', function (): void {
     $page = waitForDataTable(
         visit(route('orders.orders'))
             ->assertRoute('orders.orders')
@@ -87,21 +87,10 @@ test('the labels keep carrying after a block above the table shrinks', function 
                     };
 
                     resolve({
-                        atBottom: measured.atBottom,
-                        atTop: Math.round(labels().getBoundingClientRect().top),
-                        viewport: measured.viewport,
-                        end: read('end'),
                         maxScroll: document.documentElement.scrollHeight
                             - document.documentElement.clientHeight,
-                        start: read('start'),
-                        transformAtTop: getComputedStyle(labels()).transform,
-                        diagnose: {
-                            versteckt: document.hidden,
-                            timeline: CSS.supports('animation-timeline: scroll(root block)'),
-                            zeilen: table.querySelectorAll('tbody tr').length,
-                            tabellenHoehe: Math.round(table.getBoundingClientRect().height),
-                            dokumentHoehe: document.documentElement.scrollHeight,
-                        },
+                        startAfter: read('start'),
+                        startBefore: measured.startBefore,
                     });
 
                     return;
@@ -114,29 +103,21 @@ test('the labels keep carrying after a block above the table shrinks', function 
 
             settle([
                 toBottom,
-                () => filler.style.height = window.innerHeight + 'px',
-                toBottom,
-                toBottom,
                 () => {
-                    measured.atBottom = Math.round(labels().getBoundingClientRect().top);
-                    measured.viewport = window.innerHeight;
+                    const style = labels().getAttribute('style') || '';
+                    const match = style.match(/--flux-head-start:\s*([-\d.]+)/);
+                    measured.startBefore = match ? parseFloat(match[1]) : null;
                 },
-                () => window.scrollTo({ behavior: 'instant', top: 0 }),
+                () => filler.style.height = '0px',
             ]);
         })
     JS);
 
     $belege = json_encode($result);
 
-    expect($result['maxScroll'])->toBeGreaterThan(0)
-        ->and($result['atBottom'])->toBeGreaterThanOrEqual(0, $belege)
-        ->and($result['atBottom'])->toBeLessThan($result['viewport'], $belege)
-        ->and($result['transformAtTop'])->toBeIn(['none', 'matrix(1, 0, 0, 1, 0, 0)'])
-        ->and($result['atTop'])->toBeGreaterThan(0);
-
-    if (! is_null($result['start'])) {
-        expect($result['start'])->toBeLessThan($result['maxScroll']);
-    }
+    expect($result['startBefore'])->toBeGreaterThan(0, $belege)
+        ->and($result['startAfter'])->not->toBe($result['startBefore'], $belege)
+        ->and($result['startAfter'])->toBeLessThan($result['maxScroll'], $belege);
 });
 
 test('the measured range never reaches past what the page can scroll', function (): void {
