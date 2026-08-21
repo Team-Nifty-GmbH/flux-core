@@ -48,6 +48,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Bus;
@@ -286,6 +287,11 @@ class FluxServiceProvider extends ServiceProvider
     {
         /** @var Kernel $kernel */
         $kernel = $this->app->make(Kernel::class);
+
+        if (! $kernel->hasMiddleware(InvokeDeferredCallbacks::class)) {
+            $kernel->prependMiddleware(InvokeDeferredCallbacks::class);
+        }
+
         $kernel->prependMiddlewareToGroup('api', EnsureFrontendRequestsAreStateful::class);
 
         $kernel->appendMiddlewareToGroup('web', Localization::class);
