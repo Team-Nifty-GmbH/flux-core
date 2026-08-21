@@ -1,8 +1,21 @@
-import ApexCharts from 'apexcharts';
 import colors from 'tailwindcss/colors';
 
 window.colors = colors;
-window.ApexCharts = ApexCharts;
+
+/**
+ * ApexCharts is 909 KB, more than a third of the bundle, and only a widget that
+ * draws a chart ever needs it. Fetching it when the first chart initialises
+ * keeps it out of the payload every other page pays for. The promise is kept so
+ * a dashboard full of charts fetches it once.
+ */
+let apexChartsModule;
+
+const loadApexCharts = () =>
+    (apexChartsModule ??= import('apexcharts').then((module) => {
+        window.ApexCharts = module.default;
+
+        return module.default;
+    }));
 
 function apexCharts($wire) {
     return {
@@ -14,7 +27,7 @@ function apexCharts($wire) {
         async loadWidgetOptions() {
             this.widgetOptions = await $wire.getWidgetOptions();
         },
-        init() {
+        async init() {
             this.$el.setAttribute('apex_chart', '');
 
             if (this.$el.querySelector('.chart').clientHeight === 0) {
@@ -23,11 +36,14 @@ function apexCharts($wire) {
 
             this.height = this.$el.querySelector('.chart').clientHeight;
             document.addEventListener('livewire:navigating', () => {
-                this.chart.destroy();
+                this.chart?.destroy();
             });
 
             this.mapLivewireData($wire.options);
             this.chartType = this.livewireOptions.chart.type;
+
+            const ApexCharts = await loadApexCharts();
+
             this.chart = new ApexCharts(
                 this.$el.querySelector('.chart'),
                 this.options,
