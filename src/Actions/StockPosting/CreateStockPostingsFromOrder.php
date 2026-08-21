@@ -8,6 +8,7 @@ use FluxErp\Models\OrderPosition;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rulesets\StockPosting\CreateStockPostingsFromOrderRuleset;
+use FluxErp\Support\Stock\StockAllocator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -101,30 +102,27 @@ class CreateStockPostingsFromOrder extends FluxAction
                 ]);
             }
 
-            $stockPostings = resolve_static(StockPosting::class, 'query')
-                ->where('product_id', $orderPosition->product_id)
-                ->where('warehouse_id', $orderPosition->warehouse_id)
-                ->where('remaining_stock', '>', 0)
-                ->get(['id', 'remaining_stock', 'reserved_stock', 'purchase_price']);
-
             if ($postStock) {
                 // Post reserved stock
                 $this->postReservedStock($orderPosition, $open, $order->order_number);
 
                 // Post remaining stock
                 $open = bcsub($open, $reserved);
-                foreach ($stockPostings as $stockPosting) {
-                    if (bccomp($open, 0) <= 0) {
-                        break;
-                    }
 
-                    $posting = bccomp($open, $stockPosting->remaining_stock) === 1
-                        ? $stockPosting->remaining_stock
-                        : $open;
+                $allocation = app(StockAllocator::class)
+                    ->forProduct($orderPosition->product_id)
+                    ->inWarehouse($orderPosition->warehouse_id)
+                    ->allocate($open);
+
+                foreach ($allocation as $item) {
+                    $stockPosting = $item['stockPosting'];
+                    $posting = $item['amount'];
 
                     CreateStockPosting::make([
                         'warehouse_id' => $orderPosition->warehouse_id,
                         'product_id' => $orderPosition->product_id,
+                        'warehouse_bin_id' => $stockPosting->warehouse_bin_id,
+                        'lot_id' => $stockPosting->lot_id,
                         'parent_id' => $stockPosting->id,
                         'order_position_id' => $orderPosition->id,
                         'serial_number_id' => $stockPosting->serial_number_id,
@@ -161,15 +159,16 @@ class CreateStockPostingsFromOrder extends FluxAction
                 }
             } else {
                 $open = bcsub($open, $reserved);
-                // Reserve remaining stock
-                foreach ($stockPostings as $stockPosting) {
-                    if (bccomp($open, 0) === 0) {
-                        break;
-                    }
 
-                    $posting = bccomp($open, $stockPosting->remaining_stock) === 1
-                        ? $stockPosting->remaining_stock
-                        : $open;
+                // Reserve remaining stock
+                $allocation = app(StockAllocator::class)
+                    ->forProduct($orderPosition->product_id)
+                    ->inWarehouse($orderPosition->warehouse_id)
+                    ->allocate($open);
+
+                foreach ($allocation as $item) {
+                    $stockPosting = $item['stockPosting'];
+                    $posting = $item['amount'];
 
                     $orderPosition->reservedStock()->attach($stockPosting->id, ['reserved_amount' => $posting]);
 
