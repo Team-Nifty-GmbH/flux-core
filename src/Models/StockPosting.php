@@ -9,6 +9,7 @@ use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Model\SoftDeletes;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Cache;
 
@@ -64,5 +65,15 @@ class StockPosting extends FluxModel
     public function warehouseBin(): BelongsTo
     {
         return $this->belongsTo(WarehouseBin::class, 'warehouse_bin_id');
+    }
+
+    // Scopes
+    public function scopeExpiringWithin(Builder $query, int $days): void
+    {
+        $query->where('remaining_stock', '>', 0)
+            ->whereHas('lot', fn (Builder $query) => $query
+                ->whereNotNull('expires_at')
+                ->whereDate('expires_at', '<=', now()->addDays($days))
+            );
     }
 }
