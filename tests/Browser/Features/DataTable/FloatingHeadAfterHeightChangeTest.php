@@ -52,16 +52,29 @@ test('the labels keep carrying after a block above the table shrinks', function 
             table.querySelectorAll('tbody tr').forEach((tr) => tr.style.height = '120px');
 
             const toBottom = () => window.scrollTo(0, document.documentElement.scrollHeight);
+            const measured = {};
 
             const settle = (steps) => {
                 const next = steps.shift();
 
                 if (! next) {
+                    const style = labels.getAttribute('style') || '';
+                    const read = (name) => {
+                        const match = style.match(
+                            new RegExp('--flux-head-' + name + ':\\s*([-\\d.]+)')
+                        );
+
+                        return match ? parseFloat(match[1]) : null;
+                    };
+
                     resolve({
-                        top: Math.round(labels.getBoundingClientRect().top),
+                        atBottom: measured.atBottom,
+                        atTop: Math.round(labels.getBoundingClientRect().top),
+                        end: read('end'),
                         maxScroll: document.documentElement.scrollHeight
                             - document.documentElement.clientHeight,
-                        scrollY: Math.round(window.scrollY),
+                        start: read('start'),
+                        transformAtTop: getComputedStyle(labels).transform,
                     });
 
                     return;
@@ -75,11 +88,80 @@ test('the labels keep carrying after a block above the table shrinks', function 
                 toBottom,
                 () => filler.style.height = window.innerHeight + 'px',
                 toBottom,
+                () => measured.atBottom = Math.round(labels.getBoundingClientRect().top),
+                () => window.scrollTo(0, 0),
             ]);
         })
     JS);
 
     expect($result['maxScroll'])->toBeGreaterThan(0)
-        ->and($result['top'])->toBeGreaterThanOrEqual(0)
-        ->and($result['top'])->toBeLessThan(200);
+        ->and($result['atBottom'])->toBeGreaterThanOrEqual(0)
+        ->and($result['atBottom'])->toBeLessThanOrEqual(60)
+        ->and($result['transformAtTop'])->toBeIn(['none', 'matrix(1, 0, 0, 1, 0, 0)'])
+        ->and($result['atTop'])->toBeGreaterThan(60);
+
+    if (! is_null($result['start'])) {
+        expect($result['start'])->toBeLessThan($result['maxScroll']);
+    }
+});
+
+test('the measured range never reaches past what the page can scroll', function (): void {
+    $page = waitForDataTable(
+        visit(route('orders.orders'))
+            ->assertRoute('orders.orders')
+    );
+
+    $result = $page->script(<<<'JS'
+        () => new Promise((resolve) => {
+            const table = document.querySelector('[tall-datatable]');
+            const labels = table.querySelector('table thead').rows[0];
+            const filler = document.createElement('div');
+
+            filler.id = 'shrinking-block';
+            filler.style.height = (window.innerHeight * 4) + 'px';
+            table.parentElement.insertBefore(filler, table);
+
+            table.querySelectorAll('tbody tr').forEach((tr) => tr.style.height = '120px');
+
+            const settle = (steps) => {
+                const next = steps.shift();
+
+                if (! next) {
+                    const style = labels.getAttribute('style') || '';
+                    const read = (name) => {
+                        const match = style.match(
+                            new RegExp('--flux-head-' + name + ':\\s*([-\\d.]+)')
+                        );
+
+                        return match ? parseFloat(match[1]) : null;
+                    };
+
+                    resolve({
+                        maxScroll: document.documentElement.scrollHeight
+                            - document.documentElement.clientHeight,
+                        start: read('start'),
+                        travel: read('travel'),
+                    });
+
+                    return;
+                }
+
+                next();
+                setTimeout(() => settle(steps), 700);
+            };
+
+            settle([
+                () => window.scrollTo(0, document.documentElement.scrollHeight),
+                () => filler.style.height = '0px',
+            ]);
+        })
+    JS);
+
+    expect($result['maxScroll'])->toBeGreaterThanOrEqual(0);
+
+    if ($result['travel'] > 0) {
+        expect($result['start'])->toBeLessThan($result['maxScroll']);
+    } else {
+        expect($result['start'])->toBeNull();
+    }
 });
