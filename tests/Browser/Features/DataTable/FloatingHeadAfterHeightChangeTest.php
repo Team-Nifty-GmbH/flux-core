@@ -9,6 +9,56 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 
+const HEAD_HELPERS = <<<'JS'
+    const table = document.querySelector('[tall-datatable]');
+    const labels = () => table.querySelector('table thead').rows[0];
+
+    const read = (name) => {
+        const match = (labels().getAttribute('style') || '').match(
+            new RegExp('--flux-head-' + name + ':\\s*([-\\d.]+)')
+        );
+
+        return match ? parseFloat(match[1]) : null;
+    };
+
+    const maxScroll = () => document.documentElement.scrollHeight
+        - document.documentElement.clientHeight;
+
+    const toBottom = () => new Promise((done) => {
+        let previous = -1;
+
+        const push = () => {
+            window.scrollTo({
+                behavior: 'instant',
+                top: document.documentElement.scrollHeight,
+            });
+
+            if (window.scrollY === previous) {
+                done();
+
+                return;
+            }
+
+            previous = window.scrollY;
+            setTimeout(push, 150);
+        };
+
+        push();
+    });
+
+    const settle = (steps, resolve) => {
+        const next = steps.shift();
+
+        if (! next) {
+            resolve();
+
+            return;
+        }
+
+        Promise.resolve(next()).then(() => setTimeout(() => settle(steps, resolve), 700));
+    };
+JS;
+
 beforeEach(function (): void {
     $contact = Contact::factory()->create();
     $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
@@ -39,10 +89,12 @@ test('the head is measured again after a block above the table shrinks', functio
             ->assertRoute('orders.orders')
     );
 
-    $result = $page->script(<<<'JS'
+    $helpers = HEAD_HELPERS;
+
+    $result = $page->script(<<<JS
         () => new Promise((resolve) => {
-            const table = document.querySelector('[tall-datatable]');
-            const labels = () => table.querySelector('table thead').rows[0];
+            {$helpers}
+
             const filler = document.createElement('div');
 
             filler.id = 'shrinking-block';
@@ -51,73 +103,32 @@ test('the head is measured again after a block above the table shrinks', functio
 
             table.querySelectorAll('tbody tr').forEach((tr) => tr.style.height = '120px');
 
-            const toBottom = () => new Promise((fertig) => {
-                let letzte = -1;
-                const schieben = () => {
-                    window.scrollTo({
-                        behavior: 'instant',
-                        top: document.documentElement.scrollHeight,
-                    });
-
-                    if (window.scrollY === letzte) {
-                        fertig();
-
-                        return;
-                    }
-
-                    letzte = window.scrollY;
-                    setTimeout(schieben, 150);
-                };
-
-                schieben();
-            });
             const measured = {};
 
-            const settle = (steps) => {
-                const next = steps.shift();
+            settle(
+                [
+                    toBottom,
+                    () => measured.startBefore = read('start'),
+                    () => new Promise((done) => {
+                        filler.style.height = '0px';
 
-                if (! next) {
-                    const style = labels().getAttribute('style') || '';
-                    const read = (name) => {
-                        const match = style.match(
-                            new RegExp('--flux-head-' + name + ':\\s*([-\\d.]+)')
-                        );
-
-                        return match ? parseFloat(match[1]) : null;
-                    };
-
-                    resolve({
-                        maxScroll: document.documentElement.scrollHeight
-                            - document.documentElement.clientHeight,
-                        startAfter: read('start'),
-                        startBefore: measured.startBefore,
-                    });
-
-                    return;
-                }
-
-                Promise.resolve(next()).then(
-                    () => setTimeout(() => settle(steps), 700)
-                );
-            };
-
-            settle([
-                toBottom,
-                () => {
-                    const style = labels().getAttribute('style') || '';
-                    const match = style.match(/--flux-head-start:\s*([-\d.]+)/);
-                    measured.startBefore = match ? parseFloat(match[1]) : null;
-                },
-                () => filler.style.height = '0px',
-            ]);
+                        setTimeout(() => {
+                            measured.startAfter = read('start');
+                            measured.maxScroll = maxScroll();
+                            done();
+                        }, 200);
+                    }),
+                ],
+                () => resolve(measured)
+            );
         })
     JS);
 
-    $belege = json_encode($result);
+    $evidence = json_encode($result);
 
-    expect($result['startBefore'])->toBeGreaterThan(0, $belege)
-        ->and($result['startAfter'])->not->toBe($result['startBefore'], $belege)
-        ->and($result['startAfter'])->toBeLessThan($result['maxScroll'], $belege);
+    expect($result['startBefore'])->toBeGreaterThan(0, $evidence)
+        ->and($result['startAfter'])->not->toBe($result['startBefore'], $evidence)
+        ->and($result['startAfter'])->toBeLessThan($result['maxScroll'], $evidence);
 });
 
 test('the measured range never reaches past what the page can scroll', function (): void {
@@ -126,10 +137,12 @@ test('the measured range never reaches past what the page can scroll', function 
             ->assertRoute('orders.orders')
     );
 
-    $result = $page->script(<<<'JS'
+    $helpers = HEAD_HELPERS;
+
+    $result = $page->script(<<<JS
         () => new Promise((resolve) => {
-            const table = document.querySelector('[tall-datatable]');
-            const labels = () => table.querySelector('table thead').rows[0];
+            {$helpers}
+
             const filler = document.createElement('div');
 
             filler.id = 'shrinking-block';
@@ -138,50 +151,28 @@ test('the measured range never reaches past what the page can scroll', function 
 
             table.querySelectorAll('tbody tr').forEach((tr) => tr.style.height = '120px');
 
-            const settle = (steps) => {
-                const next = steps.shift();
-
-                if (! next) {
-                    const style = labels().getAttribute('style') || '';
-                    const read = (name) => {
-                        const match = style.match(
-                            new RegExp('--flux-head-' + name + ':\\s*([-\\d.]+)')
-                        );
-
-                        return match ? parseFloat(match[1]) : null;
-                    };
-
-                    resolve({
-                        maxScroll: document.documentElement.scrollHeight
-                            - document.documentElement.clientHeight,
-                        start: read('start'),
-                        travel: read('travel'),
-                    });
-
-                    return;
-                }
-
-                Promise.resolve(next()).then(
-                    () => setTimeout(() => settle(steps), 700)
-                );
-            };
-
-            settle([
-                () => window.scrollTo({
-                    behavior: 'instant',
-                    top: document.documentElement.scrollHeight,
-                }),
-                () => filler.style.height = '0px',
-            ]);
+            settle(
+                [
+                    toBottom,
+                    () => filler.style.height = '0px',
+                ],
+                () => resolve({
+                    maxScroll: maxScroll(),
+                    start: read('start'),
+                    travel: read('travel'),
+                })
+            );
         })
     JS);
 
-    expect($result['maxScroll'])->toBeGreaterThanOrEqual(0);
+    $evidence = json_encode($result);
+
+    expect($result['maxScroll'])->toBeGreaterThanOrEqual(0, $evidence);
 
     if ($result['travel'] > 0) {
-        expect($result['start'])->toBeLessThan($result['maxScroll']);
+        expect($result['start'])->toBeLessThan($result['maxScroll'], $evidence);
     } else {
-        expect($result['start'])->toBeNull();
+        expect($result['start'])->toBeNull($evidence);
     }
 });
 
@@ -191,63 +182,30 @@ test('the head never travels further than the page can scroll', function (): voi
             ->assertRoute('orders.orders')
     );
 
-    $result = $page->script(<<<'JS'
+    $helpers = HEAD_HELPERS;
+
+    $result = $page->script(<<<JS
         () => new Promise((resolve) => {
-            const table = document.querySelector('[tall-datatable]');
-            const labels = () => table.querySelector('table thead').rows[0];
+            {$helpers}
 
             table.querySelectorAll('tbody tr').forEach((tr) => tr.style.height = '400px');
 
-            setTimeout(() => {
-                window.scrollTo({
-                    behavior: 'instant',
-                    top: document.documentElement.scrollHeight,
-                });
-
-                setTimeout(() => {
-                    const style = labels().getAttribute('style') || '';
-                    const read = (name) => {
-                        const match = style.match(
-                            new RegExp('--flux-head-' + name + ':\\s*([-\\d.]+)')
-                        );
-
-                        return match ? parseFloat(match[1]) : null;
-                    };
-
-                    const maxScroll = () => document.documentElement.scrollHeight
-                        - document.documentElement.clientHeight;
-                    const vorher = {end: read('end'), maxScroll: maxScroll()};
-
-                    window.dispatchEvent(new Event('resize'));
-
-                    setTimeout(() => {
-                        const stil = labels().getAttribute('style') || '';
-                        const lies = (name) => {
-                            const treffer = stil.match(
-                                new RegExp('--flux-head-' + name + ':\\s*([-\\d.]+)')
-                            );
-
-                            return treffer ? parseFloat(treffer[1]) : null;
-                        };
-
-                        resolve({
-                            end: lies('end'),
-                            maxScroll: maxScroll(),
-                            travel: lies('travel'),
-                            vorher,
-                            zeilen: table.querySelectorAll('tbody tr').length,
-                        });
-                    }, 900);
-                }, 900);
-            }, 700);
+            settle(
+                [toBottom],
+                () => resolve({
+                    end: read('end'),
+                    maxScroll: maxScroll(),
+                    travel: read('travel'),
+                })
+            );
         })
     JS);
 
-    $belege = json_encode($result);
+    $evidence = json_encode($result);
 
-    expect($result['maxScroll'])->toBeGreaterThan(0, $belege);
+    expect($result['maxScroll'])->toBeGreaterThan(0, $evidence);
 
     if ($result['travel'] > 0) {
-        expect($result['end'])->toBeLessThanOrEqual($result['maxScroll'], $belege);
+        expect($result['end'])->toBeLessThanOrEqual($result['maxScroll'], $evidence);
     }
 });
