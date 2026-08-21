@@ -1,6 +1,7 @@
 <?php
 
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
+use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
 use FluxErp\Actions\StockPosting\CreateStockPostingsFromOrder;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
@@ -228,4 +229,40 @@ test('insufficient stock on a normal product is rejected', function (): void {
         ->validate()
         ->execute())
         ->toThrow(ValidationException::class);
+});
+
+test('posting a grown order after a partial reservation consumes the reservation then allocates the rest', function (): void {
+    $layer = ($this->layer)(10);
+
+    $order = ($this->makeOrder)(OrderTypeEnum::Order);
+    $position = ($this->addPosition)($order, 4);
+
+    CreateStockPostingsFromOrder::make(['id' => $order->getKey(), 'only_reserve_stock' => true])
+        ->validate()
+        ->execute();
+
+    UpdateOrderPosition::make(['id' => $position->getKey(), 'amount' => 9])
+        ->validate()
+        ->execute();
+
+    CreateStockPostingsFromOrder::make(['id' => $order->getKey()])
+        ->validate()
+        ->execute();
+
+    $withdrawals = StockPosting::query()
+        ->where('order_position_id', $position->getKey())
+        ->orderBy('id')
+        ->get();
+
+    $layer->refresh();
+
+    expect($withdrawals)->toHaveCount(2)
+        ->and(bccomp($withdrawals[0]->posting, '-4', 10))->toBe(0)
+        ->and($withdrawals[0]->parent_id)->toBeNull()
+        ->and(bccomp($withdrawals[1]->posting, '-5', 10))->toBe(0)
+        ->and($withdrawals[1]->parent_id)->toBe($layer->getKey())
+        ->and(bccomp((string) $position->stockPostings()->sum('posting'), '-9', 10))->toBe(0)
+        ->and(bccomp($layer->remaining_stock, '1', 10))->toBe(0)
+        ->and(bccomp($layer->reserved_stock, '0', 10))->toBe(0)
+        ->and($position->reservedStock()->count())->toBe(0);
 });

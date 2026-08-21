@@ -26,7 +26,7 @@ class StockAllocator
         return $this;
     }
 
-    public function inWarehouse(int $warehouseId): static
+    public function inWarehouse(?int $warehouseId): static
     {
         $this->warehouseId = $warehouseId;
 
