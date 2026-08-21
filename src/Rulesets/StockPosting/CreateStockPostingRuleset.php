@@ -9,6 +9,7 @@ use FluxErp\Models\SerialNumber;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Warehouse;
 use FluxErp\Models\WarehouseBin;
+use FluxErp\Rules\ExistsWithForeign;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
@@ -39,11 +40,19 @@ class CreateStockPostingRuleset extends FluxRuleset
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => WarehouseBin::class]),
+                app(ExistsWithForeign::class, [
+                    'foreignAttribute' => 'warehouse_id',
+                    'table' => 'warehouse_bins',
+                ]),
             ],
             'lot_id' => [
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => Lot::class]),
+                app(ExistsWithForeign::class, [
+                    'foreignAttribute' => 'product_id',
+                    'table' => 'lots',
+                ]),
             ],
             'product_id' => [
                 'required',
