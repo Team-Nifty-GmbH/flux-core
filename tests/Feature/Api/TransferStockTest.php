@@ -13,7 +13,7 @@ beforeEach(function (): void {
     $this->from = WarehouseBin::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
     $this->to = WarehouseBin::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
 
-    StockPosting::factory()->create([
+    $this->sourcePosting = StockPosting::factory()->create([
         'warehouse_id' => $this->warehouse->getKey(),
         'product_id' => $this->product->getKey(),
         'warehouse_bin_id' => $this->from->getKey(),
@@ -40,6 +40,17 @@ test('transfer stock', function (): void {
     expect(bccomp((string) StockPosting::query()
         ->where('warehouse_bin_id', $this->to->getKey())
         ->sum('posting'), '4', 10))->toBe(0);
+
+    expect(bccomp((string) StockPosting::query()
+        ->where('warehouse_bin_id', $this->from->getKey())
+        ->where('posting', '<', 0)
+        ->sum('posting'), '-4', 10))->toBe(0);
+
+    expect(bccomp(
+        (string) $this->sourcePosting->refresh()->remaining_stock,
+        '6',
+        10
+    ))->toBe(0);
 });
 
 test('transfer stock validation fails', function (): void {
@@ -52,4 +63,25 @@ test('transfer stock validation fails', function (): void {
     ]);
 
     $response->assertUnprocessable();
+});
+
+test('transfer stock fails when amount exceeds available stock', function (): void {
+    $this->user->givePermissionTo($this->permission);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->post('/api/stock-postings/transfer', [
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'from_warehouse_bin_id' => $this->from->getKey(),
+        'to_warehouse_bin_id' => $this->to->getKey(),
+        'amount' => 11,
+    ]);
+
+    $response->assertUnprocessable();
+
+    expect(bccomp(
+        (string) $this->sourcePosting->refresh()->remaining_stock,
+        '10',
+        10
+    ))->toBe(0);
 });
