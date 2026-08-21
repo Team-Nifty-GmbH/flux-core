@@ -184,3 +184,70 @@ test('the measured range never reaches past what the page can scroll', function 
         expect($result['start'])->toBeNull();
     }
 });
+
+test('the head never travels further than the page can scroll', function (): void {
+    $page = waitForDataTable(
+        visit(route('orders.orders'))
+            ->assertRoute('orders.orders')
+    );
+
+    $result = $page->script(<<<'JS'
+        () => new Promise((resolve) => {
+            const table = document.querySelector('[tall-datatable]');
+            const labels = () => table.querySelector('table thead').rows[0];
+
+            table.querySelectorAll('tbody tr').forEach((tr) => tr.style.height = '400px');
+
+            setTimeout(() => {
+                window.scrollTo({
+                    behavior: 'instant',
+                    top: document.documentElement.scrollHeight,
+                });
+
+                setTimeout(() => {
+                    const style = labels().getAttribute('style') || '';
+                    const read = (name) => {
+                        const match = style.match(
+                            new RegExp('--flux-head-' + name + ':\\s*([-\\d.]+)')
+                        );
+
+                        return match ? parseFloat(match[1]) : null;
+                    };
+
+                    const maxScroll = () => document.documentElement.scrollHeight
+                        - document.documentElement.clientHeight;
+                    const vorher = {end: read('end'), maxScroll: maxScroll()};
+
+                    window.dispatchEvent(new Event('resize'));
+
+                    setTimeout(() => {
+                        const stil = labels().getAttribute('style') || '';
+                        const lies = (name) => {
+                            const treffer = stil.match(
+                                new RegExp('--flux-head-' + name + ':\\s*([-\\d.]+)')
+                            );
+
+                            return treffer ? parseFloat(treffer[1]) : null;
+                        };
+
+                        resolve({
+                            end: lies('end'),
+                            maxScroll: maxScroll(),
+                            travel: lies('travel'),
+                            vorher,
+                            zeilen: table.querySelectorAll('tbody tr').length,
+                        });
+                    }, 900);
+                }, 900);
+            }, 700);
+        })
+    JS);
+
+    $belege = json_encode($result);
+
+    expect($result['maxScroll'])->toBeGreaterThan(0, $belege);
+
+    if ($result['travel'] > 0) {
+        expect($result['end'])->toBeLessThanOrEqual($result['maxScroll'], $belege);
+    }
+});
