@@ -11,6 +11,7 @@ use Illuminate\Contracts\Broadcasting\HasBroadcastChannel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Serializable;
+use function Illuminate\Support\defer;
 
 trait BroadcastsActionEvents
 {
