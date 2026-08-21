@@ -78,7 +78,7 @@ test('a withdrawal may not exceed the remaining stock of its parent layer', func
     ], 'posting');
 });
 
-test('a withdrawal against reserved stock is allowed', function (): void {
+test('a withdrawal may not draw against the reserved stock of its parent layer', function (): void {
     $layer = StockPosting::factory()->create([
         'warehouse_id' => $this->warehouse->getKey(),
         'product_id' => $this->product->getKey(),
@@ -86,14 +86,12 @@ test('a withdrawal against reserved stock is allowed', function (): void {
     ]);
     $layer->update(['remaining_stock' => 0, 'reserved_stock' => 10]);
 
-    $withdrawal = CreateStockPosting::make([
+    CreateStockPosting::assertValidationErrors([
         'warehouse_id' => $this->warehouse->getKey(),
         'product_id' => $this->product->getKey(),
         'parent_id' => $layer->getKey(),
         'posting' => -10,
-    ])->validate()->execute();
-
-    expect(bccomp($withdrawal->posting, '-10', 10))->toBe(0);
+    ], 'posting');
 });
 
 test('an outgoing posting is exempt from the bin requirement', function (): void {
@@ -107,4 +105,32 @@ test('an outgoing posting is exempt from the bin requirement', function (): void
     ])->validate()->execute();
 
     expect(bccomp($posting->posting, '-2', 10))->toBe(0);
+});
+
+test('an incoming posting into a bin that is not a storage location is rejected', function (): void {
+    $zone = WarehouseBin::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'is_storage_location' => false,
+    ]);
+
+    CreateStockPosting::assertValidationErrors([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'warehouse_bin_id' => $zone->getKey(),
+        'posting' => 5,
+    ], 'warehouse_bin_id');
+});
+
+test('an incoming posting into an inactive bin is rejected', function (): void {
+    $inactive = WarehouseBin::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'is_active' => false,
+    ]);
+
+    CreateStockPosting::assertValidationErrors([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'warehouse_bin_id' => $inactive->getKey(),
+        'posting' => 5,
+    ], 'warehouse_bin_id');
 });

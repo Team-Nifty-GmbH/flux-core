@@ -8,6 +8,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Warehouse;
+use FluxErp\Models\WarehouseBin;
 use FluxErp\Rulesets\StockPosting\CreateStockPostingRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
@@ -79,6 +80,18 @@ class CreateStockPosting extends FluxAction
                 ])->errorBag('createStockPosting');
             }
 
+            if ($warehouseBinId = $this->data['warehouse_bin_id'] ?? false) {
+                $warehouseBin = resolve_static(WarehouseBin::class, 'query')
+                    ->whereKey($warehouseBinId)
+                    ->first();
+
+                if (! $warehouseBin?->is_storage_location || ! $warehouseBin->is_active) {
+                    throw ValidationException::withMessages([
+                        'warehouse_bin_id' => ['The given warehouse bin cannot hold stock'],
+                    ])->errorBag('createStockPosting');
+                }
+            }
+
             $isLotTracked = resolve_static(Product::class, 'query')
                 ->whereKey($this->data['product_id'])
                 ->value('is_lot_tracked');
@@ -95,10 +108,7 @@ class CreateStockPosting extends FluxAction
                 ->whereKey($this->data['parent_id'])
                 ->first();
 
-            // reserved_stock is included because reservations move stock out of remaining_stock before it is withdrawn
-            $drawable = bcadd((string) $parent->remaining_stock, (string) $parent->reserved_stock, 10);
-
-            if (bccomp(bcabs($posting), $drawable, 10) === 1) {
+            if (bccomp(bcabs($posting), (string) $parent->remaining_stock, 10) === 1) {
                 throw ValidationException::withMessages([
                     'posting' => ['The withdrawal exceeds the drawable stock of the parent posting'],
                 ])->errorBag('createStockPosting');
