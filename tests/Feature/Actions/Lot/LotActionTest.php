@@ -53,9 +53,10 @@ test('update lot rejects a duplicate lot number for the same product', function 
     Lot::factory()->create(['product_id' => $this->product->getKey(), 'lot_number' => 'CH-2026-08']);
     $lot = Lot::factory()->create(['product_id' => $this->product->getKey(), 'lot_number' => 'CH-2026-09']);
 
-    expect(fn () => UpdateLot::make(['id' => $lot->getKey(), 'lot_number' => 'CH-2026-08'])
-        ->validate()->execute())
-        ->toThrow(Illuminate\Validation\ValidationException::class);
+    UpdateLot::assertValidationErrors([
+        'id' => $lot->getKey(),
+        'lot_number' => 'CH-2026-08',
+    ], 'lot_number');
 });
 
 test('update lot allows re-saving its own unchanged lot number', function (): void {
@@ -84,6 +85,16 @@ test('delete lot refuses while stock postings reference it', function (): void {
         'posting' => 10,
     ]);
 
-    expect(fn () => DeleteLot::make(['id' => $lot->getKey()])->validate()->execute())
-        ->toThrow(Illuminate\Validation\ValidationException::class);
+    DeleteLot::assertValidationErrors(['id' => $lot->getKey()], 'stock_postings');
+});
+
+test('create lot rejects a lot number held by a trashed lot', function (): void {
+    Lot::factory()
+        ->create(['product_id' => $this->product->getKey(), 'lot_number' => 'CH-2026-08'])
+        ->delete();
+
+    CreateLot::assertValidationErrors([
+        'product_id' => $this->product->getKey(),
+        'lot_number' => 'CH-2026-08',
+    ], 'lot_number');
 });

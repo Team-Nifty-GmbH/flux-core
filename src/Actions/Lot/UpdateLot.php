@@ -41,6 +41,7 @@ class UpdateLot extends FluxAction
             ->first();
 
         if (resolve_static(Lot::class, 'query')
+            ->withTrashed()
             ->whereKeyNot($lot->getKey())
             ->where('product_id', $this->data['product_id'] ?? $lot->product_id)
             ->where('lot_number', $this->data['lot_number'] ?? $lot->lot_number)
