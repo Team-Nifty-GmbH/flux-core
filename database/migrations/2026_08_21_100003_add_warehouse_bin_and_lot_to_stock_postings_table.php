@@ -22,12 +22,14 @@ return new class() extends Migration
                 ->nullOnDelete();
 
             $table->index(['warehouse_bin_id', 'product_id']);
+            $table->index(['warehouse_id', 'product_id']);
         });
     }
 
     public function down(): void
     {
         Schema::table('stock_postings', function (Blueprint $table): void {
+            $table->dropIndex(['warehouse_id', 'product_id']);
             $table->dropIndex(['warehouse_bin_id', 'product_id']);
             $table->dropConstrainedForeignId('lot_id');
             $table->dropConstrainedForeignId('warehouse_bin_id');
