@@ -136,12 +136,6 @@ const followsPage = (table) => {
     return true;
 };
 
-const stand = (labels) => {
-    labels.style.setProperty('--flux-head-travel', '0px');
-    labels.style.removeProperty('--flux-head-start');
-    labels.style.removeProperty('--flux-head-end');
-};
-
 const measure = (table) => {
     const head = table.querySelector('thead');
     const body = table.querySelector('tbody');
@@ -160,7 +154,7 @@ const measure = (table) => {
     }
 
     if (!followsPage(table)) {
-        stand(labels);
+        labels.style.setProperty('--flux-head-travel', '0px');
 
         return;
     }
@@ -179,7 +173,7 @@ const measure = (table) => {
         pageTravel <= 0 &&
         bodyRect.bottom - headRect.top <= window.innerHeight - edge
     ) {
-        stand(labels);
+        labels.style.setProperty('--flux-head-travel', '0px');
 
         return;
     }
@@ -190,12 +184,6 @@ const measure = (table) => {
 
     // Past this point the row would have left the top of the screen.
     const start = Math.max(0, headRect.top + window.scrollY - edge);
-
-    if (start >= pageTravel) {
-        stand(labels);
-
-        return;
-    }
 
     // And this is how far it may travel: until its bottom edge meets the end of
     // the table. After that it leaves with the table instead of hovering over
@@ -302,28 +290,13 @@ const shiftAll = () => {
 
 // Rows arrive, groups unfold, filters open: all of that moves the table without
 // anyone scrolling.
-const observer = new MutationObserver((records) => {
-    if (
-        records.every((record) =>
-            record.target.closest?.('[tall-datatable] thead'),
-        )
-    ) {
-        return;
-    }
-
-    measureAll();
-});
+const observer = new MutationObserver(measureAll);
 
 const start = () => {
     measureTopEdge();
     measureAll();
     observer.disconnect();
-    observer.observe(document.body, {
-        attributeFilter: ['class', 'hidden', 'style'],
-        attributes: true,
-        childList: true,
-        subtree: true,
-    });
+    observer.observe(document.body, { childList: true, subtree: true });
 };
 
 document.head.insertAdjacentHTML(
