@@ -96,7 +96,7 @@ trait BroadcastsActionEvents
         }
 
         if (! empty($this->broadcastOn($event)) || ! empty($channels)) {
-            defer(fn () => broadcast($instance->onChannels(Arr::wrap($channels))));
+            defer(fn () => broadcast($instance->onChannels(Arr::wrap($channels))), always: true);
         }
 
         return null;

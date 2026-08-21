@@ -91,7 +91,10 @@ trait BroadcastsEvents
             $instance->broadcastNow();
         }
 
-        defer(fn () => $this->baseBroadcastIfBroadcastChannelsExistForEvent($instance, $event, $channels));
+        defer(
+            fn () => $this->baseBroadcastIfBroadcastChannelsExistForEvent($instance, $event, $channels),
+            always: true
+        );
 
         return null;
     }
