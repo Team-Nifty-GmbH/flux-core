@@ -12,6 +12,7 @@ use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Pivots\ProductProductProperty;
 use FluxErp\Models\Pivots\ProductSupplier;
 use FluxErp\Models\Pivots\ProductTenant;
+use FluxErp\Models\Pivots\ProductWarehouseBin;
 use FluxErp\Support\Collection\ProductOptionCollection;
 use FluxErp\Traits\Model\Categorizable;
 use FluxErp\Traits\Model\Commentable;
@@ -192,6 +193,13 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     public function vatRate(): BelongsTo
     {
         return $this->belongsTo(VatRate::class);
+    }
+
+    public function warehouseBins(): BelongsToMany
+    {
+        return $this->belongsToMany(WarehouseBin::class, 'product_warehouse_bin')
+            ->using(ProductWarehouseBin::class)
+            ->withPivot(['is_fixed_location', 'min_stock', 'max_stock', 'sort_order']);
     }
 
     // Public methods
