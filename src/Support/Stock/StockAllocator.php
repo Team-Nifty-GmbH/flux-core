@@ -15,7 +15,7 @@ class StockAllocator
 
     protected ?int $warehouseId = null;
 
-    protected array $binIds = [];
+    protected ?array $binIds = null;
 
     protected ?StockRemovalStrategyEnum $strategy = null;
 
@@ -62,7 +62,7 @@ class StockAllocator
                 ->orWhereHas('lot', fn (Builder $query) => $query->whereNull('blocked_at'))
             );
 
-        if ($this->binIds) {
+        if (! is_null($this->binIds)) {
             $query->whereIn('stock_postings.warehouse_bin_id', $this->binIds);
         }
 
@@ -80,7 +80,7 @@ class StockAllocator
 
     public function allocate(string|int|float $amount): Collection
     {
-        $open = (string) $amount;
+        $open = is_float($amount) ? sprintf('%.10F', $amount) : (string) $amount;
         $allocation = collect();
 
         foreach ($this->query()->get() as $stockPosting) {

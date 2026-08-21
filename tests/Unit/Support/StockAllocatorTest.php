@@ -134,3 +134,30 @@ test('the product strategy beats the warehouse strategy', function (): void {
 
     expect($allocation[0]['stockPosting']->getKey())->toBe($second->getKey());
 });
+
+test('the warehouse strategy is used when the product has none', function (): void {
+    $this->warehouse->update(['stock_removal_strategy_enum' => StockRemovalStrategyEnum::Lifo]);
+
+    ($this->layer)(10);
+    $second = ($this->layer)(10);
+
+    $allocation = ($this->allocator)()->allocate(1);
+
+    expect($allocation[0]['stockPosting']->getKey())->toBe($second->getKey());
+});
+
+test('an empty bin scope allocates nothing', function (): void {
+    ($this->layer)(10);
+
+    $allocation = ($this->allocator)()->inBins([])->allocate(10);
+
+    expect($allocation)->toHaveCount(0);
+});
+
+test('allocating zero returns an empty collection without touching any layer', function (): void {
+    ($this->layer)(10);
+
+    $allocation = ($this->allocator)()->allocate(0);
+
+    expect($allocation)->toHaveCount(0);
+});
