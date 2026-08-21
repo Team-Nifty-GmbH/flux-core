@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasDefault;
 use FluxErp\Traits\Model\HasPackageFactory;
@@ -20,6 +21,8 @@ class Warehouse extends FluxModel
     {
         return [
             'is_default' => 'boolean',
+            'requires_bin_location' => 'boolean',
+            'stock_removal_strategy_enum' => StockRemovalStrategyEnum::class,
         ];
     }
 
@@ -27,5 +30,10 @@ class Warehouse extends FluxModel
     public function stockPostings(): HasMany
     {
         return $this->hasMany(StockPosting::class, 'warehouse_id');
+    }
+
+    public function warehouseBins(): HasMany
+    {
+        return $this->hasMany(WarehouseBin::class, 'warehouse_id');
     }
 }

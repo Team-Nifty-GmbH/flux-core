@@ -50,6 +50,7 @@ use FluxErp\Models\Loan;
 use FluxErp\Models\LoanInstallment;
 use FluxErp\Models\Location;
 use FluxErp\Models\Log;
+use FluxErp\Models\Lot;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use FluxErp\Models\Media;
@@ -108,6 +109,7 @@ use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Pivots\ProductProductProperty;
 use FluxErp\Models\Pivots\ProductSupplier;
 use FluxErp\Models\Pivots\ProductTenant;
+use FluxErp\Models\Pivots\ProductWarehouseBin;
 use FluxErp\Models\Pivots\QueueMonitorable;
 use FluxErp\Models\Pivots\TargetUser;
 use FluxErp\Models\Pivots\TaskUser;
@@ -150,6 +152,7 @@ use FluxErp\Models\VacationBlackout;
 use FluxErp\Models\VacationCarryoverRule;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
+use FluxErp\Models\WarehouseBin;
 use FluxErp\Models\Widget;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeModel;
@@ -211,6 +214,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'loan_installment' => LoanInstallment::class,
             'location' => Location::class,
             'log' => Log::class,
+            'lot' => Lot::class,
             'mail_account' => MailAccount::class,
             'mail_folder' => MailFolder::class,
             'media' => Media::class,
@@ -263,6 +267,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'vacation_carryover_rule' => VacationCarryoverRule::class,
             'vat_rate' => VatRate::class,
             'warehouse' => Warehouse::class,
+            'warehouse_bin' => WarehouseBin::class,
             'widget' => Widget::class,
             'work_time' => WorkTime::class,
             'work_time_model' => WorkTimeModel::class,
@@ -313,6 +318,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'product_product_property' => ProductProductProperty::class,
             'product_supplier' => ProductSupplier::class,
             'product_tenant' => ProductTenant::class,
+            'product_warehouse_bin' => ProductWarehouseBin::class,
             'queue_monitorable' => QueueMonitorable::class,
             'target_user' => TargetUser::class,
             'task_user' => TaskUser::class,

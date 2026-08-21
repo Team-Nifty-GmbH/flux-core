@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use Exception;
 use FluxErp\Contracts\HasMediaForeignKey;
 use FluxErp\Enums\BundleTypeEnum;
+use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Models\Pivots\BundleProductProduct;
@@ -12,6 +13,7 @@ use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Pivots\ProductProductProperty;
 use FluxErp\Models\Pivots\ProductSupplier;
 use FluxErp\Models\Pivots\ProductTenant;
+use FluxErp\Models\Pivots\ProductWarehouseBin;
 use FluxErp\Support\Collection\ProductOptionCollection;
 use FluxErp\Traits\Model\Categorizable;
 use FluxErp\Traits\Model\Commentable;
@@ -100,6 +102,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         return [
             'bundle_type_enum' => BundleTypeEnum::class,
             'time_unit_enum' => TimeUnitEnum::class,
+            'stock_removal_strategy_enum' => StockRemovalStrategyEnum::class,
             'search_aliases' => 'array',
             'is_active' => 'boolean',
             'is_highlight' => 'boolean',
@@ -109,6 +112,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             'has_serial_numbers' => 'boolean',
             'is_nos' => 'boolean',
             'is_active_export_to_web_shop' => 'boolean',
+            'is_lot_tracked' => 'boolean',
         ];
     }
 
@@ -133,6 +137,11 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     public function coverMedia(): BelongsTo
     {
         return $this->belongsTo(Media::class, 'cover_media_id');
+    }
+
+    public function lots(): HasMany
+    {
+        return $this->hasMany(Lot::class, 'product_id');
     }
 
     public function orderPositions(): HasMany
@@ -192,6 +201,13 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     public function vatRate(): BelongsTo
     {
         return $this->belongsTo(VatRate::class);
+    }
+
+    public function warehouseBins(): BelongsToMany
+    {
+        return $this->belongsToMany(WarehouseBin::class, 'product_warehouse_bin')
+            ->using(ProductWarehouseBin::class)
+            ->withPivot(['is_fixed_location', 'min_stock', 'max_stock', 'sort_order']);
     }
 
     // Public methods
