@@ -109,6 +109,7 @@
     "action.setting.update": "Update a setting",
     "action.stock-posting.create": "Create a new stock posting",
     "action.stock-posting.delete": "Delete a stock posting",
+    "action.stock.transfer": "Transfer stock between warehouse bins",
     "action.task.create": "Create a new task",
     "action.task.delete": "Delete a task",
     "action.task.update": "Update a task",
