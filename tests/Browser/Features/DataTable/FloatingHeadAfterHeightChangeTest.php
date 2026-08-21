@@ -51,7 +51,26 @@ test('the labels keep carrying after a block above the table shrinks', function 
 
             table.querySelectorAll('tbody tr').forEach((tr) => tr.style.height = '120px');
 
-            const toBottom = () => window.scrollTo(0, document.documentElement.scrollHeight);
+            const toBottom = () => new Promise((fertig) => {
+                let letzte = -1;
+                const schieben = () => {
+                    window.scrollTo({
+                        behavior: 'instant',
+                        top: document.documentElement.scrollHeight,
+                    });
+
+                    if (window.scrollY === letzte) {
+                        fertig();
+
+                        return;
+                    }
+
+                    letzte = window.scrollY;
+                    setTimeout(schieben, 150);
+                };
+
+                schieben();
+            });
             const measured = {};
 
             const settle = (steps) => {
@@ -88,8 +107,9 @@ test('the labels keep carrying after a block above the table shrinks', function 
                     return;
                 }
 
-                next();
-                setTimeout(() => settle(steps), 700);
+                Promise.resolve(next()).then(
+                    () => setTimeout(() => settle(steps), 700)
+                );
             };
 
             settle([
@@ -101,7 +121,7 @@ test('the labels keep carrying after a block above the table shrinks', function 
                     measured.atBottom = Math.round(labels().getBoundingClientRect().top);
                     measured.viewport = window.innerHeight;
                 },
-                () => window.scrollTo(0, 0),
+                () => window.scrollTo({ behavior: 'instant', top: 0 }),
             ]);
         })
     JS);
@@ -160,12 +180,16 @@ test('the measured range never reaches past what the page can scroll', function 
                     return;
                 }
 
-                next();
-                setTimeout(() => settle(steps), 700);
+                Promise.resolve(next()).then(
+                    () => setTimeout(() => settle(steps), 700)
+                );
             };
 
             settle([
-                () => window.scrollTo(0, document.documentElement.scrollHeight),
+                () => window.scrollTo({
+                    behavior: 'instant',
+                    top: document.documentElement.scrollHeight,
+                }),
                 () => filler.style.height = '0px',
             ]);
         })
