@@ -2,11 +2,13 @@
 
 namespace FluxErp\Rulesets\StockPosting;
 
+use FluxErp\Models\Lot;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Warehouse;
+use FluxErp\Models\WarehouseBin;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
@@ -32,6 +34,16 @@ class CreateStockPostingRuleset extends FluxRuleset
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => Warehouse::class]),
+            ],
+            'warehouse_bin_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => WarehouseBin::class]),
+            ],
+            'lot_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Lot::class]),
             ],
             'product_id' => [
                 'required',
