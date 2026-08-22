@@ -9,6 +9,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
@@ -234,18 +235,23 @@ class Navigation extends Component
 
     protected function getVisits(): ?array
     {
-        if (! method_exists(auth()->user(), 'activities')) {
+        $user = auth()->user();
+
+        if (! method_exists($user, 'activities')) {
             return null;
         }
 
-        return auth()->user()
-            ->activities()
-            ->selectRaw('count(*) as count, description')
-            ->where('event', 'visit')
-            ->groupBy('description')
-            ->orderByDesc('count')
-            ->limit(5)
-            ->pluck('description')
-            ->toArray();
+        return Cache::remember(
+            'navigation.visits.' . $user->getMorphClass() . '.' . $user->getAuthIdentifier(),
+            now()->addMinutes(15),
+            fn (): array => $user->activities()
+                ->selectRaw('count(*) as count, description')
+                ->where('event', 'visit')
+                ->groupBy('description')
+                ->orderByDesc('count')
+                ->limit(5)
+                ->pluck('description')
+                ->toArray()
+        );
     }
 }
