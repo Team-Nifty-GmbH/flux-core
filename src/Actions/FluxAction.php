@@ -82,27 +82,25 @@ abstract class FluxAction
             return true;
         }
 
+        $permission = 'action.' . static::name();
+
+        // Both questions walk every stored permission, and whoever holds the
+        // ability needs only the first one answered.
+        if (auth()->user()?->can($permission)) {
+            return true;
+        }
+
         try {
-            resolve_static(
-                Permission::class,
-                'findByName',
-                [
-                    'name' => 'action.' . static::name(),
-                ]
-            );
+            resolve_static(Permission::class, 'findByName', ['name' => $permission]);
         } catch (PermissionDoesNotExist) {
             return true;
         }
 
-        if (! auth()->user()?->can('action.' . static::name())) {
-            if ($throwException) {
-                throw UnauthorizedException::forPermissions(['action.' . static::name()]);
-            } else {
-                return false;
-            }
+        if ($throwException) {
+            throw UnauthorizedException::forPermissions([$permission]);
         }
 
-        return true;
+        return false;
     }
 
     public static function description(): ?string
