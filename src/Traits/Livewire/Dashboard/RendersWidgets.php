@@ -5,13 +5,12 @@ namespace FluxErp\Traits\Livewire\Dashboard;
 use FluxErp\Enums\ComparisonTypeEnum;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Facades\Widget;
-use FluxErp\Models\Permission;
+use FluxErp\Support\Auth\PermissionSet;
 use FluxErp\Traits\Livewire\EnsureUsedInLivewire;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Js;
 use Livewire\Attributes\Renderless;
-use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 trait RendersWidgets
 {
@@ -205,9 +204,11 @@ trait RendersWidgets
 
     protected function filterWidgets(array $widgets): array
     {
+        $permissions = PermissionSet::make();
+
         $widgets = array_filter(
             $widgets,
-            function (array $widget) {
+            function (array $widget) use ($permissions) {
                 $name = $widget['component_name'];
 
                 if (
@@ -218,21 +219,7 @@ trait RendersWidgets
                     return false;
                 }
 
-                try {
-                    $permissionExists = ! is_null(
-                        resolve_static(
-                            Permission::class,
-                            'findByName',
-                            [
-                                'name' => 'widget.' . $name,
-                            ]
-                        )
-                    );
-                } catch (PermissionDoesNotExist) {
-                    $permissionExists = false;
-                }
-
-                return (! $permissionExists || auth()->user()->can('widget.' . $name))
+                return $permissions->allows('widget.' . $name)
                     && ! is_null(Widget::get($name));
             }
         );

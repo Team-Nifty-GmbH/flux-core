@@ -105,7 +105,7 @@ class Navigation extends Component
         }
 
         return $user->unreadNotifications
-            ->countBy(fn (Notification $notification): ?string => $notification->menuArea())
+            ->countBy(fn (Notification $notification): string => $notification->menuArea() ?? '')
             ->forget('')
             ->all();
     }
