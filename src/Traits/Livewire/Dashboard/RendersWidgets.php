@@ -208,20 +208,11 @@ trait RendersWidgets
 
         $widgets = array_filter(
             $widgets,
-            function (array $widget) use ($permissions) {
-                $name = $widget['component_name'];
-
-                if (
-                    collect(Arr::wrap(data_get($widget, 'dashboard_component')))
-                        ->map(fn (string $dashboardClass) => resolve_static($dashboardClass, 'class'))
-                        ->doesntContain(static::class)
-                ) {
-                    return false;
-                }
-
-                return $permissions->allows('widget.' . $name)
-                    && ! is_null(Widget::get($name));
-            }
+            fn (array $widget): bool => collect(Arr::wrap(data_get($widget, 'dashboard_component')))
+                ->map(fn (string $dashboardClass): string => resolve_static($dashboardClass, 'class'))
+                ->contains(static::class)
+                && $permissions->allows('widget.' . $widget['component_name'])
+                && ! is_null(Widget::get($widget['component_name']))
         );
 
         ksort($widgets);
