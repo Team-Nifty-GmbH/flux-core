@@ -28,7 +28,6 @@ class Navigation extends Component
 
         return view('flux::livewire.navigation', [
             'navigations' => $navigations,
-            'visits' => $this->getVisits(),
             'favorites' => $this->getFavorites(),
             'notificationCounts' => $this->getNotificationCounts(),
             'childNotificationCounts' => $this->getChildNotificationCounts($navigations),
@@ -230,22 +229,5 @@ class Navigation extends Component
             : '';
 
         return $user->getAuthIdentifier() . ':' . $permissionIds;
-    }
-
-    protected function getVisits(): ?array
-    {
-        if (! method_exists(auth()->user(), 'activities')) {
-            return null;
-        }
-
-        return auth()->user()
-            ->activities()
-            ->selectRaw('count(*) as count, description')
-            ->where('event', 'visit')
-            ->groupBy('description')
-            ->orderByDesc('count')
-            ->limit(5)
-            ->pluck('description')
-            ->toArray();
     }
 }
