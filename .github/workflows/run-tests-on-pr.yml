@@ -32,6 +32,10 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          # The post step of a persisted checkout rewrites `.git/config` as root, after
+          # the cleanup below, leaving the one file that breaks the next job's checkout.
+          persist-credentials: false
 
       - name: Fix git ownership
         run: git config --global --add safe.directory $GITHUB_WORKSPACE
@@ -59,6 +63,13 @@ jobs:
 
       - name: Translation key sort
         run: node scripts/sort-lang-json.mjs --check
+
+      # This job runs in a container, as root; the runner's own jobs run as uid 1000.
+      # Every file left behind as root is one the next non-container job cannot clean,
+      # and its checkout then dies with EACCES on a workspace it does not own.
+      - name: Hand the workspace back to the runner
+        if: always()
+        run: chown -R 1000:1000 "$GITHUB_WORKSPACE" "$RUNNER_TEMP" "$RUNNER_TOOL_CACHE" || true
 
   unit-feature:
     name: Unit & Feature Tests
@@ -106,6 +117,10 @@ jobs:
         options: --health-cmd="curl -s http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
       - uses: actions/checkout@v5
+        with:
+          # The post step of a persisted checkout rewrites `.git/config` as root, after
+          # the cleanup below, leaving the one file that breaks the next job's checkout.
+          persist-credentials: false
 
       - name: Fix git ownership
         run: git config --global --add safe.directory $GITHUB_WORKSPACE
@@ -138,6 +153,13 @@ jobs:
 
       - name: Run Feature Tests
         run: composer test-feature
+
+      # This job runs in a container, as root; the runner's own jobs run as uid 1000.
+      # Every file left behind as root is one the next non-container job cannot clean,
+      # and its checkout then dies with EACCES on a workspace it does not own.
+      - name: Hand the workspace back to the runner
+        if: always()
+        run: chown -R 1000:1000 "$GITHUB_WORKSPACE" "$RUNNER_TEMP" "$RUNNER_TOOL_CACHE" || true
 
   livewire:
     name: Livewire Tests
@@ -185,6 +207,10 @@ jobs:
         options: --health-cmd="curl -s http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
       - uses: actions/checkout@v5
+        with:
+          # The post step of a persisted checkout rewrites `.git/config` as root, after
+          # the cleanup below, leaving the one file that breaks the next job's checkout.
+          persist-credentials: false
 
       - name: Fix git ownership
         run: git config --global --add safe.directory $GITHUB_WORKSPACE
@@ -214,6 +240,13 @@ jobs:
 
       - name: Run Livewire Tests
         run: composer test-livewire
+
+      # This job runs in a container, as root; the runner's own jobs run as uid 1000.
+      # Every file left behind as root is one the next non-container job cannot clean,
+      # and its checkout then dies with EACCES on a workspace it does not own.
+      - name: Hand the workspace back to the runner
+        if: always()
+        run: chown -R 1000:1000 "$GITHUB_WORKSPACE" "$RUNNER_TEMP" "$RUNNER_TOOL_CACHE" || true
 
   browser:
     name: Browser Tests
@@ -261,6 +294,10 @@ jobs:
         options: --health-cmd="curl -s http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
       - uses: actions/checkout@v5
+        with:
+          # The post step of a persisted checkout rewrites `.git/config` as root, after
+          # the cleanup below, leaving the one file that breaks the next job's checkout.
+          persist-credentials: false
 
       - name: Fix git ownership
         run: git config --global --add safe.directory $GITHUB_WORKSPACE
@@ -307,6 +344,13 @@ jobs:
             tests/Browser/Screenshots/
             vendor/orchestra/testbench-core/laravel/storage/logs/
           retention-days: 7
+
+      # This job runs in a container, as root; the runner's own jobs run as uid 1000.
+      # Every file left behind as root is one the next non-container job cannot clean,
+      # and its checkout then dies with EACCES on a workspace it does not own.
+      - name: Hand the workspace back to the runner
+        if: always()
+        run: chown -R 1000:1000 "$GITHUB_WORKSPACE" "$RUNNER_TEMP" "$RUNNER_TOOL_CACHE" || true
 
   cleanup:
     name: Cleanup Docker resources
