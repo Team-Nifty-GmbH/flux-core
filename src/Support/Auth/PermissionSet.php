@@ -51,11 +51,6 @@ class PermissionSet
             || array_key_exists($permission, $this->granted());
     }
 
-    /**
-     * Both sets cost a walk over every stored permission, and a gate that hands out
-     * everything answers the question before either is consulted. Resolving them on
-     * first use keeps that walk out of the request entirely for a super admin.
-     */
     protected function granted(): array
     {
         return $this->granted ??= is_null($this->user) || ! method_exists($this->user, 'getAllPermissions')
