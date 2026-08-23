@@ -84,8 +84,6 @@ abstract class FluxAction
 
         $permission = 'action.' . static::name();
 
-        // Both questions walk every stored permission, and whoever holds the
-        // ability needs only the first one answered.
         if (auth()->user()?->can($permission)) {
             return true;
         }
