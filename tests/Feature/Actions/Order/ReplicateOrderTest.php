@@ -1570,3 +1570,39 @@ test('still refuses a retoure from a retoure', function (): void {
     ])->validate())
         ->toThrow(ValidationException::class);
 });
+
+test('refuses a refund from an order without an invoice number', function (): void {
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
+
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $order = Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => OrderType::factory()->create([
+            'order_type_enum' => OrderTypeEnum::Order,
+            'is_active' => true,
+        ])->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => null,
+    ]);
+
+    $refundOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Refund,
+        'is_active' => true,
+    ]);
+
+    expect(fn () => ReplicateOrder::make([
+        'id' => $order->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $refundOrderType->getKey(),
+    ])->validate())
+        ->toThrow(ValidationException::class);
+});

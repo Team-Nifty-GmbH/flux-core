@@ -245,7 +245,10 @@ class ReplicateOrder extends FluxAction
         $errors = [];
         $order = resolve_static(Order::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first(['id', 'contact_id', 'tenant_id']);
+            ->with([
+                'orderType:id,order_type_enum',
+            ])
+            ->first(['id', 'contact_id', 'invoice_number', 'order_type_id', 'tenant_id']);
         $tenantId = $order->tenant_id;
         $hasTenants = [
             'contact_id' => Contact::class,
@@ -283,51 +286,31 @@ class ReplicateOrder extends FluxAction
             ->whereKey($this->getData('order_type_id'))
             ->value('order_type_enum');
 
-        $parentId = $order->contact_id === ($this->getData('contact_id') ?? $order->contact_id)
-            && in_array($orderTypeEnum, [OrderTypeEnum::SplitOrder, OrderTypeEnum::Retoure])
-                ? $order->getKey()
-                : null;
+        // Disallow creation of split-orders if order has an invoice_number
+        if ($orderTypeEnum === OrderTypeEnum::SplitOrder
+            && (
+                $order->orderType->order_type_enum !== OrderTypeEnum::Order
+                || $order->invoice_number
+            )
+        ) {
+            $errors += [
+                'order_type_id' => ['Unable to create split-order on given parent order.'],
+            ];
+        }
 
-        if ($parentId) {
-            $parentOrder = resolve_static(Order::class, 'query')
-                ->whereKey($parentId)
-                ->with([
-                    'orderType:id,order_type_enum',
-                ])
-                ->first(['id', 'order_type_id', 'parent_id', 'tenant_id', 'invoice_number']);
-
-            if ($parentOrder->tenant_id !== $tenantId) {
-                $errors += [
-                    'parent_id' => ['Parent order not found on given tenant.'],
-                ];
-            }
-
-            // Disallow creation of split-orders if order has an invoice_number
-            if ($orderTypeEnum === OrderTypeEnum::SplitOrder
-                && (
-                    $parentOrder->orderType->order_type_enum !== OrderTypeEnum::Order
-                    || $parentOrder->invoice_number
+        // Disallow creation of retoures/refunds if order doesn't have an invoice number
+        if (in_array($orderTypeEnum, [OrderTypeEnum::Retoure, OrderTypeEnum::Refund])
+            && (
+                ! in_array(
+                    $order->orderType->order_type_enum,
+                    [OrderTypeEnum::Order, OrderTypeEnum::SplitOrder]
                 )
-            ) {
-                $errors += [
-                    'order_type_id' => ['Unable to create split-order on given parent order.'],
-                ];
-            }
-
-            // Disallow creation of retoures/refunds if order doesn't have an invoice number
-            if (in_array($orderTypeEnum, [OrderTypeEnum::Retoure, OrderTypeEnum::Refund])
-                && (
-                    ! in_array(
-                        $parentOrder->orderType->order_type_enum,
-                        [OrderTypeEnum::Order, OrderTypeEnum::SplitOrder]
-                    )
-                    || ! $parentOrder->invoice_number
-                )
-            ) {
-                $errors += [
-                    'order_type_id' => ['Unable to create a retoure or refund on given parent order.'],
-                ];
-            }
+                || ! $order->invoice_number
+            )
+        ) {
+            $errors += [
+                'order_type_id' => ['Unable to create a retoure or refund on given parent order.'],
+            ];
         }
 
         $orderPositions = data_get($this->data, 'order_positions', []);
