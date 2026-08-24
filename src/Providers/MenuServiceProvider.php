@@ -96,6 +96,7 @@ class MenuServiceProvider extends ServiceProvider
             icon: 'square-3-stack-3d',
             label: 'Products',
             closure: function (): void {
+                Menu::register(route: 'products.expiring-stock');
                 Menu::register(route: 'products.products');
                 Menu::register(route: 'products.serial-numbers');
             }
@@ -164,6 +165,7 @@ class MenuServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.product-option-groups', path: 'settings.children.products.children.product-option-groups');
                 Menu::register(route: 'settings.product-properties', path: 'settings.children.products.children.product-properties');
                 Menu::register(route: 'settings.units', path: 'settings.children.products.children.units');
+                Menu::register(route: 'settings.warehouse-bins', path: 'settings.children.products.children.warehouse-bins');
                 Menu::register(route: 'settings.warehouses', path: 'settings.children.products.children.warehouses');
 
                 // Contacts

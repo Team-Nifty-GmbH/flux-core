@@ -16,6 +16,8 @@ class StockPostingForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
+    public ?int $lot_id = null;
+
     public ?int $order_position_id = null;
 
     public ?string $posting = null;
@@ -36,6 +38,8 @@ class StockPostingForm extends FluxForm
     ];
 
     public ?int $serial_number_id = null;
+
+    public ?int $warehouse_bin_id = null;
 
     public ?int $warehouse_id = null;
 
