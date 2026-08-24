@@ -3,12 +3,13 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Category;
+use FluxErp\Traits\Livewire\DataTable\BuildsFlatTreeRows;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 
 class CategoryList extends BaseDataTable
 {
+    use BuildsFlatTreeRows;
+
     public array $enabledCols = [
         'name',
         'model_type',
@@ -31,56 +32,11 @@ class CategoryList extends BaseDataTable
 
     protected function getResultFromQuery(Builder $query): array
     {
-        // Get filtered root IDs from the query (respects user filters),
-        // then load the tree with recursive children via familyTree()
-        $rootIds = $query->pluck($this->modelTable . '.' . $this->modelKeyName);
-
-        $categories = resolve_static(Category::class, 'familyTree')
-            ->whereKey($rootIds)
-            ->ordered()
-            ->get();
-
-        $tree = to_flat_tree($categories->toArray());
-
-        $modelsById = $this->collectModelsById($categories);
-
-        $data = [];
-        foreach ($tree as $item) {
-            $model = $modelsById[$item['id']] ?? null;
-
-            if ($model) {
-                $row = $this->itemToArray($model);
-            } else {
-                $row = Arr::only(Arr::dot($item), $this->getReturnKeys());
-            }
-
-            $row['depth'] = $item['depth'];
-            $row['indentation'] = '';
-
-            if ($item['depth'] > 0) {
-                $indent = $item['depth'] * 20;
-                $row['indentation'] = '<div class="shrink-0" style="min-width:' . $indent . 'px"></div>';
-            }
-
-            $data[] = $row;
-        }
-
-        return [
-            'data' => $data,
-            'total' => count($data),
-        ];
+        return $this->buildFlatTreeRows($query);
     }
 
-    protected function collectModelsById(Collection $items, array &$result = []): array
+    protected function prepareFamilyTreeQuery(Builder $query): Builder
     {
-        foreach ($items as $item) {
-            $result[$item->getKey()] = $item;
-
-            if ($item->relationLoaded('children')) {
-                $this->collectModelsById($item->children, $result);
-            }
-        }
-
-        return $result;
+        return $query->ordered();
     }
 }
