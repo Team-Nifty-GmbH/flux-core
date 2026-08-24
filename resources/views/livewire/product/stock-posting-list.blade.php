@@ -4,6 +4,7 @@
             $tallstackuiSelect(
                 'stock-posting-warehouse-bin-id',
             ).mergeRequestParams({
+                searchFields: ['code', 'name'],
                 where: [
                     ['warehouse_id', '=', $wire.stockPosting.warehouse_id],
                     ['is_storage_location', '=', true],
@@ -17,9 +18,11 @@
                 ['is_active', '=', true],
             ];
             $tallstackuiSelect('transfer-from-bin-id').mergeRequestParams({
+                searchFields: ['code', 'name'],
                 where,
             });
             $tallstackuiSelect('transfer-to-bin-id').mergeRequestParams({
+                searchFields: ['code', 'name'],
                 where: [...where, ['is_storage_location', '=', true]],
             });
         },
@@ -45,12 +48,14 @@
                 <x-select.styled
                     wire:model="stockPosting.warehouse_bin_id"
                     :label="__('Warehouse Bin')"
+                    :hint="__('Only bins marked as storage location can hold stock')"
                     select="label:label|value:id"
                     unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\WarehouseBin::class),
                         'method' => 'POST',
                         'params' => [
+                            'searchFields' => ['code', 'name'],
                             'where' => [
                                 [
                                     'warehouse_id',
@@ -153,6 +158,7 @@
                         'url' => route('search', \FluxErp\Models\WarehouseBin::class),
                         'method' => 'POST',
                         'params' => [
+                            'searchFields' => ['code', 'name'],
                             'where' => [
                                 [
                                     'warehouse_id',
@@ -169,6 +175,7 @@
                 <x-select.styled
                     wire:model="stockTransfer.to_warehouse_bin_id"
                     :label="__('Target Bin')"
+                    :hint="__('Only bins marked as storage location can hold stock')"
                     required
                     select="label:label|value:id"
                     unfiltered
@@ -176,6 +183,7 @@
                         'url' => route('search', \FluxErp\Models\WarehouseBin::class),
                         'method' => 'POST',
                         'params' => [
+                            'searchFields' => ['code', 'name'],
                             'where' => [
                                 [
                                     'warehouse_id',

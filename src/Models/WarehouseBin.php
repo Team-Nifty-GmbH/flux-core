@@ -13,8 +13,10 @@ use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
+use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class WarehouseBin extends FluxModel
+class WarehouseBin extends FluxModel implements InteractsWithDataTables
 {
     use Filterable, HasPackageFactory, HasParentChildRelations, HasUserModification, HasUuid, LogsActivity,
         SoftDeletes;
@@ -26,6 +28,28 @@ class WarehouseBin extends FluxModel
             'is_storage_location' => 'boolean',
             'is_active' => 'boolean',
         ];
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        return null;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->warehouse_bin_type_enum
+            ? __(Str::headline($this->warehouse_bin_type_enum->value))
+            : null;
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->name ? $this->code . ' - ' . $this->name : $this->code;
+    }
+
+    public function getUrl(): ?string
+    {
+        return null;
     }
 
     // Relations

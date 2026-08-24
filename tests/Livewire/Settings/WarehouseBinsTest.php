@@ -105,3 +105,12 @@ test('save fails without required fields', function (): void {
         ->assertHasErrors(['warehouseBin.code'])
         ->assertReturned(false);
 });
+
+test('the parent select sends search fields so the search endpoint accepts it', function (): void {
+    $html = Livewire::test(WarehouseBins::class)
+        ->assertOk()
+        ->html();
+
+    expect($html)->toContain('warehouse-bin-parent-id')
+        ->and(html_entity_decode($html))->toContain('searchFields');
+});

@@ -218,3 +218,17 @@ test('transfer fails when the source bin holds too little stock', function (): v
         'warehouse_bin_id' => $target->getKey(),
     ]);
 });
+
+test('the bin selects send search fields so the search endpoint accepts them', function (): void {
+    $html = html_entity_decode(
+        Livewire::test(StockPostingList::class, ['productId' => $this->product->getKey()])
+            ->assertOk()
+            ->html()
+    );
+
+    expect(substr_count($html, 'searchFields'))->toBeGreaterThanOrEqual(6)
+        ->and(substr_count($html, __('Only bins marked as storage location can hold stock')))->toBe(2)
+        ->and($html)->toContain('stock-posting-warehouse-bin-id')
+        ->and($html)->toContain('transfer-from-bin-id')
+        ->and($html)->toContain('transfer-to-bin-id');
+});

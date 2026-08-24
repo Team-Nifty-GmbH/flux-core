@@ -2,7 +2,11 @@
     x-data="{
         setParentSearch() {
             $tallstackuiSelect('warehouse-bin-parent-id').mergeRequestParams({
-                where: [['warehouse_id', '=', $wire.warehouseBin.warehouse_id]],
+                searchFields: ['code', 'name'],
+                where: [
+                    ['warehouse_id', '=', $wire.warehouseBin.warehouse_id],
+                    ['id', '!=', $wire.warehouseBin.id],
+                ],
             });
         },
     }"
@@ -50,6 +54,7 @@
                         'url' => route('search', \FluxErp\Models\WarehouseBin::class),
                         'method' => 'POST',
                         'params' => [
+                            'searchFields' => ['code', 'name'],
                             'where' => [
                                 [
                                     'warehouse_id',
