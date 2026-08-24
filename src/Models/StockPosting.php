@@ -12,6 +12,7 @@ use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Cache;
+use InvalidArgumentException;
 
 class StockPosting extends FluxModel
 {
@@ -68,8 +69,17 @@ class StockPosting extends FluxModel
     }
 
     // Scopes
+    /**
+     * Layers whose lot already expired stay in the result on purpose: they hold stock that still
+     * needs handling, so a shelf-life view that hid them would hide the most urgent cases. Only the
+     * upper end of the window is therefore bounded.
+     */
     public function scopeExpiringWithin(Builder $query, int $days): void
     {
+        if ($days < 1) {
+            throw new InvalidArgumentException('The shelf life window must span at least one day');
+        }
+
         $query->where('remaining_stock', '>', 0)
             ->whereHas('lot', fn (Builder $query) => $query
                 ->whereNotNull('expires_at')

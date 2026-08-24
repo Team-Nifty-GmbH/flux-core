@@ -57,3 +57,19 @@ test('expiring within ignores exhausted layers', function (): void {
 
     expect(StockPosting::query()->expiringWithin(30)->count())->toBe(0);
 });
+
+test('expiring within keeps layers whose lot already expired', function (): void {
+    $expired = ($this->layerWithLot)(now()->subDays(10)->toDateString());
+    $soon = ($this->layerWithLot)(now()->addDays(10)->toDateString());
+    ($this->layerWithLot)(now()->addDays(90)->toDateString());
+
+    expect(StockPosting::query()->expiringWithin(30)->pluck('id')->all())
+        ->toEqualCanonicalizing([$expired->getKey(), $soon->getKey()]);
+});
+
+test('expiring within refuses a window shorter than a day', function (): void {
+    expect(fn () => StockPosting::query()->expiringWithin(0)->get())
+        ->toThrow(InvalidArgumentException::class)
+        ->and(fn () => StockPosting::query()->expiringWithin(-5)->get())
+        ->toThrow(InvalidArgumentException::class);
+});
