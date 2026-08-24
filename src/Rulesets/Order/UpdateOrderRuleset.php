@@ -197,6 +197,7 @@ class UpdateOrderRuleset extends FluxRuleset
             'has_logistic_notify_phone_number' => 'sometimes|boolean',
             'has_logistic_notify_number' => 'sometimes|boolean',
             'is_locked' => 'sometimes|boolean',
+            'is_self_billed' => 'sometimes|boolean',
             'is_new_customer' => 'sometimes|boolean',
             'is_imported' => 'sometimes|boolean',
             'is_merge_invoice' => 'sometimes|boolean',
