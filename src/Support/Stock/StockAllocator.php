@@ -6,17 +6,16 @@ use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Warehouse;
-use FluxErp\Traits\Makeable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class StockAllocator
 {
-    use Makeable;
-
     protected ?int $productId = null;
 
     protected ?int $warehouseId = null;
+
+    protected ?StockRemovalStrategyEnum $resolvedStrategy = null;
 
     protected ?array $binIds = null;
 
@@ -31,7 +30,7 @@ class StockAllocator
         return $this;
     }
 
-    public function inWarehouse(?int $warehouseId): static
+    public function inWarehouse(int $warehouseId): static
     {
         $this->warehouseId = $warehouseId;
 
@@ -102,7 +101,7 @@ class StockAllocator
         $open = is_float($amount) ? sprintf('%.10F', $amount) : (string) $amount;
         $allocation = collect();
 
-        foreach ($this->query()->get() as $stockPosting) {
+        foreach ($this->query()->lockForUpdate()->get() as $stockPosting) {
             if (bccomp($open, '0', 10) <= 0) {
                 break;
             }
@@ -120,7 +119,7 @@ class StockAllocator
 
     protected function resolveStrategy(): StockRemovalStrategyEnum
     {
-        return $this->strategy
+        return $this->resolvedStrategy ??= $this->strategy
             ?? resolve_static(Product::class, 'query')
                 ->whereKey($this->productId)
                 ->value('stock_removal_strategy_enum')

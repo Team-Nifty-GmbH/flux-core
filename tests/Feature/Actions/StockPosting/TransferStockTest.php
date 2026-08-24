@@ -122,13 +122,19 @@ test('transferring more than the source bin holds is rejected', function (): voi
         'posting' => 2,
     ]);
 
-    TransferStock::assertValidationErrors([
+    $transfer = TransferStock::make([
         'warehouse_id' => $this->warehouse->getKey(),
         'product_id' => $this->product->getKey(),
         'from_warehouse_bin_id' => $this->from->getKey(),
         'to_warehouse_bin_id' => $this->to->getKey(),
         'amount' => 9,
-    ], 'amount');
+    ])->validate();
+
+    expect(fn () => $transfer->execute())->toThrow(ValidationException::class);
+
+    $this->assertDatabaseMissing('stock_postings', [
+        'warehouse_bin_id' => $this->to->getKey(),
+    ]);
 });
 
 test('a target bin from another warehouse is rejected', function (): void {
@@ -223,14 +229,20 @@ test('a transfer restricted to a lot that cannot cover the amount is rejected', 
         'posting' => 2,
     ]);
 
-    TransferStock::assertValidationErrors([
+    $transfer = TransferStock::make([
         'warehouse_id' => $this->warehouse->getKey(),
         'product_id' => $this->product->getKey(),
         'from_warehouse_bin_id' => $this->from->getKey(),
         'to_warehouse_bin_id' => $this->to->getKey(),
         'lot_id' => $wanted->getKey(),
         'amount' => 5,
-    ], 'amount');
+    ])->validate();
+
+    expect(fn () => $transfer->execute())->toThrow(ValidationException::class);
+
+    $this->assertDatabaseMissing('stock_postings', [
+        'warehouse_bin_id' => $this->to->getKey(),
+    ]);
 });
 
 test('a transfer naming a lot from a different product is rejected', function (): void {

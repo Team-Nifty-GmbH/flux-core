@@ -52,7 +52,7 @@ class TransferStockRuleset extends FluxRuleset
             'amount' => [
                 'required',
                 'gt:0',
-                new Numeric(),
+                app(Numeric::class),
             ],
             'description' => 'nullable|string',
         ];

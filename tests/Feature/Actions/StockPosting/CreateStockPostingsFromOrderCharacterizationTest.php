@@ -90,23 +90,20 @@ beforeEach(function (): void {
     };
 });
 
-test('a purchase order does not post incoming stock and is rejected as insufficient sales stock', function (): void {
-    // Documents a bug found while characterizing this action: OrderTypeEnum::multiplier()
-    // is declared `: string` but its match returns `int`. Without strict_types, PHP coerces
-    // the return value to the string "-1"/"1". CreateStockPostingsFromOrder is the only
-    // caller in the codebase comparing that value with strict `===` against the int -1
-    // (every other caller uses `==`, `bccomp()`, `>`, or `<`), so its "Handle Purchase
-    // Orders" branch is unreachable and every purchase order falls through to the
-    // sales-order branch instead of posting incoming stock.
+test('a purchase order posts incoming stock', function (): void {
     $order = ($this->makeOrder)(OrderTypeEnum::Purchase);
     ($this->addPosition)($order, 7);
 
-    expect(fn () => CreateStockPostingsFromOrder::make(['id' => $order->getKey()])
+    CreateStockPostingsFromOrder::make(['id' => $order->getKey()])
         ->validate()
-        ->execute())
-        ->toThrow(ValidationException::class);
+        ->execute();
 
-    expect(StockPosting::query()->where('product_id', $this->product->getKey())->exists())->toBeFalse();
+    $posting = StockPosting::query()
+        ->where('product_id', $this->product->getKey())
+        ->firstOrFail();
+
+    expect((float) $posting->posting)->toBe(7.0)
+        ->and((float) $posting->remaining_stock)->toBe(7.0);
 });
 
 test('a sales order consumes layers in id order and decrements remaining stock', function (): void {
