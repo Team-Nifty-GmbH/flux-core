@@ -72,10 +72,14 @@ beforeEach(function (): void {
         'order_number' => 'K-100',
         'system_delivery_date' => '2026-07-01',
         'system_delivery_date_end' => null,
+        // The contract is the document: no invoice arrives for it, so its children
+        // carry a number of their own. Where a supplier does invoice, the child has
+        // to stay unnumbered for that invoice to be taken over onto it.
+        'is_self_billed' => true,
     ]);
 });
 
-test('replicated purchase subscription order gets a generated invoice number', function (): void {
+test('replicated self billed purchase subscription order gets a generated invoice number', function (): void {
     (new ProcessSubscriptionOrder())($this->order->getKey(), $this->targetOrderType->getKey());
 
     $child = $this->order->createdOrders()->latest('id')->first();
