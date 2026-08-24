@@ -17,6 +17,7 @@ use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 test('copies position discounts when creating retoure', function (): void {
     // Arrange: Create an order with a position that has a discount
@@ -1463,4 +1464,109 @@ test('creates a refund from an order which itself has a parent', function (): vo
 
     expect($refund->order_type_id)->toBe($refundOrderType->getKey())
         ->and($refund->parent_id)->toBeNull();
+});
+
+test('still refuses a retoure from an order without an invoice number', function (): void {
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
+
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $order = Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => OrderType::factory()->create([
+            'order_type_enum' => OrderTypeEnum::Order,
+            'is_active' => true,
+        ])->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => null,
+    ]);
+
+    $retoureOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Retoure,
+        'is_active' => true,
+    ]);
+
+    expect(fn () => ReplicateOrder::make([
+        'id' => $order->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $retoureOrderType->getKey(),
+    ])->validate())
+        ->toThrow(ValidationException::class);
+});
+
+test('still refuses a split order from an order which is already invoiced', function (): void {
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
+
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $order = Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => OrderType::factory()->create([
+            'order_type_enum' => OrderTypeEnum::Order,
+            'is_active' => true,
+        ])->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => Str::random(),
+    ]);
+
+    $splitOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::SplitOrder,
+        'is_active' => true,
+    ]);
+
+    expect(fn () => ReplicateOrder::make([
+        'id' => $order->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $splitOrderType->getKey(),
+    ])->validate())
+        ->toThrow(ValidationException::class);
+});
+
+test('still refuses a retoure from a retoure', function (): void {
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
+
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $retoureOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Retoure,
+        'is_active' => true,
+    ]);
+
+    $retoure = Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => $retoureOrderType->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => Str::random(),
+    ]);
+
+    expect(fn () => ReplicateOrder::make([
+        'id' => $retoure->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $retoureOrderType->getKey(),
+    ])->validate())
+        ->toThrow(ValidationException::class);
 });
