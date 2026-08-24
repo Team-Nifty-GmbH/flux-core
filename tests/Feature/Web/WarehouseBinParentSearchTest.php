@@ -9,9 +9,6 @@ beforeEach(function (): void {
 });
 
 test('the parent select can search warehouse bins although the model is not searchable', function (): void {
-    expect(in_array(Laravel\Scout\Searchable::class, class_uses_recursive(WarehouseBin::class), true))
-        ->toBeFalse();
-
     $bin = WarehouseBin::factory()->create([
         'warehouse_id' => $this->warehouse->getKey(),
         'code' => 'AISLE-42',

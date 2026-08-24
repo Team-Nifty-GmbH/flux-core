@@ -20,6 +20,8 @@ test('lists lots with their product name', function (): void {
         ->instance()
         ->getDataForTesting()['data'];
 
-    expect(array_column($rows, 'id'))->toContain($lot->getKey())
-        ->and($rows[0]['product.name'])->toBe($product->name);
+    $row = collect($rows)->firstWhere('id', $lot->getKey());
+
+    expect($row)->not->toBeNull()
+        ->and($row['product.name'])->toBe($product->name);
 });
