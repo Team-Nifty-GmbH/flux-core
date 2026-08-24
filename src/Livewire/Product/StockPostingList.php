@@ -84,7 +84,7 @@ class StockPostingList extends BaseStockPostingList
     {
         $this->stockPosting->reset();
         $this->stockPosting->warehouse_id =
-            $this->warehouseId ?? resolve_static(Warehouse::class, 'default')->getKey();
+            $this->warehouseId ?? resolve_static(Warehouse::class, 'default')?->getKey();
 
         $this->modalOpen('create-stock-posting-modal');
     }
@@ -136,7 +136,7 @@ class StockPostingList extends BaseStockPostingList
         $this->stockTransfer->reset();
         $this->stockTransfer->product_id = $this->productId;
         $this->stockTransfer->warehouse_id =
-            $this->warehouseId ?? resolve_static(Warehouse::class, 'default')->getKey();
+            $this->warehouseId ?? resolve_static(Warehouse::class, 'default')?->getKey();
 
         $this->modalOpen('transfer-stock-modal');
     }
@@ -199,6 +199,7 @@ class StockPostingList extends BaseStockPostingList
                 ->toArray(),
             'lots' => resolve_static(Lot::class, 'query')
                 ->where('product_id', $this->productId)
+                ->whereNull('blocked_at')
                 ->get(['id', 'lot_number'])
                 ->toArray(),
         ];

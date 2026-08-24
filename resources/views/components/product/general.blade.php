@@ -85,13 +85,13 @@
             />
             <x-select.styled
                 x-bind:readonly="!isEditing"
-                label="{{ __('Stock Removal Strategy') }}"
+                :label="__('Stock Removal Strategy')"
                 wire:model="product.stock_removal_strategy_enum"
                 :options="\FluxErp\Enums\StockRemovalStrategyEnum::valuesLocalized()"
             />
             <x-number
                 x-bind:readonly="!isEditing"
-                label="{{ __('Min Shelf Life Days') }}"
+                :label="__('Min Shelf Life Days')"
                 wire:model.number="product.min_shelf_life_days"
             />
             <div

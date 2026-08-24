@@ -96,8 +96,8 @@ class MenuServiceProvider extends ServiceProvider
             icon: 'square-3-stack-3d',
             label: 'Products',
             closure: function (): void {
-                Menu::register(route: 'products.products');
                 Menu::register(route: 'products.expiring-stock');
+                Menu::register(route: 'products.products');
                 Menu::register(route: 'products.serial-numbers');
             }
         );

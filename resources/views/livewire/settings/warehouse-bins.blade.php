@@ -45,26 +45,11 @@
                 :options="\FluxErp\Enums\WarehouseBinTypeEnum::valuesLocalized()"
             />
             <div id="warehouse-bin-parent-id">
-                <x-select.styled
-                    wire:model="warehouseBin.parent_id"
+                <x-flux::warehouse.bin-select
+                    model="warehouseBin.parent_id"
                     :label="__('Parent')"
-                    select="label:label|value:id"
-                    unfiltered
-                    :request="[
-                        'url' => route('search', \FluxErp\Models\WarehouseBin::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'searchFields' => ['code', 'name'],
-                            'where' => [
-                                [
-                                    'warehouse_id',
-                                    '=',
-                                    $warehouseBin->warehouse_id,
-                                ],
-                                ['id', '!=', $warehouseBin->id],
-                            ],
-                        ],
-                    ]"
+                    :warehouse-id="$warehouseBin->warehouse_id"
+                    :exclude-id="$warehouseBin->id"
                 />
             </div>
             <x-number

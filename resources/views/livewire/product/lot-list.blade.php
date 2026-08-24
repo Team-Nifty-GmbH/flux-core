@@ -11,7 +11,11 @@
         />
         <x-date wire:model="lot.produced_at" :label="__('Produced At')" />
         <x-date wire:model="lot.expires_at" :label="__('Expires At')" />
-        <x-date wire:model="lot.blocked_at" :label="__('Blocked At')" />
+        <x-input
+            type="datetime-local"
+            wire:model="lot.blocked_at"
+            :label="__('Blocked At')"
+        />
         <x-textarea wire:model="lot.description" :label="__('Description')" />
     </div>
     <x-slot:footer>

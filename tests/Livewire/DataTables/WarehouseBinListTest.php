@@ -99,3 +99,30 @@ test('loads the warehouse name and the parent code for a grandchild row', functi
         ->and($rows[2]['parent.code'])->toBe($rack->code)
         ->and($rows[2]['warehouse.name'])->toBe($this->warehouse->name);
 });
+
+test('filtering for a nested bin returns its family instead of nothing', function (): void {
+    $zone = WarehouseBin::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'warehouse_bin_type_enum' => WarehouseBinTypeEnum::Zone,
+        'code' => 'ZONE-B',
+    ]);
+    $nested = WarehouseBin::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'parent_id' => $zone->getKey(),
+        'warehouse_bin_type_enum' => WarehouseBinTypeEnum::Bin,
+        'code' => 'DEEP-BIN',
+    ]);
+
+    $rows = Livewire::test(WarehouseBinList::class)
+        ->set('userFilters', [[[
+            'column' => 'code',
+            'operator' => '=',
+            'value' => 'DEEP-BIN',
+        ]]])
+        ->call('loadData')
+        ->assertOk()
+        ->instance()
+        ->getDataForTesting()['data'];
+
+    expect(array_column($rows, 'id'))->toBe([$zone->getKey(), $nested->getKey()]);
+});

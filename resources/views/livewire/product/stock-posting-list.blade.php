@@ -45,28 +45,11 @@
                 :options="$warehouses"
             />
             <div id="stock-posting-warehouse-bin-id">
-                <x-select.styled
-                    wire:model="stockPosting.warehouse_bin_id"
-                    :label="__('Warehouse Bin')"
+                <x-flux::warehouse.bin-select
+                    model="stockPosting.warehouse_bin_id"
+                    :warehouse-id="$stockPosting->warehouse_id"
+                    storage-location-only
                     :hint="__('Only bins marked as storage location can hold stock')"
-                    select="label:label|value:id"
-                    unfiltered
-                    :request="[
-                        'url' => route('search', \FluxErp\Models\WarehouseBin::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'searchFields' => ['code', 'name'],
-                            'where' => [
-                                [
-                                    'warehouse_id',
-                                    '=',
-                                    $stockPosting->warehouse_id,
-                                ],
-                                ['is_storage_location', '=', true],
-                                ['is_active', '=', true],
-                            ],
-                        ],
-                    ]"
                 />
             </div>
             <x-select.styled
@@ -148,53 +131,21 @@
                 :options="$warehouses"
             />
             <div id="transfer-from-bin-id">
-                <x-select.styled
-                    wire:model="stockTransfer.from_warehouse_bin_id"
+                <x-flux::warehouse.bin-select
+                    model="stockTransfer.from_warehouse_bin_id"
                     :label="__('Source Bin')"
+                    :warehouse-id="$stockTransfer->warehouse_id"
                     required
-                    select="label:label|value:id"
-                    unfiltered
-                    :request="[
-                        'url' => route('search', \FluxErp\Models\WarehouseBin::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'searchFields' => ['code', 'name'],
-                            'where' => [
-                                [
-                                    'warehouse_id',
-                                    '=',
-                                    $stockTransfer->warehouse_id,
-                                ],
-                                ['is_active', '=', true],
-                            ],
-                        ],
-                    ]"
                 />
             </div>
             <div id="transfer-to-bin-id">
-                <x-select.styled
-                    wire:model="stockTransfer.to_warehouse_bin_id"
+                <x-flux::warehouse.bin-select
+                    model="stockTransfer.to_warehouse_bin_id"
                     :label="__('Target Bin')"
-                    :hint="__('Only bins marked as storage location can hold stock')"
+                    :warehouse-id="$stockTransfer->warehouse_id"
+                    storage-location-only
                     required
-                    select="label:label|value:id"
-                    unfiltered
-                    :request="[
-                        'url' => route('search', \FluxErp\Models\WarehouseBin::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'searchFields' => ['code', 'name'],
-                            'where' => [
-                                [
-                                    'warehouse_id',
-                                    '=',
-                                    $stockTransfer->warehouse_id,
-                                ],
-                                ['is_storage_location', '=', true],
-                                ['is_active', '=', true],
-                            ],
-                        ],
-                    ]"
+                    :hint="__('Only bins marked as storage location can hold stock')"
                 />
             </div>
             <x-select.styled

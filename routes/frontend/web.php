@@ -244,8 +244,8 @@ Route::middleware('web')
 
                 Route::name('products.')->prefix('products')
                     ->group(function (): void {
-                        Route::get('/list', ProductList::class)->name('products');
                         Route::get('/expiring-stock', ExpiringStockList::class)->name('expiring-stock');
+                        Route::get('/list', ProductList::class)->name('products');
                         Route::get('/serial-numbers', SerialNumberList::class)->name('serial-numbers');
                         Route::get('/serial-numbers/{id?}', SerialNumber::class)->name('serial-numbers.id?')
                             ->metadata(['model' => 'serial_number']);

@@ -13,7 +13,6 @@ use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Str;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class WarehouseBin extends FluxModel implements InteractsWithDataTables
@@ -37,9 +36,12 @@ class WarehouseBin extends FluxModel implements InteractsWithDataTables
 
     public function getDescription(): ?string
     {
-        return $this->warehouse_bin_type_enum
-            ? __(Str::headline($this->warehouse_bin_type_enum->value))
-            : null;
+        if (! $this->warehouse_bin_type_enum) {
+            return null;
+        }
+
+        return collect(WarehouseBinTypeEnum::valuesLocalized())
+            ->firstWhere('value', $this->warehouse_bin_type_enum->value)['label'] ?? null;
     }
 
     public function getLabel(): ?string
