@@ -13,17 +13,16 @@ return new class() extends Migration
             $table->boolean('is_self_billed')->default(false)->after('is_locked');
         });
 
-        // Every purchase subscription so far produced its own document, because that
-        // is what the scheduler did unconditionally. Keeping them on that setting
-        // leaves rent, insurance and broadcasting fees exactly as they are.
-        DB::table('orders')
-            ->whereIn(
-                'order_type_id',
-                DB::table('order_types')
-                    ->where('order_type_enum', 'purchase-subscription')
-                    ->select('id')
-            )
-            ->update(['is_self_billed' => true]);
+        $orderTypeIds = DB::table('order_types')
+            ->where('order_type_enum', 'purchase-subscription')
+            ->pluck('id')
+            ->all();
+
+        if ($orderTypeIds) {
+            DB::table('orders')
+                ->whereIntegerInRaw('order_type_id', $orderTypeIds)
+                ->update(['is_self_billed' => true]);
+        }
     }
 
     public function down(): void

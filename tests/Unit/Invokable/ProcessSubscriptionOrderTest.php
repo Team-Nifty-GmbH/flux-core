@@ -816,8 +816,6 @@ test('a purchase subscription that gets an invoice leaves its child unnumbered',
         ->where('created_from_id', $contract->getKey())
         ->first();
 
-    // The supplier's own invoice is taken over onto this child later, which the
-    // takeover refuses on anything that already counts as invoiced.
     expect($child)->not->toBeNull()
         ->and($child->invoice_number)->toBeNull()
         ->and($child->invoice_date)->toBeNull();
@@ -852,8 +850,6 @@ test('a self billed purchase subscription numbers its own child', function (): v
         ->where('created_from_id', $contract->getKey())
         ->first();
 
-    // Rent and insurance never send anything, so the child carries the number the
-    // payment is booked against.
     expect($child)->not->toBeNull()
         ->and($child->invoice_number)->toBe(
             $contract->order_number . '-' . $child->system_delivery_date?->format('Y-m')

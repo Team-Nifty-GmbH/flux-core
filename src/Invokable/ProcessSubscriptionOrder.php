@@ -89,11 +89,6 @@ class ProcessSubscriptionOrder implements Repeatable
                 ]);
             }
 
-            // A self billed contract is its own document: rent, insurance or a
-            // broadcasting fee never send an invoice, so the child needs a number
-            // of its own for the payment to be booked against. Where the supplier
-            // does send one, the child has to stay unnumbered - otherwise it counts
-            // as invoiced and the arriving invoice cannot be taken over onto it.
             if ($order->orderType->order_type_enum === OrderTypeEnum::PurchaseSubscription
                 && $order->is_self_billed
                 && ! $newOrder->invoice_number
