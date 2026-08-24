@@ -6,6 +6,7 @@ use Composer\Autoload\ClassLoader;
 use Composer\InstalledVersions;
 use FluxErp\Mechanisms\FrontendAssets\FrontendAssets;
 use FluxErp\Mechanisms\FrontendAssets\SupportAutoInjectedAssets;
+use FluxErp\View\Components\Icon;
 use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
 use Illuminate\Support\Facades\Blade;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use ReflectionClass;
 use TallStackUi\Facades\TallStackUi;
+use TallStackUi\Support\Blade\ComponentPrefix;
 
 class ViewServiceProvider extends ServiceProvider
 {
@@ -156,6 +158,10 @@ class ViewServiceProvider extends ServiceProvider
 
     protected function registerViews(): void
     {
+        config(['ts-ui.components.icon' => [Icon::class, config('ts-ui.components.icon')[1] ?? []]]);
+
+        $this->app->booted(fn () => Blade::component(Icon::class, app(ComponentPrefix::class)->add('icon')));
+
         Blade::component(App::class, 'flux::layouts.app');
         Blade::component(Printing::class, 'flux::layouts.print');
         config([
