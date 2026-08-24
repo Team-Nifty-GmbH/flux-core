@@ -158,8 +158,6 @@ class ViewServiceProvider extends ServiceProvider
 
     protected function registerViews(): void
     {
-        config(['ts-ui.components.icon' => [Icon::class, config('ts-ui.components.icon')[1] ?? []]]);
-
         $this->app->booted(fn () => Blade::component(Icon::class, app(ComponentPrefix::class)->add('icon')));
 
         Blade::component(App::class, 'flux::layouts.app');
