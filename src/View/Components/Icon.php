@@ -21,8 +21,24 @@ class Icon extends Component
                 return $parent($data);
             }
 
-            $key = ($this->icon ?? $this->name) . '|' . ($this->type ?? '') . '|' . ($this->internal ? 1 : 0)
-                . '|' . ($this->error ? 1 : 0) . '|' . ($this->attributes?->toHtml() ?? '');
+            $attributes = $this->attributes?->getAttributes() ?? [];
+            $memoizable = true;
+
+            array_walk_recursive($attributes, function (mixed $value) use (&$memoizable): void {
+                $memoizable = $memoizable && (is_scalar($value) || is_null($value));
+            });
+
+            if (! $memoizable) {
+                return $parent($data);
+            }
+
+            $key = json_encode([
+                $this->icon ?? $this->name,
+                $this->type,
+                $this->internal,
+                $this->error,
+                $attributes,
+            ]);
 
             if (array_key_exists($key, static::$rendered)) {
                 return static::$rendered[$key];

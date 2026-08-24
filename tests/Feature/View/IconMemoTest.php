@@ -25,3 +25,17 @@ test('the memo is keyed per icon', function (): void {
     expect($again)->toBe($check)
         ->and($trash)->not->toBe($check);
 });
+
+test('an icon with an array attribute still renders', function (): void {
+    $rendered = Blade::render('<x-icon name="user" :attributes="$forwarded" />', ['forwarded' => []]);
+
+    expect($rendered)->toContain('<svg');
+});
+
+test('an icon with an object attribute skips the memo', function (): void {
+    $rendered = Blade::render('<x-icon name="check" :class="$class" />', [
+        'class' => new Illuminate\Support\Stringable('text-red-500'),
+    ]);
+
+    expect($rendered)->toContain('<svg');
+});
