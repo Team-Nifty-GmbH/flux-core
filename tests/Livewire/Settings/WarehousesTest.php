@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Livewire\Settings\Warehouses;
 use FluxErp\Models\Warehouse;
 use Illuminate\Support\Str;
@@ -76,4 +77,22 @@ test('can delete warehouse', function (): void {
     $this->assertSoftDeleted('warehouses', [
         'id' => $warehouse->getKey(),
     ]);
+});
+
+test('can set bin location requirement and removal strategy', function (): void {
+    $warehouse = Warehouse::factory()->create();
+
+    Livewire::test(Warehouses::class)
+        ->call('edit', $warehouse->getKey())
+        ->set('warehouse.requires_bin_location', true)
+        ->set('warehouse.stock_removal_strategy_enum', StockRemovalStrategyEnum::Fefo->value)
+        ->call('save')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    $warehouse->refresh();
+
+    expect($warehouse->requires_bin_location)->toBeTrue();
+    expect($warehouse->stock_removal_strategy_enum)->toBe(StockRemovalStrategyEnum::Fefo);
 });

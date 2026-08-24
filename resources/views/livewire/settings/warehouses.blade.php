@@ -7,6 +7,19 @@
                 :label="__('Is Default')"
             />
         </div>
+        <div class="mt-2">
+            <x-toggle
+                wire:model.boolean="warehouse.requires_bin_location"
+                :label="__('Requires Bin Location')"
+            />
+        </div>
+        <x-select.styled
+            wire:model="warehouse.stock_removal_strategy_enum"
+            :label="__('Stock Removal Strategy')"
+            required
+            select="label:label|value:value"
+            :options="\FluxErp\Enums\StockRemovalStrategyEnum::valuesLocalized()"
+        />
     </div>
     <x-slot:footer>
         <x-button
