@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Livewire\Product\Product;
 use FluxErp\Models\Language;
 use FluxErp\Models\Price;
@@ -252,4 +253,21 @@ test('view name computed property', function (): void {
     $viewName = $component->instance()->viewName();
     expect($viewName)->toBeString();
     $this->assertStringContainsString('product', $viewName);
+});
+
+test('can save lot tracking settings', function (): void {
+    Livewire::test(Product::class, ['id' => $this->product->id])
+        ->set('product.is_lot_tracked', true)
+        ->set('product.stock_removal_strategy_enum', StockRemovalStrategyEnum::Fefo->value)
+        ->set('product.min_shelf_life_days', 30)
+        ->call('save')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    $this->product->refresh();
+
+    expect($this->product->is_lot_tracked)->toBeTrue();
+    expect($this->product->stock_removal_strategy_enum)->toBe(StockRemovalStrategyEnum::Fefo);
+    expect($this->product->min_shelf_life_days)->toBe(30);
 });

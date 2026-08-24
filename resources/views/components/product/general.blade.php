@@ -39,6 +39,11 @@
                 />
                 <x-checkbox
                     x-bind:disabled="!isEditing"
+                    label="{{ __('Is Lot Tracked') }}"
+                    wire:model="product.is_lot_tracked"
+                />
+                <x-checkbox
+                    x-bind:disabled="!isEditing"
                     label="{{ __('Export to Webshop') }}"
                     wire:model="product.is_active_export_to_web_shop"
                 />
@@ -77,6 +82,17 @@
                 wire:model.number="product.unit_id"
                 select="label:name|value:id"
                 :options="resolve_static(\FluxErp\Models\Unit::class, 'query')->get(['id', 'name'])->toArray()"
+            />
+            <x-select.styled
+                x-bind:readonly="!isEditing"
+                label="{{ __('Stock Removal Strategy') }}"
+                wire:model="product.stock_removal_strategy_enum"
+                :options="\FluxErp\Enums\StockRemovalStrategyEnum::valuesLocalized()"
+            />
+            <x-number
+                x-bind:readonly="!isEditing"
+                label="{{ __('Min Shelf Life Days') }}"
+                wire:model.number="product.min_shelf_life_days"
             />
             <div
                 class="grid grid-cols-1 gap-4 sm:grid-cols-4"
