@@ -11,6 +11,18 @@
                 ],
             });
         },
+        setTransferBinSearch() {
+            const where = [
+                ['warehouse_id', '=', $wire.stockTransfer.warehouse_id],
+                ['is_active', '=', true],
+            ];
+            $tallstackuiSelect('transfer-from-bin-id').mergeRequestParams({
+                where,
+            });
+            $tallstackuiSelect('transfer-to-bin-id').mergeRequestParams({
+                where: [...where, ['is_storage_location', '=', true]],
+            });
+        },
     }"
 >
     <x-modal
@@ -107,6 +119,102 @@
                     $wire.save().then((success) => {
                         if (success)
                             $tsui.close.modal('create-stock-posting-modal');
+                    })
+                "
+            />
+        </x-slot:footer>
+    </x-modal>
+    <x-modal
+        id="transfer-stock-modal"
+        x-on:open="
+            $tallstackuiSelect('transfer-from-bin-id').clear();
+            $tallstackuiSelect('transfer-to-bin-id').clear();
+            setTransferBinSearch();
+        "
+        :title="__('Transfer Stock')"
+    >
+        <div class="flex flex-col gap-1.5">
+            <x-select.styled
+                wire:model="stockTransfer.warehouse_id"
+                :label="__('Warehouse')"
+                required
+                select="label:name|value:id"
+                x-on:select="setTransferBinSearch()"
+                :options="$warehouses"
+            />
+            <div id="transfer-from-bin-id">
+                <x-select.styled
+                    wire:model="stockTransfer.from_warehouse_bin_id"
+                    :label="__('Source Bin')"
+                    required
+                    select="label:label|value:id"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\WarehouseBin::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'where' => [
+                                [
+                                    'warehouse_id',
+                                    '=',
+                                    $stockTransfer->warehouse_id,
+                                ],
+                                ['is_active', '=', true],
+                            ],
+                        ],
+                    ]"
+                />
+            </div>
+            <div id="transfer-to-bin-id">
+                <x-select.styled
+                    wire:model="stockTransfer.to_warehouse_bin_id"
+                    :label="__('Target Bin')"
+                    required
+                    select="label:label|value:id"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\WarehouseBin::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'where' => [
+                                [
+                                    'warehouse_id',
+                                    '=',
+                                    $stockTransfer->warehouse_id,
+                                ],
+                                ['is_storage_location', '=', true],
+                                ['is_active', '=', true],
+                            ],
+                        ],
+                    ]"
+                />
+            </div>
+            <x-select.styled
+                wire:model="stockTransfer.lot_id"
+                :label="__('Lot')"
+                select="label:lot_number|value:id"
+                :options="$lots"
+            />
+            <x-number wire:model="stockTransfer.amount" :label="__('Amount')" />
+            <x-textarea
+                wire:model="stockTransfer.description"
+                :label="__('Description')"
+            />
+        </div>
+        <x-slot:footer>
+            <x-button
+                color="secondary"
+                light
+                flat
+                :text="__('Cancel')"
+                x-on:click="$tsui.close.modal('transfer-stock-modal')"
+            />
+            <x-button
+                color="indigo"
+                :text="__('Save')"
+                x-on:click="
+                    $wire.saveTransfer().then((success) => {
+                        if (success) $tsui.close.modal('transfer-stock-modal');
                     })
                 "
             />
