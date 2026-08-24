@@ -45,6 +45,20 @@ test('lists only layers expiring inside the default window', function (): void {
     expect(array_column($rows, 'id'))->toBe([$soon->getKey()]);
 });
 
+test('a negative window is clamped to a one day minimum', function (): void {
+    $tomorrow = ($this->layerExpiringIn)(1);
+    ($this->layerExpiringIn)(90);
+
+    $rows = Livewire::test(ExpiringStockList::class)
+        ->set('days', -5)
+        ->call('loadData')
+        ->assertOk()
+        ->instance()
+        ->getDataForTesting()['data'];
+
+    expect(array_column($rows, 'id'))->toBe([$tomorrow->getKey()]);
+});
+
 test('widening the window brings in later layers', function (): void {
     $soon = ($this->layerExpiringIn)(10);
     $later = ($this->layerExpiringIn)(90);

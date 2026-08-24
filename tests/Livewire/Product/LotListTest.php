@@ -100,5 +100,6 @@ test('save fails without lot number', function (): void {
         ->set('lot.lot_number', null)
         ->call('save')
         ->assertOk()
+        ->assertHasErrors(['lot.lot_number'])
         ->assertReturned(false);
 });

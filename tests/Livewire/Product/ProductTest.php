@@ -233,6 +233,19 @@ test('tab visibility for variant product', function (): void {
     expect($variantTab)->not->toBeNull();
 });
 
+test('tab visibility for lot tracked product', function (): void {
+    $lotTrackedProduct = ProductModel::factory()->create([
+        'is_lot_tracked' => true,
+    ]);
+    $lotTrackedProduct->tenants()->attach($this->dbTenant->getKey());
+
+    $component = Livewire::test(Product::class, ['id' => $lotTrackedProduct->id]);
+    $tabs = $component->instance()->getTabs();
+
+    $lotListTab = collect($tabs)->first(fn ($tab) => $tab->component === 'product.lot-list');
+    expect($lotListTab)->not->toBeNull();
+});
+
 test('vat rates computed property', function (): void {
     $purchaseOnlyVatRate = VatRate::factory()->create([
         'is_purchase' => true,

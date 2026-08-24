@@ -29,6 +29,6 @@ class ExpiringStockList extends BaseStockPostingList
 
     protected function getBuilder(Builder $builder): Builder
     {
-        return $builder->expiringWithin($this->days);
+        return $builder->expiringWithin(max(1, $this->days));
     }
 }

@@ -102,5 +102,6 @@ test('save fails without required fields', function (): void {
         ->set('warehouseBin.code', null)
         ->call('save')
         ->assertOk()
+        ->assertHasErrors(['warehouseBin.code'])
         ->assertReturned(false);
 });
