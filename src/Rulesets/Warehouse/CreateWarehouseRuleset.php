@@ -26,7 +26,8 @@ class CreateWarehouseRuleset extends FluxRuleset
             'is_default' => 'boolean',
             'requires_bin_location' => 'boolean',
             'stock_removal_strategy_enum' => [
-                'nullable',
+                'sometimes',
+                'required',
                 Rule::enum(StockRemovalStrategyEnum::class),
             ],
         ];

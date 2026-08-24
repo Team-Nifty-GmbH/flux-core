@@ -1,8 +1,10 @@
 <?php
 
+use FluxErp\Actions\Warehouse\UpdateWarehouse;
 use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Models\Product;
 use FluxErp\Models\Warehouse;
+use Illuminate\Validation\ValidationException;
 
 test('a warehouse defaults to fifo and to optional bin locations', function (): void {
     $warehouse = Warehouse::factory()->create()->fresh();
@@ -38,4 +40,34 @@ test('a product leaves the strategy to its warehouse by default', function (): v
 
     expect($product->stock_removal_strategy_enum)->toBeNull()
         ->and($product->is_lot_tracked)->toBeFalse();
+});
+
+test('a warehouse rejects a null removal strategy instead of failing at the database', function (): void {
+    $warehouse = Warehouse::factory()->create();
+
+    $action = UpdateWarehouse::make([
+        'id' => $warehouse->getKey(),
+        'stock_removal_strategy_enum' => null,
+    ]);
+
+    expect(fn () => $action->validate())->toThrow(ValidationException::class);
+
+    expect($warehouse->fresh()->stock_removal_strategy_enum)
+        ->toBe(StockRemovalStrategyEnum::Fifo);
+});
+
+test('a warehouse keeps its strategy when the field is omitted', function (): void {
+    $warehouse = Warehouse::factory()->create([
+        'stock_removal_strategy_enum' => StockRemovalStrategyEnum::Fefo,
+    ]);
+
+    UpdateWarehouse::make([
+        'id' => $warehouse->getKey(),
+        'name' => 'Renamed warehouse',
+    ])
+        ->validate()
+        ->execute();
+
+    expect($warehouse->fresh()->stock_removal_strategy_enum)
+        ->toBe(StockRemovalStrategyEnum::Fefo);
 });
