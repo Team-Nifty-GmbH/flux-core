@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 
 @props(['navigation' => request()->boolean('no-navigation')])
-@php($persistedByClient = array_flip(array_filter(explode(',', request()->header('X-Flux-Persisted', '')))))
 <html
     x-data="tallstackui_darkTheme()"
     @class([
@@ -25,102 +24,90 @@
 >
     @section('wire.navigate.spinner')
         @persist('spinner')
-            @unless (isset($persistedByClient['spinner']))
+            <div
+                id="loading-overlay"
+                class="fixed inset-0 hidden overflow-y-auto p-4"
+                style="z-index: 1000"
+            >
                 <div
-                    id="loading-overlay"
-                    class="fixed inset-0 hidden overflow-y-auto p-4"
-                    style="z-index: 1000"
+                    id="loading-overlay-spinner"
+                    class="bg-secondary-400 bg-opacity-60 dark:bg-secondary-700 dark:bg-opacity-60 fixed inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200"
                 >
-                    <div
-                        id="loading-overlay-spinner"
-                        class="bg-secondary-400 bg-opacity-60 dark:bg-secondary-700 dark:bg-opacity-60 fixed inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200"
-                    >
-                        <x-flux::spinner-svg />
-                    </div>
+                    <x-flux::spinner-svg />
                 </div>
-            @endunless
+            </div>
         @endpersist
 
     @show
     @persist('notifications')
-        @unless (isset($persistedByClient['notifications']))
-            @if (auth()->check() && auth()->id())
-                <div
-                    id="{{ \Illuminate\Support\Str::uuid() }}"
-                    x-on:ts-ui:toast-upsert.window="
-                        $tallstackuiToast($el.id).upsertToast($event)
-                    "
-                >
-                    <x-toast />
-                </div>
-            @endif
-            <x-dialog />
-            <x-nuxbe-lightbox />
-        @endunless
+        @if (auth()->check() && auth()->id())
+            <div
+                id="{{ \Illuminate\Support\Str::uuid() }}"
+                x-on:ts-ui:toast-upsert.window="
+                    $tallstackuiToast($el.id).upsertToast($event)
+                "
+            >
+                <x-toast />
+            </div>
+        @endif
+        <x-dialog />
+        <x-nuxbe-lightbox />
     @endpersist
 
     @auth('web')
         @persist('mail')
-            @unless (isset($persistedByClient['mail']))
-                <div id="mail">
-                    <livewire:edit-mail lazy />
-                </div>
-                <div
-                    x-data="{
-                        openUrl() {
-                            let urlObj = new URL(
-                                $el.querySelector('iframe').src,
-                            );
-                            urlObj.searchParams.delete('no-navigation');
+            <div id="mail">
+                <livewire:edit-mail lazy />
+            </div>
+            <div
+                x-data="{
+                    openUrl() {
+                        let urlObj = new URL($el.querySelector('iframe').src);
+                        urlObj.searchParams.delete('no-navigation');
 
-                            window.open(urlObj);
-                            $tsui.close.modal('detail-modal');
-                        },
-                    }"
+                        window.open(urlObj);
+                        $tsui.close.modal('detail-modal');
+                    },
+                }"
+            >
+                <x-modal
+                    id="detail-modal"
+                    size="7xl"
+                    x-on:close="
+                        $el.querySelector('iframe').src =
+                            'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'
+                    "
                 >
-                    <x-modal
-                        id="detail-modal"
-                        size="7xl"
-                        x-on:close="
-                            $el.querySelector('iframe').src =
-                                'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'
-                        "
-                    >
-                        <div class="grid h-screen w-full">
-                            <iframe
-                                class="object-contain"
-                                height="100%"
-                                width="100%"
-                                id="detail-modal-iframe"
-                                src="data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E"
-                            ></iframe>
-                        </div>
-                        <x-slot:footer>
-                            <x-button
-                                color="secondary"
-                                light
-                                :text="__('Cancel')"
-                                x-on:click="$tsui.close.modal('detail-modal')"
-                            />
-                            <x-button
-                                color="indigo"
-                                :text="__('Open')"
-                                x-on:click="openUrl()"
-                            />
-                        </x-slot:footer>
-                    </x-modal>
-                </div>
-            @endunless
+                    <div class="grid h-screen w-full">
+                        <iframe
+                            class="object-contain"
+                            height="100%"
+                            width="100%"
+                            id="detail-modal-iframe"
+                            src="data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E"
+                        ></iframe>
+                    </div>
+                    <x-slot:footer>
+                        <x-button
+                            color="secondary"
+                            light
+                            :text="__('Cancel')"
+                            x-on:click="$tsui.close.modal('detail-modal')"
+                        />
+                        <x-button
+                            color="indigo"
+                            :text="__('Open')"
+                            x-on:click="openUrl()"
+                        />
+                    </x-slot:footer>
+                </x-modal>
+            </div>
         @endpersist
         @persist('record-merging')
-            @unless (isset($persistedByClient['record-merging']))
-                <livewire:record-merging lazy />
-            @endunless
+            <livewire:record-merging lazy />
         @endpersist
         @persist('layout-global-components')
-            @unless (isset($persistedByClient['layout-global-components']))
-                @stack('layout-global-components')
-            @endunless
+            @stack('layout-global-components')
         @endpersist
     @endauth
 
@@ -175,28 +162,22 @@
 
                         @if (resolve_static(\FluxErp\Models\PriceList::class, 'default'))
                             @persist('layout.header.cart')
-                                @unless (isset($persistedByClient['layout.header.cart']))
-                                    @canAction(\FluxErp\Actions\Cart\CreateCart::class)
-                                        <livewire:cart.cart lazy />
-                                    @endcanAction
-                                @endunless
+                                @canAction(\FluxErp\Actions\Cart\CreateCart::class)
+                                    <livewire:cart.cart lazy />
+                                @endcanAction
                             @endpersist
                         @endif
 
                         @auth('web')
                             @persist('layout.header.work-time')
-                                @unless (isset($persistedByClient['layout.header.work-time']))
-                                    @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
-                                        <livewire:work-time lazy />
-                                    @endcanAction
-                                @endunless
+                                @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
+                                    <livewire:work-time lazy />
+                                @endcanAction
                             @endpersist
                         @endauth
 
                         @persist('layout.header.notifications')
-                            @unless (isset($persistedByClient['layout.header.notifications']))
-                                <livewire:features.notifications lazy />
-                            @endunless
+                            <livewire:features.notifications lazy />
                         @endpersist
                     </div>
                 </x-layout.header>
@@ -214,11 +195,9 @@
             <x-slot:menu>
                 @php($navigation = true)
                 @persist('navigation')
-                    @unless (isset($persistedByClient['navigation']))
-                        <div id="nav">
-                            <livewire:navigation />
-                        </div>
-                    @endunless
+                    <div id="nav">
+                        <livewire:navigation />
+                    </div>
                 @endpersist
             </x-slot:menu>
         @endif
