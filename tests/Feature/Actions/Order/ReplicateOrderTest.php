@@ -1414,3 +1414,53 @@ test('replicates an order whose address snapshot points at a deleted address', f
     expect($replicated->exists)->toBeTrue()
         ->and($replicated->getKey())->not->toBe($order->getKey());
 });
+
+test('creates a refund from an order which itself has a parent', function (): void {
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
+
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $orderOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+    ]);
+
+    $refundOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Refund,
+        'is_active' => true,
+    ]);
+
+    $orderAttributes = [
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => $orderOrderType->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+    ];
+
+    $newOrder = Order::factory()->create($orderAttributes);
+
+    $order = Order::factory()->create($orderAttributes + [
+        'parent_id' => $newOrder->getKey(),
+        'invoice_number' => Str::random(),
+        'is_locked' => true,
+    ]);
+
+    $refund = ReplicateOrder::make([
+        'id' => $order->getKey(),
+        'parent_id' => $order->parent_id,
+        'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $refundOrderType->getKey(),
+    ])
+        ->validate()
+        ->execute();
+
+    expect($refund->order_type_id)->toBe($refundOrderType->getKey())
+        ->and($refund->parent_id)->toBeNull();
+});

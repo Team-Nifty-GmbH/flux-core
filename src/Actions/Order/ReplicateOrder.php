@@ -279,18 +279,14 @@ class ReplicateOrder extends FluxAction
             }
         }
 
-        $parentId = $this->getData('parent_id');
         $orderTypeEnum = resolve_static(OrderType::class, 'query')
             ->whereKey($this->getData('order_type_id'))
             ->value('order_type_enum');
 
-        if (
-            ! $parentId
-            && $order->contact_id === ($this->getData('contact_id') ?? $order->contact_id)
+        $parentId = $order->contact_id === ($this->getData('contact_id') ?? $order->contact_id)
             && in_array($orderTypeEnum, [OrderTypeEnum::SplitOrder, OrderTypeEnum::Retoure])
-        ) {
-            $parentId = $order->getKey();
-        }
+                ? $order->getKey()
+                : null;
 
         if ($parentId) {
             $parentOrder = resolve_static(Order::class, 'query')
