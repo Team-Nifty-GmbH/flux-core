@@ -1,8 +1,11 @@
 <?php
 
+use FluxErp\Enums\WarehouseBinTypeEnum;
 use FluxErp\Livewire\Product\StockPostingList;
+use FluxErp\Models\Lot;
 use FluxErp\Models\Product;
 use FluxErp\Models\Warehouse;
+use FluxErp\Models\WarehouseBin;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -99,4 +102,39 @@ test('updated warehouse id sets user filters', function (): void {
     expect($filters)->not->toBeEmpty();
     expect($filters[0][0]['column'])->toEqual('warehouse_id');
     expect($filters[0][0]['value'])->toEqual($otherWarehouse->getKey());
+});
+
+test('can save stock posting with bin and lot', function (): void {
+    $warehouseBin = WarehouseBin::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'warehouse_bin_type_enum' => WarehouseBinTypeEnum::Bin,
+        'is_storage_location' => true,
+    ]);
+    $lot = Lot::factory()->create(['product_id' => $this->product->getKey()]);
+
+    Livewire::test(StockPostingList::class, ['productId' => $this->product->getKey()])
+        ->call('create')
+        ->set('stockPosting.posting', 7)
+        ->set('stockPosting.warehouse_bin_id', $warehouseBin->getKey())
+        ->set('stockPosting.lot_id', $lot->getKey())
+        ->call('save')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    $this->assertDatabaseHas('stock_postings', [
+        'product_id' => $this->product->getKey(),
+        'warehouse_bin_id' => $warehouseBin->getKey(),
+        'lot_id' => $lot->getKey(),
+        'posting' => 7,
+    ]);
+});
+
+test('view data lists only the lots of the product', function (): void {
+    $lot = Lot::factory()->create(['product_id' => $this->product->getKey()]);
+    Lot::factory()->create(['product_id' => Product::factory()]);
+
+    Livewire::test(StockPostingList::class, ['productId' => $this->product->getKey()])
+        ->assertOk()
+        ->assertViewHas('lots', fn (array $lots): bool => array_column($lots, 'id') === [$lot->getKey()]);
 });

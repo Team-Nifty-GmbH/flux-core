@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Product;
 use FluxErp\Actions\StockPosting\CreateStockPosting;
 use FluxErp\Livewire\DataTables\StockPostingList as BaseStockPostingList;
 use FluxErp\Livewire\Forms\StockPostingForm;
+use FluxErp\Models\Lot;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumberRange;
@@ -155,6 +156,10 @@ class StockPostingList extends BaseStockPostingList
         $viewData = [
             'warehouses' => resolve_static(Warehouse::class, 'query')
                 ->get(['id', 'name'])
+                ->toArray(),
+            'lots' => resolve_static(Lot::class, 'query')
+                ->where('product_id', $this->productId)
+                ->get(['id', 'lot_number'])
                 ->toArray(),
         ];
 
