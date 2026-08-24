@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 @props(['navigation' => request()->boolean('no-navigation')])
-@php($skipPersistedBlocks = request()->hasHeader('X-Livewire-Navigate'))
+@php($persistedByClient = array_flip(array_filter(explode(',', request()->header('X-Flux-Persisted', '')))))
 <html
     x-data="tallstackui_darkTheme()"
     @class([
@@ -25,7 +25,7 @@
 >
     @section('wire.navigate.spinner')
         @persist('spinner')
-            @unless ($skipPersistedBlocks)
+            @unless (isset($persistedByClient['spinner']))
                 <div
                     id="loading-overlay"
                     class="fixed inset-0 hidden overflow-y-auto p-4"
@@ -43,7 +43,7 @@
 
     @show
     @persist('notifications')
-        @unless ($skipPersistedBlocks)
+        @unless (isset($persistedByClient['notifications']))
             @if (auth()->check() && auth()->id())
                 <div
                     id="{{ \Illuminate\Support\Str::uuid() }}"
@@ -61,7 +61,7 @@
 
     @auth('web')
         @persist('mail')
-            @unless ($skipPersistedBlocks)
+            @unless (isset($persistedByClient['mail']))
                 <div id="mail">
                     <livewire:edit-mail lazy />
                 </div>
@@ -113,12 +113,12 @@
             @endunless
         @endpersist
         @persist('record-merging')
-            @unless ($skipPersistedBlocks)
+            @unless (isset($persistedByClient['record-merging']))
                 <livewire:record-merging lazy />
             @endunless
         @endpersist
         @persist('layout-global-components')
-            @unless ($skipPersistedBlocks)
+            @unless (isset($persistedByClient['layout-global-components']))
                 @stack('layout-global-components')
             @endunless
         @endpersist
@@ -175,7 +175,7 @@
 
                         @if (resolve_static(\FluxErp\Models\PriceList::class, 'default'))
                             @persist('layout.header.cart')
-                                @unless ($skipPersistedBlocks)
+                                @unless (isset($persistedByClient['layout.header.cart']))
                                     @canAction(\FluxErp\Actions\Cart\CreateCart::class)
                                         <livewire:cart.cart lazy />
                                     @endcanAction
@@ -185,7 +185,7 @@
 
                         @auth('web')
                             @persist('layout.header.work-time')
-                                @unless ($skipPersistedBlocks)
+                                @unless (isset($persistedByClient['layout.header.work-time']))
                                     @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
                                         <livewire:work-time lazy />
                                     @endcanAction
@@ -194,7 +194,7 @@
                         @endauth
 
                         @persist('layout.header.notifications')
-                            @unless ($skipPersistedBlocks)
+                            @unless (isset($persistedByClient['layout.header.notifications']))
                                 <livewire:features.notifications lazy />
                             @endunless
                         @endpersist
@@ -214,7 +214,7 @@
             <x-slot:menu>
                 @php($navigation = true)
                 @persist('navigation')
-                    @unless ($skipPersistedBlocks)
+                    @unless (isset($persistedByClient['navigation']))
                         <div id="nav">
                             <livewire:navigation />
                         </div>
