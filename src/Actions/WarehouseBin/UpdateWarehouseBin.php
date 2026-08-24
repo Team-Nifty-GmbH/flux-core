@@ -11,6 +11,8 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateWarehouseBin extends FluxAction
 {
+    private ?WarehouseBin $warehouseBin = null;
+
     public static function models(): array
     {
         return [WarehouseBin::class];
@@ -23,26 +25,22 @@ class UpdateWarehouseBin extends FluxAction
 
     public function performAction(): Model
     {
-        $warehouseBin = resolve_static(WarehouseBin::class, 'query')
-            ->whereKey($this->data['id'])
-            ->first();
+        $this->warehouseBin->fill($this->getData());
+        $this->warehouseBin->save();
 
-        $warehouseBin->fill($this->data);
-        $warehouseBin->save();
-
-        return $warehouseBin->withoutRelations()->fresh();
+        return $this->warehouseBin->withoutRelations()->fresh();
     }
 
     protected function validateData(): void
     {
         parent::validateData();
 
-        $warehouseBin = resolve_static(WarehouseBin::class, 'query')
-            ->whereKey($this->data['id'])
+        $this->warehouseBin = resolve_static(WarehouseBin::class, 'query')
+            ->whereKey($this->getData('id'))
             ->first();
 
-        $warehouseId = $this->data['warehouse_id'] ?? $warehouseBin->warehouse_id;
-        $parentId = $this->data['parent_id'] ?? $warehouseBin->parent_id;
+        $warehouseId = $this->getData('warehouse_id', $this->warehouseBin->warehouse_id);
+        $parentId = $this->getData('parent_id', $this->warehouseBin->parent_id);
 
         if ($parentId
             && resolve_static(WarehouseBin::class, 'query')
@@ -55,25 +53,24 @@ class UpdateWarehouseBin extends FluxAction
             ])->errorBag('updateWarehouseBin');
         }
 
-        if (($this->data['parent_id'] ?? false)
-            && Helper::checkCycle(WarehouseBin::class, $warehouseBin, $this->data['parent_id'])
+        if (($this->getData('parent_id', false))
+            && Helper::checkCycle(WarehouseBin::class, $this->warehouseBin, $this->getData('parent_id'))
         ) {
             throw ValidationException::withMessages([
                 'parent_id' => ['Cycle detected'],
             ])->errorBag('updateWarehouseBin');
         }
 
-        if ((int) $warehouseId !== (int) $warehouseBin->warehouse_id && $warehouseBin->getAllDescendantsQuery()->exists()) {
+        if ((int) $warehouseId !== (int) $this->warehouseBin->warehouse_id && $this->warehouseBin->getAllDescendantsQuery()->exists()) {
             throw ValidationException::withMessages([
                 'warehouse_id' => ['The given warehouse bin has child bins in its current warehouse'],
             ])->errorBag('updateWarehouseBin');
         }
 
         if (resolve_static(WarehouseBin::class, 'query')
-            ->withTrashed()
-            ->whereKeyNot($warehouseBin->getKey())
+            ->whereKeyNot($this->warehouseBin->getKey())
             ->where('warehouse_id', $warehouseId)
-            ->where('code', $this->data['code'] ?? $warehouseBin->code)
+            ->where('code', $this->getData('code', $this->warehouseBin->code))
             ->exists()
         ) {
             throw ValidationException::withMessages([

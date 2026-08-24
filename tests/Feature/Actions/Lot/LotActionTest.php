@@ -22,6 +22,13 @@ test('create lot', function (): void {
     expect($lot)->toBeInstanceOf(Lot::class)
         ->lot_number->toBe('CH-2026-08')
         ->and($lot->expires_at->toDateString())->toBe('2027-06-30');
+
+    $this->assertDatabaseHas('lots', [
+        'id' => $lot->getKey(),
+        'product_id' => $this->product->getKey(),
+        'lot_number' => 'CH-2026-08',
+        'expires_at' => '2027-06-30',
+    ]);
 });
 
 test('create lot requires product and lot number', function (): void {
@@ -47,6 +54,11 @@ test('update lot blocks it', function (): void {
     ])->validate()->execute();
 
     expect($updated->blocked_at)->not->toBeNull();
+
+    $this->assertDatabaseHas('lots', [
+        'id' => $lot->getKey(),
+        'blocked_at' => '2026-08-21 12:00:00',
+    ]);
 });
 
 test('update lot rejects a duplicate lot number for the same product', function (): void {
@@ -72,6 +84,8 @@ test('delete lot', function (): void {
     $lot = Lot::factory()->create(['product_id' => $this->product->getKey()]);
 
     expect(DeleteLot::make(['id' => $lot->getKey()])->validate()->execute())->toBeTrue();
+
+    $this->assertSoftDeleted('lots', ['id' => $lot->getKey()]);
 });
 
 test('delete lot refuses while stock postings reference it', function (): void {
@@ -88,13 +102,24 @@ test('delete lot refuses while stock postings reference it', function (): void {
     DeleteLot::assertValidationErrors(['id' => $lot->getKey()], 'stock_postings');
 });
 
-test('create lot rejects a lot number held by a trashed lot', function (): void {
+test('create lot reuses a lot number released by a trashed lot', function (): void {
     Lot::factory()
         ->create(['product_id' => $this->product->getKey(), 'lot_number' => 'CH-2026-08'])
         ->delete();
 
-    CreateLot::assertValidationErrors([
+    $lot = CreateLot::make([
         'product_id' => $this->product->getKey(),
         'lot_number' => 'CH-2026-08',
-    ], 'lot_number');
+    ])
+        ->validate()
+        ->execute();
+
+    expect($lot->lot_number)->toBe('CH-2026-08');
+
+    $this->assertDatabaseHas('lots', [
+        'id' => $lot->getKey(),
+        'product_id' => $this->product->getKey(),
+        'lot_number' => 'CH-2026-08',
+        'deleted_at' => null,
+    ]);
 });

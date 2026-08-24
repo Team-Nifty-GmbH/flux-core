@@ -10,6 +10,8 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateLot extends FluxAction
 {
+    private ?Lot $lot = null;
+
     public static function models(): array
     {
         return [Lot::class];
@@ -22,29 +24,24 @@ class UpdateLot extends FluxAction
 
     public function performAction(): Model
     {
-        $lot = resolve_static(Lot::class, 'query')
-            ->whereKey($this->data['id'])
-            ->first();
+        $this->lot->fill($this->getData());
+        $this->lot->save();
 
-        $lot->fill($this->data);
-        $lot->save();
-
-        return $lot->withoutRelations()->fresh();
+        return $this->lot->withoutRelations()->fresh();
     }
 
     protected function validateData(): void
     {
         parent::validateData();
 
-        $lot = resolve_static(Lot::class, 'query')
-            ->whereKey($this->data['id'])
+        $this->lot = resolve_static(Lot::class, 'query')
+            ->whereKey($this->getData('id'))
             ->first();
 
         if (resolve_static(Lot::class, 'query')
-            ->withTrashed()
-            ->whereKeyNot($lot->getKey())
-            ->where('product_id', $this->data['product_id'] ?? $lot->product_id)
-            ->where('lot_number', $this->data['lot_number'] ?? $lot->lot_number)
+            ->whereKeyNot($this->lot->getKey())
+            ->where('product_id', $this->getData('product_id', $this->lot->product_id))
+            ->where('lot_number', $this->getData('lot_number', $this->lot->lot_number))
             ->exists()
         ) {
             throw ValidationException::withMessages([

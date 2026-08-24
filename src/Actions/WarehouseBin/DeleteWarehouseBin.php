@@ -9,6 +9,8 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteWarehouseBin extends FluxAction
 {
+    private ?WarehouseBin $warehouseBin = null;
+
     public static function models(): array
     {
         return [WarehouseBin::class];
@@ -21,27 +23,24 @@ class DeleteWarehouseBin extends FluxAction
 
     public function performAction(): ?bool
     {
-        return resolve_static(WarehouseBin::class, 'query')
-            ->whereKey($this->data['id'])
-            ->first()
-            ->delete();
+        return $this->warehouseBin->delete();
     }
 
     protected function validateData(): void
     {
         parent::validateData();
 
-        $warehouseBin = resolve_static(WarehouseBin::class, 'query')
-            ->whereKey($this->data['id'])
+        $this->warehouseBin = resolve_static(WarehouseBin::class, 'query')
+            ->whereKey($this->getData('id'))
             ->first();
 
-        if ($warehouseBin->stockPostings()->count() > 0) {
+        if ($this->warehouseBin->stockPostings()->exists()) {
             throw ValidationException::withMessages([
                 'stock_postings' => ['The given warehouse bin has stock postings'],
             ])->errorBag('deleteWarehouseBin');
         }
 
-        if ($warehouseBin->getAllDescendantsQuery()->exists()) {
+        if ($this->warehouseBin->getAllDescendantsQuery()->exists()) {
             throw ValidationException::withMessages([
                 'children' => ['The given warehouse bin has child bins'],
             ])->errorBag('deleteWarehouseBin');

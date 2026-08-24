@@ -13,7 +13,6 @@ use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Pivots\ProductProductProperty;
 use FluxErp\Models\Pivots\ProductSupplier;
 use FluxErp\Models\Pivots\ProductTenant;
-use FluxErp\Models\Pivots\ProductWarehouseBin;
 use FluxErp\Support\Collection\ProductOptionCollection;
 use FluxErp\Traits\Model\Categorizable;
 use FluxErp\Traits\Model\Commentable;
@@ -106,13 +105,13 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             'search_aliases' => 'array',
             'is_active' => 'boolean',
             'is_highlight' => 'boolean',
+            'is_lot_tracked' => 'boolean',
             'is_bundle' => 'boolean',
             'is_service' => 'boolean',
             'is_shipping_free' => 'boolean',
             'has_serial_numbers' => 'boolean',
             'is_nos' => 'boolean',
             'is_active_export_to_web_shop' => 'boolean',
-            'is_lot_tracked' => 'boolean',
         ];
     }
 
@@ -201,13 +200,6 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     public function vatRate(): BelongsTo
     {
         return $this->belongsTo(VatRate::class);
-    }
-
-    public function warehouseBins(): BelongsToMany
-    {
-        return $this->belongsToMany(WarehouseBin::class, 'product_warehouse_bin')
-            ->using(ProductWarehouseBin::class)
-            ->withPivot(['is_fixed_location', 'min_stock', 'max_stock', 'sort_order']);
     }
 
     // Public methods

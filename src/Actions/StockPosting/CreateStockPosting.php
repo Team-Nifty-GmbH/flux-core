@@ -39,7 +39,7 @@ class CreateStockPosting extends FluxAction
             $this->data['serial_number_id'] = $serialNumber->id;
         }
 
-        $stockPosting = app(StockPosting::class, ['attributes' => $this->data]);
+        $stockPosting = app(StockPosting::class, ['attributes' => $this->getData()]);
         $stockPosting->save();
 
         $serialNumber ??= $stockPosting->serialNumber;
@@ -61,10 +61,10 @@ class CreateStockPosting extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        if (data_get($this->data, 'serial_number.use_supplier_serial_number')) {
+        if (data_get($this->getData(), 'serial_number.use_supplier_serial_number')) {
             data_set(
-                $this->data, 'serial_number.serial_number',
-                data_get($this->data, 'serial_number.supplier_serial_number')
+                $this->getData(), 'serial_number.serial_number',
+                data_get($this->getData(), 'serial_number.supplier_serial_number')
             );
         }
     }

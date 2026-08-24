@@ -25,6 +25,14 @@ test('create warehouse bin', function (): void {
     expect($bin)->toBeInstanceOf(WarehouseBin::class)
         ->code->toBe('A-01-03-B')
         ->and($bin->warehouse_bin_type_enum)->toBe(WarehouseBinTypeEnum::Bin);
+
+    $this->assertDatabaseHas('warehouse_bins', [
+        'id' => $bin->getKey(),
+        'warehouse_id' => $this->warehouse->getKey(),
+        'code' => 'A-01-03-B',
+        'name' => 'Fach B',
+        'is_storage_location' => true,
+    ]);
 });
 
 test('create warehouse bin requires warehouse and code', function (): void {
@@ -65,6 +73,12 @@ test('update warehouse bin', function (): void {
 
     expect($updated->name)->toBe('Umbenannt')
         ->and($updated->is_active)->toBeFalse();
+
+    $this->assertDatabaseHas('warehouse_bins', [
+        'id' => $bin->getKey(),
+        'name' => 'Umbenannt',
+        'is_active' => false,
+    ]);
 });
 
 test('update warehouse bin rejects a duplicate code in the same warehouse', function (): void {
@@ -99,16 +113,27 @@ test('update warehouse bin rejects moving to another warehouse while its parent 
     ], 'parent_id');
 });
 
-test('create warehouse bin rejects a code held by a trashed bin', function (): void {
+test('create warehouse bin reuses a code released by a trashed bin', function (): void {
     WarehouseBin::factory()
         ->create(['warehouse_id' => $this->warehouse->getKey(), 'code' => 'A-01'])
         ->delete();
 
-    CreateWarehouseBin::assertValidationErrors([
+    $warehouseBin = CreateWarehouseBin::make([
         'warehouse_id' => $this->warehouse->getKey(),
         'code' => 'A-01',
         'warehouse_bin_type_enum' => WarehouseBinTypeEnum::Bin->value,
-    ], 'code');
+    ])
+        ->validate()
+        ->execute();
+
+    expect($warehouseBin->code)->toBe('A-01');
+
+    $this->assertDatabaseHas('warehouse_bins', [
+        'id' => $warehouseBin->getKey(),
+        'warehouse_id' => $this->warehouse->getKey(),
+        'code' => 'A-01',
+        'deleted_at' => null,
+    ]);
 });
 
 test('update warehouse bin rejects a parent from its own subtree', function (): void {
@@ -155,6 +180,8 @@ test('delete warehouse bin', function (): void {
     $bin = WarehouseBin::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
 
     expect(DeleteWarehouseBin::make(['id' => $bin->getKey()])->validate()->execute())->toBeTrue();
+
+    $this->assertSoftDeleted('warehouse_bins', ['id' => $bin->getKey()]);
 });
 
 test('delete warehouse bin refuses while stock remains', function (): void {

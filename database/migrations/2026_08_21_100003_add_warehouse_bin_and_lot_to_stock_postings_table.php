@@ -9,16 +9,16 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('stock_postings', function (Blueprint $table): void {
-            $table->foreignId('warehouse_bin_id')
-                ->nullable()
-                ->after('warehouse_id')
-                ->comment('Null means the stock sits in the warehouse without a known bin.')
-                ->constrained('warehouse_bins')
-                ->nullOnDelete();
             $table->foreignId('lot_id')
                 ->nullable()
-                ->after('warehouse_bin_id')
+                ->after('uuid')
                 ->constrained('lots')
+                ->nullOnDelete();
+            $table->foreignId('warehouse_bin_id')
+                ->nullable()
+                ->after('serial_number_id')
+                ->comment('Null means the stock sits in the warehouse without a known bin.')
+                ->constrained('warehouse_bins')
                 ->nullOnDelete();
 
             $table->index(['warehouse_bin_id', 'product_id']);

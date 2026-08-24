@@ -109,7 +109,6 @@ use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Pivots\ProductProductProperty;
 use FluxErp\Models\Pivots\ProductSupplier;
 use FluxErp\Models\Pivots\ProductTenant;
-use FluxErp\Models\Pivots\ProductWarehouseBin;
 use FluxErp\Models\Pivots\QueueMonitorable;
 use FluxErp\Models\Pivots\TargetUser;
 use FluxErp\Models\Pivots\TaskUser;
@@ -318,7 +317,6 @@ class MorphMapServiceProvider extends ServiceProvider
             'product_product_property' => ProductProductProperty::class,
             'product_supplier' => ProductSupplier::class,
             'product_tenant' => ProductTenant::class,
-            'product_warehouse_bin' => ProductWarehouseBin::class,
             'queue_monitorable' => QueueMonitorable::class,
             'target_user' => TargetUser::class,
             'task_user' => TaskUser::class,

@@ -33,7 +33,7 @@ return new class() extends Migration
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
 
-            $table->unique(['product_id', 'lot_number']);
+            $table->unique(['product_id', 'lot_number', 'deleted_at']);
             $table->index('expires_at');
         });
     }

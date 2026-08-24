@@ -21,7 +21,7 @@ class CreateWarehouseBin extends FluxAction
 
     public function performAction(): WarehouseBin
     {
-        $warehouseBin = app(WarehouseBin::class, ['attributes' => $this->data]);
+        $warehouseBin = app(WarehouseBin::class, ['attributes' => $this->getData()]);
         $warehouseBin->save();
 
         return $warehouseBin->fresh();
@@ -31,12 +31,12 @@ class CreateWarehouseBin extends FluxAction
     {
         parent::validateData();
 
-        $parentId = $this->data['parent_id'] ?? null;
+        $parentId = $this->getData('parent_id', null);
 
         if ($parentId
             && resolve_static(WarehouseBin::class, 'query')
                 ->whereKey($parentId)
-                ->where('warehouse_id', '!=', $this->data['warehouse_id'])
+                ->where('warehouse_id', '!=', $this->getData('warehouse_id'))
                 ->exists()
         ) {
             throw ValidationException::withMessages([
@@ -45,9 +45,8 @@ class CreateWarehouseBin extends FluxAction
         }
 
         if (resolve_static(WarehouseBin::class, 'query')
-            ->withTrashed()
-            ->where('warehouse_id', $this->data['warehouse_id'])
-            ->where('code', $this->data['code'])
+            ->where('warehouse_id', $this->getData('warehouse_id'))
+            ->where('code', $this->getData('code'))
             ->exists()
         ) {
             throw ValidationException::withMessages([

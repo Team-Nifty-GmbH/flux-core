@@ -21,7 +21,7 @@ class CreateLot extends FluxAction
 
     public function performAction(): Lot
     {
-        $lot = app(Lot::class, ['attributes' => $this->data]);
+        $lot = app(Lot::class, ['attributes' => $this->getData()]);
         $lot->save();
 
         return $lot->fresh();
@@ -32,9 +32,8 @@ class CreateLot extends FluxAction
         parent::validateData();
 
         if (resolve_static(Lot::class, 'query')
-            ->withTrashed()
-            ->where('product_id', $this->data['product_id'])
-            ->where('lot_number', $this->data['lot_number'])
+            ->where('product_id', $this->getData('product_id'))
+            ->where('lot_number', $this->getData('lot_number'))
             ->exists()
         ) {
             throw ValidationException::withMessages([
