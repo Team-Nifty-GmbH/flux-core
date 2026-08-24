@@ -23,15 +23,15 @@ class TransferStock extends FluxAction
 
     public function performAction(): bool
     {
-        $description = $this->data['description'] ?? __('Stock transfer');
+        $description = $this->getData('description', __('Stock transfer'));
 
-        $allocation = $this->allocator()->allocate($this->data['amount']);
+        $allocation = $this->allocator()->allocate($this->getData('amount'));
         $allocated = $allocation->reduce(
             fn (string $carry, array $item) => bcadd($carry, $item['amount'], 10),
             '0'
         );
 
-        if (bccomp($allocated, (string) $this->data['amount'], 10) === -1) {
+        if (bccomp($allocated, (string) $this->getData('amount'), 10) === -1) {
             throw ValidationException::withMessages([
                 'amount' => ['The source bin does not hold enough stock'],
             ])->errorBag('transferStock');
@@ -42,9 +42,9 @@ class TransferStock extends FluxAction
             $amount = $item['amount'];
 
             CreateStockPosting::make([
-                'warehouse_id' => $this->data['warehouse_id'],
-                'product_id' => $this->data['product_id'],
-                'warehouse_bin_id' => $this->data['from_warehouse_bin_id'],
+                'warehouse_id' => $this->getData('warehouse_id'),
+                'product_id' => $this->getData('product_id'),
+                'warehouse_bin_id' => $this->getData('from_warehouse_bin_id'),
                 'lot_id' => $stockPosting->lot_id,
                 'parent_id' => $stockPosting->id,
                 'serial_number_id' => $stockPosting->serial_number_id,
@@ -65,9 +65,9 @@ class TransferStock extends FluxAction
                 ->execute();
 
             CreateStockPosting::make([
-                'warehouse_id' => $this->data['warehouse_id'],
-                'product_id' => $this->data['product_id'],
-                'warehouse_bin_id' => $this->data['to_warehouse_bin_id'],
+                'warehouse_id' => $this->getData('warehouse_id'),
+                'product_id' => $this->getData('product_id'),
+                'warehouse_bin_id' => $this->getData('to_warehouse_bin_id'),
                 'lot_id' => $stockPosting->lot_id,
                 'parent_id' => $stockPosting->id,
                 'serial_number_id' => $stockPosting->serial_number_id,
@@ -88,20 +88,20 @@ class TransferStock extends FluxAction
         parent::validateData();
 
         $bins = resolve_static(WarehouseBin::class, 'query')
-            ->whereKey([$this->data['from_warehouse_bin_id'], $this->data['to_warehouse_bin_id']])
+            ->whereKey([$this->getData('from_warehouse_bin_id'), $this->getData('to_warehouse_bin_id')])
             ->get()
             ->keyBy('id');
 
-        $target = $bins->get($this->data['to_warehouse_bin_id']);
-        $source = $bins->get($this->data['from_warehouse_bin_id']);
+        $target = $bins->get($this->getData('to_warehouse_bin_id'));
+        $source = $bins->get($this->getData('from_warehouse_bin_id'));
 
-        if ($source?->warehouse_id !== (int) $this->data['warehouse_id']) {
+        if ($source?->warehouse_id !== (int) $this->getData('warehouse_id')) {
             throw ValidationException::withMessages([
                 'from_warehouse_bin_id' => ['The source bin belongs to a different warehouse'],
             ])->errorBag('transferStock');
         }
 
-        if ($target?->warehouse_id !== (int) $this->data['warehouse_id']) {
+        if ($target?->warehouse_id !== (int) $this->getData('warehouse_id')) {
             throw ValidationException::withMessages([
                 'to_warehouse_bin_id' => ['The target bin belongs to a different warehouse'],
             ])->errorBag('transferStock');
@@ -115,7 +115,7 @@ class TransferStock extends FluxAction
 
         $available = (string) $this->allocator()->query()->sum('remaining_stock');
 
-        if (bccomp($available, (string) $this->data['amount'], 10) === -1) {
+        if (bccomp($available, (string) $this->getData('amount'), 10) === -1) {
             throw ValidationException::withMessages([
                 'amount' => ['The source bin does not hold enough stock'],
             ])->errorBag('transferStock');
@@ -125,9 +125,9 @@ class TransferStock extends FluxAction
     protected function allocator(): StockAllocator
     {
         return app(StockAllocator::class)
-            ->forProduct($this->data['product_id'])
-            ->inWarehouse($this->data['warehouse_id'])
-            ->inBins([$this->data['from_warehouse_bin_id']])
-            ->forLot($this->data['lot_id'] ?? null);
+            ->forProduct($this->getData('product_id'))
+            ->inWarehouse($this->getData('warehouse_id'))
+            ->inBins([$this->getData('from_warehouse_bin_id')])
+            ->forLot($this->getData('lot_id', null));
     }
 }
