@@ -327,6 +327,11 @@ class Product extends Component
                 ->text(__('Stock'))
                 ->isLivewireComponent()
                 ->wireModel('product'),
+            TabButton::make('product.lot-list')
+                ->text(__('Lots'))
+                ->isLivewireComponent()
+                ->wireModel('product')
+                ->when(fn () => (bool) $this->product->is_lot_tracked),
             TabButton::make('product.media')->text(__('Media')),
             TabButton::make('product.cross-selling')->text(__('Cross Selling')),
             TabButton::make('product.activities')
