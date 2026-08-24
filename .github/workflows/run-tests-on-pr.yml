@@ -3,8 +3,26 @@ name: tests
 on:
   push:
     branches: [dev]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/dependabot.yml'
+      - '.github/workflows/build-main-assets.yml'
+      - '.github/workflows/code-standards.yml'
+      - '.github/workflows/dependabot-auto-merge.yml'
+      - '.github/workflows/release.yml'
+      - '.github/workflows/translation-audit.yml'
   pull_request:
     branches: [main, dev]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/dependabot.yml'
+      - '.github/workflows/build-main-assets.yml'
+      - '.github/workflows/code-standards.yml'
+      - '.github/workflows/dependabot-auto-merge.yml'
+      - '.github/workflows/release.yml'
+      - '.github/workflows/translation-audit.yml'
   workflow_dispatch:
 
 concurrency:
