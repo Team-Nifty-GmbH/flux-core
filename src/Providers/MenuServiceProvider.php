@@ -97,6 +97,7 @@ class MenuServiceProvider extends ServiceProvider
             label: 'Products',
             closure: function (): void {
                 Menu::register(route: 'products.products');
+                Menu::register(route: 'products.expiring-stock');
                 Menu::register(route: 'products.serial-numbers');
             }
         );
