@@ -120,6 +120,7 @@ use FluxErp\Livewire\Settings\Users;
 use FluxErp\Livewire\Settings\VacationBlackouts;
 use FluxErp\Livewire\Settings\VacationCarryoverRules;
 use FluxErp\Livewire\Settings\VatRates;
+use FluxErp\Livewire\Settings\WarehouseBins;
 use FluxErp\Livewire\Settings\Warehouses;
 use FluxErp\Livewire\Settings\WorkTimeModel;
 use FluxErp\Livewire\Settings\WorkTimeModels;
@@ -365,6 +366,7 @@ Route::middleware('web')
                         Route::get('/vacation-blackouts', VacationBlackouts::class)->name('vacation-blackouts');
                         Route::get('/vacation-carryover-rules', VacationCarryoverRules::class)->name('vacation-carryover-rules');
                         Route::get('/vat-rates', VatRates::class)->name('vat-rates');
+                        Route::get('/warehouse-bins', WarehouseBins::class)->name('warehouse-bins');
                         Route::get('/warehouses', Warehouses::class)->name('warehouses');
                         Route::get('/work-time-model/{id}', WorkTimeModel::class)->name('work-time-model')
                             ->metadata(['model' => 'work_time_model']);
