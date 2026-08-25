@@ -27,26 +27,6 @@ beforeEach(function (): void {
         }
     }
 });
-
-afterEach(function (): void {
-    $cacheFiles = [
-        'flux-actions.php',
-        'flux-widgets.php',
-        'flux-repeatables.php',
-        'flux-view-classes.php',
-        'flux-livewire-components.php',
-        'flux-blade-components.php',
-        'flux-commands.php',
-    ];
-
-    foreach ($cacheFiles as $file) {
-        $path = app()->bootstrapPath('cache/' . $file);
-        if (file_exists($path)) {
-            unlink($path);
-        }
-    }
-});
-
 test('flux:optimize generates all cache files', function (): void {
     $this->artisan('flux:optimize')
         ->assertExitCode(0);

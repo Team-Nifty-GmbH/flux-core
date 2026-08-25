@@ -413,7 +413,12 @@ class FluxOptimize extends Command
     {
         $temporary = $path . '.' . getmypid();
 
-        file_put_contents($temporary, $content);
+        if (file_put_contents($temporary, $content) !== strlen($content)) {
+            @unlink($temporary);
+
+            return;
+        }
+
         rename($temporary, $path);
     }
 
