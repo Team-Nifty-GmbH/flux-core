@@ -17,6 +17,26 @@ beforeEach(function (): void {
         'flux-view-classes.php',
         'flux-livewire-components.php',
         'flux-blade-components.php',
+        'flux-commands.php',
+    ];
+
+    foreach ($cacheFiles as $file) {
+        $path = app()->bootstrapPath('cache/' . $file);
+        if (file_exists($path)) {
+            unlink($path);
+        }
+    }
+});
+
+afterEach(function (): void {
+    $cacheFiles = [
+        'flux-actions.php',
+        'flux-widgets.php',
+        'flux-repeatables.php',
+        'flux-view-classes.php',
+        'flux-livewire-components.php',
+        'flux-blade-components.php',
+        'flux-commands.php',
     ];
 
     foreach ($cacheFiles as $file) {
