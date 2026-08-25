@@ -47,8 +47,7 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
                     'end_time',
                 ])
             ) {
-                $absenceRequest->days_requested = $absenceRequest->start_date
-                    ->diffInDays($absenceRequest->end_date, absolute: true) + 1;
+                $absenceRequest->days_requested = $absenceRequest->calculateDaysRequested();
                 $absenceRequest->work_hours_affected = $absenceRequest->calculateWorkHoursAffected();
                 $absenceRequest->work_days_affected = $absenceRequest->calculateWorkDaysAffected();
             }
@@ -146,6 +145,21 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
     }
 
     // Public methods
+    public function calculateDaysRequested(): int
+    {
+        $daysRequested = 0;
+        $current = $this->start_date->copy();
+        while ($current->lte($this->end_date)) {
+            if ($this->employee->isWorkDay($current)) {
+                $daysRequested++;
+            }
+
+            $current->addDay();
+        }
+
+        return $daysRequested;
+    }
+
     public function calculateWorkDaysAffected(?Carbon $date = null): string|float
     {
         $deductionRate = $this->absenceType->percentage_deduction ?? 1;

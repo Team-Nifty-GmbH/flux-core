@@ -62,8 +62,8 @@ test('shows upcoming approved absence within 14 days', function (): void {
         'absence_type_id' => $this->absenceType->getKey(),
         'state' => AbsenceRequestStateEnum::Approved,
         'day_part' => AbsenceRequestDayPartEnum::FullDay,
-        'start_date' => now()->addDays(3),
-        'end_date' => now()->addDays(5),
+        'start_date' => now()->addWeek()->startOfWeek(),
+        'end_date' => now()->addWeek()->startOfWeek()->addDays(2),
         'days_requested' => 3,
         'work_days_affected' => 3,
     ]);
