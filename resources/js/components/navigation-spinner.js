@@ -18,6 +18,18 @@ export default function () {
 
         if (!overlay || !spinner) return;
 
+        const main = document.querySelector('main');
+        const box = main?.getBoundingClientRect();
+
+        spinner.style.top = box ? `${Math.round(box.top)}px` : '';
+        spinner.style.left = box ? `${Math.round(box.left)}px` : '';
+        spinner.style.right = box
+            ? `${Math.round(window.innerWidth - box.right)}px`
+            : '';
+        spinner.style.bottom = box
+            ? `${Math.round(window.innerHeight - box.bottom)}px`
+            : '';
+
         overlay.classList.remove('hidden');
 
         spinnerTimeout = setTimeout(() => {
