@@ -67,7 +67,8 @@
         >
             @if (! $position->is_free_text && ! $position->is_bundle_position)
                 {{ Number::format($position->amount) }}
-                {{ data_get($position, 'product.unit.abbreviation') }}
+                {{ data_get($position, 'product.productOptions')?->pluck('name')->filter()->implode(', ')
+                    ?: data_get($position, 'product.unit.abbreviation') }}
             @endif
         </td>
         <td

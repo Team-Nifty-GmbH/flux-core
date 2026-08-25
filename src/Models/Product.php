@@ -235,7 +235,15 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
 
     public function getLabel(): ?string
     {
-        return $this->name;
+        if (is_null($this->parent_id)) {
+            return $this->name;
+        }
+
+        $options = $this->productOptions->pluck('name')->filter();
+
+        return $options->isEmpty()
+            ? $this->name
+            : $this->name . ' (' . $options->implode(', ') . ')';
     }
 
     public function getUrl(): ?string

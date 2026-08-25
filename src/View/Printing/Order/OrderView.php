@@ -79,7 +79,10 @@ class OrderView extends PrintableView
                                         'tags',
                                         'product' => fn (BelongsTo $query) => $query
                                             ->withTrashed()
-                                            ->with('unit:id,name,abbreviation'),
+                                            ->with([
+                                                'unit:id,name,abbreviation',
+                                                'productOptions:id,name',
+                                            ]),
                                     ])
                                     ->when(
                                         ! $this->showAlternatives,

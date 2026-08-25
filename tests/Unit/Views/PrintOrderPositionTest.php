@@ -57,3 +57,53 @@ test('print order position keeps bottom padding only on the last description row
     expect(substr_count($html, 'padding-bottom: 8px;'))->toBe(1)
         ->and(strrpos($html, 'padding-bottom: 8px;'))->toBeGreaterThan(strpos($html, 'First'));
 });
+
+function renderPrintOrderPositionWithProduct(?array $optionNames, ?string $unit): string
+{
+    $product = (new FluxErp\Models\Product())->forceFill(['name' => 'Test Product']);
+    $product->setRelation(
+        'unit',
+        $unit ? (new FluxErp\Models\Unit())->forceFill(['abbreviation' => $unit]) : null
+    );
+    $product->setRelation(
+        'productOptions',
+        collect($optionNames ?? [])->map(
+            fn (string $name) => (new FluxErp\Models\ProductOption())->forceFill(['name' => $name])
+        )
+    );
+
+    $position = (new OrderPosition())->forceFill([
+        'slug_position' => '1',
+        'name' => 'Test Product',
+        'product_number' => 'P-100',
+        'description' => null,
+        'depth' => 0,
+        'amount' => 1,
+        'is_alternative' => false,
+        'is_free_text' => false,
+        'is_bundle_position' => false,
+        'total_net_price' => '10.00',
+        'total_gross_price' => '11.90',
+        'total_base_net_price' => '10.00',
+        'total_base_gross_price' => '11.90',
+    ]);
+    $position->setRelation('product', $product);
+
+    return Blade::render(
+        '<x-flux::print.order.order-position :position="$position" :is-net="true" />',
+        ['position' => $position]
+    );
+}
+
+test('print order position names the variant that was ordered', function (): void {
+    $html = renderPrintOrderPositionWithProduct(['100g Tüte'], 'kg');
+
+    expect($html)->toContain('100g Tüte')
+        ->and($html)->not->toContain('kg');
+});
+
+test('print order position keeps the unit for a product without options', function (): void {
+    $html = renderPrintOrderPositionWithProduct([], 'kg');
+
+    expect($html)->toContain('kg');
+});
