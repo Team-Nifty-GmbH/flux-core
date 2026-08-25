@@ -3,6 +3,8 @@
     x-on:open="$tsui.focus('country.name')"
     :title="__('Country')"
 >
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-1.5">
         <x-input wire:model="country.name" :label="__('Country Name')" />
         <x-select.styled
@@ -46,4 +48,6 @@
             "
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

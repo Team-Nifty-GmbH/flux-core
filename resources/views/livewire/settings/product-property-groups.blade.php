@@ -2,6 +2,8 @@
     id="edit-product-property-group-modal"
     :title="__('Product Property Group')"
 >
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-1.5">
         <x-input
             wire:model="productPropertyGroup.name"
@@ -93,4 +95,6 @@
             "
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

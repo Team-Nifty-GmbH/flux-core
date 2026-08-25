@@ -14,6 +14,8 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Users extends UserList
 {
+    public bool $rendersForm = false;
+
     public UserForm $userForm;
 
     protected ?string $includeBefore = 'flux::livewire.settings.users';
@@ -42,7 +44,6 @@ class Users extends UserList
         ];
     }
 
-    #[Renderless]
     public function edit(User $user): void
     {
         if ($user->exists) {
@@ -52,6 +53,10 @@ class Users extends UserList
         }
 
         $this->userForm->reset();
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
+
         $this->js(<<<'JS'
             $tsui.open.modal('create-user-modal');
         JS);

@@ -25,6 +25,8 @@ class Tenants extends TenantList
 {
     use SupportsLocalization, WithFileUploads, WithTabs;
 
+    public bool $rendersForm = false;
+
     public TenantForm $tenant;
 
     public MediaUploadForm $logo;
@@ -137,7 +139,6 @@ class Tenants extends TenantList
         return true;
     }
 
-    #[Renderless]
     public function edit(?Tenant $record = null): void
     {
         $this->tenant->reset();
@@ -154,6 +155,9 @@ class Tenants extends TenantList
             $this->logo->fill($record->getMedia('logo')->first() ?? []);
             $this->logoSmall->fill($record->getMedia('logo_small')->first() ?? []);
         }
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
             $tsui.open.modal('edit-tenant');

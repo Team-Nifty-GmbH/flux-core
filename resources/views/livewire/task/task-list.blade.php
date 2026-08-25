@@ -1,5 +1,7 @@
 <div>
     <x-modal id="new-task-modal" x-on:open="$tsui.focus('task-name')">
+@if ($rendersForm ?? true)
+
         <div
             class="space-y-8 divide-y divide-gray-200"
             x-data="{
@@ -146,9 +148,13 @@
                 "
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 
     <x-modal id="change-task-state-modal" :title="__('Change state')">
+@if ($rendersForm ?? true)
+
         <div
             x-data="{
                 formatter: @js(resolve_static(\FluxErp\Models\Task::class, 'typeScriptAttributes')),
@@ -183,5 +189,7 @@
                 "
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

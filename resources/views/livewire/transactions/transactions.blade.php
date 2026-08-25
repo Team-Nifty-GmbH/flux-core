@@ -1,4 +1,6 @@
 <x-modal id="transaction-details-modal" size="6xl">
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-1.5">
         <x-select.styled
             :label="__('Bank Connection')"
@@ -72,4 +74,6 @@
             </div>
         </div>
     </x-slot:footer>
+
+@endif
 </x-modal>

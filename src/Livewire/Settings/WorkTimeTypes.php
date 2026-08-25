@@ -11,6 +11,8 @@ class WorkTimeTypes extends WorkTimeTypeList
 {
     use DataTableHasFormEdit;
 
+    public bool $rendersForm = false;
+
     #[DataTableForm]
     public WorkTimeTypeForm $workTimeTypeForm;
 

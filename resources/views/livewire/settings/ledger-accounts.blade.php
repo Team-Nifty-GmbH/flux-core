@@ -1,4 +1,6 @@
 <x-modal id="edit-ledger-account-modal" :title="__('Ledger Account')">
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-1.5">
         <x-select.styled
             x-bind:readonly="!edit"
@@ -48,4 +50,6 @@
             "
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

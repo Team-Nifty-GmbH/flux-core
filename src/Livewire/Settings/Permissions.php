@@ -19,6 +19,8 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Permissions extends RoleList
 {
+    public bool $rendersForm = false;
+
     public ?string $includeBefore = 'flux::livewire.settings.permissions';
 
     public array $permissions = [];
@@ -90,7 +92,6 @@ class Permissions extends RoleList
         return true;
     }
 
-    #[Renderless]
     public function edit(?Role $role, string $modal = 'edit-role-permissions-modal'): void
     {
         $this->roleForm->reset();
@@ -99,6 +100,9 @@ class Permissions extends RoleList
         }
 
         $this->permissions = $this->getPermissionTree();
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<JS
             \$tsui.open.modal('$modal');

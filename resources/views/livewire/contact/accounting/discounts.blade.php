@@ -1,4 +1,6 @@
 <x-modal x-on:close="$wire.resetDiscount()" id="edit-discount-modal">
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-4">
         <div x-cloak x-show="!$wire.discountForm.id">
             <x-select.styled
@@ -105,4 +107,6 @@
             "
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

@@ -20,6 +20,8 @@ class Tags extends TagList
 {
     use AllowRecordMerging;
 
+    public bool $rendersForm = false;
+
     #[Locked]
     public bool $isSelectable = true;
 
@@ -121,6 +123,9 @@ class Tags extends TagList
     {
         $this->tagForm->reset();
         $this->tagForm->fill($tag);
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
             $tsui.open.modal('edit-tag-modal');

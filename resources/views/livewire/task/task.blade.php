@@ -6,6 +6,8 @@
         persistent
         x-on:close="$wire.taskId = $wire.task.id"
     >
+@if ($rendersForm ?? true)
+
         @section('replicate-task-modal')
             <div class="flex flex-col gap-2">
                 <x-select.styled
@@ -228,7 +230,9 @@
                 :text="__('Save')"
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5"
     >

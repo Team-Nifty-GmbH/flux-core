@@ -16,6 +16,8 @@ abstract class BaseDataTable extends DataTable
 {
     use Actions, HasEloquentListeners;
 
+    public bool $rendersForm = true;
+
     #[Renderless]
     public function export(array $columns = [], string $format = 'xlsx', bool $formatted = true): Response|BinaryFileResponse|StreamedResponse
     {

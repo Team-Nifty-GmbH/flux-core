@@ -20,6 +20,8 @@ class ProductPropertyGroups extends ProductPropertyGroupList
 {
     use SupportsLocalization;
 
+    public bool $rendersForm = false;
+
     public ProductPropertyGroupForm $productPropertyGroup;
 
     protected ?string $includeBefore = 'flux::livewire.settings.product-property-groups';
@@ -78,7 +80,6 @@ class ProductPropertyGroups extends ProductPropertyGroupList
         $this->loadData();
     }
 
-    #[Renderless]
     public function edit(?ProductPropertyGroup $productPropertyGroup = null): void
     {
         $this->productPropertyGroup->reset();
@@ -86,6 +87,9 @@ class ProductPropertyGroups extends ProductPropertyGroupList
             $productPropertyGroup->loadMissing('productProperties:id,product_property_group_id,name,property_type_enum');
             $this->productPropertyGroup->fill($productPropertyGroup);
         }
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
             $tsui.open.modal('edit-product-property-group-modal');

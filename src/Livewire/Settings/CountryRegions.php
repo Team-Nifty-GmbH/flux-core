@@ -11,6 +11,8 @@ class CountryRegions extends CountryRegionList
 {
     use DataTableHasFormEdit;
 
+    public bool $rendersForm = false;
+
     #[DataTableForm]
     public CountryRegionForm $countryRegionForm;
 

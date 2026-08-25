@@ -1,4 +1,6 @@
 <x-modal id="execute-payment-run">
+@if ($rendersForm ?? true)
+
     <div
         class="flex flex-col gap-4 text-sm"
         x-data="{
@@ -179,4 +181,6 @@
             </div>
         </div>
     </x-slot:footer>
+
+@endif
 </x-modal>

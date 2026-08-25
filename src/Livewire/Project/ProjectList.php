@@ -14,6 +14,8 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ProjectList extends BaseProjectList
 {
+    public bool $rendersForm = false;
+
     public array $availableStates = [];
 
     public ProjectForm $project;
@@ -47,10 +49,12 @@ class ProjectList extends BaseProjectList
         ];
     }
 
-    #[Renderless]
     public function createProject(): void
     {
         $this->project->reset();
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
             $tsui.open.modal('edit-project');

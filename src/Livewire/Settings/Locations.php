@@ -11,6 +11,8 @@ class Locations extends LocationList
 {
     use DataTableHasFormEdit;
 
+    public bool $rendersForm = false;
+
     #[DataTableForm]
     public LocationForm $locationForm;
 

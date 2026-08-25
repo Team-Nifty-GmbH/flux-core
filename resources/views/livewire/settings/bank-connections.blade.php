@@ -3,6 +3,8 @@
     class="flex flex-col gap-4"
     :title="__('Bank Connection')"
 >
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-4">
         <x-input wire:model="bankConnection.name" :label="__('Name')" />
         <x-select.styled
@@ -74,4 +76,6 @@
             "
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

@@ -9,6 +9,8 @@
             x-on:open="$tsui.focus('lead-name')"
             persistent
         >
+@if ($rendersForm ?? true)
+
             <div class="flex flex-col gap-4">
                 <x-input
                     id="lead-name"
@@ -69,7 +71,9 @@
                     x-on:click="$wire.createLeads().then((success) => {if(success) $tsui.close.modal('{{ $leadForm->modalName() }}');})"
                 />
             </x-slot:footer>
-        </x-modal>
+        
+@endif
+</x-modal>
     @endcanAction
     @section('map')
         <x-flux::map.fullscreen-container />

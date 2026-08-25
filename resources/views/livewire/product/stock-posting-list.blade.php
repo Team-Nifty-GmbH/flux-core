@@ -1,4 +1,6 @@
 <x-modal id="create-stock-posting-modal">
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-1.5">
         <x-select.styled
             wire:model="stockPosting.warehouse_id"
@@ -57,4 +59,6 @@
             "
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

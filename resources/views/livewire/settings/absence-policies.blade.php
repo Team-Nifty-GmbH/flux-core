@@ -3,6 +3,8 @@
         :id="$absencePolicyForm->modalName()"
         :title="__('Absence Policy')"
     >
+@if ($rendersForm ?? true)
+
         <div class="space-y-4">
             <x-input
                 wire:model="absencePolicyForm.name"
@@ -75,5 +77,7 @@
                 x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $absencePolicyForm->modalName() }}') })"
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

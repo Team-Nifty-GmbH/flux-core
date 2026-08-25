@@ -3,6 +3,8 @@
         :id="$vacationCarryoverRuleForm->modalName()"
         :title="__('Vacation Carryover Rule')"
     >
+@if ($rendersForm ?? true)
+
         <div class="flex flex-col gap-4">
             <x-input
                 wire:model="vacationCarryoverRuleForm.name"
@@ -50,5 +52,7 @@
                 x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $vacationCarryoverRuleForm->modalName() }}') })"
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

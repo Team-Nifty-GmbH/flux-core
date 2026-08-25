@@ -27,6 +27,8 @@ class Accounting extends OrderTransactionList
 {
     use DataTableHasFormEdit;
 
+    public bool $rendersForm = false;
+
     public array $enabledCols = [
         'amount',
         'transaction.purpose',
@@ -74,7 +76,6 @@ class Accounting extends OrderTransactionList
         $this->orderTransactionForm->calcOrderCurrencyAmount();
     }
 
-    #[Renderless]
     public function editTransaction(?Transaction $transaction): void
     {
         $this->transactionForm->reset();
@@ -87,6 +88,9 @@ class Accounting extends OrderTransactionList
             $this->transactionForm->value_date = now()->format('Y-m-d');
         }
         $this->transactionForm->order_id = $this->order->id;
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
             $tsui.open.modal('transaction-details-modal');

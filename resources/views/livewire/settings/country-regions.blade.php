@@ -1,4 +1,6 @@
 <x-modal id="country-region-form-modal" :title="__('Country Region')">
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-2">
         <x-select.styled
             :label="__('Country')"
@@ -31,4 +33,6 @@
             "
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

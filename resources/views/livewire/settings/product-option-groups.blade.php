@@ -2,6 +2,8 @@
     id="edit-product-option-group-modal"
     :title="__('Product Option Group')"
 >
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-1.5">
         <x-input
             wire:model="productOptionGroupForm.name"
@@ -60,4 +62,6 @@
             "
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

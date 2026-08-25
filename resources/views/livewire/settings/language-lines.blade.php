@@ -1,4 +1,6 @@
 <x-modal id="edit-language-line-modal" :title="__('Language Line')">
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-4">
         <x-input
             label="{{ __('Group') }}"
@@ -39,4 +41,6 @@
             "
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

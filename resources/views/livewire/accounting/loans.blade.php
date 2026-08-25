@@ -1,4 +1,6 @@
 <x-modal id="edit-loan-modal" :title="__('Loan')" size="xl">
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-1.5">
         <x-input wire:model="loan.name" :label="__('Name')" required />
         <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
@@ -104,4 +106,6 @@
             wire:click="save()"
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

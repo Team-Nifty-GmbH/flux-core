@@ -1,5 +1,7 @@
 {{ $this->renderCreateDocumentsModal() }}
 <x-modal id="edit-sepa-mandate-modal">
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-4">
         <x-select.styled
             wire:model="sepaMandate.contact_bank_connection_id"
@@ -44,4 +46,6 @@
             :text="__('Save')"
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

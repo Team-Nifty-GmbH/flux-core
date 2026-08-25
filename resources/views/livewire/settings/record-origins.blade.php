@@ -3,6 +3,8 @@
     x-on:open="$tsui.focus('record-origin-name')"
     :title="__('Record Origin')"
 >
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-1.5">
         <x-input
             id="record-origin-name"
@@ -40,4 +42,6 @@
             "
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

@@ -14,6 +14,8 @@
     @endisland
     @section('calendar-modal')
         <x-modal id="calendar-modal" :title="__('Edit Calendar')">
+@if ($rendersForm ?? true)
+
             @section('calendar-edit')
                 <div class="flex flex-col gap-4">
                     <div id="parent-calendar-select">
@@ -145,7 +147,9 @@
                     </div>
                 </div>
             </x-slot:footer>
-        </x-modal>
+        
+@endif
+</x-modal>
 
     @show
     @if ($showCalendars)

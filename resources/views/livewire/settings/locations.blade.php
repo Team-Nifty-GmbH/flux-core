@@ -4,6 +4,8 @@
         size="2xl"
         :title="__('Location')"
     >
+@if ($rendersForm ?? true)
+
         <div class="flex flex-col gap-4">
             <x-input
                 wire:model="locationForm.name"
@@ -75,5 +77,7 @@
                 x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $locationForm->modalName() }}') })"
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

@@ -21,6 +21,8 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class PriceLists extends PriceListList
 {
+    public bool $rendersForm = false;
+
     public array $discountedCategories = [];
 
     public array $newCategoryDiscount = [
@@ -113,7 +115,6 @@ class PriceLists extends PriceListList
         return true;
     }
 
-    #[Renderless]
     public function edit(PriceList $priceList): void
     {
         $this->priceList->reset();
@@ -146,6 +147,9 @@ class PriceLists extends PriceListList
                 'is_percentage' => true,
             ];
         }
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
             $tsui.open.modal('edit-price-list-modal');

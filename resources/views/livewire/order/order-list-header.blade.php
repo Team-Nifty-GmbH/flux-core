@@ -14,6 +14,8 @@
         x-trap="show"
         persistent
     >
+@if ($rendersForm ?? true)
+
         <div class="flex flex-col gap-4">
             <x-toggle
                 wire:model.live="discountIsPercentage"
@@ -58,7 +60,9 @@
                 "
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
     <x-modal
         size="6xl"
         id="edit-order-position"
@@ -66,6 +70,8 @@
         x-on:open="$tsui.focus('order-position-name')"
         persistent
     >
+@if ($rendersForm ?? true)
+
         @section('order-position-detail-modal.content')
             <div class="relative">
                 <div class="space-y-6 p-4">
@@ -604,5 +610,7 @@
                 </div>
             </div>
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

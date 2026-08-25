@@ -11,6 +11,8 @@ class VacationCarryoverRules extends VacationCarryOverRuleList
 {
     use DataTableHasFormEdit;
 
+    public bool $rendersForm = false;
+
     #[DataTableForm]
     public VacationCarryOverRuleForm $vacationCarryoverRuleForm;
 

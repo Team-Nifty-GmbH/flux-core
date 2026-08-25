@@ -34,6 +34,8 @@ abstract class Communication extends CommunicationList
 {
     use CreatesDocuments, WithFileUploads;
 
+    public bool $rendersForm = false;
+
     public MediaUploadForm $attachments;
 
     public CommunicationForm $communication;
@@ -197,7 +199,6 @@ abstract class Communication extends CommunicationList
         $this->loadData();
     }
 
-    #[Renderless]
     public function edit(?CommunicationModel $communication = null): void
     {
         $this->communication->reset();
@@ -216,6 +217,9 @@ abstract class Communication extends CommunicationList
         } elseif ($this->modelType && $this->modelId) {
             $this->addCommunicatable(morph_alias($this->modelType), $this->modelId);
         }
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
             $tsui.open.modal('edit-communication');

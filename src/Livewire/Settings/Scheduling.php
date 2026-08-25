@@ -19,6 +19,8 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Scheduling extends ScheduleList
 {
+    public bool $rendersForm = false;
+
     public ?string $includeBefore = 'flux::livewire.settings.scheduling';
 
     public array $repeatable;
@@ -96,11 +98,13 @@ class Scheduling extends ScheduleList
         return true;
     }
 
-    #[Renderless]
     public function edit(Schedule $schedule): void
     {
         $this->schedule->reset();
         $this->schedule->fill($schedule);
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
             $tsui.open.modal('edit-schedule-modal');

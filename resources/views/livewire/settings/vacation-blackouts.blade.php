@@ -3,6 +3,8 @@
         :id="$vacationBlackoutForm->modalName()"
         :title="__('Vacation Blackout')"
     >
+@if ($rendersForm ?? true)
+
         <div class="flex flex-col gap-4">
             <x-input
                 wire:model="vacationBlackoutForm.name"
@@ -101,5 +103,7 @@
                 })"
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

@@ -1,5 +1,7 @@
 <div>
     <x-modal id="edit-tag-modal" :title="__('Tag')">
+@if ($rendersForm ?? true)
+
         <div class="flex flex-col gap-1.5">
             <x-input wire:model="tagForm.name" :label="__('Name')" />
             <x-color wire:model="tagForm.color" :label="__('Color')" />
@@ -30,5 +32,7 @@
                 "
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

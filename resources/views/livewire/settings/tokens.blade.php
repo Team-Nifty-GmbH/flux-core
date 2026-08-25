@@ -55,6 +55,8 @@
     </x-slot:footer>
 </x-modal>
 <x-modal persistent id="copy-token-modal" :title="__('Copy token')">
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-4">
         <div class="text-sm text-gray-500">
             <p>{{ __('Copy the token to your clipboard.') }}</p>
@@ -77,4 +79,6 @@
             wire:flux-confirm.type.warning="{{ __('Token saved|Confirm that you copied the token.') }}"
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

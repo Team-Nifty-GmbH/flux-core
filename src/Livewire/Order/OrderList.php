@@ -34,6 +34,8 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 {
     use CreatesDocuments;
 
+    public bool $rendersForm = false;
+
     public ?string $cacheKey = 'order.order-list';
 
     public ?int $mapLimit = 100;
@@ -121,7 +123,6 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         ];
     }
 
-    #[Renderless]
     public function create(): void
     {
         $this->order->payment_type_id ??= resolve_static(PaymentType::class, 'default')?->getKey();
@@ -129,6 +130,9 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         $this->order->payment_type_id ??= resolve_static(PaymentType::class, 'default')?->getKey();
         $this->order->language_id ??= resolve_static(Language::class, 'default')?->getKey();
         $this->order->tenant_id ??= resolve_static(Tenant::class, 'default')?->getKey();
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
              $tsui.open.modal('create-order-modal');
@@ -203,7 +207,6 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         $this->reset('selected');
     }
 
-    #[Renderless]
     public function openCreateCollectiveOrderModal(): void
     {
         $selected = $this->getSelectedModelsQuery()
@@ -233,6 +236,9 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 
         $this->collectiveOrder->reset();
         $this->collectiveOrder->orders = $selected;
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
              $tsui.open.modal('create-collective-order-modal');

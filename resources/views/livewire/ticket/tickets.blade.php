@@ -5,6 +5,8 @@
     wire="showTicketModal"
     :title="__('New Ticket')"
 >
+@if ($rendersForm ?? true)
+
     <div class="space-y-8 divide-y divide-gray-200">
         <div class="space-y-8 divide-y divide-gray-200">
             <div>
@@ -64,4 +66,6 @@
             loading="save()"
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

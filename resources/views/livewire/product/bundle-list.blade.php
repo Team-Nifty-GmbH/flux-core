@@ -31,6 +31,8 @@
     "
 >
     <x-modal id="edit-bundle-product-modal" :title="__('Edit Bundle Product')">
+@if ($rendersForm ?? true)
+
         <div class="flex flex-col gap-1.5">
             <x-select.styled
                 class="pb-4"
@@ -86,7 +88,9 @@
                 "
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
     <div
         class="flex flex-col gap-2"
         x-cloak

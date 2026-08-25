@@ -239,13 +239,17 @@
         size="full"
         :title="__('Payment Reminder Preview')"
     >
+@if ($rendersForm ?? true)
+
         @if ($previewSrc)
             <iframe
                 src="{{ $previewSrc }}"
                 class="h-[85vh] w-full rounded-lg border-0"
             ></iframe>
         @endif
-    </x-modal>
+    
+@endif
+</x-modal>
 
     {{ $this->renderCreateDocumentsModal() }}
 </div>

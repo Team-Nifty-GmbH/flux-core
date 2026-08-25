@@ -4,6 +4,8 @@
         size="6xl"
         :title="__('Edit Variants')"
     >
+@if ($rendersForm ?? true)
+
         <div x-transition x-show="!Object.values($wire.variants).length > 0">
             <div
                 class="flex gap-4"
@@ -189,7 +191,9 @@
                 "
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
     <div wire:ignore>
         @include('tall-datatables::livewire.data-table')
     </div>

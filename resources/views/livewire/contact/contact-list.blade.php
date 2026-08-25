@@ -2,6 +2,8 @@
     @section('modals')
         @canAction(\FluxErp\Actions\Contact\UpdateContact::class)
             <x-modal id="assign-agent-modal" persistent>
+@if ($rendersForm ?? true)
+
                 <x-select.styled
                     :label="__('Commission Agent')"
                     wire:model="agentId"
@@ -45,7 +47,9 @@
                         "
                     />
                 </x-slot:footer>
-            </x-modal>
+            
+@endif
+</x-modal>
         @endcanAction
         {!! $createContactForm->autoRender($__data) !!}
         @stack('contact-list-modals')

@@ -11,6 +11,8 @@
     "
 ></div>
 <x-modal id="edit-media">
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-1.5">
         @section('media-attributes')
             <x-input :label="__('Name')" wire:model="mediaForm.name" />
@@ -85,4 +87,6 @@
             :text="__('Save')"
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

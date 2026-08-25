@@ -8,12 +8,13 @@ use FluxErp\Livewire\Forms\TransactionForm;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Modelable;
-use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class CreditAccounts extends BankConnections
 {
+    public bool $rendersForm = false;
+
     public array $columnLabels = [
         'bank_name' => 'Name',
     ];
@@ -48,13 +49,15 @@ class CreditAccounts extends BankConnections
         );
     }
 
-    #[Renderless]
     public function createTransaction(int $id): void
     {
         $this->transactionForm->reset();
         $this->transactionForm->contact_bank_connection_id = $id;
         $this->transactionForm->booking_date = now()->format('Y-m-d');
         $this->transactionForm->value_date = now()->format('Y-m-d');
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
             $tsui.open.modal('transaction-details-modal');

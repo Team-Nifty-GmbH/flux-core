@@ -22,6 +22,8 @@ class Mail extends CommunicationList
 {
     use SupportsFileDownloads;
 
+    public bool $rendersForm = false;
+
     public ?string $folderId = null;
 
     public array $folders = [];
@@ -144,12 +146,14 @@ class Mail extends CommunicationList
         }
     }
 
-    #[Renderless]
     public function showMail(Communication $message): void
     {
         $this->skipRender();
         $this->mailMessage->fill($message);
         $this->mailMessage->text_body = nl2br($this->mailMessage->text_body);
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
             writeHtml();

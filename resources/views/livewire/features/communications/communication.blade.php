@@ -63,6 +63,8 @@
         :title="__('Edit Communication')"
         persistent
     >
+@if ($rendersForm ?? true)
+
         <div class="flex flex-col gap-1.5">
             <div>
                 <x-select.styled
@@ -433,7 +435,9 @@
                 />
             </div>
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
     <x-modal id="create-preview" :title="__('Create Preview')">
         <div class="grid grid-cols-3 gap-1.5">
             <div class="text-sm font-semibold">{{ __('Print') }}</div>

@@ -11,6 +11,8 @@ class EmployeeDepartments extends EmployeeDepartmentList
 {
     use DataTableHasFormEdit;
 
+    public bool $rendersForm = false;
+
     #[DataTableForm]
     public EmployeeDepartmentForm $employeeDepartmentForm;
 

@@ -17,6 +17,8 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Discounts extends DiscountList
 {
+    public bool $rendersForm = false;
+
     #[Modelable]
     public int $contactId;
 
@@ -75,11 +77,13 @@ class Discounts extends DiscountList
         $this->loadData();
     }
 
-    #[Renderless]
     public function edit(Discount $discount): void
     {
         $this->discountForm->reset();
         $this->discountForm->fill($discount);
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
             $tsui.open.modal('edit-discount-modal');

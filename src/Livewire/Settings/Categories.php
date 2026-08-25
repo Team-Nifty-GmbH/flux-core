@@ -20,6 +20,8 @@ class Categories extends CategoryList
 {
     use AllowRecordMerging, SupportsLocalization;
 
+    public bool $rendersForm = false;
+
     public CategoryForm $category;
 
     public bool $isSelectable = true;
@@ -78,11 +80,13 @@ class Categories extends CategoryList
         return true;
     }
 
-    #[Renderless]
     public function edit(Category $category): void
     {
         $this->category->reset();
         $this->category->fill($category);
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
             $tsui.open.modal('edit-category-modal');

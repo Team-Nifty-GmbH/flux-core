@@ -11,6 +11,8 @@ class TicketTypes extends TicketTypeList
 {
     use DataTableHasFormEdit;
 
+    public bool $rendersForm = false;
+
     #[DataTableForm]
     public TicketTypeForm $ticketTypeForm;
 

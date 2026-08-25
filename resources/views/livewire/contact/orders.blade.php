@@ -1,5 +1,7 @@
 <div>
     <x-modal id="create-order-modal" :title="__('New Order')">
+@if ($rendersForm ?? true)
+
         <section>
             <div class="divide-secondary-200 space-y-2.5 divide-y">
                 <x-select.styled
@@ -144,5 +146,7 @@
                 loading="save()"
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

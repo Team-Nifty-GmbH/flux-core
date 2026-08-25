@@ -1,4 +1,6 @@
 <x-modal id="edit-ledger-booking-modal" :title="__('Ledger Booking')">
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-1.5">
         <x-select.styled
             :label="__('Debit Account')"
@@ -56,4 +58,6 @@
             "
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

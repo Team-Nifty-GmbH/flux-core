@@ -11,6 +11,8 @@ class VacationBlackouts extends VacationBlackoutList
 {
     use DataTableHasFormEdit;
 
+    public bool $rendersForm = false;
+
     #[DataTableForm]
     public VacationBlackoutForm $vacationBlackoutForm;
 

@@ -4,6 +4,8 @@
     size="3xl"
     :title="__('Absence Request')"
 >
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-4" x-data="{ showSickNote: false }">
         <div class="grid grid-cols-2 gap-4">
             @if ($this->canChooseEmployee())
@@ -168,4 +170,6 @@
             x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $absenceRequestForm->modalName() }}')})"
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

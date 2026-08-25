@@ -34,6 +34,8 @@ class PurchaseInvoiceList extends BaseDataTable
 {
     use WithDocumentScanning, WithFilePond, WithFileUploads;
 
+    public bool $rendersForm = false;
+
     #[Locked]
     public ?int $assignToOrderId = null;
 
@@ -134,7 +136,6 @@ class PurchaseInvoiceList extends BaseDataTable
         return true;
     }
 
-    #[Renderless]
     public function edit(?PurchaseInvoice $purchaseInvoice = null): void
     {
         $this->purchaseInvoiceForm->reset();
@@ -145,6 +146,9 @@ class PurchaseInvoiceList extends BaseDataTable
         }
 
         $this->refreshAssignableOrders();
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
             $tsui.open.modal('edit-purchase-invoice-modal');

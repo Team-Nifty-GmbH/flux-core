@@ -19,6 +19,8 @@ class Tokens extends TokenList
         DataTableHasFormEdit::edit as parentEdit;
     }
 
+    public bool $rendersForm = false;
+
     public array $permissions = [];
 
     #[DataTableForm]
@@ -50,6 +52,10 @@ class Tokens extends TokenList
     public function save(): bool
     {
         if ($result = $this->parentSave()) {
+            $this->rendersForm = true;
+            $this->islandsHaveMounted = false;
+            $this->loadData(forceRender: true);
+
             $this->js(<<<'JS'
                 $tsui.open.modal('copy-token-modal')
             JS);

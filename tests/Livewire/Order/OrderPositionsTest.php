@@ -981,6 +981,8 @@ test('save button is gated on the product round-trip so it cannot submit before 
     // addOrderPosition validates against a still-empty product_id and fails with required errors.
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->assertOk()
+        ->assertDontSeeHtml('wire:target="changedProductId"')
+        ->call('editOrderPosition')
         ->assertSeeHtml('wire:target="changedProductId"')
         ->assertSeeHtml('wire:loading.attr="disabled"');
 });

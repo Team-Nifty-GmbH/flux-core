@@ -12,6 +12,8 @@ class BankConnections extends BankConnectionList
 {
     use DataTableHasFormEdit;
 
+    public bool $rendersForm = false;
+
     #[DataTableForm('bank-connection-modal')]
     public BankConnectionForm $bankConnection;
 

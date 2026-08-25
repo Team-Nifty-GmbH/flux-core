@@ -30,6 +30,8 @@
     }"
 >
     <x-modal :id="$emailTemplateForm->modalName()" :title="__('Email Template')">
+@if ($rendersForm ?? true)
+
         <div class="flex flex-col gap-4">
             <x-input wire:model="emailTemplateForm.name" :label="__('Name')" />
             <div x-cloak x-show="$wire.emailTemplateForm.id">
@@ -276,5 +278,7 @@
                 x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $emailTemplateForm->modalName() }}')})"
             />
         </x-slot>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

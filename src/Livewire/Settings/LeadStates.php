@@ -11,6 +11,8 @@ class LeadStates extends LeadStateList
 {
     use DataTableHasFormEdit;
 
+    public bool $rendersForm = false;
+
     #[DataTableForm]
     public LeadStateForm $leadStateForm;
 

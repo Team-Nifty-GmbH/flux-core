@@ -70,7 +70,6 @@ trait DataTableHasFormEdit
         $this->reset('selected');
     }
 
-    #[Renderless]
     public function edit(string|int|null $id = null): void
     {
         $this->{$this->formAttributeName()}->reset();
@@ -81,6 +80,10 @@ trait DataTableHasFormEdit
                 ->firstOrFail();
             $this->{$this->formAttributeName()}->fill($model);
         }
+
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $modalName = $this->modalName();
         $this->js(<<<JS

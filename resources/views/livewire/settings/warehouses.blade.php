@@ -1,4 +1,6 @@
 <x-modal id="edit-warehouse-modal" :title="__('Warehouse')">
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-1.5">
         <x-input wire:model="warehouse.name" :label="__('Name')" />
         <div class="mt-2">
@@ -26,4 +28,6 @@
             "
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

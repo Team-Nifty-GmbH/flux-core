@@ -1,5 +1,7 @@
 <div class="py-6">
     <x-modal size="6xl" id="create-user-modal" :title="__('Create User')">
+@if ($rendersForm ?? true)
+
         @section('user-edit')
             <form class="space-y-5">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -96,5 +98,7 @@
                 "
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

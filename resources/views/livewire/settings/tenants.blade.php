@@ -15,6 +15,8 @@
         </div>
     </div>
     <x-modal size="6xl" id="edit-tenant" :title="__('Tenant')">
+@if ($rendersForm ?? true)
+
         <x-flux::tabs :$tabs wire:model="tab" wire:loading>
             @includeWhen($tab === 'general', 'flux::components.settings.tenant.general')
         </x-flux::tabs>
@@ -59,5 +61,7 @@
                 </div>
             </div>
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

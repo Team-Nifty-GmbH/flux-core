@@ -6,6 +6,8 @@
         persistent
         x-on:close="$wire.clear()"
     >
+@if ($rendersForm ?? true)
+
         <div class="pr-4 pl-4">
             <x-flux::table>
                 <x-slot:header>
@@ -229,5 +231,7 @@
                 wire:flux-confirm.type.warning="{{ __('Merge Records|Are you sure? This cannot be made undone!|Cancel|Confirm') }}"
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

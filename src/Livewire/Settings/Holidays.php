@@ -11,6 +11,8 @@ class Holidays extends HolidayList
 {
     use DataTableHasFormEdit;
 
+    public bool $rendersForm = false;
+
     #[DataTableForm]
     public HolidayForm $holidayForm;
 

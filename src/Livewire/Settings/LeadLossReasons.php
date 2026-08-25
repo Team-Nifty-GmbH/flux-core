@@ -11,6 +11,8 @@ class LeadLossReasons extends LeadLossReasonList
 {
     use DataTableHasFormEdit;
 
+    public bool $rendersForm = false;
+
     #[DataTableForm]
     public LeadLossReasonForm $leadLossReasonForm;
 

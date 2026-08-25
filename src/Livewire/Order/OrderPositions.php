@@ -29,6 +29,8 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableRowAttributes;
 
 class OrderPositions extends OrderPositionList
 {
+    public bool $rendersForm = false;
+
     public ?string $cacheKey = 'order.order-positions';
 
     public ?string $discount = null;
@@ -351,7 +353,6 @@ class OrderPositions extends OrderPositionList
         $this->discountIsPercentage = true;
     }
 
-    #[Renderless]
     public function editOrderPosition(?OrderPosition $orderPosition = null): void
     {
         $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
@@ -364,6 +365,9 @@ class OrderPositions extends OrderPositionList
         }
 
         $this->dispatch('load-order-position-activities', orderPositionId: $this->orderPosition->id);
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
             $tsui.open.modal('edit-order-position');

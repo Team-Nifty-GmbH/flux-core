@@ -19,6 +19,8 @@
         persistent
         x-on:close="$wire.resetEditForm()"
     >
+@if ($rendersForm ?? true)
+
         <div
             class="grid h-full min-h-0 content-stretch gap-4 overflow-hidden sm:grid-cols-2"
             x-data="{
@@ -800,7 +802,9 @@
                 </div>
             @show
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 
     <x-modal
         id="bulk-pdf-upload-modal"
@@ -809,6 +813,8 @@
         persistent
         :title="__('Upload')"
     >
+@if ($rendersForm ?? true)
+
         <div
             x-data="documentScanner($wire)"
             x-on:keydown.escape.window="
@@ -918,7 +924,9 @@
             />
             @stack('purchase-invoice-bulk-pdf-upload-modal-footer')
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 
     {!! $createContactForm->autoRender($__data) !!}
 </div>

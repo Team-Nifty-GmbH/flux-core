@@ -4,6 +4,8 @@
         z-index="z-30"
         :title="$commissionRate->id ? __('Edit Commission Rate') : __('Create Commission Rate')"
     >
+@if ($rendersForm ?? true)
+
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div>
@@ -96,5 +98,7 @@
                 x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $commissionRate->modalName() }}')})"
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

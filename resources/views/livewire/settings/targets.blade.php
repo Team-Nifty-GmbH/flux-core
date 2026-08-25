@@ -1,4 +1,6 @@
 <x-modal size="3xl" :id="$target->modalName()" :title="__('Target')">
+@if ($rendersForm ?? true)
+
     <div
         x-data="{
             addUser(user) {
@@ -116,4 +118,6 @@
             x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $target->modalName() }}')})"
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

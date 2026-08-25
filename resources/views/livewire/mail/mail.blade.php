@@ -20,6 +20,8 @@
     }"
 >
     <x-modal size="7xl" id="show-mail">
+@if ($rendersForm ?? true)
+
         <div class="flex flex-col gap-2">
             <div class="flex">
                 <div class="grow">
@@ -150,7 +152,9 @@
                 id="mail-body"
             ></div>
         </div>
-    </x-modal>
+    
+@endif
+</x-modal>
     <section class="flex max-w-384 flex-col gap-4">
         <x-card
             id="mail-folders"

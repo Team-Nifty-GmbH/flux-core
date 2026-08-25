@@ -1,4 +1,6 @@
 <x-modal id="edit-serial-number-range-modal" :title="__('Serial Number Range')">
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-1.5">
         <div
             class="flex flex-col gap-1.5"
@@ -139,4 +141,6 @@
             "
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

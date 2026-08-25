@@ -23,6 +23,8 @@
     }"
 >
     <x-modal id="create-order-modal" :title="__('New Order')">
+@if ($rendersForm ?? true)
+
         <section>
             <div class="divide-secondary-200 space-y-2.5 divide-y">
                 @if (! $orderType ?? true)
@@ -171,9 +173,13 @@
                 wire:click="save()"
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 
     <x-modal id="create-collective-order-modal" :title="__('Collective Order')">
+@if ($rendersForm ?? true)
+
         <div class="flex flex-col gap-4">
             <x-select.styled
                 :label="__('Collective Order Type')"
@@ -226,6 +232,8 @@
                 wire:click="createCollectiveOrders()"
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
     {{ $this->renderCreateDocumentsModal() }}
 </div>

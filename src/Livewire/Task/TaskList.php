@@ -18,6 +18,8 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class TaskList extends BaseTaskList
 {
+    public bool $rendersForm = false;
+
     public array $availableStates = [];
 
     public bool $isSelectable = true;
@@ -95,10 +97,12 @@ class TaskList extends BaseTaskList
         $this->reset('selected');
     }
 
-    #[Renderless]
     public function openChangeStateModal(): void
     {
         $this->selectedState = null;
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
             $tsui.open.modal('change-task-state-modal');
@@ -161,10 +165,12 @@ class TaskList extends BaseTaskList
         return true;
     }
 
-    #[Renderless]
     public function edit(): void
     {
         $this->task->reset();
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
             $tsui.open.modal('new-task-modal');

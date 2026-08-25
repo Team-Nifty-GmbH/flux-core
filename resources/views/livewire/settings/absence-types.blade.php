@@ -1,5 +1,7 @@
 <div>
     <x-modal :id="$absenceTypeForm->modalName()" :title="__('Absence Type')">
+@if ($rendersForm ?? true)
+
         <div class="flex flex-col gap-4">
             <div
                 class="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20"
@@ -259,5 +261,7 @@
                 x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $absenceTypeForm->modalName() }}') })"
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

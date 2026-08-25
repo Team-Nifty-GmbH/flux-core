@@ -1,5 +1,7 @@
 <div>
     <x-modal id="show-failed-job" max-width="6xl" :title="__('Failed Job')">
+@if ($rendersForm ?? true)
+
         <x-card footer-classes="flex justify-end" class="flex flex-col gap-4">
             <pre
                 class="max-h-96 overflow-auto rounded-md bg-black p-1 font-mono text-white"
@@ -26,5 +28,7 @@
                 />
             </x-slot:footer>
         </x-card>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

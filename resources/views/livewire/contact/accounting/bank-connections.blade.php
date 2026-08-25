@@ -1,5 +1,7 @@
 <div>
     <x-modal id="edit-contact-bank-connection">
+@if ($rendersForm ?? true)
+
         <div class="flex flex-col gap-1.5">
             <x-input
                 wire:model="contactBankConnection.iban"
@@ -37,5 +39,7 @@
                 :text="__('Save')"
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

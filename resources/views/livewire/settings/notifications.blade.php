@@ -5,6 +5,8 @@
         x-on:close="$wire.closeModal()"
         :title="__('Notification Settings')"
     >
+@if ($rendersForm ?? true)
+
         <x-slot name="title">
             {{ __('Notification Settings') }}
         </x-slot>
@@ -76,7 +78,9 @@
                 loading="save()"
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">

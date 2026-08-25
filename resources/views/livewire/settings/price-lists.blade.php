@@ -1,5 +1,7 @@
 <div class="py-6">
     <x-modal id="edit-price-list-modal" :title="__('Price List')">
+@if ($rendersForm ?? true)
+
         <div class="flex flex-col gap-8">
             <div class="flex flex-col gap-4">
                 <x-input wire:model="priceList.name" :label="__('Name')" />
@@ -226,5 +228,7 @@
                 "
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

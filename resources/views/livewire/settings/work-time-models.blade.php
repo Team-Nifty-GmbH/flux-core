@@ -4,6 +4,8 @@
         size="xl"
         :title="__('Work Time Model')"
     >
+@if ($rendersForm ?? true)
+
         <div class="flex flex-col gap-4">
             <x-input
                 wire:model="workTimeModelForm.name"
@@ -85,5 +87,7 @@
                 "
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

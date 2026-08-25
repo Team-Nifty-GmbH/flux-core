@@ -7,6 +7,8 @@
             $tsui.close.modal('edit-project');
         "
     >
+@if ($rendersForm ?? true)
+
         <div
             x-data="{ isEditing: true, formatter: @js(resolve_static(\FluxErp\Models\Project::class, 'typeScriptAttributes')) }"
         >
@@ -32,5 +34,7 @@
                 });"
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

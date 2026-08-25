@@ -11,6 +11,8 @@ class AbsencePolicies extends AbsencePolicyList
 {
     use DataTableHasFormEdit;
 
+    public bool $rendersForm = false;
+
     #[DataTableForm]
     public AbsencePolicyForm $absencePolicyForm;
 

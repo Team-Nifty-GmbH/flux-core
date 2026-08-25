@@ -23,6 +23,8 @@
             "
             :title="__('Category')"
         >
+@if ($rendersForm ?? true)
+
             <div class="flex flex-col gap-1.5">
                 @section('modals.edit-category.content')
                     <x-input
@@ -99,6 +101,8 @@
                     "
                 />
             </x-slot:footer>
-        </x-modal>
+        
+@endif
+</x-modal>
     @show
 </div>

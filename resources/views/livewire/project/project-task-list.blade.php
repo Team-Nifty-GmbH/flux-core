@@ -5,6 +5,8 @@
             id="task-form-modal"
             x-on:close="$wire.taskTab = 'task.general'"
         >
+@if ($rendersForm ?? true)
+
             <x-flux::tabs
                 wire:model.live="taskTab"
                 wire:loading="taskTab"
@@ -33,6 +35,8 @@
                     </div>
                 </div>
             </x-slot:footer>
-        </x-modal>
+        
+@endif
+</x-modal>
     </div>
 </div>

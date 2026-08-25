@@ -1,4 +1,6 @@
 <x-modal :id="$leadStateForm->modalName()" :title="__('Lead State')">
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-4">
         <x-input :label="__('Name')" wire:model="leadStateForm.name" />
         <x-color :label="__('Color')" wire:model="leadStateForm.color" />
@@ -62,4 +64,6 @@
             x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $leadStateForm->modalName() }}')})"
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

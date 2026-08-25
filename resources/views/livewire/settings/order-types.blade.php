@@ -1,4 +1,6 @@
 <x-modal :id="$orderType->modalName()" :title="__('Order Type')">
+@if ($rendersForm ?? true)
+
     <div class="space-y-8 divide-y divide-gray-200">
         <div>
             <div class="mt-6 grid grid-cols-1 sm:grid-cols-6">
@@ -116,4 +118,6 @@
             x-on:click="$wire.save().then((success) => {if (success) $tsui.close.modal('{{ $orderType->modalName() }}');})"
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

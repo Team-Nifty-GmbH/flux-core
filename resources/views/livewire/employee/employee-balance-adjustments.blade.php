@@ -1,5 +1,7 @@
 <div>
     <x-modal :id="$employeeBalanceAdjustmentForm->modalName()">
+@if ($rendersForm ?? true)
+
         <div class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
             <x-select.styled
                 :label="__('Type')"
@@ -46,5 +48,7 @@
                 })"
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

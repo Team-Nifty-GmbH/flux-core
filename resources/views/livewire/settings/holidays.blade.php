@@ -1,5 +1,7 @@
 <div>
     <x-modal :id="$holidayForm->modalName()" :title="__('Holiday')">
+@if ($rendersForm ?? true)
+
         <div class="flex flex-col gap-4">
             <x-input
                 wire:model="holidayForm.name"
@@ -107,5 +109,7 @@
                 x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $holidayForm->modalName() }}') })"
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

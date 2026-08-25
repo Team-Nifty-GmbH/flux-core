@@ -1,6 +1,8 @@
 <div class="p-6">
     <div class="text-2xl font-semibold">
         <x-modal id="edit-unit-modal" :title="__('Unit')">
+@if ($rendersForm ?? true)
+
             <div class="flex flex-col gap-1.5">
                 <x-input wire:model="unit.name" :label="__('Name')" />
                 <x-input
@@ -26,6 +28,8 @@
                     "
                 />
             </x-slot:footer>
-        </x-modal>
+        
+@endif
+</x-modal>
     </div>
 </div>

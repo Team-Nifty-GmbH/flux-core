@@ -1,4 +1,6 @@
 <x-modal id="activity-log-detail" :title="__('Activity Log')">
+@if ($rendersForm ?? true)
+
     <x-card class="flex flex-col gap-4">
         <x-input :label="__('Causer')" wire:model="activity.causer" disabled />
         <pre
@@ -14,4 +16,6 @@
             />
         </x-slot:footer>
     </x-card>
+
+@endif
 </x-modal>

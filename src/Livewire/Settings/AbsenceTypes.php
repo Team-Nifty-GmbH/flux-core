@@ -11,6 +11,8 @@ class AbsenceTypes extends AbsenceTypeList
 {
     use DataTableHasFormEdit;
 
+    public bool $rendersForm = false;
+
     #[DataTableForm]
     public AbsenceTypeForm $absenceTypeForm;
 

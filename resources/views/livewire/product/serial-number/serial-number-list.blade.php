@@ -1,4 +1,6 @@
 <x-modal id="create-serial-number-modal">
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-1.5">
         <x-select.styled
             :label="__('Product')"
@@ -73,4 +75,6 @@
             "
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

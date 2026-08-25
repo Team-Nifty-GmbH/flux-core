@@ -15,6 +15,8 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class TransactionList extends BaseDataTable
 {
+    public bool $rendersForm = false;
+
     public bool $positiveEmptyState = true;
 
     public array $enabledCols = [
@@ -74,7 +76,6 @@ class TransactionList extends BaseDataTable
         return true;
     }
 
-    #[Renderless]
     public function editTransaction(?Transaction $transaction): void
     {
         $this->transactionForm->reset();
@@ -86,6 +87,9 @@ class TransactionList extends BaseDataTable
         if (! $this->transactionForm->value_date) {
             $this->transactionForm->value_date = now()->format('Y-m-d');
         }
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
             $tsui.open.modal('transaction-details-modal');

@@ -3,6 +3,8 @@
     :title="__('Payment Reminder Text')"
     persistent
 >
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-1.5">
         <x-number
             :label="__('Minimum reminder level')"
@@ -68,4 +70,6 @@
             />
         </x-slot:footer>
     </div>
+
+@endif
 </x-modal>

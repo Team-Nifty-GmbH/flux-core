@@ -1,4 +1,6 @@
 <x-modal id="edit-schedule-modal" :title="__('Schedule')">
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-4">
         <div x-cloak x-show="!$wire.schedule.id">
             <x-select.styled
@@ -345,4 +347,6 @@
             "
         />
     </x-slot:footer>
+
+@endif
 </x-modal>

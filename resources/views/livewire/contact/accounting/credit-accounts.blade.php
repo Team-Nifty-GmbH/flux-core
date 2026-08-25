@@ -31,6 +31,8 @@
         </x-slot:footer>
     </x-modal>
     <x-modal id="transaction-details-modal">
+@if ($rendersForm ?? true)
+
         <div class="flex flex-col gap-2">
             <div class="pointer-events-none">
                 <x-select.styled
@@ -84,5 +86,7 @@
                 "
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

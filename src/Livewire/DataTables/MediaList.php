@@ -10,13 +10,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class MediaList extends BaseDataTable
 {
     use SupportsFileDownloads;
+
+    public bool $rendersForm = false;
 
     public array $enabledCols = [
         'file_name',
@@ -66,7 +67,6 @@ class MediaList extends BaseDataTable
         ];
     }
 
-    #[Renderless]
     public function edit(Media $media): void
     {
         $media->makeVisible([
@@ -80,6 +80,9 @@ class MediaList extends BaseDataTable
             'created_at',
         ]);
         $this->mediaForm->fill($media);
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
             $tsui.open.modal('edit-media');

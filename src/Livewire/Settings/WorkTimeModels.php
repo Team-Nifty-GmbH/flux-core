@@ -13,6 +13,8 @@ class WorkTimeModels extends WorkTimeModelList
 {
     use DataTableHasFormEdit;
 
+    public bool $rendersForm = false;
+
     #[DataTableForm]
     public WorkTimeModelForm $workTimeModelForm;
 

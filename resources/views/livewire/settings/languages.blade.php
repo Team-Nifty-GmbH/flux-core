@@ -1,4 +1,6 @@
 <x-modal id="edit-language-modal" wire="editModal" :title="__('Language')">
+@if ($rendersForm ?? true)
+
     <div class="flex flex-col gap-1.5">
         <x-input
             wire:model="selectedLanguage.name"
@@ -39,6 +41,8 @@
             "
         />
     </x-slot:footer>
+
+@endif
 </x-modal>
 <datalist id="language-code-data">
     <option>af_ZA</option>

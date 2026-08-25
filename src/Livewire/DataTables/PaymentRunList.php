@@ -10,12 +10,13 @@ use FluxErp\Models\PaymentRun;
 use FluxErp\States\Order\PaymentState\Open;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Validation\ValidationException;
-use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class PaymentRunList extends BaseDataTable
 {
+    public bool $rendersForm = false;
+
     public array $accounts = [];
 
     public array $enabledCols = [
@@ -67,10 +68,12 @@ class PaymentRunList extends BaseDataTable
         return true;
     }
 
-    #[Renderless]
     public function edit(PaymentRun $paymentRun): void
     {
         $this->loadPaymentRun($paymentRun);
+        $this->rendersForm = true;
+        $this->islandsHaveMounted = false;
+        $this->loadData(forceRender: true);
 
         $this->js(<<<'JS'
             $tsui.open.modal('execute-payment-run');

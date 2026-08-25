@@ -17,6 +17,8 @@
         x-on:close.self="$wire.clear()"
         persistent
     >
+@if ($rendersForm ?? true)
+
         <x-slot:title>{{ __('Email') }}</x-slot>
         <div class="flex flex-col gap-2">
             <div x-cloak x-show="isMultiGroup" class="flex flex-col gap-2">
@@ -199,5 +201,7 @@
                 :text="__('Send')"
             />
         </x-slot>
-    </x-modal>
+    
+@endif
+</x-modal>
 </div>

@@ -3,6 +3,8 @@
     @parent
     @use(FluxErp\Enums\OrderTypeEnum)
     <x-modal id="edit-schedule" :title="__('Edit Schedule')">
+@if ($rendersForm ?? true)
+
         <div class="flex flex-col gap-1.5">
             <x-select.styled
                 :label="__('Order type')"
@@ -279,7 +281,9 @@
                 :text="__('Save')"
             />
         </x-slot:footer>
-    </x-modal>
+    
+@endif
+</x-modal>
 @endsection
 
 @section('actions')
