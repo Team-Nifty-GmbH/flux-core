@@ -23,6 +23,12 @@ export default function () {
 
         spinner.style.top = box ? `${Math.round(box.top)}px` : '';
         spinner.style.left = box ? `${Math.round(box.left)}px` : '';
+        spinner.style.right = box
+            ? `${Math.round(window.innerWidth - box.right)}px`
+            : '';
+        spinner.style.bottom = box
+            ? `${Math.round(window.innerHeight - box.bottom)}px`
+            : '';
 
         overlay.classList.remove('hidden');
 
