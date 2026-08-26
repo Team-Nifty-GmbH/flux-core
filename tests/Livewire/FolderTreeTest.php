@@ -556,3 +556,13 @@ test('can delete real media folder', function (): void {
     // Verify folder is deleted
     expect(MediaFolder::whereKey($folder->getKey())->exists())->toBeFalse();
 });
+
+test('the tree is rendered with the component instead of fetched afterwards', function (): void {
+    $component = Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+        ->assertOk();
+
+    expect($component->get('mediaTree'))->not->toBeEmpty();
+
+    $component->assertSeeHtml('$wire.mediaTree')
+        ->assertDontSeeHtml('tree="$wire.getTree()"');
+});

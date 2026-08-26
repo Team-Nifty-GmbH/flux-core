@@ -34,6 +34,9 @@ abstract class FolderTree extends Component
 
     public MediaFolderForm $folder;
 
+    #[Locked]
+    public array $mediaTree = [];
+
     #[Modelable]
     public ?int $modelId = null;
 
@@ -42,6 +45,11 @@ abstract class FolderTree extends Component
 
     /** @var class-string<Model> */
     protected string $modelType;
+
+    public function mount(): void
+    {
+        $this->mediaTree = $this->getTree();
+    }
 
     public function render(): View|Factory|Application
     {
