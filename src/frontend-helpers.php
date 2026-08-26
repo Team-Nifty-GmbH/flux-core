@@ -11,14 +11,22 @@ if (! function_exists('exception_to_notifications')) {
         Exception $exception,
         Livewire\Component $component,
         bool $skipRender = true,
-        ?string $description = null
+        ?string $description = null,
+        bool $matchFormProperties = true
     ): void {
         if (! method_exists($component, 'toast')) {
             throw new InvalidArgumentException('Component does not have a toast method.');
         }
 
+        // An action on a model of its own carries the field names of that model, which may well
+        // collide with the ones the form holds. Matching them up then puts the message on a field
+        // the user never touched.
+        $reflectedProperties = $matchFormProperties
+            ? (new ReflectionClass($component))->getProperties(ReflectionProperty::IS_PUBLIC)
+            : [];
+
         $formProperties = [];
-        foreach ((new ReflectionClass($component))->getProperties(ReflectionProperty::IS_PUBLIC) as $prop) {
+        foreach ($reflectedProperties as $prop) {
             $type = $prop->getType();
             if ($type instanceof ReflectionNamedType && is_subclass_of($type->getName(), Livewire\Form::class)) {
                 $formName = $prop->getName();

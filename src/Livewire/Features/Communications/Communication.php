@@ -126,7 +126,7 @@ abstract class Communication extends CommunicationList
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, matchFormProperties: false);
 
             return;
         }

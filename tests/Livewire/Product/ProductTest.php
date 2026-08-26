@@ -6,6 +6,7 @@ use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
 use FluxErp\Models\ProductCrossSelling;
+use FluxErp\Models\Tag;
 use FluxErp\Models\VatRate;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Session;
@@ -252,4 +253,15 @@ test('view name computed property', function (): void {
     $viewName = $component->instance()->viewName();
     expect($viewName)->toBeString();
     $this->assertStringContainsString('product', $viewName);
+});
+
+// The tag is a model of its own, so the name it clashes with is the tag's, not the product's.
+// Attributing the message to the form put it under the product name field in the mask, where it
+// read as if the product were named wrong.
+test('a tag that already exists does not fault the product name', function (): void {
+    $tag = Tag::findOrCreate('Kenia', morph_alias(ProductModel::class));
+
+    Livewire::test(Product::class, ['id' => $this->product->id])
+        ->call('addTag', $tag->name)
+        ->assertHasNoErrors('product.name');
 });
