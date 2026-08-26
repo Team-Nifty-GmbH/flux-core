@@ -619,28 +619,39 @@
                                     </div>
                                 </x-slot:header>
                                 <div id="order-delivery-address-id">
-                                    <x-select.styled
-                                        :disabled="$order->is_locked"
-                                        class="pb-4"
-                                        wire:model.live="order.address_delivery_id"
-                                        required
-                                        select="label:label|value:id"
-                                        unfiltered
-                                        :request="[
-                                    'url' => route('search', \FluxErp\Models\Address::class),
-                                    'method' => 'POST',
-                                    'params' => [
-                                        'with' => 'contact.media',
-                                        'where' => [
-                                            [
-                                                'contact_id',
-                                                '=',
-                                                $order->contact_id,
+                                    @if ($order->isPurchase)
+                                        @php($tenant = collect($tenants)->firstWhere('id', $order->tenant_id))
+                                        <p class="text-sm first-line:font-semibold">
+                                            {!! collect([
+                                                data_get($tenant, 'name'),
+                                                data_get($tenant, 'street'),
+                                                collect([data_get($tenant, 'postcode'), data_get($tenant, 'city')])->filter()->implode(' '),
+                                            ])->filter()->map(fn (string $line) => e($line))->implode('<br>') !!}
+                                        </p>
+                                    @else
+                                        <x-select.styled
+                                            :disabled="$order->is_locked"
+                                            class="pb-4"
+                                            wire:model.live="order.address_delivery_id"
+                                            required
+                                            select="label:label|value:id"
+                                            unfiltered
+                                            :request="[
+                                        'url' => route('search', \FluxErp\Models\Address::class),
+                                        'method' => 'POST',
+                                        'params' => [
+                                            'with' => 'contact.media',
+                                            'where' => [
+                                                [
+                                                    'contact_id',
+                                                    '=',
+                                                    $order->contact_id,
+                                                ],
                                             ],
                                         ],
-                                    ],
-                                ]"
-                                    />
+                                    ]"
+                                        />
+                                    @endif
                                 </div>
                                 <div
                                     class="text-sm"

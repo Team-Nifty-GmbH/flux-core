@@ -134,7 +134,7 @@ class Order extends Component
                     ->get(['id', 'name'])
                     ->toArray(),
                 'tenants' => resolve_static(Tenant::class, 'query')
-                    ->get(['id', 'name'])
+                    ->get(['id', 'name', 'street', 'postcode', 'city'])
                     ->toArray(),
                 'frequencies' => array_map(
                     fn ($item) => ['value' => $item, 'label' => __(Str::headline($item))],
@@ -421,7 +421,9 @@ class Order extends Component
             ->latest()
             ->value('id');
         $this->{$orderFormName}->address_invoice_id = $contact?->invoice_address_id ?? $contact?->mainAddress?->id;
-        $this->{$orderFormName}->address_delivery_id = $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
+        $this->{$orderFormName}->address_delivery_id = $this->{$orderFormName}->isPurchase
+            ? null
+            : $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
         $this->{$orderFormName}->language_id = $contact?->mainAddress?->language_id
             ?? resolve_static(Language::class, 'default')->getKey();
         $this->{$orderFormName}->price_list_id = $contact?->price_list_id
