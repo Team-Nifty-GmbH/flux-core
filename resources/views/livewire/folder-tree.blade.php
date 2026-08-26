@@ -2,7 +2,7 @@
     <div class="w-full min-w-0 overflow-auto">
         <ul class="flex flex-col gap-1">
             <x-flux::checkbox-tree
-                tree="$wire.getTree()"
+                tree="$wire.mediaTree"
                 name-attribute="name"
                 :search-attributes="['name', 'file_name', 'collection_name']"
                 moved="$wire.moveItem(item, node, item.slug ?? item.collection_name ?? getNodePath(item, 'slug'), node.slug ?? node.collection_name ?? getNodePath(node, 'slug'))"
