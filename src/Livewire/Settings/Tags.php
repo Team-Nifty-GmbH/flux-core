@@ -8,6 +8,7 @@ use FluxErp\Actions\Tag\UpdateTag;
 use FluxErp\Livewire\DataTables\TagList;
 use FluxErp\Livewire\Forms\TagForm;
 use FluxErp\Models\Tag;
+use FluxErp\Support\Bus\BulkExecutor;
 use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
@@ -99,20 +100,26 @@ class Tags extends TagList
     #[Renderless]
     public function deleteSelected(): void
     {
-        foreach ($this->getSelectedModelsQuery()->pluck('id') as $id) {
-            try {
-                DeleteTag::make(['id' => $id])
-                    ->checkPermission()
-                    ->validate()
-                    ->execute();
-            } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+        $tagIds = $this->getSelectedModelsQuery()->pluck('id');
 
-                break;
-            }
+        if ($tagIds->isEmpty()) {
+            return;
         }
 
-        $this->loadData();
+        try {
+            BulkExecutor::make(
+                DeleteTag::class,
+                $tagIds
+                    ->map(fn (int $id): array => ['id' => $id])
+                    ->all()
+            )
+                ->name(__('Deleting tags'))
+                ->dispatch();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
 
         $this->reset('selected');
     }
