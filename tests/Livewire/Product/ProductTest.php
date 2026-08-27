@@ -6,6 +6,7 @@ use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
 use FluxErp\Models\ProductCrossSelling;
+use FluxErp\Models\Tag;
 use FluxErp\Models\VatRate;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Session;
@@ -154,10 +155,10 @@ test('save product successfully', function (): void {
 
 test('save product validation fails', function (): void {
     Livewire::test(Product::class, ['id' => $this->product->id])
-        ->set('product.name', '') // Required field
+        ->set('product.name', '')
         ->call('save')
         ->assertOk()
-        ->assertHasErrors()
+        ->assertHasErrors('product.name')
         ->assertReturned(false);
 });
 
@@ -252,4 +253,13 @@ test('view name computed property', function (): void {
     $viewName = $component->instance()->viewName();
     expect($viewName)->toBeString();
     $this->assertStringContainsString('product', $viewName);
+});
+
+test('a tag that already exists does not fault the product name', function (): void {
+    $tag = Tag::findOrCreate('Kenia', morph_alias(ProductModel::class));
+
+    Livewire::test(Product::class, ['id' => $this->product->id])
+        ->call('addTag', $tag->name)
+        ->assertHasNoErrors('product.name')
+        ->assertHasErrors('name');
 });

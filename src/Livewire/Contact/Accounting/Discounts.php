@@ -100,7 +100,7 @@ class Discounts extends DiscountList
         try {
             $this->discountForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->discountForm);
 
             return false;
         }

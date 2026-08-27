@@ -226,7 +226,7 @@ class Order extends Component
 
             $this->redirect(route('orders.orders'), true);
         } catch (Exception $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
         }
     }
 
@@ -294,7 +294,7 @@ class Order extends Component
                 $this->order->{$addressKey . '_id'} = $updatedOrder->{$addressKey . '_id'};
                 $this->order->{$addressKey} = $updatedOrder->{$addressKey};
             } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+                exception_to_notifications($e, $this, form: $this->order);
             }
         }
     }
@@ -747,7 +747,7 @@ class Order extends Component
 
             $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
 
             return false;
         }
@@ -769,7 +769,7 @@ class Order extends Component
         try {
             $this->discount->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->discount);
 
             return false;
         }
@@ -787,7 +787,7 @@ class Order extends Component
         try {
             $this->replicateOrder->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->replicateOrder);
 
             return;
         }
@@ -870,7 +870,7 @@ class Order extends Component
         try {
             $this->schedule->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->schedule);
 
             return false;
         }
@@ -989,7 +989,7 @@ class Order extends Component
 
             $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
         }
     }
 
@@ -1001,7 +1001,7 @@ class Order extends Component
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
 
             return;
         }
@@ -1047,7 +1047,7 @@ class Order extends Component
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
         }
 
         $this->toast()

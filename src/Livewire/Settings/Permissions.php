@@ -131,7 +131,7 @@ class Permissions extends RoleList
         try {
             $this->roleForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->roleForm);
 
             return false;
         }

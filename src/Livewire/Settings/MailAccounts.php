@@ -129,7 +129,7 @@ class MailAccounts extends MailAccountList
             $this->mailAccount->save();
             $this->mailAccount->reset();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->mailAccount);
 
             return false;
         }
@@ -146,7 +146,7 @@ class MailAccounts extends MailAccountList
             $this->mailFolder->reset();
             $this->loadFolders();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->mailFolder);
         }
     }
 

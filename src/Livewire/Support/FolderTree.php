@@ -288,7 +288,7 @@ abstract class FolderTree extends Component
             $this->folder->model_id = $this->modelId;
             $this->folder->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->folder);
 
             return false;
         }

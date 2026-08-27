@@ -81,7 +81,7 @@ class WorkTimeModel extends Component
             $this->workTimeModelForm->save();
             $this->workTimeModelForm->loadSchedules($this->workTimeModelForm->getActionResult());
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->workTimeModelForm);
 
             return;
         }

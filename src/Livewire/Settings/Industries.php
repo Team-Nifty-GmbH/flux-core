@@ -90,7 +90,7 @@ class Industries extends IndustryList
         try {
             $this->industryForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->industryForm);
 
             return false;
         }

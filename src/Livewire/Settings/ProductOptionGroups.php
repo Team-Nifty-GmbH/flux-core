@@ -94,7 +94,7 @@ class ProductOptionGroups extends ProductOptionGroupList
         try {
             $this->productOptionGroupForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->productOptionGroupForm);
 
             return false;
         }
