@@ -134,7 +134,7 @@ class Order extends Component
                     ->get(['id', 'name'])
                     ->toArray(),
                 'tenants' => resolve_static(Tenant::class, 'query')
-                    ->get(['id', 'name', 'street', 'postcode', 'city'])
+                    ->get(['id', 'name'])
                     ->toArray(),
                 'frequencies' => array_map(
                     fn ($item) => ['value' => $item, 'label' => __(Str::headline($item))],
