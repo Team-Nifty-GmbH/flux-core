@@ -83,7 +83,7 @@ class Contact extends Component
         try {
             $this->contact->delete();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->contact);
 
             return;
         }

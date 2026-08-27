@@ -71,7 +71,7 @@ abstract class Comments extends Component
         try {
             $this->commentForm->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->commentForm);
 
             return false;
         }

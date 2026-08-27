@@ -69,7 +69,7 @@ class Tenants extends TenantList
         try {
             $this->tenant->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->tenant);
 
             return false;
         }

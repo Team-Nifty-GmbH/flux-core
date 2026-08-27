@@ -67,7 +67,7 @@ class Discounts extends DiscountList
         try {
             $this->discountForm->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->discountForm);
 
             return;
         }
@@ -141,7 +141,7 @@ class Discounts extends DiscountList
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->discountForm);
         }
     }
 

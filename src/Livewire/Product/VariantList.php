@@ -210,7 +210,7 @@ class VariantList extends ProductList
                     ->validate()
                     ->execute();
             } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+                exception_to_notifications($e, $this, form: $this->product);
             }
         }
 
@@ -260,7 +260,7 @@ class VariantList extends ProductList
         try {
             $this->product->restore();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->product);
 
             return;
         }

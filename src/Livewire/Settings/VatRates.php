@@ -67,7 +67,7 @@ class VatRates extends VatRateList
         try {
             $this->vatRate->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->vatRate);
 
             return false;
         }

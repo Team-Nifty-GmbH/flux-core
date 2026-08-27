@@ -124,7 +124,7 @@ class PurchaseInvoiceList extends BaseDataTable
         try {
             $this->purchaseInvoiceForm->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->purchaseInvoiceForm);
 
             return false;
         }
@@ -233,7 +233,7 @@ class PurchaseInvoiceList extends BaseDataTable
         try {
             $this->purchaseInvoiceForm->finish($this->assignToOrderId);
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->purchaseInvoiceForm);
 
             return false;
         }

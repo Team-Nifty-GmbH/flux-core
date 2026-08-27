@@ -68,7 +68,7 @@ class PaymentTypes extends PaymentTypeList
         try {
             $this->paymentType->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->paymentType);
 
             return false;
         }

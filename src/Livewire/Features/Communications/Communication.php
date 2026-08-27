@@ -189,7 +189,7 @@ abstract class Communication extends CommunicationList
         try {
             $this->communication->delete();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->communication);
 
             return;
         }

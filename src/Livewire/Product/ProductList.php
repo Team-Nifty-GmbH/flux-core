@@ -160,7 +160,7 @@ class ProductList extends BaseProductList
         try {
             $this->product->restore();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->product);
 
             return;
         }

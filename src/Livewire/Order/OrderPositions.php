@@ -279,7 +279,7 @@ class OrderPositions extends OrderPositionList
         try {
             $this->orderPosition->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->orderPosition);
 
             return false;
         }
@@ -452,7 +452,7 @@ class OrderPositions extends OrderPositionList
 
             $this->forceRender();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->orderPosition);
         }
     }
 
@@ -614,7 +614,7 @@ class OrderPositions extends OrderPositionList
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->orderPosition);
         }
     }
 
