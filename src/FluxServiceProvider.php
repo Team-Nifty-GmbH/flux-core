@@ -260,9 +260,6 @@ class FluxServiceProvider extends ServiceProvider
             config(['passkeys.models.authenticatable' => resolve_static(User::class, 'class')]);
             config(['passkeys.actions.store_passkey' => resolve_static(StorePasskeyAction::class, 'class')]);
 
-            // Media library registers its observer on config('media-library.media_model'),
-            // while getMediaModel() resolves the Media model through the container. Without
-            // this the deleted event never reaches the observer and no file is ever removed.
             resolve_static(Media::class, 'class')::observe(MediaObserver::class);
         });
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
