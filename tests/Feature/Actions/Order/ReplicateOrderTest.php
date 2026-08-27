@@ -1181,7 +1181,7 @@ test('calculates order lock recalculation correctly', function (): void {
         ->and(bccomp($order->total_gross_price, '238', 2))->toBe(0);
 });
 
-test('does not set parent_id when creating refund', function (): void {
+test('hangs a refund under the order it was created from', function (): void {
     $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
 
     $address = Address::factory()->create([
@@ -1226,17 +1226,15 @@ test('does not set parent_id when creating refund', function (): void {
         'is_free_text' => true,
     ]);
 
-    // Simulate what the Livewire component does: passing parent_id explicitly
     $refund = ReplicateOrder::make([
         'id' => $order->getKey(),
         'address_invoice_id' => $address->getKey(),
         'order_type_id' => $refundOrderType->getKey(),
-        'parent_id' => $order->getKey(),
     ])
         ->validate()
         ->execute();
 
-    expect($refund->parent_id)->toBeNull()
+    expect($refund->parent_id)->toBe($order->getKey())
         ->and($refund->created_from_id)->toBe($order->getKey());
 });
 
@@ -1463,7 +1461,7 @@ test('creates a refund from an order which itself has a parent', function (): vo
         ->execute();
 
     expect($refund->order_type_id)->toBe($refundOrderType->getKey())
-        ->and($refund->parent_id)->toBeNull();
+        ->and($refund->parent_id)->toBe($order->getKey());
 });
 
 test('still refuses a retoure from an order without an invoice number', function (): void {

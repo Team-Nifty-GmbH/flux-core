@@ -84,7 +84,10 @@ class ReplicateOrder extends FluxAction
 
         if (
             $originalOrder['contact_id'] === $orderData['contact_id']
-            && in_array($orderTypeEnum, [OrderTypeEnum::SplitOrder, OrderTypeEnum::Retoure])
+            && in_array(
+                $orderTypeEnum,
+                [OrderTypeEnum::SplitOrder, OrderTypeEnum::Retoure, OrderTypeEnum::Refund]
+            )
         ) {
             $orderData['parent_id'] = data_get($originalOrder, 'id');
         }
