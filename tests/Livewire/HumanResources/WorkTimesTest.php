@@ -112,3 +112,24 @@ test('save validates required fields', function (): void {
         ->call('save')
         ->assertReturned(false);
 });
+
+test('toggle is billable updates the selected work times', function (): void {
+    $workTime = app(WorkTime::class)->create([
+        'user_id' => $this->user->getKey(),
+        'started_at' => now()->subHours(2)->format('Y-m-d H:i:s'),
+        'ended_at' => now()->subHour()->format('Y-m-d H:i:s'),
+        'name' => 'Test Work',
+        'is_locked' => true,
+        'is_daily_work_time' => false,
+        'is_billable' => false,
+    ]);
+
+    Livewire::test(WorkTimes::class)
+        ->set('selected', [$workTime->getKey()])
+        ->call('toggleIsBillable', true)
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertSet('selected', []);
+
+    expect($workTime->refresh()->is_billable)->toBeTrue();
+});

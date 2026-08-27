@@ -2,11 +2,12 @@
 
 namespace FluxErp\Actions\Product;
 
-use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\DispatchableFluxAction;
 use FluxErp\Actions\Price\DeletePrice;
 use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
 use FluxErp\Actions\ProductCrossSelling\DeleteProductCrossSelling;
 use FluxErp\Actions\ProductCrossSelling\UpdateProductCrossSelling;
+use FluxErp\Contracts\SupportsBulkExecution;
 use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Helpers\Helper;
 use FluxErp\Models\Media;
@@ -19,7 +20,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
-class UpdateProduct extends FluxAction
+class UpdateProduct extends DispatchableFluxAction implements SupportsBulkExecution
 {
     public static function models(): array
     {
