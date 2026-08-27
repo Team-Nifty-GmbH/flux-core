@@ -348,9 +348,9 @@
                     >
                         <div class="col-span-1 space-y-2">
                             <x-card>
-                                <x-slot:title>
+                                <x-slot:header>
                                     <span x-text="group"></span>
-                                </x-slot:title>
+                                </x-slot:header>
                                 <template
                                     x-for="
                                         (displayedProperties, propertyType) in
