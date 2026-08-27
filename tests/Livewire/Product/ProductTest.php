@@ -263,3 +263,9 @@ test('a tag that already exists does not fault the product name', function (): v
         ->assertHasNoErrors('product.name')
         ->assertHasErrors('name');
 });
+
+test('the product property group heading reaches the markup', function (): void {
+    Livewire::test(Product::class, ['id' => $this->product->id])
+        ->assertOk()
+        ->assertSeeHtml('x-text="group"');
+});
