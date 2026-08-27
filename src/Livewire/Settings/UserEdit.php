@@ -160,7 +160,7 @@ class UserEdit extends Component
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->userForm);
 
             return;
         }
@@ -229,7 +229,7 @@ class UserEdit extends Component
                         $this->printerUserForm->is_default = true;
                         $this->printerUserForm->save();
                     } catch (ValidationException|UnauthorizedException $e) {
-                        exception_to_notifications($e, $this);
+                        exception_to_notifications($e, $this, form: $this->printerUserForm);
                     }
                 }
             }

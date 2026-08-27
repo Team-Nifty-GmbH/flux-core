@@ -99,7 +99,7 @@ class Tenants extends TenantList
         try {
             $this->tenant->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->tenant);
 
             return false;
         }
@@ -116,7 +116,7 @@ class Tenants extends TenantList
             try {
                 $this->logo->save();
             } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+                exception_to_notifications($e, $this, form: $this->logo);
             }
         }
 
@@ -124,7 +124,7 @@ class Tenants extends TenantList
             try {
                 $this->logoSmall->save();
             } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+                exception_to_notifications($e, $this, form: $this->logoSmall);
             }
         }
 

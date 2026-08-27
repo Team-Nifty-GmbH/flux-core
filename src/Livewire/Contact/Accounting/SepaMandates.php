@@ -143,7 +143,7 @@ class SepaMandates extends SepaMandateList
         try {
             $this->sepaMandate->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->sepaMandate);
 
             return false;
         }
@@ -156,7 +156,7 @@ class SepaMandates extends SepaMandateList
             try {
                 $this->signedMandate->save();
             } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+                exception_to_notifications($e, $this, form: $this->signedMandate);
             }
         }
 

@@ -76,7 +76,7 @@ class Languages extends LanguageList
         try {
             $this->selectedLanguage->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->selectedLanguage);
 
             return false;
         }

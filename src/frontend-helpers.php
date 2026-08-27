@@ -12,29 +12,15 @@ if (! function_exists('exception_to_notifications')) {
         Livewire\Component $component,
         bool $skipRender = true,
         ?string $description = null,
-        bool $matchFormProperties = true
+        ?Livewire\Form $form = null
     ): void {
         if (! method_exists($component, 'toast')) {
             throw new InvalidArgumentException('Component does not have a toast method.');
         }
 
-        // An action on a model of its own carries the field names of that model, which may well
-        // collide with the ones the form holds. Matching them up then puts the message on a field
-        // the user never touched.
-        $reflectedProperties = $matchFormProperties
-            ? (new ReflectionClass($component))->getProperties(ReflectionProperty::IS_PUBLIC)
-            : [];
-
-        $formProperties = [];
-        foreach ($reflectedProperties as $prop) {
-            $type = $prop->getType();
-            if ($type instanceof ReflectionNamedType && is_subclass_of($type->getName(), Livewire\Form::class)) {
-                $formName = $prop->getName();
-                $formProperties[$formName] = array_keys(
-                    Livewire\Drawer\Utils::getPublicProperties($component->{$formName})
-                );
-            }
-        }
+        $formProperties = is_null($form)
+            ? []
+            : array_keys(Livewire\Drawer\Utils::getPublicProperties($form));
 
         switch (true) {
             case method_exists($exception, 'errors') && $errors = $exception->errors():
@@ -45,20 +31,14 @@ if (! function_exists('exception_to_notifications')) {
                 []
             ):
                 foreach ($errors as $field => $messages) {
-                    $matchedForms = [];
-                    $baseField = Illuminate\Support\Str::before($field, '.');
-
-                    foreach ($formProperties as $name => $props) {
-                        if (in_array($baseField, $props)) {
-                            $matchedForms[] = $name;
-                        }
-                    }
+                    $belongsToForm = in_array(
+                        Illuminate\Support\Str::before($field, '.'),
+                        $formProperties
+                    );
 
                     foreach (Illuminate\Support\Arr::flatten($messages) as $message) {
-                        if ($matchedForms) {
-                            foreach ($matchedForms as $formName) {
-                                $component->addError($formName . '.' . $field, __($message));
-                            }
+                        if ($belongsToForm) {
+                            $component->addError($form->getPropertyName() . '.' . $field, __($message));
                         } else {
                             $title = array_map(
                                 fn ($segment) => is_numeric($segment)

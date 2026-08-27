@@ -98,7 +98,7 @@ class TransactionList extends BaseDataTable
         try {
             $this->transactionForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->transactionForm);
 
             return false;
         }

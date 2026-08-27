@@ -133,7 +133,7 @@ class CalendarEvent extends Component
         try {
             $this->event->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->event);
 
             return false;
         }

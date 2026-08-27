@@ -113,7 +113,7 @@ class Scheduling extends ScheduleList
         try {
             $this->schedule->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->schedule);
 
             return false;
         }

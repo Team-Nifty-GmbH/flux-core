@@ -138,7 +138,7 @@ class CreateChildOrder extends Component
 
             $this->replicateOrder->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->replicateOrder);
 
             return;
         }

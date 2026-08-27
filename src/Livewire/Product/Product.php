@@ -217,7 +217,7 @@ class Product extends Component
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this, matchFormProperties: false);
+            exception_to_notifications($e, $this);
 
             return;
         }
@@ -445,7 +445,7 @@ class Product extends Component
         try {
             $this->product->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->product);
 
             return false;
         }

@@ -82,7 +82,7 @@ class PaymentRunList extends BaseDataTable
         try {
             $this->paymentRunForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->paymentRunForm);
 
             return false;
         }

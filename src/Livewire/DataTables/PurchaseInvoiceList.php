@@ -197,7 +197,7 @@ class PurchaseInvoiceList extends BaseDataTable
         try {
             $this->createContactForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->createContactForm);
 
             return false;
         }
@@ -295,7 +295,7 @@ class PurchaseInvoiceList extends BaseDataTable
 
                 $successCount++;
             } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+                exception_to_notifications($e, $this, form: $this->purchaseInvoiceForm);
 
                 $errorCount++;
             }
@@ -326,7 +326,7 @@ class PurchaseInvoiceList extends BaseDataTable
         try {
             $this->purchaseInvoiceForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->purchaseInvoiceForm);
 
             return false;
         }

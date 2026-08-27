@@ -244,7 +244,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         try {
             $this->order->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
 
             return false;
         }
@@ -260,7 +260,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         try {
             $this->collectiveOrder->create();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->collectiveOrder);
 
             return;
         }

@@ -159,7 +159,7 @@ class WorkTime extends Component
 
             $this->workTime->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->workTime);
 
             return false;
         }
@@ -261,7 +261,7 @@ class WorkTime extends Component
         try {
             $this->dailyWorkTime->save();
         } catch (ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->dailyWorkTime);
         }
 
         if (! $start) {

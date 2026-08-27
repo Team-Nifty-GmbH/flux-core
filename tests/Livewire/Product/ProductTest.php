@@ -155,10 +155,10 @@ test('save product successfully', function (): void {
 
 test('save product validation fails', function (): void {
     Livewire::test(Product::class, ['id' => $this->product->id])
-        ->set('product.name', '') // Required field
+        ->set('product.name', '')
         ->call('save')
         ->assertOk()
-        ->assertHasErrors()
+        ->assertHasErrors('product.name')
         ->assertReturned(false);
 });
 
@@ -255,9 +255,6 @@ test('view name computed property', function (): void {
     $this->assertStringContainsString('product', $viewName);
 });
 
-// The tag is a model of its own, so the name it clashes with is the tag's, not the product's.
-// Attributing the message to the form put it under the product name field in the mask, where it
-// read as if the product were named wrong.
 test('a tag that already exists does not fault the product name', function (): void {
     $tag = Tag::findOrCreate('Kenia', morph_alias(ProductModel::class));
 

@@ -132,7 +132,7 @@ class Tags extends TagList
         try {
             $this->tagForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->tagForm);
 
             return false;
         }
