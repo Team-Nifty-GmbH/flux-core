@@ -271,6 +271,34 @@ test('fetch contact data', function (): void {
         ->assertSet('order.address_delivery_id', $newContact->delivery_address_id);
 });
 
+test('a purchase order is delivered to the tenant, not to the supplier', function (): void {
+    $supplier = Contact::factory()->create();
+
+    $supplierAddress = Address::factory()->create([
+        'contact_id' => $supplier->id,
+    ]);
+
+    $supplier->update([
+        'delivery_address_id' => $supplierAddress->id,
+        'invoice_address_id' => $supplierAddress->id,
+        'main_address_id' => $supplierAddress->id,
+    ]);
+
+    $this->order->update([
+        'order_type_id' => OrderType::factory()->create([
+            'order_type_enum' => OrderTypeEnum::Purchase,
+            'is_active' => true,
+        ])->getKey(),
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('order.contact_id', $supplier->id)
+        ->call('fetchContactData')
+        ->assertOk()
+        ->assertSet('order.address_invoice_id', $supplier->invoice_address_id)
+        ->assertSet('order.address_delivery_id', null);
+});
+
 test('get additional model actions', function (): void {
     $this->order->update([
         'invoice_date' => now(),
