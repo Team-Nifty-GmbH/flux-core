@@ -9,7 +9,7 @@ use Webklex\PHPIMAP\Address;
 use Webklex\PHPIMAP\Attachment;
 use Webklex\PHPIMAP\Message;
 
-final readonly class ImapMessage
+readonly class ImapMessage
 {
     public function __construct(
         public string $messageId,
@@ -56,16 +56,16 @@ final readonly class ImapMessage
         return new ImapMessage(
             messageId: $message->getMessageId()->toString(),
             uid: $message->getUid(),
-            subject: self::scrub($message->getSubject()->toString()),
-            from: self::scrub($message->getFrom()[0]->full),
-            to: self::scrub($message->getTo()->toArray()),
-            cc: self::scrub($message->getCc()->toArray()),
-            bcc: self::scrub($message->getBcc()->toArray()),
+            subject: static::toUtf8($message->getSubject()->toString()),
+            from: static::toUtf8($message->getFrom()[0]->full),
+            to: static::toUtf8($message->getTo()->toArray()),
+            cc: static::toUtf8($message->getCc()->toArray()),
+            bcc: static::toUtf8($message->getBcc()->toArray()),
             textBody: $withBody
-                ? self::scrub($message->getTextBody())
+                ? static::toUtf8($message->getTextBody())
                 : null,
             htmlBody: $withBody
-                ? self::scrub($message->getHtmlBody())
+                ? static::toUtf8($message->getHtmlBody())
                 : null,
             date: CarbonImmutable::parse($message->getDate()->toDate()),
             isSeen: $message->hasFlag('seen'),
@@ -74,25 +74,21 @@ final readonly class ImapMessage
         );
     }
 
-    /**
-     * A mail header may carry any bytes at all, and a sender that announces one
-     * encoding while writing another is common enough. The address fields are
-     * stored as json, which refuses invalid UTF-8 outright, so a single such
-     * message would otherwise stop the whole folder from syncing.
-     */
-    protected static function scrub(mixed $value): mixed
+    protected static function toUtf8(mixed $value): mixed
     {
         if (is_string($value)) {
-            return mb_scrub($value, 'UTF-8');
+            return mb_check_encoding($value, 'UTF-8')
+                ? $value
+                : mb_convert_encoding($value, 'UTF-8', 'UTF-8, Windows-1252, ISO-8859-1');
         }
 
         if (is_array($value)) {
-            return array_map(static fn (mixed $item) => self::scrub($item), $value);
+            return array_map(static fn (mixed $item): mixed => static::toUtf8($item), $value);
         }
 
         if ($value instanceof Address) {
             foreach (['personal', 'mailbox', 'host', 'mail', 'full'] as $property) {
-                $value->{$property} = mb_scrub($value->{$property}, 'UTF-8');
+                $value->{$property} = static::toUtf8($value->{$property});
             }
         }
 

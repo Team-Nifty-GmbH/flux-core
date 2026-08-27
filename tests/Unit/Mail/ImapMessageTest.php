@@ -3,7 +3,7 @@
 use Carbon\CarbonImmutable;
 use FluxErp\Mail\ImapMessage;
 
-it('can be constructed with all properties', function (): void {
+test('can be constructed with all properties', function (): void {
     $message = new ImapMessage(
         messageId: '<test@example.com>',
         uid: 42,
@@ -57,14 +57,14 @@ function imapMessageFrom(string $senderFull, string $subject, string $recipientP
     return ImapMessage::fromImapMessage($message);
 }
 
-it('keeps a sender with broken encoding storable as json', function (): void {
+test('keeps a sender with broken encoding storable as json', function (): void {
     $message = imapMessageFrom("Ren\xE9 M\xFCller <rene@example.com>", 'Betreff', 'Empfänger');
 
     expect(mb_check_encoding($message->from, 'UTF-8'))->toBeTrue()
         ->and(json_encode($message->from))->not->toBeFalse();
 });
 
-it('scrubs subject and bodies as well', function (): void {
+test('makes subject and bodies storable as json', function (): void {
     $message = imapMessageFrom('sender@example.com', "Angebot \xC0\xC1", 'Empfänger');
 
     expect(mb_check_encoding($message->subject, 'UTF-8'))->toBeTrue()
@@ -72,14 +72,20 @@ it('scrubs subject and bodies as well', function (): void {
         ->and(mb_check_encoding($message->htmlBody, 'UTF-8'))->toBeTrue();
 });
 
-it('scrubs the address objects the recipients are made of', function (): void {
+test('converts the address objects the recipients are made of', function (): void {
     $message = imapMessageFrom('sender@example.com', 'Betreff', "K\xF6rner");
 
-    expect(json_encode($message->to))->not->toBeFalse()
-        ->and(mb_check_encoding($message->to[0]->personal, 'UTF-8'))->toBeTrue();
+    expect('Körner')->toBe($message->to[0]->personal)
+        ->and(json_encode($message->to))->not->toBeFalse();
 });
 
-it('leaves a clean message untouched', function (): void {
+test('converts a latin encoded sender instead of dropping the characters', function (): void {
+    $message = imapMessageFrom("Ren\xE9 M\xFCller <rene@example.com>", 'Betreff', 'Empfänger');
+
+    expect('René Müller <rene@example.com>')->toBe($message->from);
+});
+
+test('leaves a clean message untouched', function (): void {
     $message = imapMessageFrom('René Müller <rene@example.com>', 'Angebot für Sie', 'Empfänger');
 
     expect($message->from)->toBe('René Müller <rene@example.com>')
