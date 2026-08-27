@@ -110,7 +110,7 @@ class SepaMandates extends SepaMandateList
         try {
             $this->sepaMandate->delete();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->sepaMandate);
 
             return;
         }

@@ -55,7 +55,7 @@ class Loans extends LoanList
         try {
             $this->loan->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->loan);
 
             return false;
         }

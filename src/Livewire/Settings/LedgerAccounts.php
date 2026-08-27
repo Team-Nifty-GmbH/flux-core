@@ -61,7 +61,7 @@ class LedgerAccounts extends LedgerAccountList
         try {
             $this->ledgerAccount->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->ledgerAccount);
 
             return false;
         }

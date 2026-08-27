@@ -61,7 +61,7 @@ class Warehouses extends WarehouseList
         try {
             $this->warehouse->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->warehouse);
 
             return false;
         }

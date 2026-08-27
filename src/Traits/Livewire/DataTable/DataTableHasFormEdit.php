@@ -35,7 +35,7 @@ trait DataTableHasFormEdit
         try {
             $this->{$this->formAttributeName()}->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->{$this->formAttributeName()});
 
             return false;
         }
@@ -108,7 +108,7 @@ trait DataTableHasFormEdit
         try {
             $this->{$this->formAttributeName()}->restore();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->{$this->formAttributeName()});
 
             return false;
         }
@@ -124,9 +124,6 @@ trait DataTableHasFormEdit
         try {
             $this->{$this->formAttributeName()}->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            // Named, because the blade binds every input to `<form>.<field>`. Without
-            // the form the helper cannot know that prefix and files the error under
-            // the bare field name, where no input ever looks for it.
             exception_to_notifications($e, $this, form: $this->{$this->formAttributeName()});
 
             return false;

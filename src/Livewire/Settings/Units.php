@@ -60,7 +60,7 @@ class Units extends UnitList
         try {
             $this->unit->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->unit);
 
             return false;
         }

@@ -69,7 +69,7 @@ class ProductOptionGroups extends ProductOptionGroupList
         try {
             $this->productOptionGroupForm->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->productOptionGroupForm);
 
             return;
         }

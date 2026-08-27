@@ -117,7 +117,7 @@ class WorkTimes extends WorkTimeList
         try {
             $this->workTime->delete();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->workTime);
 
             return;
         }

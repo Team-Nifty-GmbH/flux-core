@@ -77,7 +77,7 @@ abstract class FolderTree extends Component
                     ->validate()
                     ->execute();
             } catch (UnauthorizedException|ValidationException $e) {
-                exception_to_notifications($e, $this);
+                exception_to_notifications($e, $this, form: $this->folder);
 
                 return false;
             }
@@ -374,7 +374,7 @@ abstract class FolderTree extends Component
                 ->validate()
                 ->execute();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->folder);
 
             return false;
         }
