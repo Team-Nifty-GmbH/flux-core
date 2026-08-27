@@ -260,5 +260,6 @@ test('a tag that already exists does not fault the product name', function (): v
 
     Livewire::test(Product::class, ['id' => $this->product->id])
         ->call('addTag', $tag->name)
-        ->assertHasNoErrors('product.name');
+        ->assertHasNoErrors('product.name')
+        ->assertHasErrors('name');
 });
