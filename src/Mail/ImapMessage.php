@@ -5,6 +5,7 @@ namespace FluxErp\Mail;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Str;
 use RuntimeException;
+use Webklex\PHPIMAP\Address;
 use Webklex\PHPIMAP\Attachment;
 use Webklex\PHPIMAP\Message;
 
@@ -55,21 +56,46 @@ final readonly class ImapMessage
         return new ImapMessage(
             messageId: $message->getMessageId()->toString(),
             uid: $message->getUid(),
-            subject: $message->getSubject()->toString(),
-            from: $message->getFrom()[0]->full,
-            to: $message->getTo()->toArray(),
-            cc: $message->getCc()->toArray(),
-            bcc: $message->getBcc()->toArray(),
+            subject: self::scrub($message->getSubject()->toString()),
+            from: self::scrub($message->getFrom()[0]->full),
+            to: self::scrub($message->getTo()->toArray()),
+            cc: self::scrub($message->getCc()->toArray()),
+            bcc: self::scrub($message->getBcc()->toArray()),
             textBody: $withBody
-                ? $message->getTextBody()
+                ? self::scrub($message->getTextBody())
                 : null,
             htmlBody: $withBody
-                ? $message->getHtmlBody()
+                ? self::scrub($message->getHtmlBody())
                 : null,
             date: CarbonImmutable::parse($message->getDate()->toDate()),
             isSeen: $message->hasFlag('seen'),
             flags: $message->getFlags()->toArray(),
             attachments: $attachments,
         );
+    }
+
+    /**
+     * A mail header may carry any bytes at all, and a sender that announces one
+     * encoding while writing another is common enough. The address fields are
+     * stored as json, which refuses invalid UTF-8 outright, so a single such
+     * message would otherwise stop the whole folder from syncing.
+     */
+    protected static function scrub(mixed $value): mixed
+    {
+        if (is_string($value)) {
+            return mb_scrub($value, 'UTF-8');
+        }
+
+        if (is_array($value)) {
+            return array_map(static fn (mixed $item) => self::scrub($item), $value);
+        }
+
+        if ($value instanceof Address) {
+            foreach (['personal', 'mailbox', 'host', 'mail', 'full'] as $property) {
+                $value->{$property} = mb_scrub($value->{$property}, 'UTF-8');
+            }
+        }
+
+        return $value;
     }
 }

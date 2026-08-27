@@ -27,3 +27,62 @@ it('can be constructed with all properties', function (): void {
         ->and($message->isSeen)->toBeFalse()
         ->and($message->attachments)->toBeEmpty();
 });
+
+function imapMessageFrom(string $senderFull, string $subject, string $recipientPersonal): ImapMessage
+{
+    $address = new Webklex\PHPIMAP\Address((object) [
+        'personal' => $recipientPersonal,
+        'mailbox' => 'recipient',
+        'host' => 'example.com',
+        'mail' => 'recipient@example.com',
+        'full' => $recipientPersonal . ' <recipient@example.com>',
+    ]);
+
+    $message = Mockery::mock(Webklex\PHPIMAP\Message::class);
+    $message->shouldReceive('parseBody')->andReturnSelf();
+    $message->shouldReceive('getAttachments')->andReturn(new Webklex\PHPIMAP\Support\AttachmentCollection());
+    $message->shouldReceive('getMessageId->toString')->andReturn('<broken@example.com>');
+    $message->shouldReceive('getUid')->andReturn(7);
+    $message->shouldReceive('getSubject->toString')->andReturn($subject);
+    $message->shouldReceive('getFrom')->andReturn([(object) ['full' => $senderFull]]);
+    $message->shouldReceive('getTo->toArray')->andReturn([$address]);
+    $message->shouldReceive('getCc->toArray')->andReturn([]);
+    $message->shouldReceive('getBcc->toArray')->andReturn([]);
+    $message->shouldReceive('getTextBody')->andReturn("plain \xFF body");
+    $message->shouldReceive('getHtmlBody')->andReturn("<p>\xFE</p>");
+    $message->shouldReceive('getDate->toDate')->andReturn(new DateTime('2026-01-30 12:00:00'));
+    $message->shouldReceive('hasFlag')->andReturn(false);
+    $message->shouldReceive('getFlags->toArray')->andReturn([]);
+
+    return ImapMessage::fromImapMessage($message);
+}
+
+it('keeps a sender with broken encoding storable as json', function (): void {
+    $message = imapMessageFrom("Ren\xE9 M\xFCller <rene@example.com>", 'Betreff', 'Empfänger');
+
+    expect(mb_check_encoding($message->from, 'UTF-8'))->toBeTrue()
+        ->and(json_encode($message->from))->not->toBeFalse();
+});
+
+it('scrubs subject and bodies as well', function (): void {
+    $message = imapMessageFrom('sender@example.com', "Angebot \xC0\xC1", 'Empfänger');
+
+    expect(mb_check_encoding($message->subject, 'UTF-8'))->toBeTrue()
+        ->and(mb_check_encoding($message->textBody, 'UTF-8'))->toBeTrue()
+        ->and(mb_check_encoding($message->htmlBody, 'UTF-8'))->toBeTrue();
+});
+
+it('scrubs the address objects the recipients are made of', function (): void {
+    $message = imapMessageFrom('sender@example.com', 'Betreff', "K\xF6rner");
+
+    expect(json_encode($message->to))->not->toBeFalse()
+        ->and(mb_check_encoding($message->to[0]->personal, 'UTF-8'))->toBeTrue();
+});
+
+it('leaves a clean message untouched', function (): void {
+    $message = imapMessageFrom('René Müller <rene@example.com>', 'Angebot für Sie', 'Empfänger');
+
+    expect($message->from)->toBe('René Müller <rene@example.com>')
+        ->and($message->subject)->toBe('Angebot für Sie')
+        ->and($message->to[0]->personal)->toBe('Empfänger');
+});
