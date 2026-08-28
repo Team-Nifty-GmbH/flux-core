@@ -1,6 +1,8 @@
 <?php
 
 use FluxErp\Livewire\Product\Product;
+use FluxErp\Models\Address;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
@@ -8,6 +10,7 @@ use FluxErp\Models\Product as ProductModel;
 use FluxErp\Models\ProductCrossSelling;
 use FluxErp\Models\Tag;
 use FluxErp\Models\VatRate;
+use FluxErp\Rulesets\Product\SupplierRuleset;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Session;
 use Livewire\Livewire;
@@ -268,4 +271,22 @@ test('the product property group heading reaches the markup', function (): void 
     Livewire::test(Product::class, ['id' => $this->product->id])
         ->assertOk()
         ->assertSeeHtml('x-text="group"');
+});
+
+test('add supplier fills every pivot field declared by the ruleset', function (): void {
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
+    $contact->update(['main_address_id' => $address->getKey()]);
+
+    $component = Livewire::test(Product::class, ['id' => $this->product->id])
+        ->call('addSupplier', $contact->getKey())
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    $pivotFields = resolve_static(SupplierRuleset::class, 'pivotFields');
+
+    expect($pivotFields)
+        ->not->toBeEmpty()
+        ->and(data_get($component->get('product.suppliers'), '0'))
+        ->toHaveKeys(array_merge($pivotFields, ['customer_number', 'main_address']));
 });

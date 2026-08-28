@@ -448,6 +448,7 @@
                                 :label="__('Purchase Price')"
                                 step="0.01"
                             />
+                            @stack('product-supplier-fields')
                             <div class="mt-6">
                                 <x-button
                                     color="red"

@@ -18,6 +18,7 @@ use FluxErp\Models\ProductCrossSelling;
 use FluxErp\Models\ProductProperty;
 use FluxErp\Models\ProductPropertyGroup;
 use FluxErp\Models\VatRate;
+use FluxErp\Rulesets\Product\SupplierRuleset;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
@@ -192,15 +193,16 @@ class Product extends Component
             return;
         }
 
-        $this->product->suppliers[] = [
-            'contact_id' => $contact->id,
-            'customer_number' => $contact->customer_number,
-            'manufacturer_product_number' => null,
-            'purchase_price' => null,
-            'main_address' => [
-                'name' => $contact->mainAddress->name,
-            ],
-        ];
+        $this->product->suppliers[] = array_merge(
+            array_fill_keys(resolve_static(SupplierRuleset::class, 'pivotFields'), null),
+            [
+                'contact_id' => $contact->getKey(),
+                'customer_number' => $contact->customer_number,
+                'main_address' => [
+                    'name' => $contact->mainAddress?->name,
+                ],
+            ]
+        );
 
         $this->product->suppliers = array_values($this->product->suppliers);
     }

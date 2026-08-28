@@ -6,6 +6,7 @@ use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\RestoreProduct;
 use FluxErp\Actions\Product\UpdateProduct;
+use FluxErp\Rulesets\Product\SupplierRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
 
@@ -130,10 +131,13 @@ class ProductForm extends FluxForm
                 'parent',
                 'productProperties:id,product_property_group_id,name,property_type_enum,product_product_property.value',
                 'productProperties.productPropertyGroup:id,name',
-                'suppliers:id,main_address_id,customer_number,' .
-                    'product_supplier.contact_id,' .
-                    'product_supplier.manufacturer_product_number,' .
-                    'product_supplier.purchase_price',
+                'suppliers:id,main_address_id,customer_number,' . implode(
+                    ',',
+                    array_map(
+                        fn (string $field): string => 'product_supplier.' . $field,
+                        resolve_static(SupplierRuleset::class, 'pivotFields')
+                    )
+                ),
                 'suppliers.mainAddress:id,name',
                 'tags:id',
                 'vatRate:id,rate_percentage',
