@@ -36,11 +36,8 @@ class AssignableOrders extends Component
     }
 
     #[On('assignable-orders.load')]
-    public function load(
-        ?int $contactId = null,
-        float|int|string|null $invoiceTotal = null,
-        ?int $orderId = null
-    ): void {
+    public function load(?int $contactId = null, float|int|string|null $invoiceTotal = null): void
+    {
         $this->reset();
 
         unset($this->orders);
@@ -52,8 +49,7 @@ class AssignableOrders extends Component
         $this->contactId = $contactId;
         $this->invoiceTotal = is_null($invoiceTotal) ? null : (float) $invoiceTotal;
 
-        // A suggestion only counts when the order is still assignable at all.
-        if ($orderId && ! is_null($this->selectedTotal($orderId))) {
+        if ($orderId = $this->suggestedOrderId()) {
             $this->orderId = $orderId;
             $this->updatedOrderId($orderId);
         }
@@ -106,6 +102,7 @@ class AssignableOrders extends Component
 
         return $groups
             ->map(fn (Collection $orders, string $group) => [
+                'key' => $group,
                 'label' => $group === 'rates' ? __('Subscription Rates') : __('Orders'),
                 'value' => $orders
                     ->map(fn (Order $order) => [
@@ -124,6 +121,32 @@ class AssignableOrders extends Component
             ->sortBy(fn (array $group, string $key) => $key === 'rates' ? 0 : 1)
             ->values()
             ->all();
+    }
+
+    /**
+     * A subscription rate is planned for exactly the amount its invoice will carry, so
+     * a single rate matching the invoice total is the obvious choice and gets offered
+     * as the preselection. Anything ambiguous is left to the user.
+     */
+    protected function suggestedOrderId(): ?int
+    {
+        if (is_null($this->invoiceTotal)) {
+            return null;
+        }
+
+        $rates = collect($this->orders)
+            ->firstWhere('key', 'rates')['value'] ?? [];
+
+        $matching = collect($rates)
+            ->filter(
+                fn (array $option) => bccomp(
+                    bcround((string) $option['total_gross_price'], 2),
+                    bcround((string) $this->invoiceTotal, 2),
+                    2
+                ) === 0
+            );
+
+        return $matching->count() === 1 ? $matching->first()['value'] : null;
     }
 
     protected function selectedTotal(int $orderId): ?string
