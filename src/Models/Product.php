@@ -270,27 +270,6 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         return bcdiv(bcmul($price, $this->basic_unit), $this->selling_unit);
     }
 
-    public function purchaseAmount(float|int|string $amount): string
-    {
-        $amount = bcadd($amount, 0);
-
-        if ($this->min_purchase && bccomp($amount, $this->min_purchase) < 0) {
-            $amount = bcadd($this->min_purchase, 0);
-        }
-
-        if (! $this->purchase_steps) {
-            return $amount;
-        }
-
-        $steps = bcdiv($amount, $this->purchase_steps, 0);
-
-        if (bccomp(bcmul($steps, $this->purchase_steps), $amount) < 0) {
-            $steps = bcadd($steps, 1);
-        }
-
-        return bcmul($steps, $this->purchase_steps);
-    }
-
     public function purchasePrice(float|int|null $amount = 1): ?Price
     {
         return $amount
