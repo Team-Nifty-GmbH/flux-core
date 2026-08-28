@@ -273,7 +273,7 @@ test('the product property group heading reaches the markup', function (): void 
         ->assertSeeHtml('x-text="group"');
 });
 
-test('add supplier fills every pivot field declared by the ruleset', function (): void {
+test('add supplier fills every column the pivot table carries', function (): void {
     $contact = Contact::factory()->create();
     $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
     $contact->update(['main_address_id' => $address->getKey()]);
