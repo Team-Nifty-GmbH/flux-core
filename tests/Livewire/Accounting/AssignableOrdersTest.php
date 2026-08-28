@@ -107,3 +107,41 @@ test('a new load event clears the previous choice', function (): void {
         ->assertSet('hasDeviation', false)
         ->assertCount('orders', 0);
 });
+
+test('the load event preselects a suggested order and tells the parent', function (): void {
+    Livewire::test(AssignableOrders::class)
+        ->dispatch(
+            'assignable-orders.load',
+            contactId: $this->contact->getKey(),
+            invoiceTotal: 200,
+            orderId: $this->rate->getKey()
+        )
+        ->assertOk()
+        ->assertSet('orderId', $this->rate->getKey())
+        ->assertSet('hasDeviation', false)
+        ->assertDispatched('assignable-orders.selected');
+});
+
+test('a preselected order with a deviating amount is flagged', function (): void {
+    Livewire::test(AssignableOrders::class)
+        ->dispatch(
+            'assignable-orders.load',
+            contactId: $this->contact->getKey(),
+            invoiceTotal: 200,
+            orderId: $this->purchaseOrder->getKey()
+        )
+        ->assertSet('orderId', $this->purchaseOrder->getKey())
+        ->assertSet('hasDeviation', true);
+});
+
+test('a preselected order that cannot be assigned is ignored', function (): void {
+    Livewire::test(AssignableOrders::class)
+        ->dispatch(
+            'assignable-orders.load',
+            contactId: $this->contact->getKey(),
+            invoiceTotal: 200,
+            orderId: $this->invoiced->getKey()
+        )
+        ->assertSet('orderId', null)
+        ->assertNotDispatched('assignable-orders.selected');
+});

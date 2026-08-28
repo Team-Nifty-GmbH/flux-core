@@ -36,8 +36,11 @@ class AssignableOrders extends Component
     }
 
     #[On('assignable-orders.load')]
-    public function load(?int $contactId = null, float|int|string|null $invoiceTotal = null): void
-    {
+    public function load(
+        ?int $contactId = null,
+        float|int|string|null $invoiceTotal = null,
+        ?int $orderId = null
+    ): void {
         $this->reset();
 
         unset($this->orders);
@@ -48,6 +51,12 @@ class AssignableOrders extends Component
 
         $this->contactId = $contactId;
         $this->invoiceTotal = is_null($invoiceTotal) ? null : (float) $invoiceTotal;
+
+        // A suggestion only counts when the order is still assignable at all.
+        if ($orderId && ! is_null($this->selectedTotal($orderId))) {
+            $this->orderId = $orderId;
+            $this->updatedOrderId($orderId);
+        }
     }
 
     public function updatedOrderId(mixed $value): void

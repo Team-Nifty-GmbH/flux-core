@@ -217,6 +217,7 @@ class PurchaseInvoiceList extends BaseDataTable
             'assignable-orders.load',
             contactId: $this->purchaseInvoiceForm->contact_id,
             invoiceTotal: $this->purchaseInvoiceForm->total_gross_price,
+            orderId: $this->purchaseInvoiceForm->order_id,
         );
     }
 
