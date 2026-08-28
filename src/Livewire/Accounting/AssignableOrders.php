@@ -123,32 +123,6 @@ class AssignableOrders extends Component
             ->all();
     }
 
-    /**
-     * A subscription rate is planned for exactly the amount its invoice will carry, so
-     * a single rate matching the invoice total is the obvious choice and gets offered
-     * as the preselection. Anything ambiguous is left to the user.
-     */
-    protected function suggestedOrderId(): ?int
-    {
-        if (is_null($this->invoiceTotal)) {
-            return null;
-        }
-
-        $rates = collect($this->orders)
-            ->firstWhere('key', 'rates')['value'] ?? [];
-
-        $matching = collect($rates)
-            ->filter(
-                fn (array $option) => bccomp(
-                    bcround((string) $option['total_gross_price'], 2),
-                    bcround((string) $this->invoiceTotal, 2),
-                    2
-                ) === 0
-            );
-
-        return $matching->count() === 1 ? $matching->first()['value'] : null;
-    }
-
     protected function selectedTotal(int $orderId): ?string
     {
         foreach ($this->orders as $group) {
@@ -160,5 +134,25 @@ class AssignableOrders extends Component
         }
 
         return null;
+    }
+
+    protected function suggestedOrderId(): ?int
+    {
+        if (is_null($this->invoiceTotal)) {
+            return null;
+        }
+
+        $matching = collect(
+            data_get(collect($this->orders)->firstWhere('key', 'rates'), 'value', [])
+        )
+            ->filter(
+                fn (array $option) => bccomp(
+                    bcround((string) data_get($option, 'total_gross_price'), 2),
+                    bcround((string) $this->invoiceTotal, 2),
+                    2
+                ) === 0
+            );
+
+        return $matching->count() === 1 ? data_get($matching->first(), 'value') : null;
     }
 }
