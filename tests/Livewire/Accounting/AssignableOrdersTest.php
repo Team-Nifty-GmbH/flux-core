@@ -108,40 +108,46 @@ test('a new load event clears the previous choice', function (): void {
         ->assertCount('orders', 0);
 });
 
-test('the load event preselects a suggested order and tells the parent', function (): void {
+test('the single subscription rate matching the invoice total is preselected', function (): void {
     Livewire::test(AssignableOrders::class)
-        ->dispatch(
-            'assignable-orders.load',
-            contactId: $this->contact->getKey(),
-            invoiceTotal: 200,
-            orderId: $this->rate->getKey()
-        )
+        ->dispatch('assignable-orders.load', contactId: $this->contact->getKey(), invoiceTotal: 200)
         ->assertOk()
         ->assertSet('orderId', $this->rate->getKey())
         ->assertSet('hasDeviation', false)
         ->assertDispatched('assignable-orders.selected');
 });
 
-test('a preselected order with a deviating amount is flagged', function (): void {
-    Livewire::test(AssignableOrders::class)
-        ->dispatch(
-            'assignable-orders.load',
-            contactId: $this->contact->getKey(),
-            invoiceTotal: 200,
-            orderId: $this->purchaseOrder->getKey()
-        )
-        ->assertSet('orderId', $this->purchaseOrder->getKey())
-        ->assertSet('hasDeviation', true);
-});
+test('nothing is preselected when several rates carry the invoice total', function (): void {
+    Order::factory()->create([
+        'order_type_id' => $this->rate->order_type_id,
+        'address_invoice_id' => $this->rate->address_invoice_id,
+        'contact_id' => $this->contact->getKey(),
+        'payment_type_id' => $this->rate->payment_type_id,
+        'price_list_id' => $this->rate->price_list_id,
+        'tenant_id' => $this->dbTenant->getKey(),
+        'currency_id' => $this->rate->currency_id,
+        'language_id' => $this->defaultLanguage->getKey(),
+        'created_from_id' => $this->contract->getKey(),
+        'invoice_number' => null,
+        'is_locked' => false,
+        'total_gross_price' => -200,
+    ]);
 
-test('a preselected order that cannot be assigned is ignored', function (): void {
     Livewire::test(AssignableOrders::class)
-        ->dispatch(
-            'assignable-orders.load',
-            contactId: $this->contact->getKey(),
-            invoiceTotal: 200,
-            orderId: $this->invoiced->getKey()
-        )
+        ->dispatch('assignable-orders.load', contactId: $this->contact->getKey(), invoiceTotal: 200)
         ->assertSet('orderId', null)
         ->assertNotDispatched('assignable-orders.selected');
+});
+
+test('a plain purchase order matching the total is never preselected', function (): void {
+    Livewire::test(AssignableOrders::class)
+        ->dispatch('assignable-orders.load', contactId: $this->contact->getKey(), invoiceTotal: 890)
+        ->assertSet('orderId', null)
+        ->assertNotDispatched('assignable-orders.selected');
+});
+
+test('nothing is preselected without an invoice total', function (): void {
+    Livewire::test(AssignableOrders::class)
+        ->dispatch('assignable-orders.load', contactId: $this->contact->getKey())
+        ->assertSet('orderId', null);
 });
