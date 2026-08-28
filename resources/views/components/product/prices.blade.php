@@ -28,7 +28,9 @@
                 return null;
             }
 
-            return $nuxbe.parseNumber((priceNet * basicUnit) / sellingUnit);
+            return $nuxbe.parseNumber(
+                Math.round(((priceNet * basicUnit) / sellingUnit) * 100) / 100,
+            );
         },
         resetPrice(priceList) {
             if (priceList.is_editable) {

@@ -253,23 +253,6 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         return $this->detailRoute();
     }
 
-    public function pricePerBasicUnit(float|int|string $price): ?string
-    {
-        if (is_null($this->selling_unit) || is_null($this->basic_unit)) {
-            return null;
-        }
-
-        if (bccomp($this->selling_unit, 0) === 0 || bccomp($this->basic_unit, 0) === 0) {
-            return null;
-        }
-
-        if (bccomp($this->basic_unit, $this->selling_unit) === 0) {
-            return null;
-        }
-
-        return bcdiv(bcmul($price, $this->basic_unit), $this->selling_unit);
-    }
-
     public function purchasePrice(float|int|null $amount = 1): ?Price
     {
         return $amount

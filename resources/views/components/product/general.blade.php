@@ -191,7 +191,7 @@
                                 <div>{{ __('Min Purchase') }}</div>
                                 <div>
                                     <x-tooltip
-                                        :text="__('Smallest amount that can be purchased from a supplier. A smaller demand is raised to this amount.')"
+                                        :text="__('Smallest amount that can be purchased from this supplier.')"
                                     />
                                 </div>
                             </div>
@@ -206,7 +206,7 @@
                                 <div>{{ __('Purchase Steps') }}</div>
                                 <div>
                                     <x-tooltip
-                                        :text="__('Amount the supplier sells in. A demand is rounded up to the next multiple of this amount.')"
+                                        :text="__('Amount the supplier sells in. An order position entered in the purchase unit is multiplied by it.')"
                                     />
                                 </div>
                             </div>
