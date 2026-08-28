@@ -1,6 +1,7 @@
 <div
     x-data="{
         calculatedPrices: {},
+        units: @js(resolve_static(\FluxErp\Models\Unit::class, 'query')->pluck('name', 'id')),
         init() {
             $wire.getPriceLists().then(() =>
                 $wire.priceLists.forEach((priceList) => {
@@ -16,6 +17,18 @@
                     };
                 }),
             );
+        },
+        pricePerBasicUnit(priceList) {
+            const sellingUnit = Number($wire.product.selling_unit);
+            const basicUnit = Number($wire.product.basic_unit);
+
+            const priceNet = Number(priceList.price_net);
+
+            if (!sellingUnit || !basicUnit || sellingUnit === basicUnit || !priceNet) {
+                return null;
+            }
+
+            return $nuxbe.parseNumber((priceNet * basicUnit) / sellingUnit);
         },
         resetPrice(priceList) {
             if (priceList.is_editable) {
@@ -113,6 +126,22 @@
                 label="{{ __('Price gross') }}"
                 x-model="priceList.price_gross"
             />
+            <div
+                x-cloak
+                x-show="pricePerBasicUnit(priceList)"
+                class="text-sm text-gray-500 dark:text-gray-400"
+            >
+                <span>{{ __('Price per Basic Unit (net)') }}:</span>
+                <span
+                    x-text="
+                        '{{ resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol }} ' +
+                        pricePerBasicUnit(priceList) +
+                        (units[$wire.product.reference_unit_id]
+                            ? ' / ' + units[$wire.product.reference_unit_id]
+                            : '')
+                    "
+                ></span>
+            </div>
         </x-card>
     </template>
 </div>

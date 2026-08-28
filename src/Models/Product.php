@@ -167,6 +167,16 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             ->using(ProductProductProperty::class);
     }
 
+    public function purchaseUnit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class, 'purchase_unit_id');
+    }
+
+    public function referenceUnit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class, 'reference_unit_id');
+    }
+
     public function stockPostings(): HasMany
     {
         return $this->hasMany(StockPosting::class);
@@ -241,6 +251,44 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     public function getUrl(): ?string
     {
         return $this->detailRoute();
+    }
+
+    public function pricePerBasicUnit(float|int|string $price): ?string
+    {
+        if (is_null($this->selling_unit) || is_null($this->basic_unit)) {
+            return null;
+        }
+
+        if (bccomp($this->selling_unit, 0) === 0 || bccomp($this->basic_unit, 0) === 0) {
+            return null;
+        }
+
+        if (bccomp($this->basic_unit, $this->selling_unit) === 0) {
+            return null;
+        }
+
+        return bcdiv(bcmul($price, $this->basic_unit), $this->selling_unit);
+    }
+
+    public function purchaseAmount(float|int|string $amount): string
+    {
+        $amount = bcadd($amount, 0);
+
+        if ($this->min_purchase && bccomp($amount, $this->min_purchase) < 0) {
+            $amount = bcadd($this->min_purchase, 0);
+        }
+
+        if (! $this->purchase_steps) {
+            return $amount;
+        }
+
+        $steps = bcdiv($amount, $this->purchase_steps, 0);
+
+        if (bccomp(bcmul($steps, $this->purchase_steps), $amount) < 0) {
+            $steps = bcadd($steps, 1);
+        }
+
+        return bcmul($steps, $this->purchase_steps);
     }
 
     public function purchasePrice(float|int|null $amount = 1): ?Price

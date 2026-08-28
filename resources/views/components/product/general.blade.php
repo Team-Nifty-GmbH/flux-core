@@ -1,3 +1,6 @@
+@php
+    $units = resolve_static(\FluxErp\Models\Unit::class, 'query')->get(['id', 'name'])->toArray();
+@endphp
 <div class="space-y-5" x-data wire:key="products-general">
     <x-card class="space-y-2.5" :header="__('General')">
         @section('general')
@@ -76,7 +79,7 @@
                 label="{{ __('Unit') }}"
                 wire:model.number="product.unit_id"
                 select="label:name|value:id"
-                :options="resolve_static(\FluxErp\Models\Unit::class, 'query')->get(['id', 'name'])->toArray()"
+                :options="$units"
             />
             <div
                 class="grid grid-cols-1 gap-4 sm:grid-cols-4"
@@ -156,8 +159,61 @@
                         </div>
                     </x-slot:label>
                 </x-number>
+                <x-select.styled
+                    label="{{ __('Reference Unit') }}"
+                    wire:model.number="product.reference_unit_id"
+                    select="label:name|value:id"
+                    :options="$units"
+                />
             </div>
             @show
+            </x-card>
+            <x-card class="space-y-2.5" :header="__('Purchase')">
+                @section('purchase')
+                <div x-bind:class="{ 'pointer-events-none': !isEditing }">
+                    <x-select.styled
+                        label="{{ __('Purchase Unit') }}"
+                        wire:model.number="product.purchase_unit_id"
+                        select="label:name|value:id"
+                        :options="$units"
+                    />
+                </div>
+                <div
+                    class="grid grid-cols-1 gap-4 sm:grid-cols-2"
+                    x-bind:class="{ 'pointer-events-none': !isEditing }"
+                >
+                    <x-number
+                        x-bind:readonly="!isEditing"
+                        wire:model.number="product.min_purchase"
+                    >
+                        <x-slot:label>
+                            <div class="flex items-center justify-between">
+                                <div>{{ __('Min Purchase') }}</div>
+                                <div>
+                                    <x-tooltip
+                                        :text="__('Smallest amount that can be purchased from a supplier. A smaller demand is raised to this amount.')"
+                                    />
+                                </div>
+                            </div>
+                        </x-slot:label>
+                    </x-number>
+                    <x-number
+                        x-bind:readonly="!isEditing"
+                        wire:model.number="product.purchase_steps"
+                    >
+                        <x-slot:label>
+                            <div class="flex items-center justify-between">
+                                <div>{{ __('Purchase Steps') }}</div>
+                                <div>
+                                    <x-tooltip
+                                        :text="__('Amount the supplier sells in. A demand is rounded up to the next multiple of this amount.')"
+                                    />
+                                </div>
+                            </div>
+                        </x-slot:label>
+                    </x-number>
+                </div>
+                @show
             </x-card>
             <x-card class="flex flex-col gap-4" :header="__('Assignment')">
                 <x-select.styled
