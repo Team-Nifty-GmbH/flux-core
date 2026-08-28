@@ -12,13 +12,13 @@ use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use FluxErp\Models\Pivots\BundleProductProduct;
+use FluxErp\Models\Pivots\ProductSupplier;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
 use FluxErp\Models\ProductCrossSelling;
 use FluxErp\Models\ProductProperty;
 use FluxErp\Models\ProductPropertyGroup;
 use FluxErp\Models\VatRate;
-use FluxErp\Rulesets\Product\SupplierRuleset;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
@@ -194,7 +194,7 @@ class Product extends Component
         }
 
         $this->product->suppliers[] = array_merge(
-            array_fill_keys(resolve_static(SupplierRuleset::class, 'pivotFields'), null),
+            array_fill_keys(resolve_static(ProductSupplier::class, 'pivotFields'), null),
             [
                 'contact_id' => $contact->getKey(),
                 'customer_number' => $contact->customer_number,

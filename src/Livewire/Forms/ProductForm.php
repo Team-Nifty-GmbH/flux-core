@@ -6,7 +6,7 @@ use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\RestoreProduct;
 use FluxErp\Actions\Product\UpdateProduct;
-use FluxErp\Rulesets\Product\SupplierRuleset;
+use FluxErp\Models\Pivots\ProductSupplier;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
 
@@ -135,7 +135,7 @@ class ProductForm extends FluxForm
                     ',',
                     array_map(
                         fn (string $field): string => 'product_supplier.' . $field,
-                        resolve_static(SupplierRuleset::class, 'pivotFields')
+                        resolve_static(ProductSupplier::class, 'pivotFields')
                     )
                 ),
                 'suppliers.mainAddress:id,name',

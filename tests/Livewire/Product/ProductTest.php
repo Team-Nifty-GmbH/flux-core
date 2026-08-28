@@ -4,13 +4,13 @@ use FluxErp\Livewire\Product\Product;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
+use FluxErp\Models\Pivots\ProductSupplier;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
 use FluxErp\Models\ProductCrossSelling;
 use FluxErp\Models\Tag;
 use FluxErp\Models\VatRate;
-use FluxErp\Rulesets\Product\SupplierRuleset;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Session;
 use Livewire\Livewire;
@@ -283,7 +283,7 @@ test('add supplier fills every pivot field declared by the ruleset', function ()
         ->assertOk()
         ->assertHasNoErrors();
 
-    $pivotFields = resolve_static(SupplierRuleset::class, 'pivotFields');
+    $pivotFields = resolve_static(ProductSupplier::class, 'pivotFields');
 
     expect($pivotFields)
         ->not->toBeEmpty()
