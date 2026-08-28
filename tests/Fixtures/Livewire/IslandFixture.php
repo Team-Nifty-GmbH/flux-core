@@ -9,6 +9,8 @@ class IslandFixture extends Component
 {
     public ?string $choice = null;
 
+    public ?string $nestedChoice = null;
+
     public function render(): View
     {
         return view()->file(__DIR__ . '/../views/island-fixture.blade.php');
@@ -17,5 +19,10 @@ class IslandFixture extends Component
     public function repaint(): void
     {
         $this->renderIsland('island-fixture');
+    }
+
+    public function repaintNested(): void
+    {
+        $this->renderIsland('island-fixture-nested');
     }
 }
