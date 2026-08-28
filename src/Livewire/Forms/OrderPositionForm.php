@@ -179,10 +179,22 @@ class OrderPositionForm extends FluxForm
         }
 
         $this->unit_id = data_get($this->packaging, 'unit_id');
-        $this->amount = rtrim(
-            rtrim(bcmul($this->unit_amount, data_get($this->packaging, 'factor')), '0'),
-            '.'
+        $this->amount = $this->trimDecimals(
+            bcmul($this->unit_amount, data_get($this->packaging, 'factor'))
         );
+    }
+
+    public function deriveUnitAmount(): void
+    {
+        $factor = data_get($this->packaging, 'factor');
+
+        if (! $factor || ! is_numeric($this->amount) || $this->unit_id !== data_get($this->packaging, 'unit_id')) {
+            $this->unit_amount = null;
+
+            return;
+        }
+
+        $this->unit_amount = $this->trimDecimals(bcdiv($this->amount, $factor));
     }
 
     public function getProduct(): Product
@@ -219,6 +231,13 @@ class OrderPositionForm extends FluxForm
         );
 
         return $data;
+    }
+
+    protected function trimDecimals(string $value): string
+    {
+        return str_contains($value, '.')
+            ? rtrim(rtrim($value, '0'), '.')
+            : $value;
     }
 
     protected function getActions(): array
