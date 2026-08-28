@@ -273,6 +273,11 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         return $this->belongsTo(Tenant::class);
     }
 
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
+    }
+
     public function vatRate(): BelongsTo
     {
         return $this->belongsTo(VatRate::class);

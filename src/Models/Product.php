@@ -254,6 +254,21 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         return $this->detailRoute();
     }
 
+    public function packaging(): ?array
+    {
+        if (! $this->purchase_unit_id || ! $this->purchase_steps) {
+            return null;
+        }
+
+        $this->loadMissing('purchaseUnit:id,name');
+
+        return [
+            'unit_id' => $this->purchase_unit_id,
+            'name' => $this->purchaseUnit?->name,
+            'factor' => bcadd($this->purchase_steps, 0),
+        ];
+    }
+
     public function purchasePrice(float|int|null $amount = 1): ?Price
     {
         return $amount

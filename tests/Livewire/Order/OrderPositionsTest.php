@@ -19,6 +19,7 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\Project;
 use FluxErp\Models\Task;
+use FluxErp\Models\Unit;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 use Illuminate\Support\Facades\DB;
@@ -983,4 +984,129 @@ test('save button is gated on the product round-trip so it cannot submit before 
         ->assertOk()
         ->assertSeeHtml('wire:target="changedProductId"')
         ->assertSeeHtml('wire:loading.attr="disabled"');
+});
+
+function packagingOrderForm(Order $order): OrderForm
+{
+    $form = new OrderForm(Livewire::new(OrderPositions::class), 'order');
+    $form->fill($order);
+
+    return $form;
+}
+
+function packagingOrder(Order $sourceOrder, OrderTypeEnum $orderTypeEnum): Order
+{
+    return Order::factory()->create([
+        'currency_id' => $sourceOrder->currency_id,
+        'tenant_id' => $sourceOrder->tenant_id,
+        'language_id' => $sourceOrder->language_id,
+        'order_type_id' => OrderType::factory()->create([
+            'order_type_enum' => $orderTypeEnum,
+            'is_active' => true,
+        ])->getKey(),
+        'payment_type_id' => $sourceOrder->payment_type_id,
+        'price_list_id' => $sourceOrder->price_list_id,
+        'contact_id' => $sourceOrder->contact_id,
+        'address_invoice_id' => $sourceOrder->address_invoice_id,
+        'is_locked' => false,
+    ]);
+}
+
+function packagingPosition(Order $order, Product $product, VatRate $vatRate, int $tenantId): OrderPosition
+{
+    return OrderPosition::factory()->create([
+        'order_id' => $order->getKey(),
+        'product_id' => $product->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'tenant_id' => $tenantId,
+        'price_list_id' => $order->price_list_id,
+        'warehouse_id' => Warehouse::default()?->getKey(),
+        'amount' => 1,
+    ]);
+}
+
+beforeEach(function (): void {
+    $this->purchaseUnit = Unit::factory()->create(['name' => 'Box']);
+    $this->product->update([
+        'purchase_unit_id' => $this->purchaseUnit->getKey(),
+        'purchase_steps' => 12,
+    ]);
+
+    $this->purchaseOrder = packagingOrder($this->order, OrderTypeEnum::Purchase);
+    $this->purchaseOrderForm = packagingOrderForm($this->purchaseOrder);
+    $this->purchasePosition = packagingPosition(
+        $this->purchaseOrder,
+        $this->product,
+        $this->vatRate,
+        $this->dbTenant->getKey()
+    );
+});
+
+test('the packaging of the edited position reaches the form', function (): void {
+    $component = Livewire::test(OrderPositions::class, ['order' => $this->purchaseOrderForm])
+        ->call('editOrderPosition', $this->purchasePosition->getKey())
+        ->assertOk();
+
+    expect($component->get('orderPosition.packaging'))
+        ->toMatchArray([
+            'unit_id' => $this->purchaseUnit->getKey(),
+            'name' => 'Box',
+        ]);
+});
+
+test('typing a packaging amount converts the quantity and names the unit', function (): void {
+    Livewire::test(OrderPositions::class, ['order' => $this->purchaseOrderForm])
+        ->call('editOrderPosition', $this->purchasePosition->getKey())
+        ->set('orderPosition.unit_amount', 3)
+        ->assertOk()
+        ->assertSet('orderPosition.unit_id', $this->purchaseUnit->getKey())
+        ->assertSet('orderPosition.amount', '36');
+});
+
+test('clearing the packaging amount forgets the unit', function (): void {
+    Livewire::test(OrderPositions::class, ['order' => $this->purchaseOrderForm])
+        ->call('editOrderPosition', $this->purchasePosition->getKey())
+        ->set('orderPosition.unit_amount', 3)
+        ->set('orderPosition.unit_amount', '')
+        ->assertOk()
+        ->assertSet('orderPosition.unit_id', null);
+});
+
+test('a sales order leaves the form without a packaging', function (): void {
+    $salesOrder = packagingOrder($this->order, OrderTypeEnum::Order);
+    $position = packagingPosition(
+        $salesOrder,
+        $this->product,
+        $this->vatRate,
+        $this->dbTenant->getKey()
+    );
+
+    Livewire::test(OrderPositions::class, ['order' => packagingOrderForm($salesOrder)])
+        ->call('editOrderPosition', $position->getKey())
+        ->set('orderPosition.unit_amount', 3)
+        ->assertOk()
+        ->assertSet('orderPosition.packaging', null)
+        ->assertSet('orderPosition.unit_id', null);
+});
+
+test('a product without packaging leaves the form without one', function (): void {
+    $this->product->update(['purchase_unit_id' => null, 'purchase_steps' => null]);
+
+    Livewire::test(OrderPositions::class, ['order' => $this->purchaseOrderForm])
+        ->call('editOrderPosition', $this->purchasePosition->getKey())
+        ->assertOk()
+        ->assertSet('orderPosition.packaging', null);
+});
+
+test('saving keeps the unit and the converted quantity', function (): void {
+    Livewire::test(OrderPositions::class, ['order' => $this->purchaseOrderForm])
+        ->call('editOrderPosition', $this->purchasePosition->getKey())
+        ->set('orderPosition.unit_amount', 3)
+        ->call('addOrderPosition')
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    expect($this->purchasePosition->refresh())
+        ->amount->toEqual(36)
+        ->unit_id->toBe($this->purchaseUnit->getKey());
 });

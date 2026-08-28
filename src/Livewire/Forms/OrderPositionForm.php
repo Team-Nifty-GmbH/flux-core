@@ -100,13 +100,19 @@ class OrderPositionForm extends FluxForm
 
     public null|string|float $total_net_price = null;
 
+    public null|float|string $unit_amount = null;
+
     public ?string $unit_gram_weight = null;
 
     public null|string|float $unit_gross_price = null;
 
     public null|string|float $unit_net_price = null;
 
+    public ?int $unit_id = null;
+
     public null|string|float $unit_price = null;
+
+    public ?array $packaging = null;
 
     public null|string|float $vat_price = null;
 
@@ -163,6 +169,22 @@ class OrderPositionForm extends FluxForm
         }
     }
 
+    public function applyUnitAmount(): void
+    {
+        if (is_null($this->packaging) || ! is_numeric($this->unit_amount)) {
+            $this->unit_amount = null;
+            $this->unit_id = null;
+
+            return;
+        }
+
+        $this->unit_id = data_get($this->packaging, 'unit_id');
+        $this->amount = rtrim(
+            rtrim(bcmul($this->unit_amount, data_get($this->packaging, 'factor')), '0'),
+            '.'
+        );
+    }
+
     public function getProduct(): Product
     {
         return $this->product;
@@ -188,7 +210,13 @@ class OrderPositionForm extends FluxForm
             }
         }
 
-        unset($data['discount_flat'], $data['discount_is_percentage'], $data['is_bundle_parent']);
+        unset(
+            $data['discount_flat'],
+            $data['discount_is_percentage'],
+            $data['is_bundle_parent'],
+            $data['packaging'],
+            $data['unit_amount']
+        );
 
         return $data;
     }
