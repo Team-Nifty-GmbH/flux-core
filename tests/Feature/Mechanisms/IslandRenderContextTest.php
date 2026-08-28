@@ -3,14 +3,24 @@
 use FluxErp\Tests\Fixtures\Livewire\IslandFixture;
 use Livewire\Livewire;
 
+function islandFragmentsOf(object $component): string
+{
+    $lastState = (new ReflectionClass($component))->getProperty('lastState');
+    $lastState->setAccessible(true);
+
+    return implode('', data_get($lastState->getValue($component)->getEffects(), 'islandFragments', []));
+}
+
 test('an island render keeps bound components entangled', function (): void {
     $component = Livewire::test(IslandFixture::class)
         ->call('repaint');
 
-    $lastState = (new ReflectionClass($component))->getProperty('lastState');
-    $lastState->setAccessible(true);
+    expect(islandFragmentsOf($component))->toContain("\$wire.entangle('choice')");
+});
 
-    $fragments = data_get($lastState->getValue($component)->getEffects(), 'islandFragments', []);
+test('a nested island render keeps bound components entangled', function (): void {
+    $component = Livewire::test(IslandFixture::class)
+        ->call('repaintNested');
 
-    expect(implode('', $fragments))->toContain("\$wire.entangle('choice')");
+    expect(islandFragmentsOf($component))->toContain("\$wire.entangle('nestedChoice')");
 });
