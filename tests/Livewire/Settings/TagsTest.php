@@ -82,6 +82,7 @@ test('can delete tag', function (): void {
 });
 
 test('delete selected deletes the selected tags', function (): void {
+    config(['queue.default' => 'sync']);
     $tag = Tag::factory()->create();
 
     Livewire::test(Tags::class)

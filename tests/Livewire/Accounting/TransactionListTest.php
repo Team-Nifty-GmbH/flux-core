@@ -11,6 +11,7 @@ test('renders successfully', function (): void {
 });
 
 test('delete selected deletes the selected transactions', function (): void {
+    config(['queue.default' => 'sync']);
     $transaction = Transaction::factory()->create([
         'bank_connection_id' => BankConnection::factory()->create()->getKey(),
     ]);

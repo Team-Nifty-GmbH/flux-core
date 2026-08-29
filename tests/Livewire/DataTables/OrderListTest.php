@@ -19,6 +19,7 @@ test('renders successfully', function (): void {
 });
 
 test('delete removes the selected unlocked orders', function (): void {
+    config(['queue.default' => 'sync']);
     $contact = Contact::factory()->create();
     $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
     $orderType = OrderType::factory()->create([

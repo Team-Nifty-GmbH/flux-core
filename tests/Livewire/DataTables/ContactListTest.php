@@ -11,6 +11,7 @@ test('renders successfully', function (): void {
 });
 
 test('assign to agent sets the agent on the selected contacts', function (): void {
+    config(['queue.default' => 'sync']);
     $contact = Contact::factory()->create();
     $agent = User::factory()->create(['is_active' => true]);
 
