@@ -126,6 +126,7 @@ test('mount initializes selected options from existing children', function (): v
 });
 
 test('recalculate names renames the selected variants', function (): void {
+    config(['queue.default' => 'sync']);
     $group = ProductOptionGroup::factory()->create();
     $option = ProductOption::factory()->create([
         'product_option_group_id' => $group->getKey(),

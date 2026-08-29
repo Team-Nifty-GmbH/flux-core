@@ -114,6 +114,7 @@ test('save validates required fields', function (): void {
 });
 
 test('toggle is billable updates the selected work times', function (): void {
+    config(['queue.default' => 'sync']);
     $workTime = app(WorkTime::class)->create([
         'user_id' => $this->user->getKey(),
         'started_at' => now()->subHours(2)->format('Y-m-d H:i:s'),
