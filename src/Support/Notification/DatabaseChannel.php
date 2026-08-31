@@ -10,9 +10,12 @@ class DatabaseChannel extends BaseDatabaseChannel
 {
     public function send($notifiable, Notification $notification): Model
     {
+        $payload = $this->buildPayload($notifiable, $notification);
+        $payload['id'] = NotificationId::for($notification, $notifiable);
+
         return $notifiable->routeNotificationFor('database', $notification)->updateOrCreate(
-            ['id' => $notification->id],
-            $this->buildPayload($notifiable, $notification)
+            ['id' => $payload['id']],
+            $payload
         );
     }
 }
