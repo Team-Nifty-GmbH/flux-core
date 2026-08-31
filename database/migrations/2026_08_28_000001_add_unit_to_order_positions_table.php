@@ -13,8 +13,7 @@ return new class() extends Migration
                 ->nullable()
                 ->after('tenant_id')
                 ->constrained('units')
-                ->nullOnDelete()
-                ->comment('The unit this order-position was ordered in, when it differs from the article unit.');
+                ->nullOnDelete();
         });
     }
 
