@@ -4,6 +4,7 @@ namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\Contact;
 use FluxErp\Models\Product;
+use FluxErp\Models\Unit;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use TeamNiftyGmbH\DataTable\Helpers\SchemaInfo;
 use TeamNiftyGmbH\DataTable\ModelInfo\Attribute;
@@ -32,6 +33,11 @@ class ProductSupplier extends FluxPivot
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
+    }
+
+    public function packagingUnit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
     }
 
     public function product(): BelongsTo
