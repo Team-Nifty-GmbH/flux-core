@@ -1,6 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { destroy } from 'filepond';
 
+// The tree is edited in place (nodes are pushed, removed and moved). A tree handed in
+// as a Livewire property is the live property, so editing it in place marks the property
+// dirty and a locked one then rejects the next request. Work on a copy instead.
+const detachTree = (tree) => JSON.parse(JSON.stringify(tree ?? []));
+
 // Filter out dangerous keys to prevent prototype pollution
 const sanitizeObject = (obj) => {
     if (typeof obj !== 'object' || obj === null) return obj;
@@ -43,14 +48,14 @@ export default function folders(
 
             if (typeof this.property === 'string') {
                 this.$watch(property, (newFolders) => {
-                    this.tree = newFolders;
+                    this.tree = detachTree(newFolders);
                 });
             }
         },
         async refresh() {
             this.tree = [];
             try {
-                this.tree = await getTreePromise;
+                this.tree = detachTree(await getTreePromise);
             } catch (error) {
                 console.error('Error fetching the tree structure:', error);
                 this.tree = [];
