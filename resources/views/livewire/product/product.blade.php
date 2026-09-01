@@ -98,6 +98,17 @@
             @stack('product-detail-header-actions')
         </div>
     </div>
+    <x-flux::product.inheritance-orphan-banner
+        :visible="$this->isOrphanedParent"
+    />
+    @if ($state = $this->inheritanceState)
+        <x-badge color="amber" sm>
+            {{ __(':fields fields overridden, :prices prices differing', $state) }}
+        </x-badge>
+    @endif
+    <x-flux::product.variant-bulk-reset
+        :counters="$this->inheritanceCounters"
+    />
     <x-flux::tabs wire:model.live="tab" wire:loading="tab" :$tabs wire:ignore />
     @stack('product-detail-after-tabs')
 </div>
