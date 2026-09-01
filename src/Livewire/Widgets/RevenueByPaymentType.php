@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
 use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
@@ -79,22 +80,28 @@ class RevenueByPaymentType extends BarChart implements HasWidgetOptions
             ->whereNotNull('invoice_date')
             ->whereBetween('invoice_date', [$start, $end])
             ->whereNotNull('invoice_number')
-            ->selectRaw("{$dateExpression} as period, payment_type_id, sum({$grammar->wrap('total_net_price')}) as total")
+            ->selectRaw("{$dateExpression} AS period, payment_type_id, SUM({$grammar->wrap('total_net_price')}) AS total")
             ->groupBy('period', 'payment_type_id')
             ->get(['period', 'payment_type_id', 'total']);
 
         $periods = collect(CarbonPeriod::create($start, '1 ' . $unit, $end))
-            ->map(fn ($d) => $d->format($format))
+            ->map(fn (CarbonInterface $date): string => $date->format($format))
             ->all();
 
         $groupedByPayment = $rows->groupBy('payment_type_id');
 
         foreach ($paymentTypes as $paymentType) {
-            $byPeriod = $groupedByPayment->get($paymentType->getKey())?->keyBy('period') ?? collect();
+            $byPeriod = $groupedByPayment
+                ->get($paymentType->getKey())
+                ?->keyBy('period')
+                ?? collect();
 
             $this->series[] = [
                 'name' => $paymentType->name,
-                'data' => array_map(fn ($p) => (float) ($byPeriod->get($p)?->total ?? 0), $periods),
+                'data' => array_map(
+                    fn (string $period): float => (float) ($byPeriod->get($period)?->total ?? 0),
+                    $periods
+                ),
                 'payment_type_id' => $paymentType->getKey(),
             ];
         }
