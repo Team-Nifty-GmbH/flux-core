@@ -190,6 +190,10 @@
                         ['value' => 'tls', 'label' => __('TLS')],
                     ]"
                 />
+                <x-checkbox
+                    wire:model.boolean="mailAccount.smtp_has_valid_certificate"
+                    :label="__('Validate Certificate')"
+                />
                 @stack('mail-account-form-smtp-extra')
             </div>
             <x-slot:footer>
