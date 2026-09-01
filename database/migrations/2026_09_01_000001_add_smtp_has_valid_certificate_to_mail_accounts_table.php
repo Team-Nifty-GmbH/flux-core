@@ -9,7 +9,7 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('mail_accounts', function (Blueprint $table): void {
-            $table->boolean('smtp_has_valid_certificate')->default(true)->after('smtp_encryption');
+            $table->boolean('smtp_has_valid_certificate')->default(true)->after('has_valid_certificate');
         });
     }
 

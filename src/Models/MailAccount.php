@@ -44,8 +44,11 @@ class MailAccount extends FluxModel
     {
         return [
             'password' => 'encrypted',
-            'smtp_has_valid_certificate' => 'boolean',
             'smtp_password' => 'encrypted',
+            'has_auto_assign' => 'boolean',
+            'has_o_auth' => 'boolean',
+            'has_valid_certificate' => 'boolean',
+            'smtp_has_valid_certificate' => 'boolean',
         ];
     }
 
