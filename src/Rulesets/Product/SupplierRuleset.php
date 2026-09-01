@@ -42,7 +42,10 @@ class SupplierRuleset extends FluxRuleset
                     'integer',
                     app(ModelExists::class, ['model' => Unit::class]),
                 ],
-                'suppliers.*.purchase_price' => 'numeric|nullable|min:0',
+                'suppliers.*.purchase_price' => [
+                    'nullable',
+                    app(Numeric::class, ['min' => 0]),
+                ],
                 'suppliers.*.note' => 'string|nullable',
             ]
         );
