@@ -7,7 +7,6 @@ use FluxErp\Assets\AssetManager;
 use FluxErp\Facades\ProductType;
 use FluxErp\Helpers\Composer;
 use FluxErp\Helpers\Livewire\Features\SupportFormObjects;
-use FluxErp\Helpers\Livewire\Features\SupportIslands;
 use FluxErp\Helpers\MediaLibraryDownloader;
 use FluxErp\Http\Controllers\AuthenticateUsingPasskeyController;
 use FluxErp\Http\Middleware\AuthContextMiddleware;
@@ -129,7 +128,6 @@ class FluxServiceProvider extends ServiceProvider
         $this->registerExtensions();
 
         app('livewire')->componentHook(SupportFormObjects::class);
-        app('livewire')->componentHook(SupportIslands::class);
         $this->app->bind(DatabaseNotification::class, Notification::class);
         $this->app->bind(BaseAuthenticateUsingPasskeyController::class, AuthenticateUsingPasskeyController::class);
 
