@@ -12,7 +12,6 @@ use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use FluxErp\Models\Pivots\BundleProductProduct;
-use FluxErp\Models\Pivots\ProductSupplier;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
 use FluxErp\Models\ProductCrossSelling;
@@ -194,7 +193,7 @@ class Product extends Component
         }
 
         $this->product->suppliers[] = array_merge(
-            array_fill_keys(resolve_static(ProductSupplier::class, 'pivotFields'), null),
+            array_fill_keys(app(ProductModel::class)->suppliers()->getPivotColumns(), null),
             [
                 'contact_id' => $contact->getKey(),
                 'customer_number' => $contact->customer_number,
