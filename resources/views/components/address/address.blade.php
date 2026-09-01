@@ -463,6 +463,9 @@
                 />
             @show
         </div>
+        <div class="flex flex-wrap gap-1.5 pt-1.5">
+            @stack('address-detail-badges')
+        </div>
         <h3
             class="pt-12 text-lg leading-6 font-medium text-gray-900 dark:text-gray-50"
         >

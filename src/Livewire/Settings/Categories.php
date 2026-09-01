@@ -68,7 +68,7 @@ class Categories extends CategoryList
         try {
             $this->category->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->category);
 
             return false;
         }
@@ -120,7 +120,7 @@ class Categories extends CategoryList
         try {
             $this->category->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->category);
 
             return false;
         }

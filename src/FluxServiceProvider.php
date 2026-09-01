@@ -20,6 +20,7 @@ use FluxErp\Livewire\Product\Product;
 use FluxErp\Mail\MailDriverManager;
 use FluxErp\Models\Activity;
 use FluxErp\Models\Currency;
+use FluxErp\Models\Media;
 use FluxErp\Models\Notification;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
@@ -48,6 +49,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Bus;
@@ -58,6 +60,7 @@ use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Spatie\LaravelPasskeys\Http\Controllers\AuthenticateUsingPasskeyController as BaseAuthenticateUsingPasskeyController;
+use Spatie\MediaLibrary\MediaCollections\Models\Observers\MediaObserver;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Symfony\Component\Finder\Finder;
@@ -256,6 +259,8 @@ class FluxServiceProvider extends ServiceProvider
             config(['two-factor.recovery.enabled' => false]);
             config(['passkeys.models.authenticatable' => resolve_static(User::class, 'class')]);
             config(['passkeys.actions.store_passkey' => resolve_static(StorePasskeyAction::class, 'class')]);
+
+            resolve_static(Media::class, 'class')::observe(MediaObserver::class);
         });
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
@@ -286,6 +291,11 @@ class FluxServiceProvider extends ServiceProvider
     {
         /** @var Kernel $kernel */
         $kernel = $this->app->make(Kernel::class);
+
+        if (! $kernel->hasMiddleware(InvokeDeferredCallbacks::class)) {
+            $kernel->prependMiddleware(InvokeDeferredCallbacks::class);
+        }
+
         $kernel->prependMiddlewareToGroup('api', EnsureFrontendRequestsAreStateful::class);
 
         $kernel->appendMiddlewareToGroup('web', Localization::class);

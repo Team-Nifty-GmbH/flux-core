@@ -107,7 +107,9 @@ class Transaction extends FluxModel implements HasMedia, InteractsWithDataTables
                 bcsub(
                     bcsub(
                         $this->amount,
-                        $this->orders()->withPivot('amount')->sum('order_transaction.amount'),
+                        $this->orders()
+                            ->wherePivot('is_accepted', true)
+                            ->sum('order_transaction.amount'),
                         9
                     ),
                     $this->ledgerAccountTransactions()

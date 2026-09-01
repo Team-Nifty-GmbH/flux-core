@@ -115,6 +115,15 @@ document.addEventListener('livewire:init', () => {
     wireNavigation();
     validationErrors();
 
+    Livewire.hook('navigate.request', ({ options }) => {
+        options.headers['X-Flux-Persisted'] = [
+            ...document.querySelectorAll('[x-persist]'),
+        ]
+            .filter((element) => element.children.length > 0)
+            .map((element) => element.getAttribute('x-persist'))
+            .join(',');
+    });
+
     Livewire.hook('request', ({ fail }) => {
         fail(({ status, preventDefault }) => {
             if (status === 419) {

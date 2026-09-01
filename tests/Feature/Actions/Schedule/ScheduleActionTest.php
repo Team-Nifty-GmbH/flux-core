@@ -31,3 +31,30 @@ test('a schedule with an unknown repeatable name can still be updated', function
 
     expect(data_get($updated->parameters, 'orderId'))->toBe(2);
 });
+
+test('updating a schedule cannot clear its repetition', function (): void {
+    $schedule = Schedule::query()->create([
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => 'invokable',
+        'cron' => [
+            'methods' => ['basic' => 'yearlyOn', 'dayConstraint' => null, 'timeConstraint' => null],
+            'parameters' => ['basic' => [4, 1, '06:00'], 'dayConstraint' => [], 'timeConstraint' => []],
+        ],
+        'parameters' => ['orderId' => 1],
+        'is_active' => true,
+    ]);
+
+    UpdateSchedule::assertValidationErrors(
+        [
+            'id' => $schedule->getKey(),
+            'cron' => [
+                'methods' => ['basic' => null, 'dayConstraint' => null, 'timeConstraint' => null],
+                'parameters' => ['basic' => [], 'dayConstraint' => [], 'timeConstraint' => []],
+            ],
+        ],
+        ['cron.methods.basic']
+    );
+
+    expect(data_get($schedule->refresh()->cron, 'methods.basic'))->toBe('yearlyOn');
+});

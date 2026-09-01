@@ -90,6 +90,7 @@ class ProcessSubscriptionOrder implements Repeatable
             }
 
             if ($order->orderType->order_type_enum === OrderTypeEnum::PurchaseSubscription
+                && $order->is_self_billed
                 && ! $newOrder->invoice_number
             ) {
                 $newOrder->invoice_number = $order->order_number

@@ -601,3 +601,13 @@ test('cannot rename media of another model', function (): void {
 
     expect($media->refresh()->name)->not->toBe('Renamed file');
 });
+
+test('the tree is rendered with the component instead of fetched afterwards', function (): void {
+    $component = Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+        ->assertOk();
+
+    expect($component->get('mediaTree'))->not->toBeEmpty();
+
+    $component->assertSeeHtml('$wire.mediaTree')
+        ->assertDontSeeHtml('tree="$wire.getTree()"');
+});

@@ -64,7 +64,7 @@ class BankConnections extends BaseContactBankConnectionList
         try {
             $this->contactBankConnection->delete();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->contactBankConnection);
 
             return;
         }
@@ -91,7 +91,7 @@ class BankConnections extends BaseContactBankConnectionList
         try {
             $this->contactBankConnection->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->contactBankConnection);
 
             return false;
         }

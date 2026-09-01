@@ -54,9 +54,13 @@ pest()
             'is_default' => true,
         ]);
 
-        $this->defaultLanguage = Language::default() ?? Language::factory()->create([
-            'is_default' => true,
-        ]);
+        $this->defaultLanguage = Language::default() ?? tap(
+            Language::query()->firstOrCreate(
+                ['language_code' => 'en'],
+                Language::factory()->make(['language_code' => 'en'])->toArray()
+            ),
+            fn (Language $language) => $language->update(['is_default' => true])
+        );
 
         VatRate::default() ?? VatRate::factory()->create([
             'is_default' => true,
@@ -240,4 +244,30 @@ function waitForCondition(PendingAwaitablePage|AwaitableWebpage $page, string $c
     JS);
 
     return $page;
+}
+
+class CountingPermissionRegistrar extends Spatie\Permission\PermissionRegistrar
+{
+    public static int $scans = 0;
+
+    public function getPermissions(array $params = [], bool $onlyOne = false): Illuminate\Database\Eloquent\Collection
+    {
+        static::$scans++;
+
+        return parent::getPermissions($params, $onlyOne);
+    }
+}
+
+function countRegistrarScans(callable $callback): int
+{
+    app()->forgetInstance(Spatie\Permission\PermissionRegistrar::class);
+    app()->singleton(
+        Spatie\Permission\PermissionRegistrar::class,
+        fn ($app) => new CountingPermissionRegistrar($app->make(Illuminate\Cache\CacheManager::class))
+    );
+
+    CountingPermissionRegistrar::$scans = 0;
+    $callback();
+
+    return CountingPermissionRegistrar::$scans;
 }

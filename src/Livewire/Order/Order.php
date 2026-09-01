@@ -226,7 +226,7 @@ class Order extends Component
 
             $this->redirect(route('orders.orders'), true);
         } catch (Exception $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
         }
     }
 
@@ -239,7 +239,7 @@ class Order extends Component
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->discount);
 
             return;
         }
@@ -294,7 +294,7 @@ class Order extends Component
                 $this->order->{$addressKey . '_id'} = $updatedOrder->{$addressKey . '_id'};
                 $this->order->{$addressKey} = $updatedOrder->{$addressKey};
             } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+                exception_to_notifications($e, $this, form: $this->order);
             }
         }
     }
@@ -421,7 +421,9 @@ class Order extends Component
             ->latest()
             ->value('id');
         $this->{$orderFormName}->address_invoice_id = $contact?->invoice_address_id ?? $contact?->mainAddress?->id;
-        $this->{$orderFormName}->address_delivery_id = $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
+        $this->{$orderFormName}->address_delivery_id = $this->{$orderFormName}->isPurchase
+            ? null
+            : $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
         $this->{$orderFormName}->language_id = $contact?->mainAddress?->language_id
             ?? resolve_static(Language::class, 'default')->getKey();
         $this->{$orderFormName}->price_list_id = $contact?->price_list_id
@@ -665,7 +667,7 @@ class Order extends Component
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->discount);
 
             return false;
         }
@@ -747,7 +749,7 @@ class Order extends Component
 
             $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
 
             return false;
         }
@@ -769,7 +771,7 @@ class Order extends Component
         try {
             $this->discount->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->discount);
 
             return false;
         }
@@ -787,7 +789,7 @@ class Order extends Component
         try {
             $this->replicateOrder->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->replicateOrder);
 
             return;
         }
@@ -870,7 +872,7 @@ class Order extends Component
         try {
             $this->schedule->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->schedule);
 
             return false;
         }
@@ -882,6 +884,25 @@ class Order extends Component
     public function previewSchedule(): void
     {
         $this->schedule->nextExecutionDates = $this->schedule->getNextExecutionDates();
+    }
+
+    public function updatingScheduleCronMethodsBasic(?string $value): void
+    {
+        $defaults = [
+            FrequenciesEnum::WeeklyOn->value => [1, '00:00'],
+            FrequenciesEnum::MonthlyOn->value => [1, '00:00'],
+            FrequenciesEnum::QuarterlyOn->value => [1, '00:00'],
+            FrequenciesEnum::YearlyOn->value => [1, 1, '00:00'],
+        ];
+
+        if (
+            $value === data_get($this->schedule->cron, 'methods.basic')
+            || ! array_key_exists($value, $defaults)
+        ) {
+            return;
+        }
+
+        $this->schedule->cron['parameters']['basic'] = $defaults[$value];
     }
 
     #[Renderless]
@@ -970,7 +991,7 @@ class Order extends Component
 
             $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
         }
     }
 
@@ -982,7 +1003,7 @@ class Order extends Component
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
 
             return;
         }
@@ -1028,7 +1049,7 @@ class Order extends Component
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
         }
 
         $this->toast()

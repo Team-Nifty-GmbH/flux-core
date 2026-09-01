@@ -482,7 +482,8 @@ test('item to array formatting', function (): void {
 });
 
 test('augmentItemArray injects order currency for money formatter', function (): void {
-    $usdCurrency = Currency::factory()->create(['iso' => 'USD', 'name' => 'Dollar']);
+    $usdCurrency = Currency::query()->firstWhere('iso', 'USD')
+        ?? Currency::factory()->create(['iso' => 'USD', 'name' => 'Dollar']);
     $this->order->update(['currency_id' => $usdCurrency->getKey()]);
     $this->orderForm->fill($this->order->fresh(['currency']));
 
@@ -498,7 +499,8 @@ test('augmentItemArray injects order currency for money formatter', function ():
 });
 
 test('money columns are formatted with order currency not default EUR', function (): void {
-    $usdCurrency = Currency::factory()->create(['iso' => 'USD', 'name' => 'US Dollar']);
+    $usdCurrency = Currency::query()->firstWhere('iso', 'USD')
+        ?? Currency::factory()->create(['iso' => 'USD', 'name' => 'US Dollar']);
     $this->order->update(['currency_id' => $usdCurrency->getKey()]);
     $this->order->orderPositions()->update(['unit_net_price' => 10, 'total_net_price' => 10]);
     $this->orderForm->fill($this->order->fresh(['currency']));
