@@ -42,10 +42,7 @@ class TicketsByState extends CircleChart implements HasWidgetOptions
     {
         $allStates = TicketState::all();
 
-        $endStates = $allStates
-            ->filter(fn (string $state) => $state::$isEndState)
-            ->keys()
-            ->toArray();
+        $endStates = TicketState::endStateKeys();
 
         $data = resolve_static(Ticket::class, 'query')
             ->whereNotIn('state', $endStates)

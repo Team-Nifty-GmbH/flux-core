@@ -21,7 +21,7 @@ class UpdateCategoryRuleset extends FluxRuleset
             'parent_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Category::class]),
+                app(ModelExists::class, ['model' => Category::class, 'subject' => Category::class]),
             ],
             'name' => 'required|string|max:255',
             'sort_number' => 'integer|min:0',

@@ -111,7 +111,7 @@
                 wire:model="employee.nationality"
                 x-bind:disabled="!isEditing"
             />
-            <div x-bind:class="!isEditing && 'pointer-events-none'">
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                 <x-select.styled
                     wire:model="employee.country_id"
                     :label="__('Country')"
@@ -146,7 +146,7 @@
                 wire:model="employee.city"
                 x-bind:disabled="!isEditing"
             />
-            <div x-bind:class="!isEditing && 'pointer-events-none'">
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                 <x-number
                     min="0"
                     step="0.5"
@@ -186,7 +186,7 @@
     <x-card :header="__('Employment Information')">
         <div
             class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2"
-            x-bind:class="!isEditing && 'pointer-events-none'"
+            x-bind:class="{ 'pointer-events-none': !isEditing }"
         >
             <x-date
                 :label="__('Employment Date')"
@@ -259,13 +259,14 @@
                     ]
                 ]"
             />
-            <x-select.native
-                :label="__('Salary Type')"
-                wire:model="employee.salary_type"
-                :options="\FluxErp\Enums\SalaryTypeEnum::valuesLocalized()"
-                :hint="__('For hourly employees no negative balance is accumulated; positive overtime is still tracked.')"
-                x-bind:disabled="!isEditing"
-            />
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
+                <x-select.styled
+                    :label="__('Salary Type')"
+                    wire:model="employee.salary_type"
+                    :options="\FluxErp\Enums\SalaryTypeEnum::valuesLocalized()"
+                    :hint="__('For hourly employees no negative balance is accumulated; positive overtime is still tracked.')"
+                />
+            </div>
         </div>
     </x-card>
 
@@ -277,7 +278,7 @@
 
     <x-card :header="__('Vacation Carryover Rule')">
         <div class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
-            <div x-bind:class="!isEditing && 'pointer-events-none'">
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                 <x-select.styled
                     :label="__('Vacation Carryover Rule')"
                     wire:model="employee.vacation_carryover_rule_id"

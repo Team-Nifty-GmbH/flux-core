@@ -64,6 +64,12 @@ class OrderType extends FluxModel implements Sortable
             ->using(OrderTypeTenant::class);
     }
 
+    // Public methods
+    public function getLabel(): ?string
+    {
+        return $this->name;
+    }
+
     // Protected methods
     protected function translatableAttributes(): array
     {

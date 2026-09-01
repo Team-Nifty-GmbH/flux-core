@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Support;
 use Exception;
 use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Actions\Media\DeleteMediaCollection;
+use FluxErp\Actions\Media\UpdateMedia;
 use FluxErp\Actions\MediaFolder\DeleteMediaFolder;
 use FluxErp\Actions\MediaFolder\UpdateMediaFolder;
 use FluxErp\Livewire\Forms\MediaFolderForm;
@@ -34,6 +35,9 @@ abstract class FolderTree extends Component
 
     public MediaFolderForm $folder;
 
+    #[Locked]
+    public array $mediaTree = [];
+
     #[Modelable]
     public ?int $modelId = null;
 
@@ -42,6 +46,11 @@ abstract class FolderTree extends Component
 
     /** @var class-string<Model> */
     protected string $modelType;
+
+    public function mount(): void
+    {
+        $this->mediaTree = $this->getTree();
+    }
 
     public function render(): View|Factory|Application
     {
@@ -77,7 +86,7 @@ abstract class FolderTree extends Component
                     ->validate()
                     ->execute();
             } catch (UnauthorizedException|ValidationException $e) {
-                exception_to_notifications($e, $this);
+                exception_to_notifications($e, $this, form: $this->folder);
 
                 return false;
             }
@@ -175,8 +184,12 @@ abstract class FolderTree extends Component
     }
 
     #[Renderless]
-    public function moveItem(array $subject, array $target, ?string $subjectPath, ?string $targetPath): bool
-    {
+    public function moveItem(
+        array $subject,
+        array $target,
+        ?string $subjectPath,
+        ?string $targetPath
+    ): bool {
         $subjectPath = $this->resolveSubjectPath($subject, $subjectPath);
         $targetPath = $this->resolveTargetPath($target, $targetPath);
 
@@ -284,7 +297,7 @@ abstract class FolderTree extends Component
             $this->folder->model_id = $this->modelId;
             $this->folder->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->folder);
 
             return false;
         }
@@ -304,6 +317,32 @@ abstract class FolderTree extends Component
                 ])
             )
         );
+    }
+
+    #[Renderless]
+    public function saveMedia(array $media): false|array
+    {
+        $mediaId = (int) data_get($media, 'id');
+
+        if ($this->isReadonly || ! $this->findMedia($mediaId)) {
+            return false;
+        }
+
+        try {
+            $updated = UpdateMedia::make([
+                'id' => $mediaId,
+                'name' => data_get($media, 'name'),
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        return array_merge($media, $updated->only(['name']));
     }
 
     protected function resolveSubjectPath(array $subject, ?string $subjectPath): ?string
@@ -370,7 +409,7 @@ abstract class FolderTree extends Component
                 ->validate()
                 ->execute();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->folder);
 
             return false;
         }
@@ -405,8 +444,12 @@ abstract class FolderTree extends Component
         return true;
     }
 
-    protected function moveMedia(array $subject, array $target, string $targetPath, string $targetType): bool
-    {
+    protected function moveMedia(
+        array $subject,
+        array $target,
+        string $targetPath,
+        string $targetType
+    ): bool {
         $targetModel = $targetType === 'collection'
             ? resolve_static($this->modelType, 'query')->whereKey($this->modelId)->first()
             : resolve_static(MediaFolder::class, 'query')->whereKey(data_get($target, 'id'))->first();
@@ -421,11 +464,16 @@ abstract class FolderTree extends Component
             return false;
         }
 
-        $collectionName = $targetType === 'folder'
-            ? $targetPath
-            : data_get($subject, 'collection_name', $targetPath);
+        $isAlreadyInTarget = $targetType === 'folder'
+            ? $media->model_type === morph_alias(MediaFolder::class)
+                && (int) $media->model_id === (int) data_get($target, 'id')
+            : $media->model_type === morph_alias($this->modelType)
+                && (int) $media->model_id === (int) $this->modelId
+                && $media->collection_name === $targetPath;
 
-        $media->move($targetModel, $collectionName);
+        if (! $isAlreadyInTarget) {
+            $media->move($targetModel, $targetPath);
+        }
 
         $this->toast()
             ->success(__('Moved successfully'))

@@ -77,6 +77,7 @@
                     color="red"
                     :text="__('Delete')"
                     wire:click="delete()"
+                    loading="delete()"
                 />
             @endcanAction
 

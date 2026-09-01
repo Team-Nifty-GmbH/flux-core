@@ -49,6 +49,8 @@ class OrderForm extends FluxForm
 
     public ?int $contact_id = null;
 
+    public ?string $contract_total_amount = null;
+
     public ?string $created_at = null;
 
     public ?string $created_by = null;
@@ -90,6 +92,8 @@ class OrderForm extends FluxForm
 
     public bool $is_locked = false;
 
+    public bool $is_self_billed = false;
+
     #[Locked]
     public bool $isPurchase = false;
 
@@ -120,6 +124,8 @@ class OrderForm extends FluxForm
     public ?int $payment_discount_target = null;
 
     public ?string $payment_discount_target_date = null;
+
+    public ?string $payment_purpose_pattern = null;
 
     public ?int $payment_reminder_current_level = null;
 
@@ -192,7 +198,7 @@ class OrderForm extends FluxForm
 
     protected ?string $modelClass = Order::class;
 
-    protected PriceList $priceList;
+    protected ?PriceList $priceList = null;
 
     public function fill($values): void
     {
@@ -275,7 +281,8 @@ class OrderForm extends FluxForm
                 'rounding_number',
                 'rounding_mode',
                 'is_net',
-            ]);
+            ])
+            ?? resolve_static(PriceList::class, 'default');
     }
 
     public function save(): void

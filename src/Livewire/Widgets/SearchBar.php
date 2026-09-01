@@ -53,6 +53,13 @@ class SearchBar extends Component
             return;
         }
 
+        if (! resolve_static($model, 'query')->whereKey($modelId)->exists()) {
+            $this->skipRender();
+            $this->show = false;
+
+            return;
+        }
+
         $this->widgetComponent = $component;
         $this->widgetId = $modelId;
         $this->show = true;

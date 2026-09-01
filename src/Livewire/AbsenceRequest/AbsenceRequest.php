@@ -57,7 +57,7 @@ class AbsenceRequest extends Component
         try {
             $this->absenceRequestForm->changeState(AbsenceRequestStateEnum::Approved);
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->absenceRequestForm);
 
             return false;
         }
@@ -139,7 +139,7 @@ class AbsenceRequest extends Component
         try {
             $this->absenceRequestForm->changeState(AbsenceRequestStateEnum::Rejected);
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->absenceRequestForm);
 
             return false;
         }
@@ -170,7 +170,7 @@ class AbsenceRequest extends Component
         try {
             $this->absenceRequestForm->changeState(AbsenceRequestStateEnum::Revoked);
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->absenceRequestForm);
 
             return false;
         }
@@ -190,7 +190,7 @@ class AbsenceRequest extends Component
         try {
             $this->absenceRequestForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->absenceRequestForm);
 
             return false;
         }

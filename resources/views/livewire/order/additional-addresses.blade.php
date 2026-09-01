@@ -67,6 +67,7 @@
                     <x-button.circle
                         icon="trash"
                         wire:click="delete({{ data_get($address, 'address_id') }})"
+                        loading="delete({{ data_get($address, 'address_id') }})"
                         color="red"
                         wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Address assignment')]) }}"
                     />

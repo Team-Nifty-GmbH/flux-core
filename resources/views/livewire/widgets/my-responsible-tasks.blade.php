@@ -1,10 +1,24 @@
 <div class="flex max-h-full flex-col gap-4 p-4">
     <div>
-        <h2
-            class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
-        >
-            {{ __('My Responsible Tasks') }}
-        </h2>
+        <div class="flex w-full items-start justify-between gap-2">
+            <h2
+                class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
+            >
+                {{ __('My Responsible Tasks') }}
+            </h2>
+            @if ($this instanceof \FluxErp\Contracts\HasWidgetOptions)
+                <div class="flex-none">
+                    <x-dropdown icon="ellipsis-vertical" static>
+                        @foreach ($this->options() ?? [] as $option)
+                            <x-dropdown.items
+                                :text="data_get($option, 'label')"
+                                wire:click="{{ data_get($option, 'method') }}()"
+                            />
+                        @endforeach
+                    </x-dropdown>
+                </div>
+            @endif
+        </div>
         <hr class="mt-2" />
     </div>
     <div class="flex-1 overflow-auto">

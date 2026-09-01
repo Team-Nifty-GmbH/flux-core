@@ -1,6 +1,7 @@
 <div
     x-data="dashboard()"
     x-init.once="reInit().disable()"
+    x-on:livewire:navigated.window="reInit().disable()"
     x-on:gridstack-reinit.window="reinitWithPositionSaving()"
     x-on:remove-group.window="removeNewGroup($event.detail.groupName)"
 >

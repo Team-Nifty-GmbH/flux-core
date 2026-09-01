@@ -423,6 +423,73 @@ const initializeNativeBridge = async () => {
     return bridge;
 };
 
+// Share target: plugins are resolved live on each call so the page can be
+// opened before the native bridge has injected window.Capacitor.
+const shareTargetPlugins = () => {
+    const plugins = window.Capacitor?.Plugins;
+
+    return plugins?.Preferences && plugins?.Filesystem ? plugins : null;
+};
+
+export const loadSharedFiles = async () => {
+    const plugins = shareTargetPlugins();
+
+    if (!plugins) {
+        return null;
+    }
+
+    const { value } = await plugins.Preferences.get({
+        key: 'pending_shared_files',
+    });
+    const metas = value ? JSON.parse(value) : [];
+    const files = [];
+
+    for (const meta of metas) {
+        try {
+            const { data } = await plugins.Filesystem.readFile({
+                path: meta.path,
+                directory: 'CACHE',
+            });
+            const bytes = Uint8Array.from(atob(data), (char) =>
+                char.charCodeAt(0),
+            );
+
+            files.push(
+                new File([bytes], meta.name, {
+                    type: meta.mimeType || 'application/octet-stream',
+                }),
+            );
+        } catch (error) {
+            console.error(
+                '[SHARE TARGET] Failed to read shared file:',
+                meta.path,
+                error,
+            );
+        }
+    }
+
+    return files;
+};
+
+export const clearSharedFiles = async () => {
+    const plugins = shareTargetPlugins();
+
+    if (!plugins) {
+        return;
+    }
+
+    try {
+        await plugins.Preferences.remove({ key: 'pending_shared_files' });
+        await plugins.Filesystem.rmdir({
+            path: 'shared_files',
+            directory: 'CACHE',
+            recursive: true,
+        });
+    } catch (error) {
+        console.error('[SHARE TARGET] Cleanup failed:', error);
+    }
+};
+
 // Initialize and export
 const nuxbeAppBridge = await initializeNativeBridge();
 

@@ -41,7 +41,8 @@ class CreatePurchaseInvoicePositionRuleset extends FluxRuleset
             'vat_rate_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => VatRate::class]),
+                app(ModelExists::class, ['model' => VatRate::class])
+                    ->where('is_purchase', true),
             ],
             'name' => 'nullable|string|max:255',
             'amount' => [

@@ -20,8 +20,8 @@ test('payment runs list loads', function (): void {
         ->assertNoSmoke();
 });
 
-test('payment reminders list loads', function (): void {
-    visit(route('accounting.payment-reminders'))
+test('payment reminder run loads', function (): void {
+    visit(route('accounting.payment-reminder-run'))
         ->assertNoSmoke();
 });
 

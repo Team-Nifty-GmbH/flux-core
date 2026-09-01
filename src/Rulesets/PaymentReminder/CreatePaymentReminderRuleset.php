@@ -27,6 +27,7 @@ class CreatePaymentReminderRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Media::class]),
             ],
             'reminder_level' => 'nullable|integer|min:1',
+            'mark_as_sent' => 'nullable|boolean',
         ];
     }
 }

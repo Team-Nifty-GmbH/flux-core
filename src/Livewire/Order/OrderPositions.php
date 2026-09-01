@@ -175,7 +175,7 @@ class OrderPositions extends OrderPositionList
         try {
             $this->orderPosition->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->orderPosition);
 
             return false;
         }
@@ -279,7 +279,7 @@ class OrderPositions extends OrderPositionList
         try {
             $this->orderPosition->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->orderPosition);
 
             return false;
         }
@@ -363,6 +363,8 @@ class OrderPositions extends OrderPositionList
             $this->orderPosition->vat_rate_id ??= resolve_static(VatRate::class, 'default')?->getKey();
         }
 
+        $this->dispatch('load-order-position-activities', orderPositionId: $this->orderPosition->id);
+
         $this->js(<<<'JS'
             $tsui.open.modal('edit-order-position');
         JS);
@@ -424,6 +426,7 @@ class OrderPositions extends OrderPositionList
             parent::getViewData(),
             [
                 'vatRates' => resolve_static(VatRate::class, 'query')
+                    ->where($this->order->isPurchase ? 'is_purchase' : 'is_sales', true)
                     ->get(['id', 'name', 'rate_percentage'])
                     ->toArray(),
             ]
@@ -449,7 +452,7 @@ class OrderPositions extends OrderPositionList
 
             $this->forceRender();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->orderPosition);
         }
     }
 
@@ -611,7 +614,7 @@ class OrderPositions extends OrderPositionList
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->orderPosition);
         }
     }
 

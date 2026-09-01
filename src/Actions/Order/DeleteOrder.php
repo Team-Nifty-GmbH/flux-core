@@ -2,12 +2,13 @@
 
 namespace FluxErp\Actions\Order;
 
-use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\DispatchableFluxAction;
+use FluxErp\Contracts\SupportsBulkExecution;
 use FluxErp\Models\Order;
 use FluxErp\Rulesets\Order\DeleteOrderRuleset;
 use Illuminate\Validation\ValidationException;
 
-class DeleteOrder extends FluxAction
+class DeleteOrder extends DispatchableFluxAction implements SupportsBulkExecution
 {
     public static function models(): array
     {

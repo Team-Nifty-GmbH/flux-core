@@ -55,10 +55,10 @@
                 @section('tenant')
                     @if (count($tenants ?? []) > 1)
                         <div
-                            x-bind:class="
-                                $wire.purchaseInvoiceForm.order_id &&
-                                'pointer-events-none'
-                            "
+                            x-bind:class="{
+                                'pointer-events-none':
+                                    $wire.purchaseInvoiceForm.order_id,
+                            }"
                         >
                             <x-select.styled
                                 x-bind:readonly="
@@ -77,10 +77,10 @@
                 @section('basic-info')
                     <div
                         class="flex items-end gap-2"
-                        x-bind:class="
-                            $wire.purchaseInvoiceForm.order_id &&
-                            'pointer-events-none'
-                        "
+                        x-bind:class="{
+                            'pointer-events-none':
+                                $wire.purchaseInvoiceForm.order_id,
+                        }"
                     >
                         <div class="flex-1">
                             <x-select.styled
@@ -120,10 +120,10 @@
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div
-                            x-bind:class="
-                                $wire.purchaseInvoiceForm.order_id &&
-                                'pointer-events-none'
-                            "
+                            x-bind:class="{
+                                'pointer-events-none':
+                                    $wire.purchaseInvoiceForm.order_id,
+                            }"
                         >
                             <x-select.styled
                                 x-bind:readonly="
@@ -136,10 +136,10 @@
                             />
                         </div>
                         <div
-                            x-bind:class="
-                                $wire.purchaseInvoiceForm.order_id &&
-                                'pointer-events-none'
-                            "
+                            x-bind:class="{
+                                'pointer-events-none':
+                                    $wire.purchaseInvoiceForm.order_id,
+                            }"
                         >
                             <x-select.styled
                                 x-bind:readonly="
@@ -160,6 +160,9 @@
                             />
                         </div>
                     </div>
+                    <div x-cloak x-show="!$wire.purchaseInvoiceForm.order_id">
+                        <livewire:accounting.assignable-orders />
+                    </div>
                     <div class="grid grid-cols-2 gap-4">
                         <x-input
                             x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
@@ -167,10 +170,10 @@
                             :label="__('Invoice Number')"
                         />
                         <div
-                            x-bind:class="
-                                $wire.purchaseInvoiceForm.order_id &&
-                                'pointer-events-none'
-                            "
+                            x-bind:class="{
+                                'pointer-events-none':
+                                    $wire.purchaseInvoiceForm.order_id,
+                            }"
                         >
                             <x-date
                                 x-bind:readonly="
@@ -184,10 +187,10 @@
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div
-                            x-bind:class="
-                                $wire.purchaseInvoiceForm.order_id &&
-                                'pointer-events-none'
-                            "
+                            x-bind:class="{
+                                'pointer-events-none':
+                                    $wire.purchaseInvoiceForm.order_id,
+                            }"
                         >
                             <x-date
                                 x-bind:readonly="
@@ -199,10 +202,10 @@
                             />
                         </div>
                         <div
-                            x-bind:class="
-                                $wire.purchaseInvoiceForm.order_id &&
-                                'pointer-events-none'
-                            "
+                            x-bind:class="{
+                                'pointer-events-none':
+                                    $wire.purchaseInvoiceForm.order_id,
+                            }"
                         >
                             <x-date
                                 x-bind:readonly="
@@ -229,18 +232,18 @@
                             <x-icon
                                 name="chevron-down"
                                 class="h-4 w-4 transition-transform"
-                                x-bind:class="showPayment && 'rotate-180'"
+                                x-bind:class="{ 'rotate-180': showPayment }"
                             />
                         </button>
                         <div x-cloak x-show="showPayment" x-collapse>
                             <div class="grid grid-cols-2 gap-4 pt-2 pb-2">
                                 @if (count($currencies ?? []) > 1)
                                     <div
-                                        x-bind:class="
-                                            $wire.purchaseInvoiceForm
-                                                .order_id &&
-                                            'pointer-events-none'
-                                        "
+                                        x-bind:class="{
+                                            'pointer-events-none':
+                                                $wire.purchaseInvoiceForm
+                                                    .order_id,
+                                        }"
                                     >
                                         <x-select.styled
                                             x-bind:readonly="
@@ -256,10 +259,10 @@
                                 @endif
 
                                 <div
-                                    x-bind:class="
-                                        $wire.purchaseInvoiceForm.order_id &&
-                                        'pointer-events-none'
-                                    "
+                                    x-bind:class="{
+                                        'pointer-events-none':
+                                            $wire.purchaseInvoiceForm.order_id,
+                                    }"
                                 >
                                     <x-select.styled
                                         :label="__('Approval User')"
@@ -274,10 +277,10 @@
                                     />
                                 </div>
                                 <div
-                                    x-bind:class="
-                                        $wire.purchaseInvoiceForm.order_id &&
-                                        'pointer-events-none'
-                                    "
+                                    x-bind:class="{
+                                        'pointer-events-none':
+                                            $wire.purchaseInvoiceForm.order_id,
+                                    }"
                                 >
                                     <x-date
                                         x-bind:readonly="
@@ -288,10 +291,10 @@
                                     />
                                 </div>
                                 <div
-                                    x-bind:class="
-                                        $wire.purchaseInvoiceForm.order_id &&
-                                        'pointer-events-none'
-                                    "
+                                    x-bind:class="{
+                                        'pointer-events-none':
+                                            $wire.purchaseInvoiceForm.order_id,
+                                    }"
                                 >
                                     <x-date
                                         x-bind:readonly="
@@ -302,10 +305,10 @@
                                     />
                                 </div>
                                 <div
-                                    x-bind:class="
-                                        $wire.purchaseInvoiceForm.order_id &&
-                                        'pointer-events-none'
-                                    "
+                                    x-bind:class="{
+                                        'pointer-events-none':
+                                            $wire.purchaseInvoiceForm.order_id,
+                                    }"
                                 >
                                     <x-number
                                         x-bind:readonly="
@@ -334,7 +337,7 @@
                             <x-icon
                                 name="chevron-down"
                                 class="h-4 w-4 transition-transform"
-                                x-bind:class="showBank && 'rotate-180'"
+                                x-bind:class="{ 'rotate-180': showBank }"
                             />
                         </button>
                         <div x-cloak x-show="showBank" x-collapse>
@@ -531,11 +534,11 @@
                                             :label="__('Name')"
                                         />
                                         <div
-                                            x-bind:class="
-                                                $wire.purchaseInvoiceForm
-                                                    .order_id &&
-                                                'pointer-events-none'
-                                            "
+                                            x-bind:class="{
+                                                'pointer-events-none':
+                                                    $wire.purchaseInvoiceForm
+                                                        .order_id,
+                                            }"
                                         >
                                             <x-select.styled
                                                 :label="__('Product')"
@@ -581,7 +584,7 @@
                                                 )
                                             "
                                             x-model.number="position.amount"
-                                            :label="__('Amount')"
+                                            :label="__('Quantity')"
                                         />
                                         <x-number
                                             step="0.01"
@@ -616,11 +619,11 @@
                                             :label="__('Total')"
                                         />
                                         <div
-                                            x-bind:class="
-                                                $wire.purchaseInvoiceForm
-                                                    .order_id &&
-                                                'pointer-events-none'
-                                            "
+                                            x-bind:class="{
+                                                'pointer-events-none':
+                                                    $wire.purchaseInvoiceForm
+                                                        .order_id,
+                                            }"
                                         >
                                             <x-select.styled
                                                 x-bind:readonly="
@@ -643,11 +646,11 @@
                                     </div>
 
                                     <div
-                                        x-bind:class="
-                                            $wire.purchaseInvoiceForm
-                                                .order_id &&
-                                            'pointer-events-none'
-                                        "
+                                        x-bind:class="{
+                                            'pointer-events-none':
+                                                $wire.purchaseInvoiceForm
+                                                    .order_id,
+                                        }"
                                     >
                                         <x-select.styled
                                             x-bind:readonly="

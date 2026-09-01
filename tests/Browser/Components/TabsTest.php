@@ -45,3 +45,40 @@ test('tab livewire sub-component keeps identity after parent re-render', functio
         'Tab sub-component wire:id changed after parent re-render.'
     );
 });
+
+test('tab livewire sub-component shows fresh content after bound model changes', function (): void {
+    Livewire::component('tabs-fixture', TabsFixture::class);
+    Livewire::component('tabs-fixture-general', TabsFixtureChild::class);
+    Livewire::component('tabs-fixture-child', TabsFixtureChild::class);
+
+    $page = visitLivewire(TabsFixture::class)
+        ->assertNoSmoke()
+        ->assertSee('Tab child loaded model: 1');
+
+    $page->click('Switch Model');
+
+    $page->assertSee('Tab child loaded model: 2');
+});
+
+test('tab livewire sub-component instances are released after bound model changes', function (): void {
+    Livewire::component('tabs-fixture', TabsFixture::class);
+    Livewire::component('tabs-fixture-general', TabsFixtureChild::class);
+    Livewire::component('tabs-fixture-child', TabsFixtureChild::class);
+
+    $page = visitLivewire(TabsFixture::class)
+        ->assertNoSmoke()
+        ->assertSee('Tab child loaded model: 1');
+
+    $componentCountBefore = $page->script('() => window.Livewire.all().length');
+
+    foreach (range(2, 6) as $modelId) {
+        $page->click('Switch Model');
+        $page->assertSee('Tab child loaded model: ' . $modelId);
+    }
+
+    $componentCountAfter = $page->script('() => window.Livewire.all().length');
+
+    expect($componentCountAfter)->toBe($componentCountBefore,
+        'Livewire component registry grew after model switches - old tab sub-components are not released.'
+    );
+});

@@ -1,6 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { destroy } from 'filepond';
 
+// The tree is edited in place (nodes are pushed, removed and moved). A tree handed in
+// as a Livewire property is the live property, so editing it in place marks the property
+// dirty and a locked one then rejects the next request. Work on a copy instead.
+const detachTree = (tree) => JSON.parse(JSON.stringify(tree ?? []));
+
 // Filter out dangerous keys to prevent prototype pollution
 const sanitizeObject = (obj) => {
     if (typeof obj !== 'object' || obj === null) return obj;
@@ -43,14 +48,14 @@ export default function folders(
 
             if (typeof this.property === 'string') {
                 this.$watch(property, (newFolders) => {
-                    this.tree = newFolders;
+                    this.tree = detachTree(newFolders);
                 });
             }
         },
         async refresh() {
             this.tree = [];
             try {
-                this.tree = await getTreePromise;
+                this.tree = detachTree(await getTreePromise);
             } catch (error) {
                 console.error('Error fetching the tree structure:', error);
                 this.tree = [];
@@ -365,6 +370,14 @@ export default function folders(
                 return null;
             }
 
+            // A node's slug already encodes its full dotted path from the root,
+            // so deriving it again by walking ancestors would prepend the parent
+            // segments a second time (e.g. "Berater.1 Update" -> "Berater.Berater.1 Update").
+            // Return the slug as-is instead.
+            if (attribute === 'slug') {
+                return node.slug ?? null;
+            }
+
             const findPath = (node, path = []) => {
                 path.push(node[attribute]);
 
@@ -400,13 +413,7 @@ export default function folders(
                 return null;
             };
 
-            const pathArray = findPath(node);
-
-            if (attribute === 'slug' && pathArray) {
-                return pathArray.join('.');
-            }
-
-            return pathArray;
+            return findPath(node);
         },
     };
 }

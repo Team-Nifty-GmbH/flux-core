@@ -5,6 +5,7 @@
             icon="x-mark"
             color="red"
             wire:click="remove({{ $cartItem->id }})"
+            loading="remove({{ $cartItem->id }})"
         />
     </div>
     <div class="flex justify-start gap-2">

@@ -8,6 +8,7 @@ use FluxErp\Models\Media;
 use FluxErp\Models\MediaFolder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -18,9 +19,14 @@ trait SupportsFileDownloads
     use EnsureUsedInLivewire;
 
     #[Renderless]
-    public function download(Media $media): void
+    public function download(?Media $media): void
     {
-        if (! file_exists($media->getPath())) {
+        // Guards against stale frontend state calling download without an id,
+        // e.g. a staged upload whose media row does not exist yet.
+        if (
+            ! $media?->exists
+            || ! Storage::disk($media->disk)->exists($media->getPathRelativeToRoot())
+        ) {
             $this->toast()
                 ->error(__('The file does not exist anymore.'))
                 ->send();

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Accounting;
 
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\DataTables\OrderList as DataTableOrderList;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Modelable;
@@ -31,6 +32,13 @@ class OrderList extends DataTableOrderList
 
     protected function getBuilder(Builder $builder): Builder
     {
-        return $builder->whereNotNull('invoice_number');
+        return $builder->whereNotNull('invoice_number')
+            ->whereHas(
+                'orderType',
+                fn (Builder $query) => $query->whereNotIn('order_type_enum', [
+                    OrderTypeEnum::Subscription->value,
+                    OrderTypeEnum::PurchaseSubscription->value,
+                ])
+            );
     }
 }

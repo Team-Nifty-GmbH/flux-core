@@ -128,12 +128,14 @@
                         :label="__('oAuth')"
                     />
                 </div>
+                @stack('mail-account-form-inbound-extra')
                 <x-toggle
                     wire:model.boolean="mailAccount.has_auto_assign"
                     :label="__('Auto assign mails')"
                 />
             </div>
             <x-slot:footer>
+                @stack('mail-account-form-inbound-footer-actions')
                 <x-button
                     loading
                     color="indigo"
@@ -188,8 +190,10 @@
                         ['value' => 'tls', 'label' => __('TLS')],
                     ]"
                 />
+                @stack('mail-account-form-smtp-extra')
             </div>
             <x-slot:footer>
+                @stack('mail-account-form-smtp-footer-actions')
                 <x-button
                     color="secondary"
                     light

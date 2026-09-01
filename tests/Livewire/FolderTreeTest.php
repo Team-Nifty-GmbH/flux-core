@@ -8,6 +8,7 @@ use FluxErp\Tests\Livewire\FolderTreeReadonlyTestClass;
 use FluxErp\Tests\Livewire\FolderTreeTestClass;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -113,6 +114,130 @@ test('can move media from parent model to folder', function (): void {
     expect($movedMedia)->not->toBeNull()
         ->and($movedMedia->model_type)->toBe(morph_alias(MediaFolder::class))
         ->and($movedMedia->model_id)->toBe($targetFolder->getKey());
+});
+
+test('same-folder drag keeps the existing media row', function (): void {
+    Storage::fake('local');
+
+    $folder = MediaFolder::create([
+        'name' => 'Folder',
+        'model_type' => morph_alias(Contact::class),
+        'model_id' => $this->contact->getKey(),
+    ]);
+
+    $media = $folder
+        ->addMedia(UploadedFile::fake()->image('a.jpg'))
+        ->toMediaCollection('files');
+
+    $subject = [
+        'id' => $media->getKey(),
+        'name' => $media->name,
+        'file_name' => $media->file_name,
+        'collection_name' => $media->collection_name,
+    ];
+
+    $target = [
+        'id' => $folder->getKey(),
+        'name' => $folder->name,
+        'slug' => $folder->slug,
+    ];
+
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+        ->call('moveItem', $subject, $target, null, null)
+        ->assertReturned(true);
+
+    // a same-folder drag must not recreate the media row with a new id
+    expect(Media::query()->whereKey($media->getKey())->exists())->toBeTrue()
+        ->and(Media::query()
+            ->where('model_type', morph_alias(MediaFolder::class))
+            ->where('model_id', $folder->getKey())
+            ->count()
+        )->toBe(1);
+});
+
+test('moving media between a folder and a fixed collection keeps the model attachment consistent', function (): void {
+    Storage::fake('local');
+
+    $folder = MediaFolder::create([
+        'name' => 'Source Folder',
+        'model_type' => morph_alias(Contact::class),
+        'model_id' => $this->contact->getKey(),
+    ]);
+    $this->contact->mediaFolders()->attach($folder->getKey());
+
+    $media = $folder
+        ->addMedia(UploadedFile::fake()->image('test.jpg'))
+        ->toMediaCollection($folder->slug);
+
+    $fileName = $media->file_name;
+
+    $component = Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()]);
+
+    // folder -> fixed collection on the owner model
+    $component
+        ->call(
+            'moveItem',
+            [
+                'id' => $media->getKey(),
+                'name' => $media->name,
+                'file_name' => $fileName,
+                'collection_name' => $media->collection_name,
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'name' => 'Files',
+                'slug' => 'files',
+            ],
+            null,
+            null
+        )
+        ->assertReturned(true);
+
+    $movedMedia = Media::query()
+        ->where('file_name', $fileName)
+        ->firstOrFail();
+
+    expect($movedMedia->model_type)->toBe(morph_alias(Contact::class))
+        ->and($movedMedia->model_id)->toBe($this->contact->getKey())
+        ->and($movedMedia->collection_name)->toBe('files');
+
+    $collectionNode = collect($this->contact->refresh()->getMediaAsTree())
+        ->firstWhere('slug', 'files');
+
+    expect(data_get($collectionNode, 'children.*.id'))->toContain($movedMedia->getKey());
+
+    // fixed collection -> back into the folder
+    $component
+        ->call(
+            'moveItem',
+            [
+                'id' => $movedMedia->getKey(),
+                'name' => $movedMedia->name,
+                'file_name' => $fileName,
+                'collection_name' => $movedMedia->collection_name,
+            ],
+            [
+                'id' => $folder->getKey(),
+                'name' => $folder->name,
+                'slug' => $folder->slug,
+            ],
+            null,
+            null
+        )
+        ->assertReturned(true);
+
+    $returnedMedia = Media::query()
+        ->where('file_name', $fileName)
+        ->firstOrFail();
+
+    expect($returnedMedia->model_type)->toBe(morph_alias(MediaFolder::class))
+        ->and($returnedMedia->model_id)->toBe($folder->getKey())
+        ->and($returnedMedia->collection_name)->toBe($folder->slug);
+
+    $folderNode = collect($this->contact->refresh()->getMediaAsTree())
+        ->firstWhere('id', $folder->getKey());
+
+    expect(data_get($folderNode, 'children.*.id'))->toContain($returnedMedia->getKey());
 });
 
 test('can move folder to another folder', function (): void {
@@ -430,4 +555,59 @@ test('can delete real media folder', function (): void {
 
     // Verify folder is deleted
     expect(MediaFolder::whereKey($folder->getKey())->exists())->toBeFalse();
+});
+
+test('can rename media', function (): void {
+    Storage::fake('local');
+
+    $permission = Permission::findOrCreate('action.media.update', 'web');
+    $this->user->givePermissionTo($permission);
+
+    $media = $this->contact
+        ->addMedia(UploadedFile::fake()->image('test.jpg'))
+        ->toMediaCollection('attachments');
+
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+        ->call('saveMedia', [
+            'id' => $media->getKey(),
+            'name' => 'Renamed file',
+            'file_name' => $media->file_name,
+            'collection_name' => $media->collection_name,
+        ])
+        ->assertReturned(fn (mixed $returned): bool => data_get($returned, 'name') === 'Renamed file');
+
+    expect($media->refresh())
+        ->name->toBe('Renamed file')
+        ->file_name->toBe('test.jpg');
+});
+
+test('cannot rename media of another model', function (): void {
+    Storage::fake('local');
+
+    $permission = Permission::findOrCreate('action.media.update', 'web');
+    $this->user->givePermissionTo($permission);
+
+    $foreignContact = Contact::factory()->create();
+    $media = $foreignContact
+        ->addMedia(UploadedFile::fake()->image('test.jpg'))
+        ->toMediaCollection('attachments');
+
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+        ->call('saveMedia', [
+            'id' => $media->getKey(),
+            'name' => 'Renamed file',
+        ])
+        ->assertReturned(false);
+
+    expect($media->refresh()->name)->not->toBe('Renamed file');
+});
+
+test('the tree is rendered with the component instead of fetched afterwards', function (): void {
+    $component = Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+        ->assertOk();
+
+    expect($component->get('mediaTree'))->not->toBeEmpty();
+
+    $component->assertSeeHtml('$wire.mediaTree')
+        ->assertDontSeeHtml('tree="$wire.getTree()"');
 });

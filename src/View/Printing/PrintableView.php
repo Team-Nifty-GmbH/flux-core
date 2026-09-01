@@ -12,6 +12,7 @@ use FluxErp\Contracts\SignablePrintView;
 use FluxErp\Models\Tenant;
 use FluxErp\Printing\Printable;
 use FluxErp\Traits\Makeable;
+use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
@@ -23,7 +24,7 @@ use Imagick;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-abstract class PrintableView extends Component
+abstract class PrintableView extends Component implements Responsable
 {
     use Makeable;
 
@@ -224,6 +225,11 @@ abstract class PrintableView extends Component
     public function streamPDF(?string $fileName = null): Response
     {
         return $this->pdf->stream(Str::finish($fileName ?? $this->getFileName(), '.pdf'));
+    }
+
+    public function toResponse($request): Response
+    {
+        return $this->streamPDF();
     }
 
     protected function getCollectionName(): string

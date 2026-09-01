@@ -2,7 +2,8 @@
 
 namespace FluxErp\Actions\Product;
 
-use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\DispatchableFluxAction;
+use FluxErp\Actions\Price\CreatePrice;
 use FluxErp\Actions\Price\UpdatePrice;
 use FluxErp\Enums\RoundingMethodEnum;
 use FluxErp\Helpers\PriceHelper;
@@ -10,10 +11,13 @@ use FluxErp\Models\Discount;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Rulesets\Product\ProductPricesUpdateRuleset;
+use FluxErp\Traits\IsMonitored;
 use Illuminate\Database\Eloquent\Collection;
 
-class ProductPricesUpdate extends FluxAction
+class ProductPricesUpdate extends DispatchableFluxAction
 {
+    use IsMonitored;
+
     public static function models(): array
     {
         return [Product::class];
@@ -22,6 +26,11 @@ class ProductPricesUpdate extends FluxAction
     protected function getRulesets(): string|array
     {
         return ProductPricesUpdateRuleset::class;
+    }
+
+    public function getName(): string
+    {
+        return __('Updating prices');
     }
 
     public function performAction(): Collection
@@ -45,21 +54,30 @@ class ProductPricesUpdate extends FluxAction
             ),
         ]]);
 
+        $total = $products->count();
+        $this->message(__(':count products', ['count' => $total]));
+
+        $processed = 0;
         foreach ($products as $product) {
+            if ($total > 0) {
+                $this->queueProgress(min(99, (int) (++$processed / $total * 100)));
+            }
+
             $price = PriceHelper::make($product)
                 ->addDiscount($discount)
                 ->setPriceList($basePriceList ?? $priceList)
                 ->price();
-            $priceId = $price?->getKey();
+
+            if (! $price) {
+                continue;
+            }
+
+            $priceId = $price->getKey();
 
             if ($basePriceList) {
                 $priceId = $product->prices()
                     ->where('price_list_id', $priceList->getKey())
                     ->value('id');
-            }
-
-            if (! $priceId) {
-                continue;
             }
 
             if ($this->getData('rounding_method_enum')) {
@@ -76,8 +94,20 @@ class ProductPricesUpdate extends FluxAction
                 );
             }
 
-            UpdatePrice::make([
-                'id' => $priceId,
+            if ($priceId) {
+                UpdatePrice::make([
+                    'id' => $priceId,
+                    'product_id' => $product->id,
+                    'price_list_id' => $priceList->id,
+                    'price' => $price->price,
+                ])
+                    ->validate()
+                    ->execute();
+
+                continue;
+            }
+
+            CreatePrice::make([
                 'product_id' => $product->id,
                 'price_list_id' => $priceList->id,
                 'price' => $price->price,

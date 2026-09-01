@@ -104,7 +104,7 @@
                                     <x-input
                                         type="number"
                                         min="0"
-                                        :label="__('Amount')"
+                                        :label="__('Quantity')"
                                         wire:model="orderPosition.amount"
                                     />
                                 </div>
@@ -128,25 +128,25 @@
                                         select="label:label|value:id|description:product_number"
                                         unfiltered
                                         :request="[
-                                    'url' => route('search', \FluxErp\Models\Product::class),
-                                    'method' => 'POST',
-                                    'params' => [
-                                        'whereDoesntHave' => 'children',
-                                        'where' => [
-                                            [
-                                                'is_active',
-                                                '=',
-                                                true,
+                                            'url' => route('search', \FluxErp\Models\Product::class),
+                                            'method' => 'POST',
+                                            'params' => [
+                                                'whereDoesntHave' => 'children',
+                                                'where' => [
+                                                    [
+                                                        'is_active',
+                                                        '=',
+                                                        true,
+                                                    ],
+                                                ],
+                                                'fields' => [
+                                                    'id',
+                                                    'name',
+                                                    'product_number',
+                                                ],
+                                                'with' => 'media',
                                             ],
-                                        ],
-                                        'fields' => [
-                                            'id',
-                                            'name',
-                                            'product_number',
-                                        ],
-                                        'with' => 'media',
-                                    ],
-                                ]"
+                                        ]"
                                     />
                                     @if (resolve_static(\FluxErp\Models\Warehouse::class, 'query')->count() > 1)
                                         <div
@@ -162,9 +162,9 @@
                                                 unfiltered
                                                 required
                                                 :request="[
-                                            'url' => route('search', \FluxErp\Models\Warehouse::class),
-                                            'method' => 'POST',
-                                        ]"
+                                                    'url' => route('search', \FluxErp\Models\Warehouse::class),
+                                                    'method' => 'POST',
+                                                ]"
                                             />
                                         </div>
                                     @endif
@@ -221,7 +221,7 @@
                                     <x-input
                                         type="number"
                                         min="0"
-                                        :label="__('Amount')"
+                                        :label="__('Quantity')"
                                         wire:model="orderPosition.amount"
                                         x-ref="amount"
                                     />
@@ -241,10 +241,10 @@
                                             >
                                                 <span
                                                     x-text="
-                                                $wire.orderPosition.is_net
-                                                    ? '{{ __('Unit price :type', ['type' => __('net')]) }}'
-                                                    : '{{ __('Unit price :type', ['type' => __('gross')]) }}'
-                                            "
+                                                        $wire.orderPosition.is_net
+                                                            ? '{{ __('Unit price :type', ['type' => __('net')]) }}'
+                                                            : '{{ __('Unit price :type', ['type' => __('gross')]) }}'
+                                                    "
                                                 ></span>
                                             </x-label>
                                         </x-slot:label>
@@ -369,11 +369,11 @@
                                         <span
                                             class="text-lg font-semibold text-gray-900 dark:text-white"
                                             x-text="
-                                        totalPrice.toLocaleString(document.documentElement.lang, {
-                                            minimumFractionDigits: 2,
-                                            maximumFractionDigits: 2,
-                                        }) + ' {{ data_get($order->currency, 'symbol') }}'
-                                    "
+                                                totalPrice.toLocaleString(document.documentElement.lang, {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2,
+                                                }) + ' {{ data_get($order->currency, 'symbol') }}'
+                                            "
                                         ></span>
                                     </div>
                                     <div
@@ -386,13 +386,13 @@
                                         >
                                             <span
                                                 x-text="
-                                            '(-' +
-                                                discountAmount.toLocaleString(document.documentElement.lang, {
-                                                    minimumFractionDigits: 2,
-                                                    maximumFractionDigits: 2,
-                                                }) +
-                                                ' {{ data_get($order->currency, 'symbol') }})'
-                                        "
+                                                    '(-' +
+                                                        discountAmount.toLocaleString(document.documentElement.lang, {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2,
+                                                        }) +
+                                                        ' {{ data_get($order->currency, 'symbol') }})'
+                                                "
                                             ></span>
                                         </span>
                                     </div>
@@ -411,9 +411,9 @@
                                         <x-icon
                                             name="chevron-down"
                                             class="h-4 w-4 transition-transform"
-                                            x-bind:class="
-                                                showAdvanced && 'rotate-180'
-                                            "
+                                            x-bind:class="{
+                                                'rotate-180': showAdvanced,
+                                            }"
                                         />
                                     </button>
                                     <div
@@ -441,20 +441,20 @@
                                                     select="label:name|value:id|description:number"
                                                     unfiltered
                                                     :request="[
-                                                'url' => route('search', \FluxErp\Models\LedgerAccount::class),
-                                                'method' => 'POST',
-                                                'params' => [
-                                                    'where' => [
-                                                        [
-                                                            'ledger_account_type_enum',
-                                                            '=',
-                                                            $order->isPurchase
-                                                                ? \FluxErp\Enums\LedgerAccountTypeEnum::Expense
-                                                                : \FluxErp\Enums\LedgerAccountTypeEnum::Revenue,
+                                                        'url' => route('search', \FluxErp\Models\LedgerAccount::class),
+                                                        'method' => 'POST',
+                                                        'params' => [
+                                                            'where' => [
+                                                                [
+                                                                    'ledger_account_type_enum',
+                                                                    '=',
+                                                                    $order->isPurchase
+                                                                        ? \FluxErp\Enums\LedgerAccountTypeEnum::Expense
+                                                                        : \FluxErp\Enums\LedgerAccountTypeEnum::Revenue,
+                                                                ],
+                                                            ],
                                                         ],
-                                                    ],
-                                                ],
-                                            ]"
+                                                    ]"
                                                 />
                                             @endif
 
@@ -465,22 +465,22 @@
                                                     select="label:label|value:id|description:description"
                                                     unfiltered
                                                     :request="[
-                                                'url' => route('search', \FluxErp\Models\ContactBankConnection::class),
-                                                'method' => 'POST',
-                                                'params' => [
-                                                    'where' => [
-                                                        [
-                                                            'contact_id',
-                                                            '=',
-                                                            $order->contact_id,
+                                                        'url' => route('search', \FluxErp\Models\ContactBankConnection::class),
+                                                        'method' => 'POST',
+                                                        'params' => [
+                                                            'where' => [
+                                                                [
+                                                                    'contact_id',
+                                                                    '=',
+                                                                    $order->contact_id,
+                                                                ],
+                                                                [
+                                                                    'is_credit_account',
+                                                                    true,
+                                                                ],
+                                                            ],
                                                         ],
-                                                        [
-                                                            'is_credit_account',
-                                                            true,
-                                                        ],
-                                                    ],
-                                                ],
-                                            ]"
+                                                    ]"
                                                 />
                                                 <div
                                                     class="space-y-4"
@@ -520,6 +520,23 @@
                         </div>
                     </div>
 
+                    @section('order-position-detail-modal.content.performance-period')
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <x-date
+                                wire:model="orderPosition.system_delivery_date"
+                                :without-time="true"
+                                :label="__('Performance/Delivery date')"
+                            />
+                            <x-date
+                                wire:model="orderPosition.system_delivery_date_end"
+                                :without-time="true"
+                                :label="__('Performance/Delivery date end')"
+                            />
+                        </div>
+                        <div class="text-secondary-500 text-xs">
+                            {{ __('Leave empty to use the period of the order.') }}
+                        </div>
+                    @show
                     @section('order-position-detail-modal.content.bottom')
                         <x-flux::editor
                             wire:model="orderPosition.description"
@@ -527,6 +544,20 @@
                             :label="__('Description')"
                             :blade-variables="\FluxErp\Facades\Editor::getTranslatedVariables(\FluxErp\Models\OrderPosition::class)"
                         />
+                    @show
+                    @stack('order-edit-position-modal-fields')
+                    @section('order-position-detail-modal.content.activities')
+                        <div
+                            id="order-position-activities"
+                            x-cloak
+                            x-show="$wire.orderPosition.id"
+                        >
+                            <x-card :header="__('Activities')" minimize="mount">
+                                <div class="px-2 py-5">
+                                    <livewire:order-position.activities />
+                                </div>
+                            </x-card>
+                        </div>
                     @show
                 </div>
                 <x-errors />
@@ -565,6 +596,7 @@
                                     $tsui.close.modal('edit-order-position');
                             })
                         "
+                        loading="changedProductId"
                         x-cloak
                         x-show="!$wire.order.is_locked"
                         :text="__('Save')"

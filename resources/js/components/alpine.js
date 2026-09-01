@@ -15,6 +15,7 @@ import navigationSpinner from './navigation-spinner.js';
 import wireNavigation from './wire-navigation.js';
 import teleportRestore from './teleport-restore.js';
 import comments from './comments.js';
+import pillbox from './pillbox.js';
 import familyTree from './family-tree.js';
 import documentScanner from './document-scanner.js';
 import validationErrors from './validation-errors.js';
@@ -22,12 +23,13 @@ import selectComponent from './tallstackui/select.js';
 import toastComponent from './tallstackui/toast.js';
 import nuxbe from '../nuxbe.js';
 
-import { Calendar } from '@fullcalendar/core';
-import allLocales from '@fullcalendar/core/locales-all';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import listPlugin from '@fullcalendar/list';
-import interactionPlugin from '@fullcalendar/interaction';
+import { Calendar } from 'fullcalendar';
+import allLocales from 'fullcalendar/locales-all';
+import dayGridPlugin from 'fullcalendar/daygrid';
+import timeGridPlugin from 'fullcalendar/timegrid';
+import listPlugin from 'fullcalendar/list';
+import interactionPlugin from 'fullcalendar/interaction';
+import classicThemePlugin from 'fullcalendar/themes/classic';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import isoWeek from 'dayjs/plugin/isoWeek';
@@ -55,26 +57,55 @@ window.dayGridPlugin = dayGridPlugin;
 window.timeGridPlugin = timeGridPlugin;
 window.listPlugin = listPlugin;
 window.interactionPlugin = interactionPlugin;
+window.classicThemePlugin = classicThemePlugin;
 window.allLocales = allLocales;
 
 navigationSpinner();
 
-if (window.Alpine?.version) {
+const resolveModelId = (el) => () => {
+    const root = el.closest('[wire\\:id]');
+
+    if (!root || !window.Livewire) {
+        return null;
+    }
+
+    const wire = window.Livewire.find(root.getAttribute('wire:id'));
+    const bindingAttr = root
+        .getAttributeNames()
+        .find((name) => name.startsWith('wire:model'));
+    const binding = bindingAttr ? root.getAttribute(bindingAttr) : null;
+
+    if (binding && wire?.$parent) {
+        // wire:model on a child component is evaluated in the parent's scope,
+        // whether or not it carries an explicit "$parent." prefix.
+        const prop = binding.startsWith('$parent.')
+            ? binding.slice('$parent.'.length)
+            : binding;
+        const value = wire.$parent.get(prop);
+
+        if (value !== undefined && value !== null) {
+            return value;
+        }
+    }
+
+    return wire?.get('modelId') ?? null;
+};
+
+const registerFluxAlpine = () => {
     window.Alpine.plugin(sort);
     window.Alpine.plugin(collapse);
     window.Alpine.plugin(nuxbe);
     window.Alpine.directive('template-outlet', templateOutlet);
+    window.Alpine.magic('resolveModelId', resolveModelId);
     window.Alpine.data('folder_tree', folders);
     window.Alpine.data('comments', comments);
+    window.Alpine.data('pillbox', pillbox);
+};
+
+if (window.Alpine?.version) {
+    registerFluxAlpine();
 } else {
-    window.addEventListener('alpine:init', () => {
-        window.Alpine.plugin(sort);
-        window.Alpine.plugin(collapse);
-        window.Alpine.plugin(nuxbe);
-        window.Alpine.directive('template-outlet', templateOutlet);
-        window.Alpine.data('folder_tree', folders);
-        window.Alpine.data('comments', comments);
-    });
+    window.addEventListener('alpine:init', registerFluxAlpine);
 }
 
 document.addEventListener('livewire:navigated', wireNavigation, { once: true });
@@ -83,6 +114,15 @@ document.addEventListener('livewire:navigated', teleportRestore);
 document.addEventListener('livewire:init', () => {
     wireNavigation();
     validationErrors();
+
+    Livewire.hook('navigate.request', ({ options }) => {
+        options.headers['X-Flux-Persisted'] = [
+            ...document.querySelectorAll('[x-persist]'),
+        ]
+            .filter((element) => element.children.length > 0)
+            .map((element) => element.getAttribute('x-persist'))
+            .join(',');
+    });
 
     Livewire.hook('request', ({ fail }) => {
         fail(({ status, preventDefault }) => {
@@ -132,6 +172,23 @@ document.addEventListener('livewire:init', () => {
                 .wireable(component.id)
                 [type](title, description)
                 .confirm(confirmLabel, () => {
+                    // Livewire 4's own evaluator resolves unknown identifiers
+                    // against $wire, which breaks expressions like
+                    // addTag($nuxbe.promptValue()). Evaluate through Alpine
+                    // instead, where $wire, magics and x-for scope all work.
+                    const expression = el.getAttribute('wire:click');
+
+                    if (expression) {
+                        window.Alpine.evaluate(
+                            el,
+                            expression.trimStart().startsWith('$wire.')
+                                ? expression
+                                : '$wire.' + expression,
+                        );
+
+                        return;
+                    }
+
                     action();
                 })
                 .cancel(cancelLabel)

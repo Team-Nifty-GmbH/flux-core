@@ -255,12 +255,12 @@
                     @if (resolve_static(\FluxErp\Actions\Plugins\ToggleActive::class, 'canPerformAction', [false]))
                         <div
                             x-cloak
-                            x-bind:class="
-                                !(
+                            x-bind:class="{
+                                invisible: !(
                                     plugin.can_uninstall &&
                                     !plugin.offer_install
-                                ) && 'invisible'
-                            "
+                                ),
+                            }"
                         >
                             <x-toggle
                                 x-model="$wire.installed[key].is_active"
@@ -270,7 +270,7 @@
                 </div>
                 <div
                     class="flex grow gap-1.5"
-                    x-bind:class="!plugin.is_active && 'opacity-60'"
+                    x-bind:class="{ 'opacity-60': !plugin.is_active }"
                 >
                     <img
                         x-bind:src="

@@ -1,5 +1,6 @@
 <div
     x-data="{
+        calculatedPrices: {},
         init() {
             $wire.getPriceLists().then(() =>
                 $wire.priceLists.forEach((priceList) => {
@@ -9,8 +10,21 @@
                     priceList.price_gross = $nuxbe.parseNumber(
                         priceList.price_gross,
                     );
+                    this.calculatedPrices[priceList.id] = {
+                        price_net: priceList.price_net,
+                        price_gross: priceList.price_gross,
+                    };
                 }),
             );
+        },
+        resetPrice(priceList) {
+            if (priceList.is_editable) {
+                return;
+            }
+
+            const calculated = this.calculatedPrices[priceList.id];
+            priceList.price_net = calculated?.price_net;
+            priceList.price_gross = calculated?.price_gross;
         },
         recalculate(priceList, isNet) {
             const vatRate = Number($wire.product.vat_rate?.rate_percentage);
@@ -74,6 +88,7 @@
                     <div x-show="priceList.parent">
                         <x-toggle
                             x-model.boolean="priceList.is_editable"
+                            x-on:change="resetPrice(priceList)"
                             x-bind:disabled="!isEditing"
                             label="{{ __('Override calculated price') }}"
                         />

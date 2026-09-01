@@ -223,6 +223,7 @@
             <x-button
                 color="primary"
                 wire:click="replicate()"
+                loading="replicate()"
                 primary
                 :text="__('Save')"
             />
@@ -271,6 +272,7 @@
                     color="red"
                     :text="__('Delete')"
                     wire:click="delete()"
+                    loading="delete()"
                 />
             @endcanAction
 

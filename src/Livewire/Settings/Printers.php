@@ -67,7 +67,7 @@ class Printers extends PrinterList
         try {
             $this->printerForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->printerForm);
 
             return false;
         }
@@ -99,7 +99,7 @@ class Printers extends PrinterList
         try {
             $this->configForm->create();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->configForm);
 
             return;
         }

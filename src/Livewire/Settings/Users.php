@@ -63,7 +63,7 @@ class Users extends UserList
         try {
             $this->userForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->userForm);
 
             return false;
         }

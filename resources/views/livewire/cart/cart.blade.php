@@ -64,6 +64,7 @@
                                     @section('cart-sidebar.footer.buttons.buy')
                                         <x-button
                                             wire:click="addToCurrentOrder()"
+                                            loading="addToCurrentOrder()"
                                             color="indigo"
                                             class="w-full"
                                             :text="__('Add to current order')"
@@ -72,6 +73,7 @@
                                             light
                                             :text="__('Clear cart')"
                                             wire:click="clear()"
+                                            loading="clear()"
                                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Cart Items')]) }}"
                                             color="red"
                                             class="w-full"

@@ -40,3 +40,42 @@ test('delete vat rate', function (): void {
     expect(DeleteVatRate::make(['id' => $vat->getKey()])
         ->validate()->execute())->toBeTrue();
 });
+
+test('vat rate defaults to usable for purchase and sales', function (): void {
+    $vat = CreateVatRate::make([
+        'name' => 'Standard',
+        'rate_percentage' => 0.19,
+    ])
+        ->validate()
+        ->execute();
+
+    expect($vat->refresh())
+        ->is_purchase->toBeTrue()
+        ->is_sales->toBeTrue();
+});
+
+test('vat rate purchase and sales flags can be set', function (): void {
+    $vat = CreateVatRate::make([
+        'name' => 'Import VAT',
+        'rate_percentage' => 0.19,
+        'is_purchase' => true,
+        'is_sales' => false,
+    ])
+        ->validate()
+        ->execute();
+
+    expect($vat->refresh())
+        ->is_purchase->toBeTrue()
+        ->is_sales->toBeFalse();
+
+    $updated = UpdateVatRate::make([
+        'id' => $vat->getKey(),
+        'name' => $vat->name,
+        'rate_percentage' => 0.19,
+        'is_sales' => true,
+    ])
+        ->validate()
+        ->execute();
+
+    expect($updated->is_sales)->toBeTrue();
+});

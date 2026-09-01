@@ -2,13 +2,17 @@
 
 namespace FluxErp\Mail;
 
+use Closure;
 use FluxErp\Contracts\MailSyncDriver;
+use FluxErp\Contracts\ReportsSyncProgress;
 use FluxErp\Models\Communication;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 
-class ImapMailSyncDriver implements MailSyncDriver
+class ImapMailSyncDriver implements MailSyncDriver, ReportsSyncProgress
 {
+    protected ?Closure $progressCallback = null;
+
     public function syncFolders(MailAccount $account): array
     {
         return $account->syncFolders();
@@ -18,7 +22,7 @@ class ImapMailSyncDriver implements MailSyncDriver
     {
         $startUid = $this->resolveStartUid($folder);
 
-        $builder = $folder->messages();
+        $builder = $folder->messages()->onProgress($this->progressCallback);
 
         if (! is_null($startUid)) {
             $builder->newSince($startUid);
@@ -26,17 +30,19 @@ class ImapMailSyncDriver implements MailSyncDriver
 
         $builder->fetchAndStore();
 
-        $builder
-            ->reset()
-            ->unseen()
-            ->withoutBody()
-            ->fetch()
-            ->syncReadStatus();
+        $builder->syncReadStatus();
     }
 
     public function testConnection(MailAccount $account): bool
     {
         return ! is_null($account->connect());
+    }
+
+    public function withProgressCallback(?Closure $callback): static
+    {
+        $this->progressCallback = $callback;
+
+        return $this;
     }
 
     protected function resolveStartUid(MailFolder $folder): ?int

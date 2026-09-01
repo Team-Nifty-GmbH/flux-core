@@ -91,6 +91,7 @@
                                 color="red"
                                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Two-Factor Authentication')]) }}"
                                 wire:click="disableTwoFactor()"
+                                loading="disableTwoFactor()"
                             />
                         @else
                             <p class="text-xs text-amber-600 dark:text-amber-400">
@@ -112,6 +113,7 @@
                             :text="__('Enable')"
                             color="primary"
                             wire:click="startSetup()"
+                            loading="startSetup()"
                         />
                     </div>
                     @if ($isForced)

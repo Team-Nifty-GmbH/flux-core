@@ -1,6 +1,9 @@
 <?php
 
+use FluxErp\Models\Address;
 use FluxErp\Models\Media;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
@@ -46,9 +49,47 @@ test('signed route with conversion query serves the conversion file', function (
     expect($response->streamedContent())->toBe('fake-thumb-bytes');
 });
 
-test('unsigned request to the private route is rejected', function (): void {
+test('guest with a valid signature is served without authentication', function (): void {
+    $this->actingAsGuest();
+
+    $url = URL::temporarySignedRoute('media.private', now()->addMinutes(5), [
+        'media' => $this->media->getKey(),
+        'filename' => $this->filename,
+    ]);
+
+    $this->get($url)->assertOk();
+});
+
+test('guest without a valid signature is rejected', function (): void {
+    $this->actingAsGuest();
+
     $this->get('/media-private/' . $this->media->getKey() . '/' . $this->filename)
         ->assertStatus(403);
+});
+
+test('authenticated user is served without a signature', function (): void {
+    $this->get('/media-private/' . $this->media->getKey() . '/' . $this->filename)
+        ->assertOk();
+});
+
+test('authenticated non-user is rejected without a signature', function (): void {
+    $this->be(new Address(), 'web');
+
+    $this->get('/media-private/' . $this->media->getKey() . '/' . $this->filename)
+        ->assertStatus(403);
+});
+
+test('authenticated user is denied when a global scope hides the media', function (): void {
+    Media::addGlobalScope('test_hide_media', function (Builder $query): void {
+        $query->whereRaw('1 = 0');
+    });
+
+    try {
+        $this->get('/media-private/' . $this->media->getKey() . '/' . $this->filename)
+            ->assertNotFound();
+    } finally {
+        Model::clearBootedModels();
+    }
 });
 
 test('signed route with conversion query 404s when the conversion is not generated', function (): void {

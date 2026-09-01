@@ -58,6 +58,7 @@
                     color="red"
                     :text="__('Delete') "
                     wire:click="delete()"
+                    loading="delete()"
                     wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Product')]) }}"
                 />
             @endcanAction

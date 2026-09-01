@@ -17,7 +17,7 @@ class BaseController extends Controller
     public function index(Request $request, string $model): JsonResponse
     {
         $model = app($model);
-        if ($request->filled('search') && ! in_array(Searchable::class, class_uses($model))) {
+        if ($request->filled('search') && ! in_array(Searchable::class, class_uses_recursive($model))) {
             return ResponseHelper::createResponseFromBase(
                 statusCode: 400,
                 data: ['search' => 'Search not allowed on given model.']

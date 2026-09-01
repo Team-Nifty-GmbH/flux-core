@@ -687,3 +687,94 @@ test('shows correct title for split order', function (): void {
 
     expect($component->instance()->getTitle())->toEqual(__('Create Split-Order'));
 });
+
+function createChildOrderTestPosition(int $orderId, int $tenantId, array $attributes = []): OrderPosition
+{
+    return OrderPosition::factory()->create(array_merge([
+        'order_id' => $orderId,
+        'tenant_id' => $tenantId,
+        'vat_rate_id' => VatRate::query()->first()->getKey(),
+        'discount_percentage' => null,
+        'amount' => 5,
+        'signed_amount' => 5,
+        'unit_net_price' => 20,
+        'unit_gross_price' => 23.8,
+        'total_net_price' => 100,
+        'total_gross_price' => 119,
+        'is_alternative' => false,
+        'is_free_text' => false,
+        'is_net' => true,
+    ], $attributes));
+}
+
+test('takeOrderPositions marks alternative positions in payload', function (): void {
+    $alternativePosition = createChildOrderTestPosition(
+        $this->parentOrder->id,
+        $this->dbTenant->getKey(),
+        ['is_alternative' => true]
+    );
+
+    $component = Livewire::test(CreateChildOrder::class, [
+        'orderId' => $this->parentOrder->id,
+        'type' => OrderTypeEnum::Retoure->value,
+    ]);
+
+    $component->set('selectedPositions', [$alternativePosition->getKey()])
+        ->call('takeOrderPositions');
+
+    $positions = $component->get('replicateOrder.order_positions');
+    $payload = collect($positions)->firstWhere('id', $alternativePosition->getKey());
+
+    expect($payload)->not->toBeNull()
+        ->and(data_get($payload, 'is_alternative'))->toBeTrue();
+});
+
+test('saved retoure keeps alternative flag and excludes it from totals', function (): void {
+    $this->parentOrder->update([
+        'invoice_number' => Str::random(),
+        'shipping_costs_net_price' => 0,
+    ]);
+
+    $orderPosition = createChildOrderTestPosition(
+        $this->parentOrder->id,
+        $this->dbTenant->getKey(),
+        [
+            'amount' => 10,
+            'signed_amount' => 10,
+            'unit_net_price' => 100,
+            'unit_gross_price' => 119,
+            'total_net_price' => 1000,
+            'total_gross_price' => 1190,
+        ]
+    );
+
+    $alternativePosition = createChildOrderTestPosition(
+        $this->parentOrder->id,
+        $this->dbTenant->getKey(),
+        ['is_alternative' => true]
+    );
+
+    $component = Livewire::test(CreateChildOrder::class, [
+        'orderId' => $this->parentOrder->id,
+        'type' => OrderTypeEnum::Retoure->value,
+    ]);
+
+    $component->set('selectedPositions', [$orderPosition->getKey(), $alternativePosition->getKey()])
+        ->call('takeOrderPositions')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $retoure = Order::query()
+        ->where('parent_id', $this->parentOrder->id)
+        ->first();
+
+    expect($retoure)->not->toBeNull();
+
+    $replicatedAlternative = $retoure->orderPositions()
+        ->where('created_from_id', $alternativePosition->getKey())
+        ->first();
+
+    expect($replicatedAlternative)->not->toBeNull()
+        ->and($replicatedAlternative->is_alternative)->toBeTrue()
+        ->and(abs((float) $retoure->total_net_price))->toEqual(1000.0);
+});

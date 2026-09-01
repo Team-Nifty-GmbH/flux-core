@@ -9,8 +9,10 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Laravel\Scout\SearchableScope;
+use Spatie\EloquentSortable\Sortable;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class SearchController extends Controller
@@ -57,12 +59,19 @@ class SearchController extends Controller
             $query = ! is_string($request->input('search'))
                 ? resolve_static($model, 'query')->limit(20)
                 : resolve_static($model, 'search', ['query' => $request->input('search')])
-                    ->toEloquentBuilder(perPage: $perPageSearch);
+                    ->toEloquentBuilder(highlight: [], perPage: $perPageSearch);
         } elseif ($request->has('search')) {
             $query = resolve_static($model, 'query');
             $query->where(function (Builder $query) use ($request): void {
                 foreach (Arr::wrap($request->input('searchFields')) as $field) {
-                    $query->orWhere($field, 'like', '%' . $request->input('search') . '%');
+                    str_contains($field, '.')
+                        ? $query->orWhereRelation(
+                            Str::beforeLast($field, '.'),
+                            Str::afterLast($field, '.'),
+                            'like',
+                            '%' . $request->input('search') . '%'
+                        )
+                        : $query->orWhere($field, 'like', '%' . $request->input('search') . '%');
                 }
             });
         } else {
@@ -84,6 +93,27 @@ class SearchController extends Controller
             $query->orderBy($request->input('orderBy'), $request->input('orderDirection', 'asc'));
         }
 
+        $this->applyRequestConstraints($query, $request, $model);
+
+        $result = $query
+            ->when(
+                is_a(resolve_static($model, 'class'), Sortable::class, true),
+                fn (Builder $query): Builder => $query->ordered()
+            )
+            ->latest()
+            ->get();
+
+        if ($request->has('appends')) {
+            $result->each(function ($item) use ($request): void {
+                $item->append(array_intersect($item->getAppends(), $request->input('appends')));
+            });
+        }
+
+        return $this->formatAndDispatch($result, $model, $request);
+    }
+
+    protected function applyRequestConstraints(Builder $query, Request $request, string $model): void
+    {
         if ($request->has('where')) {
             $query->where($request->input('where'));
         }
@@ -190,31 +220,30 @@ class SearchController extends Controller
                 }
             }
         }
-
-        $result = $query->latest()->get();
-
-        if ($request->has('appends')) {
-            $result->each(function ($item) use ($request): void {
-                $item->append(array_intersect($item->getAppends(), $request->input('appends')));
-            });
-        }
-
-        return $this->formatAndDispatch($result, $model, $request);
     }
 
     protected function formatAndDispatch(Collection $result, string $model, Request $request)
     {
         if (is_a(app($model), InteractsWithDataTables::class)) {
-            $result = $result->map(fn ($item) => array_merge(
-                [
-                    'id' => $item->getKey(),
-                    'label' => $item->getLabel() ?? '-',
-                    'description' => $item->getDescription(),
-                    'image' => $item->getAvatarUrl(),
-                ],
-                $item->only($request->input('fields', [])),
-                $item->only($request->input('appends', [])),
-            ));
+            $result = $result->map(function ($item) use ($request): array {
+                $formatted = array_merge(
+                    [
+                        'id' => $item->getKey(),
+                        'label' => $item->getLabel() ?? '-',
+                        'description' => $item->getDescription(),
+                        'image' => $item->getAvatarUrl(),
+                    ],
+                    $item->only($request->input('fields', [])),
+                    $item->only($request->input('appends', [])),
+                );
+
+                // mapping sources are limited to keys already exposed above
+                foreach (Arr::wrap($request->input('mapping', [])) as $target => $source) {
+                    data_set($formatted, $target, data_get($formatted, $source));
+                }
+
+                return $formatted;
+            });
         }
 
         Event::dispatch('tall-datatables-searched', [$request, $result]);
