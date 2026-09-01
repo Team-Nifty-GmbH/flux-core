@@ -39,6 +39,7 @@ class CreateMailAccountRuleset extends FluxRuleset
             'has_auto_assign' => 'boolean',
             'has_o_auth' => 'boolean',
             'has_valid_certificate' => 'boolean',
+            'smtp_has_valid_certificate' => 'boolean',
         ];
     }
 }
