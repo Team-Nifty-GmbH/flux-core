@@ -117,102 +117,159 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     }
 
     // Relations
+    /**
+     * @return HasMany<AbsenceRequest, $this>
+     */
     public function absenceRequests(): HasMany
     {
         return $this->hasMany(AbsenceRequest::class);
     }
 
+    /**
+     * @return MorphMany<Activity, $this>
+     */
     public function activities(): MorphMany
     {
         return $this->morphMany(Activity::class, 'causer');
     }
 
+    /**
+     * @return HasMany<CommissionRate, $this>
+     */
     public function commissionRates(): HasMany
     {
         return $this->hasMany(CommissionRate::class);
     }
 
+    /**
+     * @return HasMany<Commission, $this>
+     */
     public function commissions(): HasMany
     {
         return $this->hasMany(Commission::class);
     }
 
+    /**
+     * @return BelongsTo<Contact, $this>
+     */
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
     }
 
+    /**
+     * @return BelongsTo<Currency, $this>
+     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
     }
 
+    /**
+     * @return HasOne<Employee, $this>
+     */
     public function employee(): HasOne
     {
         return $this->hasOne(Employee::class);
     }
 
+    /**
+     * @return MorphMany<Favorite, $this>
+     */
     public function favorites(): MorphMany
     {
         return $this->morphMany(Favorite::class, 'authenticatable');
     }
 
+    /**
+     * @return BelongsTo<Language, $this>
+     */
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);
     }
 
+    /**
+     * @return HasMany<Lead, $this>
+     */
     public function leads(): HasMany
     {
         return $this->hasMany(Lead::class);
     }
 
+    /**
+     * @return BelongsToMany<MailAccount, $this>
+     */
     public function mailAccounts(): BelongsToMany
     {
         return $this->belongsToMany(MailAccount::class, 'mail_account_user')
             ->withPivot('is_default');
     }
 
+    /**
+     * @return BelongsToMany<Printer, $this>
+     */
     public function printers(): BelongsToMany
     {
         return $this->belongsToMany(Printer::class, 'printer_user')
             ->using(PrinterUser::class);
     }
 
+    /**
+     * @return HasMany<PrinterUser, $this>
+     */
     public function printerUsers(): HasMany
     {
         return $this->hasMany(PrinterUser::class);
     }
 
+    /**
+     * @return BelongsToMany<Target, $this>
+     */
     public function targets(): BelongsToMany
     {
         return $this->belongsToMany(Target::class, 'target_user')
             ->using(TargetUser::class);
     }
 
+    /**
+     * @return BelongsToMany<Task, $this>
+     */
     public function tasks(): BelongsToMany
     {
         return $this->belongsToMany(Task::class, 'task_user')
             ->using(TaskUser::class);
     }
 
+    /**
+     * @return HasMany<Task, $this>
+     */
     public function tasksResponsible(): HasMany
     {
         return $this->hasMany(Task::class, 'responsible_user_id');
     }
 
+    /**
+     * @return BelongsToMany<Ticket, $this>
+     */
     public function tickets(): BelongsToMany
     {
         return $this->belongsToMany(Ticket::class, 'ticket_user')
             ->using(TicketUser::class);
     }
 
+    /**
+     * @return BelongsToMany<Tenant, $this>
+     */
     public function tenants(): BelongsToMany
     {
         return $this->belongsToMany(Tenant::class, 'tenant_user')
             ->using(TenantUser::class);
     }
 
+    /**
+     * @return HasMany<WorkTime, $this>
+     */
     public function workTimes(): HasMany
     {
         return $this->hasMany(WorkTime::class);

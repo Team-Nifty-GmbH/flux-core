@@ -64,11 +64,17 @@ class LoanInstallment extends FluxModel implements InteractsWithDataTables
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Loan, $this>
+     */
     public function loan(): BelongsTo
     {
         return $this->belongsTo(Loan::class);
     }
 
+    /**
+     * @return BelongsToMany<Transaction, $this>
+     */
     public function transactions(): BelongsToMany
     {
         return $this->belongsToMany(Transaction::class)

@@ -36,6 +36,9 @@ class Holiday extends FluxModel
     }
 
     // Relations
+    /**
+     * @return BelongsToMany<Location, $this>
+     */
     public function locations(): BelongsToMany
     {
         return $this->belongsToMany(Location::class, 'holiday_location')

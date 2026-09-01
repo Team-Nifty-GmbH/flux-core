@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,6 +24,9 @@ class CalendarUserSetting extends FluxModel
     }
 
     // Relations
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function authenticatable(): MorphTo
     {
         return $this->morphTo();

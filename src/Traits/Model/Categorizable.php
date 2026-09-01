@@ -36,6 +36,9 @@ trait Categorizable
         });
     }
 
+    /**
+     * @return MorphToMany<Category, $this>
+     */
     public function categories(): MorphToMany
     {
         return $this->morphToMany(Category::class, 'categorizable', 'categorizable')

@@ -34,6 +34,9 @@ class PaymentType extends FluxModel
     }
 
     // Relations
+    /**
+     * @return BelongsToMany<Tenant, $this>
+     */
     public function tenants(): BelongsToMany
     {
         return $this->belongsToMany(Tenant::class, 'payment_type_tenant')

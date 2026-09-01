@@ -80,26 +80,41 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
     }
 
     // Relations
+    /**
+     * @return HasMany<Address, $this>
+     */
     public function addresses(): HasMany
     {
         return $this->hasMany(Address::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function agent(): BelongsTo
     {
         return $this->belongsTo(User::class, 'agent_id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function approvalUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approval_user_id');
     }
 
+    /**
+     * @return HasMany<ContactBankConnection, $this>
+     */
     public function contactBankConnections(): HasMany
     {
         return $this->hasMany(ContactBankConnection::class);
     }
 
+    /**
+     * @return HasOneThrough<Country, Address, $this>
+     */
     public function country(): HasOneThrough
     {
         return $this->hasOneThrough(
@@ -112,92 +127,143 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
         );
     }
 
+    /**
+     * @return BelongsTo<Currency, $this>
+     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
     }
 
+    /**
+     * @return BelongsTo<Address, $this>
+     */
     public function deliveryAddress(): BelongsTo
     {
         return $this->belongsTo(Address::class, 'delivery_address_id');
     }
 
+    /**
+     * @return BelongsToMany<DiscountGroup, $this>
+     */
     public function discountGroups(): BelongsToMany
     {
         return $this->belongsToMany(DiscountGroup::class, 'contact_discount_group')
             ->using(ContactDiscountGroup::class);
     }
 
+    /**
+     * @return BelongsToMany<Discount, $this>
+     */
     public function discounts(): BelongsToMany
     {
         return $this->belongsToMany(Discount::class, 'contact_discount')
             ->using(ContactDiscount::class);
     }
 
+    /**
+     * @return BelongsToMany<Industry, $this>
+     */
     public function industries(): BelongsToMany
     {
         return $this->belongsToMany(Industry::class, 'contact_industry')
             ->using(ContactIndustry::class);
     }
 
+    /**
+     * @return BelongsTo<Address, $this>
+     */
     public function invoiceAddress(): BelongsTo
     {
         return $this->belongsTo(Address::class, 'invoice_address_id');
     }
 
+    /**
+     * @return BelongsTo<LedgerAccount, $this>
+     */
     public function ledgerAccount(): BelongsTo
     {
         return $this->belongsTo(LedgerAccount::class);
     }
 
+    /**
+     * @return BelongsTo<Address, $this>
+     */
     public function mainAddress(): BelongsTo
     {
         return $this->belongsTo(Address::class, 'main_address_id');
     }
 
+    /**
+     * @return HasMany<Order, $this>
+     */
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }
 
+    /**
+     * @return HasOne<Address, $this>
+     */
     public function paymentReminderAddress(): HasOne
     {
         return $this->hasOne(Address::class)
             ->where('is_payment_reminder_address', true);
     }
 
+    /**
+     * @return BelongsTo<PaymentType, $this>
+     */
     public function paymentType(): BelongsTo
     {
         return $this->belongsTo(PaymentType::class);
     }
 
+    /**
+     * @return BelongsTo<PriceList, $this>
+     */
     public function priceList(): BelongsTo
     {
         return $this->belongsTo(PriceList::class);
     }
 
+    /**
+     * @return BelongsToMany<Product, $this>
+     */
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'product_supplier')
             ->using(ProductSupplier::class);
     }
 
+    /**
+     * @return HasMany<SepaMandate, $this>
+     */
     public function sepaMandates(): HasMany
     {
         return $this->hasMany(SepaMandate::class);
     }
 
+    /**
+     * @return BelongsToMany<Tenant, $this>
+     */
     public function tenants(): BelongsToMany
     {
         return $this->belongsToMany(Tenant::class, 'contact_tenant')
             ->using(ContactTenant::class);
     }
 
+    /**
+     * @return BelongsTo<VatRate, $this>
+     */
     public function vatRate(): BelongsTo
     {
         return $this->belongsTo(VatRate::class);
     }
 
+    /**
+     * @return HasMany<WorkTime, $this>
+     */
     public function workTimes(): HasMany
     {
         return $this->hasMany(WorkTime::class);

@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait HasRecordOrigin
 {
+    /**
+     * @return BelongsTo<RecordOrigin, $this>
+     */
     public function recordOrigin(): BelongsTo
     {
         return $this->belongsTo(RecordOrigin::class, 'record_origin_id');

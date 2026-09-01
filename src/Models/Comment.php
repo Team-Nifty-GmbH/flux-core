@@ -77,6 +77,9 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable
     }
 
     // Relations
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function model(): MorphTo
     {
         return $this->morphTo('model');

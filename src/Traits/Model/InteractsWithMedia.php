@@ -123,6 +123,9 @@ trait InteractsWithMedia
         return resolve_static(FluxMedia::class, 'class');
     }
 
+    /**
+     * @return MorphToMany<MediaFolder, $this>
+     */
     public function mediaFolders(): MorphToMany
     {
         return $this->morphToMany(MediaFolder::class, 'model', 'media_folder_model');

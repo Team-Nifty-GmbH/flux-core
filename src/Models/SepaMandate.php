@@ -47,16 +47,25 @@ class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Contact, $this>
+     */
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
     }
 
+    /**
+     * @return BelongsTo<ContactBankConnection, $this>
+     */
     public function contactBankConnection(): BelongsTo
     {
         return $this->belongsTo(ContactBankConnection::class);
     }
 
+    /**
+     * @return BelongsTo<Tenant, $this>
+     */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);

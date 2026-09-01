@@ -68,6 +68,9 @@ class Schedule extends FluxModel
     }
 
     // Relations
+    /**
+     * @return BelongsToMany<Order, $this>
+     */
     public function orders(): BelongsToMany
     {
         return $this->belongsToMany(Order::class, 'order_schedule')

@@ -27,12 +27,18 @@ class AddressType extends FluxModel
     }
 
     // Relations
+    /**
+     * @return BelongsToMany<Address, $this>
+     */
     public function addresses(): BelongsToMany
     {
         return $this->belongsToMany(Address::class, 'address_address_type')
             ->using(AddressAddressType::class);
     }
 
+    /**
+     * @return BelongsToMany<Order, $this>
+     */
     public function orders(): BelongsToMany
     {
         return $this->belongsToMany(Order::class, 'address_address_type_order')
@@ -40,6 +46,9 @@ class AddressType extends FluxModel
             ->withPivot('address_id');
     }
 
+    /**
+     * @return BelongsToMany<Tenant, $this>
+     */
     public function tenants(): BelongsToMany
     {
         return $this->belongsToMany(Tenant::class, 'address_type_tenant')

@@ -36,16 +36,25 @@ class PaymentReminder extends FluxModel implements HasMediaForeignKey, OffersPri
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Media, $this>
+     */
     public function media(): BelongsTo
     {
         return $this->belongsTo(Media::class);
     }
 
+    /**
+     * @return BelongsTo<Order, $this>
+     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
+    /**
+     * @return HasMany<PaymentReminder, $this>
+     */
     public function siblings(): HasMany
     {
         return $this->hasMany(PaymentReminder::class, 'order_id', 'order_id')

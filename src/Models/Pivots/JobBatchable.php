@@ -3,6 +3,7 @@
 namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\JobBatch;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
@@ -22,11 +23,17 @@ class JobBatchable extends FluxPivot
     }
 
     // Relations
+    /**
+     * @return BelongsTo<JobBatch, $this>
+     */
     public function jobBatch(): BelongsTo
     {
         return $this->belongsTo(JobBatch::class);
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function jobBatchable(): MorphTo
     {
         return $this->morphTo();

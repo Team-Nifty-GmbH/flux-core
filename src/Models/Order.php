@@ -491,11 +491,17 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Address, $this>
+     */
     public function addressDelivery(): BelongsTo
     {
         return $this->belongsTo(Address::class, 'address_delivery_id');
     }
 
+    /**
+     * @return BelongsToMany<Address, $this>
+     */
     public function addresses(): BelongsToMany
     {
         return $this->belongsToMany(Address::class, 'address_address_type_order')
@@ -503,6 +509,9 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ->withPivot(['address_type_id', 'address']);
     }
 
+    /**
+     * @return BelongsTo<Address, $this>
+     */
     public function addressInvoice(): BelongsTo
     {
         return $this->belongsTo(Address::class, 'address_invoice_id');
@@ -515,150 +524,237 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ->withPivot('address_id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function agent(): BelongsTo
     {
         return $this->belongsTo(User::class, 'agent_id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function approvalUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approval_user_id');
     }
 
+    /**
+     * @return HasMany<Commission, $this>
+     */
     public function commissions(): HasMany
     {
         return $this->hasMany(Commission::class);
     }
 
+    /**
+     * @return BelongsTo<Contact, $this>
+     */
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
     }
 
+    /**
+     * @return BelongsTo<ContactBankConnection, $this>
+     */
     public function contactBankConnection(): BelongsTo
     {
         return $this->belongsTo(ContactBankConnection::class);
     }
 
+    /**
+     * @return BelongsTo<Order, $this>
+     */
     public function createdFrom(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'created_from_id');
     }
 
+    /**
+     * @return HasMany<Order, $this>
+     */
     public function createdOrders(): HasMany
     {
         return $this->hasMany(Order::class, 'created_from_id');
     }
 
+    /**
+     * @return BelongsTo<Currency, $this>
+     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
     }
 
+    /**
+     * @return MorphMany<Discount, $this>
+     */
     public function discounts(): MorphMany
     {
         return $this->morphMany(Discount::class, 'model');
     }
 
+    /**
+     * @return BelongsTo<Language, $this>
+     */
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);
     }
 
+    /**
+     * @return MorphMany<LedgerBooking, $this>
+     */
     public function ledgerBookings(): MorphMany
     {
         return $this->morphMany(LedgerBooking::class, 'source');
     }
 
+    /**
+     * @return BelongsTo<Lead, $this>
+     */
     public function lead(): BelongsTo
     {
         return $this->belongsTo(Lead::class);
     }
 
+    /**
+     * @return HasMany<OrderPosition, $this>
+     */
     public function orderPositions(): HasMany
     {
         return $this->hasMany(OrderPosition::class);
     }
 
+    /**
+     * @return HasMany<OrderTransaction, $this>
+     */
     public function orderTransactions(): HasMany
     {
         return $this->hasMany(OrderTransaction::class);
     }
 
+    /**
+     * @return BelongsTo<OrderType, $this>
+     */
     public function orderType(): BelongsTo
     {
         return $this->belongsTo(OrderType::class);
     }
 
+    /**
+     * @return HasMany<PaymentReminder, $this>
+     */
     public function paymentReminders(): HasMany
     {
         return $this->hasMany(PaymentReminder::class);
     }
 
+    /**
+     * @return BelongsToMany<PaymentRun, $this>
+     */
     public function paymentRuns(): BelongsToMany
     {
         return $this->belongsToMany(PaymentRun::class, 'order_payment_run')
             ->using(OrderPaymentRun::class);
     }
 
+    /**
+     * @return BelongsTo<PaymentType, $this>
+     */
     public function paymentType(): BelongsTo
     {
         return $this->belongsTo(PaymentType::class);
     }
 
+    /**
+     * @return BelongsTo<PriceList, $this>
+     */
     public function priceList(): BelongsTo
     {
         return $this->belongsTo(PriceList::class);
     }
 
+    /**
+     * @return HasMany<Project, $this>
+     */
     public function projects(): HasMany
     {
         return $this->hasMany(Project::class);
     }
 
+    /**
+     * @return HasOne<PurchaseInvoice, $this>
+     */
     public function purchaseInvoice(): HasOne
     {
         return $this->hasOne(PurchaseInvoice::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function responsibleUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsible_user_id');
     }
 
+    /**
+     * @return BelongsToMany<Schedule, $this>
+     */
     public function schedules(): BelongsToMany
     {
         return $this->belongsToMany(Schedule::class, 'order_schedule')
             ->using(OrderSchedule::class);
     }
 
+    /**
+     * @return HasManyThrough<Task, Project, $this>
+     */
     public function tasks(): HasManyThrough
     {
         return $this->hasManyThrough(Task::class, Project::class);
     }
 
+    /**
+     * @return BelongsTo<Tenant, $this>
+     */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
     }
 
+    /**
+     * @return BelongsToMany<Transaction, $this>
+     */
     public function transactions(): BelongsToMany
     {
         return $this->belongsToMany(Transaction::class, 'order_transaction')
             ->using(OrderTransaction::class);
     }
 
+    /**
+     * @return BelongsToMany<User, $this>
+     */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'order_user')
             ->using(OrderUser::class);
     }
 
+    /**
+     * @return BelongsTo<VatRate, $this>
+     */
     public function vatRate(): BelongsTo
     {
         return $this->belongsTo(VatRate::class);
     }
 
+    /**
+     * @return HasManyThrough<VatRate, OrderPosition, $this>
+     */
     public function vatRates(): HasManyThrough
     {
         return $this->hasManyThrough(

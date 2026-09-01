@@ -23,32 +23,50 @@ class Location extends FluxModel
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Country, $this>
+     */
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
     }
 
+    /**
+     * @return BelongsTo<CountryRegion, $this>
+     */
     public function countryRegion(): BelongsTo
     {
         return $this->belongsTo(CountryRegion::class);
     }
 
+    /**
+     * @return HasMany<EmployeeDepartment, $this>
+     */
     public function departments(): HasMany
     {
         return $this->hasMany(EmployeeDepartment::class);
     }
 
+    /**
+     * @return HasMany<Employee, $this>
+     */
     public function employees(): HasMany
     {
         return $this->hasMany(Employee::class);
     }
 
+    /**
+     * @return BelongsToMany<Holiday, $this>
+     */
     public function holidays(): BelongsToMany
     {
         return $this->belongsToMany(Holiday::class, 'holiday_location')
             ->using(HolidayLocation::class);
     }
 
+    /**
+     * @return BelongsToMany<VacationBlackout, $this>
+     */
     public function vacationBlackouts(): BelongsToMany
     {
         return $this->belongsToMany(VacationBlackout::class, 'location_vacation_blackout')

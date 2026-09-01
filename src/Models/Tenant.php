@@ -48,29 +48,44 @@ class Tenant extends FluxModel implements HasMedia
     }
 
     // Relations
+    /**
+     * @return BelongsToMany<BankConnection, $this>
+     */
     public function bankConnections(): BelongsToMany
     {
         return $this->belongsToMany(BankConnection::class, 'bank_connection_tenant')
             ->using(BankConnectionTenant::class);
     }
 
+    /**
+     * @return BelongsTo<Country, $this>
+     */
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
     }
 
+    /**
+     * @return BelongsToMany<PaymentType, $this>
+     */
     public function paymentTypes(): BelongsToMany
     {
         return $this->belongsToMany(PaymentType::class, 'payment_type_tenant')
             ->using(PaymentTypeTenant::class);
     }
 
+    /**
+     * @return BelongsToMany<Product, $this>
+     */
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'product_tenant')
             ->using(ProductTenant::class);
     }
 
+    /**
+     * @return HasMany<Project, $this>
+     */
     public function projects(): HasMany
     {
         return $this->hasMany(Project::class);

@@ -18,6 +18,9 @@ class Industry extends FluxModel
     ];
 
     // Relations
+    /**
+     * @return BelongsToMany<Contact, $this>
+     */
     public function contacts(): BelongsToMany
     {
         return $this->belongsToMany(Contact::class, 'contact_industry')

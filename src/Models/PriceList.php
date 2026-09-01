@@ -57,28 +57,43 @@ class PriceList extends FluxModel
     }
 
     // Relations
+    /**
+     * @return BelongsToMany<Discount, $this>
+     */
     public function categoryDiscounts(): BelongsToMany
     {
         return $this->belongsToMany(Discount::class, 'category_price_list')
             ->using(CategoryPriceList::class);
     }
 
+    /**
+     * @return HasMany<Contact, $this>
+     */
     public function contacts(): HasMany
     {
         return $this->hasMany(Contact::class, 'price_list_id');
     }
 
+    /**
+     * @return MorphOne<Discount, $this>
+     */
     public function discount(): MorphOne
     {
         return $this->morphOne(Discount::class, 'model');
     }
 
+    /**
+     * @return BelongsToMany<Category, $this>
+     */
     public function discountedCategories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class, 'category_price_list')
             ->using(CategoryPriceList::class);
     }
 
+    /**
+     * @return HasMany<Price, $this>
+     */
     public function prices(): HasMany
     {
         return $this->hasMany(Price::class);

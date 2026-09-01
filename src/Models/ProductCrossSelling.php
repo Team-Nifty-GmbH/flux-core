@@ -23,11 +23,17 @@ class ProductCrossSelling extends FluxModel implements Sortable
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Product, $this>
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
+    /**
+     * @return BelongsToMany<Product, $this>
+     */
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'product_cross_selling_product')

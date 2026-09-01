@@ -24,18 +24,27 @@ class VacationBlackout extends FluxModel
     }
 
     // Relations
+    /**
+     * @return BelongsToMany<EmployeeDepartment, $this>
+     */
     public function employeeDepartments(): BelongsToMany
     {
         return $this->belongsToMany(EmployeeDepartment::class, 'employee_department_vacation_blackout')
             ->using(EmployeeDepartmentVacationBlackout::class);
     }
 
+    /**
+     * @return BelongsToMany<Employee, $this>
+     */
     public function employees(): BelongsToMany
     {
         return $this->belongsToMany(Employee::class, 'employee_vacation_blackout')
             ->using(EmployeeVacationBlackout::class);
     }
 
+    /**
+     * @return BelongsToMany<Location, $this>
+     */
     public function locations(): BelongsToMany
     {
         return $this->belongsToMany(Location::class, 'location_vacation_blackout')

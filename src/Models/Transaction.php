@@ -53,27 +53,42 @@ class Transaction extends FluxModel implements HasMedia, InteractsWithDataTables
     }
 
     // Relations
+    /**
+     * @return BelongsTo<BankConnection, $this>
+     */
     public function bankConnection(): BelongsTo
     {
         return $this->belongsTo(BankConnection::class);
     }
 
+    /**
+     * @return BelongsTo<Currency, $this>
+     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
     }
 
+    /**
+     * @return BelongsToMany<LedgerAccount, $this>
+     */
     public function ledgerAccounts(): BelongsToMany
     {
         return $this->belongsToMany(LedgerAccount::class)
             ->using(LedgerAccountTransaction::class);
     }
 
+    /**
+     * @return HasMany<LedgerAccountTransaction, $this>
+     */
     public function ledgerAccountTransactions(): HasMany
     {
         return $this->hasMany(LedgerAccountTransaction::class);
     }
 
+    /**
+     * @return BelongsToMany<LoanInstallment, $this>
+     */
     public function loanInstallments(): BelongsToMany
     {
         return $this->belongsToMany(LoanInstallment::class)
@@ -81,17 +96,26 @@ class Transaction extends FluxModel implements HasMedia, InteractsWithDataTables
             ->withPivot(['pivot_id', 'amount', 'note', 'is_accepted']);
     }
 
+    /**
+     * @return HasMany<LoanInstallmentTransaction, $this>
+     */
     public function loanInstallmentTransactions(): HasMany
     {
         return $this->hasMany(LoanInstallmentTransaction::class);
     }
 
+    /**
+     * @return BelongsToMany<Order, $this>
+     */
     public function orders(): BelongsToMany
     {
         return $this->belongsToMany(Order::class)
             ->using(OrderTransaction::class);
     }
 
+    /**
+     * @return HasMany<OrderTransaction, $this>
+     */
     public function orderTransactions(): HasMany
     {
         return $this->hasMany(OrderTransaction::class);

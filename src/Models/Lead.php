@@ -174,36 +174,57 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Address, $this>
+     */
     public function address(): BelongsTo
     {
         return $this->belongsTo(Address::class);
     }
 
+    /**
+     * @return BelongsTo<Address, $this>
+     */
     public function addressRecommendedBy(): BelongsTo
     {
         return $this->belongsTo(Address::class, 'recommended_by_address_id');
     }
 
+    /**
+     * @return HasOneThrough<Contact, Address, $this>
+     */
     public function contact(): HasOneThrough
     {
         return $this->hasOneThrough(Contact::class, Address::class);
     }
 
+    /**
+     * @return BelongsTo<LeadLossReason, $this>
+     */
     public function leadLossReason(): BelongsTo
     {
         return $this->belongsTo(LeadLossReason::class);
     }
 
+    /**
+     * @return BelongsTo<LeadState, $this>
+     */
     public function leadState(): BelongsTo
     {
         return $this->belongsTo(LeadState::class);
     }
 
+    /**
+     * @return HasMany<Order, $this>
+     */
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

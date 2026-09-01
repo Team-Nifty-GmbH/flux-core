@@ -16,6 +16,7 @@ use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -249,16 +250,25 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Contact, $this>
+     */
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
     }
 
+    /**
+     * @return BelongsTo<Employee, $this>
+     */
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
     }
 
+    /**
+     * @return BelongsToMany<EmployeeDay, $this>
+     */
     public function employeeDays(): BelongsToMany
     {
         return $this->belongsToMany(EmployeeDay::class, 'employee_day_work_time')
@@ -280,21 +290,33 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
         return $channels;
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function model(): MorphTo
     {
         return $this->morphTo('trackable');
     }
 
+    /**
+     * @return BelongsTo<OrderPosition, $this>
+     */
     public function orderPosition(): BelongsTo
     {
         return $this->belongsTo(OrderPosition::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<WorkTimeType, $this>
+     */
     public function workTimeType(): BelongsTo
     {
         return $this->belongsTo(WorkTimeType::class);

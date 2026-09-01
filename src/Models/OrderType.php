@@ -48,16 +48,25 @@ class OrderType extends FluxModel implements Sortable
     }
 
     // Relations
+    /**
+     * @return BelongsTo<EmailTemplate, $this>
+     */
     public function emailTemplate(): BelongsTo
     {
         return $this->belongsTo(EmailTemplate::class);
     }
 
+    /**
+     * @return HasMany<Order, $this>
+     */
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }
 
+    /**
+     * @return BelongsToMany<Tenant, $this>
+     */
     public function tenants(): BelongsToMany
     {
         return $this->belongsToMany(Tenant::class, 'order_type_tenant')

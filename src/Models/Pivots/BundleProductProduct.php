@@ -30,16 +30,25 @@ class BundleProductProduct extends FluxPivot
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Product, $this>
+     */
     public function bundleProduct(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'bundle_product_id');
     }
 
+    /**
+     * @return BelongsTo<Product, $this>
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
 
+    /**
+     * @return HasMany<BundleProductProduct, $this>
+     */
     public function siblings(): HasMany
     {
         return $this->hasMany(BundleProductProduct::class, 'product_id', 'product_id');

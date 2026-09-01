@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 trait HasCalendarUserSettings
 {
+    /**
+     * @return MorphMany<CalendarUserSetting, $this>
+     */
     public function calendarUserSettings(): MorphMany
     {
         return $this->morphMany(CalendarUserSetting::class, 'authenticatable');

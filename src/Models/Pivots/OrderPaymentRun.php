@@ -46,11 +46,17 @@ class OrderPaymentRun extends FluxPivot
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Order, $this>
+     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
+    /**
+     * @return BelongsTo<PaymentRun, $this>
+     */
     public function paymentRun(): BelongsTo
     {
         return $this->belongsTo(PaymentRun::class);

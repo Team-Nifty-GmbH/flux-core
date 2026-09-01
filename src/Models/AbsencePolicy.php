@@ -24,6 +24,9 @@ class AbsencePolicy extends FluxModel
     }
 
     // Relations
+    /**
+     * @return BelongsToMany<AbsenceType, $this>
+     */
     public function absenceTypes(): BelongsToMany
     {
         return $this->belongsToMany(AbsenceType::class, 'absence_policy_absence_type')

@@ -31,11 +31,17 @@ class ProductProperty extends FluxModel
     }
 
     // Relations
+    /**
+     * @return BelongsTo<ProductPropertyGroup, $this>
+     */
     public function productPropertyGroup(): BelongsTo
     {
         return $this->belongsTo(ProductPropertyGroup::class);
     }
 
+    /**
+     * @return BelongsToMany<Product, $this>
+     */
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(

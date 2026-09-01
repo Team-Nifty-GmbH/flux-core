@@ -22,6 +22,7 @@ use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Model\Trackable;
 use FluxErp\Traits\Scout\Searchable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -85,21 +86,33 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
     }
 
     // Relations
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function authenticatable(): MorphTo
     {
         return $this->morphTo('authenticatable');
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function model(): MorphTo
     {
         return $this->morphTo('model');
     }
 
+    /**
+     * @return BelongsTo<TicketType, $this>
+     */
     public function ticketType(): BelongsTo
     {
         return $this->belongsTo(TicketType::class);
     }
 
+    /**
+     * @return BelongsToMany<User, $this>
+     */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'ticket_user')

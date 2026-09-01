@@ -27,22 +27,34 @@ class EmployeeDay extends FluxModel implements InteractsWithDataTables
     }
 
     // Relations
+    /**
+     * @return BelongsToMany<AbsenceRequest, $this>
+     */
     public function absenceRequests(): BelongsToMany
     {
         return $this->belongsToMany(AbsenceRequest::class, 'absence_request_employee_day')
             ->using(AbsenceRequestEmployeeDay::class);
     }
 
+    /**
+     * @return BelongsTo<Employee, $this>
+     */
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
     }
 
+    /**
+     * @return BelongsTo<Holiday, $this>
+     */
     public function holiday(): BelongsTo
     {
         return $this->belongsTo(Holiday::class);
     }
 
+    /**
+     * @return BelongsToMany<WorkTime, $this>
+     */
     public function workTimes(): BelongsToMany
     {
         return $this->belongsToMany(WorkTime::class, 'employee_day_work_time')

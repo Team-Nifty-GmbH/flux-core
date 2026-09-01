@@ -22,16 +22,25 @@ class Printer extends FluxModel
     }
 
     // Relations
+    /**
+     * @return HasMany<PrinterUser, $this>
+     */
     public function printerUsers(): HasMany
     {
         return $this->hasMany(PrinterUser::class);
     }
 
+    /**
+     * @return HasMany<PrintJob, $this>
+     */
     public function printJobs(): HasMany
     {
         return $this->hasMany(PrintJob::class);
     }
 
+    /**
+     * @return BelongsToMany<User, $this>
+     */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'printer_user')

@@ -34,16 +34,25 @@ class BankConnection extends FluxModel
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Currency, $this>
+     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
     }
 
+    /**
+     * @return BelongsTo<LedgerAccount, $this>
+     */
     public function ledgerAccount(): BelongsTo
     {
         return $this->belongsTo(LedgerAccount::class);
     }
 
+    /**
+     * @return BelongsToMany<Tenant, $this>
+     */
     public function tenants(): BelongsToMany
     {
         return $this->belongsToMany(Tenant::class, 'bank_connection_tenant')

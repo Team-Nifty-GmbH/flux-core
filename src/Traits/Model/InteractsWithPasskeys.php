@@ -9,6 +9,9 @@ trait InteractsWithPasskeys
 {
     use \Spatie\LaravelPasskeys\Models\Concerns\InteractsWithPasskeys;
 
+    /**
+     * @return HasMany<Passkey, $this>
+     */
     public function passkeys(): HasMany
     {
         return $this->hasMany(Passkey::class, 'authenticatable_id')

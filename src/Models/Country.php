@@ -27,26 +27,41 @@ class Country extends FluxModel
     }
 
     // Relations
+    /**
+     * @return HasMany<Address, $this>
+     */
     public function addresses(): HasMany
     {
         return $this->hasMany(Address::class);
     }
 
+    /**
+     * @return BelongsTo<Currency, $this>
+     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
     }
 
+    /**
+     * @return BelongsTo<Language, $this>
+     */
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);
     }
 
+    /**
+     * @return HasMany<CountryRegion, $this>
+     */
     public function regions(): HasMany
     {
         return $this->hasMany(CountryRegion::class);
     }
 
+    /**
+     * @return HasMany<Tenant, $this>
+     */
     public function tenants(): HasMany
     {
         return $this->hasMany(Tenant::class);

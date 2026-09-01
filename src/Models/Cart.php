@@ -13,6 +13,7 @@ use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
@@ -34,21 +35,33 @@ class Cart extends FluxModel
     }
 
     // Relations
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function authenticatable(): MorphTo
     {
         return $this->morphTo();
     }
 
+    /**
+     * @return HasMany<CartItem, $this>
+     */
     public function cartItems(): HasMany
     {
         return $this->hasMany(CartItem::class);
     }
 
+    /**
+     * @return BelongsTo<PriceList, $this>
+     */
     public function priceList(): BelongsTo
     {
         return $this->belongsTo(PriceList::class);
     }
 
+    /**
+     * @return HasManyThrough<Product, CartItem, $this>
+     */
     public function products(): HasManyThrough
     {
         return $this->hasManyThrough(

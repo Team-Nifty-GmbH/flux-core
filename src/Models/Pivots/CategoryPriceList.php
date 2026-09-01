@@ -12,16 +12,25 @@ class CategoryPriceList extends FluxPivot
     protected $table = 'category_price_list';
 
     // Relations
+    /**
+     * @return BelongsTo<Category, $this>
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
+    /**
+     * @return BelongsTo<Discount, $this>
+     */
     public function discount(): BelongsTo
     {
         return $this->belongsTo(Discount::class);
     }
 
+    /**
+     * @return BelongsTo<PriceList, $this>
+     */
     public function priceList(): BelongsTo
     {
         return $this->belongsTo(PriceList::class);

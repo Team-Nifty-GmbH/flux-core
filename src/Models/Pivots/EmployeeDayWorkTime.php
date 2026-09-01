@@ -14,11 +14,17 @@ class EmployeeDayWorkTime extends FluxPivot
     protected $table = 'employee_day_work_time';
 
     // Relations
+    /**
+     * @return BelongsTo<EmployeeDay, $this>
+     */
     public function employeeDay(): BelongsTo
     {
         return $this->belongsTo(EmployeeDay::class);
     }
 
+    /**
+     * @return BelongsTo<WorkTime, $this>
+     */
     public function workTime(): BelongsTo
     {
         return $this->belongsTo(WorkTime::class);

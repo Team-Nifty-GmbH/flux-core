@@ -13,6 +13,9 @@ trait MonitorsQueue
         return $this->morphToMany(JobBatch::class, 'job_batchable', 'job_batchables');
     }
 
+    /**
+     * @return MorphToMany<QueueMonitor, $this>
+     */
     public function queueMonitors(): MorphToMany
     {
         return $this->morphToMany(QueueMonitor::class, 'queue_monitorable', 'queue_monitorable');

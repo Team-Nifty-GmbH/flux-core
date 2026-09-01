@@ -19,11 +19,17 @@ class RecordOrigin extends FluxModel
     }
 
     // Relations
+    /**
+     * @return HasMany<Contact, $this>
+     */
     public function contacts(): HasMany
     {
         return $this->hasMany(Contact::class, 'record_origin_id');
     }
 
+    /**
+     * @return HasMany<Lead, $this>
+     */
     public function leads(): HasMany
     {
         return $this->hasMany(Lead::class, 'record_origin_id');

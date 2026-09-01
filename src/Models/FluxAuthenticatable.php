@@ -16,6 +16,9 @@ abstract class FluxAuthenticatable extends User
     use BroadcastsEvents, CausesActivity, HasApiTokens, HasModelPermission, ResolvesRelationsThroughContainer;
 
     // Relations
+    /**
+     * @return MorphMany<DeviceToken, $this>
+     */
     public function deviceTokens(): MorphMany
     {
         return $this->morphMany(DeviceToken::class, 'authenticatable');

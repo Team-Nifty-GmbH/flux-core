@@ -29,12 +29,18 @@ class AbsenceType extends FluxModel implements InteractsWithDataTables
     }
 
     // Relations
+    /**
+     * @return BelongsToMany<AbsencePolicy, $this>
+     */
     public function absencePolicies(): BelongsToMany
     {
         return $this->belongsToMany(AbsencePolicy::class, 'absence_policy_absence_type')
             ->using(AbsencePolicyAbsenceType::class);
     }
 
+    /**
+     * @return HasMany<AbsenceRequest, $this>
+     */
     public function absenceRequests(): HasMany
     {
         return $this->hasMany(AbsenceRequest::class);

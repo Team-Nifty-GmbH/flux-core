@@ -20,6 +20,9 @@ class PaymentReminderText extends FluxModel
     }
 
     // Relations
+    /**
+     * @return BelongsTo<EmailTemplate, $this>
+     */
     public function emailTemplate(): BelongsTo
     {
         return $this->belongsTo(EmailTemplate::class);

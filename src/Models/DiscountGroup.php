@@ -21,12 +21,18 @@ class DiscountGroup extends FluxModel
     }
 
     // Relations
+    /**
+     * @return BelongsToMany<Contact, $this>
+     */
     public function contacts(): BelongsToMany
     {
         return $this->belongsToMany(Contact::class, 'contact_discount_group')
             ->using(ContactDiscountGroup::class);
     }
 
+    /**
+     * @return BelongsToMany<Discount, $this>
+     */
     public function discounts(): BelongsToMany
     {
         return $this->belongsToMany(Discount::class, 'discount_discount_group')

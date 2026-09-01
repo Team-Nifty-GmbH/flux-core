@@ -11,11 +11,17 @@ class TicketUser extends FluxPivot
     protected $table = 'ticket_user';
 
     // Relations
+    /**
+     * @return BelongsTo<Ticket, $this>
+     */
     public function ticket(): BelongsTo
     {
         return $this->belongsTo(Ticket::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

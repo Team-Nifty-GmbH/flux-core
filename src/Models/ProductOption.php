@@ -21,11 +21,17 @@ class ProductOption extends FluxModel
         SoftDeletes;
 
     // Relations
+    /**
+     * @return BelongsTo<ProductOptionGroup, $this>
+     */
     public function productOptionGroup(): BelongsTo
     {
         return $this->belongsTo(ProductOptionGroup::class);
     }
 
+    /**
+     * @return BelongsToMany<Product, $this>
+     */
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'product_product_option')

@@ -151,6 +151,9 @@ trait HasAttributeTranslations
         ];
     }
 
+    /**
+     * @return MorphMany<AttributeTranslation, $this>
+     */
     public function attributeTranslations(): MorphMany
     {
         return $this->morphMany(AttributeTranslation::class, 'model');

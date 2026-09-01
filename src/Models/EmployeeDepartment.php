@@ -23,21 +23,33 @@ class EmployeeDepartment extends FluxModel
     }
 
     // Relations
+    /**
+     * @return HasMany<Employee, $this>
+     */
     public function employees(): HasMany
     {
         return $this->hasMany(Employee::class, 'employee_department_id');
     }
 
+    /**
+     * @return BelongsTo<Location, $this>
+     */
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
     }
 
+    /**
+     * @return BelongsTo<Employee, $this>
+     */
     public function manager(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'manager_employee_id');
     }
 
+    /**
+     * @return BelongsToMany<VacationBlackout, $this>
+     */
     public function vacationBlackouts(): BelongsToMany
     {
         return $this->belongsToMany(VacationBlackout::class, 'employee_department_vacation_blackout')

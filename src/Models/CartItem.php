@@ -38,16 +38,25 @@ class CartItem extends FluxModel implements Sortable
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Cart, $this>
+     */
     public function cart(): BelongsTo
     {
         return $this->belongsTo(Cart::class);
     }
 
+    /**
+     * @return BelongsTo<Product, $this>
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
+    /**
+     * @return BelongsTo<VatRate, $this>
+     */
     public function vatRate(): BelongsTo
     {
         return $this->belongsTo(VatRate::class);

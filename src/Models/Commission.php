@@ -22,21 +22,33 @@ class Commission extends FluxModel implements InteractsWithDataTables
     }
 
     // Relations
+    /**
+     * @return BelongsTo<OrderPosition, $this>
+     */
     public function creditNoteOrderPosition(): BelongsTo
     {
         return $this->belongsTo(OrderPosition::class, 'credit_note_order_position_id');
     }
 
+    /**
+     * @return BelongsTo<Order, $this>
+     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
+    /**
+     * @return BelongsTo<OrderPosition, $this>
+     */
     public function orderPosition(): BelongsTo
     {
         return $this->belongsTo(OrderPosition::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

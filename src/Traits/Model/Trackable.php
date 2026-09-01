@@ -21,6 +21,9 @@ trait Trackable
         return null;
     }
 
+    /**
+     * @return MorphMany<WorkTime, $this>
+     */
     public function workTimes(): MorphMany
     {
         return $this->morphMany(WorkTime::class, 'trackable');

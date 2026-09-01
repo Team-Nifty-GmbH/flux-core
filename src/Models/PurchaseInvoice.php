@@ -54,46 +54,73 @@ class PurchaseInvoice extends FluxModel implements HasMedia, HasMediaForeignKey
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Contact, $this>
+     */
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
     }
 
+    /**
+     * @return BelongsTo<Currency, $this>
+     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
     }
 
+    /**
+     * @return BelongsTo<Media, $this>
+     */
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Media::class, 'media_id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function layOutUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'lay_out_user_id');
     }
 
+    /**
+     * @return BelongsTo<Order, $this>
+     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
+    /**
+     * @return BelongsTo<OrderType, $this>
+     */
     public function orderType(): BelongsTo
     {
         return $this->belongsTo(OrderType::class);
     }
 
+    /**
+     * @return BelongsTo<PaymentType, $this>
+     */
     public function paymentType(): BelongsTo
     {
         return $this->belongsTo(PaymentType::class);
     }
 
+    /**
+     * @return HasMany<PurchaseInvoicePosition, $this>
+     */
     public function purchaseInvoicePositions(): HasMany
     {
         return $this->hasMany(PurchaseInvoicePosition::class);
     }
 
+    /**
+     * @return BelongsTo<Tenant, $this>
+     */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);

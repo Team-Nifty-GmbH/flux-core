@@ -29,11 +29,17 @@ class JobBatch extends FluxModel
     }
 
     // Relations
+    /**
+     * @return HasMany<JobBatchable, $this>
+     */
     public function jobBatchables(): HasMany
     {
         return $this->hasMany(JobBatchable::class);
     }
 
+    /**
+     * @return HasMany<QueueMonitor, $this>
+     */
     public function queueMonitors(): HasMany
     {
         return $this->hasMany(QueueMonitor::class);

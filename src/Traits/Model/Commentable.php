@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 trait Commentable
 {
+    /**
+     * @return MorphMany<Comment, $this>
+     */
     public function comments(): MorphMany
     {
         return $this->morphMany(Comment::class, 'model')

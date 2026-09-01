@@ -29,16 +29,25 @@ class PrintJob extends FluxModel implements HasMediaForeignKey
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Media, $this>
+     */
     public function media(): BelongsTo
     {
         return $this->belongsTo(Media::class);
     }
 
+    /**
+     * @return BelongsTo<Printer, $this>
+     */
     public function printer(): BelongsTo
     {
         return $this->belongsTo(Printer::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
