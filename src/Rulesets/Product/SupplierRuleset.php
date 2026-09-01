@@ -6,6 +6,7 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Pivots\ProductSupplier;
 use FluxErp\Models\Unit;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
 
 class SupplierRuleset extends FluxRuleset
@@ -30,10 +31,15 @@ class SupplierRuleset extends FluxRuleset
                 'suppliers.*.manufacturer_product_number' => 'string|max:255|nullable',
                 'suppliers.*.supplier_product_number' => 'string|max:255|nullable',
                 'suppliers.*.supplier_product_name' => 'string|max:255|nullable',
-                'suppliers.*.packaging_amount' => 'numeric|nullable|min:0',
-                'suppliers.*.packaging_unit_id' => [
-                    'integer',
+                'suppliers.*.packaging_amount' => [
                     'nullable',
+                    'required_with:suppliers.*.packaging_unit_id',
+                    app(Numeric::class, ['min' => 0]),
+                ],
+                'suppliers.*.packaging_unit_id' => [
+                    'nullable',
+                    'required_with:suppliers.*.packaging_amount',
+                    'integer',
                     app(ModelExists::class, ['model' => Unit::class]),
                 ],
                 'suppliers.*.purchase_price' => 'numeric|nullable|min:0',
