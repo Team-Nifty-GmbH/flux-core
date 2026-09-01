@@ -1982,7 +1982,7 @@
     "Package :package installed successfully.": "Paket :package erfolgreich installiert.",
     "Package :package uninstalled successfully.": "Paket :package erfolgreich deinstalliert.",
     "Packages": "Pakete",
-    "Packaging Unit": "Gebindeeinheit",
+    "Packaging Unit": "Einheit je Gebinde",
     "Packed Quantity": "Verpackte Menge",
     "Page": "Seite",
     "pagination.next": "Weiter &raquo;",
