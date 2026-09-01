@@ -8,6 +8,7 @@ use FluxErp\Enums\RepeatableTypeEnum;
 use FluxErp\Models\Transaction;
 use FluxErp\Support\Matching\LoanInstallmentMatcher;
 use FluxErp\Support\Matching\OrderMatcher;
+use FluxErp\Support\Matching\PaymentRunMatcher;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -66,6 +67,7 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
 
     public function handle(): void
     {
+        $paymentRunMatcher = app(PaymentRunMatcher::class);
         $loanInstallmentMatcher = app(LoanInstallmentMatcher::class);
         $orderMatcher = app(OrderMatcher::class);
         $invoiceNumberPatterns = $orderMatcher->invoiceNumberPatterns();
@@ -79,10 +81,15 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
             ->latest()
             ->cursor()
             ->each(function (Transaction $transaction) use (
+                $paymentRunMatcher,
                 $loanInstallmentMatcher,
                 $orderMatcher,
                 $invoiceNumberPatterns
             ): void {
+                if ($paymentRunMatcher->match($transaction)) {
+                    return;
+                }
+
                 if ($loanInstallmentMatcher->match($transaction)) {
                     return;
                 }
