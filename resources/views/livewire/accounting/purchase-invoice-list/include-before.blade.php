@@ -160,6 +160,9 @@
                             />
                         </div>
                     </div>
+                    <div x-cloak x-show="!$wire.purchaseInvoiceForm.order_id">
+                        <livewire:accounting.assignable-orders />
+                    </div>
                     <div class="grid grid-cols-2 gap-4">
                         <x-input
                             x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
@@ -581,7 +584,7 @@
                                                 )
                                             "
                                             x-model.number="position.amount"
-                                            :label="__('Amount')"
+                                            :label="__('Quantity')"
                                         />
                                         <x-number
                                             step="0.01"

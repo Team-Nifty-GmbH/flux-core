@@ -5,11 +5,14 @@ use FluxErp\Jobs\Accounting\SendPaymentReminderJob;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
+use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentReminder;
+use FluxErp\Models\PaymentReminderText;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use Illuminate\Support\Facades\Mail;
 use Spatie\Activitylog\Models\Activity;
 
 beforeEach(function (): void {
@@ -70,4 +73,36 @@ test('skips without sending and logs a skip when no reminder text exists for the
         ->exists();
 
     expect($logged)->toBeTrue();
+});
+
+test('fails the job when the reminder mail cannot be sent', function (): void {
+    $orderId = $this->order->getKey();
+
+    PaymentReminderText::factory()->create([
+        'reminder_level' => 1,
+        'email_template_id' => EmailTemplate::factory()->create()->getKey(),
+    ]);
+
+    $pendingMail = Mockery::mock();
+    $pendingMail->shouldReceive('to', 'cc', 'bcc')->andReturnSelf();
+    $pendingMail->shouldReceive('send')
+        ->andThrow(new RuntimeException('SMTP connection refused'));
+
+    Mail::shouldReceive('mailer')->andReturn($pendingMail);
+
+    $job = Mockery::mock(SendPaymentReminderJob::class . '[fail]', [$orderId])
+        ->shouldAllowMockingProtectedMethods();
+    $job->shouldReceive('fail')->once();
+
+    $job->handle();
+
+    // The delivery failure is surfaced, not swallowed as a successful batch job.
+    $logged = Activity::query()
+        ->where('subject_type', morph_alias(Order::class))
+        ->where('subject_id', $orderId)
+        ->where('event', 'payment_reminder_send_failed')
+        ->exists();
+
+    expect($logged)->toBeTrue()
+        ->and(PaymentReminder::query()->where('order_id', $orderId)->count())->toBe(0);
 });

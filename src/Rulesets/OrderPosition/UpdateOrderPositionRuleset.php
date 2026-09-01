@@ -134,6 +134,8 @@ class UpdateOrderPositionRuleset extends FluxRuleset
             'customer_delivery_date' => 'date|nullable',
             'ean_code' => 'string|max:255|nullable',
             'possible_delivery_date' => 'date|nullable',
+            'system_delivery_date' => 'date|nullable|required_with:system_delivery_date_end',
+            'system_delivery_date_end' => 'date|nullable|after_or_equal:system_delivery_date',
             'unit_gram_weight' => 'numeric|nullable',
 
             'description' => 'string|nullable',

@@ -1,4 +1,4 @@
-<x-modal id="edit-loan-modal" :title="__('Loan')" size="6xl">
+<x-modal id="edit-loan-modal" :title="__('Loan')" size="xl">
     <div class="flex flex-col gap-1.5">
         <x-input wire:model="loan.name" :label="__('Name')" required />
         <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
@@ -34,87 +34,60 @@
             ]"
         />
         <x-input wire:model="loan.number" :label="__('Number')" />
-        <div
-            class="flex flex-col gap-1.5"
-            x-bind:class="$wire.loan.id && 'pointer-events-none opacity-60'"
-        >
-            <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
-                <x-number
-                    wire:model="loan.amount"
-                    :label="__('Amount')"
-                    step="0.01"
-                    placeholder="0.00"
-                />
-                <x-number
-                    wire:model="loan.interest_rate"
-                    :label="__('Interest Rate')"
-                    suffix="%"
-                    min="0"
-                    step="0.001"
-                    placeholder="0.000"
-                />
-            </div>
-            <div class="grid grid-cols-1 gap-1.5 md:grid-cols-3">
-                <x-select.styled
-                    wire:model="loan.repayment_type_enum"
-                    :label="__('Repayment Type')"
-                    required
-                    select="label:label|value:value"
-                    :options="\FluxErp\Enums\RepaymentTypeEnum::valuesLocalized()"
-                />
-                <x-number
-                    wire:model="loan.number_of_installments"
-                    :label="__('Number Of Installments')"
-                    step="1"
-                />
-                <x-date wire:model="loan.starts_at" :label="__('Starts At')" />
-            </div>
+        <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
+            <x-number
+                wire:model="loan.amount"
+                :label="__('Amount')"
+                step="0.01"
+                placeholder="0.00"
+            />
+            <x-number
+                wire:model="loan.interest_rate"
+                :label="__('Interest Rate')"
+                suffix="%"
+                min="0"
+                step="0.001"
+                placeholder="0.000"
+            />
         </div>
-
-        <x-flux::features.media.upload-form-object
-            :label="__('Contract')"
-            wire:model="contract"
-            :multiple="false"
-            accept="application/pdf, image/jpeg, image/png"
-        />
-
-        @if ($installments)
-            <div class="mt-4 max-h-96 overflow-y-auto">
-                <x-table>
-                    <x-slot:header>
-                        <table.row>
-                            <th class="text-left">{{ __('Sequence') }}</th>
-                            <th class="text-left">{{ __('Due Date') }}</th>
-                            <th class="text-right">{{ __('Principal') }}</th>
-                            <th class="text-right">{{ __('Interest') }}</th>
-                            <th class="text-right">{{ __('Remaining') }}</th>
-                            <th class="text-left">{{ __('Paid') }}</th>
-                        </table.row>
-                    </x-slot:header>
-                    @foreach ($installments as $installment)
-                        <x-table.row>
-                            <td>{{ $installment['sequence'] }}</td>
-                            <td>{{ $installment['due_date'] }}</td>
-                            <td class="text-right">
-                                {{ number_format((float) $installment['principal_amount'], 2) }}
-                            </td>
-                            <td class="text-right">
-                                {{ number_format((float) $installment['interest_amount'], 2) }}
-                            </td>
-                            <td class="text-right">
-                                {{ number_format((float) $installment['remaining'], 2) }}
-                            </td>
-                            <td>
-                                <x-icon
-                                    :name="$installment['is_paid'] ? 'check' : 'x-mark'"
-                                    class="h-5 w-5"
-                                />
-                            </td>
-                        </x-table.row>
-                    @endforeach
-                </x-table>
-            </div>
-        @endif
+        <div class="grid grid-cols-1 gap-1.5 md:grid-cols-3">
+            <x-select.styled
+                wire:model="loan.repayment_type_enum"
+                :label="__('Repayment Type')"
+                required
+                select="label:label|value:value"
+                :options="\FluxErp\Enums\RepaymentTypeEnum::valuesLocalized()"
+            />
+            <x-number
+                wire:model="loan.number_of_installments"
+                :label="__('Number Of Installments')"
+                step="1"
+            />
+            <x-date wire:model="loan.starts_at" :label="__('Starts At')" />
+        </div>
+        <div class="grid grid-cols-1 gap-1.5 md:grid-cols-3">
+            <x-select.styled
+                wire:model="loan.installment_interval_enum"
+                :label="__('Installment Interval')"
+                select="label:label|value:value"
+                :options="\FluxErp\Enums\InstallmentIntervalEnum::valuesLocalized()"
+            />
+            <x-number
+                wire:model="loan.grace_period_installments"
+                :label="__('Grace Period Installments')"
+                min="0"
+                step="1"
+                placeholder="0"
+                :hint="__('Interest only installments before the repayment starts')"
+            />
+            <x-number
+                wire:model="loan.installment_amount"
+                :label="__('Installment Amount')"
+                step="0.01"
+                placeholder="0.00"
+                :hint="__('Leave empty to derive it from the term')"
+            />
+        </div>
     </div>
     <x-slot:footer>
         <x-button
@@ -126,12 +99,9 @@
         />
         <x-button
             color="indigo"
+            loading="save"
             :text="__('Save')"
-            x-on:click="
-                $wire.save().then((success) => {
-                    if (success) $tsui.close.modal('edit-loan-modal');
-                })
-            "
+            wire:click="save()"
         />
     </x-slot:footer>
 </x-modal>

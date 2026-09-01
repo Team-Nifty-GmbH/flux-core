@@ -6,6 +6,7 @@ use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\ProductProperty;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 
@@ -146,4 +147,31 @@ test('create product rejects a purchase-only vat rate', function (): void {
         'name' => 'Test Widget',
         'vat_rate_id' => $purchaseOnlyVatRate->getKey(),
     ], 'vat_rate_id');
+});
+
+test('update product keeps its properties when none are passed', function (): void {
+    $product = Product::factory()->create();
+    $property = ProductProperty::factory()->create();
+    $product->productProperties()->attach($property->getKey(), ['value' => 'kept']);
+
+    UpdateProduct::make([
+        'id' => $product->getKey(),
+        'name' => 'Updated Widget',
+    ])->validate()->execute();
+
+    expect($product->productProperties()->pluck('id')->all())->toBe([$property->getKey()]);
+});
+
+test('update product syncs its properties when they are passed', function (): void {
+    $product = Product::factory()->create();
+    $stale = ProductProperty::factory()->create();
+    $wanted = ProductProperty::factory()->create();
+    $product->productProperties()->attach($stale->getKey(), ['value' => 'gone']);
+
+    UpdateProduct::make([
+        'id' => $product->getKey(),
+        'product_properties' => [['id' => $wanted->getKey(), 'value' => 'set']],
+    ])->validate()->execute();
+
+    expect($product->productProperties()->pluck('id')->all())->toBe([$wanted->getKey()]);
 });

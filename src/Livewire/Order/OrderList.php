@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 use Laravel\SerializableClosure\SerializableClosure;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -243,7 +244,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         try {
             $this->order->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
 
             return false;
         }
@@ -259,7 +260,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         try {
             $this->collectiveOrder->create();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->collectiveOrder);
 
             return;
         }
@@ -271,8 +272,8 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         JS);
     }
 
-    #[Renderless]
-    public function getOrdersWithoutCoordinatesCount(): int
+    #[Computed]
+    public function ordersWithoutCoordinatesCount(): int
     {
         return $this->buildSearch()
             ->where(function (Builder $query): void {

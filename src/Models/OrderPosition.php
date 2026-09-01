@@ -30,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\EloquentSortable\Sortable;
@@ -129,6 +130,8 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         return [
             'customer_delivery_date',
             'possible_delivery_date',
+            'system_delivery_date',
+            'system_delivery_date_end',
             'created_at',
             'updated_at',
         ];
@@ -152,6 +155,8 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
             'vat_rate_percentage' => Percentage::class,
             'customer_delivery_date' => 'date:Y-m-d',
             'possible_delivery_date' => 'date:Y-m-d',
+            'system_delivery_date' => 'date:Y-m-d',
+            'system_delivery_date_end' => 'date:Y-m-d',
             'product_prices' => 'array',
             'post_on_credit_account' => CreditAccountPostingEnum::class,
             'is_alternative' => 'boolean',
@@ -320,6 +325,22 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     public function getTagsAttribute(): Collection
     {
         return $this->tags()->get();
+    }
+
+    protected function performancePeriodEnd(): Attribute
+    {
+        return Attribute::get(
+            fn (): ?Carbon => $this->system_delivery_date
+                ? $this->system_delivery_date_end
+                : $this->order?->system_delivery_date_end
+        );
+    }
+
+    protected function performancePeriodStart(): Attribute
+    {
+        return Attribute::get(
+            fn (): ?Carbon => $this->system_delivery_date ?? $this->order?->system_delivery_date
+        );
     }
 
     protected function slugPosition(): Attribute

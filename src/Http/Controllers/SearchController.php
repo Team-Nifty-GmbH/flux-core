@@ -9,8 +9,10 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Laravel\Scout\SearchableScope;
+use Spatie\EloquentSortable\Sortable;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class SearchController extends Controller
@@ -62,7 +64,14 @@ class SearchController extends Controller
             $query = resolve_static($model, 'query');
             $query->where(function (Builder $query) use ($request): void {
                 foreach (Arr::wrap($request->input('searchFields')) as $field) {
-                    $query->orWhere($field, 'like', '%' . $request->input('search') . '%');
+                    str_contains($field, '.')
+                        ? $query->orWhereRelation(
+                            Str::beforeLast($field, '.'),
+                            Str::afterLast($field, '.'),
+                            'like',
+                            '%' . $request->input('search') . '%'
+                        )
+                        : $query->orWhere($field, 'like', '%' . $request->input('search') . '%');
                 }
             });
         } else {
@@ -86,7 +95,13 @@ class SearchController extends Controller
 
         $this->applyRequestConstraints($query, $request, $model);
 
-        $result = $query->latest()->get();
+        $result = $query
+            ->when(
+                is_a(resolve_static($model, 'class'), Sortable::class, true),
+                fn (Builder $query): Builder => $query->ordered()
+            )
+            ->latest()
+            ->get();
 
         if ($request->has('appends')) {
             $result->each(function ($item) use ($request): void {

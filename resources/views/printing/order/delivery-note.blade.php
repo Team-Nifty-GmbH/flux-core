@@ -9,7 +9,7 @@
             {{ __('Name') }}
         </th>
         <th style="padding-right: 32px; text-align: center; font-weight: 400">
-            {{ __('Amount') }}
+            {{ __('Quantity') }}
         </th>
     </tr>
 @endsection

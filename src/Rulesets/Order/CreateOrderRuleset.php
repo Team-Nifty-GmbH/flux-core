@@ -158,7 +158,6 @@ class CreateOrderRuleset extends FluxRuleset
             'address_delivery.id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Address::class]),
             ],
 
             'delivery_state' => [
@@ -214,6 +213,7 @@ class CreateOrderRuleset extends FluxRuleset
             'has_logistic_notify_phone_number' => 'boolean',
             'has_logistic_notify_number' => 'boolean',
             'is_locked' => 'boolean',
+            'is_self_billed' => 'boolean',
             'is_new_customer' => 'boolean',
             'is_imported' => 'boolean',
             'is_merge_invoice' => 'boolean',

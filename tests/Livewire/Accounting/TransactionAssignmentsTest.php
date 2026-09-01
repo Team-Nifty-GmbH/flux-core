@@ -7,9 +7,12 @@ use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
+use FluxErp\Models\LedgerAccount;
+use FluxErp\Models\Loan;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
+use FluxErp\Models\Pivots\LoanInstallmentTransaction;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Tenant;
@@ -154,7 +157,7 @@ test('assign ledger account through the modal', function (): void {
         'amount' => 3000,
         'balance' => 3000,
     ]);
-    $ledgerAccount = FluxErp\Models\LedgerAccount::factory()->create([
+    $ledgerAccount = LedgerAccount::factory()->create([
         'tenant_id' => Tenant::default()->getKey(),
         'ledger_account_type_enum' => FluxErp\Enums\LedgerAccountTypeEnum::Expense,
     ]);
@@ -257,4 +260,66 @@ test('replacing a staged file before saving stores only the newly picked file', 
 
     expect($media)->toHaveCount(1)
         ->and($media->first()->file_name)->toBe('right.jpg');
+});
+
+test('a loan installment can be assigned, accepted and detached', function (): void {
+    $loan = Loan::factory()->create([
+        'tenant_id' => Tenant::default()->getKey(),
+        'contact_id' => Contact::factory()->create()->getKey(),
+        'ledger_account_id' => LedgerAccount::factory()
+            ->create(['tenant_id' => Tenant::default()->getKey()])
+            ->getKey(),
+        'amount' => 1000,
+        'number_of_installments' => 1,
+    ]);
+    $installment = $loan->installments()->create([
+        'sequence' => 1,
+        'due_date' => now()->toDateString(),
+        'principal_amount' => 1000,
+        'interest_amount' => 10,
+    ]);
+
+    $transaction = Transaction::factory()->create([
+        'bank_connection_id' => BankConnection::factory()->create()->getKey(),
+        'amount' => -1010,
+        'balance' => -1010,
+    ]);
+
+    $component = Livewire::test(TransactionAssignments::class)
+        ->call('assignLoanInstallmentModal', $transaction)
+        ->set('loanInstallmentTransactionForm.loan_installment_id', $installment->getKey())
+        ->set('loanInstallmentTransactionForm.amount', -1010)
+        ->set('loanInstallmentTransactionForm.is_accepted', false)
+        ->call('saveLoanInstallmentTransaction')
+        ->assertHasNoErrors();
+
+    $pivot = LoanInstallmentTransaction::query()
+        ->where('transaction_id', $transaction->getKey())
+        ->firstOrFail();
+
+    expect($pivot->is_accepted)->toBeFalse()
+        ->and($loan->refresh()->remaining)->toEqual(1000);
+
+    $component->call('acceptAll', $transaction)
+        ->assertHasNoErrors();
+
+    expect($pivot->refresh()->is_accepted)->toBeTrue()
+        ->and($loan->refresh()->remaining)->toEqual(0);
+
+    $component->call('deleteLoanInstallmentTransaction', $pivot)
+        ->assertHasNoErrors();
+
+    expect(LoanInstallmentTransaction::query()->whereKey($pivot->getKey())->exists())->toBeFalse()
+        ->and($loan->refresh()->remaining)->toEqual(1000);
+});
+
+test('a ledger account error stays off the sibling transaction forms', function (): void {
+    Livewire::test(TransactionAssignments::class)
+        ->call('saveLedgerAccountTransaction')
+        ->assertHasErrors('ledgerAccountTransactionForm.amount')
+        ->assertHasNoErrors([
+            'loanInstallmentTransactionForm.amount',
+            'orderTransactionForm.amount',
+            'transactionForm.amount',
+        ]);
 });

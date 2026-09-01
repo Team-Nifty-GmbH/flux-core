@@ -72,10 +72,11 @@ beforeEach(function (): void {
         'order_number' => 'K-100',
         'system_delivery_date' => '2026-07-01',
         'system_delivery_date_end' => null,
+        'is_self_billed' => true,
     ]);
 });
 
-test('replicated purchase subscription order gets a generated invoice number', function (): void {
+test('replicated self billed purchase subscription order gets a generated invoice number', function (): void {
     (new ProcessSubscriptionOrder())($this->order->getKey(), $this->targetOrderType->getKey());
 
     $child = $this->order->createdOrders()->latest('id')->first();

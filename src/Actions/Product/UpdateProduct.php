@@ -2,11 +2,12 @@
 
 namespace FluxErp\Actions\Product;
 
-use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\DispatchableFluxAction;
 use FluxErp\Actions\Price\DeletePrice;
 use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
 use FluxErp\Actions\ProductCrossSelling\DeleteProductCrossSelling;
 use FluxErp\Actions\ProductCrossSelling\UpdateProductCrossSelling;
+use FluxErp\Contracts\SupportsBulkExecution;
 use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Helpers\Helper;
 use FluxErp\Models\Media;
@@ -21,7 +22,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
-class UpdateProduct extends FluxAction
+class UpdateProduct extends DispatchableFluxAction implements SupportsBulkExecution
 {
     public static function models(): array
     {
@@ -39,7 +40,12 @@ class UpdateProduct extends FluxAction
         $productCrossSellings = Arr::pull($this->data, 'product_cross_sellings');
         $tenants = Arr::pull($this->data, 'tenants');
 
-        $productProperties = Arr::pull($this->data, 'product_properties');
+        $productProperties = is_null($properties = Arr::pull($this->data, 'product_properties'))
+            ? null
+            : Arr::mapWithKeys(
+                $properties,
+                fn (array $item) => [$item['id'] => ['value' => $item['value']]]
+            );
         $bundleProducts = Arr::pull($this->data, 'bundle_products', false);
         $prices = Arr::pull($this->data, 'prices', false);
         $suppliers = Arr::pull($this->data, 'suppliers');
@@ -74,10 +80,7 @@ class UpdateProduct extends FluxAction
         if (! is_null($productProperties)) {
             resolve_static(PivotInheritanceSync::class, 'syncOwned', [
                 'relation' => $product->productProperties(),
-                'desired' => Arr::mapWithKeys(
-                    $productProperties,
-                    fn (array $item) => [$item['id'] => ['value' => $item['value']]]
-                ),
+                'desired' => $productProperties,
                 'takesOwnership' => $takesOwnership,
             ]);
         }

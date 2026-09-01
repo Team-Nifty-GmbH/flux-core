@@ -5,7 +5,6 @@ use FluxErp\Livewire\Accounting\Loans;
 use FluxErp\Models\Contact;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Loan;
-use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -26,7 +25,6 @@ test('edit with null resets form and opens modal', function (): void {
         ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('loan.id', null)
-        ->assertSet('installments', [])
         ->assertOpensModal('edit-loan-modal');
 });
 
@@ -43,7 +41,10 @@ test('can create a loan with its schedule', function (): void {
         ->set('loan.starts_at', '2026-01-01')
         ->call('save')
         ->assertOk()
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertRedirect(
+            route('accounting.loans.id', ['id' => Loan::query()->value('id')])
+        );
 
     $this->assertDatabaseHas('loans', [
         'name' => 'Machine financing',
@@ -73,48 +74,6 @@ test('a tiny interest rate does not reach bcmath in scientific notation', functi
     ]);
 });
 
-test('edit shows the interest rate as a percentage', function (): void {
-    $loan = Loan::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-        'contact_id' => $this->contact->getKey(),
-        'ledger_account_id' => $this->ledgerAccount->getKey(),
-        'interest_rate' => 0.02299,
-    ]);
-
-    Livewire::test(Loans::class)
-        ->call('edit', $loan->getKey())
-        ->assertOk()
-        ->assertSet('loan.interest_rate', 2.299);
-});
-
-test('edit populates the schedule for an existing loan', function (): void {
-    $loan = Loan::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-        'contact_id' => $this->contact->getKey(),
-        'ledger_account_id' => $this->ledgerAccount->getKey(),
-        'amount' => 12000,
-        'number_of_installments' => 2,
-    ]);
-    $loan->installments()->create([
-        'sequence' => 1,
-        'due_date' => '2026-02-01',
-        'principal_amount' => 6000,
-        'interest_amount' => 0,
-    ]);
-    $loan->installments()->create([
-        'sequence' => 2,
-        'due_date' => '2026-03-01',
-        'principal_amount' => 6000,
-        'interest_amount' => 0,
-    ]);
-
-    Livewire::test(Loans::class)
-        ->call('edit', $loan->getKey())
-        ->assertOk()
-        ->assertSet('loan.id', $loan->getKey())
-        ->assertCount('installments', 2);
-});
-
 test('the list sums the total interest over the whole term', function (): void {
     $loan = Loan::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
@@ -137,6 +96,9 @@ test('the list sums the total interest over the whole term', function (): void {
         'is_paid' => true,
     ]);
 
+    // the schedule was created without the action, so the loan has to catch up once
+    $loan->calculateTotalInterest()->save();
+
     $data = Livewire::test(Loans::class)
         ->call('loadData')
         ->assertOk()
@@ -145,27 +107,7 @@ test('the list sums the total interest over the whole term', function (): void {
 
     expect(data_get($data, 'data.0.total_interest.raw'))->toEqual(90)
         ->and(data_get($data, 'data.0.total_interest.display'))->toContain('text-green-600')
-        ->and(data_get($data, 'data.0.remaining_principal.raw'))->toEqual(6000);
-});
-
-test('can attach a contract to a loan', function (): void {
-    $loan = Loan::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-        'contact_id' => $this->contact->getKey(),
-        'ledger_account_id' => $this->ledgerAccount->getKey(),
-    ]);
-
-    Livewire::test(Loans::class)
-        ->call('edit', $loan->getKey())
-        ->set('contract.file', [UploadedFile::fake()->image('contract.jpg')])
-        ->call('save')
-        ->assertOk()
-        ->assertHasNoErrors();
-
-    $media = $loan->refresh()->getMedia('contract');
-
-    expect($media)->toHaveCount(1)
-        ->and($media->first()->file_name)->toBe('contract.jpg');
+        ->and(data_get($data, 'data.0.remaining.raw'))->toEqual(6000);
 });
 
 test('can delete a loan', function (): void {

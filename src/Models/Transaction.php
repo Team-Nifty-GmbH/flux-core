@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Casts\Money;
 use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Models\Pivots\LedgerAccountTransaction;
+use FluxErp\Models\Pivots\LoanInstallmentTransaction;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Traits\Model\Categorizable;
 use FluxErp\Traits\Model\Commentable;
@@ -73,6 +74,18 @@ class Transaction extends FluxModel implements HasMedia, InteractsWithDataTables
         return $this->hasMany(LedgerAccountTransaction::class);
     }
 
+    public function loanInstallments(): BelongsToMany
+    {
+        return $this->belongsToMany(LoanInstallment::class)
+            ->using(LoanInstallmentTransaction::class)
+            ->withPivot(['pivot_id', 'amount', 'note', 'is_accepted']);
+    }
+
+    public function loanInstallmentTransactions(): HasMany
+    {
+        return $this->hasMany(LoanInstallmentTransaction::class);
+    }
+
     public function orders(): BelongsToMany
     {
         return $this->belongsToMany(Order::class)
@@ -94,10 +107,23 @@ class Transaction extends FluxModel implements HasMedia, InteractsWithDataTables
                 bcsub(
                     bcsub(
                         $this->amount,
-                        $this->orders()->withPivot('amount')->sum('order_transaction.amount'),
+                        $this->orders()
+                            ->wherePivot('is_accepted', true)
+                            ->sum('order_transaction.amount'),
                         9
                     ),
                     $this->ledgerAccountTransactions()
+                        ->where('is_accepted', true)
+                        ->sum('amount'),
+                    9
+                ),
+                2
+            );
+
+            $this->balance = bcround(
+                bcsub(
+                    (string) $this->balance,
+                    (string) $this->loanInstallmentTransactions()
                         ->where('is_accepted', true)
                         ->sum('amount'),
                     9

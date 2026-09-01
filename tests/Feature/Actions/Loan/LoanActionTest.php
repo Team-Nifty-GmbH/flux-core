@@ -3,6 +3,7 @@
 use FluxErp\Actions\Loan\CreateLoan;
 use FluxErp\Actions\Loan\DeleteLoan;
 use FluxErp\Actions\Loan\UpdateLoan;
+use FluxErp\Enums\InstallmentIntervalEnum;
 use FluxErp\Enums\RepaymentTypeEnum;
 use FluxErp\Models\Contact;
 use FluxErp\Models\LedgerAccount;
@@ -30,14 +31,69 @@ function baseLoanData(array $overrides = []): array
     ], $overrides);
 }
 
+test('create loan persists the remaining principal and the total interest', function (): void {
+    $loan = CreateLoan::make(baseLoanData())->validate()->execute();
+
+    $this->assertDatabaseHas('loans', [
+        'id' => $loan->getKey(),
+        'remaining' => 12000,
+    ]);
+
+    expect($loan->refresh()->total_interest)
+        ->toEqual($loan->installments()->sum('interest_amount'))
+        ->and((float) $loan->total_interest)->toBeGreaterThan(0);
+});
+
 test('create loan generates the full repayment schedule', function (): void {
     $loan = CreateLoan::make(baseLoanData())->validate()->execute();
 
     expect($loan->installments()->count())->toBe(12);
-    expect($loan->remaining)->toBe('12000.00');
+    expect($loan->remaining)->toEqual(12000);
     expect($loan->ends_at->toDateString())->toBe('2027-01-01');
 
     $this->assertDatabaseCount('loan_installments', 12);
+});
+
+test('create loan spaces a quarterly schedule and delays it by the grace period', function (): void {
+    $loan = CreateLoan::make(baseLoanData([
+        'name' => 'Development loan',
+        'amount' => 120000,
+        'interest_rate' => 0.0346,
+        'repayment_type_enum' => RepaymentTypeEnum::Linear->value,
+        'number_of_installments' => 20,
+        'installment_interval_enum' => InstallmentIntervalEnum::Quarterly->value,
+        'grace_period_installments' => 8,
+        'starts_at' => '2024-12-30',
+    ]))->validate()->execute();
+
+    expect($loan->installments()->count())->toBe(28)
+        ->and($loan->ends_at->toDateString())->toBe('2031-12-30')
+        ->and($loan->remaining)->toEqual(120000)
+        ->and($loan->installment_amount)->toEqual(7038);
+});
+
+test('create loan keeps a fixed installment amount and settles the rest on the last one', function (): void {
+    $loan = CreateLoan::make(baseLoanData([
+        'name' => 'Car loan',
+        'amount' => 16800,
+        'interest_rate' => 0.0275,
+        'number_of_installments' => 61,
+        'installment_amount' => 300,
+        'starts_at' => '2021-08-30',
+    ]))->validate()->execute();
+
+    $installments = $loan->installments()->orderBy('sequence')->get();
+
+    expect($installments)->toHaveCount(61)
+        ->and($loan->installment_amount)->toEqual(300);
+
+    $lastPayment = bcadd(
+        $installments->last()->principal_amount,
+        $installments->last()->interest_amount,
+        2
+    );
+
+    expect(bccomp($lastPayment, '300.00', 2))->toBe(-1);
 });
 
 test('create loan rejects a foreign tenant contact', function (): void {
@@ -54,11 +110,13 @@ test('create loan rejects a foreign tenant contact', function (): void {
 test('remaining drops after an installment is settled', function (): void {
     $loan = CreateLoan::make(baseLoanData(['interest_rate' => 0]))->validate()->execute();
 
-    expect($loan->remaining)->toBe('12000.00');
+    expect($loan->remaining)->toEqual(12000)
+        ->and((float) $loan->progress)->toEqual(0.0);
 
     $loan->installments()->orderBy('sequence')->first()->update(['is_paid' => true]);
 
-    expect($loan->refresh()->remaining)->toBe('11000.00');
+    expect($loan->refresh()->remaining)->toEqual(11000)
+        ->and(round((float) $loan->progress, 4))->toEqual(0.0833);
 });
 
 test('update loan', function (): void {
@@ -107,4 +165,34 @@ test('delete loan soft deletes', function (): void {
     DeleteLoan::make(['id' => $loan->getKey()])->validate()->execute();
 
     $this->assertSoftDeleted('loans', ['id' => $loan->getKey()]);
+});
+
+test('deleting an installment updates every derived column', function (): void {
+    $loan = CreateLoan::make(baseLoanData(['number_of_installments' => 2, 'interest_rate' => 0.12]))
+        ->validate()
+        ->execute();
+
+    $lastInstallment = $loan->installments()->orderByDesc('sequence')->first();
+    $expectedInterest = bcsub((string) $loan->total_interest, (string) $lastInstallment->interest_amount, 2);
+
+    $lastInstallment->delete();
+
+    expect($loan->refresh()->total_interest)->toEqual($expectedInterest)
+        ->and($loan->remaining)->toEqual($loan->installments()->sum('principal_amount'));
+});
+
+test('a fixed installment amount is rejected for a linear loan', function (): void {
+    CreateLoan::assertValidationErrors(baseLoanData([
+        'repayment_type_enum' => RepaymentTypeEnum::Linear->value,
+        'installment_amount' => 300,
+    ]), 'installment_amount');
+});
+
+test('an installment amount below the interest fails validation instead of erroring out', function (): void {
+    expect(fn () => CreateLoan::make(baseLoanData([
+        'amount' => 100000,
+        'interest_rate' => 0.12,
+        'number_of_installments' => 120,
+        'installment_amount' => 10,
+    ]))->validate()->execute())->toThrow(ValidationException::class);
 });

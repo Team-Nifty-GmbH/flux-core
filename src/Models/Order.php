@@ -483,6 +483,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             'customer_delivery_date' => 'date',
             'date_of_approval' => 'date',
             'is_locked' => 'boolean',
+            'is_self_billed' => 'boolean',
             'is_imported' => 'boolean',
             'is_confirmed' => 'boolean',
             'requires_approval' => 'boolean',

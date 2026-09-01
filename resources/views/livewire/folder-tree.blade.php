@@ -2,7 +2,7 @@
     <div class="w-full min-w-0 overflow-auto">
         <ul class="flex flex-col gap-1">
             <x-flux::checkbox-tree
-                tree="$wire.getTree()"
+                tree="$wire.mediaTree"
                 name-attribute="name"
                 :search-attributes="['name', 'file_name', 'collection_name']"
                 moved="$wire.moveItem(item, node, item.slug ?? item.collection_name ?? getNodePath(item, 'slug'), node.slug ?? node.collection_name ?? getNodePath(node, 'slug'))"
@@ -430,6 +430,48 @@
                                     ></div>
                                 </template>
                             </div>
+                            @canAction(\FluxErp\Actions\Media\UpdateMedia::class)
+                                <div
+                                    class="flex flex-col gap-3 md:flex-row md:items-end"
+                                    x-cloak
+                                    x-show="!$wire.isReadonly && !readOnly"
+                                >
+                                    <div class="w-full md:flex-1">
+                                        <x-input
+                                            :label="__('Name')"
+                                            x-model="selection.name"
+                                        />
+                                    </div>
+                                    <x-button
+                                        class="w-full md:w-auto"
+                                        color="indigo"
+                                        :text="__('Save')"
+                                        x-on:click="
+                                            $wire
+                                                .saveMedia(selection)
+                                                .then((media) => {
+                                                    if (media) {
+                                                        this.selectionProxy =
+                                                            JSON.parse(
+                                                                JSON.stringify(
+                                                                    media,
+                                                                ),
+                                                            );
+                                                        this.selection =
+                                                            JSON.parse(
+                                                                JSON.stringify(
+                                                                    media,
+                                                                ),
+                                                            );
+                                                        updateNode(
+                                                            this.selectionProxy,
+                                                        );
+                                                    }
+                                                })
+                                        "
+                                    />
+                                </div>
+                            @endcanAction
                             <div class="flex flex-wrap gap-2">
                                 <x-button
                                     color="indigo"

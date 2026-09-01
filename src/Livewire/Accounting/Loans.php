@@ -4,12 +4,9 @@ namespace FluxErp\Livewire\Accounting;
 
 use FluxErp\Actions\Loan\CreateLoan;
 use FluxErp\Actions\Loan\DeleteLoan;
-use FluxErp\Actions\Loan\UpdateLoan;
 use FluxErp\Livewire\DataTables\LoanList;
 use FluxErp\Livewire\Forms\LoanForm;
-use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Models\Loan;
-use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -17,15 +14,9 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Loans extends LoanList
 {
-    use WithFileUploads;
-
     public ?string $includeBefore = 'flux::livewire.accounting.loans';
 
     public LoanForm $loan;
-
-    public MediaUploadForm $contract;
-
-    public array $installments = [];
 
     protected function getTableActions(): array
     {
@@ -44,14 +35,6 @@ class Loans extends LoanList
     protected function getRowActions(): array
     {
         return [
-            DataTableButton::make()
-                ->text(__('Edit'))
-                ->icon('pencil')
-                ->color('indigo')
-                ->when(resolve_static(UpdateLoan::class, 'canPerformAction', [false]))
-                ->attributes([
-                    'wire:click' => 'edit(record.id)',
-                ]),
             DataTableButton::make()
                 ->text(__('Delete'))
                 ->icon('trash')
@@ -72,7 +55,7 @@ class Loans extends LoanList
         try {
             $this->loan->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->loan);
 
             return false;
         }
@@ -83,17 +66,9 @@ class Loans extends LoanList
     }
 
     #[Renderless]
-    public function edit(?Loan $loan = null): void
+    public function edit(): void
     {
         $this->loan->reset();
-        $this->contract->reset();
-        $this->installments = [];
-
-        if ($loan?->exists) {
-            $this->loan->fill($loan);
-            $this->contract->fill($loan->getFirstMedia('contract') ?? []);
-            $this->installments = $this->buildSchedule($loan);
-        }
 
         $this->modalOpen('edit-loan-modal');
     }
@@ -103,49 +78,13 @@ class Loans extends LoanList
         try {
             $this->loan->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->loan);
 
             return false;
         }
 
-        $this->contract->model_type = morph_alias(Loan::class);
-        $this->contract->model_id = $this->loan->id;
-        $this->contract->collection_name = 'contract';
-
-        if ($this->contract->stagedFiles || $this->contract->id) {
-            try {
-                $this->contract->save();
-            } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
-            }
-        }
-
-        $this->loadData();
+        $this->redirect(route('accounting.loans.id', ['id' => $this->loan->id]), navigate: true);
 
         return true;
-    }
-
-    /**
-     * The stored installments plus a running remaining balance for display.
-     */
-    protected function buildSchedule(Loan $loan): array
-    {
-        $remaining = $loan->amount;
-        $schedule = [];
-
-        foreach ($loan->installments()->orderBy('sequence')->get() as $installment) {
-            $remaining = bcsub($remaining, $installment->principal_amount, 2);
-
-            $schedule[] = [
-                'sequence' => $installment->sequence,
-                'due_date' => $installment->due_date->toDateString(),
-                'principal_amount' => $installment->principal_amount,
-                'interest_amount' => $installment->interest_amount,
-                'is_paid' => $installment->is_paid,
-                'remaining' => $remaining,
-            ];
-        }
-
-        return $schedule;
     }
 }

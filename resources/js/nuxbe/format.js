@@ -30,8 +30,8 @@ const badgeClasses = {
     rose: 'text-rose-600 bg-rose-100 dark:text-rose-400 dark:bg-slate-700',
 };
 
-function getLocale() {
-    return document.documentElement.lang || 'de';
+export function getLocale() {
+    return document.documentElement.lang || 'en';
 }
 
 function getCurrencyCode() {
