@@ -22,10 +22,10 @@ class CartItem extends FluxModel implements Sortable
             ]);
 
             $cartItem->total = bcmul($cartItem->amount, $cartItem->price);
-            $cartItem->total_net = $cartItem->cart->priceList->is_net
+            $cartItem->total_net = $cartItem->cart->priceList?->is_net
                 ? $cartItem->total
                 : gross_to_net($cartItem->total, $cartItem->vatRate->rate_percentage);
-            $cartItem->total_gross = $cartItem->cart->priceList->is_net
+            $cartItem->total_gross = $cartItem->cart->priceList?->is_net
                 ? net_to_gross($cartItem->total, $cartItem->vatRate->rate_percentage)
                 : $cartItem->total;
         });

@@ -7,6 +7,10 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <link rel="manifest" href="{{ route('manifest') }}" />
 <meta name="csrf-token" content="{{ csrf_token() }}" />
+<meta
+    name="user-authenticated"
+    content="{{ auth()->check() ? 'true' : 'false' }}"
+/>
 <meta name="ws-key" content="{{ config('flux.vite.reverb_app_key') }}" />
 <meta
     name="ws-broadcaster"

@@ -9,6 +9,14 @@ const ERROR_RING = [
     'dark:focus-within:ring-red-500',
 ];
 
+// Property extraction patterns for TallStackUI's form/error.blade.php span,
+// which carries `x-show="...$errors.has('prop')..."` and
+// `x-text="...$errors.first('prop')..."`. Other $errors helpers
+// (count/any/get) are intentionally not handled — we only ship the
+// has/first shape today.
+const ERROR_PROPERTY_FROM_HAS = /has\(['"]([^'"]+)['"]\)/;
+const ERROR_PROPERTY_FROM_FIRST = /first\(['"]([^'"]+)['"]\)/;
+
 function toggleRing(wrapper, add) {
     if (!wrapper) return;
 
@@ -34,6 +42,14 @@ function getWireModel(el) {
     }
 
     return null;
+}
+
+function getErrorProperty(node) {
+    return (
+        node.getAttribute('x-show')?.match(ERROR_PROPERTY_FROM_HAS)?.[1] ||
+        node.getAttribute('x-text')?.match(ERROR_PROPERTY_FROM_FIRST)?.[1] ||
+        null
+    );
 }
 
 function isVisible(el) {
@@ -129,31 +145,32 @@ function processComponent(component) {
         },
     );
 
-    // Force Alpine to re-evaluate x-show/x-text for vendor-rendered error
-    // spans inside teleported subtrees, where reactive bindings on
-    // $wire.$errors don't trigger automatically.
+    // Update vendor-rendered error spans inside teleported subtrees, where
+    // reactive bindings on $wire.$errors don't trigger automatically.
+    // We read the bound property name out of the directive and consult the
+    // commit's errors map directly instead of invoking Alpine.evaluate —
+    // every Alpine.evaluate call goes through getUtilities which pushes a
+    // cleanup onto el._x_cleanups that never runs while the element stays
+    // mounted, leaking closures on every commit. matched.add() only fires
+    // for the x-show branch to mirror the old behaviour: spans that were
+    // shown count as "matched" so the toast fallback below skips them.
     queryAllScoped(roots, '[x-show*="$errors"], [x-text*="$errors"]').forEach(
         (node) => {
-            try {
-                const xshow = node.getAttribute('x-show');
-                const xtext = node.getAttribute('x-text');
+            const prop = getErrorProperty(node);
 
-                if (xshow) {
-                    const visible = Alpine.evaluate(node, xshow);
-                    node.style.display = visible ? '' : 'none';
+            if (!prop) return;
 
-                    if (visible) {
-                        const prop = xshow.match(/has\('([^']+)'\)/)?.[1];
+            const messages = errors[prop];
+            const visible = messages?.length > 0;
 
-                        if (prop) matched.add(prop);
-                    }
-                }
+            if (node.hasAttribute('x-show')) {
+                node.style.display = visible ? '' : 'none';
 
-                if (xtext) {
-                    node.textContent = Alpine.evaluate(node, xtext) || '';
-                }
-            } catch (e) {
-                console.warn('[validation-errors]', e);
+                if (visible) matched.add(prop);
+            }
+
+            if (node.hasAttribute('x-text')) {
+                node.textContent = visible ? messages[0] : '';
             }
         },
     );

@@ -116,7 +116,7 @@
                     @show
                 </thead>
                 @section('positions.body')
-                    @foreach($model->orders()->unpaid()->get(['id', 'order_number', 'invoice_date', 'invoice_number', 'total_gross_price', 'balance']) as $order)
+                    @foreach ($model->orders()->unpaid()->get(['id', 'order_number', 'invoice_date', 'invoice_number', 'total_gross_price', 'balance']) as $order)
                         <x-flux::print.order.order
                             :order="$order"
                             :loop="$loop"

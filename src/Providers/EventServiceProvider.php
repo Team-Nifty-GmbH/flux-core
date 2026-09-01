@@ -2,6 +2,7 @@
 
 namespace FluxErp\Providers;
 
+use Carbon\Translator;
 use FluxErp\Listeners\Auth\LoginListener;
 use FluxErp\Listeners\Auth\LogoutListener;
 use FluxErp\Listeners\BroadcastEventSubscriber;
@@ -11,6 +12,7 @@ use FluxErp\Listeners\MessageSendingEventSubscriber;
 use FluxErp\Listeners\Notifications\EloquentEventSubscriber;
 use FluxErp\Listeners\Order\OrderInvoiceAddedSubscriber;
 use FluxErp\Listeners\Order\OrderStockSubscriber;
+use FluxErp\Listeners\Product\DispatchVariantInheritanceMigration;
 use FluxErp\Listeners\RegisterMobilePushToken;
 use FluxErp\Listeners\SnapshotEventSubscriber;
 use FluxErp\Listeners\Ticket\CommentCreatedListener;
@@ -40,7 +42,9 @@ use Illuminate\Queue\Events\JobQueued;
 use Illuminate\Queue\QueueManager;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
-use TallStackUi\Components\Form\Date;
+use Spatie\LaravelSettings\Events\SavingSettings;
+use TallStackUi\Components\Form\Date\Component as Date;
+use TallStackUi\Components\Form\Time\Component as Time;
 use Throwable;
 
 class EventServiceProvider extends ServiceProvider
@@ -55,6 +59,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         KeyWritten::class => [
             CacheKeyWrittenListener::class,
+        ],
+        SavingSettings::class => [
+            DispatchVariantInheritanceMigration::class,
         ],
     ];
 
@@ -141,14 +148,39 @@ class EventServiceProvider extends ServiceProvider
             QueueMonitorManager::handle($event);
         });
 
-        $this->app->resolving(Date::class, function (Date $component) {
+        $this->app->resolving(Date::class, function (Date $component): void {
             $component->start = Carbon::getWeekStartsAt();
 
-            if ($format = data_get(Carbon::getTranslator()->getMessages(), 'de.formats.L')) {
-                $component->format = $format;
+            if ($component->format !== 'YYYY-MM-DD') {
+                return;
             }
 
-            return $component;
+            if ($format = $this->localeFormat('L')) {
+                $component->format = $format;
+            }
         });
+
+        $this->app->resolving(Time::class, function (Time $component): void {
+            if ($component->format !== '12') {
+                return;
+            }
+
+            $format = $this->localeFormat('LT');
+
+            if (! $format) {
+                return;
+            }
+
+            if (! str_contains(preg_replace('/\[[^\]]*\]/', '', $format), 'h')) {
+                $component->format = '24';
+            }
+        });
+    }
+
+    protected function localeFormat(string $key): ?string
+    {
+        $locale = app()->getLocale();
+
+        return data_get(Translator::get($locale)->getMessages(), $locale . '.formats.' . $key);
     }
 }

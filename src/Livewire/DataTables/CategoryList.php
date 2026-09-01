@@ -37,6 +37,7 @@ class CategoryList extends BaseDataTable
 
         $categories = resolve_static(Category::class, 'familyTree')
             ->whereKey($rootIds)
+            ->ordered()
             ->get();
 
         $tree = to_flat_tree($categories->toArray());

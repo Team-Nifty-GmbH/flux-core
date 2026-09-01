@@ -6,21 +6,17 @@ use FluxErp\Actions\MailAccount\CreateMailAccount;
 use FluxErp\Actions\MailAccount\DeleteMailAccount;
 use FluxErp\Actions\MailAccount\UpdateMailAccount;
 use FluxErp\Mail\GenericMail;
+use FluxErp\Mail\MailDriverManager;
 use FluxErp\Models\MailAccount;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
-use Webklex\PHPIMAP\Exceptions\AuthFailedException;
-use Webklex\PHPIMAP\Exceptions\ConnectionFailedException;
-use Webklex\PHPIMAP\Exceptions\ImapBadRequestException;
-use Webklex\PHPIMAP\Exceptions\ImapServerErrorException;
-use Webklex\PHPIMAP\Exceptions\ResponseException;
-use Webklex\PHPIMAP\Exceptions\RuntimeException;
+use RuntimeException;
 
 class MailAccountForm extends FluxForm
 {
     public ?string $email = null;
 
-    public string $encryption = 'ssl';
+    public ?string $encryption = 'ssl';
 
     public bool $has_valid_certificate = true;
 
@@ -37,7 +33,7 @@ class MailAccountForm extends FluxForm
 
     public ?string $password = null;
 
-    public int $port = 993;
+    public ?int $port = 993;
 
     public ?string $protocol = 'imap';
 
@@ -83,17 +79,15 @@ class MailAccountForm extends FluxForm
             );
     }
 
-    /**
-     * @throws ImapBadRequestException
-     * @throws RuntimeException
-     * @throws ResponseException
-     * @throws ConnectionFailedException
-     * @throws AuthFailedException
-     * @throws ImapServerErrorException
-     */
-    public function testImapConnection(): void
+    public function testConnection(): void
     {
-        app(MailAccount::class)->fill($this->toArray())->connect();
+        $account = app(MailAccount::class)->fill($this->toArray());
+
+        $driver = app(MailDriverManager::class)->driver($account->protocol);
+
+        if (! $driver->testConnection($account)) {
+            throw new RuntimeException(__('Connection failed'));
+        }
     }
 
     protected function getActions(): array

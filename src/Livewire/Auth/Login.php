@@ -23,7 +23,7 @@ class Login extends Component
     use Actions;
 
     #[Rule(['required', 'email'])]
-    public string $email;
+    public ?string $email = null;
 
     public ?string $password = null;
 

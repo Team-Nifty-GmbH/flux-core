@@ -6,6 +6,7 @@ use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
 use FluxErp\Models\ProductCrossSelling;
+use FluxErp\Models\Tag;
 use FluxErp\Models\VatRate;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Session;
@@ -154,10 +155,10 @@ test('save product successfully', function (): void {
 
 test('save product validation fails', function (): void {
     Livewire::test(Product::class, ['id' => $this->product->id])
-        ->set('product.name', '') // Required field
+        ->set('product.name', '')
         ->call('save')
         ->assertOk()
-        ->assertHasErrors()
+        ->assertHasErrors('product.name')
         ->assertReturned(false);
 });
 
@@ -233,11 +234,17 @@ test('tab visibility for variant product', function (): void {
 });
 
 test('vat rates computed property', function (): void {
+    $purchaseOnlyVatRate = VatRate::factory()->create([
+        'is_purchase' => true,
+        'is_sales' => false,
+    ]);
+
     $component = Livewire::test(Product::class, ['id' => $this->product->id]);
 
     $vatRates = $component->instance()->vatRates();
     expect($vatRates)->toBeArray();
     expect($vatRates)->not->toBeEmpty();
+    expect(array_column($vatRates, 'id'))->not->toContain($purchaseOnlyVatRate->getKey());
 });
 
 test('view name computed property', function (): void {
@@ -246,4 +253,19 @@ test('view name computed property', function (): void {
     $viewName = $component->instance()->viewName();
     expect($viewName)->toBeString();
     $this->assertStringContainsString('product', $viewName);
+});
+
+test('a tag that already exists does not fault the product name', function (): void {
+    $tag = Tag::findOrCreate('Kenia', morph_alias(ProductModel::class));
+
+    Livewire::test(Product::class, ['id' => $this->product->id])
+        ->call('addTag', $tag->name)
+        ->assertHasNoErrors('product.name')
+        ->assertHasErrors('name');
+});
+
+test('the product property group heading reaches the markup', function (): void {
+    Livewire::test(Product::class, ['id' => $this->product->id])
+        ->assertOk()
+        ->assertSeeHtml('x-text="group"');
 });

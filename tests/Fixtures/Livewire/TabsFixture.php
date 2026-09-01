@@ -14,7 +14,7 @@ class TabsFixture extends Component
 
     public string $activeTab = 'tabs-fixture-general';
 
-    public ?int $modelId = null;
+    public ?int $modelId = 1;
 
     public function render(): View
     {
@@ -39,6 +39,11 @@ class TabsFixture extends Component
     public function refreshParent(): void
     {
         // Triggers a parent re-render (default Livewire behavior)
+    }
+
+    public function switchModel(): void
+    {
+        $this->modelId++;
     }
 
     public function updatedActiveTab(): void

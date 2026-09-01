@@ -2,8 +2,10 @@
 
 namespace FluxErp\Rulesets\MailAccount;
 
+use FluxErp\Mail\MailDriverManager;
 use FluxErp\Models\MailAccount;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Validation\Rule;
 
 class CreateMailAccountRuleset extends FluxRuleset
 {
@@ -14,7 +16,12 @@ class CreateMailAccountRuleset extends FluxRuleset
         return [
             'uuid' => 'nullable|string|uuid|unique:mail_accounts,uuid',
             'name' => 'required|string|max:255',
-            'protocol' => 'nullable|string|max:255|in:imap,pop3,nntp',
+            'protocol' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::in(app(MailDriverManager::class)->driverNames()),
+            ],
             'email' => 'nullable|string|unique:mail_accounts,email',
             'password' => 'nullable|string|max:255',
             'host' => 'nullable|string|max:255',

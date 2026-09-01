@@ -9,6 +9,10 @@
 @import 'gridstack/dist/gridstack.min.css' layer(base);
 @import './components/grid-stack.css' layer(base);
 @import './components/apex-charts.css' layer(base);
+
+@import 'fullcalendar/skeleton.css' layer(base);
+@import 'fullcalendar/themes/classic/theme.css' layer(base);
+@import 'fullcalendar/themes/classic/palette.css' layer(base);
 @import './components/full-calendar.css' layer(base);
 
 @import '../../node_modules/@phosphor-icons/web/src/regular/style.css'

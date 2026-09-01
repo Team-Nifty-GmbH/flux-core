@@ -60,10 +60,7 @@ class TicketsPerUser extends BarChart implements HasWidgetOptions
     {
         $allStates = TicketState::all();
 
-        $endStates = $allStates
-            ->filter(fn (string $state) => $state::$isEndState)
-            ->keys()
-            ->toArray();
+        $endStates = TicketState::endStateKeys();
 
         $openStates = $allStates
             ->reject(fn (string $state) => $state::$isEndState);
@@ -149,10 +146,7 @@ class TicketsPerUser extends BarChart implements HasWidgetOptions
     #[Renderless]
     public function show(array $params): void
     {
-        $endStates = TicketState::all()
-            ->filter(fn (string $state) => $state::$isEndState)
-            ->keys()
-            ->toArray();
+        $endStates = TicketState::endStateKeys();
 
         $id = data_get($params, 'id');
         $name = data_get($params, 'name');

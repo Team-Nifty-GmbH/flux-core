@@ -41,6 +41,12 @@ class TallstackUISelect {
     }
 
     setOptions(params) {
+        if (window.$tsui?.select) {
+            window.$tsui.select(this.id).setOptions(params);
+
+            return;
+        }
+
         const encoded = btoa(JSON.stringify(params));
 
         this.alpineComponent.$refs.options.innerText = `JSON.parse(atob('${encoded}'))`;

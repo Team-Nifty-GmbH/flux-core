@@ -10,6 +10,6 @@ class Done extends OrderState
 
     public function color(): string
     {
-        return static::$color ?? 'emerald';
+        return static::$color ?? 'violet';
     }
 }

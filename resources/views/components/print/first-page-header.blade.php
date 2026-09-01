@@ -5,7 +5,7 @@
     @section('first-page-logo')
         <div style="display: grid; height: 128px; align-content: center">
             <div style="margin: auto; max-height: 288px; text-align: center">
-                @if($tenant->logo)
+                @if ($tenant->logo)
                     <img
                         class="logo"
                         style="margin: auto"
@@ -49,7 +49,7 @@
             <tr>
                 <td style="width: 50%; vertical-align: top">
                     @section('recipient-address.left-block')
-                        @if($slot->isNotEmpty())
+                        @if ($slot->isNotEmpty())
                             {!! $slot !!}
                         @else
                             <address
@@ -66,7 +66,7 @@
                                 <div>
                                     {{ trim(($address->zip ?? '') . ' ' . ($address->city ?? '')) }}
                                 </div>
-                                @if($address->country_name ?? null)
+                                @if ($address->country_name ?? null)
                                     <div>{{ $address->country_name }}</div>
                                 @endif
                             </address>

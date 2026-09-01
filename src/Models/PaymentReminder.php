@@ -2,7 +2,6 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Contracts\HasMediaForeignKey;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Traits\Model\HasPackageFactory;
@@ -25,21 +24,6 @@ class PaymentReminder extends FluxModel implements HasMediaForeignKey, OffersPri
             if (! $model->reminder_level) {
                 $model->reminder_level = $model->siblings()->max('reminder_level') + 1;
             }
-        });
-
-        static::created(function (PaymentReminder $model): void {
-            UpdateLockedOrder::make([
-                'id' => $model->order_id,
-                'payment_reminder_current_level' => $model->reminder_level,
-                'payment_reminder_next_date' => $model->created_at
-                    ->addDays(
-                        $model->order->{'payment_reminder_days_' . $model->reminder_level + 1}
-                            ?? $model->order->payment_reminder_days_3
-                    )
-                    ->toDateString(),
-            ])
-                ->validate()
-                ->execute();
         });
     }
 

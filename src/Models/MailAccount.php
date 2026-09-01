@@ -79,6 +79,7 @@ class MailAccount extends FluxModel
 
         try {
             return ImapClient::make([
+                'protocol' => $this->protocol ?: 'imap',
                 'host' => $this->host,
                 'port' => $this->port,
                 'encryption' => $this->encryption,

@@ -3,9 +3,31 @@ name: tests
 on:
   push:
     branches: [dev]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/dependabot.yml'
+      - '.github/workflows/build-main-assets.yml'
+      - '.github/workflows/code-standards.yml'
+      - '.github/workflows/dependabot-auto-merge.yml'
+      - '.github/workflows/release.yml'
+      - '.github/workflows/translation-audit.yml'
   pull_request:
     branches: [main, dev]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/dependabot.yml'
+      - '.github/workflows/build-main-assets.yml'
+      - '.github/workflows/code-standards.yml'
+      - '.github/workflows/dependabot-auto-merge.yml'
+      - '.github/workflows/release.yml'
+      - '.github/workflows/translation-audit.yml'
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -52,6 +74,9 @@ jobs:
 
       - name: Prettier
         run: npx prettier . --check
+
+      - name: Translation key sort
+        run: node scripts/sort-lang-json.mjs --check
 
   unit-feature:
     name: Unit & Feature Tests
@@ -300,12 +325,3 @@ jobs:
             tests/Browser/Screenshots/
             vendor/orchestra/testbench-core/laravel/storage/logs/
           retention-days: 7
-
-  cleanup:
-    name: Cleanup Docker resources
-    runs-on: [self-hosted, Linux]
-    needs: [unit-feature, livewire, browser]
-    if: always()
-    steps:
-      - name: Prune unused Docker images older than 7 days
-        run: docker image prune -af --filter "until=168h"

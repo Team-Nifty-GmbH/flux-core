@@ -25,6 +25,8 @@ test('renders successfully', function (): void {
 });
 
 test('counts new hires in current month', function (): void {
+    $this->travelTo(now()->startOfMonth()->addDays(14));
+
     for ($i = 0; $i < 2; $i++) {
         $employee = app(Employee::class)->create([
             'tenant_id' => $this->dbTenant->getKey(),

@@ -3,7 +3,8 @@
 namespace FluxErp\Actions\Task;
 
 use Carbon\Carbon;
-use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\DispatchableFluxAction;
+use FluxErp\Contracts\SupportsBulkExecution;
 use FluxErp\Events\Task\TaskAssignedEvent;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Task;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
-class UpdateTask extends FluxAction
+class UpdateTask extends DispatchableFluxAction implements SupportsBulkExecution
 {
     public static function models(): array
     {

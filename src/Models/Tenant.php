@@ -38,30 +38,12 @@ class Tenant extends FluxModel implements HasMedia
         'media',
     ];
 
-    protected static function booted(): void
-    {
-        parent::booted();
-
-        static::creating(function (self $tenant): void {
-            if (! array_key_exists('product_variant_inheritance_enabled', $tenant->getAttributes())) {
-                $tenant->product_variant_inheritance_enabled = true;
-            }
-        });
-
-        static::saving(function (self $tenant): void {
-            if ($tenant->isDirty('product_variant_inheritance_enabled')) {
-                self::clearDefaultCache();
-            }
-        });
-    }
-
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
             'opening_hours' => 'array',
             'is_default' => 'boolean',
-            'product_variant_inheritance_enabled' => 'boolean',
         ];
     }
 
@@ -132,7 +114,7 @@ class Tenant extends FluxModel implements HasMedia
                 array_filter([
                     $attributes['name'] ?? null,
                     $attributes['street'] ?? null,
-                    trim($attributes['postcode'] ?? null . ' ' . $attributes['city'] ?? null),
+                    trim(($attributes['postcode'] ?? '') . ' ' . ($attributes['city'] ?? '')) ?: null,
                 ])
             )
         );

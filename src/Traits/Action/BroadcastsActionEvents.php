@@ -11,6 +11,7 @@ use Illuminate\Contracts\Broadcasting\HasBroadcastChannel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Serializable;
+use function Illuminate\Support\defer;
 
 trait BroadcastsActionEvents
 {
@@ -33,7 +34,7 @@ trait BroadcastsActionEvents
         //
     }
 
-    public function broadcastExecuted(Channel|HasBroadcastChannel|array|null $channels = null): PendingBroadcast
+    public function broadcastExecuted(Channel|HasBroadcastChannel|array|null $channels = null): ?PendingBroadcast
     {
         return $this->broadcastEvent('executed', $channels);
     }
@@ -96,7 +97,7 @@ trait BroadcastsActionEvents
         }
 
         if (! empty($this->broadcastOn($event)) || ! empty($channels)) {
-            return broadcast($instance->onChannels(Arr::wrap($channels)));
+            defer(fn () => broadcast($instance->onChannels(Arr::wrap($channels))), always: true);
         }
 
         return null;

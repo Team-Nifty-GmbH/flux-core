@@ -2,8 +2,13 @@
 
 use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Models\Task;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
+
+beforeEach(function (): void {
+    config()->set('queue.default', 'sync');
+});
 
 test('create new task', function (): void {
     Livewire::actingAs($this->user)
@@ -38,4 +43,81 @@ test('create new task', function (): void {
 test('renders successfully', function (): void {
     Livewire::test(TaskList::class)
         ->assertOk();
+});
+
+test('list is selectable', function (): void {
+    Livewire::actingAs($this->user)
+        ->test(TaskList::class)
+        ->assertSet('isSelectable', true);
+});
+
+test('delete selected deletes the selected tasks', function (): void {
+    $task = Task::factory()->create(['name' => Str::uuid(), 'state' => 'open']);
+
+    Livewire::actingAs($this->user)
+        ->test(TaskList::class)
+        ->set('selected', [$task->getKey()])
+        ->call('deleteSelected')
+        ->assertSet('selected', []);
+
+    $this->assertSoftDeleted($task);
+});
+
+test('delete selected does nothing without selection', function (): void {
+    $task = Task::factory()->create(['name' => Str::uuid(), 'state' => 'open']);
+
+    Livewire::actingAs($this->user)
+        ->test(TaskList::class)
+        ->set('selected', [])
+        ->call('deleteSelected');
+
+    $this->assertModelExists($task);
+});
+
+test('open change state modal resets state and opens modal', function (): void {
+    Livewire::actingAs($this->user)
+        ->test(TaskList::class)
+        ->set('selectedState', 'open')
+        ->call('openChangeStateModal')
+        ->assertSet('selectedState', null)
+        ->assertOpensModal('change-task-state-modal');
+});
+
+test('change state updates the selected tasks', function (): void {
+    $task = Task::factory()->create(['name' => Str::uuid(), 'state' => 'open']);
+
+    $component = Livewire::actingAs($this->user)
+        ->test(TaskList::class);
+
+    $state = data_get(Arr::first($component->get('availableStates')), 'name');
+
+    $component
+        ->set('selected', [$task->getKey()])
+        ->set('selectedState', $state)
+        ->call('changeState')
+        ->assertReturned(true)
+        ->assertSet('selected', [])
+        ->assertSet('selectedState', null);
+
+    $this->assertDatabaseHas('tasks', [
+        'id' => $task->getKey(),
+        'state' => $state,
+    ]);
+});
+
+test('change state rejects invalid state with a validation error', function (): void {
+    $task = Task::factory()->create(['name' => Str::uuid(), 'state' => 'open']);
+
+    Livewire::actingAs($this->user)
+        ->test(TaskList::class)
+        ->set('selected', [$task->getKey()])
+        ->set('selectedState', 'not-a-real-state')
+        ->call('changeState')
+        ->assertReturned(false)
+        ->assertHasErrors('selectedState');
+
+    $this->assertDatabaseHas('tasks', [
+        'id' => $task->getKey(),
+        'state' => 'open',
+    ]);
 });

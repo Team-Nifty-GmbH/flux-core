@@ -3,7 +3,7 @@
         <div class="flex flex-col gap-1.5">
             <x-input wire:model="tagForm.name" :label="__('Name')" />
             <x-color wire:model="tagForm.color" :label="__('Color')" />
-            <div x-bind:class="$wire.tagForm.id && 'pointer-events-none'">
+            <div x-bind:class="{ 'pointer-events-none': $wire.tagForm.id }">
                 <x-select.styled
                     x-bind:disabled="$wire.tagForm.id"
                     wire:model="tagForm.type"

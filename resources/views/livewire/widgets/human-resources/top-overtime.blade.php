@@ -20,7 +20,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($employees as $employee)
+                @forelse ($employees as $employee)
                     <tr class="border-t border-gray-100 dark:border-gray-700">
                         <td class="py-1.5 text-sm text-gray-400">
                             {{ $employee['rank'] }}

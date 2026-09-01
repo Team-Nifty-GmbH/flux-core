@@ -5,6 +5,10 @@
                 return 0;
             }
 
+            if (position.is_alternative) {
+                return 0;
+            }
+
             const unitPrice = position.is_net
                 ? position.unit_net_price
                 : position.unit_gross_price;
@@ -126,8 +130,8 @@
                         {{ __("Selected Positions") }}
                     </h3>
                     <div class="space-y-2">
-                        @forelse($replicateOrder->order_positions as $index => $position)
-                            @if(data_get($position, "is_free_text"))
+                        @forelse ($replicateOrder->order_positions as $index => $position)
+                            @if (data_get($position, "is_free_text"))
                                 <div
                                     class="dark:bg-secondary-700 flex items-center justify-between rounded bg-gray-100 px-3 py-2 font-semibold"
                                 >
@@ -139,6 +143,7 @@
                                         icon="trash"
                                         sm
                                         wire:click="removePosition({{ $index }})"
+                                        loading="removePosition({{ $index }})"
                                     />
                                 </div>
                             @else
@@ -151,6 +156,12 @@
                                                 <span>
                                                     {{ data_get($position, "name") }}
                                                 </span>
+                                                @if (data_get($position, "is_alternative"))
+                                                    <x-badge
+                                                        :text="__('Alternative')"
+                                                        color="red"
+                                                    />
+                                                @endif
                                                 <div
                                                     class="text-sm text-gray-600 dark:text-gray-400"
                                                 >
@@ -168,11 +179,11 @@
                                                     class="text-sm text-gray-600 dark:text-gray-400"
                                                 >
                                                     {{ Number::currency((data_get($position, "is_net") ? data_get($position, "unit_net_price") : data_get($position, "unit_gross_price")) ?? 0, data_get($parentOrder, "currency.iso")) }}
-                                                    @if(data_get($position, "unit_abbreviation"))
+                                                    @if (data_get($position, "unit_abbreviation"))
                                                         / {{ data_get($position, "unit_abbreviation") }}
                                                     @endif
                                                 </div>
-                                                @if(data_get($position, "discount_percentage") && bccomp(data_get($position, "discount_percentage"), 0) === 1)
+                                                @if (data_get($position, "discount_percentage") && bccomp(data_get($position, "discount_percentage"), 0) === 1)
                                                     <div
                                                         class="text-sm text-red-500"
                                                     >
@@ -192,6 +203,7 @@
                                             color="red"
                                             icon="trash"
                                             wire:click="removePosition({{ $index }})"
+                                            loading="removePosition({{ $index }})"
                                         />
                                     </x-slot:actions>
                                 </x-flux::list-item>
@@ -208,7 +220,7 @@
                         x-show="$wire.replicateOrder.order_positions.length > 0"
                         x-cloak
                     >
-                        @if(count(data_get($parentOrder, "discounts") ?? []) > 0)
+                        @if (count(data_get($parentOrder, "discounts") ?? []) > 0)
                             <div
                                 class="flex items-center justify-between text-gray-600 dark:text-gray-400"
                             >
@@ -217,7 +229,7 @@
                                     x-html="$nuxbe.format.money(getSubtotal(), {colored: true, currency: '{{ data_get($parentOrder, 'currency.iso') }}'})"
                                 ></span>
                             </div>
-                            @foreach(data_get($parentOrder, "discounts") ?? [] as $discount)
+                            @foreach (data_get($parentOrder, "discounts") ?? [] as $discount)
                                 <div
                                     class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400"
                                 >
@@ -225,7 +237,7 @@
                                         {{ data_get($discount, "name") ?? __("Discount") }}
                                     </span>
                                     <span class="text-red-500">
-                                        @if(data_get($discount, "is_percentage"))
+                                        @if (data_get($discount, "is_percentage"))
                                             -{{ Number::percentage(bcmul(data_get($discount, "discount") ?? 0, 100), 2) }}
                                         @else
                                             -{{ Number::currency(data_get($discount, "discount"), data_get($parentOrder, "currency.iso")) }}
@@ -262,7 +274,7 @@
                     color="indigo"
                     :text="$this->getTitle()"
                     wire:click="save()"
-                    loading
+                    loading="save()"
                     x-bind:disabled="
                         !$wire.replicateOrder.order_type_id ||
                         !$wire.replicateOrder.order_positions.length

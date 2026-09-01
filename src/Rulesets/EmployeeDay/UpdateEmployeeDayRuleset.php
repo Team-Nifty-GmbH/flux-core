@@ -25,7 +25,7 @@ class UpdateEmployeeDayRuleset extends FluxRuleset
             'holiday_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Holiday::class]),
+                app(ModelExists::class, ['model' => Holiday::class, 'subject' => EmployeeDay::class]),
             ],
             'date' => 'sometimes|required|date',
             'target_hours' => [

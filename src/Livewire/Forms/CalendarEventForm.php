@@ -7,50 +7,31 @@ use Carbon\Exceptions\InvalidFormatException;
 use FluxErp\Actions\DispatchableFluxAction;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
+use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
+use FluxErp\Support\Livewire\Attributes\ExcludeFromActionData;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use InvalidArgumentException;
 
 class CalendarEventForm extends FluxForm
 {
-    public int|string|null $calendar_id = null;
-
-    public ?string $calendar_type = null;
-
-    public string $confirm_option = 'this';
-
-    public ?string $description = null;
-
-    public ?string $edit_component = null;
-
-    public ?string $end = null;
-
-    public ?array $extended_props = null;
-
-    public bool $has_repeats = false;
-
-    public bool $has_taken_place = false;
-
+    // Model properties
     public string|int|null $id = null;
 
-    public bool $is_all_day = false;
-
-    public bool $is_cancelled = false;
-
-    public bool $is_editable = true;
-
-    public bool $is_repeatable = false;
-
-    public ?array $model = null;
-
-    public ?int $model_id = null;
+    public int|string|null $calendar_id = null;
 
     public ?string $model_type = null;
 
-    public ?string $original_start = null;
+    public ?int $model_id = null;
 
-    public ?int $recurrences = null;
+    public ?string $start = null;
+
+    public ?string $end = null;
+
+    public ?string $title = null;
+
+    public ?string $description = null;
 
     public ?array $repeat = [
         'interval' => 1,
@@ -62,15 +43,41 @@ class CalendarEventForm extends FluxForm
 
     public ?string $repeat_end = null;
 
-    public ?int $repetition = null;
+    public ?int $recurrences = null;
 
-    public ?string $start = null;
+    public bool $has_taken_place = false;
+
+    public bool $is_all_day = false;
+
+    public ?array $extended_props = null;
+
+    // Non model properties
+    public ?string $calendar_type = null;
+
+    public string $confirm_option = 'this';
+
+    public ?string $edit_component = null;
+
+    public ?string $original_start = null;
 
     public ?string $status = null;
 
-    public ?string $title = null;
+    public ?int $repetition = null;
+
+    public bool $has_repeats = false;
+
+    public bool $is_cancelled = false;
+
+    public bool $is_editable = true;
+
+    public bool $is_repeatable = false;
 
     public bool $was_repeatable = false;
+
+    public ?array $model = null;
+
+    #[ExcludeFromActionData]
+    public array $calendar = [];
 
     public function cancel(): void
     {
@@ -136,6 +143,32 @@ class CalendarEventForm extends FluxForm
 
     public function fillFromJs(array $values): void
     {
+        if (
+            $calendarId = data_get($values, 'extendedProps.calendar_id') ?? data_get($values, 'calendar_id')
+        ) {
+            $values['calendar'] = resolve_static(Calendar::class, 'query')
+                ->whereKey($calendarId)
+                ->first()
+                ?->toCalendarObject() ?? [];
+
+            if (is_null(data_get($values, 'id')) && is_array(data_get($values, 'calendar.customProperties'))) {
+                data_set(
+                    $values,
+                    'extendedProps.customProperties',
+                    array_map(
+                        function (array $item) {
+                            $item['value'] = null;
+
+                            return $item;
+                        },
+                        data_get($values, 'calendar.customProperties')
+                    )
+                );
+            }
+        } else {
+            unset($values['calendar']);
+        }
+
         if (data_get($values, 'allDay')) {
             if (is_null(data_get($values, 'end'))) {
                 $values['end'] = $values['start'];

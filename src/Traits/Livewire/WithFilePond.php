@@ -8,6 +8,8 @@ use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
+use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 trait WithFilePond
 {
@@ -114,5 +116,29 @@ trait WithFilePond
         }
 
         return true;
+    }
+
+    #[Renderless]
+    public function acceptChunkedUpload(string $signedPath, ?string $collectionName = null): ?string
+    {
+        $filename = TemporaryUploadedFile::extractPathFromSignedPath($signedPath);
+        if ($filename === false) {
+            return null;
+        }
+
+        $disk = FileUploadConfiguration::storage();
+
+        // The data file, the metadata sidecar, and the absence of the chunk
+        // marker together prove the upload finalized successfully.
+        if (! $disk->exists(FileUploadConfiguration::path($filename))
+            || ! $disk->exists(FileUploadConfiguration::path($filename . '.json'))
+            || $disk->exists(FileUploadConfiguration::path($filename . '.chunk'))
+        ) {
+            return null;
+        }
+
+        $this->files[] = TemporaryUploadedFile::createFromLivewire($filename);
+
+        return $this->validateOnDemand($filename, $collectionName) ? $filename : null;
     }
 }

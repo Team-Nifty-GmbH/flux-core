@@ -3,7 +3,7 @@
 namespace FluxErp\Support\Notification;
 
 use Exception;
-use FluxErp\Contracts\HasToastNotification;
+use FluxErp\Contracts\RoutableToastNotification;
 use FluxErp\Models\EventSubscription;
 use FluxErp\Models\NotificationSetting;
 use FluxErp\Models\User;
@@ -11,6 +11,7 @@ use FluxErp\Notifications\Notification;
 use FluxErp\Support\Notification\ToastNotification\NotificationAction;
 use FluxErp\Support\Notification\ToastNotification\ToastNotification;
 use FluxErp\Traits\Model\Notifiable;
+use FluxErp\Traits\Notification\DelegatesToToastNotification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -18,11 +19,11 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
 use Illuminate\Support\Str;
-use Kreait\Firebase\Messaging\Notification as FcmNotification;
-use NotificationChannels\WebPush\WebPushMessage;
 
-abstract class SubscribableNotification extends Notification implements HasToastNotification
+abstract class SubscribableNotification extends Notification implements RoutableToastNotification
 {
+    use DelegatesToToastNotification;
+
     public object $event;
 
     public ?Model $model;
@@ -45,11 +46,6 @@ abstract class SubscribableNotification extends Notification implements HasToast
         ];
     }
 
-    public function getRoute(): ?string
-    {
-        return null;
-    }
-
     public function sendNotification(object $event): void
     {
         $this->event = $event;
@@ -64,11 +60,6 @@ abstract class SubscribableNotification extends Notification implements HasToast
             NotificationFacade::routes($anonymousSubscriptions)
                 ->notify($this);
         }
-    }
-
-    public function toArray(object $notifiable): array
-    {
-        return $this->toToastNotification($notifiable)->toArray();
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -90,27 +81,6 @@ abstract class SubscribableNotification extends Notification implements HasToast
             )
             ->description($this->getDescription())
             ->accept($this->getAcceptAction($notifiable));
-    }
-
-    public function toWebPush(object $notifiable): ?WebPushMessage
-    {
-        if (! method_exists($notifiable, 'pushSubscriptions')
-            || ! $notifiable->pushSubscriptions()->exists()
-        ) {
-            return null;
-        }
-
-        return $this->toToastNotification($notifiable)->toWebPush();
-    }
-
-    public function toFcm(object $notifiable): ?FcmNotification
-    {
-        return $this->toToastNotification($notifiable)->toFcm();
-    }
-
-    public function toFcmData(object $notifiable): array
-    {
-        return $this->toToastNotification($notifiable)->toFcmData();
     }
 
     public function via(object $notifiable): array

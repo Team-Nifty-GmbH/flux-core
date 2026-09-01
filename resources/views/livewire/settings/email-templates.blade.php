@@ -182,7 +182,12 @@
                                 x-cloak
                                 x-show="file.preview_url !== ''"
                                 class="h-full"
-                                x-on:click="$nuxbe.openDetailModal(file.original_url)"
+                                x-on:click="
+                                    $nuxbe.openLightbox(file.original_url, {
+                                        mime: file.mime_type,
+                                        title: file.name,
+                                    })
+                                "
                                 icon="eye"
                             />
                         </div>

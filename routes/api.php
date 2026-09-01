@@ -121,6 +121,9 @@ use FluxErp\Actions\LeadState\UpdateLeadState;
 use FluxErp\Actions\LedgerAccount\CreateLedgerAccount;
 use FluxErp\Actions\LedgerAccount\DeleteLedgerAccount;
 use FluxErp\Actions\LedgerAccount\UpdateLedgerAccount;
+use FluxErp\Actions\LedgerAccountTransaction\CreateLedgerAccountTransaction;
+use FluxErp\Actions\LedgerAccountTransaction\DeleteLedgerAccountTransaction;
+use FluxErp\Actions\LedgerAccountTransaction\UpdateLedgerAccountTransaction;
 use FluxErp\Actions\Location\CreateLocation;
 use FluxErp\Actions\Location\DeleteLocation;
 use FluxErp\Actions\Location\UpdateLocation;
@@ -193,11 +196,8 @@ use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\CreateProductBundleProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\DeleteProductBundleProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\UpdateProductBundleProduct;
-use FluxErp\Actions\Product\PromoteParentToStandalone;
-use FluxErp\Actions\Product\ResetFieldOnAllVariants;
-use FluxErp\Actions\Product\ResetProductField;
-use FluxErp\Actions\Product\ResetProductRelation;
-use FluxErp\Actions\Product\ResetRelationOnAllVariants;
+use FluxErp\Actions\Product\ResetProductFields;
+use FluxErp\Actions\Product\ResetProductRelations;
 use FluxErp\Actions\Product\RestoreProduct;
 use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
@@ -309,11 +309,17 @@ use FluxErp\Http\Controllers\BaseController;
 use FluxErp\Http\Controllers\CommentController;
 use FluxErp\Http\Controllers\EventSubscriptionController;
 use FluxErp\Http\Controllers\MobileController;
+use FluxErp\Http\Controllers\NotificationController;
 use FluxErp\Http\Controllers\PermissionController;
 use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\RoleController;
+use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Controllers\SettingController;
 use FluxErp\Http\Middleware\SetAcceptHeaders;
+use FluxErp\Livewire\Widgets\Employee\CurrentWorkTimeModel;
+use FluxErp\Livewire\Widgets\Employee\OvertimeBalanceBox;
+use FluxErp\Livewire\Widgets\MyTasks;
+use FluxErp\Livewire\Widgets\MyTickets;
 use FluxErp\Models\AbsencePolicy;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\AbsenceType;
@@ -364,6 +370,7 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Pivots\BundleProductProduct;
 use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
+use FluxErp\Models\Pivots\LedgerAccountTransaction;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Price;
@@ -420,9 +427,9 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('api')
     ->middleware(['throttle:api', SetAcceptHeaders::class])
     ->group(function (): void {
+        Route::get('/broadcasting/connection', [MobileController::class, 'broadcastingConnection']);
         Route::get('/health', [MobileController::class, 'health']);
         Route::get('/mobile/config', [MobileController::class, 'config']);
-        Route::delete('/mobile/device-token/{deviceId}', [MobileController::class, 'deleteDeviceToken']);
 
         Route::post('/auth/token', [AuthController::class, 'authenticate']);
 
@@ -636,6 +643,9 @@ Route::prefix('api')
                 Route::put('/currencies', UpdateCurrency::class);
                 Route::delete('/currencies/{id}', DeleteCurrency::class);
 
+                // DeviceTokens
+                Route::delete('/mobile/device-token/{deviceId}', [MobileController::class, 'deleteDeviceToken']);
+
                 // DiscountGroups
                 Route::get('/discount-groups/{id}', [BaseController::class, 'show'])
                     ->defaults('model', DiscountGroup::class);
@@ -839,6 +849,15 @@ Route::prefix('api')
                 Route::put('/order-transactions', UpdateOrderTransaction::class);
                 Route::delete('/order-transactions/{id}', DeleteOrderTransaction::class);
 
+                // LedgerAccountTransactions
+                Route::get('/ledger-account-transactions/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', LedgerAccountTransaction::class);
+                Route::get('/ledger-account-transactions', [BaseController::class, 'index'])
+                    ->defaults('model', LedgerAccountTransaction::class);
+                Route::post('/ledger-account-transactions', CreateLedgerAccountTransaction::class);
+                Route::put('/ledger-account-transactions', UpdateLedgerAccountTransaction::class);
+                Route::delete('/ledger-account-transactions/{id}', DeleteLedgerAccountTransaction::class);
+
                 // OrderTypes
                 Route::get('/order-types/{id}', [BaseController::class, 'show'])->defaults('model', OrderType::class);
                 Route::get('/order-types', [BaseController::class, 'index'])->defaults('model', OrderType::class);
@@ -940,11 +959,8 @@ Route::prefix('api')
                 Route::put('/products', UpdateProduct::class);
                 Route::delete('/products/{id}', DeleteProduct::class);
                 Route::post('/products/{id}/restore', RestoreProduct::class);
-                Route::post('/products/{id}/promote-to-standalone', PromoteParentToStandalone::class);
-                Route::post('/products/{id}/reset-field', ResetProductField::class);
-                Route::post('/products/{id}/reset-relation', ResetProductRelation::class);
-                Route::post('/products/{parent_id}/variants/reset-field', ResetFieldOnAllVariants::class);
-                Route::post('/products/{parent_id}/variants/reset-relation', ResetRelationOnAllVariants::class);
+                Route::post('/products/variants/reset-fields', ResetProductFields::class);
+                Route::post('/products/variants/reset-relations', ResetProductRelations::class);
 
                 // Product bundle products
                 Route::get('/product-bundle-products/{id}', [BaseController::class, 'show'])
@@ -1048,6 +1064,10 @@ Route::prefix('api')
                 Route::post('/schedules', CreateSchedule::class);
                 Route::put('/schedules', UpdateSchedule::class);
                 Route::delete('/schedules/{id}', DeleteSchedule::class);
+
+                // Search
+                Route::get('/search/{model}', SearchController::class)
+                    ->where('model', '[A-Za-z0-9._-]+');
 
                 // SepaMandates
                 Route::get('/sepa-mandates/{id}', [BaseController::class, 'show'])
@@ -1180,6 +1200,10 @@ Route::prefix('api')
 
                     return ResponseHelper::createResponseFromBase(statusCode: 200, data: $user);
                 });
+                Route::post('/user/login-url', [AuthController::class, 'loginUrl'])
+                    ->middleware('ability:user');
+                Route::get('/user/notifications', [NotificationController::class, 'userIndex']);
+                Route::post('/user/notifications/read', [NotificationController::class, 'markRead']);
 
                 Route::get('/users/{id}', [BaseController::class, 'show'])->defaults('model', User::class);
                 Route::get('/users', [BaseController::class, 'index'])->defaults('model', User::class);
@@ -1218,6 +1242,12 @@ Route::prefix('api')
                 Route::post('/warehouses', CreateWarehouse::class);
                 Route::put('/warehouses', UpdateWarehouse::class);
                 Route::delete('/warehouses/{id}', DeleteWarehouse::class);
+
+                // Widgets
+                Route::get('/widgets/current-work-time-model', CurrentWorkTimeModel::class);
+                Route::get('/widgets/my-tasks', MyTasks::class);
+                Route::get('/widgets/my-tickets', MyTickets::class);
+                Route::get('/widgets/overtime-balance-box', OvertimeBalanceBox::class);
 
                 // WorkTimeModels
                 Route::get('/work-time-models/{id}', [BaseController::class, 'show'])

@@ -1,6 +1,6 @@
 <x-modal id="edit-role-users-modal">
     <div class="flex flex-col gap-1.5">
-        @foreach($users as $user)
+        @foreach ($users as $user)
             <div class="flex">
                 <div class="flex-1 font-medium">{{ $user['name'] }}</div>
                 <div class="">
@@ -35,7 +35,7 @@
 <x-modal id="edit-role-permissions-modal">
     <div class="flex flex-col gap-1.5">
         <x-input wire:model="roleForm.name" :label="__('Name')" />
-        <div x-bind:class="$wire.roleForm.id && 'pointer-events-none'">
+        <div x-bind:class="{ 'pointer-events-none': $wire.roleForm.id }">
             <x-select.styled
                 :label="__('Guard')"
                 :disabled="$roleForm->id ?? false"

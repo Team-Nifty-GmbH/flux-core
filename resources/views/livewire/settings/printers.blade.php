@@ -116,6 +116,7 @@
                 :text="__('Generate Configuration')"
                 icon="cog"
                 wire:click="generateBridgeConfig()"
+                loading="generateBridgeConfig()"
             />
         </div>
 

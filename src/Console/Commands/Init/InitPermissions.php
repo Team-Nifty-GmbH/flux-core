@@ -7,6 +7,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Facades\Action;
 use FluxErp\Facades\Widget;
+use FluxErp\Http\Controllers\Controller;
 use FluxErp\Models\Permission;
 use FluxErp\Traits\Livewire\WithTabs;
 use FluxErp\Traits\Model\HasModelPermission;
@@ -28,14 +29,23 @@ class InitPermissions extends Command
 
     private array $currentPermissions = [];
 
+    private array $knownPermissions = [];
+
+    private array $preexistingPermissions = [];
+
     public function handle(): void
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
-        $this->currentPermissions = array_flip(
-            resolve_static(Permission::class, 'query')
-                ->pluck('id')
-                ->toArray()
-        );
+
+        $this->knownPermissions = resolve_static(Permission::class, 'query')
+            ->get(['id', 'name', 'guard_name'])
+            ->mapWithKeys(fn (Permission $permission): array => [
+                $permission->guard_name . '|' . $permission->name => $permission->getKey(),
+            ])
+            ->all();
+
+        $this->currentPermissions = array_flip(array_values($this->knownPermissions));
+        $this->preexistingPermissions = $this->currentPermissions;
 
         $this->registerActionPermission();
         $this->registerActionPermission('sanctum');
@@ -51,20 +61,25 @@ class InitPermissions extends Command
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
 
+    protected function keepPermission(string $name, string $guardName = 'web'): int
+    {
+        $key = $guardName . '|' . $name;
+
+        $id = $this->knownPermissions[$key] ??= resolve_static(Permission::class, 'query')
+            ->create(['name' => $name, 'guard_name' => $guardName])
+            ->getKey();
+
+        unset($this->currentPermissions[$id]);
+
+        return $id;
+    }
+
     protected function registerActionPermission(string $guardName = 'web'): void
     {
         $this->info('Registering action permissions for guard ' . $guardName . '…');
         foreach (Action::all() as $action) {
             if ($action['class']::hasPermission()) {
-                $permission = resolve_static(
-                    Permission::class,
-                    'findOrCreate',
-                    [
-                        'name' => 'action.' . $action['name'],
-                        'guardName' => $guardName,
-                    ]
-                );
-                unset($this->currentPermissions[$permission->id]);
+                $this->keepPermission('action.' . $action['name'], $guardName);
             }
         }
     }
@@ -81,20 +96,11 @@ class InitPermissions extends Command
             if (in_array(HasModelPermission::class, class_uses_recursive($class))
                 && resolve_static($class, 'hasPermission')
             ) {
-                $permission = resolve_static(
-                    Permission::class,
-                    'findOrCreate',
-                    [
-                        'name' => 'model.' . $alias . '.get',
-                        'guardName' => 'web',
-                    ]
-                );
+                $id = $this->keepPermission('model.' . $alias . '.get');
 
-                if (is_null(data_get($this->currentPermissions, $permission->id))) {
-                    $newPermissions[] = $permission->getKey();
+                if (! array_key_exists($id, $this->preexistingPermissions)) {
+                    $newPermissions[] = $id;
                 }
-
-                unset($this->currentPermissions[$permission->id]);
             }
         }
 
@@ -120,6 +126,13 @@ class InitPermissions extends Command
                 continue;
             }
 
+            $controllerClass = is_string($route->action['uses'] ?? null) ? $route->getControllerClass() : null;
+            if ($controllerClass && is_a($controllerClass, Controller::class, true) && ! $controllerClass::hasPermission()) {
+                $bar->advance();
+
+                continue;
+            }
+
             $guards = array_values(array_filter($route->middleware(), fn ($guard) => str_starts_with($guard, 'auth:')));
             $guard = array_shift($guards);
 
@@ -131,16 +144,7 @@ class InitPermissions extends Command
             $authGuards = explode(',', str_replace('auth:', '', $guard));
 
             foreach ($authGuards as $guard) {
-                $permission = resolve_static(
-                    Permission::class,
-                    'findOrCreate',
-                    [
-                        'name' => $permissionName,
-                        'guardName' => $guard,
-                    ]
-                );
-
-                unset($this->currentPermissions[$permission->id]);
+                $this->keepPermission($permissionName, $guard);
             }
 
             $bar->advance();
@@ -167,15 +171,7 @@ class InitPermissions extends Command
     {
         $this->info('Registering widget permissions…');
         foreach (Widget::all() as $widget) {
-            $permission = resolve_static(
-                Permission::class,
-                'findOrCreate',
-                [
-                    'name' => 'widget.' . $widget['component_name'],
-                    'guardName' => 'web',
-                ]
-            );
-            unset($this->currentPermissions[$permission->id]);
+            $this->keepPermission('widget.' . $widget['component_name']);
         }
     }
 
@@ -191,15 +187,7 @@ class InitPermissions extends Command
             $componentInstance = new $component();
 
             foreach ($componentInstance->renderingWithTabs()->getTabsToRender() as $tab) {
-                $permission = resolve_static(
-                    Permission::class,
-                    'findOrCreate',
-                    [
-                        'name' => 'tab.' . $tab->component,
-                        'guardName' => 'web',
-                    ]
-                );
-                unset($this->currentPermissions[$permission->id]);
+                $this->keepPermission('tab.' . $tab->component);
             }
         }
     }
@@ -216,20 +204,11 @@ class InitPermissions extends Command
             $model = app($class);
             if ($model instanceof OffersPrinting) {
                 foreach ($model->getPrintViews() as $key => $view) {
-                    $permission = resolve_static(
-                        Permission::class,
-                        'findOrCreate',
-                        [
-                            'name' => print_view_to_permission($key, $alias),
-                            'guardName' => 'web',
-                        ]
-                    );
+                    $id = $this->keepPermission(print_view_to_permission($key, $alias));
 
-                    if (is_null(data_get($this->currentPermissions, $permission->id))) {
-                        $newPermissions[] = $permission->getKey();
+                    if (! array_key_exists($id, $this->preexistingPermissions)) {
+                        $newPermissions[] = $id;
                     }
-
-                    unset($this->currentPermissions[$permission->id]);
                 }
             }
         }

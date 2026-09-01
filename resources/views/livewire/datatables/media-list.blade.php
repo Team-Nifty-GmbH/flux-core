@@ -1,3 +1,15 @@
+<div
+    x-data
+    x-on:data-table-row-clicked.window="
+        const record = $event.detail?.record;
+        if (record?.original_url) {
+            $nuxbe.openLightbox(record.original_url, {
+                mime: record.mime_type,
+                title: record.name,
+            });
+        }
+    "
+></div>
 <x-modal id="edit-media">
     <div class="flex flex-col gap-1.5">
         @section('media-attributes')

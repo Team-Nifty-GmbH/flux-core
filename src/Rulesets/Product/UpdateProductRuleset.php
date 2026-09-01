@@ -10,7 +10,6 @@ use FluxErp\Models\ProductCrossSelling;
 use FluxErp\Models\Unit;
 use FluxErp\Models\VatRate;
 use FluxErp\Rules\ModelExists;
-use FluxErp\Rules\ProductHierarchyDepth;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Rulesets\ProductCrossSelling\CreateProductCrossSellingRuleset;
 use Illuminate\Support\Arr;
@@ -63,34 +62,35 @@ class UpdateProductRuleset extends FluxRuleset
             'cover_media_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Media::class]),
+                app(ModelExists::class, ['model' => Media::class, 'subject' => Product::class]),
             ],
             'parent_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Product::class]),
-                app(ProductHierarchyDepth::class),
+                app(ModelExists::class, ['model' => Product::class, 'subject' => Product::class])
+                    ->whereNull('parent_id'),
             ],
             'vat_rate_id' => [
                 'sometimes',
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => VatRate::class]),
+                app(ModelExists::class, ['model' => VatRate::class, 'subject' => Product::class])
+                    ->where('is_sales', true),
             ],
             'unit_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Unit::class]),
+                app(ModelExists::class, ['model' => Unit::class, 'subject' => Product::class]),
             ],
             'purchase_unit_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Unit::class]),
+                app(ModelExists::class, ['model' => Unit::class, 'subject' => Product::class]),
             ],
             'reference_unit_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Unit::class]),
+                app(ModelExists::class, ['model' => Unit::class, 'subject' => Product::class]),
             ],
 
             'bundle_type_enum' => [
@@ -140,6 +140,7 @@ class UpdateProductRuleset extends FluxRuleset
             ],
             'is_service' => 'boolean',
             'is_shipping_free' => 'boolean',
+            'is_variant_parent' => 'boolean',
             'has_serial_numbers' => 'boolean',
             'is_nos' => 'boolean',
             'is_active_export_to_web_shop' => 'boolean',

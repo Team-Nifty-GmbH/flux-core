@@ -89,24 +89,26 @@ class UpdateOrderPosition extends FluxAction
         unset($orderPosition->discounts, $orderPosition->unit_price);
         $orderPosition->save();
 
-        if ($orderPosition->wasChanged('amount')) {
+        if ($orderPosition->wasChanged('amount') && bccomp($orderPosition->amount ?? 0, 0) === 1) {
             $children = resolve_static(OrderPosition::class, 'query')
                 ->where('parent_id', $orderPosition->getKey())
                 ->whereNotNull('amount')
                 ->get();
 
-            $previousAmount = data_get($orderPosition->getPrevious(), 'amount') ?? 1;
-            $previousAmount = bccomp($previousAmount, 0) === 0 ? 1 : $previousAmount;
+            $previousAmount = data_get($orderPosition->getPrevious(), 'amount');
+            $hasPreviousAmount = ! is_null($previousAmount) && bccomp($previousAmount, 0) === 1;
 
             foreach ($children as $child) {
-                $amountBundle = $child->amount_bundle ?? bcdiv($child->amount, $previousAmount);
+                $amountBundle = $child->amount_bundle
+                    ?? ($hasPreviousAmount ? bcdiv($child->amount, $previousAmount) : null);
+
+                if (is_null($amountBundle)) {
+                    continue;
+                }
 
                 UpdateOrderPosition::make([
                     'id' => $child->getKey(),
-                    'amount' => bcmul(
-                        $amountBundle,
-                        bccomp($orderPosition->amount, 0) === 0 ? 1 : $orderPosition->amount
-                    ),
+                    'amount' => bcmul($amountBundle, $orderPosition->amount),
                 ])
                     ->validate()
                     ->execute();

@@ -11,16 +11,31 @@ class SetJobAuthenticatedUserMiddleware
 {
     public function handle($job, Closure $next)
     {
+        $previous = auth()->user();
         $user = morph_to(Context::get('user'));
 
-        if (
-            (! auth()->check() || auth()->user()->isNot($user))
-            && $user
-            && $user instanceof Authenticatable
-        ) {
-            Auth::setUser($user);
+        if ($user instanceof Authenticatable) {
+            if (! $previous || $previous->isNot($user)) {
+                Auth::setUser($user);
+            }
+        } elseif ($previous) {
+            // Queue workers are long-running processes. Without a reset, a job
+            // dispatched without a user context (e.g. by the scheduler) would
+            // run as whatever user the previous job authenticated.
+            auth()->forgetUser();
         }
 
-        return $next($job);
+        try {
+            return $next($job);
+        } finally {
+            // Restore the dispatcher state: queue workers stay clean between
+            // jobs, sync dispatches don't leak the job user into the
+            // surrounding request or test.
+            if ($previous) {
+                Auth::setUser($previous);
+            } elseif (auth()->check()) {
+                auth()->forgetUser();
+            }
+        }
     }
 }

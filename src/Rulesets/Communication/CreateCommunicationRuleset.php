@@ -41,7 +41,7 @@ class CreateCommunicationRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => MailFolder::class]),
             ],
             'message_id' => 'nullable|string|max:255',
-            'message_uid' => 'integer',
+            'message_uid' => 'nullable|string|max:255',
             'from' => 'nullable|string|max:255',
             'to' => 'nullable|array',
             'cc' => 'nullable|array',

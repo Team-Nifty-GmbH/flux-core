@@ -85,12 +85,13 @@
                         <p class="text-sm text-gray-600 dark:text-gray-400">
                             {{ __('Your account is protected with two-factor authentication.') }}
                         </p>
-                        @if(! $isForced)
+                        @if (! $isForced)
                             <x-button
                                 :text="__('Disable')"
                                 color="red"
                                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Two-Factor Authentication')]) }}"
                                 wire:click="disableTwoFactor()"
+                                loading="disableTwoFactor()"
                             />
                         @else
                             <p class="text-xs text-amber-600 dark:text-amber-400">
@@ -112,9 +113,10 @@
                             :text="__('Enable')"
                             color="primary"
                             wire:click="startSetup()"
+                            loading="startSetup()"
                         />
                     </div>
-                    @if($isForced)
+                    @if ($isForced)
                         <p class="text-sm text-amber-600 dark:text-amber-400">
                             {{ __('Your administrator requires you to enable two-factor authentication.') }}
                         </p>
@@ -125,7 +127,7 @@
     @show
 
     @section('passkey-management')
-        <div x-show="browserSupportsWebAuthn" x-cloak>
+        <div x-show="browserSupportsWebAuthn()" x-cloak>
             <x-card>
                 <div class="space-y-4">
                     <div
@@ -142,7 +144,12 @@
                             </p>
                         </div>
                     </div>
-                    <livewire:passkeys />
+                    <div x-show="!window.nuxbeAppBridge?.isNative?.()" x-cloak>
+                        <livewire:passkeys />
+                    </div>
+                    <div x-show="window.nuxbeAppBridge?.isNative?.()" x-cloak>
+                        <x-flux::passkey-bridge-register />
+                    </div>
                 </div>
             </x-card>
         </div>

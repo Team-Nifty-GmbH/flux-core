@@ -6,6 +6,7 @@ use Composer\Autoload\ClassLoader;
 use Composer\InstalledVersions;
 use FluxErp\Mechanisms\FrontendAssets\FrontendAssets;
 use FluxErp\Mechanisms\FrontendAssets\SupportAutoInjectedAssets;
+use FluxErp\View\Components\Icon;
 use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
 use Illuminate\Support\Facades\Blade;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use ReflectionClass;
 use TallStackUi\Facades\TallStackUi;
+use TallStackUi\Support\Blade\ComponentPrefix;
 
 class ViewServiceProvider extends ServiceProvider
 {
@@ -96,7 +98,7 @@ class ViewServiceProvider extends ServiceProvider
             ->scope('calendar')
             ->dropdown()
             ->block('wrapper.second', 'relative inline-block text-left w-full')
-            ->block('floating.class', 'w-full');
+            ->block('floating.widths.md', 'w-full');
 
         TallStackUi::customize()
             ->badge()
@@ -146,8 +148,8 @@ class ViewServiceProvider extends ServiceProvider
 
         TallStackUi::customize()
             ->modal('fullscreen')
-            ->block('wrapper.fourth', 'dark:bg-dark-700 relative flex w-full transform flex-col rounded-xl bg-white text-left shadow-xl transition-all min-h-screen')
-            ->block('body', 'dark:text-dark-300 grow rounded-b-xl py-5 text-gray-700 px-4 min-h-screen');
+            ->block('wrapper.fourth', 'dark:bg-dark-700 relative flex h-screen w-full transform flex-col overflow-hidden rounded-xl bg-white text-left shadow-xl transition-all')
+            ->block('body', 'dark:text-dark-300 min-h-0 flex-1 rounded-b-xl py-5 text-gray-700 px-4');
 
         TallStackUi::customize()
             ->modal('headless')
@@ -156,11 +158,21 @@ class ViewServiceProvider extends ServiceProvider
 
     protected function registerViews(): void
     {
+        $this->app->booted(function (): void {
+            Blade::component(Icon::class, app(ComponentPrefix::class)->add('icon'));
+
+            Blade::directive('persist', fn (string $expression): string => '<?php app("livewire")->forceAssetInjection(); ?>'
+                . '<div x-persist="<?php echo e(' . $expression . '); ?>">'
+                . '<?php if (! in_array(' . $expression . ", explode(',', request()->header('X-Flux-Persisted', '')), true)): ?>");
+
+            Blade::directive('endpersist', fn (): string => '<?php endif; ?></div>');
+        });
+
         Blade::component(App::class, 'flux::layouts.app');
         Blade::component(Printing::class, 'flux::layouts.print');
         config([
-            'livewire.layout' => 'flux::layouts.app',
-            'livewire.component_layout' => 'flux::layouts.app',
+            'livewire.layout' => App::class,
+            'livewire.component_layout' => App::class,
         ]);
 
         // Register Printing views as blade components

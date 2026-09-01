@@ -39,17 +39,17 @@ class UpdateTaskRuleset extends FluxRuleset
             'project_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Project::class]),
+                app(ModelExists::class, ['model' => Project::class, 'subject' => Task::class]),
             ],
             'responsible_user_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => User::class]),
+                app(ModelExists::class, ['model' => User::class, 'subject' => Task::class]),
             ],
             'order_position_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => OrderPosition::class]),
+                app(ModelExists::class, ['model' => OrderPosition::class, 'subject' => Task::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
             'description' => 'string|nullable',

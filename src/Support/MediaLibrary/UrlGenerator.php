@@ -2,6 +2,7 @@
 
 namespace FluxErp\Support\MediaLibrary;
 
+use FluxErp\Models\Media;
 use Illuminate\Support\Facades\URL;
 use Spatie\MediaLibrary\Support\UrlGenerator\DefaultUrlGenerator;
 
@@ -9,11 +10,28 @@ class UrlGenerator extends DefaultUrlGenerator
 {
     public function getUrl(): string
     {
-        if ($this->media->disk !== 'public' && $this->media->id && $this->media->file_name) {
-            return URL::temporarySignedRoute('media.private', now()->addMinutes(5), [
-                'media' => $this->media->id,
+        // Conversions and originals can live on different disks (e.g. originals on s3,
+        // conversions on the local public disk). Pick the disk that actually backs the
+        // file we're being asked for, not just the original's disk.
+        $effectiveDisk = is_null($this->conversion)
+            ? $this->media->disk
+            : $this->media->conversions_disk;
+
+        if ($effectiveDisk !== 'public' && $this->media->getKey() && $this->media->file_name) {
+            $params = [
+                'media' => $this->media->getKey(),
                 'filename' => $this->media->file_name,
-            ]);
+            ];
+
+            if (! is_null($this->conversion)) {
+                $params['conversion'] = $this->conversion->getName();
+            }
+
+            return URL::temporarySignedRoute(
+                'media.private',
+                now()->addMinutes(Media::PRIVATE_URL_TTL_MINUTES),
+                $params,
+            );
         }
 
         return parent::getUrl();

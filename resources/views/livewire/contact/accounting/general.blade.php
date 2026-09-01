@@ -1,6 +1,6 @@
 <div
     class="flex flex-col gap-4"
-    x-bind:class="!$wire.$parent.$parent.edit && 'pointer-events-none'"
+    x-bind:class="{ 'pointer-events-none': !$wire.$parent.$parent.edit }"
 >
     @section('commercial')
         <x-card>

@@ -18,16 +18,30 @@
                                     await $wire.isCalendarEventRepeatable(
                                         $event.detail.select.id,
                                     ),
-                                )
+                                );
+                                $wire.$set(
+                                    'event.extended_props',
+                                    $event.detail.select.customProperties.map(
+                                        function (item) {
+                                            item.value = null;
+
+                                            return item;
+                                        },
+                                    ),
+                                );
+                                $wire.$set(
+                                    'event.calendar',
+                                    $event.detail.select,
+                                );
                             "
                             select="label:label|value:id"
                             :request="[
-                        'url' => route('calendar-search'),
-                        'method' => 'POST',
-                        'params' => [
-                            'where' => [['is_group', '=', false]],
-                        ],
-                    ]"
+                                'url' => route('calendar-search'),
+                                'method' => 'POST',
+                                'params' => [
+                                    'where' => [['is_group', '=', false]],
+                                ],
+                            ]"
                         />
                     </div>
                 @show
@@ -273,11 +287,11 @@
                                 "
                                 required
                                 :options="[
-                            ['label' => __('Day(s)'), 'value' => 'days'],
-                            ['label' => __('Week(s)'), 'value' => 'weeks'],
-                            ['label' => __('Month(s)'), 'value' => 'months'],
-                            ['label' => __('Year(s)'), 'value' => 'years'],
-                        ]"
+                                    ['label' => __('Day(s)'), 'value' => 'days'],
+                                    ['label' => __('Week(s)'), 'value' => 'weeks'],
+                                    ['label' => __('Month(s)'), 'value' => 'months'],
+                                    ['label' => __('Year(s)'), 'value' => 'years'],
+                                ]"
                                 x-bind:disabled="
                                     !$wire.event.is_editable ?? false
                                 "
@@ -381,51 +395,51 @@
                         <template x-if="$wire.event.repeat.unit === 'months'">
                             <div
                                 x-data="{
-                            selectedOption: null,
-                            selectOption(option) {
-                                $wire.$set('event.repeat.monthly', option.value)
-                                this.selectedOption = option
-                            },
-                            options: [
-                                {
-                                    value: 'day',
-                                    label:
-                                        '{{ __('Monthly on') }} ' +
-                                        dayjs($wire.event.start).format('DD') +
-                                        '.',
-                                },
-                                {
-                                    value: 'first',
-                                    label:
-                                        '{{ __('Monthly on first') }} ' +
-                                        dayjs($wire.event.start).format('dddd'),
-                                },
-                                {
-                                    value: 'second',
-                                    label:
-                                        '{{ __('Monthly on second') }} ' +
-                                        dayjs($wire.event.start).format('dddd'),
-                                },
-                                {
-                                    value: 'third',
-                                    label:
-                                        '{{ __('Monthly on third') }} ' +
-                                        dayjs($wire.event.start).format('dddd'),
-                                },
-                                {
-                                    value: 'fourth',
-                                    label:
-                                        '{{ __('Monthly on fourth') }} ' +
-                                        dayjs($wire.event.start).format('dddd'),
-                                },
-                                {
-                                    value: 'last',
-                                    label:
-                                        '{{ __('Monthly on last') }} ' +
-                                        dayjs($wire.event.start).format('dddd'),
-                                },
-                            ],
-                        }"
+                                    selectedOption: null,
+                                    selectOption(option) {
+                                        $wire.$set('event.repeat.monthly', option.value)
+                                        this.selectedOption = option
+                                    },
+                                    options: [
+                                        {
+                                            value: 'day',
+                                            label:
+                                                '{{ __('Monthly on') }} ' +
+                                                dayjs($wire.event.start).format('DD') +
+                                                '.',
+                                        },
+                                        {
+                                            value: 'first',
+                                            label:
+                                                '{{ __('Monthly on first') }} ' +
+                                                dayjs($wire.event.start).format('dddd'),
+                                        },
+                                        {
+                                            value: 'second',
+                                            label:
+                                                '{{ __('Monthly on second') }} ' +
+                                                dayjs($wire.event.start).format('dddd'),
+                                        },
+                                        {
+                                            value: 'third',
+                                            label:
+                                                '{{ __('Monthly on third') }} ' +
+                                                dayjs($wire.event.start).format('dddd'),
+                                        },
+                                        {
+                                            value: 'fourth',
+                                            label:
+                                                '{{ __('Monthly on fourth') }} ' +
+                                                dayjs($wire.event.start).format('dddd'),
+                                        },
+                                        {
+                                            value: 'last',
+                                            label:
+                                                '{{ __('Monthly on last') }} ' +
+                                                dayjs($wire.event.start).format('dddd'),
+                                        },
+                                    ],
+                                }"
                             >
                                 <x-dropdown position="bottom" scope="calendar">
                                     <x-slot:action>
@@ -620,6 +634,7 @@
                                     :text="__('Reactivate')"
                                     primary
                                     wire:click="reactivate()"
+                                    loading="reactivate()"
                                 />
                             </div>
                         @endcanAction

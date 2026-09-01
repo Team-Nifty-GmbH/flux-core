@@ -16,8 +16,8 @@ use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
-use FluxErp\Rules\ProductIsOrderable;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Fluent;
 use Illuminate\Validation\Rule;
 
@@ -86,8 +86,12 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 ),
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Product::class]),
-                app(ProductIsOrderable::class),
+                app(ModelExists::class, ['model' => Product::class])
+                    ->where('is_variant_parent', false)
+                    ->whereDoesntHave(
+                        'children',
+                        fn (Builder $query) => $query->where('is_active', true)
+                    ),
             ],
             'supplier_contact_id' => [
                 'integer',
@@ -166,6 +170,8 @@ class CreateOrderPositionRuleset extends FluxRuleset
             'customer_delivery_date' => 'date|nullable',
             'ean_code' => 'string|max:255|nullable',
             'possible_delivery_date' => 'date|nullable',
+            'system_delivery_date' => 'date|nullable|required_with:system_delivery_date_end',
+            'system_delivery_date_end' => 'date|nullable|after_or_equal:system_delivery_date',
             'unit_gram_weight' => [
                 app(Numeric::class),
                 'nullable',

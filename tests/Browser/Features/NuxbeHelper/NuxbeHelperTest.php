@@ -1,5 +1,19 @@
 <?php
 
+use FluxErp\Models\Currency;
+
+beforeEach(function (): void {
+    // The default language and currency are created with random faker values.
+    // Pin them so Intl.NumberFormat output is deterministic - locales like
+    // "mr" render Devanagari digits, which breaks the digit assertions.
+    $this->defaultLanguage->update(['language_code' => 'de']);
+
+    Currency::default()?->update([
+        'iso' => 'EUR',
+        'symbol' => '€',
+    ]);
+});
+
 test('$nuxbe is available as Alpine magic', function (): void {
     visit(route('dashboard'))
         ->assertRoute('dashboard')

@@ -18,6 +18,8 @@ use Illuminate\Validation\ValidationException;
 
 class FillOrderPositions extends FluxAction
 {
+    protected ?int $orderTenantId = null;
+
     public static function models(): array
     {
         return [OrderPosition::class, Order::class];
@@ -65,6 +67,18 @@ class FillOrderPositions extends FluxAction
         }
 
         return $orderPositions;
+    }
+
+    protected function orderTenantId(): ?int
+    {
+        return $this->orderTenantId ??= resolve_static(Order::class, 'query')
+            ->whereKey($this->getData('order_id'))
+            ->value('tenant_id');
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->data['simulate'] ??= false;
     }
 
     protected function validateData(): void
@@ -136,6 +150,8 @@ class FillOrderPositions extends FluxAction
             $orderPosition->parent_id = $parentId;
         }
 
+        $orderPosition->tenant_id ??= $this->orderTenantId();
+
         // Fill product info if not already filled
         if ($orderPosition->product) {
             $orderPosition->ean_code = $orderPosition->ean_code ?: $orderPosition->product->ean;
@@ -153,7 +169,7 @@ class FillOrderPositions extends FluxAction
         // If simulate = false, save order position, keep track of saved ids
         if (! $simulate) {
             $discounts = $orderPosition->discounts;
-            unset($orderPosition->discounts);
+            unset($orderPosition->discounts, $orderPosition->unit_price);
             $orderPosition->save();
 
             $existingDiscounts = $discounts->filter(fn ($discount) => $discount['id'] ?? false)->toArray();

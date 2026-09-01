@@ -166,7 +166,7 @@ test('create documents', function (): void {
         ->call('openCreateDocumentsModal')
         ->assertExecutesJs("\$tsui.open.modal('create-documents-$componentId')")
         ->assertSet('printLayouts', [
-            ['layout' => 'invoice', 'label' => 'invoice'],
+            ['layout' => 'invoice', 'label' => 'Invoice'],
         ])
         ->set([
             'selectedPrintLayouts' => [
@@ -180,6 +180,31 @@ test('create documents', function (): void {
 
     $invoice = $this->order->invoice();
     expect($invoice?->getPath())->not->toBeNull();
+});
+
+test('the invoice preview carries what the lightbox needs', function (): void {
+    Storage::fake();
+
+    $this->order->update(['is_locked' => false, 'invoice_number' => null]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('openCreateDocumentsModal')
+        ->set([
+            'selectedPrintLayouts' => [
+                'download' => ['invoice'],
+            ],
+        ])
+        ->call('createDocuments')
+        ->assertHasNoErrors();
+
+    $invoice = $this->order->invoice();
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertSet('order.invoice', [
+            'url' => $invoice->getUrl(),
+            'mime_type' => $invoice->mime_type,
+            'name' => $invoice->name,
+        ]);
 });
 
 test('create documents with delivery lock fails', function (): void {
@@ -197,7 +222,7 @@ test('create documents with delivery lock fails', function (): void {
         ->call('createDocuments')
         ->assertOk()
         ->assertReturned(null)
-        ->assertHasErrors(['has_contact_delivery_lock', 'order.balance'])
+        ->assertHasErrors(['has_contact_delivery_lock', 'balance'])
         ->assertSet('order.invoice_number', null);
 
     expect($this->order->refresh()->invoice_number)->toBeNull();
@@ -244,6 +269,34 @@ test('fetch contact data', function (): void {
         ->assertSet('order.tenant_id', $newContact->getTenantId())
         ->assertSet('order.address_invoice_id', $newContact->invoice_address_id)
         ->assertSet('order.address_delivery_id', $newContact->delivery_address_id);
+});
+
+test('a purchase order is delivered to the tenant, not to the supplier', function (): void {
+    $supplier = Contact::factory()->create();
+
+    $supplierAddress = Address::factory()->create([
+        'contact_id' => $supplier->id,
+    ]);
+
+    $supplier->update([
+        'delivery_address_id' => $supplierAddress->id,
+        'invoice_address_id' => $supplierAddress->id,
+        'main_address_id' => $supplierAddress->id,
+    ]);
+
+    $this->order->update([
+        'order_type_id' => OrderType::factory()->create([
+            'order_type_enum' => OrderTypeEnum::Purchase,
+            'is_active' => true,
+        ])->getKey(),
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('order.contact_id', $supplier->id)
+        ->call('fetchContactData')
+        ->assertOk()
+        ->assertSet('order.address_invoice_id', $supplier->invoice_address_id)
+        ->assertSet('order.address_delivery_id', null);
 });
 
 test('get additional model actions', function (): void {
@@ -574,7 +627,24 @@ test('renders subscription order view', function (): void {
 
     Livewire::test(OrderView::class, ['id' => $this->order->id])
         ->assertOk()
-        ->assertViewIs('flux::livewire.order.subscription');
+        ->assertViewIs('flux::livewire.order.subscription')
+        ->assertViewHas('canCreateCancellationConfirmation', false);
+});
+
+test('subscription view offers cancellation confirmation when print layout is enabled', function (): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Subscription,
+        'is_active' => true,
+        'is_hidden' => false,
+        'print_layouts' => ['cancellation-confirmation'],
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertOk()
+        ->assertViewIs('flux::livewire.order.subscription')
+        ->assertViewHas('canCreateCancellationConfirmation', true);
 });
 
 test('renders successfully', function (): void {
@@ -719,6 +789,35 @@ test('subscription schedule functionality', function (): void {
     ]);
 });
 
+test('reselecting the same frequency keeps month and day', function (): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Subscription,
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    $schedule = Schedule::query()->create([
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => 'invokable',
+        'cron' => [
+            'methods' => ['basic' => 'yearlyOn', 'dayConstraint' => null, 'timeConstraint' => null],
+            'parameters' => ['basic' => [1, 24, '06:00'], 'dayConstraint' => [], 'timeConstraint' => []],
+        ],
+        'parameters' => ['orderId' => $this->order->id],
+        'is_active' => true,
+    ]);
+
+    $schedule->orders()->attach($this->order->id);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertSet('schedule.cron.parameters.basic', [1, 24, '06:00'])
+        ->set('schedule.cron.methods.basic', 'yearlyOn')
+        ->assertSet('schedule.cron.parameters.basic', [1, 24, '06:00'])
+        ->set('schedule.cron.methods.basic', 'monthlyOn')
+        ->assertSet('schedule.cron.parameters.basic', [1, '00:00']);
+});
+
 test('cancel subscription immediately deactivates schedule', function (): void {
     $subscriptionOrderType = OrderType::factory()->create([
         'order_type_enum' => OrderTypeEnum::Subscription,
@@ -798,6 +897,74 @@ test('cancel subscription next period sets ends_at to due date', function (): vo
     expect($schedule)
         ->is_active->toBeTrue()
         ->and($schedule->ends_at->toDateTimeString())->toBe($dueAt->toDateTimeString());
+});
+
+test('cancel subscription with send email opens the mail dialog', function (): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Subscription,
+        'is_active' => true,
+        'is_hidden' => false,
+        'print_layouts' => ['cancellation-confirmation'],
+    ]);
+
+    $targetOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set([
+            'schedule.parameters.orderTypeId' => $targetOrderType->id,
+            'schedule.parameters.orderId' => $this->order->id,
+            'schedule.cron.methods.basic' => 'monthlyOn',
+            'schedule.cron.parameters.basic' => ['1', '00:00', null],
+        ])
+        ->call('saveSchedule')
+        ->assertReturned(true);
+
+    $component
+        ->call('cancelSubscription', 'immediate', true, true)
+        ->assertReturned(true)
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertDispatched('createFromSession');
+});
+
+test('cancel subscription generating document only does not open the mail dialog', function (): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Subscription,
+        'is_active' => true,
+        'is_hidden' => false,
+        'print_layouts' => ['cancellation-confirmation'],
+    ]);
+
+    $targetOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set([
+            'schedule.parameters.orderTypeId' => $targetOrderType->id,
+            'schedule.parameters.orderId' => $this->order->id,
+            'schedule.cron.methods.basic' => 'monthlyOn',
+            'schedule.cron.parameters.basic' => ['1', '00:00', null],
+        ])
+        ->call('saveSchedule')
+        ->assertReturned(true);
+
+    $component
+        ->call('cancelSubscription', 'immediate', true, false)
+        ->assertReturned(true)
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertNotDispatched('createFromSession');
 });
 
 test('switch tabs', function (): void {
@@ -1439,6 +1606,50 @@ test('refresh delivery address updates address from address model', function ():
     $refreshedOrder = $this->order->fresh();
     expect($refreshedOrder->address_delivery['company'])->toEqual('Updated Delivery Company');
     expect($refreshedOrder->address_delivery['street'])->toEqual('Delivery Street 456');
+    expect($refreshedOrder->address_delivery['city'])->toEqual('Delivery City');
+});
+
+test('refresh invoice address switches to the contacts invoice address', function (): void {
+    $newInvoiceAddress = Address::factory()->create([
+        'contact_id' => $this->contact->id,
+        'company' => 'New Invoice Company',
+        'street' => 'Invoice Street 1',
+        'city' => 'Invoice City',
+        'is_invoice_address' => true,
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('refreshAddress', 'invoice')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertSet('order.address_invoice_id', $newInvoiceAddress->id);
+
+    $refreshedOrder = $this->order->fresh();
+    expect($refreshedOrder->address_invoice_id)->toEqual($newInvoiceAddress->id);
+    expect($refreshedOrder->address_invoice['company'])->toEqual('New Invoice Company');
+    expect($refreshedOrder->address_invoice['street'])->toEqual('Invoice Street 1');
+    expect($refreshedOrder->address_invoice['city'])->toEqual('Invoice City');
+});
+
+test('refresh delivery address switches to the contacts delivery address', function (): void {
+    $newDeliveryAddress = Address::factory()->create([
+        'contact_id' => $this->contact->id,
+        'company' => 'New Delivery Company',
+        'street' => 'Delivery Street 1',
+        'city' => 'Delivery City',
+        'is_delivery_address' => true,
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('refreshAddress', 'delivery')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertSet('order.address_delivery_id', $newDeliveryAddress->id);
+
+    $refreshedOrder = $this->order->fresh();
+    expect($refreshedOrder->address_delivery_id)->toEqual($newDeliveryAddress->id);
+    expect($refreshedOrder->address_delivery['company'])->toEqual('New Delivery Company');
+    expect($refreshedOrder->address_delivery['street'])->toEqual('Delivery Street 1');
     expect($refreshedOrder->address_delivery['city'])->toEqual('Delivery City');
 });
 

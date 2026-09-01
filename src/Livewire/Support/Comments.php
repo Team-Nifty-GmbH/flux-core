@@ -71,7 +71,7 @@ abstract class Comments extends Component
         try {
             $this->commentForm->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->commentForm);
 
             return false;
         }
@@ -152,6 +152,14 @@ abstract class Comments extends Component
             return [];
         }
 
+        $recordExists = resolve_static($this->modelType, 'query')
+            ->whereKey($this->modelId)
+            ->exists();
+
+        if (! $recordExists) {
+            return [];
+        }
+
         return resolve_static(Comment::class, 'withTemporaryGlobalScopes', [
             'scopes' => [
                 'media' => fn (Builder $query) => $query->with('media:id,name,model_type,model_id,disk'),
@@ -204,7 +212,7 @@ abstract class Comments extends Component
                 $this->commentForm->id
             );
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->commentForm);
 
             return null;
         }
@@ -230,7 +238,33 @@ abstract class Comments extends Component
         try {
             $this->commentForm->save();
         } catch (ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->commentForm);
         }
+    }
+
+    #[Renderless]
+    public function updateComment(int $id, string $comment): ?array
+    {
+        $this->commentForm->reset();
+        $this->commentForm->fill([
+            'id' => $id,
+            'comment' => $comment,
+        ]);
+
+        try {
+            $this->commentForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this, form: $this->commentForm);
+
+            return null;
+        }
+
+        $comment = $this->commentForm->getActionResult();
+
+        return [
+            'id' => $comment->getKey(),
+            'comment' => $comment->comment,
+            'edited_at' => $comment->edited_at,
+        ];
     }
 }

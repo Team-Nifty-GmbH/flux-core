@@ -19,6 +19,7 @@
         'dark bg-secondary-800': darkTheme,
         'bg-slate-50': !darkTheme,
     }"
+    x-bind:data-color-scheme="darkTheme ? 'dark' : 'light'"
     class="text-secondary-600 dark:text-secondary-50 h-full transition duration-300"
 >
     @section('wire.navigate.spinner')
@@ -39,7 +40,7 @@
 
     @show
     @persist('notifications')
-        @if(auth()->check() && auth()->id())
+        @if (auth()->check() && auth()->id())
             <div
                 id="{{ \Illuminate\Support\Str::uuid() }}"
                 x-on:ts-ui:toast-upsert.window="
@@ -50,6 +51,7 @@
             </div>
         @endif
         <x-dialog />
+        <x-nuxbe-lightbox />
     @endpersist
 
     @auth('web')
@@ -104,10 +106,13 @@
         @persist('record-merging')
             <livewire:record-merging lazy />
         @endpersist
+        @persist('layout-global-components')
+            @stack('layout-global-components')
+        @endpersist
     @endauth
 
     <x-flux::layout>
-        @if(
+        @if (
             ! $navigation
             && auth()->check()
             && auth()->id()
@@ -124,7 +129,7 @@
                     />
                     @auth('web')
                         <div
-                            x-persist="layout.header.search - bar"
+                            x-persist="layout.header.searchBar"
                             class="hidden grow sm:block"
                         >
                             <livewire:features.search-bar />
@@ -135,9 +140,7 @@
 
                     <div class="flex shrink-0 gap-2">
                         @auth('web')
-                            <div
-                                x-persist="layout.header.search - bar - mobile"
-                            >
+                            <div x-persist="layout.header.searchBarMobile">
                                 <livewire:features.search-bar
                                     :mobile="true"
                                     lazy
@@ -155,7 +158,7 @@
                             x-on:click="window.location.reload()"
                         />
 
-                        @if(resolve_static(\FluxErp\Models\PriceList::class, 'default'))
+                        @if (resolve_static(\FluxErp\Models\PriceList::class, 'default'))
                             @persist('layout.header.cart')
                                 @canAction(\FluxErp\Actions\Cart\CreateCart::class)
                                     <livewire:cart.cart lazy />
@@ -179,7 +182,7 @@
             </x-slot:header>
         @endif
 
-        @if(
+        @if (
             ! $navigation
             && auth()->check()
             && auth()->id()

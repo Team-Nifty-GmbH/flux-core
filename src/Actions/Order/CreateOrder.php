@@ -13,6 +13,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\User;
 use FluxErp\Rulesets\Order\CreateOrderRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -126,7 +127,10 @@ class CreateOrder extends FluxAction
             ->whereKey(data_get($this->data, 'payment_type_id'))
             ->first();
 
-        $this->data['agent_id'] = $this->data['agent_id'] ?? $contact->agent_id;
+        $this->data['agent_id'] ??= $contact->agent_id
+            && resolve_static(User::class, 'query')->whereKey($contact->agent_id)->exists()
+                ? $contact->agent_id
+                : null;
         $this->data['approval_user_id'] ??= $contact->approval_user_id;
         $this->data['contact_bank_connection_id'] ??= $contact->contactBankConnections()->first()?->id;
         $this->data['payment_discount_target'] ??= $contact->discount_days
@@ -230,6 +234,18 @@ class CreateOrder extends FluxAction
                     'invoice_number' => [__('validation.unique', ['attribute' => 'invoice_number'])],
                 ];
             }
+        }
+
+        if (
+            ! is_null($this->getData('contract_total_amount'))
+            && ! resolve_static(OrderType::class, 'query')
+                ->whereKey($this->getData('order_type_id'))
+                ->value('order_type_enum')
+                ?->isSubscription()
+        ) {
+            $errors += [
+                'contract_total_amount' => ['Only subscription orders can carry a contract total amount.'],
+            ];
         }
 
         if ($errors) {

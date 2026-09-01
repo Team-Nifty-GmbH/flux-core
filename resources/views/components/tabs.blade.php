@@ -50,19 +50,29 @@
 >
     {{ $prepend ?? '' }}
 
+    @php
+        $tabProperty = $attributes->wire('model')->value();
+        $activeTab = $this->{$tabProperty};
+        $activeTabButton = $tabs[$activeTab] ?? null;
+        $boundModelKey = $activeTabButton?->wireModel;
+        $boundModelValue = $boundModelKey ? data_get($this, $boundModelKey) : null;
+
+        if (! is_scalar($boundModelValue)) {
+            $boundModelValue = data_get($boundModelValue, 'id');
+        }
+    @endphp
+
     <div class="min-w-0 w-full">
         @if ($slot->isNotEmpty())
             {{ $slot }}
-        @elseif ($tabs[$this->{$attributes->wire('model')->value()}]?->isLivewireComponent)
+        @elseif ($activeTabButton?->isLivewireComponent)
             <livewire:dynamic-component
-                wire:model="{{ $tabs[$this->{$attributes->wire('model')->value()}]?->wireModel }}"
-                :is="$this->{$attributes->wire('model')->value()}"
-                wire:key="tab-{{ $attributes->wire('model')->value() }}-{{ $this->{$attributes->wire('model')->value()} }}"
+                wire:model="{{ $boundModelKey }}"
+                :is="$activeTab"
+                wire:key="tab-{{ $tabProperty }}-{{ $activeTab }}{{ is_null($boundModelValue) ? '' : '-' . $boundModelValue }}"
             />
         @else
-            <x-dynamic-component
-                :component="$this->{$attributes->wire('model')->value()}"
-            />
+            <x-dynamic-component :component="$activeTab" />
         @endif
     </div>
     {{ $append ?? '' }}

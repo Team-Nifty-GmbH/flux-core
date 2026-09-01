@@ -6,6 +6,7 @@ use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\ProductProperty;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 
@@ -63,10 +64,7 @@ test('delete product with children fails', function (): void {
     )->toThrow(Illuminate\Validation\ValidationException::class);
 });
 
-it('does not copy parent prices into variant when inheritance is enabled', function (): void {
-    Tenant::default()->update(['product_variant_inheritance_enabled' => true]);
-    Tenant::clearDefaultCache();
-
+test('does not copy parent prices into variant when inheritance is enabled', function (): void {
     $listA = PriceList::factory()->create();
     $parent = Product::factory()->create(['vat_rate_id' => VatRate::default()?->getKey()]);
     $parent->tenants()->attach(Tenant::default()->getKey());
@@ -87,9 +85,8 @@ it('does not copy parent prices into variant when inheritance is enabled', funct
     expect($variant->prices->where('price_list_id', $listA->getKey())->first()->price)->toEqual(100);
 });
 
-it('still copies parent prices into variant when inheritance is disabled', function (): void {
-    Tenant::default()->update(['product_variant_inheritance_enabled' => false]);
-    Tenant::clearDefaultCache();
+test('still copies parent prices into variant when inheritance is disabled', function (): void {
+    app(FluxErp\Settings\ProductSettings::class)->fill(['variant_inheritance_enabled' => false])->save();
 
     $listA = PriceList::factory()->create();
     $parent = Product::factory()->create(['vat_rate_id' => VatRate::default()?->getKey()]);
@@ -107,4 +104,74 @@ it('still copies parent prices into variant when inheritance is disabled', funct
     ])->validate()->execute();
 
     expect($variant->ownPrices()->count())->toBe(1);
+});
+
+test('demoting a variant parent to standalone via update product', function (): void {
+    $parent = Product::factory()->create();
+    Product::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'is_active' => false,
+    ]);
+
+    UpdateProduct::make([
+        'id' => $parent->getKey(),
+        'is_variant_parent' => false,
+    ])
+        ->validate()
+        ->execute();
+
+    expect($parent->fresh()->is_variant_parent)->toBeFalse();
+});
+
+test('rejects demoting a variant parent while active variants exist', function (): void {
+    $parent = Product::factory()->create();
+    Product::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'is_active' => true,
+    ]);
+
+    UpdateProduct::make([
+        'id' => $parent->getKey(),
+        'is_variant_parent' => false,
+    ])
+        ->validate()
+        ->execute();
+})->throws(Illuminate\Validation\ValidationException::class);
+test('create product rejects a purchase-only vat rate', function (): void {
+    $purchaseOnlyVatRate = VatRate::factory()->create([
+        'is_purchase' => true,
+        'is_sales' => false,
+    ]);
+
+    CreateProduct::assertValidationErrors([
+        'name' => 'Test Widget',
+        'vat_rate_id' => $purchaseOnlyVatRate->getKey(),
+    ], 'vat_rate_id');
+});
+
+test('update product keeps its properties when none are passed', function (): void {
+    $product = Product::factory()->create();
+    $property = ProductProperty::factory()->create();
+    $product->productProperties()->attach($property->getKey(), ['value' => 'kept']);
+
+    UpdateProduct::make([
+        'id' => $product->getKey(),
+        'name' => 'Updated Widget',
+    ])->validate()->execute();
+
+    expect($product->productProperties()->pluck('id')->all())->toBe([$property->getKey()]);
+});
+
+test('update product syncs its properties when they are passed', function (): void {
+    $product = Product::factory()->create();
+    $stale = ProductProperty::factory()->create();
+    $wanted = ProductProperty::factory()->create();
+    $product->productProperties()->attach($stale->getKey(), ['value' => 'gone']);
+
+    UpdateProduct::make([
+        'id' => $product->getKey(),
+        'product_properties' => [['id' => $wanted->getKey(), 'value' => 'set']],
+    ])->validate()->execute();
+
+    expect($product->productProperties()->pluck('id')->all())->toBe([$wanted->getKey()]);
 });

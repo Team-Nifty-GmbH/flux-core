@@ -291,6 +291,11 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     }
 
     // Scopes
+    public function scopeAssignedTo(Builder $builder, int $userId): void
+    {
+        $builder->whereRelation('users', 'users.id', $userId);
+    }
+
     public function scopeInTimeframe(
         Builder $builder,
         Carbon|string $start,

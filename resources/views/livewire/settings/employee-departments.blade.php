@@ -63,8 +63,10 @@
                     'url' => route('search', \FluxErp\Models\Employee::class),
                     'method' => 'POST',
                     'params' => [
-                        'searchFields' => ['name', 'email']
-                    ]
+                        'where' => [
+                            ['is_active', '=', true],
+                        ],
+                    ],
                 ]"
             />
 

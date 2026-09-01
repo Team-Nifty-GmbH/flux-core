@@ -43,3 +43,28 @@ test('delete media folder', function (): void {
     expect(DeleteMediaFolder::make(['id' => $folder->getKey()])
         ->validate()->execute())->toBeTrue();
 });
+
+test('renaming media folder with apostrophe in name does not break descendant slug update', function (): void {
+    $contact = FluxErp\Models\Contact::factory()->create();
+
+    $parent = CreateMediaFolder::make([
+        'name' => "Zusatzinfo's",
+        'model_type' => morph_alias(FluxErp\Models\Contact::class),
+        'model_id' => $contact->getKey(),
+    ])->validate()->execute();
+
+    $child = CreateMediaFolder::make([
+        'parent_id' => $parent->getKey(),
+        'name' => 'Sub',
+        'model_type' => morph_alias(FluxErp\Models\Contact::class),
+        'model_id' => $contact->getKey(),
+    ])->validate()->execute();
+
+    UpdateMediaFolder::make([
+        'id' => $parent->getKey(),
+        'name' => "Zusatzinfo's renamed",
+    ])->validate()->execute();
+
+    expect($child->fresh()->slug)
+        ->toBe("zusatzinfo's_renamed|{$parent->getKey()}.sub|{$child->getKey()}");
+});

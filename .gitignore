@@ -9,6 +9,7 @@ testbench.yaml
 /vendor
 node_modules
 reports
+/build
 /dist
 /workbench
 .playwright-mcp/

@@ -147,4 +147,41 @@
             />
         </x-slot:footer>
     </x-modal>
+
+    <x-modal id="change-task-state-modal" :title="__('Change state')">
+        <div
+            x-data="{
+                formatter: @js(resolve_static(\FluxErp\Models\Task::class, 'typeScriptAttributes')),
+            }"
+        >
+            <x-flux::state
+                class="w-full"
+                align="bottom-start"
+                :label="__('Task state')"
+                wire:model="selectedState"
+                formatters="formatter.state"
+                available="availableStates"
+            />
+        </div>
+        <x-slot:footer>
+            <x-button
+                color="secondary"
+                light
+                flat
+                :text="__('Cancel')"
+                x-on:click="$tsui.close.modal('change-task-state-modal')"
+            />
+            <x-button
+                color="indigo"
+                :text="__('Save')"
+                x-on:click="
+                    $wire.changeState().then((success) => {
+                        if (success) {
+                            $tsui.close.modal('change-task-state-modal');
+                        }
+                    })
+                "
+            />
+        </x-slot:footer>
+    </x-modal>
 </div>

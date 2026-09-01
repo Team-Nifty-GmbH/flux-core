@@ -6,6 +6,7 @@ use FluxErp\Actions\Contact\UpdateContact;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Contact;
 use FluxErp\Models\User;
+use FluxErp\Support\Bus\BulkExecutor;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
 use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
@@ -84,7 +85,7 @@ class ContactList extends BaseDataTable
         try {
             $this->createContactForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->createContactForm);
 
             return false;
         }
@@ -97,8 +98,6 @@ class ContactList extends BaseDataTable
     #[Renderless]
     public function assignToAgent(): bool
     {
-        $actions = [];
-
         try {
             if (! resolve_static(User::class, 'query')
                 ->where('is_active', true)
@@ -108,28 +107,23 @@ class ContactList extends BaseDataTable
                 throw ValidationException::withMessages(['agentId' => __('The selected agent does not exist.')]);
             }
 
-            foreach ($this->getSelectedModelsQuery()->pluck('id') as $contactId) {
-                $actions[] = UpdateContact::make([
-                    'id' => $contactId,
-                    'agent_id' => $this->agentId,
-                ])
-                    ->checkPermission()
-                    ->validate();
-            }
+            BulkExecutor::make(
+                UpdateContact::class,
+                $this->getSelectedModelsQuery()
+                    ->pluck('id')
+                    ->map(fn (int $contactId): array => [
+                        'id' => $contactId,
+                        'agent_id' => $this->agentId,
+                    ])
+                    ->all()
+            )
+                ->name(__('Assigning contacts to agent'))
+                ->dispatch();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
             return false;
         }
-
-        foreach ($actions as $action) {
-            $action->execute();
-        }
-
-        $this->loadData();
-        $this->toast()
-            ->success(__('Contacts assigned to agent successfully.'))
-            ->send();
 
         return true;
     }

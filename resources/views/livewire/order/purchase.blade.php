@@ -103,7 +103,12 @@
             <x-button
                 color="indigo"
                 :text="__('View')"
-                x-on:click="$nuxbe.openDetailModal($wire.order.invoice.url)"
+                x-on:click="
+                    $nuxbe.openLightbox($wire.order.invoice.url, {
+                        mime: $wire.order.invoice.mime_type,
+                        title: $wire.order.invoice.name,
+                    })
+                "
             />
         </x-card>
     @show

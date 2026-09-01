@@ -214,27 +214,23 @@ class TabButton implements Htmlable
 
     public function userHasTabPermission(bool $throwException = true): bool
     {
+        $permission = 'tab.' . $this->component;
+
+        if (auth()->user()?->can($permission)) {
+            return true;
+        }
+
         try {
-            resolve_static(
-                Permission::class,
-                'findByName',
-                [
-                    'name' => 'tab.' . $this->component,
-                ]
-            );
+            resolve_static(Permission::class, 'findByName', ['name' => $permission]);
         } catch (PermissionDoesNotExist) {
             return true;
         }
 
-        if (! auth()->user()->can('tab.' . $this->component)) {
-            if ($throwException) {
-                throw UnauthorizedException::forPermissions(['tab.' . $this->component]);
-            } else {
-                return false;
-            }
+        if ($throwException) {
+            throw UnauthorizedException::forPermissions([$permission]);
         }
 
-        return true;
+        return false;
     }
 
     public function when(Closure|bool $condition): static

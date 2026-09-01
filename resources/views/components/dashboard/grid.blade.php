@@ -1,11 +1,11 @@
-@if($this->sync)
+@if ($this->sync)
     <div
         x-init="reInitPlaceholder"
         class="grid-stack"
         id="stack-1"
         wire:ignore.self
     >
-        @foreach($this->widgets as $widget)
+        @foreach ($this->widgets as $widget)
             <div
                 class="grid-stack-item z-0 rounded-lg"
                 gs-id="{{ $widget['id'] }}"
@@ -26,7 +26,7 @@
         id="stack-2"
         wire:key="grid-{{ $this->group ?? 'default' }}"
     >
-        @forelse(collect($this->widgets)->filter(fn (array $widget) => data_get($widget, 'group') === $this->group) as $widget)
+        @forelse (collect($this->widgets)->filter(fn (array $widget) => data_get($widget, 'group') === $this->group) as $widget)
             <div
                 class="grid-stack-item z-0 rounded-lg"
                 gs-id="{{ $widget['id'] }}"
@@ -37,7 +37,7 @@
             >
                 <div
                     class="grid-stack-item-content"
-                    x-bind:class="editGrid ? 'border-4 border-primary-500' : ''"
+                    x-bind:class="{ 'border-4 border-primary-500': editGrid }"
                 >
                     <div class="absolute top-2 right-2 z-10">
                         <x-button.circle
@@ -52,7 +52,7 @@
                     </div>
                     <div
                         class="w-full"
-                        x-bind:class="editGrid ? 'pointer-events-none' : ''"
+                        x-bind:class="{ 'pointer-events-none': editGrid }"
                     >
                         @livewire(
                             $widget['component_name'] ?? $widget['class'],

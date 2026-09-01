@@ -16,11 +16,11 @@
             />
         @show
         <div
-            @if($collapsed) x-collapse x-show="expanded" x-cloak @endif
+            @if ($collapsed) x-collapse x-show="expanded" x-cloak @endif
             class="space-y-2.5 p-0.5"
         >
             <div
-                x-bind:class="!isEditing && 'pointer-events-none'"
+                x-bind:class="{ 'pointer-events-none': !isEditing }"
                 x-show="!$wire.project.id"
                 x-cloak
             >
@@ -41,20 +41,20 @@
                     <x-date
                         without-time
                         x-bind:readonly="!isEditing"
-                        x-bind:class="!isEditing && 'pointer-events-none'"
+                        x-bind:class="{ 'pointer-events-none': !isEditing }"
                         wire:model="project.start_date"
                         :label="__('Start Date')"
                     />
                     <x-date
                         without-time
                         x-bind:readonly="!isEditing"
-                        x-bind:class="!isEditing && 'pointer-events-none'"
+                        x-bind:class="{ 'pointer-events-none': !isEditing }"
                         wire:model="project.end_date"
                         :label="__('End Date')"
                     />
                 @show
             </div>
-            <div x-bind:class="!isEditing && 'pointer-events-none'">
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                 <x-flux::state
                     x-bind:readonly="!isEditing"
                     class="w-full"
@@ -71,7 +71,7 @@
                 :label="__('Description')"
             />
             @section('connections')
-                <div x-bind:class="!isEditing && 'pointer-events-none'">
+                <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                     <x-select.styled
                         x-bind:readonly="!isEditing"
                         :label="__('Responsible User')"
@@ -88,7 +88,7 @@
                     ]"
                     />
                 </div>
-                <div x-bind:class="!isEditing && 'pointer-events-none'">
+                <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                     <x-select.styled
                         x-bind:readonly="!isEditing"
                         wire:model="project.contact_id"
@@ -126,7 +126,7 @@
                         </x-slot:label>
                     </x-select.styled>
                 </div>
-                <div x-bind:class="!isEditing && 'pointer-events-none'">
+                <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                     <x-select.styled
                         x-bind:readonly="!isEditing"
                         wire:model="project.order_id"
@@ -166,7 +166,7 @@
                 />
             @show
         </div>
-        @if($collapsed)
+        @if ($collapsed)
             <x-badge
                 outline
                 md
@@ -181,7 +181,7 @@
                 </x-slot:text>
                 <x-slot:left
                     class="relative flex h-2 w-2 items-center transition-transform"
-                    x-bind:class="expanded && '-rotate-180'"
+                    x-bind:class="{ '-rotate-180': expanded }"
                 >
                     <x-icon name="chevron-down" class="h-4 w-4 shrink-0" />
                 </x-slot:left>

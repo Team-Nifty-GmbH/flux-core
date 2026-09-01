@@ -9,16 +9,16 @@
     </div>
     <div class="overflow-auto">
         <div class="mb-1 grid grid-cols-7 gap-1">
-            @foreach(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as $day)
+            @foreach (['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as $day)
                 <div class="text-center text-xs font-medium text-gray-500">
                     {{ __($day) }}
                 </div>
             @endforeach
         </div>
-        @foreach($weeks as $week)
+        @foreach ($weeks as $week)
             <div class="mb-1 grid grid-cols-7 gap-1">
-                @foreach($week as $day)
-                    @if($day)
+                @foreach ($week as $day)
+                    @if ($day)
                         <div
                             @class([
                                 'rounded p-1 text-center text-xs',
@@ -34,7 +34,7 @@
                             <div class="font-medium">
                                 {{ $day['day_number'] }}
                             </div>
-                            @unless($day['is_weekend'])
+                            @unless ($day['is_weekend'])
                                 <div class="text-[10px]">
                                     {{ $day['absent_count'] }}
                                 </div>
