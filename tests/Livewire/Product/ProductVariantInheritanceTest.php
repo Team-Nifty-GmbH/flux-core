@@ -5,38 +5,54 @@ use FluxErp\Models\Category;
 use FluxErp\Models\Product as ProductModel;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
+use FluxErp\Settings\ProductSettings;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
-    Tenant::default()->update(['product_variant_inheritance_enabled' => true]);
-    Tenant::clearDefaultCache();
+    app(ProductSettings::class)->fill(['variant_inheritance_enabled' => true])->save();
 });
 
-test('resetField clears overridden_fields on the variant', function (): void {
+/**
+ * Build a variant whose inheritable columns all match the parent, so the override
+ * bookkeeping on save marks exactly the fields a test sets and nothing else. Without
+ * the alignment the factory's random values count as overrides on their own.
+ */
+function inheritingVariant(ProductModel $parent, array $overrides = []): ProductModel
+{
+    $raw = $parent->getRawOriginal();
+    $aligned = collect($parent->getInheritableFields())
+        ->filter(fn (string $field): bool => array_key_exists($field, $raw))
+        ->mapWithKeys(fn (string $field): array => [$field => $raw[$field]])
+        ->all();
+
+    return ProductModel::factory()->create(
+        array_merge($aligned, ['parent_id' => $parent->getKey()], $overrides)
+    );
+}
+
+test('resetFields clears overridden_fields on the variant', function (): void {
     $parent = ProductModel::factory()->create(['name' => 'Parent']);
-    $variant = ProductModel::factory()->create([
-        'parent_id' => $parent->getKey(),
-        'overridden_fields' => ['name'],
-        'name' => 'override',
-    ]);
+    $variant = inheritingVariant($parent, ['name' => 'override']);
+
+    expect($variant->fresh()->overridden_fields)->toBe(['name']);
 
     Livewire::test(Product::class, ['id' => $variant->getKey()])
-        ->call('resetField', 'name')
+        ->call('resetFields', 'name')
         ->assertHasNoErrors();
 
     expect($variant->fresh()->overridden_fields)->toBeNull();
 });
 
-test('resetField on non-inheritable field surfaces a validation error', function (): void {
+test('resetFields on a non-inheritable field surfaces a validation error', function (): void {
     $parent = ProductModel::factory()->create();
     $variant = ProductModel::factory()->create(['parent_id' => $parent->getKey()]);
 
     Livewire::test(Product::class, ['id' => $variant->getKey()])
-        ->call('resetField', 'product_number')
-        ->assertHasErrors(['inheritance']);
+        ->call('resetFields', 'product_number')
+        ->assertHasErrors(['fields.0']);
 });
 
-test('resetRelation deletes own pivot rows for the relation', function (): void {
+test('resetRelations deletes own pivot rows for the relation', function (): void {
     $cat = Category::factory()->create([
         'model_type' => morph_alias(ProductModel::class),
     ]);
@@ -45,25 +61,19 @@ test('resetRelation deletes own pivot rows for the relation', function (): void 
     $variant->ownCategories()->attach([$cat->getKey()]);
 
     Livewire::test(Product::class, ['id' => $variant->getKey()])
-        ->call('resetRelation', 'categories')
+        ->call('resetRelations', 'categories')
         ->assertHasNoErrors();
 
     expect($variant->ownCategories()->count())->toBe(0);
 });
 
-test('resetFieldOnAllVariants clears the field across every variant', function (): void {
+test('resetFields on the parent clears the field across every variant', function (): void {
     $parent = ProductModel::factory()->create(['name' => 'Parent']);
-    ProductModel::factory()->create([
-        'parent_id' => $parent->getKey(),
-        'overridden_fields' => ['name'],
-    ]);
-    ProductModel::factory()->create([
-        'parent_id' => $parent->getKey(),
-        'overridden_fields' => ['name', 'description'],
-    ]);
+    inheritingVariant($parent, ['name' => 'first override']);
+    inheritingVariant($parent, ['name' => 'second override', 'description' => 'differs']);
 
     Livewire::test(Product::class, ['id' => $parent->getKey()])
-        ->call('resetFieldOnAllVariants', 'name')
+        ->call('resetFields', 'name')
         ->assertHasNoErrors();
 
     foreach (ProductModel::where('parent_id', $parent->getKey())->get() as $variant) {
@@ -71,10 +81,10 @@ test('resetFieldOnAllVariants clears the field across every variant', function (
     }
 });
 
-test('promoteToStandalone clears was_parent on a parent without active children', function (): void {
+test('promoteToStandalone clears is_variant_parent on a parent without active children', function (): void {
     $parent = ProductModel::factory()->create([
         'parent_id' => null,
-        'was_parent' => true,
+        'is_variant_parent' => true,
     ]);
     ProductModel::factory()->create([
         'parent_id' => $parent->getKey(),
@@ -85,13 +95,13 @@ test('promoteToStandalone clears was_parent on a parent without active children'
         ->call('promoteToStandalone')
         ->assertHasNoErrors();
 
-    expect($parent->fresh()->was_parent)->toBeFalse();
+    expect($parent->fresh()->is_variant_parent)->toBeFalse();
 });
 
 test('promoteToStandalone surfaces error when active children still exist', function (): void {
     $parent = ProductModel::factory()->create([
         'parent_id' => null,
-        'was_parent' => true,
+        'is_variant_parent' => true,
     ]);
     ProductModel::factory()->create([
         'parent_id' => $parent->getKey(),
@@ -100,7 +110,7 @@ test('promoteToStandalone surfaces error when active children still exist', func
 
     Livewire::test(Product::class, ['id' => $parent->getKey()])
         ->call('promoteToStandalone')
-        ->assertHasErrors(['inheritance']);
+        ->assertHasErrors(['is_variant_parent']);
 });
 
 test('variant edit form renders inheritance indicator on inheritable fields', function (): void {
@@ -110,15 +120,15 @@ test('variant edit form renders inheritance indicator on inheritable fields', fu
     ]);
 
     Livewire::test(Product::class, ['id' => $variant->getKey()])
-        ->assertSeeHtml('Vererbt');
+        ->assertSeeHtml(__('Inherited'));
 });
 
 test('non-variant edit form does not render inheritance indicator chrome', function (): void {
     $product = ProductModel::factory()->create(['parent_id' => null]);
 
     Livewire::test(Product::class, ['id' => $product->getKey()])
-        ->assertDontSeeHtml('Vererbt')
-        ->assertDontSeeHtml('Überschrieben');
+        ->assertDontSeeHtml(__('Inherited'))
+        ->assertDontSeeHtml(__('Overridden'));
 });
 
 test('priceLists payload marks variant_owns_price true when variant has own price', function (): void {
@@ -179,7 +189,7 @@ test('priceLists payload marks variant_owns_price false on non-variant products'
     expect($listEntry['variant_owns_price'])->toBeFalse();
 });
 
-test('variant prices tab shows Vererbt badge for inherited price-lists', function (): void {
+test('variant prices tab shows the inherited badge for inherited price lists', function (): void {
     $listA = FluxErp\Models\PriceList::factory()->create(['is_default' => false, 'name' => 'Liste A']);
     $parent = ProductModel::factory()->create();
     FluxErp\Models\Price::factory()->create([
@@ -190,19 +200,13 @@ test('variant prices tab shows Vererbt badge for inherited price-lists', functio
     $variant = ProductModel::factory()->create(['parent_id' => $parent->getKey()]);
 
     Livewire::test(Product::class, ['id' => $variant->getKey()])
-        ->assertSeeHtml('Vererbt');
+        ->assertSeeHtml(__('Inherited'));
 });
 
 test('parent product computes inheritance counters per inheritable field', function (): void {
     $parent = ProductModel::factory()->create();
-    ProductModel::factory()->create([
-        'parent_id' => $parent->getKey(),
-        'overridden_fields' => ['name'],
-    ]);
-    ProductModel::factory()->create([
-        'parent_id' => $parent->getKey(),
-        'overridden_fields' => null,
-    ]);
+    inheritingVariant($parent, ['name' => 'override']);
+    inheritingVariant($parent);
 
     $component = Livewire::test(Product::class, ['id' => $parent->getKey()]);
 
@@ -217,7 +221,7 @@ test('parent product computes inheritance counters per inheritable field', funct
 test('inheritanceCounters is empty for non-parent products', function (): void {
     $product = ProductModel::factory()->create([
         'parent_id' => null,
-        'was_parent' => false,
+        'is_variant_parent' => false,
     ]);
 
     $component = Livewire::test(Product::class, ['id' => $product->getKey()]);
@@ -227,43 +231,37 @@ test('inheritanceCounters is empty for non-parent products', function (): void {
 
 test('variant bulk-reset panel renders on parent product edit view', function (): void {
     $parent = ProductModel::factory()->create();
-    ProductModel::factory()->create([
-        'parent_id' => $parent->getKey(),
-        'overridden_fields' => ['name'],
-    ]);
+    inheritingVariant($parent, ['name' => 'override']);
 
     Livewire::test(Product::class, ['id' => $parent->getKey()])
-        ->assertSeeHtml('Auswirkung auf Varianten');
+        ->assertSeeHtml(__('Effect on variants'));
 });
 
 test('variant bulk-reset panel does not render on non-parent products', function (): void {
     $product = ProductModel::factory()->create([
         'parent_id' => null,
-        'was_parent' => false,
+        'is_variant_parent' => false,
     ]);
 
     Livewire::test(Product::class, ['id' => $product->getKey()])
-        ->assertDontSeeHtml('Auswirkung auf Varianten');
+        ->assertDontSeeHtml(__('Effect on variants'));
 });
 
 test('variant header shows consistency badge when there are field overrides', function (): void {
     $parent = ProductModel::factory()->create();
-    $variant = ProductModel::factory()->create([
-        'parent_id' => $parent->getKey(),
-        'overridden_fields' => ['name', 'description'],
+    $variant = inheritingVariant($parent, [
+        'name' => 'override',
+        'description' => 'differs',
     ]);
 
     Livewire::test(Product::class, ['id' => $variant->getKey()])
-        ->assertSeeHtml('2 Felder überschrieben');
+        ->assertSeeHtml(__(':fields fields overridden, :prices prices differing', ['fields' => 2, 'prices' => 0]));
 });
 
 test('variant header shows price-override count in consistency badge', function (): void {
     $listA = FluxErp\Models\PriceList::factory()->create(['is_default' => false]);
     $parent = ProductModel::factory()->create();
-    $variant = ProductModel::factory()->create([
-        'parent_id' => $parent->getKey(),
-        'overridden_fields' => null,
-    ]);
+    $variant = inheritingVariant($parent);
     FluxErp\Models\Price::factory()->create([
         'product_id' => $variant->getKey(),
         'price_list_id' => $listA->getKey(),
@@ -271,7 +269,7 @@ test('variant header shows price-override count in consistency badge', function 
     ]);
 
     Livewire::test(Product::class, ['id' => $variant->getKey()])
-        ->assertSeeHtml('1 Preise abweichend');
+        ->assertSeeHtml(__(':fields fields overridden, :prices prices differing', ['fields' => 0, 'prices' => 1]));
 });
 
 test('inheritanceState returns null on non-variant products', function (): void {
@@ -284,10 +282,7 @@ test('inheritanceState returns null on non-variant products', function (): void 
 
 test('inheritanceState returns null on variants with no overrides', function (): void {
     $parent = ProductModel::factory()->create();
-    $variant = ProductModel::factory()->create([
-        'parent_id' => $parent->getKey(),
-        'overridden_fields' => null,
-    ]);
+    $variant = inheritingVariant($parent);
 
     $component = Livewire::test(Product::class, ['id' => $variant->getKey()]);
 
@@ -296,14 +291,8 @@ test('inheritanceState returns null on variants with no overrides', function ():
 
 test('variant list filters to only overridden variants when toggle is on', function (): void {
     $parent = ProductModel::factory()->create();
-    ProductModel::factory()->create([
-        'parent_id' => $parent->getKey(),
-        'overridden_fields' => ['name'],
-    ]);
-    ProductModel::factory()->create([
-        'parent_id' => $parent->getKey(),
-        'overridden_fields' => null,
-    ]);
+    inheritingVariant($parent, ['name' => 'override']);
+    inheritingVariant($parent);
 
     $form = new FluxErp\Livewire\Forms\ProductForm(
         Livewire::new(FluxErp\Livewire\Product\VariantList::class),
@@ -333,14 +322,8 @@ test('variant list filters to only overridden variants when toggle is on', funct
 
 test('variant list eager-loads parent so accessor lookups do not N+1', function (): void {
     $parent = ProductModel::factory()->create();
-    ProductModel::factory()->create([
-        'parent_id' => $parent->getKey(),
-        'overridden_fields' => null,
-    ]);
-    ProductModel::factory()->create([
-        'parent_id' => $parent->getKey(),
-        'overridden_fields' => null,
-    ]);
+    inheritingVariant($parent);
+    inheritingVariant($parent);
 
     $form = new FluxErp\Livewire\Forms\ProductForm(
         Livewire::new(FluxErp\Livewire\Product\VariantList::class),
@@ -360,7 +343,7 @@ test('variant list eager-loads parent so accessor lookups do not N+1', function 
 test('orphaned-parent banner shows on parent that lost all active variants', function (): void {
     $parent = ProductModel::factory()->create([
         'parent_id' => null,
-        'was_parent' => true,
+        'is_variant_parent' => true,
     ]);
     ProductModel::factory()->create([
         'parent_id' => $parent->getKey(),
@@ -368,15 +351,15 @@ test('orphaned-parent banner shows on parent that lost all active variants', fun
     ]);
 
     Livewire::test(Product::class, ['id' => $parent->getKey()])
-        ->assertSeeHtml('Dieses Produkt hatte Varianten')
-        ->assertSeeHtml('Als eigenständiges Produkt aktivieren')
-        ->assertSeeHtml('Produkt deaktivieren')
-        ->assertSeeHtml('Neue Variante anlegen');
+        ->assertSeeHtml(__('This product had variants, none of them is active anymore.'))
+        ->assertSeeHtml(__('Activate as a standalone product'))
+        ->assertSeeHtml(__('Deactivate product'))
+        ->assertSeeHtml(__('Create a new variant'));
 });
 
 test('orphaned-parent banner does not show when active children exist', function (): void {
     $parent = ProductModel::factory()->create([
-        'was_parent' => true,
+        'is_variant_parent' => true,
     ]);
     ProductModel::factory()->create([
         'parent_id' => $parent->getKey(),
@@ -384,22 +367,22 @@ test('orphaned-parent banner does not show when active children exist', function
     ]);
 
     Livewire::test(Product::class, ['id' => $parent->getKey()])
-        ->assertDontSeeHtml('Dieses Produkt hatte Varianten');
+        ->assertDontSeeHtml(__('This product had variants, none of them is active anymore.'));
 });
 
 test('orphaned-parent banner does not show on standalone products', function (): void {
     $product = ProductModel::factory()->create([
         'parent_id' => null,
-        'was_parent' => false,
+        'is_variant_parent' => false,
     ]);
 
     Livewire::test(Product::class, ['id' => $product->getKey()])
-        ->assertDontSeeHtml('Dieses Produkt hatte Varianten');
+        ->assertDontSeeHtml(__('This product had variants, none of them is active anymore.'));
 });
 
-test('isOrphanedParent computed returns true when was_parent and no active children', function (): void {
+test('isOrphanedParent computed returns true when is_variant_parent and no active children', function (): void {
     $parent = ProductModel::factory()->create([
-        'was_parent' => true,
+        'is_variant_parent' => true,
     ]);
     ProductModel::factory()->create([
         'parent_id' => $parent->getKey(),
@@ -416,7 +399,7 @@ test('deactivate banner action persists is_active false', function (): void {
         ->for(VatRate::default())
         ->create([
             'parent_id' => null,
-            'was_parent' => true,
+            'is_variant_parent' => true,
             'is_active' => true,
             'is_bundle' => false,
         ]);

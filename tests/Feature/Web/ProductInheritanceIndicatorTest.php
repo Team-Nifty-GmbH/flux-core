@@ -1,12 +1,11 @@
 <?php
 
 use FluxErp\Models\Product;
-use FluxErp\Models\Tenant;
+use FluxErp\Settings\ProductSettings;
 use Illuminate\Support\Facades\Blade;
 
 beforeEach(function (): void {
-    Tenant::default()->update(['product_variant_inheritance_enabled' => true]);
-    Tenant::clearDefaultCache();
+    app(ProductSettings::class)->fill(['variant_inheritance_enabled' => true])->save();
 });
 
 test('renders only slot for non-variant products', function (): void {
@@ -18,15 +17,17 @@ test('renders only slot for non-variant products', function (): void {
     );
 
     expect($html)->toContain('data-testid="slot"');
-    expect($html)->not->toContain('Vererbt');
-    expect($html)->not->toContain('Überschrieben');
+    expect($html)->not->toContain(__('Inherited'));
+    expect($html)->not->toContain(__('Overridden'));
 });
 
 test('renders inherited badge when variant has not overridden the field', function (): void {
     $parent = Product::factory()->create();
+    // The value has to match the parent: the override bookkeeping on save derives
+    // overridden_fields from the difference, it does not take the column as given.
     $variant = Product::factory()->create([
         'parent_id' => $parent->getKey(),
-        'overridden_fields' => null,
+        'name' => $parent->name,
     ]);
 
     $html = Blade::render(
@@ -35,15 +36,15 @@ test('renders inherited badge when variant has not overridden the field', functi
     );
 
     expect($html)->toContain('data-testid="slot"');
-    expect($html)->toContain('Vererbt');
-    expect($html)->not->toContain('Überschrieben');
+    expect($html)->toContain(__('Inherited'));
+    expect($html)->not->toContain(__('Overridden'));
 });
 
 test('renders overridden badge and reset button when variant overrides the field', function (): void {
     $parent = Product::factory()->create();
     $variant = Product::factory()->create([
         'parent_id' => $parent->getKey(),
-        'overridden_fields' => ['name'],
+        'name' => 'override',
     ]);
 
     $html = Blade::render(
@@ -52,19 +53,18 @@ test('renders overridden badge and reset button when variant overrides the field
     );
 
     expect($html)->toContain('data-testid="slot"');
-    expect($html)->toContain('Überschrieben');
-    expect($html)->toContain('resetField');
+    expect($html)->toContain(__('Overridden'));
+    expect($html)->toContain('resetFields');
     expect($html)->toContain("'name'");
 });
 
-test('renders only slot when inheritance is disabled tenant-wide', function (): void {
-    Tenant::default()->update(['product_variant_inheritance_enabled' => false]);
-    Tenant::clearDefaultCache();
+test('renders only slot when inheritance is disabled', function (): void {
+    app(ProductSettings::class)->fill(['variant_inheritance_enabled' => false])->save();
 
     $parent = Product::factory()->create();
     $variant = Product::factory()->create([
         'parent_id' => $parent->getKey(),
-        'overridden_fields' => ['name'],
+        'name' => 'override',
     ]);
 
     $html = Blade::render(
@@ -73,26 +73,22 @@ test('renders only slot when inheritance is disabled tenant-wide', function (): 
     );
 
     expect($html)->toContain('data-testid="slot"');
-    expect($html)->not->toContain('Vererbt');
-    expect($html)->not->toContain('Überschrieben');
+    expect($html)->not->toContain(__('Inherited'));
+    expect($html)->not->toContain(__('Overridden'));
 });
 
-test('uses custom reset method when reset-method prop is set', function (): void {
+test('an explicit overridden flag wins over the products own state', function (): void {
     $parent = Product::factory()->create();
     $variant = Product::factory()->create([
         'parent_id' => $parent->getKey(),
         'overridden_fields' => null,
     ]);
 
-    $template = '<x-flux::product.inheritance-indicator'
-        . ' :product="$variant"'
-        . ' field="price:42"'
-        . ' reset-method="resetPriceListEntry"'
-        . ' :overridden="true"'
-        . '><span>slot</span></x-flux::product.inheritance-indicator>';
+    $html = Blade::render(
+        '<x-flux::product.inheritance-indicator :product="$variant" field="name" :overridden="true"><span>slot</span></x-flux::product.inheritance-indicator>',
+        ['variant' => $variant]
+    );
 
-    $html = Blade::render($template, ['variant' => $variant]);
-
-    expect($html)->toContain('resetPriceListEntry');
-    expect($html)->toContain("'price:42'");
+    expect($html)->toContain(__('Overridden'))
+        ->and($html)->toContain("resetFields('name')");
 });

@@ -3,11 +3,9 @@
 namespace FluxErp\Livewire\Product;
 
 use Exception;
-use FluxErp\Actions\Product\PromoteParentToStandalone;
-use FluxErp\Actions\Product\ResetFieldOnAllVariants;
-use FluxErp\Actions\Product\ResetProductField;
-use FluxErp\Actions\Product\ResetProductRelation;
-use FluxErp\Actions\Product\ResetRelationOnAllVariants;
+use FluxErp\Actions\Product\ResetProductFields;
+use FluxErp\Actions\Product\ResetProductRelations;
+use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Enums\PropertyTypeEnum;
 use FluxErp\Facades\ProductType;
@@ -403,77 +401,57 @@ class Product extends Component
         $this->recalculateDisplayedProductProperties();
     }
 
-    public function resetField(string $field): void
+    /**
+     * Drop the overrides on inheritable fields so they follow the parent again. Called on a
+     * variant it resets that variant, called on a parent it resets every variant under it.
+     */
+    public function resetFields(array|string $fields): bool
+    {
+        return $this->resetInheritance(
+            ResetProductFields::class,
+            ['fields' => Arr::wrap($fields)]
+        );
+    }
+
+    /**
+     * Same for inheritable relations. $relatedIds narrows the reset to single related rows,
+     * for instance one price list on the prices tab; leave it empty to reset the whole relation.
+     */
+    public function resetRelations(array|string $relations, array $relatedIds = []): bool
+    {
+        return $this->resetInheritance(
+            ResetProductRelations::class,
+            [
+                'relations' => array_map(
+                    fn (string $relation): array => [
+                        'relation' => $relation,
+                        'related_ids' => $relatedIds ?: null,
+                    ],
+                    Arr::wrap($relations)
+                ),
+            ]
+        );
+    }
+
+    public function promoteToStandalone(): bool
     {
         try {
-            ResetProductField::make([
+            UpdateProduct::make([
                 'id' => $this->product->id,
-                'field' => $field,
-            ])->validate()->execute();
-        } catch (ValidationException $e) {
-            $this->addError('inheritance', $e->validator->errors()->first());
+                'is_variant_parent' => false,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this, form: $this->product);
 
-            return;
+            return false;
         }
 
         $this->resetProduct();
-    }
 
-    #[Renderless]
-    public function resetRelation(string $relation, mixed $key = null): void
-    {
-        try {
-            ResetProductRelation::make([
-                'id' => $this->product->id,
-                'relation' => $relation,
-                'key' => $key,
-            ])->validate()->execute();
-        } catch (ValidationException $e) {
-            $this->addError('inheritance', $e->validator->errors()->first());
-        }
-    }
-
-    #[Renderless]
-    public function resetFieldOnAllVariants(string $field): int
-    {
-        try {
-            return ResetFieldOnAllVariants::make([
-                'parent_id' => $this->product->id,
-                'field' => $field,
-            ])->validate()->execute();
-        } catch (ValidationException $e) {
-            $this->addError('inheritance', $e->validator->errors()->first());
-
-            return 0;
-        }
-    }
-
-    #[Renderless]
-    public function resetRelationOnAllVariants(string $relation, mixed $key = null): int
-    {
-        try {
-            return ResetRelationOnAllVariants::make([
-                'parent_id' => $this->product->id,
-                'relation' => $relation,
-                'key' => $key,
-            ])->validate()->execute();
-        } catch (ValidationException $e) {
-            $this->addError('inheritance', $e->validator->errors()->first());
-
-            return 0;
-        }
-    }
-
-    #[Renderless]
-    public function promoteToStandalone(): void
-    {
-        try {
-            PromoteParentToStandalone::make([
-                'id' => $this->product->id,
-            ])->validate()->execute();
-        } catch (ValidationException $e) {
-            $this->addError('inheritance', $e->validator->errors()->first());
-        }
+        return true;
     }
 
     public function deactivate(): bool
@@ -601,7 +579,7 @@ class Product extends Component
         }
 
         $hasChildren = $product->children()->exists();
-        if (! $product->was_parent && ! $hasChildren) {
+        if (! $product->is_variant_parent && ! $hasChildren) {
             return [];
         }
 
@@ -632,7 +610,7 @@ class Product extends Component
     {
         $product = $this->product->getProductModel();
 
-        if (! $product?->was_parent) {
+        if (! $product?->is_variant_parent) {
             return false;
         }
 
@@ -647,6 +625,40 @@ class Product extends Component
             ->value('product_type');
 
         return data_get(ProductType::get($productType) ?? ProductType::getDefault(), 'view') ?? $this->view;
+    }
+
+    /**
+     * @param  class-string<\FluxErp\Actions\FluxAction>  $action
+     */
+    protected function resetInheritance(string $action, array $payload): bool
+    {
+        $product = $this->product->getProductModel();
+
+        if (! $product) {
+            return false;
+        }
+
+        $isVariant = $product->isVariant();
+
+        try {
+            $action::make(
+                $payload + [
+                    'parent_id' => $isVariant ? $product->parent_id : $product->getKey(),
+                    'variant_ids' => $isVariant ? [$product->getKey()] : null,
+                ]
+            )
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this, form: $this->product);
+
+            return false;
+        }
+
+        $this->resetProduct();
+
+        return true;
     }
 
     protected function recalculateDisplayedProductProperties(): void

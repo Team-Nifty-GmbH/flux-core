@@ -17,7 +17,6 @@ class InheritanceIndicator extends Component
     public function __construct(
         public ?Product $product,
         public string $field,
-        public string $resetMethod = 'resetField',
         ?bool $overridden = null,
     ) {
         $this->isVariant = $product?->isVariant() ?? false;

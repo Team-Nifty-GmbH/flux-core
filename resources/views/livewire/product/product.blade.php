@@ -103,7 +103,7 @@
     />
     @if($state = $this->inheritanceState)
         <x-badge color="amber" sm>
-            {{ __(':fields Felder überschrieben, :prices Preise abweichend', $state) }}
+            {{ __(':fields fields overridden, :prices prices differing', $state) }}
         </x-badge>
     @endif
     <x-flux::product.variant-bulk-reset

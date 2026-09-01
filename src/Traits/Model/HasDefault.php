@@ -25,7 +25,7 @@ trait HasDefault
             );
 
         if (! is_null($attributes) && ! is_array($attributes)) {
-            static::clearDefaultCache();
+            Cache::memo()->forget($cacheKey);
             $attributes = resolve_static(static::class, 'query')
                 ->where(static::$defaultColumn, true)
                 ->first()
@@ -42,17 +42,12 @@ trait HasDefault
         return $model;
     }
 
-    public static function clearDefaultCache(): void
-    {
-        Cache::memo()->forget('default_' . morph_alias(static::class));
-    }
-
     protected static function bootHasDefault(): void
     {
         static::saving(
             function (Model $model): void {
                 if ($model->isDirty(static::$defaultColumn)) {
-                    static::clearDefaultCache();
+                    Cache::memo()->forget('default_' . morph_alias(static::class));
 
                     if ($model->{static::$defaultColumn}) {
                         $model->setUpdatedDefault();
@@ -80,7 +75,7 @@ trait HasDefault
 
         static::deleted(function (Model $model): void {
             if ($model->{static::$defaultColumn}) {
-                static::clearDefaultCache();
+                Cache::memo()->forget('default_' . morph_alias(static::class));
 
                 $default = static::query()->first();
                 if ($default) {

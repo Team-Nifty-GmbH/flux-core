@@ -92,7 +92,7 @@
                             priceList.variant_owns_price
                         "
                         color="amber"
-                        :text="__('Überschrieben')"
+                        :text="__('Overridden')"
                     />
                     <x-badge
                         x-cloak
@@ -102,7 +102,7 @@
                             priceList.price_id
                         "
                         color="gray"
-                        :text="__('Vererbt')"
+                        :text="__('Inherited')"
                     />
                     <x-button
                         x-cloak
@@ -114,10 +114,10 @@
                         color="secondary"
                         flat
                         sm
-                        :title="__('Auf geerbt zurücksetzen')"
+                        :title="__('Reset to inherited')"
                         x-on:click="
                             $wire
-                                .resetRelation('prices', priceList.id)
+                                .resetRelations('prices', [priceList.id])
                                 .then(() => $wire.getPriceLists())
                         "
                     />

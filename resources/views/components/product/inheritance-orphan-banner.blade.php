@@ -1,25 +1,25 @@
-@if($visible)
+@if ($visible)
     <x-alert color="amber">
         <div class="space-y-3">
             <div class="font-semibold">
-                {{ __('Dieses Produkt hatte Varianten, aber keine aktive Variante mehr.') }}
+                {{ __('This product had variants, none of them is active anymore.') }}
             </div>
-            <div class="text-sm">{{ __('Was soll passieren?') }}</div>
+            <div class="text-sm">{{ __('What should happen?') }}</div>
             <div class="flex flex-wrap gap-2">
                 <x-button
-                    :text="__('Als eigenständiges Produkt aktivieren')"
+                    :text="__('Activate as a standalone product')"
                     color="primary"
-                    wire:click="promoteToStandalone"
-                    wire:flux-confirm.type.info="{{ __('Sicher? Das Produkt ist danach wieder verkaufbar.') }}"
+                    wire:click="promoteToStandalone()"
+                    wire:flux-confirm.type.info="{{ __('The product is sellable again afterwards. Continue?') }}"
                 />
                 <x-button
-                    :text="__('Produkt deaktivieren')"
+                    :text="__('Deactivate product')"
                     color="secondary"
                     flat
-                    wire:click="deactivate"
+                    wire:click="deactivate()"
                 />
                 <x-button
-                    :text="__('Neue Variante anlegen')"
+                    :text="__('Create a new variant')"
                     color="secondary"
                     flat
                     x-on:click="$tsui.open.modal('generate-variants-modal')"

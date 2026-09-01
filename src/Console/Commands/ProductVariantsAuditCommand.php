@@ -44,7 +44,7 @@ class ProductVariantsAuditCommand extends Command
         $parents = resolve_static(Product::class, 'query')
             ->where(fn (Builder $query) => $query
                 ->whereHas('children')
-                ->orWhere('was_parent', true)
+                ->orWhere('is_variant_parent', true)
             )
             ->get(['id', 'product_number', 'is_active_export_to_web_shop']);
 

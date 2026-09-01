@@ -193,7 +193,7 @@
     <div class="mb-4 flex items-center gap-2">
         <x-toggle
             wire:model.live="onlyOverrides"
-            :label="__('Nur Overrides anzeigen')"
+            :label="__('Show overrides only')"
         />
     </div>
     <div wire:ignore>
