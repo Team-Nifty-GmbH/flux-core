@@ -16,7 +16,10 @@ class BroadcastNowChannel extends BroadcastChannel
         // The payload keeps the job derived id as its contextId, which is what addresses the toast.
         // What travels as the id has to be the row the database channel writes, because that is what
         // the client looks the notification up by before it marks it as read.
-        $notification->id = NotificationId::for($notification, $notifiable);
+        $notification->id = resolve_static(NotificationId::class, 'for', [
+            'notification' => $notification,
+            'notifiable' => $notifiable,
+        ]);
 
         $event = new BroadcastNowNotificationCreated(
             $notifiable, $notification, is_array($message) ? $message : $message->data

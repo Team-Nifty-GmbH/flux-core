@@ -23,6 +23,7 @@ class NotificationId
                 morph_alias($notifiable::class),
                 $notifiable->getKey(),
             ])
-        )->toString();
+        )
+            ->toString();
     }
 }
