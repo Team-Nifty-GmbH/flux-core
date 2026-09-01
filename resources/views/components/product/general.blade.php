@@ -1,3 +1,6 @@
+@php
+    $units = resolve_static(\FluxErp\Models\Unit::class, 'query')->get(['id', 'name'])->toArray();
+@endphp
 <div class="space-y-5" x-data wire:key="products-general">
     <x-card class="space-y-2.5" :header="__('General')">
         @section('general')
@@ -439,15 +442,49 @@
                         <x-slot:actions>
                             <x-input
                                 x-bind:disabled="!isEditing"
+                                x-model="supplier.supplier_product_number"
+                                :label="__('Supplier product number')"
+                            />
+                            <x-input
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.supplier_product_name"
+                                :label="__('Supplier product name')"
+                            />
+                            <x-input
+                                x-bind:disabled="!isEditing"
                                 x-model="supplier.manufacturer_product_number"
                                 :label="__('Manufacturer product number')"
                             />
+                            <x-number
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.packaging_amount"
+                                :label="__('Amount per Packaging')"
+                                step="0.01"
+                            />
+                            <div
+                                x-bind:class="{
+                                    'pointer-events-none': !isEditing,
+                                }"
+                            >
+                                <x-select.styled
+                                    x-model.number="supplier.packaging_unit_id"
+                                    :label="__('Packaging Unit')"
+                                    select="label:name|value:id"
+                                    :options="$units"
+                                />
+                            </div>
                             <x-number
                                 x-bind:disabled="!isEditing"
                                 x-model="supplier.purchase_price"
                                 :label="__('Purchase Price')"
                                 step="0.01"
                             />
+                            <x-input
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.note"
+                                :label="__('Note')"
+                            />
+                            @stack('product-supplier-fields')
                             <div class="mt-6">
                                 <x-button
                                     color="red"

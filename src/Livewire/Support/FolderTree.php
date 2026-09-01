@@ -13,6 +13,7 @@ use FluxErp\Models\Media;
 use FluxErp\Models\Media as MediaModel;
 use FluxErp\Models\MediaFolder;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\LoadsMediaTree;
 use FluxErp\Traits\Livewire\WithFilePond;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -29,7 +30,7 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 abstract class FolderTree extends Component
 {
-    use Actions, WithFilePond;
+    use Actions, LoadsMediaTree, WithFilePond;
 
     public $files = [];
 
@@ -46,11 +47,6 @@ abstract class FolderTree extends Component
 
     /** @var class-string<Model> */
     protected string $modelType;
-
-    public function mount(): void
-    {
-        $this->mediaTree = $this->getTree();
-    }
 
     public function render(): View|Factory|Application
     {
