@@ -27,3 +27,19 @@ test('the factory does not hand out a number twice', function (): void {
 
     expect($numbers->unique())->toHaveCount(50);
 });
+
+test('the factory compares numbers numerically, not as text', function (): void {
+    // number is a varchar, so MAX() sorts it lexicographically and '9' beats
+    // '1000000000'. Reading the highest as text puts the range far too low.
+    foreach ([9, 1000000000] as $number) {
+        LedgerAccount::factory()->create([
+            'number' => $number,
+            'ledger_account_type_enum' => LedgerAccountTypeEnum::Asset,
+            'tenant_id' => $this->dbTenant->getKey(),
+        ]);
+    }
+
+    $account = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
+
+    expect($account->number)->toBeGreaterThan(1000000000);
+});
