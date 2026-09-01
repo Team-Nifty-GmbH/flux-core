@@ -50,6 +50,7 @@ class PrivateMediaController extends Controller
         return StreamedFile::response(
             $disk,
             $relativePath,
+            $fileName,
             ['Content-Disposition' => $disposition],
         );
     }

@@ -431,6 +431,7 @@ Route::middleware('web')
                 return StreamedFile::response(
                     $disk,
                     $path,
+                    $media->file_name,
                     ['Content-Disposition' => $disposition],
                 );
             })
