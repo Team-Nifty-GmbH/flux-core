@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProductSupplier extends FluxPivot
 {
+    protected static array $pivotColumns = [
+        'manufacturer_product_number',
+        'purchase_price',
+    ];
+
     protected $table = 'product_supplier';
 
     // Relations

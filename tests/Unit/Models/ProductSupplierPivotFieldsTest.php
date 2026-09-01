@@ -1,13 +1,19 @@
 <?php
 
 use FluxErp\Models\Contact;
+use FluxErp\Models\Pivots\ProductSupplier;
 use FluxErp\Models\Product;
 use FluxErp\Models\VatRate;
 use FluxErp\Rulesets\Product\SupplierRuleset;
 
-test('the relation declares the editable pivot columns', function (): void {
-    expect(app(Product::class)->suppliers()->getPivotColumns())
+test('the pivot model declares the editable columns', function (): void {
+    expect(resolve_static(ProductSupplier::class, 'pivotColumns'))
         ->toEqualCanonicalizing(['manufacturer_product_number', 'purchase_price']);
+});
+
+test('the relation carries what the pivot model declares', function (): void {
+    expect(app(Product::class)->suppliers()->getPivotColumns())
+        ->toEqualCanonicalizing(resolve_static(ProductSupplier::class, 'pivotColumns'));
 });
 
 test('every declared pivot column is accepted by the supplier rules', function (): void {
