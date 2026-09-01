@@ -15,6 +15,8 @@ use Illuminate\Contracts\Mail\Mailer;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Mail;
+use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
+use Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream;
 use Webklex\IMAP\Facades\Client as ImapClient;
 use Webklex\PHPIMAP\Client;
 use Webklex\PHPIMAP\Exceptions\AuthFailedException;
@@ -42,6 +44,7 @@ class MailAccount extends FluxModel
     {
         return [
             'password' => 'encrypted',
+            'smtp_has_valid_certificate' => 'boolean',
             'smtp_password' => 'encrypted',
         ];
     }
@@ -151,6 +154,21 @@ class MailAccount extends FluxModel
         ];
 
         $mailer = Mail::build($config);
+
+        if ($this->smtp_has_valid_certificate === false) {
+            $transport = $mailer->getSymfonyTransport();
+            $stream = $transport instanceof EsmtpTransport ? $transport->getStream() : null;
+
+            if ($stream instanceof SocketStream) {
+                $stream->setStreamOptions([
+                    'ssl' => [
+                        'verify_peer' => false,
+                        'verify_peer_name' => false,
+                        'allow_self_signed' => true,
+                    ],
+                ]);
+            }
+        }
 
         $mailer->alwaysFrom($this->smtp_email, $fromName);
 

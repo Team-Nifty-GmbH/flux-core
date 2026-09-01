@@ -40,6 +40,7 @@ class UpdateMailAccountRuleset extends FluxRuleset
             'smtp_host' => 'nullable|string|max:255',
             'smtp_port' => 'nullable|integer',
             'smtp_encryption' => 'nullable|string|max:255|in:ssl,tls',
+            'smtp_has_valid_certificate' => 'boolean',
             'has_auto_assign' => 'boolean',
             'has_o_auth' => 'boolean',
             'has_valid_certificate' => 'boolean',
