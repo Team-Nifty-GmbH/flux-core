@@ -5,6 +5,10 @@ use FluxErp\Models\QueueMonitor;
 use FluxErp\Models\User;
 use FluxErp\Notifications\QueueMonitor\Batch\BatchFinishedNotification;
 use FluxErp\Notifications\QueueMonitor\Job\JobFinishedNotification;
+use FluxErp\Support\Notification\NotificationId;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Support\Facades\DB;
+use Ramsey\Uuid\Uuid;
 
 beforeEach(function (): void {
     $this->notifiable = User::factory()->create();
@@ -113,4 +117,47 @@ test('a second recipient still collapses a repeat onto the row it already has', 
     expect($this->notifiable->notifications()->count())->toBe(1)
         ->and($second->notifications()->count())->toBe(1)
         ->and(data_get($second->notifications()->first()->data, 'description'))->toBe('second run');
+});
+
+test('a row that appears between the lookup and the insert is updated, not collided with', function (): void {
+    $monitor = QueueMonitor::factory()->create([
+        'job_id' => 'job-that-finishes-concurrently',
+        'job_batch_id' => null,
+        'message' => 'the row that wins the race',
+    ]);
+
+    $notification = new JobFinishedNotification($monitor);
+    $notification->id = Uuid::uuid5(Uuid::NAMESPACE_URL, $monitor->job_id)->toString();
+
+    // Simulate the second worker: the row is written after our lookup has already
+    // missed it, so the insert that follows runs into the primary key.
+    $raced = false;
+    DB::listen(function (QueryExecuted $query) use (&$raced, $notification): void {
+        if ($raced || ! str_starts_with(strtolower(trim($query->sql)), 'select')) {
+            return;
+        }
+
+        if (! str_contains($query->sql, 'notifications')) {
+            return;
+        }
+
+        $raced = true;
+
+        DB::table('notifications')->insert([
+            'id' => NotificationId::for($notification, $this->notifiable),
+            'type' => $notification::class,
+            'notifiable_type' => morph_alias($this->notifiable::class),
+            'notifiable_id' => $this->notifiable->getKey(),
+            'data' => json_encode(['description' => 'the row that lost the race']),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    });
+
+    $this->notifiable->notify(new JobFinishedNotification($monitor));
+
+    expect($raced)->toBeTrue()
+        ->and($this->notifiable->notifications()->count())->toBe(1)
+        ->and(data_get($this->notifiable->notifications()->first()->data, 'description'))
+        ->toBe('the row that wins the race');
 });
