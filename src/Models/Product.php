@@ -175,7 +175,8 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     public function suppliers(): BelongsToMany
     {
         return $this->belongsToMany(Contact::class, 'product_supplier')
-            ->using(ProductSupplier::class);
+            ->using(ProductSupplier::class)
+            ->withPivot(resolve_static(ProductSupplier::class, 'pivotColumns'));
     }
 
     public function tenants(): BelongsToMany

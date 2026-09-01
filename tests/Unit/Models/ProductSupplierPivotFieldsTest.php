@@ -8,10 +8,9 @@ use FluxErp\Models\VatRate;
 use FluxErp\Rulesets\Product\SupplierRuleset;
 use Illuminate\Support\Facades\Validator;
 
-test('the pivot fields are the editable columns of the pivot table', function (): void {
-    expect(resolve_static(ProductSupplier::class, 'pivotFields'))
+test('the pivot model declares the editable columns', function (): void {
+    expect(resolve_static(ProductSupplier::class, 'pivotColumns'))
         ->toEqualCanonicalizing([
-            'contact_id',
             'packaging_unit_id',
             'manufacturer_product_number',
             'supplier_product_number',
@@ -22,18 +21,32 @@ test('the pivot fields are the editable columns of the pivot table', function ()
         ]);
 });
 
-test('the pivot fields leave out the primary key and the owning key', function (): void {
-    expect(resolve_static(ProductSupplier::class, 'pivotFields'))
-        ->not->toContain('pivot_id')
-        ->not->toContain('product_id');
+test('the relation carries what the pivot model declares', function (): void {
+    expect(app(Product::class)->suppliers()->getPivotColumns())
+        ->toEqualCanonicalizing(resolve_static(ProductSupplier::class, 'pivotColumns'));
 });
 
-test('every pivot column is accepted by the supplier rules', function (): void {
+test('every declared pivot column is accepted by the supplier rules', function (): void {
     $rules = array_keys(resolve_static(SupplierRuleset::class, 'getRules'));
 
-    foreach (resolve_static(ProductSupplier::class, 'pivotFields') as $field) {
+    foreach (app(Product::class)->suppliers()->getPivotColumns() as $field) {
         expect($rules)->toContain('suppliers.*.' . $field);
     }
+});
+
+test('the declared pivot columns come back through the relation', function (): void {
+    $product = Product::factory()->create(['vat_rate_id' => VatRate::factory()->create()->getKey()]);
+    $contact = Contact::factory()->create();
+
+    $product->suppliers()->attach($contact->getKey(), [
+        'manufacturer_product_number' => 'MPN-4711',
+        'purchase_price' => 12.5,
+    ]);
+
+    $pivot = $product->load('suppliers')->suppliers->first()->pivot;
+
+    expect($pivot->manufacturer_product_number)->toBe('MPN-4711')
+        ->and($pivot->purchase_price)->toEqual(12.5);
 });
 
 test('the purchase data of a supplier survives a save', function (): void {

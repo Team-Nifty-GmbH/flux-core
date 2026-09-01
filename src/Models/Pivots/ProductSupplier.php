@@ -6,28 +6,20 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Product;
 use FluxErp\Models\Unit;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use TeamNiftyGmbH\DataTable\Helpers\SchemaInfo;
-use TeamNiftyGmbH\DataTable\ModelInfo\Attribute;
 
 class ProductSupplier extends FluxPivot
 {
+    protected static array $pivotColumns = [
+        'manufacturer_product_number',
+        'supplier_product_number',
+        'supplier_product_name',
+        'packaging_amount',
+        'packaging_unit_id',
+        'purchase_price',
+        'note',
+    ];
+
     protected $table = 'product_supplier';
-
-    // Public static methods
-    public static function pivotFields(): array
-    {
-        $ownerKey = app(static::class)->product()->getForeignKeyName();
-
-        return SchemaInfo::forModel(static::class)
-            ->attributes
-            ->reject(fn (Attribute $attribute): bool => $attribute->primary
-                || $attribute->virtual
-                || $attribute->name === $ownerKey
-            )
-            ->pluck('name')
-            ->values()
-            ->all();
-    }
 
     // Relations
     public function contact(): BelongsTo

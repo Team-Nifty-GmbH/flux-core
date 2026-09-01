@@ -4,7 +4,6 @@ use FluxErp\Livewire\Product\Product;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
-use FluxErp\Models\Pivots\ProductSupplier;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
@@ -283,7 +282,7 @@ test('add supplier fills every column the pivot table carries', function (): voi
         ->assertOk()
         ->assertHasNoErrors();
 
-    $pivotFields = resolve_static(ProductSupplier::class, 'pivotFields');
+    $pivotFields = app(ProductModel::class)->suppliers()->getPivotColumns();
 
     expect($pivotFields)
         ->not->toBeEmpty()

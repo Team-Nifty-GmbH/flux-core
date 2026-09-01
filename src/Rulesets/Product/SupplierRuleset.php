@@ -3,7 +3,7 @@
 namespace FluxErp\Rulesets\Product;
 
 use FluxErp\Models\Contact;
-use FluxErp\Models\Pivots\ProductSupplier;
+use FluxErp\Models\Product;
 use FluxErp\Models\Unit;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
@@ -17,7 +17,7 @@ class SupplierRuleset extends FluxRuleset
             array_fill_keys(
                 array_map(
                     fn (string $field): string => 'suppliers.*.' . $field,
-                    resolve_static(ProductSupplier::class, 'pivotFields')
+                    app(Product::class)->suppliers()->getPivotColumns()
                 ),
                 'nullable'
             ),
