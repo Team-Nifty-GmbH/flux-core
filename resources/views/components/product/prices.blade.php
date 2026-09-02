@@ -24,7 +24,15 @@
 
             const priceNet = Number(priceList.price_net);
 
-            if (!sellingUnit || !basicUnit || sellingUnit === basicUnit || !priceNet) {
+            // a net price of zero is a price, only null or an empty field is not
+            if (
+                !sellingUnit ||
+                !basicUnit ||
+                sellingUnit === basicUnit ||
+                priceList.price_net == null ||
+                priceList.price_net === '' ||
+                Number.isNaN(priceNet)
+            ) {
                 return null;
             }
 
