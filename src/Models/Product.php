@@ -192,6 +192,22 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     }
 
     /**
+     * @return BelongsTo<Unit, $this>
+     */
+    public function purchaseUnit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class, 'purchase_unit_id');
+    }
+
+    /**
+     * @return BelongsTo<Unit, $this>
+     */
+    public function referenceUnit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class, 'reference_unit_id');
+    }
+
+    /**
      * @return HasMany<StockPosting, $this>
      */
     public function stockPostings(): HasMany
