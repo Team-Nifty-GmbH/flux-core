@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Support;
 use Exception;
 use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Actions\Media\DeleteMediaCollection;
+use FluxErp\Actions\Media\UpdateMedia;
 use FluxErp\Actions\MediaFolder\DeleteMediaFolder;
 use FluxErp\Actions\MediaFolder\UpdateMediaFolder;
 use FluxErp\Livewire\Forms\MediaFolderForm;
@@ -12,6 +13,7 @@ use FluxErp\Models\Media;
 use FluxErp\Models\Media as MediaModel;
 use FluxErp\Models\MediaFolder;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\LoadsMediaTree;
 use FluxErp\Traits\Livewire\WithFilePond;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -28,11 +30,14 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 abstract class FolderTree extends Component
 {
-    use Actions, WithFilePond;
+    use Actions, LoadsMediaTree, WithFilePond;
 
     public $files = [];
 
     public MediaFolderForm $folder;
+
+    #[Locked]
+    public array $mediaTree = [];
 
     #[Modelable]
     public ?int $modelId = null;
@@ -308,6 +313,32 @@ abstract class FolderTree extends Component
                 ])
             )
         );
+    }
+
+    #[Renderless]
+    public function saveMedia(array $media): false|array
+    {
+        $mediaId = (int) data_get($media, 'id');
+
+        if ($this->isReadonly || ! $this->findMedia($mediaId)) {
+            return false;
+        }
+
+        try {
+            $updated = UpdateMedia::make([
+                'id' => $mediaId,
+                'name' => data_get($media, 'name'),
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        return array_merge($media, $updated->only(['name']));
     }
 
     protected function resolveSubjectPath(array $subject, ?string $subjectPath): ?string

@@ -11,6 +11,7 @@ use FluxErp\Livewire\DataTables\ProductList;
 use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Models\Product;
 use FluxErp\Models\ProductOptionGroup;
+use FluxErp\Support\Bus\BulkExecutor;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Session;
@@ -170,8 +171,10 @@ class VariantList extends ProductList
             ->whereKey($this->product->id)
             ->first(['id', 'name']);
 
-        foreach ($this->getSelectedModelsQuery()->with('productOptions:id,name')->get(['id']) as $product) {
-            UpdateProduct::make([
+        $payloads = $this->getSelectedModelsQuery()
+            ->with('productOptions:id,name')
+            ->get(['id'])
+            ->map(fn (Product $product): array => [
                 'id' => $product->getKey(),
                 'name' => resolve_static(
                     Product::class,
@@ -182,12 +185,19 @@ class VariantList extends ProductList
                     ]
                 ),
             ])
-                ->checkPermission()
-                ->validate()
-                ->execute();
+            ->all();
+
+        if (blank($payloads)) {
+            return;
         }
 
-        $this->loadData();
+        try {
+            BulkExecutor::make(UpdateProduct::class, $payloads)
+                ->name(__('Recalculating variant names'))
+                ->dispatch();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
     }
 
     public function save(): void

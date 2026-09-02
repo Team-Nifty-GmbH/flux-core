@@ -1,6 +1,8 @@
 <?php
 
 use FluxErp\Livewire\Product\Product;
+use FluxErp\Models\Address;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
@@ -284,4 +286,22 @@ test('the price per basic unit reaches the prices tab', function (): void {
         ->set('tab', 'product.prices')
         ->assertOk()
         ->assertSeeHtml('pricePerBasicUnit');
+});
+
+test('add supplier fills every column the pivot table carries', function (): void {
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
+    $contact->update(['main_address_id' => $address->getKey()]);
+
+    $component = Livewire::test(Product::class, ['id' => $this->product->id])
+        ->call('addSupplier', $contact->getKey())
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    $pivotFields = app(ProductModel::class)->suppliers()->getPivotColumns();
+
+    expect($pivotFields)
+        ->not->toBeEmpty()
+        ->and(data_get($component->get('product.suppliers'), '0'))
+        ->toHaveKeys(array_merge($pivotFields, ['customer_number', 'main_address']));
 });
