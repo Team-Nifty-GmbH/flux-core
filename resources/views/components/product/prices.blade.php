@@ -1,6 +1,7 @@
 <div
     x-data="{
         calculatedPrices: {},
+        units: @js(resolve_static(\FluxErp\Models\Unit::class, 'query')->pluck('name', 'id')),
         init() {
             $wire.getPriceLists().then(() =>
                 $wire.priceLists.forEach((priceList) => {
@@ -15,6 +16,28 @@
                         price_gross: priceList.price_gross,
                     };
                 }),
+            );
+        },
+        pricePerBasicUnit(priceList) {
+            const sellingUnit = Number($wire.product.selling_unit);
+            const basicUnit = Number($wire.product.basic_unit);
+
+            const priceNet = Number(priceList.price_net);
+
+            // a net price of zero is a price, only null or an empty field is not
+            if (
+                !sellingUnit ||
+                !basicUnit ||
+                sellingUnit === basicUnit ||
+                priceList.price_net == null ||
+                priceList.price_net === '' ||
+                Number.isNaN(priceNet)
+            ) {
+                return null;
+            }
+
+            return $nuxbe.parseNumber(
+                Math.round(((priceNet * basicUnit) / sellingUnit) * 100) / 100,
             );
         },
         resetPrice(priceList) {
@@ -113,6 +136,22 @@
                 label="{{ __('Price gross') }}"
                 x-model="priceList.price_gross"
             />
+            <div
+                x-cloak
+                x-show="pricePerBasicUnit(priceList)"
+                class="text-sm text-gray-500 dark:text-gray-400"
+            >
+                <span>{{ __('Price per Basic Unit (net)') }}:</span>
+                <span
+                    x-text="
+                        '{{ resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol }} ' +
+                        pricePerBasicUnit(priceList) +
+                        (units[$wire.product.reference_unit_id]
+                            ? ' / ' + units[$wire.product.reference_unit_id]
+                            : '')
+                    "
+                ></span>
+            </div>
         </x-card>
     </template>
 </div>

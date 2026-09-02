@@ -272,6 +272,22 @@ test('the product property group heading reaches the markup', function (): void 
         ->assertSeeHtml('x-text="group"');
 });
 
+test('the purchase fields reach the markup', function (): void {
+    Livewire::test(Product::class, ['id' => $this->product->id])
+        ->assertOk()
+        ->assertSeeHtml('product.purchase_unit_id')
+        ->assertSeeHtml('product.reference_unit_id')
+        ->assertSeeHtml('product.min_purchase')
+        ->assertSeeHtml('product.purchase_steps');
+});
+
+test('the price per basic unit reaches the prices tab', function (): void {
+    Livewire::test(Product::class, ['id' => $this->product->id])
+        ->set('tab', 'product.prices')
+        ->assertOk()
+        ->assertSeeHtml('pricePerBasicUnit');
+});
+
 test('add supplier fills every column the pivot table carries', function (): void {
     $contact = Contact::factory()->create();
     $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
