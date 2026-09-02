@@ -127,6 +127,9 @@ use FluxErp\Actions\LedgerAccountTransaction\UpdateLedgerAccountTransaction;
 use FluxErp\Actions\Location\CreateLocation;
 use FluxErp\Actions\Location\DeleteLocation;
 use FluxErp\Actions\Location\UpdateLocation;
+use FluxErp\Actions\Lot\CreateLot;
+use FluxErp\Actions\Lot\DeleteLot;
+use FluxErp\Actions\Lot\UpdateLot;
 use FluxErp\Actions\MailAccount\CreateMailAccount;
 use FluxErp\Actions\MailAccount\DeleteMailAccount;
 use FluxErp\Actions\MailAccount\UpdateMailAccount;
@@ -292,6 +295,9 @@ use FluxErp\Actions\VatRate\UpdateVatRate;
 use FluxErp\Actions\Warehouse\CreateWarehouse;
 use FluxErp\Actions\Warehouse\DeleteWarehouse;
 use FluxErp\Actions\Warehouse\UpdateWarehouse;
+use FluxErp\Actions\WarehouseBin\CreateWarehouseBin;
+use FluxErp\Actions\WarehouseBin\DeleteWarehouseBin;
+use FluxErp\Actions\WarehouseBin\UpdateWarehouseBin;
 use FluxErp\Actions\WorkTime\CreateWorkTime;
 use FluxErp\Actions\WorkTime\DeleteWorkTime;
 use FluxErp\Actions\WorkTime\UpdateWorkTime;
@@ -355,6 +361,7 @@ use FluxErp\Models\LeadLossReason;
 use FluxErp\Models\LeadState;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Location;
+use FluxErp\Models\Lot;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use FluxErp\Models\MediaFolder;
@@ -404,6 +411,7 @@ use FluxErp\Models\VacationBlackout;
 use FluxErp\Models\VacationCarryoverRule;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
+use FluxErp\Models\WarehouseBin;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeModel;
 use FluxErp\Models\WorkTimeType;
@@ -776,6 +784,13 @@ Route::prefix('api')
                 Route::post('/locations', CreateLocation::class);
                 Route::put('/locations', UpdateLocation::class);
                 Route::delete('/locations/{id}', DeleteLocation::class);
+
+                // Lots
+                Route::get('/lots/{id}', [BaseController::class, 'show'])->defaults('model', Lot::class);
+                Route::get('/lots', [BaseController::class, 'index'])->defaults('model', Lot::class);
+                Route::post('/lots', CreateLot::class);
+                Route::put('/lots', UpdateLot::class);
+                Route::delete('/lots/{id}', DeleteLot::class);
 
                 // MailAccounts
                 Route::get('/mail-accounts/{id}', [BaseController::class, 'show'])
@@ -1231,6 +1246,14 @@ Route::prefix('api')
                 Route::post('/vat-rates', CreateVatRate::class);
                 Route::put('/vat-rates', UpdateVatRate::class);
                 Route::delete('/vat-rates/{id}', DeleteVatRate::class);
+
+                // WarehouseBins
+                Route::get('/warehouse-bins/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', WarehouseBin::class);
+                Route::get('/warehouse-bins', [BaseController::class, 'index'])->defaults('model', WarehouseBin::class);
+                Route::post('/warehouse-bins', CreateWarehouseBin::class);
+                Route::put('/warehouse-bins', UpdateWarehouseBin::class);
+                Route::delete('/warehouse-bins/{id}', DeleteWarehouseBin::class);
 
                 // Warehouses
                 Route::get('/warehouses/{id}', [BaseController::class, 'show'])->defaults('model', Warehouse::class);

@@ -3,6 +3,7 @@
 namespace FluxErp\Rulesets\Product;
 
 use FluxErp\Enums\BundleTypeEnum;
+use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Models\Media;
 use FluxErp\Models\Product;
@@ -112,12 +113,17 @@ class UpdateProductRuleset extends FluxRuleset
                 'required_if:is_service,true',
                 Rule::enum(TimeUnitEnum::class),
             ],
+            'stock_removal_strategy_enum' => [
+                'nullable',
+                Rule::enum(StockRemovalStrategyEnum::class),
+            ],
             'ean' => 'string|nullable',
             'customs_tariff_number' => 'string|nullable|max:64',
             'stock' => 'integer|nullable',
             'min_delivery_time' => 'integer|nullable',
             'max_delivery_time' => 'integer|nullable',
             'restock_time' => 'integer|nullable',
+            'min_shelf_life_days' => 'nullable|integer|min:0',
             'purchase_steps' => 'numeric|nullable',
             'min_purchase' => 'numeric|nullable',
             'max_purchase' => 'numeric|nullable',
@@ -132,6 +138,7 @@ class UpdateProductRuleset extends FluxRuleset
 
             'is_active' => 'boolean',
             'is_highlight' => 'boolean',
+            'is_lot_tracked' => 'boolean',
             'is_bundle' => [
                 'required_with:bundle_type_enum',
                 'required_if:bundle_type_enum,null',
