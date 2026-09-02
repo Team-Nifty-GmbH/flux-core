@@ -171,14 +171,16 @@ class OrderPositionForm extends FluxForm
 
     public function applyUnitAmount(): void
     {
-        if (is_null($this->packaging) || ! is_numeric($this->unit_amount)) {
+        $unitId = data_get($this->packaging, 'unit_id');
+
+        if (! $unitId || ! is_numeric($this->unit_amount)) {
             $this->unit_amount = null;
             $this->unit_id = null;
 
             return;
         }
 
-        $this->unit_id = data_get($this->packaging, 'unit_id');
+        $this->unit_id = $unitId;
         $this->amount = $this->trimDecimals(
             bcmul($this->unit_amount, data_get($this->packaging, 'factor'))
         );
@@ -186,15 +188,29 @@ class OrderPositionForm extends FluxForm
 
     public function deriveUnitAmount(): void
     {
+        $unitId = data_get($this->packaging, 'unit_id');
         $factor = data_get($this->packaging, 'factor');
 
-        if (! $factor || ! is_numeric($this->amount) || $this->unit_id !== data_get($this->packaging, 'unit_id')) {
+        if (! $unitId || ! $factor || ! is_numeric($this->amount) || $this->unit_id !== $unitId) {
             $this->unit_amount = null;
+            $this->unit_id = null;
 
             return;
         }
 
-        $this->unit_amount = $this->trimDecimals(bcdiv($this->amount, $factor));
+        $unitAmount = $this->trimDecimals(bcdiv($this->amount, $factor));
+
+        // Only a packaging amount that multiplies back to the exact article amount may
+        // stand. Anything else would silently move the amount on the next save, and the
+        // position would keep claiming a packaging its quantity no longer matches.
+        if (bccomp($this->trimDecimals(bcmul($unitAmount, $factor)), $this->amount) !== 0) {
+            $this->unit_amount = null;
+            $this->unit_id = null;
+
+            return;
+        }
+
+        $this->unit_amount = $unitAmount;
     }
 
     public function getProduct(): Product

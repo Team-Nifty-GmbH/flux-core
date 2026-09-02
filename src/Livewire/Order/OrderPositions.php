@@ -576,6 +576,12 @@ class OrderPositions extends OrderPositionList
         JS);
     }
 
+    public function updatedOrderPositionAmount(): void
+    {
+        $this->loadPositionPackaging();
+        $this->orderPosition->deriveUnitAmount();
+    }
+
     public function updatedOrderPositionUnitAmount(): void
     {
         $this->loadPositionPackaging();
