@@ -50,12 +50,18 @@ class Media extends BaseMedia
     }
 
     // Relations
+    /**
+     * @return MorphToMany<Category, $this>
+     */
     public function category(): MorphToMany
     {
         return $this->morphToMany(Category::class, 'categorizable', 'categorizable')
             ->using(Categorizable::class);
     }
 
+    /**
+     * @return HasMany<PrintJob, $this>
+     */
     public function printJobs(): HasMany
     {
         return $this->hasMany(PrintJob::class);

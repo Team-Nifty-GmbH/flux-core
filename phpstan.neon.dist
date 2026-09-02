@@ -1,7 +1,10 @@
 includes:
+    - vendor/larastan/larastan/extension.neon
     - phpstan-baseline.neon
 
 parameters:
+    bootstrapFiles:
+        - tests/PHPStan/bootstrap.php
     level: 4
     paths:
         - src
@@ -10,5 +13,5 @@ parameters:
     tmpDir: build/phpstan
     checkOctaneCompatibility: true
     checkModelProperties: true
-    checkMissingIterableValueType: false
-
+    databaseMigrationsPath:
+        - database/migrations

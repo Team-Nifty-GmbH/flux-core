@@ -39,11 +39,17 @@ class LedgerAccountTransaction extends FluxPivot
     }
 
     // Relations
+    /**
+     * @return BelongsTo<LedgerAccount, $this>
+     */
     public function ledgerAccount(): BelongsTo
     {
         return $this->belongsTo(LedgerAccount::class);
     }
 
+    /**
+     * @return BelongsTo<Transaction, $this>
+     */
     public function transaction(): BelongsTo
     {
         return $this->belongsTo(Transaction::class);

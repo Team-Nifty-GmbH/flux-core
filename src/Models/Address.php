@@ -384,6 +384,9 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
     }
 
     // Relations
+    /**
+     * @return BelongsToMany<Order, $this>
+     */
     public function addressTypeOrders(): BelongsToMany
     {
         return $this->belongsToMany(Order::class, 'address_address_type_order')
@@ -391,12 +394,18 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             ->withPivot('address_type_id');
     }
 
+    /**
+     * @return BelongsToMany<AddressType, $this>
+     */
     public function addressTypes(): BelongsToMany
     {
         return $this->belongsToMany(AddressType::class, 'address_address_type')
             ->using(AddressAddressType::class);
     }
 
+    /**
+     * @return BelongsToMany<Category, $this>
+     */
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -410,21 +419,33 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             ->wherePivot('categorizable_type', morph_alias(Contact::class));
     }
 
+    /**
+     * @return BelongsTo<Contact, $this>
+     */
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
     }
 
+    /**
+     * @return HasMany<ContactOption, $this>
+     */
     public function contactOptions(): HasMany
     {
         return $this->hasMany(ContactOption::class);
     }
 
+    /**
+     * @return BelongsTo<Country, $this>
+     */
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
     }
 
+    /**
+     * @return BelongsToMany<Industry, $this>
+     */
     public function industries(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -437,21 +458,33 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         );
     }
 
+    /**
+     * @return BelongsTo<Language, $this>
+     */
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);
     }
 
+    /**
+     * @return HasMany<Lead, $this>
+     */
     public function leadRecommendations(): HasMany
     {
         return $this->hasMany(Lead::class, 'recommended_by_address_id');
     }
 
+    /**
+     * @return HasMany<Lead, $this>
+     */
     public function leads(): HasMany
     {
         return $this->hasMany(Lead::class);
     }
 
+    /**
+     * @return BelongsToMany<Order, $this>
+     */
     public function orders(): BelongsToMany
     {
         return $this->belongsToMany(Order::class, 'address_address_type_order')
@@ -459,16 +492,25 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             ->withPivot('address_type_id');
     }
 
+    /**
+     * @return HasMany<Order, $this>
+     */
     public function ordersDeliveryAddress(): HasMany
     {
         return $this->hasMany(Order::class, 'address_delivery_id');
     }
 
+    /**
+     * @return HasMany<Order, $this>
+     */
     public function ordersInvoiceAddress(): HasMany
     {
         return $this->hasMany(Order::class, 'address_invoice_id');
     }
 
+    /**
+     * @return HasOneThrough<PriceList, Contact, $this>
+     */
     public function priceList(): HasOneThrough
     {
         return $this->hasOneThrough(
@@ -481,12 +523,18 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         );
     }
 
+    /**
+     * @return BelongsToMany<SerialNumber, $this>
+     */
     public function serialNumbers(): BelongsToMany
     {
         return $this->belongsToMany(SerialNumber::class, 'address_serial_number')
             ->using(AddressSerialNumber::class);
     }
 
+    /**
+     * @return BelongsToMany<Tenant, $this>
+     */
     public function tenants(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -499,6 +547,9 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         );
     }
 
+    /**
+     * @return MorphMany<Ticket, $this>
+     */
     public function tickets(): MorphMany
     {
         return $this->morphMany(Ticket::class, 'authenticatable');

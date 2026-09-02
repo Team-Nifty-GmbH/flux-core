@@ -21,7 +21,7 @@ trait HasUserModification
 
     public function getCreatedByColumn(): string
     {
-        return defined(static::class . '::CREATED_BY') ? static::CREATED_BY : 'created_by';
+        return defined(static::class . '::CREATED_BY') ? (string) constant(static::class . '::CREATED_BY') : 'created_by';
     }
 
     public function getUpdatedBy(): ?Model
@@ -33,7 +33,7 @@ trait HasUserModification
 
     public function getUpdatedByColumn(): string
     {
-        return defined(static::class . '::UPDATED_BY') ? static::UPDATED_BY : 'updated_by';
+        return defined(static::class . '::UPDATED_BY') ? (string) constant(static::class . '::UPDATED_BY') : 'updated_by';
     }
 
     public function initializeHasUserModification(): void

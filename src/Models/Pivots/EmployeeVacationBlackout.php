@@ -11,11 +11,17 @@ class EmployeeVacationBlackout extends FluxPivot
     protected $table = 'employee_vacation_blackout';
 
     // Relations
+    /**
+     * @return BelongsTo<Employee, $this>
+     */
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
     }
 
+    /**
+     * @return BelongsTo<VacationBlackout, $this>
+     */
     public function vacationBlackout(): BelongsTo
     {
         return $this->belongsTo(VacationBlackout::class);

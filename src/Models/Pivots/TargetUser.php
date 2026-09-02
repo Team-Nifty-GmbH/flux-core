@@ -18,11 +18,17 @@ class TargetUser extends FluxPivot
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Target, $this>
+     */
     public function target(): BelongsTo
     {
         return $this->belongsTo(Target::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

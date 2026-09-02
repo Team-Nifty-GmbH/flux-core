@@ -26,11 +26,17 @@ class EmployeeWorkTimeModel extends FluxPivot
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Employee, $this>
+     */
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
     }
 
+    /**
+     * @return BelongsTo<WorkTimeModel, $this>
+     */
     public function workTimeModel(): BelongsTo
     {
         return $this->belongsTo(WorkTimeModel::class)

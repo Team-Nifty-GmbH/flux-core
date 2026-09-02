@@ -167,26 +167,41 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     }
 
     // Relations
+    /**
+     * @return HasOne<Commission, $this>
+     */
     public function commission(): HasOne
     {
         return $this->hasOne(Commission::class);
     }
 
+    /**
+     * @return BelongsTo<OrderPosition, $this>
+     */
     public function createdFrom(): BelongsTo
     {
         return $this->belongsTo(OrderPosition::class, 'created_from_id');
     }
 
+    /**
+     * @return HasMany<OrderPosition, $this>
+     */
     public function createdOrderPositions(): HasMany
     {
         return $this->hasMany(OrderPosition::class, 'created_from_id');
     }
 
+    /**
+     * @return HasOne<Commission, $this>
+     */
     public function creditNoteCommission(): HasOne
     {
         return $this->hasOne(Commission::class, 'credit_note_order_position_id');
     }
 
+    /**
+     * @return HasOneThrough<Currency, Order, $this>
+     */
     public function currency(): HasOneThrough
     {
         return $this->hasOneThrough(
@@ -199,41 +214,65 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         );
     }
 
+    /**
+     * @return HasMany<OrderPosition, $this>
+     */
     public function descendants(): HasMany
     {
         return $this->hasMany(OrderPosition::class, 'origin_position_id');
     }
 
+    /**
+     * @return MorphMany<Discount, $this>
+     */
     public function discounts(): MorphMany
     {
         return $this->morphMany(Discount::class, 'model');
     }
 
+    /**
+     * @return BelongsTo<LedgerAccount, $this>
+     */
     public function ledgerAccount(): BelongsTo
     {
         return $this->belongsTo(LedgerAccount::class);
     }
 
+    /**
+     * @return BelongsTo<Order, $this>
+     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
+    /**
+     * @return BelongsTo<OrderPosition, $this>
+     */
     public function origin(): BelongsTo
     {
         return $this->belongsTo(OrderPosition::class, 'origin_position_id');
     }
 
+    /**
+     * @return BelongsTo<PriceList, $this>
+     */
     public function priceList(): BelongsTo
     {
         return $this->belongsTo(PriceList::class);
     }
 
+    /**
+     * @return BelongsTo<Product, $this>
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
+    /**
+     * @return BelongsToMany<StockPosting, $this>
+     */
     public function reservedStock(): BelongsToMany
     {
         return $this->belongsToMany(StockPosting::class, 'order_position_stock_posting')
@@ -241,6 +280,9 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
             ->withPivot('reserved_amount');
     }
 
+    /**
+     * @return HasManyThrough<SerialNumber, StockPosting, $this>
+     */
     public function serialNumbers(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -253,36 +295,57 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         );
     }
 
+    /**
+     * @return HasMany<OrderPosition, $this>
+     */
     public function siblings(): HasMany
     {
         return $this->hasMany(OrderPosition::class, 'origin_position_id', 'origin_position_id');
     }
 
+    /**
+     * @return HasMany<StockPosting, $this>
+     */
     public function stockPostings(): HasMany
     {
         return $this->hasMany(StockPosting::class);
     }
 
+    /**
+     * @return HasMany<Task, $this>
+     */
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
     }
 
+    /**
+     * @return BelongsTo<Tenant, $this>
+     */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
     }
 
+    /**
+     * @return BelongsTo<VatRate, $this>
+     */
     public function vatRate(): BelongsTo
     {
         return $this->belongsTo(VatRate::class);
     }
 
+    /**
+     * @return BelongsTo<Warehouse, $this>
+     */
     public function warehouse(): BelongsTo
     {
         return $this->belongsTo(Warehouse::class);
     }
 
+    /**
+     * @return HasOne<WorkTime, $this>
+     */
     public function workTime(): HasOne
     {
         return $this->hasOne(WorkTime::class);

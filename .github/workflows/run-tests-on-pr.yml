@@ -72,6 +72,9 @@ jobs:
       - name: Pint
         run: ./vendor/bin/pint --test --parallel
 
+      - name: PHPStan
+        run: ./vendor/bin/phpstan analyse --no-progress --memory-limit=2G
+
       - name: Prettier
         run: npx prettier . --check
 

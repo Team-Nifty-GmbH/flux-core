@@ -6,6 +6,7 @@ use FluxErp\Enums\DevicePlatformEnum;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class DeviceToken extends FluxModel
@@ -21,6 +22,9 @@ class DeviceToken extends FluxModel
     }
 
     // Relations
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function authenticatable(): MorphTo
     {
         return $this->morphTo('authenticatable');

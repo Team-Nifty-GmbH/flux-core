@@ -36,6 +36,9 @@ class EmailTemplate extends FluxModel implements HasMedia, InteractsWithDataTabl
     }
 
     // Relations
+    /**
+     * @return HasMany<OrderType, $this>
+     */
     public function orderTypes(): HasMany
     {
         return $this->hasMany(OrderType::class);

@@ -18,11 +18,17 @@ class MailAccountUser extends FluxPivot
     }
 
     // Relations
+    /**
+     * @return BelongsTo<MailAccount, $this>
+     */
     public function mailAccount(): BelongsTo
     {
         return $this->belongsTo(MailAccount::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

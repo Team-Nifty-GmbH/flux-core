@@ -88,11 +88,17 @@ class QueueMonitor extends FluxModel
         return $this->morphedByMany(Address::class, 'queue_monitorable', 'queue_monitorable');
     }
 
+    /**
+     * @return BelongsTo<JobBatch, $this>
+     */
     public function jobBatch(): BelongsTo
     {
         return $this->belongsTo(JobBatch::class);
     }
 
+    /**
+     * @return HasMany<QueueMonitorable, $this>
+     */
     public function queueMonitorables(): HasMany
     {
         return $this->hasMany(QueueMonitorable::class);

@@ -21,11 +21,17 @@ class ContactOption extends FluxModel
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Address, $this>
+     */
     public function address(): BelongsTo
     {
         return $this->belongsTo(Address::class);
     }
 
+    /**
+     * @return HasOneThrough<Contact, Address, $this>
+     */
     public function contact(): HasOneThrough
     {
         return $this->hasOneThrough(
@@ -38,6 +44,9 @@ class ContactOption extends FluxModel
         );
     }
 
+    /**
+     * @return HasMany<static, $this>
+     */
     public function siblings(): HasMany
     {
         return $this->hasMany(static::class, 'address_id', 'address_id')

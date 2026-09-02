@@ -32,6 +32,9 @@ class PaymentRun extends FluxModel
     }
 
     // Relations
+    /**
+     * @return BelongsTo<BankConnection, $this>
+     */
     public function bankConnection(): BelongsTo
     {
         return $this->belongsTo(BankConnection::class);
@@ -51,6 +54,9 @@ class PaymentRun extends FluxModel
         return $this;
     }
 
+    /**
+     * @return BelongsToMany<Order, $this>
+     */
     public function orders(): BelongsToMany
     {
         return $this->belongsToMany(Order::class, 'order_payment_run')

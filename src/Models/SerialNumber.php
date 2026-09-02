@@ -42,6 +42,9 @@ class SerialNumber extends FluxModel implements HasMedia, InteractsWithDataTable
     }
 
     // Relations
+    /**
+     * @return BelongsToMany<Address, $this>
+     */
     public function addresses(): BelongsToMany
     {
         return $this->belongsToMany(Address::class, 'address_serial_number')
@@ -49,6 +52,9 @@ class SerialNumber extends FluxModel implements HasMedia, InteractsWithDataTable
             ->withPivot('quantity');
     }
 
+    /**
+     * @return HasOneThrough<Product, StockPosting, $this>
+     */
     public function product(): HasOneThrough
     {
         return $this->hasOneThrough(
@@ -61,6 +67,9 @@ class SerialNumber extends FluxModel implements HasMedia, InteractsWithDataTable
         );
     }
 
+    /**
+     * @return HasMany<StockPosting, $this>
+     */
     public function stockPostings(): HasMany
     {
         return $this->hasMany(StockPosting::class);

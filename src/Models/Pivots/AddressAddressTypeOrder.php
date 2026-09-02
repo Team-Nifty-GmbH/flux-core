@@ -29,16 +29,25 @@ class AddressAddressTypeOrder extends FluxPivot
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Address, $this>
+     */
     public function address(): BelongsTo
     {
         return $this->belongsTo(Address::class);
     }
 
+    /**
+     * @return BelongsTo<AddressType, $this>
+     */
     public function addressType(): BelongsTo
     {
         return $this->belongsTo(AddressType::class);
     }
 
+    /**
+     * @return BelongsTo<Order, $this>
+     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'order_id');

@@ -98,6 +98,9 @@ class Category extends FluxModel implements HasMedia, InteractsWithDataTables, S
         return $this->baseChildren()->ordered();
     }
 
+    /**
+     * @return BelongsToMany<Discount, $this>
+     */
     public function discounts(): BelongsToMany
     {
         return $this->belongsToMany(Discount::class, 'category_price_list')

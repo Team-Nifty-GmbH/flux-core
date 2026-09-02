@@ -11,6 +11,9 @@ class WorkTimeModelSchedule extends FluxModel
     use HasUserModification, HasUuid;
 
     // Relations
+    /**
+     * @return BelongsTo<WorkTimeModel, $this>
+     */
     public function workTimeModel(): BelongsTo
     {
         return $this->belongsTo(WorkTimeModel::class);

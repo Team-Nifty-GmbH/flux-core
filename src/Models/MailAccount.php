@@ -53,11 +53,17 @@ class MailAccount extends FluxModel
     }
 
     // Relations
+    /**
+     * @return HasMany<MailFolder, $this>
+     */
     public function mailFolders(): HasMany
     {
         return $this->hasMany(MailFolder::class);
     }
 
+    /**
+     * @return BelongsToMany<User, $this>
+     */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'mail_account_user')
@@ -65,6 +71,9 @@ class MailAccount extends FluxModel
             ->withPivot('is_default');
     }
 
+    /**
+     * @return HasMany<Communication, $this>
+     */
     public function mailMessages(): HasMany
     {
         return $this->hasMany(Communication::class);

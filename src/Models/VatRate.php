@@ -29,6 +29,9 @@ class VatRate extends FluxModel
     }
 
     // Relations
+    /**
+     * @return HasMany<OrderPosition, $this>
+     */
     public function orderPositions(): HasMany
     {
         return $this->hasMany(OrderPosition::class);

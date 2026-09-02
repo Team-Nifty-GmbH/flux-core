@@ -113,6 +113,9 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     }
 
     // Relations
+    /**
+     * @return BelongsToMany<Product, $this>
+     */
     public function bundleProducts(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -125,37 +128,58 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             ->withPivot('count');
     }
 
+    /**
+     * @return HasMany<CartItem, $this>
+     */
     public function cartItems(): HasMany
     {
         return $this->hasMany(CartItem::class);
     }
 
+    /**
+     * @return BelongsTo<Media, $this>
+     */
     public function coverMedia(): BelongsTo
     {
         return $this->belongsTo(Media::class, 'cover_media_id');
     }
 
+    /**
+     * @return HasMany<OrderPosition, $this>
+     */
     public function orderPositions(): HasMany
     {
         return $this->hasMany(OrderPosition::class);
     }
 
+    /**
+     * @return HasMany<Price, $this>
+     */
     public function prices(): HasMany
     {
         return $this->hasMany(Price::class);
     }
 
+    /**
+     * @return HasMany<ProductCrossSelling, $this>
+     */
     public function productCrossSellings(): HasMany
     {
         return $this->hasMany(ProductCrossSelling::class);
     }
 
+    /**
+     * @return BelongsToMany<ProductOption, $this>
+     */
     public function productOptions(): BelongsToMany
     {
         return $this->belongsToMany(ProductOption::class, 'product_product_option')
             ->using(ProductProductOption::class);
     }
 
+    /**
+     * @return BelongsToMany<ProductProperty, $this>
+     */
     public function productProperties(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -167,21 +191,33 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             ->using(ProductProductProperty::class);
     }
 
+    /**
+     * @return BelongsTo<Unit, $this>
+     */
     public function purchaseUnit(): BelongsTo
     {
         return $this->belongsTo(Unit::class, 'purchase_unit_id');
     }
 
+    /**
+     * @return BelongsTo<Unit, $this>
+     */
     public function referenceUnit(): BelongsTo
     {
         return $this->belongsTo(Unit::class, 'reference_unit_id');
     }
 
+    /**
+     * @return HasMany<StockPosting, $this>
+     */
     public function stockPostings(): HasMany
     {
         return $this->hasMany(StockPosting::class);
     }
 
+    /**
+     * @return BelongsToMany<Contact, $this>
+     */
     public function suppliers(): BelongsToMany
     {
         return $this->belongsToMany(Contact::class, 'product_supplier')
@@ -189,17 +225,26 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             ->withPivot(resolve_static(ProductSupplier::class, 'pivotColumns'));
     }
 
+    /**
+     * @return BelongsToMany<Tenant, $this>
+     */
     public function tenants(): BelongsToMany
     {
         return $this->belongsToMany(Tenant::class, 'product_tenant')
             ->using(ProductTenant::class);
     }
 
+    /**
+     * @return BelongsTo<Unit, $this>
+     */
     public function unit(): BelongsTo
     {
         return $this->belongsTo(Unit::class);
     }
 
+    /**
+     * @return BelongsTo<VatRate, $this>
+     */
     public function vatRate(): BelongsTo
     {
         return $this->belongsTo(VatRate::class);

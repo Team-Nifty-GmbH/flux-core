@@ -41,16 +41,25 @@ class LoanInstallmentTransaction extends FluxPivot
         ];
     }
 
+    /**
+     * @return MorphMany<LedgerBooking, $this>
+     */
     public function ledgerBookings(): MorphMany
     {
         return $this->morphMany(LedgerBooking::class, 'source');
     }
 
+    /**
+     * @return BelongsTo<LoanInstallment, $this>
+     */
     public function loanInstallment(): BelongsTo
     {
         return $this->belongsTo(LoanInstallment::class);
     }
 
+    /**
+     * @return BelongsTo<Transaction, $this>
+     */
     public function transaction(): BelongsTo
     {
         return $this->belongsTo(Transaction::class);

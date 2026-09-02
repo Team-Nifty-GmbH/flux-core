@@ -40,31 +40,49 @@ class Loan extends FluxModel implements HasMedia, InteractsWithDataTables
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Contact, $this>
+     */
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
     }
 
+    /**
+     * @return HasMany<LoanInstallment, $this>
+     */
     public function installments(): HasMany
     {
         return $this->hasMany(LoanInstallment::class);
     }
 
+    /**
+     * @return BelongsTo<LedgerAccount, $this>
+     */
     public function interestLedgerAccount(): BelongsTo
     {
         return $this->belongsTo(LedgerAccount::class, 'interest_ledger_account_id');
     }
 
+    /**
+     * @return BelongsTo<LedgerAccount, $this>
+     */
     public function ledgerAccount(): BelongsTo
     {
         return $this->belongsTo(LedgerAccount::class);
     }
 
+    /**
+     * @return BelongsTo<Order, $this>
+     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
+    /**
+     * @return BelongsTo<Tenant, $this>
+     */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);

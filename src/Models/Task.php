@@ -28,6 +28,7 @@ use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Model\Trackable;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -189,16 +190,25 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     }
 
     // Relations
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function model(): MorphTo
     {
         return $this->morphTo('model');
     }
 
+    /**
+     * @return BelongsTo<OrderPosition, $this>
+     */
     public function orderPosition(): BelongsTo
     {
         return $this->belongsTo(OrderPosition::class);
     }
 
+    /**
+     * @return BelongsToMany<OrderPosition, $this>
+     */
     public function orderPositions(): BelongsToMany
     {
         return $this->belongsToMany(OrderPosition::class, 'order_position_task')
@@ -206,16 +216,25 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             ->withPivot('amount');
     }
 
+    /**
+     * @return BelongsTo<Project, $this>
+     */
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function responsibleUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsible_user_id');
     }
 
+    /**
+     * @return BelongsToMany<User, $this>
+     */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'task_user')

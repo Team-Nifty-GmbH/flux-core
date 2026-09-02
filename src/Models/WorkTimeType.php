@@ -20,6 +20,9 @@ class WorkTimeType extends FluxModel
     }
 
     // Relations
+    /**
+     * @return HasMany<WorkTime, $this>
+     */
     public function workTimes(): HasMany
     {
         return $this->hasMany(WorkTime::class);

@@ -113,32 +113,50 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
     }
 
     // Relations
+    /**
+     * @return BelongsTo<AbsenceType, $this>
+     */
     public function absenceType(): BelongsTo
     {
         return $this->belongsTo(AbsenceType::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function approvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by_id');
     }
 
+    /**
+     * @return BelongsTo<Employee, $this>
+     */
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
     }
 
+    /**
+     * @return BelongsToMany<EmployeeDay, $this>
+     */
     public function employeeDays(): BelongsToMany
     {
         return $this->belongsToMany(EmployeeDay::class, 'absence_request_employee_day')
             ->using(AbsenceRequestEmployeeDay::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function rejectedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'rejected_by_id');
     }
 
+    /**
+     * @return BelongsToMany<Employee, $this>
+     */
     public function substitutes(): BelongsToMany
     {
         return $this->belongsToMany(Employee::class, 'absence_request_substitute')

@@ -14,11 +14,17 @@ class MailFolder extends FluxModel
     use HasPackageFactory, HasParentChildRelations, HasUuid;
 
     // Relations
+    /**
+     * @return BelongsTo<MailAccount, $this>
+     */
     public function mailAccount(): BelongsTo
     {
         return $this->belongsTo(MailAccount::class);
     }
 
+    /**
+     * @return HasMany<Communication, $this>
+     */
     public function mailMessages(): HasMany
     {
         return $this->hasMany(Communication::class);

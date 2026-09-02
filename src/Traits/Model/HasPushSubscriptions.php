@@ -10,6 +10,9 @@ trait HasPushSubscriptions
 {
     use BaseHasPushSubscriptions;
 
+    /**
+     * @return MorphMany<PushSubscription, $this>
+     */
     public function pushSubscriptions(): MorphMany
     {
         return $this->morphMany(PushSubscription::class, 'subscribable');

@@ -84,6 +84,9 @@ class Communication extends FluxModel implements HasMedia, OffersPrinting, Targe
         return $this->morphedByMany(Address::class, 'communicatable', 'communicatable');
     }
 
+    /**
+     * @return HasMany<Communicatable, $this>
+     */
     public function communicatables(): HasMany
     {
         return $this->hasMany(Communicatable::class);
@@ -94,11 +97,17 @@ class Communication extends FluxModel implements HasMedia, OffersPrinting, Targe
         return $this->morphedByMany(Contact::class, 'communicatable', 'communicatable');
     }
 
+    /**
+     * @return BelongsTo<MailAccount, $this>
+     */
     public function mailAccount(): BelongsTo
     {
         return $this->belongsTo(MailAccount::class);
     }
 
+    /**
+     * @return BelongsTo<MailFolder, $this>
+     */
     public function mailFolder(): BelongsTo
     {
         return $this->belongsTo(MailFolder::class);

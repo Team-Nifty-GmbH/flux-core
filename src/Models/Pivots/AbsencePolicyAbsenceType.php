@@ -11,11 +11,17 @@ class AbsencePolicyAbsenceType extends FluxPivot
     protected $table = 'absence_policy_absence_type';
 
     // Relations
+    /**
+     * @return BelongsTo<AbsencePolicy, $this>
+     */
     public function absencePolicy(): BelongsTo
     {
         return $this->belongsTo(AbsencePolicy::class);
     }
 
+    /**
+     * @return BelongsTo<AbsenceType, $this>
+     */
     public function absenceType(): BelongsTo
     {
         return $this->belongsTo(AbsenceType::class);

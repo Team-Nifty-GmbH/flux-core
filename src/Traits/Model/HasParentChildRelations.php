@@ -47,6 +47,9 @@ trait HasParentChildRelations
             ->toArray();
     }
 
+    /**
+     * @return HasMany<static, $this>
+     */
     public function children(): HasMany
     {
         return $this->hasMany(static::class, $this->getParentKeyAttribute());
@@ -98,6 +101,9 @@ trait HasParentChildRelations
         return static::query()->whereKey($this->descendantKeys());
     }
 
+    /**
+     * @return BelongsTo<static, $this>
+     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(static::class, $this->getParentKeyAttribute());

@@ -20,11 +20,17 @@ class OrderSchedule extends FluxPivot
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Order, $this>
+     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
+    /**
+     * @return BelongsTo<Schedule, $this>
+     */
     public function schedule(): BelongsTo
     {
         return $this->belongsTo(Schedule::class);

@@ -45,11 +45,17 @@ class Calendar extends FluxModel
     }
 
     // Relations
+    /**
+     * @return HasMany<Calendarable, $this>
+     */
     public function calendarables(): HasMany
     {
         return $this->hasMany(Calendarable::class);
     }
 
+    /**
+     * @return HasMany<CalendarEvent, $this>
+     */
     public function calendarEvents(): HasMany
     {
         return $this->hasMany(CalendarEvent::class);

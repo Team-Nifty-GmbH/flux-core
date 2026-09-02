@@ -18,6 +18,9 @@ trait Notifiable
         BaseNotifiable::routeNotificationFor as protected baseRouteNotificationFor;
     }
 
+    /**
+     * @return MorphMany<EventSubscription, $this>
+     */
     public function eventSubscriptions(): MorphMany
     {
         return $this->morphMany(EventSubscription::class, 'subscribable');
@@ -50,6 +53,9 @@ trait Notifiable
         return array_values(array_unique(array_merge($activeChannels, $defaultChannels)));
     }
 
+    /**
+     * @return MorphMany<NotificationSetting, $this>
+     */
     public function notificationSettings(): MorphMany
     {
         return $this->morphMany(NotificationSetting::class, 'notifiable');

@@ -4,6 +4,7 @@ namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\Calendar;
 use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -21,11 +22,17 @@ class Calendarable extends MorphPivot
     protected $guarded = ['pivot_id'];
 
     // Relations
+    /**
+     * @return BelongsTo<Calendar, $this>
+     */
     public function calendar(): BelongsTo
     {
         return $this->belongsTo(Calendar::class);
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function calendarable(): MorphTo
     {
         return $this->morphTo();

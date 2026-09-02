@@ -82,51 +82,81 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
     }
 
     // Relations
+    /**
+     * @return HasMany<AbsenceRequest, $this>
+     */
     public function absenceRequests(): HasMany
     {
         return $this->hasMany(AbsenceRequest::class);
     }
 
+    /**
+     * @return HasMany<EmployeeBalanceAdjustment, $this>
+     */
     public function employeeBalanceAdjustments(): HasMany
     {
         return $this->hasMany(EmployeeBalanceAdjustment::class);
     }
 
+    /**
+     * @return HasMany<EmployeeDay, $this>
+     */
     public function employeeDays(): HasMany
     {
         return $this->hasMany(EmployeeDay::class);
     }
 
+    /**
+     * @return BelongsTo<EmployeeDepartment, $this>
+     */
     public function employeeDepartment(): BelongsTo
     {
         return $this->belongsTo(EmployeeDepartment::class);
     }
 
+    /**
+     * @return BelongsTo<Location, $this>
+     */
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
     }
 
+    /**
+     * @return HasMany<Employee, $this>
+     */
     public function subordinates(): HasMany
     {
         return $this->hasMany(Employee::class, 'supervisor_id');
     }
 
+    /**
+     * @return BelongsTo<Employee, $this>
+     */
     public function supervisor(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'supervisor_id');
     }
 
+    /**
+     * @return BelongsTo<Tenant, $this>
+     */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsToMany<VacationBlackout, $this>
+     */
     public function vacationBlackouts(): BelongsToMany
     {
         return $this->belongsToMany(VacationBlackout::class, 'employee_vacation_blackout')
@@ -138,12 +168,18 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
         return $this->belongsto(VacationCarryoverRule::class);
     }
 
+    /**
+     * @return HasMany<EmployeeWorkTimeModel, $this>
+     */
     public function workTimeModelHistory(): HasMany
     {
         return $this->hasMany(EmployeeWorkTimeModel::class)
             ->orderBy('valid_from', 'desc');
     }
 
+    /**
+     * @return HasMany<WorkTime, $this>
+     */
     public function workTimes(): HasMany
     {
         return $this->hasMany(WorkTime::class);

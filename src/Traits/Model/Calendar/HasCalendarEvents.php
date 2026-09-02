@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 trait HasCalendarEvents
 {
+    /**
+     * @return MorphMany<CalendarEvent, $this>
+     */
     public function calendarEvents(): MorphMany
     {
         return $this->morphMany(CalendarEvent::class, 'model');

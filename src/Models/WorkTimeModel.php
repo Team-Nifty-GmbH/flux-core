@@ -24,12 +24,18 @@ class WorkTimeModel extends FluxModel
     }
 
     // Relations
+    /**
+     * @return BelongsToMany<Employee, $this>
+     */
     public function employees(): BelongsToMany
     {
         return $this->belongsToMany(Employee::class, 'employee_work_time_model')
             ->using(EmployeeWorkTimeModel::class);
     }
 
+    /**
+     * @return HasMany<WorkTimeModelSchedule, $this>
+     */
     public function schedules(): HasMany
     {
         return $this->hasMany(WorkTimeModelSchedule::class);

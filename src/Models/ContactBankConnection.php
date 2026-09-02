@@ -37,16 +37,25 @@ class ContactBankConnection extends FluxModel implements InteractsWithDataTables
     }
 
     // Relations
+    /**
+     * @return BelongsTo<Contact, $this>
+     */
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
     }
 
+    /**
+     * @return HasMany<SepaMandate, $this>
+     */
     public function sepaMandates(): HasMany
     {
         return $this->hasMany(SepaMandate::class);
     }
 
+    /**
+     * @return HasMany<Transaction, $this>
+     */
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);

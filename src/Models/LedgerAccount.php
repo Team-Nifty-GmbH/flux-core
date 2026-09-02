@@ -40,11 +40,17 @@ class LedgerAccount extends FluxModel
     }
 
     // Relations
+    /**
+     * @return HasMany<OrderPosition, $this>
+     */
     public function orderPositions(): HasMany
     {
         return $this->hasMany(OrderPosition::class);
     }
 
+    /**
+     * @return BelongsToMany<Transaction, $this>
+     */
     public function transactions(): BelongsToMany
     {
         return $this->belongsToMany(Transaction::class)

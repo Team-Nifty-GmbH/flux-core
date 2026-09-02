@@ -33,6 +33,9 @@ class LeadState extends FluxModel
     }
 
     // Relations
+    /**
+     * @return HasMany<Lead, $this>
+     */
     public function leads(): HasMany
     {
         return $this->hasMany(Lead::class);
