@@ -251,7 +251,7 @@ class ReplicateOrder extends FluxAction
             ->with([
                 'orderType:id,order_type_enum',
             ])
-            ->first(['id', 'contact_id', 'invoice_number', 'order_type_id', 'tenant_id']);
+            ->first(['id', 'contact_id', 'order_type_id', 'tenant_id', 'invoice_number']);
         $tenantId = $order->tenant_id;
         $hasTenants = [
             'contact_id' => Contact::class,
