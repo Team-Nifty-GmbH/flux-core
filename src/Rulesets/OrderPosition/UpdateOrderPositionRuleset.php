@@ -12,6 +12,7 @@ use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\Tenant;
+use FluxErp\Models\Unit;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rules\ModelExists;
@@ -92,6 +93,13 @@ class UpdateOrderPositionRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => VatRate::class, 'subject' => OrderPosition::class]),
+            ],
+            'unit_id' => [
+                'exclude_if:is_free_text,true',
+                'sometimes',
+                'integer',
+                'nullable',
+                app(ModelExists::class, ['model' => Unit::class, 'subject' => OrderPosition::class]),
             ],
             'warehouse_id' => [
                 'exclude_if:is_free_text,true',

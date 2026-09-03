@@ -229,6 +229,8 @@ class OrderPositions extends OrderPositionList
             : $this->order->getPriceList();
         $this->orderPosition->vat_rate_id = $this->order->vat_rate_id;
         $this->orderPosition->fillFromProduct($product);
+        $this->loadPositionPackaging($product);
+        $this->orderPosition->applyUnitAmount();
         $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
         $this->orderPosition->unit_price = PriceHelper::make($this->orderPosition->getProduct())
             ->setPriceList($priceList ?? $this->order->getPriceList())
@@ -357,6 +359,8 @@ class OrderPositions extends OrderPositionList
         $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
         if ($orderPosition?->exists) {
             $this->orderPosition->fill($orderPosition);
+            $this->loadPositionPackaging();
+            $this->orderPosition->deriveUnitAmount();
             $this->orderPosition->is_bundle_parent = $orderPosition->is_free_text
                 && $orderPosition->children()->whereNotNull('amount')->exists();
         } else {
@@ -572,6 +576,18 @@ class OrderPositions extends OrderPositionList
         JS);
     }
 
+    public function updatedOrderPositionAmount(): void
+    {
+        $this->loadPositionPackaging();
+        $this->orderPosition->deriveUnitAmount();
+    }
+
+    public function updatedOrderPositionUnitAmount(): void
+    {
+        $this->loadPositionPackaging();
+        $this->orderPosition->applyUnitAmount();
+    }
+
     public function switchView(string $view): void
     {
         if ($view === $this->orderPositionsView) {
@@ -594,6 +610,17 @@ class OrderPositions extends OrderPositionList
         }
 
         $this->cacheState();
+    }
+
+    protected function loadPositionPackaging(?Product $product = null): void
+    {
+        $product ??= $this->orderPosition->product_id
+            ? resolve_static(Product::class, 'query')
+                ->whereKey($this->orderPosition->product_id)
+                ->first(['id', 'purchase_unit_id', 'purchase_steps'])
+            : null;
+
+        $this->orderPosition->packaging = $this->order->isPurchase ? $product?->packaging() : null;
     }
 
     protected function updatePositionNameAndDescription(OrderPosition $position): void
