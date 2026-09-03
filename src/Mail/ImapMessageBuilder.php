@@ -269,6 +269,13 @@ class ImapMessageBuilder
             return false;
         }
 
+        // A stream failure only counts when it happened inside the imap client.
+        // The same words turn up in unrelated failures, and retrying one of
+        // those would repeat work that never touched the connection.
+        if (! str_contains($exception->getFile(), 'webklex/php-imap')) {
+            return false;
+        }
+
         // php-imap reports the loss as a failed stream write, and PHP itself as
         // a broken pipe or a reset by the peer.
         return (bool) preg_match(

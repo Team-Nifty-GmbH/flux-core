@@ -188,6 +188,22 @@ function makeImapMessage(int $uid, string $messageId): ImapMessage
 }
 
 /**
+ * A stream failure as it arrives from the imap client: PHP raises the warning
+ * inside the package, and Laravel turns it into an ErrorException carrying that
+ * file.
+ */
+function makeStreamFailure(string $message = 'fwrite(): SSL: Broken pipe'): ErrorException
+{
+    return new ErrorException(
+        $message,
+        0,
+        E_WARNING,
+        '/app/vendor/webklex/php-imap/src/Connection/Protocols/ImapProtocol.php',
+        469,
+    );
+}
+
+/**
  * The mail server drops a long running connection on its own. The next write
  * into that stream raises a PHP warning which Laravel turns into an
  * ErrorException, and that used to end the whole sync run.
@@ -240,7 +256,7 @@ function makeReconnectingBuilder(
 test('repeats the work on a fresh connection when the server closed the old one', function (): void {
     $folder = MailAccount::factory()->has(MailFolder::factory())->create()->mailFolders->first();
 
-    $builder = makeReconnectingBuilder($folder, new ErrorException('fwrite(): SSL: Broken pipe'));
+    $builder = makeReconnectingBuilder($folder, makeStreamFailure());
 
     expect($builder->run())->toBe('done')
         ->and($builder->attempts)->toBe(2)
@@ -278,7 +294,7 @@ test('lets an unrelated failure through instead of repeating it', function (): v
 test('gives up after one repeat rather than looping', function (): void {
     $folder = MailAccount::factory()->has(MailFolder::factory())->create()->mailFolders->first();
 
-    $builder = makeReconnectingBuilder($folder, new ErrorException('fwrite(): SSL: Broken pipe'), failures: 2);
+    $builder = makeReconnectingBuilder($folder, makeStreamFailure(), failures: 2);
 
     expect(fn () => $builder->run())->toThrow(ErrorException::class)
         ->and($builder->attempts)->toBe(2);
@@ -289,10 +305,25 @@ test('reports the lost connection rather than the failed dial', function (): voi
 
     $builder = makeReconnectingBuilder(
         $folder,
-        new ErrorException('fwrite(): SSL: Broken pipe'),
+        makeStreamFailure(),
         reconnectFailure: new RuntimeException('could not reach the mail server'),
     );
 
     expect(fn () => $builder->run())->toThrow(ErrorException::class, 'fwrite(): SSL: Broken pipe')
         ->and($builder->attempts)->toBe(1);
+});
+
+test('leaves a stream failure alone that did not come from the imap client', function (): void {
+    $folder = MailAccount::factory()->has(MailFolder::factory())->create()->mailFolders->first();
+
+    // Same words, raised while writing an attachment to disk rather than to the
+    // connection. Repeating that would redo work the server never saw.
+    $builder = makeReconnectingBuilder(
+        $folder,
+        new ErrorException('fwrite(): write of 8192 bytes failed', 0, E_WARNING, __FILE__, __LINE__),
+    );
+
+    expect(fn () => $builder->run())->toThrow(ErrorException::class)
+        ->and($builder->attempts)->toBe(1)
+        ->and($builder->reconnects)->toBe(0);
 });
