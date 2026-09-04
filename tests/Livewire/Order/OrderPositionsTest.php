@@ -1022,6 +1022,7 @@ function packagingPosition(Order $order, Product $product, VatRate $vatRate, int
         'price_list_id' => $order->price_list_id,
         'warehouse_id' => Warehouse::default()?->getKey(),
         'amount' => 1,
+        'is_free_text' => false,
     ]);
 }
 
