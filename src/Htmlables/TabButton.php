@@ -202,7 +202,7 @@ class TabButton implements Htmlable
         $button->attributes = new ComponentAttributeBag(
             array_merge([
                 'wire:loading.attr' => 'readonly',
-                'class' => 'border-b-2 text-secondary-600! !dark:text-secondary-400 border-b-transparent focus:ring-0! focus:ring-offset-0!',
+                'class' => 'border-b-2 text-secondary-600 dark:text-secondary-400 border-b-transparent focus:ring-0! focus:ring-offset-0!',
                 'x-bind:class' => "{'border-b-primary-600! rounded-b-none!': tab === '{$this->component}'}",
                 'data-tab-name' => $this->component,
                 'x-on:click.prevent' => 'tabButtonClicked($el)',
