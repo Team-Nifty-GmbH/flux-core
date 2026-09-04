@@ -6,11 +6,16 @@ use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\RestoreProduct;
 use FluxErp\Actions\Product\UpdateProduct;
+use FluxErp\Support\Livewire\Attributes\InlineEditable;
+use FluxErp\Support\Livewire\Attributes\RenderAs;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
 
 class ProductForm extends FluxForm
 {
+    use SupportsAutoRender;
+
     public ?string $avatar_url = null;
 
     public ?float $basic_unit = null;
@@ -46,6 +51,8 @@ class ProductForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
+    #[InlineEditable]
+    #[RenderAs(type: 'toggle')]
     public ?bool $is_active = true;
 
     public ?bool $is_active_export_to_web_shop = false;
@@ -69,6 +76,7 @@ class ProductForm extends FluxForm
 
     public ?float $min_purchase = null;
 
+    #[InlineEditable]
     public ?string $name = null;
 
     public ?array $parent = null;
@@ -113,6 +121,12 @@ class ProductForm extends FluxForm
 
     public ?array $vat_rate = null;
 
+    #[InlineEditable]
+    #[RenderAs(type: 'select.styled', options: [
+        'select' => 'label:name|value:id',
+        'unfiltered' => true,
+        ':request' => "['url' => route('search', \FluxErp\Models\VatRate::class), 'method' => 'POST']",
+    ])]
     public ?int $vat_rate_id = null;
 
     public ?float $warning_stock_amount = null;

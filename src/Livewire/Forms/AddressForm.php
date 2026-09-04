@@ -7,17 +7,23 @@ use FluxErp\Actions\Address\CreateAddress;
 use FluxErp\Actions\Address\DeleteAddress;
 use FluxErp\Actions\Address\UpdateAddress;
 use FluxErp\Models\Address;
+use FluxErp\Support\Livewire\Attributes\InlineEditable;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 
 class AddressForm extends FluxForm
 {
+    use SupportsAutoRender;
+
     public ?string $addition = null;
 
     public ?string $advertising_state = null;
 
+    #[InlineEditable]
     public ?string $city = null;
 
+    #[InlineEditable]
     public ?string $company = null;
 
     public ?int $contact_id = null;
@@ -32,6 +38,7 @@ class AddressForm extends FluxForm
 
     public ?string $email_primary = null;
 
+    #[InlineEditable]
     public ?string $firstname = null;
 
     public ?bool $has_formal_salutation = null;
@@ -51,6 +58,7 @@ class AddressForm extends FluxForm
 
     public ?int $language_id = null;
 
+    #[InlineEditable]
     public ?string $lastname = null;
 
     public string|float|null $latitude = null;
@@ -73,12 +81,14 @@ class AddressForm extends FluxForm
 
     public ?array $search_aliases = null;
 
+    #[InlineEditable]
     public ?string $street = null;
 
     public ?string $title = null;
 
     public ?string $url = null;
 
+    #[InlineEditable]
     public ?string $zip = null;
 
     public array $tags = [];
