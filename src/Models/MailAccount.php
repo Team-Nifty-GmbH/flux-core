@@ -111,6 +111,21 @@ class MailAccount extends FluxModel
         return $this->imapClient;
     }
 
+    /**
+     * Drop the cached client and connect again.
+     *
+     * The client is held for the lifetime of the model, so once the server has
+     * closed the connection every later call hands out the same dead stream.
+     * Anything recovering from a lost connection has to clear the cache first,
+     * otherwise it retries into the same broken socket.
+     */
+    public function reconnectImapClient(): ?Client
+    {
+        $this->imapClient = null;
+
+        return $this->getImapClient();
+    }
+
     public function syncFolders(): array
     {
         $client = $this->getImapClient();
