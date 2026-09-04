@@ -33,6 +33,11 @@ class SupplierRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Unit::class]),
             ],
+            'suppliers.*.items_per_packaging' => [
+                'nullable',
+                'integer',
+                'min:1',
+            ],
             'suppliers.*.purchase_price' => [
                 'nullable',
                 app(Numeric::class, ['min' => 0]),

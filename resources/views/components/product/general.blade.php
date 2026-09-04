@@ -528,6 +528,12 @@
                             </div>
                             <x-number
                                 x-bind:disabled="!isEditing"
+                                x-model="supplier.items_per_packaging"
+                                :label="__('Items per Packaging')"
+                                step="1"
+                            />
+                            <x-number
+                                x-bind:disabled="!isEditing"
                                 x-model="supplier.purchase_price"
                                 :label="__('Purchase Price')"
                                 step="0.01"
