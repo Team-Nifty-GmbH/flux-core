@@ -1,0 +1,126 @@
+name: performance
+
+# Started by hand, never on a push: the run seeds a demo database, walks every
+# route in a browser and takes minutes, and its numbers only mean something when
+# nothing else competes for the runner.
+on:
+  workflow_dispatch:
+    inputs:
+      budget_ms:
+        description: 'Fail the run when a route needs longer than this, in ms. 0 reports without failing.'
+        required: false
+        default: '0'
+
+permissions:
+  contents: read
+  packages: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  PHP_VERSION: '8.5'
+  LARAVEL_VERSION: '13.*'
+  TESTBENCH_VERSION: '11.*'
+
+jobs:
+  routes:
+    name: Route Performance
+    runs-on: [self-hosted, Linux]
+    container:
+      image: ghcr.io/team-nifty-gmbh/flux-ci:php8.5
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: false
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: testing
+        options: >-
+          --tmpfs /var/lib/mysql
+          --tmpfs /var/log/mysql
+          --tmpfs /tmp
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+      meilisearch:
+        image: getmeili/meilisearch:latest
+        options: --health-cmd="curl -s http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Prepare
+        uses: ./.github/actions/prepare-browser-tests
+        with:
+          laravel-version: ${{ env.LARAVEL_VERSION }}
+          testbench-version: ${{ env.TESTBENCH_VERSION }}
+          github-token: ${{ github.token }}
+
+      # The measurement runs against a served application rather than the test
+      # harness, so its configuration has to reach a second process that the job
+      # does not start itself. Only the environment file gets there.
+      - name: Configure the application
+        run: |
+          cat > vendor/orchestra/testbench-core/laravel/.env <<ENV
+          APP_ENV=local
+          APP_DEBUG=false
+          APP_KEY=$(php -r 'echo "base64:" . base64_encode(random_bytes(32));')
+          APP_URL=http://127.0.0.1:8000
+          FLUX_INSTALL_DONE=true
+          CACHE_STORE=file
+          SESSION_DRIVER=file
+          QUEUE_CONNECTION=sync
+          DB_CONNECTION=mysql
+          DB_HOST=mysql
+          DB_PORT=3306
+          DB_DATABASE=testing
+          DB_USERNAME=root
+          DB_PASSWORD=password
+          MEILISEARCH_HOST=http://meilisearch:7700
+          ENV
+
+      - name: Seed the demo database
+        run: |
+          SEED_STARTED=$(date +%s)
+          php -d memory_limit=-1 ./vendor/bin/testbench migrate:fresh --seed --seeder="FluxErp\Database\Seeders\FluxSeeder"
+          echo "PERFORMANCE_SEED_SECONDS=$(( $(date +%s) - SEED_STARTED ))" >> "$GITHUB_ENV"
+
+      # A page renders what the signed in user is allowed to see, so the run
+      # needs an account rather than a bypass. The password lives for the length
+      # of this job and the database is thrown away with it.
+      - name: Prepare the account and the route list
+        run: |
+          echo "PERFORMANCE_EMAIL=$(php -d memory_limit=-1 ./vendor/bin/testbench tinker --execute="\$user = FluxErp\Models\User::query()->first(); \$user->password = 'performance-run'; \$user->save(); echo \$user->email;" | tail -1)" >> "$GITHUB_ENV"
+          php -d memory_limit=-1 ./vendor/bin/testbench route:list --json > routes.json
+
+      - name: Serve the application
+        run: |
+          php -d memory_limit=-1 -d display_errors=0 ./vendor/bin/testbench serve --host=127.0.0.1 --port=8000 &
+          until curl -sf -o /dev/null http://127.0.0.1:8000/login; do sleep 2; done
+
+      - name: Measure every route
+        run: node tests/Performance/measure-routes.mjs
+        env:
+          APP_URL: http://127.0.0.1:8000
+          PERFORMANCE_PASSWORD: performance-run
+          PERFORMANCE_BUDGET_MS: ${{ inputs.budget_ms }}
+          PLAYWRIGHT_BROWSERS_PATH: /tmp/pw-browsers
+
+      - name: Write the report to the job summary
+        if: always()
+        run: |
+          if [ -f route-performance.md ]; then
+            cat route-performance.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'The run produced no report.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload the report
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: route-performance
+          path: route-performance.md
+          retention-days: 30
