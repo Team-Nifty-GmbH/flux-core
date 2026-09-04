@@ -124,14 +124,14 @@ class ProductForm extends FluxForm
         if ($values instanceof Model) {
             $values->loadMissing([
                 'bundleProducts:id',
-                'categories:id',
+                'ownCategories:id',
                 'tenants:id',
                 'coverMedia',
                 'parent',
-                'productProperties:id,product_property_group_id,name,property_type_enum,product_product_property.value',
-                'productProperties.productPropertyGroup:id,name',
-                'suppliers:id,main_address_id,customer_number',
-                'suppliers.mainAddress:id,name',
+                'ownProductProperties:id,product_property_group_id,name,property_type_enum,product_product_property.value',
+                'ownProductProperties.productPropertyGroup:id,name',
+                'ownSuppliers:id,main_address_id,customer_number',
+                'ownSuppliers.mainAddress:id,name',
                 'tags:id',
                 'vatRate:id,rate_percentage',
             ]);

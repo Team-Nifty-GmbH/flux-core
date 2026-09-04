@@ -16,7 +16,7 @@ beforeEach(function (): void {
         ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create();
 
-    $this->products->productProperties()->sync($this->productProperties[1]->id);
+    $this->products->ownProductProperties()->sync($this->productProperties[1]->id);
 
     $this->user->tenants()->attach($tenant->id);
 
