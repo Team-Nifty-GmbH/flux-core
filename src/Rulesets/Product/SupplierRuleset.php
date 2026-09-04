@@ -19,6 +19,12 @@ class SupplierRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Contact::class]),
             ],
+            'suppliers.*.packaging_unit_id' => [
+                'nullable',
+                'required_with:suppliers.*.packaging_amount',
+                'integer',
+                app(ModelExists::class, ['model' => Unit::class]),
+            ],
             'suppliers.*.manufacturer_product_number' => 'string|max:255|nullable',
             'suppliers.*.supplier_product_number' => 'string|max:255|nullable',
             'suppliers.*.supplier_product_name' => 'string|max:255|nullable',
@@ -27,11 +33,10 @@ class SupplierRuleset extends FluxRuleset
                 'required_with:suppliers.*.packaging_unit_id',
                 app(Numeric::class, ['min' => 0]),
             ],
-            'suppliers.*.packaging_unit_id' => [
+            'suppliers.*.items_per_packaging' => [
                 'nullable',
-                'required_with:suppliers.*.packaging_amount',
                 'integer',
-                app(ModelExists::class, ['model' => Unit::class]),
+                'min:1',
             ],
             'suppliers.*.purchase_price' => [
                 'nullable',

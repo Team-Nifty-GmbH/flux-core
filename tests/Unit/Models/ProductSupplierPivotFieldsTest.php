@@ -16,6 +16,7 @@ test('the pivot model declares the editable columns', function (): void {
             'supplier_product_number',
             'supplier_product_name',
             'packaging_amount',
+            'items_per_packaging',
             'purchase_price',
             'note',
         ]);
@@ -61,6 +62,7 @@ test('the purchase data of a supplier survives a save', function (): void {
         'supplier_product_name' => 'Schrauben 4x30 Grosspackung',
         'packaging_amount' => 250,
         'packaging_unit_id' => $unit->getKey(),
+        'items_per_packaging' => 500,
         'purchase_price' => 12.5,
         'note' => 'Nur in ganzen Kartons lieferbar.',
     ]);
@@ -74,6 +76,7 @@ test('the purchase data of a supplier survives a save', function (): void {
         ->and($pivot->supplier_product_name)->toBe('Schrauben 4x30 Grosspackung')
         ->and($pivot->packaging_amount)->toEqual(250)
         ->and($pivot->packagingUnit->name)->toBe('Karton')
+        ->and($pivot->items_per_packaging)->toEqual(500)
         ->and($pivot->note)->toBe('Nur in ganzen Kartons lieferbar.');
 });
 
@@ -96,4 +99,21 @@ test('a packaging amount and its unit are only valid together', function (): voi
         ->and($errorsFor(['packaging_amount' => null]))->toContain('suppliers.0.packaging_amount')
         ->and($errorsFor([]))->toBeEmpty()
         ->and($errorsFor(['packaging_amount' => null, 'packaging_unit_id' => null]))->toBeEmpty();
+});
+
+test('a packaging holds a whole number of items, or none is stated', function (): void {
+    $rules = resolve_static(SupplierRuleset::class, 'getRules');
+    $supplier = ['contact_id' => Contact::factory()->create()->getKey()];
+
+    $errorsFor = fn (array $attributes): array => Validator::make(
+        ['suppliers' => [array_merge($supplier, $attributes)]],
+        $rules
+    )
+        ->errors()
+        ->keys();
+
+    expect($errorsFor(['items_per_packaging' => 500]))->toBeEmpty()
+        ->and($errorsFor(['items_per_packaging' => null]))->toBeEmpty()
+        ->and($errorsFor(['items_per_packaging' => 0]))->toContain('suppliers.0.items_per_packaging')
+        ->and($errorsFor(['items_per_packaging' => 2.5]))->toContain('suppliers.0.items_per_packaging');
 });
