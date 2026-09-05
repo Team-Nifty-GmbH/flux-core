@@ -31,6 +31,7 @@ class UpdateOrderPosition extends FluxAction
     public function performAction(): Model
     {
         $tags = Arr::pull($this->data, 'tags', []);
+        $recalculateOrder = Arr::pull($this->data, 'recalculate_order', false);
 
         $orderPosition = resolve_static(OrderPosition::class, 'query')
             ->whereKey($this->data['id'] ?? null)
@@ -149,6 +150,10 @@ class UpdateOrderPosition extends FluxAction
         }
 
         $orderPosition->syncTags($tags);
+
+        if ($recalculateOrder) {
+            $orderPosition->order->calculatePrices()->save();
+        }
 
         return $orderPosition->withoutRelations()->fresh();
     }
