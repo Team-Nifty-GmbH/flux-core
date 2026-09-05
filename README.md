@@ -126,8 +126,8 @@ composer test
 
 The test suite needs MySQL 8 or MariaDB as well. `phpunit.xml` pins `DB_CONNECTION=mysql`,
 so the requirement above is not only about production. A local `.env` pointing at SQLite
-aborts on the first migration that uses raw MySQL, before a single test has run; that abort
-is not a failing test and not a problem with your setup.
+aborts on the first migration that uses raw MySQL, before a single test has run. That abort
+is not a failing test, it means the test database points at the wrong driver.
 
 Give every session its own database. Parallel runs against one shared schema pull each
 other's tables away through `RefreshDatabase`, which shows up as
