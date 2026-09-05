@@ -181,6 +181,8 @@ class UpdateOrderPositionRuleset extends FluxRuleset
             'is_alternative' => 'boolean',
             'is_net' => 'boolean',
             'is_free_text' => 'boolean',
+
+            'recalculate_order' => 'boolean',
         ];
     }
 }

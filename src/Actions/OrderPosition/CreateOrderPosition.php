@@ -37,6 +37,7 @@ class CreateOrderPosition extends FluxAction
     public function performAction(): OrderPosition
     {
         $tags = Arr::pull($this->data, 'tags', []);
+        $recalculateOrder = Arr::pull($this->data, 'recalculate_order', false);
         $order = resolve_static(Order::class, 'query')
             ->with(['orderType:id,order_type_enum', 'priceList:id,is_net'])
             ->whereKey($this->getData('order_id'))
@@ -142,6 +143,10 @@ class CreateOrderPosition extends FluxAction
         }
 
         $orderPosition->attachTags($tags);
+
+        if ($recalculateOrder) {
+            $orderPosition->order->calculatePrices()->save();
+        }
 
         return $orderPosition->withoutRelations()->fresh();
     }

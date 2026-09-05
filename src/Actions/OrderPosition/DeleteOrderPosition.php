@@ -25,7 +25,13 @@ class DeleteOrderPosition extends FluxAction
             ->whereKey($this->getData('id'))
             ->first();
 
-        return $orderPosition->delete();
+        $deleted = $orderPosition->delete();
+
+        if ($this->getData('recalculate_order', false)) {
+            $orderPosition->order->calculatePrices()->save();
+        }
+
+        return $deleted;
     }
 
     protected function validateData(): void
