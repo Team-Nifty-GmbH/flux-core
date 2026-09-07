@@ -513,6 +513,7 @@ return [
         'packages' => 'Packages',
         'packages.*' => 'Package',
         'parameters' => 'Parameters',
+        'parent_collection' => 'Parent Folder',
         'parent_id' => 'Parent ID',
         'password' => 'Password',
         'paused_time_ms' => 'Paused Time in ms',

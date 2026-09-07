@@ -4,6 +4,7 @@ namespace FluxErp\Traits\Model;
 
 use FluxErp\Models\Media as FluxMedia;
 use FluxErp\Models\MediaFolder;
+use FluxErp\Models\Scopes\FamilyTreeScope;
 use FluxErp\Support\MediaLibrary\MediaCollection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -30,6 +31,7 @@ trait InteractsWithMedia
         $mediaFolders = resolve_static(MediaFolder::class, 'familyTree')
             ->whereKey($this->mediaFolders()->pluck('id')->toArray())
             ->whereKeyNot($exclude)
+            ->whereNull('parent_collection')
             ->get()
             ->flatten();
 
@@ -187,7 +189,21 @@ trait InteractsWithMedia
                 'is_readonly' => data_get($item, 'is_readonly') ?? false,
                 'is_static' => data_get($item, 'is_static') ?? false,
                 'children' => array_merge(
-                    $this->calculateTree(data_get($item, 'children') ?? []),
+                    $this->calculateTree(
+                        array_merge(
+                            data_get($item, 'children') ?? [],
+                            is_null($id) ?
+                                $this->mediaFolders()
+                                    ->where('parent_collection', $slug)
+                                    ->withGlobalScope(
+                                        resolve_static(FamilyTreeScope::class, 'class'),
+                                        app(FamilyTreeScope::class)
+                                    )
+                                    ->get()
+                                    ->toArray()
+                                : []
+                        )
+                    ),
                     resolve_static(FluxMedia::class, 'query')
                         ->when(
                             $id,

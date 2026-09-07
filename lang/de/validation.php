@@ -514,6 +514,7 @@ return [
         'packages' => 'Pakete',
         'packages.*' => 'Paket',
         'parameters' => 'Parameter',
+        'parent_collection' => 'Übergeordneter Ordner',
         'parent_id' => 'Eltern-ID',
         'password' => 'Passwort',
         'paused_time_ms' => 'Pausenzeit in ms',

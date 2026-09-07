@@ -264,6 +264,15 @@ abstract class FolderTree extends Component
                             . '\', SUBSTRING(collection_name, ' . strlen($path) + 1 . '))'
                         ),
                     ]);
+
+                resolve_static(MediaFolder::class, 'query')
+                    ->join('media_folder_model AS mfm', 'media_folders.id', '=', 'mfm.media_folder_id')
+                    ->where('mfm.model_type', morph_alias($this->modelType))
+                    ->where('mfm.model_id', $this->modelId)
+                    ->where('media_folders.parent_collection', $path)
+                    ->update([
+                        'parent_collection' => $replace,
+                    ]);
             }
 
             return $attributes;
@@ -299,7 +308,7 @@ abstract class FolderTree extends Component
                 array_flip([
                     'id',
                     'parent_id',
-                    'collection_name',
+                    'parent_collection',
                     'name',
                     'slug',
                     'is_readonly',
@@ -362,7 +371,6 @@ abstract class FolderTree extends Component
         return ! $this->isReadonly
             && $targetType !== 'media'
             && ! ($subjectType === 'folder' && $targetType !== 'folder')
-            && ! ($subjectType === 'collection' && $targetType !== 'collection')
             && ($subjectType === 'media' || ! $this->readOnly(data_get($subject, 'id'), $subjectPath))
             && ! $this->readOnly(data_get($target, 'id'), $targetPath);
     }
@@ -372,7 +380,8 @@ abstract class FolderTree extends Component
         try {
             UpdateMediaFolder::make([
                 'id' => data_get($subject, 'id'),
-                'parent_id' => data_get($target, 'id'),
+                'parent_id' => is_int($parentId = data_get($target, 'id')) ? $parentId : null,
+                'parent_collection' => data_get($target, 'slug'),
                 'model_type' => morph_alias($this->modelType),
                 'model_id' => $this->modelId,
             ])
@@ -405,6 +414,15 @@ abstract class FolderTree extends Component
                     'collection_name' => DB::raw(
                         'CONCAT(\'' . $newCollectionName . '\', SUBSTRING(collection_name, ' . (strlen($subjectPath) + 1) . '))'
                     ),
+                ]);
+
+            resolve_static(MediaFolder::class, 'query')
+                ->join('media_folder_model AS mfm', 'media_folders.id', '=', 'mfm.media_folder_id')
+                ->where('mfm.model_type', morph_alias($this->modelType))
+                ->where('mfm.model_id', $this->modelId)
+                ->where('media_folders.parent_collection', $subjectPath)
+                ->update([
+                    'parent_collection' => $newCollectionName,
                 ]);
         }
 

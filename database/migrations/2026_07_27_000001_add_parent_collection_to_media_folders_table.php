@@ -9,8 +9,9 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('media_folders', function (Blueprint $table): void {
-            $table->string('collection_name')
+            $table->string('parent_collection')
                 ->nullable()
+                ->index()
                 ->after('parent_id');
         });
     }
@@ -18,7 +19,7 @@ return new class() extends Migration
     public function down(): void
     {
         Schema::table('media_folders', function (Blueprint $table): void {
-            $table->dropColumn('collection_name');
+            $table->dropColumn('parent_collection');
         });
     }
 };

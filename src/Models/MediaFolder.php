@@ -2,11 +2,13 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Models\Pivots\MediaFolderModel;
 use FluxErp\Traits\Model\CascadeSoftDeletes;
 use FluxErp\Traits\Model\HasParentChildRelations;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
@@ -19,7 +21,7 @@ class MediaFolder extends FluxModel implements HasMedia
     {
         static::saving(function (MediaFolder $model): void {
             if ($model->parent_id) {
-                $model->collection_name = null;
+                $model->parent_collection = null;
             }
         });
 
@@ -37,7 +39,7 @@ class MediaFolder extends FluxModel implements HasMedia
         });
 
         static::updating(function (MediaFolder $model): void {
-            if ($model->isDirty(['parent_id', 'collection_name', 'name'])) {
+            if ($model->isDirty(['parent_id', 'parent_collection', 'name'])) {
                 $model->slug = $model->buildSlug();
             }
         });
@@ -69,11 +71,16 @@ class MediaFolder extends FluxModel implements HasMedia
         ];
     }
 
+    public function mediaFolderModel(): HasOne
+    {
+        return $this->hasOne(MediaFolderModel::class, 'media_folder_id');
+    }
+
     public function buildSlug(): string
     {
         return implode('.',
             array_filter([
-                $this->parent?->slug ?? $this->collection_name,
+                $this->parent?->slug ?? $this->parent_collection,
                 Str::of($this->name)
                     ->replace('.', '_')
                     ->snake()
