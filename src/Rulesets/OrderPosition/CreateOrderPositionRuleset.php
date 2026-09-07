@@ -227,6 +227,8 @@ class CreateOrderPositionRuleset extends FluxRuleset
             ],
             'is_free_text' => 'boolean',
             'is_bundle_position' => 'exclude_without:parent_id|boolean',
+
+            'recalculate_order' => 'boolean',
         ];
     }
 }

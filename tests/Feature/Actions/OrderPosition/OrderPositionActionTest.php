@@ -526,3 +526,74 @@ test('fill order positions still simulates when asked to', function (): void {
 
     expect(OrderPosition::query()->where('order_id', $this->order->getKey())->count())->toBe(0);
 });
+
+test('create order position recalculates the order when asked to', function (): void {
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'name' => 'Recalculated Position',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 2,
+        'unit_price' => 50.00,
+        'recalculate_order' => true,
+    ])->validate()->execute();
+
+    $order = $this->order->refresh();
+
+    expect($order->total_net_price)
+        ->toEqual(bcround(bcadd($position->total_net_price, $order->shipping_costs_net_price ?: 0, 9), 2));
+});
+
+test('create order position leaves the order totals alone by default', function (): void {
+    $totalNetPrice = $this->order->refresh()->total_net_price;
+
+    CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'name' => 'Untouched Position',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 2,
+        'unit_price' => 50.00,
+    ])->validate()->execute();
+
+    expect($this->order->refresh()->total_net_price)->toEqual($totalNetPrice);
+});
+
+test('update order position recalculates the order when asked to', function (): void {
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'name' => 'Recalculated Position',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 1,
+        'unit_price' => 50.00,
+    ])->validate()->execute();
+
+    $updated = UpdateOrderPosition::make([
+        'id' => $position->getKey(),
+        'amount' => 3,
+        'recalculate_order' => true,
+    ])->validate()->execute();
+
+    $order = $this->order->refresh();
+
+    expect($order->total_net_price)
+        ->toEqual(bcround(bcadd($updated->total_net_price, $order->shipping_costs_net_price ?: 0, 9), 2));
+});
+
+test('delete order position recalculates the order when asked to', function (): void {
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'name' => 'Deleted Position',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 2,
+        'unit_price' => 50.00,
+        'recalculate_order' => true,
+    ])->validate()->execute();
+
+    DeleteOrderPosition::make([
+        'id' => $position->getKey(),
+        'recalculate_order' => true,
+    ])->validate()->execute();
+
+    $order = $this->order->refresh();
+
+    expect($order->total_net_price)->toEqual(bcround(bcadd(0, $order->shipping_costs_net_price ?: 0, 9), 2));
+});
