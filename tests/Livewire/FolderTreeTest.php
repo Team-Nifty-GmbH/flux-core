@@ -30,7 +30,7 @@ test('can create a folder below a collection', function (): void {
     Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
         ->call('saveFolder', [
             'parent_id' => Str::uuid()->toString(),
-            'collection_name' => 'attachments',
+            'parent_collection' => 'attachments',
             'name' => 'New folder',
             'is_new' => true,
             'children' => [],
@@ -40,7 +40,7 @@ test('can create a folder below a collection', function (): void {
         ->where('name', 'New folder')
         ->firstOrFail();
 
-    expect($folder->collection_name)->toBe('attachments')
+    expect($folder->parent_collection)->toBe('attachments')
         ->and($folder->slug)->toBe('attachments.new_folder|' . $folder->getKey());
 
     $collectionNode = collect($this->contact->refresh()->getMediaAsTree())
@@ -52,7 +52,7 @@ test('can create a folder below a collection', function (): void {
 test('can rename a folder below a collection', function (): void {
     $folder = MediaFolder::create([
         'name' => 'New folder',
-        'collection_name' => 'attachments',
+        'parent_collection' => 'attachments',
         'model_type' => morph_alias(Contact::class),
         'model_id' => $this->contact->getKey(),
     ]);
@@ -68,7 +68,7 @@ test('can rename a folder below a collection', function (): void {
         ]);
 
     expect($folder->refresh()->name)->toBe('Renamed folder')
-        ->and($folder->collection_name)->toBe('attachments')
+        ->and($folder->parent_collection)->toBe('attachments')
         ->and($folder->slug)->toBe('attachments.renamed_folder|' . $folder->getKey());
 });
 
