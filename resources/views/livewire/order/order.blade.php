@@ -48,30 +48,30 @@
                         select="label:name|value:id"
                         unfiltered
                         :request="[
-                        'url' => route('search', \FluxErp\Models\OrderType::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'searchFields' => [
-                                'name',
-                            ],
-                            'select' => [
-                                'name',
-                                'id',
-                            ],
-                            'where' => [
-                                [
-                                    'is_active',
-                                    '=',
-                                    true,
+                            'url' => route('search', \FluxErp\Models\OrderType::class),
+                            'method' => 'POST',
+                            'params' => [
+                                'searchFields' => [
+                                    'name',
                                 ],
-                                [
-                                    'is_hidden',
-                                    '=',
-                                    false,
+                                'select' => [
+                                    'name',
+                                    'id',
+                                ],
+                                'where' => [
+                                    [
+                                        'is_active',
+                                        '=',
+                                        true,
+                                    ],
+                                    [
+                                        'is_hidden',
+                                        '=',
+                                        false,
+                                    ],
                                 ],
                             ],
-                        ],
-                    ]"
+                        ]"
                     />
                     <div class="pt-4">
                         <x-select.styled
@@ -85,27 +85,27 @@
                             select="label:label|value:contact_id"
                             unfiltered
                             :request="[
-                            'url' => route('search', \FluxErp\Models\Address::class),
-                            'method' => 'POST',
-                            'params' => [
-                                'option-value' => 'contact_id',
-                                'fields' => [
-                                    'name',
-                                    'contact_id',
-                                    'firstname',
-                                    'lastname',
-                                    'company',
+                                'url' => route('search', \FluxErp\Models\Address::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'option-value' => 'contact_id',
+                                    'fields' => [
+                                        'name',
+                                        'contact_id',
+                                        'firstname',
+                                        'lastname',
+                                        'company',
+                                    ],
+                                    'where' => [
+                                        [
+                                            'is_main_address',
+                                            '=',
+                                            true,
+                                        ]
+                                    ],
+                                    'with' => 'contact.media',
                                 ],
-                                'where' => [
-                                    [
-                                        'is_main_address',
-                                        '=',
-                                        true,
-                                    ]
-                                ],
-                                'with' => 'contact.media',
-                            ],
-                        ]"
+                            ]"
                         />
                         <div id="invoice-address-id">
                             <x-select.styled
@@ -116,19 +116,19 @@
                                 select="label:label|value:id"
                                 unfiltered
                                 :request="[
-                                'url' => route('search', \FluxErp\Models\Address::class),
-                                'method' => 'POST',
-                                'params' => [
-                                    'with' => 'contact.media',
-                                    'where' => [
-                                        [
-                                            'contact_id',
-                                            '=',
-                                            $order->contact_id,
+                                    'url' => route('search', \FluxErp\Models\Address::class),
+                                    'method' => 'POST',
+                                    'params' => [
+                                        'with' => 'contact.media',
+                                        'where' => [
+                                            [
+                                                'contact_id',
+                                                '=',
+                                                $order->contact_id,
+                                            ],
                                         ],
                                     ],
-                                ],
-                            ]"
+                                ]"
                             />
                         </div>
                         <div id="delivery-address-id">
@@ -140,19 +140,19 @@
                                 select="label:label|value:id"
                                 unfiltered
                                 :request="[
-                                'url' => route('search', \FluxErp\Models\Address::class),
-                                'method' => 'POST',
-                                'params' => [
-                                    'with' => 'contact.media',
-                                    'where' => [
-                                        [
-                                            'contact_id',
-                                            '=',
-                                            $order->contact_id,
+                                    'url' => route('search', \FluxErp\Models\Address::class),
+                                    'method' => 'POST',
+                                    'params' => [
+                                        'with' => 'contact.media',
+                                        'where' => [
+                                            [
+                                                'contact_id',
+                                                '=',
+                                                $order->contact_id,
+                                            ],
                                         ],
                                     ],
-                                ],
-                            ]"
+                                ]"
                             />
                         </div>
                     </div>
@@ -472,27 +472,27 @@
                                         select="label:label|value:contact_id"
                                         unfiltered
                                         :request="[
-                                    'url' => route('search', \FluxErp\Models\Address::class),
-                                    'method' => 'POST',
-                                    'params' => [
-                                        'option-value' => 'contact_id',
-                                        'fields' => [
-                                            'name',
-                                            'contact_id',
-                                            'firstname',
-                                            'lastname',
-                                            'company',
-                                        ],
-                                        'where' => [
-                                            [
-                                                'is_main_address',
-                                                '=',
-                                                true,
-                                            ]
-                                        ],
-                                        'with' => 'contact.media',
-                                    ],
-                                ]"
+                                            'url' => route('search', \FluxErp\Models\Address::class),
+                                            'method' => 'POST',
+                                            'params' => [
+                                                'option-value' => 'contact_id',
+                                                'fields' => [
+                                                    'name',
+                                                    'contact_id',
+                                                    'firstname',
+                                                    'lastname',
+                                                    'company',
+                                                ],
+                                                'where' => [
+                                                    [
+                                                        'is_main_address',
+                                                        '=',
+                                                        true,
+                                                    ]
+                                                ],
+                                                'with' => 'contact.media',
+                                            ],
+                                        ]"
                                     />
                                 </div>
                             </x-card>
@@ -536,19 +536,19 @@
                                         select="label:label|value:id"
                                         unfiltered
                                         :request="[
-                                    'url' => route('search', \FluxErp\Models\Address::class),
-                                    'method' => 'POST',
-                                    'params' => [
-                                        'with' => 'contact.media',
-                                        'where' => [
-                                            [
-                                                'contact_id',
-                                                '=',
-                                                $order->contact_id,
+                                            'url' => route('search', \FluxErp\Models\Address::class),
+                                            'method' => 'POST',
+                                            'params' => [
+                                                'with' => 'contact.media',
+                                                'where' => [
+                                                    [
+                                                        'contact_id',
+                                                        '=',
+                                                        $order->contact_id,
+                                                    ],
+                                                ],
                                             ],
-                                        ],
-                                    ],
-                                ]"
+                                        ]"
                                     />
                                 </div>
                                 <div class="text-sm">
@@ -631,19 +631,19 @@
                                             select="label:label|value:id"
                                             unfiltered
                                             :request="[
-                                        'url' => route('search', \FluxErp\Models\Address::class),
-                                        'method' => 'POST',
-                                        'params' => [
-                                            'with' => 'contact.media',
-                                            'where' => [
-                                                [
-                                                    'contact_id',
-                                                    '=',
-                                                    $order->contact_id,
+                                                'url' => route('search', \FluxErp\Models\Address::class),
+                                                'method' => 'POST',
+                                                'params' => [
+                                                    'with' => 'contact.media',
+                                                    'where' => [
+                                                        [
+                                                            'contact_id',
+                                                            '=',
+                                                            $order->contact_id,
+                                                        ],
+                                                    ],
                                                 ],
-                                            ],
-                                        ],
-                                    ]"
+                                            ]"
                                         />
                                     </div>
                                     <div
@@ -734,12 +734,12 @@
                                         select="label:label|value:id"
                                         unfiltered
                                         :request="[
-                                    'url' => route('search', \FluxErp\Models\User::class),
-                                    'method' => 'POST',
-                                    'params' => [
-                                        'with' => 'media',
-                                    ],
-                                ]"
+                                            'url' => route('search', \FluxErp\Models\User::class),
+                                            'method' => 'POST',
+                                            'params' => [
+                                                'with' => 'media',
+                                            ],
+                                        ]"
                                     />
                                     <x-select.styled
                                         :label="__('Responsible User')"
@@ -748,12 +748,12 @@
                                         select="label:label|value:id"
                                         unfiltered
                                         :request="[
-                                    'url' => route('search', \FluxErp\Models\User::class),
-                                    'method' => 'POST',
-                                    'params' => [
-                                        'with' => 'media',
-                                    ],
-                                ]"
+                                            'url' => route('search', \FluxErp\Models\User::class),
+                                            'method' => 'POST',
+                                            'params' => [
+                                                'with' => 'media',
+                                            ],
+                                        ]"
                                     />
                                     <x-select.styled
                                         :label="__('Assigned')"
@@ -763,12 +763,12 @@
                                         select="label:label|value:id"
                                         unfiltered
                                         :request="[
-                                    'url' => route('search', \FluxErp\Models\User::class),
-                                    'method' => 'POST',
-                                    'params' => [
-                                        'with' => 'media',
-                                    ],
-                                ]"
+                                            'url' => route('search', \FluxErp\Models\User::class),
+                                            'method' => 'POST',
+                                            'params' => [
+                                                'with' => 'media',
+                                            ],
+                                        ]"
                                     />
                                     <x-select.styled
                                         :label="__('Price list')"
@@ -811,27 +811,27 @@
                                         select="label:label|value:id"
                                         unfiltered
                                         :request="[
-                                    'url' => route('search', \FluxErp\Models\Lead::class),
-                                    'method' => 'POST',
-                                    'params' => [
-                                        'searchFields' => [
-                                            'name',
-                                        ],
-                                        'select' => [
-                                            'name',
-                                            'id',
-                                        ],
-                                        'whereIn' => [
-                                            [
-                                                'address_id',
-                                                resolve_static(\FluxErp\Models\Address::class, 'query')
-                                                    ->where('contact_id', $order->contact_id)
-                                                    ->pluck('id')
-                                                    ->toArray(),
+                                            'url' => route('search', \FluxErp\Models\Lead::class),
+                                            'method' => 'POST',
+                                            'params' => [
+                                                'searchFields' => [
+                                                    'name',
+                                                ],
+                                                'select' => [
+                                                    'name',
+                                                    'id',
+                                                ],
+                                                'whereIn' => [
+                                                    [
+                                                        'address_id',
+                                                        resolve_static(\FluxErp\Models\Address::class, 'query')
+                                                            ->where('contact_id', $order->contact_id)
+                                                            ->pluck('id')
+                                                            ->toArray(),
+                                                    ],
+                                                ],
                                             ],
-                                        ],
-                                    ],
-                                ]"
+                                        ]"
                                     >
                                         <x-slot:label>
                                             <x-link
