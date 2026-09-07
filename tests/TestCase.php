@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Foundation\Testing\WithCachedConfig;
 use Illuminate\Foundation\Testing\WithCachedRoutes;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Laragear\TwoFactor\TwoFactorServiceProvider;
 use Laravel\Scout\ScoutServiceProvider;
@@ -30,6 +31,29 @@ abstract class TestCase extends BaseTestCase
     use CreatesApplication, RefreshDatabase, WithCachedConfig, WithCachedRoutes;
 
     protected $loadEnvironmentVariables = true;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // CI dumps the schema after migrating, which captures the settings table
+        // structure but not the create_product_settings migration's row, so ensure
+        // it exists for tests that read or write ProductSettings directly.
+        if (! DB::table('settings')
+            ->where('group', 'product')
+            ->where('name', 'variant_inheritance_enabled')
+            ->exists()
+        ) {
+            DB::table('settings')->insert([
+                'group' => 'product',
+                'name' => 'variant_inheritance_enabled',
+                'locked' => false,
+                'payload' => json_encode(true),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+    }
 
     public function getPackageProviders($app): array
     {

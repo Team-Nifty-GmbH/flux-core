@@ -13,6 +13,7 @@ use FluxErp\Models\Tag;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 use FluxErp\Rulesets\Product\CreateProductRuleset;
+use FluxErp\Settings\ProductSettings;
 use Illuminate\Support\Arr;
 
 class CreateProduct extends FluxAction
@@ -46,10 +47,10 @@ class CreateProduct extends FluxAction
         $product->save();
 
         $product->productOptions()->attach($productOptions);
-        $product->productProperties()->attach($productProperties);
+        $product->ownProductProperties()->attach($productProperties);
 
         if ($suppliers) {
-            $product->suppliers()->attach($suppliers);
+            $product->ownSuppliers()->attach($suppliers);
         }
 
         if ($tags) {
@@ -99,7 +100,13 @@ class CreateProduct extends FluxAction
             $this->data['bundle_type_enum'] = null;
         }
 
-        if (! data_get($this->data, 'prices') && data_get($this->data, 'parent_id')) {
+        $inheritanceEnabled = app(ProductSettings::class)->variant_inheritance_enabled;
+
+        if (
+            ! $inheritanceEnabled
+            && ! data_get($this->data, 'prices')
+            && data_get($this->data, 'parent_id')
+        ) {
             $this->data['prices'] = resolve_static(Price::class, 'query')
                 ->where('product_id', data_get($this->data, 'parent_id'))
                 ->get()
@@ -120,11 +127,11 @@ class CreateProduct extends FluxAction
         }
 
         if (! data_get($this->data, 'vat_rate_id')) {
-            if (data_get($this->data, 'parent_id')) {
+            if (data_get($this->data, 'parent_id') && ! $inheritanceEnabled) {
                 $this->data['vat_rate_id'] = resolve_static(Product::class, 'query')
                     ->whereKey(data_get($this->data, 'parent_id'))
                     ->value('vat_rate_id');
-            } else {
+            } elseif (! data_get($this->data, 'parent_id')) {
                 $this->data['vat_rate_id'] = resolve_static(VatRate::class, 'default')?->id;
             }
         }
