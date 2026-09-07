@@ -50,7 +50,8 @@ class CreateProductRuleset extends FluxRuleset
             'parent_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Product::class]),
+                app(ModelExists::class, ['model' => Product::class])
+                    ->whereNull('parent_id'),
             ],
             'vat_rate_id' => [
                 'required',

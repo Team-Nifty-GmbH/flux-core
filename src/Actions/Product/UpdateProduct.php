@@ -15,6 +15,8 @@ use FluxErp\Models\Product;
 use FluxErp\Models\Tag;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\Product\UpdateProductRuleset;
+use FluxErp\Support\VariantInheritance\PivotInheritanceSync;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
@@ -42,7 +44,7 @@ class UpdateProduct extends DispatchableFluxAction implements SupportsBulkExecut
             ? null
             : Arr::mapWithKeys(
                 $properties,
-                fn ($item, $key) => [$item['id'] => ['value' => $item['value']]]
+                fn (array $item) => [$item['id'] => ['value' => $item['value']]]
             );
         $bundleProducts = Arr::pull($this->data, 'bundle_products', false);
         $prices = Arr::pull($this->data, 'prices', false);
@@ -61,6 +63,12 @@ class UpdateProduct extends DispatchableFluxAction implements SupportsBulkExecut
 
         $product->save();
 
+        // A variant editing its own relation entry must take ownership (is_inherited = false),
+        // otherwise the edit would either get overwritten by the next parent propagation or
+        // sit alongside a duplicate inherited copy. Parents never own an inherited copy of
+        // their own, so this is a no-op for them.
+        $takesOwnership = $product->isVariant() && $product->inheritanceEnabled();
+
         if (! is_null($tags)) {
             $product->syncTags(resolve_static(Tag::class, 'query')->whereKey($tags)->get());
         }
@@ -70,12 +78,27 @@ class UpdateProduct extends DispatchableFluxAction implements SupportsBulkExecut
         }
 
         if (! is_null($productProperties)) {
-            $product->productProperties()->sync($productProperties);
+            resolve_static(PivotInheritanceSync::class, 'syncOwned', [
+                'relation' => $product->productProperties(),
+                'desired' => $productProperties,
+                'takesOwnership' => $takesOwnership,
+            ]);
         }
 
         if (! is_null($suppliers)) {
-            $product->suppliers()->sync($suppliers);
+            // Key by contact_id instead of passing the raw payload list straight to sync():
+            // sync() keys unkeyed array items by their list index, so it would compare those
+            // indexes against the real contact_ids already attached and detach everything.
+            resolve_static(PivotInheritanceSync::class, 'syncOwned', [
+                'relation' => $product->suppliers(),
+                'desired' => collect($suppliers)
+                    ->mapWithKeys(fn (array $item) => [$item['contact_id'] => Arr::except($item, 'contact_id')])
+                    ->all(),
+                'takesOwnership' => $takesOwnership,
+            ]);
         }
+
+        resolve_static(PivotInheritanceSync::class, 'propagateToChildren', ['parent' => $product]);
 
         if ($tenants) {
             $product->tenants()->sync($tenants);
@@ -84,16 +107,30 @@ class UpdateProduct extends DispatchableFluxAction implements SupportsBulkExecut
         if ($prices) {
             $priceCollection = collect($prices)->keyBy('price_list_id');
             $product->prices
-                ?->each(function ($price) use ($priceCollection): void {
+                ?->each(function ($price) use ($priceCollection, $takesOwnership): void {
                     if ($priceCollection->has($price->price_list_id)) {
-                        $price->update($priceCollection->get($price->price_list_id));
+                        $data = $priceCollection->get($price->price_list_id);
+
+                        if ($takesOwnership) {
+                            $data['is_inherited'] = false;
+                        }
+
+                        $price->update($data);
                         $priceCollection->forget($price->price_list_id);
-                    } else {
+                    } elseif (! $takesOwnership || ! $price->is_inherited) {
+                        // Inherited copies absent from the payload are managed by parent
+                        // propagation and the reset actions, not by payload omission.
                         $price->delete();
                     }
                 });
 
-            $priceCollection->each(fn ($item) => $product->prices()->create($item));
+            $priceCollection->each(function ($item) use ($product, $takesOwnership): void {
+                if ($takesOwnership) {
+                    $item['is_inherited'] = false;
+                }
+
+                $product->prices()->create($item);
+            });
         }
 
         if ($product->is_bundle && $bundleProducts) {
@@ -153,6 +190,19 @@ class UpdateProduct extends DispatchableFluxAction implements SupportsBulkExecut
     {
         parent::validateData();
 
+        if (array_key_exists('is_variant_parent', $this->data)
+            && ! $this->getData('is_variant_parent')
+            && resolve_static(Product::class, 'query')
+                ->whereKey($this->getData('id'))
+                ->whereHas('children', fn (Builder $query) => $query->where('is_active', true))
+                ->exists()
+        ) {
+            throw ValidationException::withMessages([
+                'is_variant_parent' => ['Cannot demote to standalone: active variants still exist.'],
+            ])
+                ->errorBag('updateProduct');
+        }
+
         if ($this->data['parent_id'] ?? false) {
             $product = resolve_static(Product::class, 'query')
                 ->whereKey($this->data['id'])
@@ -162,6 +212,15 @@ class UpdateProduct extends DispatchableFluxAction implements SupportsBulkExecut
                 throw ValidationException::withMessages([
                     'parent_id' => ['Cycle detected'],
                 ])->errorBag('updateProduct');
+            }
+
+            if ($product?->children()->exists()) {
+                throw ValidationException::withMessages([
+                    'parent_id' => [
+                        'A product with existing variants cannot itself become a variant.',
+                    ],
+                ])
+                    ->errorBag('updateProduct');
             }
         }
     }

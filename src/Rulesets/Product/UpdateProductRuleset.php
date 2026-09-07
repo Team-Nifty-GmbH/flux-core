@@ -67,7 +67,8 @@ class UpdateProductRuleset extends FluxRuleset
             'parent_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Product::class, 'subject' => Product::class]),
+                app(ModelExists::class, ['model' => Product::class, 'subject' => Product::class])
+                    ->whereNull('parent_id'),
             ],
             'vat_rate_id' => [
                 'sometimes',
@@ -139,6 +140,7 @@ class UpdateProductRuleset extends FluxRuleset
             ],
             'is_service' => 'boolean',
             'is_shipping_free' => 'boolean',
+            'is_variant_parent' => 'boolean',
             'has_serial_numbers' => 'boolean',
             'is_nos' => 'boolean',
             'is_active_export_to_web_shop' => 'boolean',
