@@ -92,3 +92,23 @@ test('leaves a clean message untouched', function (): void {
         ->and($message->subject)->toBe('Angebot für Sie')
         ->and($message->to[0]->personal)->toBe('Empfänger');
 });
+
+test('keeps a message without a from header readable', function (): void {
+    $message = Mockery::mock(Webklex\PHPIMAP\Message::class);
+    $message->shouldReceive('parseBody')->andReturnSelf();
+    $message->shouldReceive('getAttachments')->andReturn(new Webklex\PHPIMAP\Support\AttachmentCollection());
+    $message->shouldReceive('getMessageId->toString')->andReturn('<draft@example.com>');
+    $message->shouldReceive('getUid')->andReturn(1);
+    $message->shouldReceive('getSubject->toString')->andReturn('Entwurf');
+    $message->shouldReceive('getFrom')->andReturn([]);
+    $message->shouldReceive('getTo->toArray')->andReturn([]);
+    $message->shouldReceive('getCc->toArray')->andReturn([]);
+    $message->shouldReceive('getBcc->toArray')->andReturn([]);
+    $message->shouldReceive('getTextBody')->andReturn('Entwurfstext');
+    $message->shouldReceive('getHtmlBody')->andReturn('<p>Entwurfstext</p>');
+    $message->shouldReceive('getDate->toDate')->andReturn(new DateTime('2026-01-30 12:00:00'));
+    $message->shouldReceive('hasFlag')->andReturn(false);
+    $message->shouldReceive('getFlags->toArray')->andReturn([]);
+
+    expect(ImapMessage::fromImapMessage($message)->from)->toBe('');
+});
