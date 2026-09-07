@@ -407,21 +407,11 @@ class ImapMessageBuilder
         } while ($page !== $messages->lastPage());
     }
 
-    /**
-     * Read one message off the server, or report it and move on.
-     *
-     * A single malformed message, a draft without a from header among them,
-     * used to end the run for the whole account. The folders are walked in
-     * order, so a broken message in the first folder kept every later folder,
-     * the inbox included, from ever being read.
-     */
     protected function makeMessage(Message $message): ?ImapMessage
     {
         try {
             return ImapMessage::fromImapMessage($message, $this->fetchBody);
         } catch (Throwable $exception) {
-            // A lost connection says nothing about this message and is handled
-            // by the retry around the whole fetch.
             if ($this->isLostConnection($exception)) {
                 throw $exception;
             }
