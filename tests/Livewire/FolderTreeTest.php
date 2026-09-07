@@ -53,8 +53,6 @@ test('can rename a folder below a collection', function (): void {
     $folder = MediaFolder::create([
         'name' => 'New folder',
         'parent_collection' => 'attachments',
-        'model_type' => morph_alias(Contact::class),
-        'model_id' => $this->contact->getKey(),
     ]);
     $this->contact->mediaFolders()->attach($folder->getKey());
 
@@ -62,6 +60,7 @@ test('can rename a folder below a collection', function (): void {
         ->call('saveFolder', [
             'id' => $folder->getKey(),
             'parent_id' => Str::uuid()->toString(),
+            'parent_collection' => 'attachments',
             'name' => 'Renamed folder',
             'slug' => $folder->slug,
             'children' => [],
