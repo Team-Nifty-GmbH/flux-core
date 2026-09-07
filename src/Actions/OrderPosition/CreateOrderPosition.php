@@ -145,7 +145,9 @@ class CreateOrderPosition extends FluxAction
         $orderPosition->attachTags($tags);
 
         if ($recalculateOrder) {
-            $orderPosition->order->calculatePrices()->save();
+            $orderPosition->order
+                ->calculatePrices()
+                ->save();
         }
 
         return $orderPosition->withoutRelations()->fresh();

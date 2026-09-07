@@ -28,7 +28,9 @@ class DeleteOrderPosition extends FluxAction
         $deleted = $orderPosition->delete();
 
         if ($this->getData('recalculate_order', false)) {
-            $orderPosition->order->calculatePrices()->save();
+            $orderPosition->order
+                ->calculatePrices()
+                ->save();
         }
 
         return $deleted;
