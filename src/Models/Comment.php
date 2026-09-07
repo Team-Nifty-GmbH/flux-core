@@ -70,14 +70,6 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable, MentionsCon
         return $this->model_type . '.' . $this->model_id;
     }
 
-    public function broadcastWith(): array
-    {
-        $data = $this->toArray();
-        $data['user'] = $this->user;
-
-        return ['model' => $data];
-    }
-
     /**
      * @return array<int, string>
      */

@@ -72,7 +72,7 @@ abstract class Comments extends Component
         try {
             $this->commentForm->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->commentForm);
 
             return false;
         }
@@ -223,7 +223,7 @@ abstract class Comments extends Component
                 $this->commentForm->id
             );
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->commentForm);
 
             return null;
         }
@@ -249,7 +249,7 @@ abstract class Comments extends Component
         try {
             $this->commentForm->save();
         } catch (ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->commentForm);
         }
     }
 
@@ -265,7 +265,7 @@ abstract class Comments extends Component
         try {
             $this->commentForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->commentForm);
 
             return null;
         }

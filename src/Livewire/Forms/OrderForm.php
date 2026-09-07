@@ -92,6 +92,8 @@ class OrderForm extends FluxForm
 
     public bool $is_locked = false;
 
+    public bool $is_self_billed = false;
+
     #[Locked]
     public bool $isPurchase = false;
 

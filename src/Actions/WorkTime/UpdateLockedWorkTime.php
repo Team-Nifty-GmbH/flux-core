@@ -2,14 +2,15 @@
 
 namespace FluxErp\Actions\WorkTime;
 
-use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\DispatchableFluxAction;
+use FluxErp\Contracts\SupportsBulkExecution;
 use FluxErp\Models\WorkTime;
 use FluxErp\Rulesets\WorkTime\UpdateLockedWorkTimeRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 
-class UpdateLockedWorkTime extends FluxAction
+class UpdateLockedWorkTime extends DispatchableFluxAction implements SupportsBulkExecution
 {
     public static function models(): array
     {

@@ -167,6 +167,16 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             ->using(ProductProductProperty::class);
     }
 
+    public function purchaseUnit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class, 'purchase_unit_id');
+    }
+
+    public function referenceUnit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class, 'reference_unit_id');
+    }
+
     public function stockPostings(): HasMany
     {
         return $this->hasMany(StockPosting::class);
@@ -175,7 +185,8 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     public function suppliers(): BelongsToMany
     {
         return $this->belongsToMany(Contact::class, 'product_supplier')
-            ->using(ProductSupplier::class);
+            ->using(ProductSupplier::class)
+            ->withPivot(resolve_static(ProductSupplier::class, 'pivotColumns'));
     }
 
     public function tenants(): BelongsToMany
@@ -241,6 +252,21 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     public function getUrl(): ?string
     {
         return $this->detailRoute();
+    }
+
+    public function packaging(): ?array
+    {
+        if (! $this->purchase_unit_id || ! $this->purchase_steps) {
+            return null;
+        }
+
+        $this->loadMissing('purchaseUnit:id,name');
+
+        return [
+            'unit_id' => $this->purchase_unit_id,
+            'name' => $this->purchaseUnit?->name,
+            'factor' => bcadd($this->purchase_steps, 0),
+        ];
     }
 
     public function purchasePrice(float|int|null $amount = 1): ?Price

@@ -69,12 +69,28 @@ class ProcessSubscriptionOrder implements Repeatable
             )
             : $order->system_delivery_date;
 
+        $positionPeriods = $this->calculatePositionPeriods($order, $schedule);
+
         try {
             $newOrder = ReplicateOrder::make($order)
                 ->validate()
                 ->execute();
 
+            foreach ($newOrder->orderPositions as $orderPosition) {
+                $period = data_get($positionPeriods, $orderPosition->created_from_id);
+
+                if (! $period) {
+                    continue;
+                }
+
+                $orderPosition->update([
+                    'system_delivery_date' => data_get($period, 'start'),
+                    'system_delivery_date_end' => data_get($period, 'end'),
+                ]);
+            }
+
             if ($order->orderType->order_type_enum === OrderTypeEnum::PurchaseSubscription
+                && $order->is_self_billed
                 && ! $newOrder->invoice_number
             ) {
                 $newOrder->invoice_number = $order->order_number
@@ -154,6 +170,37 @@ class ProcessSubscriptionOrder implements Repeatable
             'cancellationNoticeValue' => null,
             'cancellationNoticeUnit' => null,
         ];
+    }
+
+    protected function calculatePositionPeriods(Order $order, ?Schedule $schedule): array
+    {
+        $periods = [];
+
+        $orderPositions = $order->orderPositions()
+            ->whereNotNull('system_delivery_date')
+            ->get(['id', 'system_delivery_date']);
+
+        foreach ($orderPositions as $orderPosition) {
+            $latestChild = $orderPosition->createdOrderPositions()
+                ->orderBy('system_delivery_date_end', 'DESC')
+                ->first(['id', 'system_delivery_date_end']);
+
+            $start = $latestChild?->system_delivery_date_end?->addDay()
+                ?? $orderPosition->system_delivery_date;
+
+            $periods[$orderPosition->getKey()] = [
+                'start' => $start,
+                'end' => $schedule
+                    ? resolve_static(
+                        Schedule::class,
+                        'performancePeriodEnd',
+                        [$start, $schedule->cron, $schedule->cron_expression]
+                    )
+                    : $start,
+            ];
+        }
+
+        return $periods;
     }
 
     protected function processPrintAndSend(Order $order, array $printLayouts, ?int $emailTemplateId = null): array

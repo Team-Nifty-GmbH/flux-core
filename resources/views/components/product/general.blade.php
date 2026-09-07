@@ -1,3 +1,6 @@
+@php
+    $units = resolve_static(\FluxErp\Models\Unit::class, 'query')->get(['id', 'name'])->toArray();
+@endphp
 <div class="space-y-5" x-data wire:key="products-general">
     <x-card class="space-y-2.5" :header="__('General')">
         @section('general')
@@ -76,7 +79,7 @@
                 label="{{ __('Unit') }}"
                 wire:model.number="product.unit_id"
                 select="label:name|value:id"
-                :options="resolve_static(\FluxErp\Models\Unit::class, 'query')->get(['id', 'name'])->toArray()"
+                :options="$units"
             />
             <div
                 class="grid grid-cols-1 gap-4 sm:grid-cols-4"
@@ -156,8 +159,61 @@
                         </div>
                     </x-slot:label>
                 </x-number>
+                <x-select.styled
+                    label="{{ __('Reference Unit') }}"
+                    wire:model.number="product.reference_unit_id"
+                    select="label:name|value:id"
+                    :options="$units"
+                />
             </div>
             @show
+            </x-card>
+            <x-card class="space-y-2.5" :header="__('Purchase')">
+                @section('purchase')
+                <div x-bind:class="{ 'pointer-events-none': !isEditing }">
+                    <x-select.styled
+                        label="{{ __('Purchase Unit') }}"
+                        wire:model.number="product.purchase_unit_id"
+                        select="label:name|value:id"
+                        :options="$units"
+                    />
+                </div>
+                <div
+                    class="grid grid-cols-1 gap-4 sm:grid-cols-2"
+                    x-bind:class="{ 'pointer-events-none': !isEditing }"
+                >
+                    <x-number
+                        x-bind:readonly="!isEditing"
+                        wire:model.number="product.min_purchase"
+                    >
+                        <x-slot:label>
+                            <div class="flex items-center justify-between">
+                                <div>{{ __('Min Purchase') }}</div>
+                                <div>
+                                    <x-tooltip
+                                        :text="__('Smallest amount that can be purchased from this supplier.')"
+                                    />
+                                </div>
+                            </div>
+                        </x-slot:label>
+                    </x-number>
+                    <x-number
+                        x-bind:readonly="!isEditing"
+                        wire:model.number="product.purchase_steps"
+                    >
+                        <x-slot:label>
+                            <div class="flex items-center justify-between">
+                                <div>{{ __('Purchase Steps') }}</div>
+                                <div>
+                                    <x-tooltip
+                                        :text="__('Amount the supplier sells in. An order position entered in the purchase unit is multiplied by it.')"
+                                    />
+                                </div>
+                            </div>
+                        </x-slot:label>
+                    </x-number>
+                </div>
+                @show
             </x-card>
             <x-card class="flex flex-col gap-4" :header="__('Assignment')">
                 <x-select.styled
@@ -348,9 +404,9 @@
                     >
                         <div class="col-span-1 space-y-2">
                             <x-card>
-                                <x-slot:title>
+                                <x-slot:header>
                                     <span x-text="group"></span>
-                                </x-slot:title>
+                                </x-slot:header>
                                 <template
                                     x-for="
                                         (displayedProperties, propertyType) in
@@ -439,8 +495,42 @@
                         <x-slot:actions>
                             <x-input
                                 x-bind:disabled="!isEditing"
+                                x-model="supplier.supplier_product_number"
+                                :label="__('Supplier product number')"
+                            />
+                            <x-input
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.supplier_product_name"
+                                :label="__('Supplier product name')"
+                            />
+                            <x-input
+                                x-bind:disabled="!isEditing"
                                 x-model="supplier.manufacturer_product_number"
                                 :label="__('Manufacturer product number')"
+                            />
+                            <x-number
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.packaging_amount"
+                                :label="__('Amount per Packaging')"
+                                step="0.01"
+                            />
+                            <div
+                                x-bind:class="{
+                                    'pointer-events-none': !isEditing,
+                                }"
+                            >
+                                <x-select.styled
+                                    x-model.number="supplier.packaging_unit_id"
+                                    :label="__('Packaging Unit')"
+                                    select="label:name|value:id"
+                                    :options="$units"
+                                />
+                            </div>
+                            <x-number
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.items_per_packaging"
+                                :label="__('Items per Packaging')"
+                                step="1"
                             />
                             <x-number
                                 x-bind:disabled="!isEditing"
@@ -448,6 +538,12 @@
                                 :label="__('Purchase Price')"
                                 step="0.01"
                             />
+                            <x-input
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.note"
+                                :label="__('Note')"
+                            />
+                            @stack('product-supplier-fields')
                             <div class="mt-6">
                                 <x-button
                                     color="red"

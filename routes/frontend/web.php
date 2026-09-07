@@ -130,6 +130,7 @@ use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Livewire\Ticket\Ticket;
 use FluxErp\Models\Address;
 use FluxErp\Support\MediaLibrary\ContentDisposition;
+use FluxErp\Support\MediaLibrary\StreamedFile;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -430,7 +431,8 @@ Route::middleware('web')
                     );
                 }
 
-                return $disk->response(
+                return StreamedFile::response(
+                    $disk,
                     $path,
                     $media->file_name,
                     ['Content-Disposition' => $disposition],

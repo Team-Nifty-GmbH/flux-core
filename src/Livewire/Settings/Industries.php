@@ -66,7 +66,7 @@ class Industries extends IndustryList
         try {
             $this->industryForm->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->industryForm);
 
             return false;
         }
@@ -90,7 +90,7 @@ class Industries extends IndustryList
         try {
             $this->industryForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->industryForm);
 
             return false;
         }
@@ -111,7 +111,7 @@ class Industries extends IndustryList
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->industryForm);
         }
     }
 

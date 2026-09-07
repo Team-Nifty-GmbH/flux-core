@@ -12,6 +12,7 @@ use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\Tenant;
+use FluxErp\Models\Unit;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rules\ModelExists;
@@ -113,6 +114,13 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => VatRate::class]),
             ],
+            'unit_id' => [
+                'exclude_if:is_free_text,true',
+                'exclude_without:product_id',
+                'integer',
+                'nullable',
+                app(ModelExists::class, ['model' => Unit::class]),
+            ],
             'warehouse_id' => [
                 'exclude_if:is_free_text,true',
                 'exclude_without:product_id',
@@ -164,6 +172,8 @@ class CreateOrderPositionRuleset extends FluxRuleset
             'customer_delivery_date' => 'date|nullable',
             'ean_code' => 'string|max:255|nullable',
             'possible_delivery_date' => 'date|nullable',
+            'system_delivery_date' => 'date|nullable|required_with:system_delivery_date_end',
+            'system_delivery_date_end' => 'date|nullable|after_or_equal:system_delivery_date',
             'unit_gram_weight' => [
                 app(Numeric::class),
                 'nullable',

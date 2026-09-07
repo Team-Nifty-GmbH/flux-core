@@ -200,3 +200,19 @@ test('dashboard widget rendering', function (): void {
         ->assertSeeLivewire('sample-component')
         ->assertDontSeeLivewire('sample-component-2');
 });
+
+test('filtering many permissioned widgets does not scan the permissions per widget', function (): void {
+    foreach (range(1, 25) as $index) {
+        Livewire::component('probe-widget-' . $index, $this->components[0]);
+        FluxErp\Facades\Widget::register('probe-widget-' . $index, 'probe-widget-' . $index);
+        Permission::findOrCreate('widget.probe-widget-' . $index, 'web');
+    }
+
+    $scans = countRegistrarScans(function (): void {
+        Livewire::withoutLazyLoading()
+            ->test(Dashboard::class)
+            ->assertOk();
+    });
+
+    expect($scans)->toBeLessThan(10);
+});

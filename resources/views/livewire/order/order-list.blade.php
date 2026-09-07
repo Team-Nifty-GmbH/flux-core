@@ -1,9 +1,9 @@
 <x-flux::map.fullscreen-container>
     <x-slot:controls>
-        @if ($this->getOrdersWithoutCoordinatesCount() > 0)
+        @if ($this->showMap && $this->ordersWithoutCoordinatesCount > 0)
             <x-badge
                 color="amber"
-                :text="__(':count orders without coordinates', ['count' => $this->getOrdersWithoutCoordinatesCount()])"
+                :text="__(':count orders without coordinates', ['count' => $this->ordersWithoutCoordinatesCount])"
             />
         @endif
     </x-slot:controls>

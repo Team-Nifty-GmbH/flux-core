@@ -22,6 +22,7 @@ class PaymentRunList extends BaseDataTable
         'bank_connection.iban',
         'state',
         'payment_run_type_enum',
+        'total_amount',
     ];
 
     public ?string $includeBefore = 'flux::livewire.accounting.payment-run.include-before';
@@ -56,7 +57,7 @@ class PaymentRunList extends BaseDataTable
         try {
             $this->paymentRunForm->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->paymentRunForm);
 
             return false;
         }
@@ -81,7 +82,7 @@ class PaymentRunList extends BaseDataTable
         try {
             $this->paymentRunForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->paymentRunForm);
 
             return false;
         }
@@ -147,8 +148,7 @@ class PaymentRunList extends BaseDataTable
                     ])
                     ->with(['contactBankConnection:id,iban', 'addressInvoice:id,name'])
                     ->withPivot('amount'),
-            ])
-            ->loadSum('orders AS total_amount', 'order_payment_run.amount');
+            ]);
 
         $this->paymentRunForm->fill($paymentRun);
         $this->paymentRunForm->orders = $paymentRun->orders->toArray();

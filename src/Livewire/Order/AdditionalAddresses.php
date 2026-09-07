@@ -55,7 +55,7 @@ class AdditionalAddresses extends Component
         try {
             $this->form->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->form);
             $this->form->addresses = $current;
 
             return;
@@ -78,7 +78,7 @@ class AdditionalAddresses extends Component
         try {
             $this->form->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->form);
             $this->form->addresses = $current;
 
             return false;

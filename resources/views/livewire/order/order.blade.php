@@ -589,102 +589,112 @@
                             </x-card>
                         @show
                         @section('delivery-address-card')
-                            <x-card>
-                                <x-slot:header>
-                                    <div
-                                        class="flex w-full items-center justify-between gap-4"
-                                    >
-                                        <div>{{ __('Delivery Address') }}</div>
-                                        @if ($deliveryAddressId = data_get($order, 'address_delivery_id', ''))
-                                            <div class="flex gap-1">
-                                                <x-button
-                                                    x-cloak
-                                                    x-show="
-                                                        !$wire.order.is_locked
-                                                    "
-                                                    color="secondary"
-                                                    light
-                                                    icon="arrow-path"
-                                                    wire:click="refreshAddress('delivery')"
-                                                />
-                                                <x-button
-                                                    color="secondary"
-                                                    light
-                                                    wire:navigate
-                                                    icon="eye"
-                                                    :href="route('address.id', $deliveryAddressId)"
-                                                />
+                            @if (! $order->isPurchase)
+                                <x-card>
+                                    <x-slot:header>
+                                        <div
+                                            class="flex w-full items-center justify-between gap-4"
+                                        >
+                                            <div>
+                                                {{ __('Delivery Address') }}
                                             </div>
-                                        @endif
-                                    </div>
-                                </x-slot:header>
-                                <div id="order-delivery-address-id">
-                                    <x-select.styled
-                                        :disabled="$order->is_locked"
-                                        class="pb-4"
-                                        wire:model.live="order.address_delivery_id"
-                                        required
-                                        select="label:label|value:id"
-                                        unfiltered
-                                        :request="[
-                                    'url' => route('search', \FluxErp\Models\Address::class),
-                                    'method' => 'POST',
-                                    'params' => [
-                                        'with' => 'contact.media',
-                                        'where' => [
-                                            [
-                                                'contact_id',
-                                                '=',
-                                                $order->contact_id,
+                                            @if ($deliveryAddressId = data_get($order, 'address_delivery_id', ''))
+                                                <div class="flex gap-1">
+                                                    <x-button
+                                                        x-cloak
+                                                        x-show="
+                                                            !$wire.order
+                                                                .is_locked
+                                                        "
+                                                        color="secondary"
+                                                        light
+                                                        icon="arrow-path"
+                                                        wire:click="refreshAddress('delivery')"
+                                                    />
+                                                    <x-button
+                                                        color="secondary"
+                                                        light
+                                                        wire:navigate
+                                                        icon="eye"
+                                                        :href="route('address.id', $deliveryAddressId)"
+                                                    />
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </x-slot:header>
+                                    <div id="order-delivery-address-id">
+                                        <x-select.styled
+                                            :disabled="$order->is_locked"
+                                            class="pb-4"
+                                            wire:model.live="order.address_delivery_id"
+                                            required
+                                            select="label:label|value:id"
+                                            unfiltered
+                                            :request="[
+                                        'url' => route('search', \FluxErp\Models\Address::class),
+                                        'method' => 'POST',
+                                        'params' => [
+                                            'with' => 'contact.media',
+                                            'where' => [
+                                                [
+                                                    'contact_id',
+                                                    '=',
+                                                    $order->contact_id,
+                                                ],
                                             ],
                                         ],
-                                    ],
-                                ]"
-                                    />
-                                </div>
-                                <div
-                                    class="text-sm"
-                                    x-bind:class="{
-                                        hidden:
-                                            $wire.order.address_delivery_id ===
-                                            $wire.order.address_invoice_id,
-                                    }"
-                                >
-                                    <p
-                                        class="truncate first-line:font-semibold"
-                                        x-html="
-                                            [
-                                                $wire.order.address_delivery
-                                                    ?.company,
+                                    ]"
+                                        />
+                                    </div>
+                                    <div
+                                        class="text-sm"
+                                        x-bind:class="{
+                                            hidden:
+                                                $wire.order
+                                                    .address_delivery_id ===
+                                                $wire.order.address_invoice_id,
+                                        }"
+                                    >
+                                        <p
+                                            class="truncate first-line:font-semibold"
+                                            x-html="
                                                 [
                                                     $wire.order.address_delivery
-                                                        ?.firstname,
+                                                        ?.company,
+                                                    [
+                                                        $wire.order
+                                                            .address_delivery
+                                                            ?.firstname,
+                                                        $wire.order
+                                                            .address_delivery
+                                                            ?.lastname,
+                                                    ]
+                                                        .filter(Boolean)
+                                                        .join(' '),
                                                     $wire.order.address_delivery
-                                                        ?.lastname,
+                                                        ?.addition,
+                                                    $wire.order.address_delivery
+                                                        ?.street,
+                                                    [
+                                                        $wire.order
+                                                            .address_delivery
+                                                            ?.zip,
+                                                        $wire.order
+                                                            .address_delivery
+                                                            ?.city,
+                                                    ]
+                                                        .filter(Boolean)
+                                                        .join(' '),
+                                                    $wire.order.address_delivery
+                                                        ?.country?.name,
                                                 ]
                                                     .filter(Boolean)
-                                                    .join(' '),
-                                                $wire.order.address_delivery
-                                                    ?.addition,
-                                                $wire.order.address_delivery
-                                                    ?.street,
-                                                [
-                                                    $wire.order.address_delivery
-                                                        ?.zip,
-                                                    $wire.order.address_delivery
-                                                        ?.city,
-                                                ]
-                                                    .filter(Boolean)
-                                                    .join(' '),
-                                                $wire.order.address_delivery
-                                                    ?.country?.name,
-                                            ]
-                                                .filter(Boolean)
-                                                .join('<br>')
-                                        "
-                                    ></p>
-                                </div>
-                            </x-card>
+                                                    .join('<br>')
+                                            "
+                                        ></p>
+                                    </div>
+                                </x-card>
+                            @endif
                         @show
                         @section('general-card')
                             <x-card

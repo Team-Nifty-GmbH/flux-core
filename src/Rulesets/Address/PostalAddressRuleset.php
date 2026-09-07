@@ -4,7 +4,9 @@ namespace FluxErp\Rulesets\Address;
 
 use FluxErp\Enums\SalutationEnum;
 use FluxErp\Models\Address;
+use FluxErp\Models\Country;
 use FluxErp\Rules\EnumRule;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\StringOrInteger;
 use FluxErp\Rulesets\FluxRuleset;
 
@@ -15,6 +17,11 @@ class PostalAddressRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
+            'country_id' => [
+                'integer',
+                'nullable',
+                app(ModelExists::class, ['model' => Country::class]),
+            ],
             'company' => 'string|max:255|nullable',
             'title' => 'string|max:255|nullable',
             'salutation' => [

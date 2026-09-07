@@ -13,6 +13,7 @@ use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\View\View;
 use Illuminate\Process\Exceptions\ProcessFailedException;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
@@ -29,6 +30,10 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 class Plugins extends Component
 {
     use Actions, WithFileUploads;
+
+    public static int $availableFresh = 300;
+
+    public static int $availableStale = 3600;
 
     public MediaUploadForm $file;
 
@@ -101,7 +106,18 @@ class Plugins extends Component
     {
         /** @var \FluxErp\Helpers\Composer $composer */
         $composer = app('composer');
-        $available = Arr::keyBy(data_get($composer->showAvailable(), 'available', []), 'name');
+        $available = Arr::keyBy(
+            data_get(
+                Cache::flexible(
+                    'flux.plugins.available',
+                    [static::$availableFresh, static::$availableStale],
+                    fn (): array => $composer->showAvailable()
+                ),
+                'available',
+                []
+            ),
+            'name'
+        );
         $this->installed = data_get($composer->installed(true), 'installed', []);
 
         foreach ($available as $key => $package) {
@@ -317,5 +333,16 @@ class Plugins extends Component
             ->send();
 
         $this->checkForUpdates();
+    }
+
+    protected function composerState(): string
+    {
+        return hash(
+            'xxh128',
+            implode('', array_map(
+                fn (string $file): string => is_file(base_path($file)) ? (string) filemtime(base_path($file)) : '',
+                ['composer.lock', 'composer.json']
+            ))
+        );
     }
 }

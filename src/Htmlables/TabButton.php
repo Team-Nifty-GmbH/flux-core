@@ -202,7 +202,7 @@ class TabButton implements Htmlable
         $button->attributes = new ComponentAttributeBag(
             array_merge([
                 'wire:loading.attr' => 'readonly',
-                'class' => 'border-b-2 text-secondary-600! !dark:text-secondary-400 border-b-transparent focus:ring-0! focus:ring-offset-0!',
+                'class' => 'border-b-2 text-secondary-600 dark:text-secondary-400 border-b-transparent focus:ring-0! focus:ring-offset-0!',
                 'x-bind:class' => "{'border-b-primary-600! rounded-b-none!': tab === '{$this->component}'}",
                 'data-tab-name' => $this->component,
                 'x-on:click.prevent' => 'tabButtonClicked($el)',
@@ -214,27 +214,23 @@ class TabButton implements Htmlable
 
     public function userHasTabPermission(bool $throwException = true): bool
     {
+        $permission = 'tab.' . $this->component;
+
+        if (auth()->user()?->can($permission)) {
+            return true;
+        }
+
         try {
-            resolve_static(
-                Permission::class,
-                'findByName',
-                [
-                    'name' => 'tab.' . $this->component,
-                ]
-            );
+            resolve_static(Permission::class, 'findByName', ['name' => $permission]);
         } catch (PermissionDoesNotExist) {
             return true;
         }
 
-        if (! auth()->user()->can('tab.' . $this->component)) {
-            if ($throwException) {
-                throw UnauthorizedException::forPermissions(['tab.' . $this->component]);
-            } else {
-                return false;
-            }
+        if ($throwException) {
+            throw UnauthorizedException::forPermissions([$permission]);
         }
 
-        return true;
+        return false;
     }
 
     public function when(Closure|bool $condition): static

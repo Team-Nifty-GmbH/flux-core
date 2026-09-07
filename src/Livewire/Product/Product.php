@@ -192,15 +192,16 @@ class Product extends Component
             return;
         }
 
-        $this->product->suppliers[] = [
-            'contact_id' => $contact->id,
-            'customer_number' => $contact->customer_number,
-            'manufacturer_product_number' => null,
-            'purchase_price' => null,
-            'main_address' => [
-                'name' => $contact->mainAddress->name,
-            ],
-        ];
+        $this->product->suppliers[] = array_merge(
+            array_fill_keys(app(ProductModel::class)->suppliers()->getPivotColumns(), null),
+            [
+                'contact_id' => $contact->getKey(),
+                'customer_number' => $contact->customer_number,
+                'main_address' => [
+                    'name' => $contact->mainAddress?->name,
+                ],
+            ]
+        );
 
         $this->product->suppliers = array_values($this->product->suppliers);
     }
@@ -238,7 +239,7 @@ class Product extends Component
 
             return true;
         } catch (Exception $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->product);
         }
 
         return false;
@@ -445,7 +446,7 @@ class Product extends Component
         try {
             $this->product->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->product);
 
             return false;
         }

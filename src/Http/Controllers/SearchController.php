@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Laravel\Scout\SearchableScope;
+use Spatie\EloquentSortable\Sortable;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class SearchController extends Controller
@@ -94,7 +95,13 @@ class SearchController extends Controller
 
         $this->applyRequestConstraints($query, $request, $model);
 
-        $result = $query->latest()->get();
+        $result = $query
+            ->when(
+                is_a(resolve_static($model, 'class'), Sortable::class, true),
+                fn (Builder $query): Builder => $query->ordered()
+            )
+            ->latest()
+            ->get();
 
         if ($request->has('appends')) {
             $result->each(function ($item) use ($request): void {
