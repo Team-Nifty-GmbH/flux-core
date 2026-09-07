@@ -57,7 +57,7 @@ readonly class ImapMessage
             messageId: $message->getMessageId()->toString(),
             uid: $message->getUid(),
             subject: static::toUtf8($message->getSubject()->toString()),
-            from: static::toUtf8($message->getFrom()[0]->full),
+            from: static::toUtf8(data_get($message->getFrom(), '0.full') ?? ''),
             to: static::toUtf8($message->getTo()->toArray()),
             cc: static::toUtf8($message->getCc()->toArray()),
             bcc: static::toUtf8($message->getBcc()->toArray()),

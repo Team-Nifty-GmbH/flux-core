@@ -17,6 +17,7 @@ use Webklex\PHPIMAP\Exceptions\ConnectionFailedException;
 use Webklex\PHPIMAP\Exceptions\GetMessagesFailedException;
 use Webklex\PHPIMAP\Exceptions\ResponseException;
 use Webklex\PHPIMAP\Folder;
+use Webklex\PHPIMAP\Message;
 
 class ImapMessageBuilder
 {
@@ -351,7 +352,11 @@ class ImapMessageBuilder
             $messages = $query->paginate(100, $page);
 
             foreach ($messages as $message) {
-                $imapMessage = ImapMessage::fromImapMessage($message, $this->fetchBody);
+                $imapMessage = $this->makeMessage($message);
+
+                if (! $imapMessage) {
+                    continue;
+                }
 
                 if ($onMessage) {
                     $onMessage($imapMessage);
@@ -386,7 +391,11 @@ class ImapMessageBuilder
             $messages = $query->paginate(100, $page);
 
             foreach ($messages as $message) {
-                $imapMessage = ImapMessage::fromImapMessage($message, $this->fetchBody);
+                $imapMessage = $this->makeMessage($message);
+
+                if (! $imapMessage) {
+                    continue;
+                }
 
                 if ($onMessage) {
                     $onMessage($imapMessage);
@@ -396,6 +405,21 @@ class ImapMessageBuilder
                 }
             }
         } while ($page !== $messages->lastPage());
+    }
+
+    protected function makeMessage(Message $message): ?ImapMessage
+    {
+        try {
+            return ImapMessage::fromImapMessage($message, $this->fetchBody);
+        } catch (Throwable $exception) {
+            if ($this->isLostConnection($exception)) {
+                throw $exception;
+            }
+
+            report($exception);
+
+            return null;
+        }
     }
 
     protected function storeMessage(ImapMessage $imapMessage): void

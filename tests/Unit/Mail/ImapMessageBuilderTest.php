@@ -6,7 +6,12 @@ use FluxErp\Mail\ImapMessageBuilder;
 use FluxErp\Models\Communication;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Webklex\PHPIMAP\Client;
+use Webklex\PHPIMAP\Folder;
+use Webklex\PHPIMAP\Message;
+use Webklex\PHPIMAP\Query\WhereQuery;
+use Webklex\PHPIMAP\Support\AttachmentCollection;
 
 test('can be instantiated from a mail folder', function (): void {
     $folder = new MailFolder();
@@ -140,12 +145,51 @@ test('syncReadStatus leaves read status untouched when the unseen uids cannot be
         ->and($unseen->refresh()->is_seen)->toBeFalse();
 });
 
+test('keeps importing a folder when one message cannot be read', function (): void {
+    $mailAccount = MailAccount::factory()
+        ->has(MailFolder::factory())
+        ->create();
+    $folder = $mailAccount->mailFolders->first();
+
+    $broken = Mockery::mock(Message::class);
+    $broken->shouldReceive('parseBody')->andReturnSelf();
+    $broken->shouldReceive('getAttachments')->andReturn(new AttachmentCollection());
+    $broken->shouldReceive('getMessageId->toString')->andThrow(new RuntimeException('unparsable message'));
+
+    $intact = Mockery::mock(Message::class);
+    $intact->shouldReceive('parseBody')->andReturnSelf();
+    $intact->shouldReceive('getAttachments')->andReturn(new AttachmentCollection());
+    $intact->shouldReceive('getMessageId->toString')->andReturn('<intact@example.com>');
+    $intact->shouldReceive('getUid')->andReturn(43);
+    $intact->shouldReceive('getSubject->toString')->andReturn('Anfrage');
+    $intact->shouldReceive('getFrom')->andReturn([(object) ['full' => 'sender@example.com']]);
+    $intact->shouldReceive('getTo->toArray')->andReturn([]);
+    $intact->shouldReceive('getCc->toArray')->andReturn([]);
+    $intact->shouldReceive('getBcc->toArray')->andReturn([]);
+    $intact->shouldReceive('getTextBody')->andReturn('Hello');
+    $intact->shouldReceive('getHtmlBody')->andReturn('<p>Hello</p>');
+    $intact->shouldReceive('getDate->toDate')->andReturn(new DateTime('2026-01-30 12:00:00'));
+    $intact->shouldReceive('hasFlag')->andReturn(false);
+    $intact->shouldReceive('getFlags->toArray')->andReturn([]);
+
+    makeTestableBuilder($folder)
+        ->setImapFolder(makeImapFolderServing([$broken, $intact]))
+        ->fetchAndStore();
+
+    $this->assertDatabaseHas('communications', [
+        'mail_account_id' => $mailAccount->getKey(),
+        'message_id' => '<intact@example.com>',
+    ]);
+});
+
 function makeTestableBuilder(MailFolder $folder): ImapMessageBuilder
 {
     return new class($folder) extends ImapMessageBuilder
     {
         /** @var array<int, int>|null */
         public ?array $unseenUids = [];
+
+        public ?Folder $imapFolder = null;
 
         public function pushMessage(ImapMessage $message): static
         {
@@ -161,11 +205,39 @@ function makeTestableBuilder(MailFolder $folder): ImapMessageBuilder
             return $this;
         }
 
+        public function setImapFolder(Folder $folder): static
+        {
+            $this->imapFolder = $folder;
+
+            return $this;
+        }
+
+        protected function resolveImapFolder(): ?Folder
+        {
+            return $this->imapFolder;
+        }
+
         protected function resolveUnseenUids(): ?array
         {
             return $this->unseenUids;
         }
     };
+}
+
+function makeImapFolderServing(array $messages): Folder
+{
+    $query = Mockery::mock(WhereQuery::class);
+    $query->shouldReceive('setFetchBody')->andReturnSelf();
+    $query->shouldReceive('leaveUnread')->andReturnSelf();
+    $query->shouldReceive('since')->andReturnSelf();
+    $query->shouldReceive('paginate')->andReturn(
+        new LengthAwarePaginator($messages, count($messages), 100, 1)
+    );
+
+    $imapFolder = Mockery::mock(Folder::class);
+    $imapFolder->shouldReceive('messages')->andReturn($query);
+
+    return $imapFolder;
 }
 
 function makeImapMessage(int $uid, string $messageId): ImapMessage
