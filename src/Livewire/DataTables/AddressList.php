@@ -5,12 +5,14 @@ namespace FluxErp\Livewire\DataTables;
 use FluxErp\Actions\Contact\CreateContact;
 use FluxErp\Actions\Lead\CreateLead;
 use FluxErp\Contracts\OffersPrinting;
+use FluxErp\Livewire\Forms\AddressForm;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Livewire\Forms\LeadForm;
 use FluxErp\Models\Address;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasInlineEdit;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -23,7 +25,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class AddressList extends BaseDataTable
 {
-    use AllowRecordMerging, CreatesDocuments;
+    use AllowRecordMerging, CreatesDocuments, DataTableHasInlineEdit;
 
     #[DataTableForm(
         only: [
@@ -45,6 +47,9 @@ class AddressList extends BaseDataTable
         ],
     )]
     public ContactForm $createContactForm;
+
+    #[DataTableForm]
+    public AddressForm $addressForm;
 
     public array $enabledCols = [
         'avatar',
@@ -299,6 +304,11 @@ class AddressList extends BaseDataTable
     protected function getPreferredLanguageId(OffersPrinting $item): int
     {
         return $item->language_id;
+    }
+
+    protected function inlineFormAttributeName(): string
+    {
+        return 'addressForm';
     }
 
     protected function augmentItemArray(array &$itemArray, Model $item): void
