@@ -224,18 +224,18 @@
                     select="label:label|value:id"
                     unfiltered
                     :request="[
-                'url' => route('search', \FluxErp\Models\Category::class),
-                'method' => 'POST',
-                'params' => [
-                    'where' => [
-                        [
-                            'model_type',
-                            '=',
-                            morph_alias(\FluxErp\Models\Product::class),
+                        'url' => route('search', \FluxErp\Models\Category::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'where' => [
+                                [
+                                    'model_type',
+                                    '=',
+                                    morph_alias(\FluxErp\Models\Product::class),
+                                ],
+                            ],
                         ],
-                    ],
-                ],
-            ]"
+                    ]"
                 />
                 <x-select.styled
                     multiple
@@ -246,9 +246,9 @@
                     :src="'logo_small_url'"
                     unfiltered
                     :request="[
-                'url' => route('search', \FluxErp\Models\Tenant::class),
-                'method' => 'POST',
-            ]"
+                        'url' => route('search', \FluxErp\Models\Tenant::class),
+                        'method' => 'POST',
+                    ]"
                 />
                 <x-select.styled
                     multiple
@@ -257,18 +257,18 @@
                     select="label:label|value:id"
                     unfiltered
                     :request="[
-                'url' => route('search', \FluxErp\Models\Tag::class),
-                'method' => 'POST',
-                'params' => [
-                    'where' => [
-                        [
-                            'type',
-                            '=',
-                            morph_alias(\FluxErp\Models\Product::class),
+                        'url' => route('search', \FluxErp\Models\Tag::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'where' => [
+                                [
+                                    'type',
+                                    '=',
+                                    morph_alias(\FluxErp\Models\Product::class),
+                                ],
+                            ],
                         ],
-                    ],
-                ],
-            ]"
+                    ]"
                 >
                     <x-slot:label>
                         <div class="flex items-center gap-2">
@@ -567,24 +567,24 @@
                         "
                         unfiltered
                         :request="[
-                    'url' => route('search', \FluxErp\Models\Address::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'where' => [
-                            [
-                                'is_main_address',
-                                '=',
-                                true,
+                            'url' => route('search', \FluxErp\Models\Address::class),
+                            'method' => 'POST',
+                            'params' => [
+                                'where' => [
+                                    [
+                                        'is_main_address',
+                                        '=',
+                                        true,
+                                    ],
+                                ],
+                                'option-value' => 'contact_id',
+                                'fields' => [
+                                    'contact_id',
+                                    'name',
+                                ],
+                                'with' => 'contact.media',
                             ],
-                        ],
-                        'option-value' => 'contact_id',
-                        'fields' => [
-                            'contact_id',
-                            'name',
-                        ],
-                        'with' => 'contact.media',
-                    ],
-                ]"
+                        ]"
                     />
                 </div>
                 @show

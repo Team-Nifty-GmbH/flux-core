@@ -366,19 +366,19 @@
                         select="label:label|value:id"
                         unfiltered
                         :request="[
-                        'url' => route('search', \FluxErp\Models\Tag::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'option-value' => 'id',
-                            'where' => [
-                                [
-                                    'type',
-                                    '=',
-                                    morph_alias(\FluxErp\Models\Address::class),
+                            'url' => route('search', \FluxErp\Models\Tag::class),
+                            'method' => 'POST',
+                            'params' => [
+                                'option-value' => 'id',
+                                'where' => [
+                                    [
+                                        'type',
+                                        '=',
+                                        morph_alias(\FluxErp\Models\Address::class),
+                                    ],
                                 ],
                             ],
-                        ],
-                    ]"
+                        ]"
                     >
                         <x-slot:label>
                             <div class="flex items-center gap-2">
