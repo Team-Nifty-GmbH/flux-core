@@ -103,15 +103,6 @@ class MailAccount extends FluxModel
         return null;
     }
 
-    public function getImapClient(): ?Client
-    {
-        if (is_null($this->imapClient)) {
-            $this->imapClient = $this->connect();
-        }
-
-        return $this->imapClient;
-    }
-
     public function disconnectImapClient(): void
     {
         $client = $this->imapClient;
@@ -121,6 +112,15 @@ class MailAccount extends FluxModel
             $client?->disconnect();
         } catch (Throwable) {
         }
+    }
+
+    public function getImapClient(): ?Client
+    {
+        if (is_null($this->imapClient)) {
+            $this->imapClient = $this->connect();
+        }
+
+        return $this->imapClient;
     }
 
     /**
