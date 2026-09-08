@@ -123,3 +123,51 @@ test('variant inherits parent default price when useDefault is on', function ():
     expect($price)->not->toBeNull()
         ->and((float) $price->price)->toBe(77.0);
 });
+
+test('a price list copy is not treated as a price inherited from a parent price list', function (): void {
+    $list = PriceList::factory()->create(['is_default' => false, 'parent_id' => null]);
+    $parent = Product::factory()->create(['vat_rate_id' => $this->vatRate->getKey()]);
+    $variant = Product::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'vat_rate_id' => $this->vatRate->getKey(),
+    ]);
+
+    // what variant inheritance writes: the variant owns the row, flagged as a copy
+    Price::factory()->create([
+        'product_id' => $variant->getKey(),
+        'price_list_id' => $list->getKey(),
+        'price' => '100.0000',
+        'is_inherited' => true,
+    ]);
+
+    $price = PriceHelper::make($variant)
+        ->setPriceList($list)
+        ->useDefault(false)
+        ->price();
+
+    expect($price->is_inherited)->toBeTrue()
+        ->and($price->isInherited)->toBeFalse();
+});
+
+test('a price taken from a parent price list is marked as inherited', function (): void {
+    $parentList = PriceList::factory()->create(['is_default' => false]);
+    $childList = PriceList::factory()->create([
+        'is_default' => false,
+        'parent_id' => $parentList->getKey(),
+    ]);
+
+    $product = Product::factory()->create(['vat_rate_id' => $this->vatRate->getKey()]);
+    Price::factory()->create([
+        'product_id' => $product->getKey(),
+        'price_list_id' => $parentList->getKey(),
+        'price' => '100.0000',
+    ]);
+
+    $price = PriceHelper::make($product)
+        ->setPriceList($childList)
+        ->useDefault(false)
+        ->price();
+
+    expect($price)->not->toBeNull()
+        ->and($price->isInherited)->toBeTrue();
+});
