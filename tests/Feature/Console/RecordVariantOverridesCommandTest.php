@@ -1,5 +1,7 @@
 <?php
 
+use FluxErp\Models\AttributeTranslation;
+use FluxErp\Models\Language;
 use FluxErp\Models\Product;
 use FluxErp\Models\VatRate;
 
@@ -75,4 +77,34 @@ test('keeps overrides that were already recorded', function (): void {
     expect($variant->refresh()->overridden_fields)
         ->toContain('description')
         ->toContain('name');
+});
+
+test('records a field whose translation already reads as the parent value', function (): void {
+    if (! Language::default()) {
+        Language::factory()->create(['language_code' => 'en', 'is_default' => true]);
+    }
+
+    $language = Language::query()->firstWhere('language_code', 'de')
+        ?? Language::factory()->create(['language_code' => 'de']);
+
+    app()->setLocale('de');
+
+    $variant = legacyVariant(['name' => 'Variant own name']);
+
+    // inheritance copies the parent translation onto a variant that carries no override,
+    // so reading the attribute hands back the parent name while the column keeps its own
+    AttributeTranslation::query()->create([
+        'model_type' => $variant->getMorphClass(),
+        'model_id' => $variant->getKey(),
+        'language_id' => $language->getKey(),
+        'attribute' => 'name',
+        'value' => $this->parent->name,
+    ]);
+
+    expect($variant->fresh()->getAttribute('name'))->toBe($this->parent->name)
+        ->and($variant->fresh()->getRawOriginal('name'))->toBe('Variant own name');
+
+    $this->artisan('flux:product-variants:record-overrides')->assertSuccessful();
+
+    expect($variant->refresh()->overridden_fields)->toContain('name');
 });
