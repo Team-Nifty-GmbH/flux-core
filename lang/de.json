@@ -36,6 +36,7 @@
     ":model restored": ":model wiederhergestellt",
     ":model saved": ":model gespeichert",
     ":order_type :order_number dated :order_date": ":order_type :order_number vom :order_date",
+    ":overridden of :total fields overridden on at least one variant": ":overridden von :total Feldern werden auf mindestens einer Variante überschrieben",
     ":percentage% Deduction": ":percentage% Kürzung",
     ":processed of :total mails (:folder)": ":processed von :total Mails (:folder)",
     ":rate% present": ":rate% anwesend",

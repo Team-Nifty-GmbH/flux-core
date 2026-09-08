@@ -6,6 +6,7 @@ use FluxErp\Models\Product as ProductModel;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 use FluxErp\Settings\ProductSettings;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -234,7 +235,8 @@ test('variant bulk-reset panel renders on parent product edit view', function ()
     inheritingVariant($parent, ['name' => 'override']);
 
     Livewire::test(Product::class, ['id' => $parent->getKey()])
-        ->assertSeeHtml(__('Effect on variants'));
+        ->assertSeeHtml(__('Set all to inherited'))
+        ->assertSeeHtml(__(Str::headline('name')));
 });
 
 test('variant bulk-reset panel does not render on non-parent products', function (): void {
@@ -244,7 +246,7 @@ test('variant bulk-reset panel does not render on non-parent products', function
     ]);
 
     Livewire::test(Product::class, ['id' => $product->getKey()])
-        ->assertDontSeeHtml(__('Effect on variants'));
+        ->assertDontSeeHtml(__('Set all to inherited'));
 });
 
 test('variant header shows consistency badge when there are field overrides', function (): void {
