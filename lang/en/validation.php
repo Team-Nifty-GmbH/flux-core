@@ -636,7 +636,6 @@ return [
         'serial_number_range_id' => 'Serial Number Range ID',
         'session_id' => 'Session ID',
         'settings' => 'Settings',
-        'shipping_costs_net_price' => 'Shipping Costs Net Price',
         'signed_date' => 'Signed Date',
         'simulate' => 'Simulate',
         'slug' => 'Slug',

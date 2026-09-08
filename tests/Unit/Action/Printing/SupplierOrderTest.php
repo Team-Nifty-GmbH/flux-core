@@ -77,7 +77,6 @@ beforeEach(function (): void {
         'invoice_number' => null,
         'order_number' => 'TEST-2024-002',
         'system_delivery_date' => now()->addWeek(),
-        'shipping_costs_net_price' => 0,
     ]);
 
     $this->order->orderPositions()->create([

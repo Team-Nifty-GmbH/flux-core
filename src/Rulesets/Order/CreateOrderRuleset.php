@@ -181,7 +181,6 @@ class CreateOrderRuleset extends FluxRuleset
                 app(Numeric::class, ['min' => 0, 'max' => 1]),
             ],
             'header_discount' => 'numeric|min:0|nullable',
-            'shipping_costs_net_price' => 'numeric|nullable',
             'margin' => 'numeric|nullable',
             'contract_total_amount' => [
                 'nullable',

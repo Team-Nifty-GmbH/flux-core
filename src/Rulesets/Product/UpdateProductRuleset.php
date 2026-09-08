@@ -140,6 +140,7 @@ class UpdateProductRuleset extends FluxRuleset
             ],
             'is_service' => 'boolean',
             'is_shipping_free' => 'boolean',
+            'is_shipping_item' => 'boolean',
             'is_variant_parent' => 'boolean',
             'has_serial_numbers' => 'boolean',
             'is_nos' => 'boolean',

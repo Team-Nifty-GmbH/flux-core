@@ -83,6 +83,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         'is_nos',
         'is_service',
         'is_shipping_free',
+        'is_shipping_item',
     ];
 
     protected array $inheritableRelations = [
@@ -206,6 +207,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             'is_nos' => 'boolean',
             'is_service' => 'boolean',
             'is_shipping_free' => 'boolean',
+            'is_shipping_item' => 'boolean',
             'is_variant_parent' => 'boolean',
         ];
     }

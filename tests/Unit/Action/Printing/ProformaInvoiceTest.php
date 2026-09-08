@@ -72,7 +72,6 @@ beforeEach(function (): void {
         'invoice_number' => null,
         'order_number' => 'TEST-2024-001',
         'system_delivery_date' => now()->addWeek(),
-        'shipping_costs_net_price' => 0,
     ]);
 
     $vatRate = VatRate::factory()->create(['rate_percentage' => 0.19]);

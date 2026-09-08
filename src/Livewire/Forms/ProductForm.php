@@ -62,6 +62,8 @@ class ProductForm extends FluxForm
 
     public ?bool $is_shipping_free = false;
 
+    public ?bool $is_shipping_item = false;
+
     public ?int $max_delivery_time = null;
 
     public ?float $max_purchase = null;

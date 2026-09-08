@@ -73,7 +73,6 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Number;
@@ -455,10 +454,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             'state' => OrderState::class,
             'payment_state' => PaymentState::class,
             'delivery_state' => DeliveryState::class,
-            'shipping_costs_net_price' => Money::class,
-            'shipping_costs_gross_price' => Money::class,
-            'shipping_costs_vat_price' => Money::class,
-            'shipping_costs_vat_rate_percentage' => Percentage::class,
             'total_base_net_price' => Money::class,
             'total_base_gross_price' => Money::class,
             'total_base_discounted_net_price' => Money::class,
@@ -910,10 +905,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ->where('is_alternative', false)
             ->sum('total_base_gross_price');
 
-        $this->total_base_gross_price = bcround(
-            bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0),
-            2
-        );
+        $this->total_base_gross_price = bcround($totalBaseGross, 2);
         $this->total_base_discounted_gross_price = $this->total_gross_price;
 
         return $this;
@@ -930,14 +922,8 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ->where(fn ($q) => $q->where('is_free_text', false)->orWhereDoesntHave('children'))
             ->sum('total_base_net_price');
 
-        $this->total_net_price = bcround(
-            bcadd($totalNet, $this->shipping_costs_net_price ?: 0, 9),
-            2
-        );
-        $this->total_base_net_price = bcround(
-            bcadd($totalBaseNet, $this->shipping_costs_net_price ?: 0, 9),
-            2
-        );
+        $this->total_net_price = bcround($totalNet, 2);
+        $this->total_base_net_price = bcround($totalBaseNet, 2);
         $this->total_base_discounted_net_price = $this->total_net_price;
 
         $this->total_position_discount_percentage = diff_percentage(
@@ -1022,30 +1008,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                         2
                     ),
                 ];
-            })
-            ->when($this->shipping_costs_vat_price, function (SupportCollection $vats): SupportCollection {
-                return $vats->put(
-                    $this->shipping_costs_vat_rate_percentage,
-                    [
-                        'vat_rate_percentage' => $this->shipping_costs_vat_rate_percentage,
-                        'total_vat_price' => bcadd(
-                            $this->shipping_costs_vat_price,
-                            data_get(
-                                $vats->get($this->shipping_costs_vat_rate_percentage),
-                                'total_vat_price'
-                            ) ?? 0,
-                            9
-                        ),
-                        'total_net_price' => bcadd(
-                            $this->shipping_costs_net_price,
-                            data_get(
-                                $vats->get($this->shipping_costs_vat_rate_percentage),
-                                'total_net_price'
-                            ) ?? 0,
-                            9
-                        ),
-                    ]
-                );
             })
             ->sortBy('vat_rate_percentage')
             ->values()

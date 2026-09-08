@@ -72,6 +72,16 @@
                 </x-flux::product.inheritance-indicator>
                 <x-flux::product.inheritance-indicator
                     :product="$this->product->getProductModel()"
+                    field="is_shipping_item"
+                >
+                    <x-checkbox
+                        x-bind:disabled="!isEditing"
+                        label="{{ __('Is shipping item') }}"
+                        wire:model="product.is_shipping_item"
+                    />
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
                     field="is_service"
                 >
                     <x-checkbox

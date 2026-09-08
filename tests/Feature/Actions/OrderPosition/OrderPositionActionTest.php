@@ -540,7 +540,7 @@ test('create order position recalculates the order when asked to', function (): 
     $order = $this->order->refresh();
 
     expect($order->total_net_price)
-        ->toEqual(bcround(bcadd($position->total_net_price, $order->shipping_costs_net_price ?: 0, 9), 2));
+        ->toEqual(bcround($position->total_net_price, 2));
 });
 
 test('create order position leaves the order totals alone by default', function (): void {
@@ -575,7 +575,7 @@ test('update order position recalculates the order when asked to', function (): 
     $order = $this->order->refresh();
 
     expect($order->total_net_price)
-        ->toEqual(bcround(bcadd($updated->total_net_price, $order->shipping_costs_net_price ?: 0, 9), 2));
+        ->toEqual(bcround($updated->total_net_price, 2));
 });
 
 test('delete order position recalculates the order when asked to', function (): void {
@@ -595,5 +595,5 @@ test('delete order position recalculates the order when asked to', function (): 
 
     $order = $this->order->refresh();
 
-    expect($order->total_net_price)->toEqual(bcround(bcadd(0, $order->shipping_costs_net_price ?: 0, 9), 2));
+    expect($order->total_net_price)->toEqual(bcround(0, 2));
 });
