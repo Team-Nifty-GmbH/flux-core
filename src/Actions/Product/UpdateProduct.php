@@ -176,16 +176,14 @@ class UpdateProduct extends DispatchableFluxAction implements SupportsBulkExecut
             $this->data['bundle_type_enum'] = null;
         }
 
-        $this->rules['cover_media_id'][] = (new ModelExists(Media::class))
-            ->where('model_type', app(Product::class)->getMorphClass())
-            ->where('model_id', $this->data['id'] ?? null);
-        $this->rules['product_number'] = [
-            'string',
-            'nullable',
-            Rule::unique('products', 'product_number')
+        $this->addRules([
+            'cover_media_id' => (new ModelExists(Media::class))
+                ->where('model_type', app(Product::class)->getMorphClass())
+                ->where('model_id', $this->data['id'] ?? null),
+            'product_number' => Rule::unique('products', 'product_number')
                 ->whereNull('deleted_at')
                 ->ignore(data_get($this->data, 'id')),
-        ];
+        ]);
     }
 
     protected function validateData(): void
