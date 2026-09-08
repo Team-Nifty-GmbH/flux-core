@@ -99,7 +99,10 @@ class UpdateProductRuleset extends FluxRuleset
                 Rule::enum(BundleTypeEnum::class),
             ],
 
-            'product_number' => 'string|nullable',
+            'product_number' => [
+                'string',
+                'nullable',
+            ],
             'name' => 'string|max:255',
             'description' => 'string|nullable',
             'weight_gram' => 'numeric|nullable',
