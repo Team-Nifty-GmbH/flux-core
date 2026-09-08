@@ -114,3 +114,39 @@ test('search controller shortens a long string and keeps the image url whole', f
         ->and(data_get($result, 'description'))->toEndWith('...')
         ->and(data_get($result, 'image'))->toBe($product->getAvatarUrl());
 });
+
+test('search controller strips markup below the top level', function (): void {
+    $product = Product::factory()->create([
+        'description' => '<p>Nested markup</p>',
+    ]);
+
+    $response = $this->post(
+        route('search', Product::class),
+        [
+            'selected' => [$product->getKey()],
+            'mapping' => ['meta.text' => 'description'],
+        ]
+    );
+
+    $response->assertOk();
+
+    expect(data_get($response->json(), '0.meta.text'))->toBe('Nested markup');
+});
+
+test('search controller strips markup that was mapped onto the image key', function (): void {
+    $product = Product::factory()->create([
+        'description' => '<p>Mapped markup</p>',
+    ]);
+
+    $response = $this->post(
+        route('search', Product::class),
+        [
+            'selected' => [$product->getKey()],
+            'mapping' => ['image' => 'description'],
+        ]
+    );
+
+    $response->assertOk();
+
+    expect(data_get($response->json(), '0.image'))->toBe('Mapped markup');
+});
