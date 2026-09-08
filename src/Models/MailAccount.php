@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Mail;
 use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
 use Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream;
+use Throwable;
 use Webklex\IMAP\Facades\Client as ImapClient;
 use Webklex\PHPIMAP\Client;
 use Webklex\PHPIMAP\Exceptions\AuthFailedException;
@@ -102,6 +103,17 @@ class MailAccount extends FluxModel
         return null;
     }
 
+    public function disconnectImapClient(): void
+    {
+        $client = $this->imapClient;
+        $this->imapClient = null;
+
+        try {
+            $client?->disconnect();
+        } catch (Throwable) {
+        }
+    }
+
     public function getImapClient(): ?Client
     {
         if (is_null($this->imapClient)) {
@@ -121,7 +133,7 @@ class MailAccount extends FluxModel
      */
     public function reconnectImapClient(): ?Client
     {
-        $this->imapClient = null;
+        $this->disconnectImapClient();
 
         return $this->getImapClient();
     }
