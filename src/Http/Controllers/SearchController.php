@@ -242,6 +242,14 @@ class SearchController extends Controller
                     data_set($formatted, $target, data_get($formatted, $source));
                 }
 
+                foreach ($formatted as $key => $value) {
+                    if ($key === 'image' || ! is_string($value)) {
+                        continue;
+                    }
+
+                    $formatted[$key] = Str::limit(trim(html_entity_decode(strip_tags($value))));
+                }
+
                 return $formatted;
             });
         }

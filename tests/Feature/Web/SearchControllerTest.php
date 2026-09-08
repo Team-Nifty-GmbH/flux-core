@@ -2,6 +2,7 @@
 
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Product;
 
 test('search controller returns soft deleted record when selected', function (): void {
     $contact = Contact::factory()->create();
@@ -72,4 +73,44 @@ test('search controller maps response keys to the requested mapping', function (
 
     expect($item)->not->toBeNull()
         ->and(data_get($item, 'description'))->toBe($address->getLabel());
+});
+
+test('search controller strips markup from the strings it returns', function (): void {
+    $product = Product::factory()->create([
+        'name' => 'Widget',
+        'description' => '<p style="text-align: left;">Erste Zeile&nbsp;&amp; mehr</p><p>zweite</p>',
+    ]);
+
+    $response = $this->post(
+        route('search', Product::class),
+        ['selected' => [$product->getKey()]]
+    );
+
+    $response->assertOk();
+
+    $description = data_get($response->json(), '0.description');
+
+    expect($description)->not->toContain('<')
+        ->and($description)->not->toContain('&amp;')
+        ->and($description)->toContain('Erste Zeile')
+        ->and($description)->toContain('& mehr');
+});
+
+test('search controller shortens a long string and keeps the image url whole', function (): void {
+    $product = Product::factory()->create([
+        'description' => str_repeat('sehr lange beschreibung ', 40),
+    ]);
+
+    $response = $this->post(
+        route('search', Product::class),
+        ['selected' => [$product->getKey()]]
+    );
+
+    $response->assertOk();
+
+    $result = data_get($response->json(), '0');
+
+    expect(mb_strlen(data_get($result, 'description')))->toBeLessThanOrEqual(104)
+        ->and(data_get($result, 'description'))->toEndWith('...')
+        ->and(data_get($result, 'image'))->toBe($product->getAvatarUrl());
 });
