@@ -222,23 +222,6 @@ class SearchController extends Controller
         }
     }
 
-    protected function toPlainText(array $values): array
-    {
-        foreach ($values as $key => $value) {
-            if (is_array($value)) {
-                $values[$key] = $this->toPlainText($value);
-
-                continue;
-            }
-
-            if (is_string($value)) {
-                $values[$key] = Str::limit(trim(html_entity_decode(strip_tags($value))));
-            }
-        }
-
-        return $values;
-    }
-
     protected function formatAndDispatch(Collection $result, string $model, Request $request)
     {
         if (is_a(app($model), InteractsWithDataTables::class)) {
@@ -276,5 +259,23 @@ class SearchController extends Controller
         Event::dispatch('tall-datatables-searched', [$request, $result]);
 
         return $result;
+    }
+
+    // a link is not display text, shortening it would break it
+    protected function toPlainText(array $values): array
+    {
+        foreach ($values as $key => $value) {
+            if (is_array($value)) {
+                $values[$key] = $this->toPlainText($value);
+
+                continue;
+            }
+
+            if (is_string($value) && ! Str::isUrl($value)) {
+                $values[$key] = Str::limit(trim(html_entity_decode(strip_tags($value))));
+            }
+        }
+
+        return $values;
     }
 }

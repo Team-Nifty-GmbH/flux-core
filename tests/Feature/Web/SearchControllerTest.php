@@ -150,3 +150,25 @@ test('search controller strips markup that was mapped onto the image key', funct
 
     expect(data_get($response->json(), '0.image'))->toBe('Mapped markup');
 });
+
+test('search controller leaves a link in a requested field whole', function (): void {
+    $contact = Contact::factory()->create();
+    $url = 'https://example.com/' . str_repeat('a-very-long-path-segment/', 8);
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+        'url' => $url,
+    ]);
+
+    $response = $this->post(
+        route('search', Address::class),
+        [
+            'selected' => [$address->getKey()],
+            'fields' => ['url'],
+        ]
+    );
+
+    $response->assertOk();
+
+    expect(data_get($response->json(), '0.url'))->toBe($url);
+});
