@@ -81,7 +81,6 @@ beforeEach(function (): void {
         'system_delivery_date' => '2026-07-01',
         'system_delivery_date_end' => null,
         'is_locked' => false,
-        'shipping_costs_net_price' => 0,
     ]);
 
     CreateOrderPosition::make([

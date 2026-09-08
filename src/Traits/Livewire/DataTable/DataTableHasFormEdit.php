@@ -35,7 +35,7 @@ trait DataTableHasFormEdit
         try {
             $this->{$this->formAttributeName()}->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->{$this->formAttributeName()});
 
             return false;
         }
@@ -108,7 +108,7 @@ trait DataTableHasFormEdit
         try {
             $this->{$this->formAttributeName()}->restore();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->{$this->formAttributeName()});
 
             return false;
         }
@@ -124,7 +124,7 @@ trait DataTableHasFormEdit
         try {
             $this->{$this->formAttributeName()}->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->{$this->formAttributeName()});
 
             return false;
         }

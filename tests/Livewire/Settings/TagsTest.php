@@ -1,7 +1,9 @@
 <?php
 
+use FluxErp\Actions\Tag\DeleteTag;
 use FluxErp\Livewire\Settings\Tags;
 use FluxErp\Models\Tag;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
@@ -77,4 +79,32 @@ test('can delete tag', function (): void {
     $this->assertDatabaseMissing('tags', [
         'id' => $tag->getKey(),
     ]);
+});
+
+test('delete selected deletes the selected tags', function (): void {
+    config(['queue.default' => 'sync']);
+    $tag = Tag::factory()->create();
+
+    Livewire::test(Tags::class)
+        ->set('selected', [$tag->getKey()])
+        ->call('deleteSelected')
+        ->assertOk()
+        ->assertSet('selected', []);
+
+    $this->assertModelMissing($tag);
+});
+
+test('delete selected dispatches instead of deleting in the request', function (): void {
+    Queue::fake();
+
+    $tag = Tag::factory()->create();
+
+    Livewire::test(Tags::class)
+        ->set('selected', [$tag->getKey()])
+        ->call('deleteSelected')
+        ->assertOk();
+
+    Queue::assertPushed(DeleteTag::class);
+
+    $this->assertModelExists($tag);
 });

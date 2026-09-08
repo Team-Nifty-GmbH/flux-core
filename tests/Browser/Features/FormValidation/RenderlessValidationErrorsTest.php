@@ -62,7 +62,7 @@ class ValidationTestComponent extends Component
                 'related_id' => 'required',
             ])->validate();
         } catch (Illuminate\Validation\ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->form);
 
             return false;
         }
@@ -101,7 +101,7 @@ class ModalValidationTestComponent extends Component
                 'related_id' => 'required',
             ])->validate();
         } catch (Illuminate\Validation\ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->form);
 
             return false;
         }

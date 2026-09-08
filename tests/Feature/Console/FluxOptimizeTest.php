@@ -17,6 +17,7 @@ beforeEach(function (): void {
         'flux-view-classes.php',
         'flux-livewire-components.php',
         'flux-blade-components.php',
+        'flux-commands.php',
     ];
 
     foreach ($cacheFiles as $file) {
@@ -26,7 +27,6 @@ beforeEach(function (): void {
         }
     }
 });
-
 test('flux:optimize generates all cache files', function (): void {
     $this->artisan('flux:optimize')
         ->assertExitCode(0);

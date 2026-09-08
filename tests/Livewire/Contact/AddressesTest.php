@@ -139,3 +139,28 @@ test('can lift an address into a new contact', function (): void {
     expect($secondary->refresh()->contact_id)->not->toBe($this->contactForm->id)
         ->and($secondary->is_main_address)->toBeTrue();
 });
+
+test('goes back to the contacts when the last address is gone', function (): void {
+    $address = Address::query()->whereKey($this->addressForm->id)->first();
+
+    $component = Livewire::actingAs($this->user)
+        ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm]);
+
+    $address->forceDelete();
+
+    $component
+        ->call('addressDeleted', ['model' => ['id' => $this->addressForm->id]])
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertRedirect(route('contacts.contacts'));
+});
+
+test('goes back to the contacts when the only address is deleted from the pane', function (): void {
+    Livewire::actingAs($this->user)
+        ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm])
+        ->set('addressId', $this->addressForm->id)
+        ->call('delete')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertRedirect(route('contacts.contacts'));
+});

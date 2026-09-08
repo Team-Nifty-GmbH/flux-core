@@ -166,3 +166,21 @@ test('save validation fails with missing required fields', function (): void {
         ->assertOk()
         ->assertReturned(false);
 });
+
+test('save validation rejects a zero discount', function (): void {
+    $contact = Contact::factory()->create();
+    $product = Product::factory()
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
+        ->create();
+
+    Livewire::test(Discounts::class, ['contactId' => $contact->getKey()])
+        ->set('discountForm.model_type', morph_alias(Product::class))
+        ->set('discountForm.model_id', $product->getKey())
+        ->set('discountForm.discount', 0)
+        ->set('discountForm.is_percentage', true)
+        ->call('save')
+        ->assertOk()
+        ->assertReturned(false);
+
+    $this->assertDatabaseCount('discounts', 0);
+});

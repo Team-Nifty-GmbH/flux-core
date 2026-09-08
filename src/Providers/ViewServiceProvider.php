@@ -6,6 +6,7 @@ use Composer\Autoload\ClassLoader;
 use Composer\InstalledVersions;
 use FluxErp\Mechanisms\FrontendAssets\FrontendAssets;
 use FluxErp\Mechanisms\FrontendAssets\SupportAutoInjectedAssets;
+use FluxErp\View\Components\Icon;
 use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
 use Illuminate\Support\Facades\Blade;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use ReflectionClass;
 use TallStackUi\Facades\TallStackUi;
+use TallStackUi\Support\Blade\ComponentPrefix;
 
 class ViewServiceProvider extends ServiceProvider
 {
@@ -156,6 +158,16 @@ class ViewServiceProvider extends ServiceProvider
 
     protected function registerViews(): void
     {
+        $this->app->booted(function (): void {
+            Blade::component(Icon::class, app(ComponentPrefix::class)->add('icon'));
+
+            Blade::directive('persist', fn (string $expression): string => '<?php app("livewire")->forceAssetInjection(); ?>'
+                . '<div x-persist="<?php echo e(' . $expression . '); ?>">'
+                . '<?php if (! in_array(' . $expression . ", explode(',', request()->header('X-Flux-Persisted', '')), true)): ?>");
+
+            Blade::directive('endpersist', fn (): string => '<?php endif; ?></div>');
+        });
+
         Blade::component(App::class, 'flux::layouts.app');
         Blade::component(Printing::class, 'flux::layouts.print');
         config([

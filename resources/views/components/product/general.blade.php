@@ -1,3 +1,6 @@
+@php
+    $units = resolve_static(\FluxErp\Models\Unit::class, 'query')->get(['id', 'name'])->toArray();
+@endphp
 <div class="space-y-5" x-data wire:key="products-general">
     <x-card class="space-y-2.5" :header="__('General')">
         @section('general')
@@ -6,17 +9,27 @@
                 label="{{ __('Product number') }}"
                 wire:model="product.product_number"
             />
-            <x-input
-                x-bind:readonly="!isEditing"
-                label="{{ __('Name') }}"
-                wire:model="product.name"
-            />
-            <x-flux::editor
-                x-model="isEditing"
-                wire:model="product.description"
-                scope="product"
-                :label="__('Description')"
-            />
+            <x-flux::product.inheritance-indicator
+                :product="$this->product->getProductModel()"
+                field="name"
+            >
+                <x-input
+                    x-bind:readonly="!isEditing"
+                    label="{{ __('Name') }}"
+                    wire:model="product.name"
+                />
+            </x-flux::product.inheritance-indicator>
+            <x-flux::product.inheritance-indicator
+                :product="$this->product->getProductModel()"
+                field="description"
+            >
+                <x-flux::editor
+                    x-model="isEditing"
+                    wire:model="product.description"
+                    scope="product"
+                    :label="__('Description')"
+                />
+            </x-flux::product.inheritance-indicator>
         @show
     </x-card>
     <x-card class="space-y-2.5" :header="__('Attributes')">
@@ -27,32 +40,67 @@
                     label="{{ __('Is active') }}"
                     wire:model="product.is_active"
                 />
-                <x-checkbox
-                    x-bind:disabled="!isEditing"
-                    label="{{ __('Is highlight') }}"
-                    wire:model="product.is_highlight"
-                />
-                <x-checkbox
-                    x-bind:disabled="!isEditing"
-                    label="{{ __('Is NOS') }}"
-                    wire:model="product.is_nos"
-                />
-                <x-checkbox
-                    x-bind:disabled="!isEditing"
-                    label="{{ __('Export to Webshop') }}"
-                    wire:model="product.is_active_export_to_web_shop"
-                />
-                <x-checkbox
-                    x-bind:disabled="!isEditing"
-                    label="{{ __('Is service') }}"
-                    wire:model="product.is_service"
-                />
-                <div x-cloak x-show="$wire.product.is_service">
-                    <x-select.styled
-                        label="{{ __('Time unit') }}"
-                        wire:model="product.time_unit_enum"
-                        :options="\FluxErp\Enums\TimeUnitEnum::valuesLocalized()"
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="is_highlight"
+                >
+                    <x-checkbox
+                        x-bind:disabled="!isEditing"
+                        label="{{ __('Is highlight') }}"
+                        wire:model="product.is_highlight"
                     />
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="is_nos"
+                >
+                    <x-checkbox
+                        x-bind:disabled="!isEditing"
+                        label="{{ __('Is NOS') }}"
+                        wire:model="product.is_nos"
+                    />
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="is_active_export_to_web_shop"
+                >
+                    <x-checkbox
+                        x-bind:disabled="!isEditing"
+                        label="{{ __('Export to Webshop') }}"
+                        wire:model="product.is_active_export_to_web_shop"
+                    />
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="is_shipping_item"
+                >
+                    <x-checkbox
+                        x-bind:disabled="!isEditing"
+                        label="{{ __('Is shipping item') }}"
+                        wire:model="product.is_shipping_item"
+                    />
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="is_service"
+                >
+                    <x-checkbox
+                        x-bind:disabled="!isEditing"
+                        label="{{ __('Is service') }}"
+                        wire:model="product.is_service"
+                    />
+                </x-flux::product.inheritance-indicator>
+                <div x-cloak x-show="$wire.product.is_service">
+                    <x-flux::product.inheritance-indicator
+                        :product="$this->product->getProductModel()"
+                        field="time_unit_enum"
+                    >
+                        <x-select.styled
+                            label="{{ __('Time unit') }}"
+                            wire:model="product.time_unit_enum"
+                            :options="\FluxErp\Enums\TimeUnitEnum::valuesLocalized()"
+                        />
+                    </x-flux::product.inheritance-indicator>
                 </div>
             @show
             <hr />
@@ -61,103 +109,201 @@
                 label="{{ __('EAN') }}"
                 wire:model="product.ean"
             />
-            <x-input
-                x-bind:readonly="!isEditing"
-                label="{{ __('Customs Tariff Number') }}"
-                wire:model="product.customs_tariff_number"
-            />
+            <x-flux::product.inheritance-indicator
+                :product="$this->product->getProductModel()"
+                field="customs_tariff_number"
+            >
+                <x-input
+                    x-bind:readonly="!isEditing"
+                    label="{{ __('Customs Tariff Number') }}"
+                    wire:model="product.customs_tariff_number"
+                />
+            </x-flux::product.inheritance-indicator>
             <x-input
                 x-bind:readonly="!isEditing"
                 label="{{ __('Manufacturer product number') }}"
                 wire:model="product.manufacturer_product_number"
             />
-            <x-select.styled
-                x-bind:readonly="!isEditing"
-                label="{{ __('Unit') }}"
-                wire:model.number="product.unit_id"
-                select="label:name|value:id"
-                :options="resolve_static(\FluxErp\Models\Unit::class, 'query')->get(['id', 'name'])->toArray()"
-            />
+            <x-flux::product.inheritance-indicator
+                :product="$this->product->getProductModel()"
+                field="unit_id"
+            >
+                <x-select.styled
+                    x-bind:readonly="!isEditing"
+                    label="{{ __('Unit') }}"
+                    wire:model.number="product.unit_id"
+                    select="label:name|value:id"
+                    :options="$units"
+                />
+            </x-flux::product.inheritance-indicator>
             <div
                 class="grid grid-cols-1 gap-4 sm:grid-cols-4"
                 x-bind:class="{ 'pointer-events-none': !isEditing }"
             >
-                <x-number
-                    x-bind:readonly="!isEditing"
-                    wire:model.number="product.dimension_length_mm"
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="dimension_length_mm"
                 >
-                    <x-slot:label>
-                        <div class="flex items-center justify-between">
-                            <div>{{ __('Length') }}</div>
-                            <div>{{ __('mm') }}</div>
-                        </div>
-                    </x-slot:label>
-                </x-number>
-                <x-number
-                    x-bind:readonly="!isEditing"
-                    wire:model.number="product.dimension_width_mm"
-                >
-                    <x-slot:label>
-                        <div class="flex items-center justify-between">
-                            <div>{{ __('Width') }}</div>
-                            <div>{{ __('mm') }}</div>
-                        </div>
-                    </x-slot:label>
-                </x-number>
-                <x-number
-                    x-bind:readonly="!isEditing"
-                    wire:model.number="product.dimension_height_mm"
-                >
-                    <x-slot:label>
-                        <div class="flex items-center justify-between">
-                            <div>{{ __('Height') }}</div>
-                            <div>{{ __('mm') }}</div>
-                        </div>
-                    </x-slot:label>
-                </x-number>
-                <x-number
-                    x-bind:readonly="!isEditing"
-                    wire:model.number="product.weight_gram"
-                >
-                    <x-slot:label>
-                        <div class="flex items-center justify-between">
-                            <div>{{ __('Weight') }}</div>
-                            <div>{{ __('Gram') }}</div>
-                        </div>
-                    </x-slot:label>
-                </x-number>
-                <x-number
-                    x-bind:readonly="!isEditing"
-                    wire:model.number="product.selling_unit"
-                >
-                    <x-slot:label>
-                        <div class="flex items-center justify-between">
-                            <div>{{ __('Selling Unit') }}</div>
-                            <div>
-                                <x-tooltip
-                                    :text="__('Required to calculate the product\'s unit price. The value to be entered depends on the selected scale unit.<br><br>Unit price = (product price * basic unit) / selling unit.<br><br>Unit price not displayed, if selling unit and basic unit have the same value.')"
-                                />
+                    <x-number
+                        x-bind:readonly="!isEditing"
+                        wire:model.number="product.dimension_length_mm"
+                    >
+                        <x-slot:label>
+                            <div class="flex items-center justify-between">
+                                <div>{{ __('Length') }}</div>
+                                <div>{{ __('mm') }}</div>
                             </div>
-                        </div>
-                    </x-slot:label>
-                </x-number>
-                <x-number
-                    x-bind:readonly="!isEditing"
-                    wire:model.number="product.basic_unit"
+                        </x-slot:label>
+                    </x-number>
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="dimension_width_mm"
                 >
-                    <x-slot:label>
-                        <div class="flex items-center justify-between">
-                            <div>{{ __('Basic Unit') }}</div>
-                            <div>
-                                <x-tooltip
-                                    :text="__('Required to calculate the product\'s unit price. The value to be entered depends on the selected scale unit.<br><br>Unit price = (product price * basic unit) / selling unit.<br><br>Unit price not displayed, if selling unit and basic unit have the same value.')"
-                                />
+                    <x-number
+                        x-bind:readonly="!isEditing"
+                        wire:model.number="product.dimension_width_mm"
+                    >
+                        <x-slot:label>
+                            <div class="flex items-center justify-between">
+                                <div>{{ __('Width') }}</div>
+                                <div>{{ __('mm') }}</div>
                             </div>
-                        </div>
-                    </x-slot:label>
-                </x-number>
+                        </x-slot:label>
+                    </x-number>
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="dimension_height_mm"
+                >
+                    <x-number
+                        x-bind:readonly="!isEditing"
+                        wire:model.number="product.dimension_height_mm"
+                    >
+                        <x-slot:label>
+                            <div class="flex items-center justify-between">
+                                <div>{{ __('Height') }}</div>
+                                <div>{{ __('mm') }}</div>
+                            </div>
+                        </x-slot:label>
+                    </x-number>
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="weight_gram"
+                >
+                    <x-number
+                        x-bind:readonly="!isEditing"
+                        wire:model.number="product.weight_gram"
+                    >
+                        <x-slot:label>
+                            <div class="flex items-center justify-between">
+                                <div>{{ __('Weight') }}</div>
+                                <div>{{ __('Gram') }}</div>
+                            </div>
+                        </x-slot:label>
+                    </x-number>
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="selling_unit"
+                >
+                    <x-number
+                        x-bind:readonly="!isEditing"
+                        wire:model.number="product.selling_unit"
+                    >
+                        <x-slot:label>
+                            <div class="flex items-center justify-between">
+                                <div>{{ __('Selling Unit') }}</div>
+                                <div>
+                                    <x-tooltip
+                                        :text="__('Required to calculate the product\'s unit price. The value to be entered depends on the selected scale unit.<br><br>Unit price = (product price * basic unit) / selling unit.<br><br>Unit price not displayed, if selling unit and basic unit have the same value.')"
+                                    />
+                                </div>
+                            </div>
+                        </x-slot:label>
+                    </x-number>
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="basic_unit"
+                >
+                    <x-number
+                        x-bind:readonly="!isEditing"
+                        wire:model.number="product.basic_unit"
+                    >
+                        <x-slot:label>
+                            <div class="flex items-center justify-between">
+                                <div>{{ __('Basic Unit') }}</div>
+                                <div>
+                                    <x-tooltip
+                                        :text="__('Required to calculate the product\'s unit price. The value to be entered depends on the selected scale unit.<br><br>Unit price = (product price * basic unit) / selling unit.<br><br>Unit price not displayed, if selling unit and basic unit have the same value.')"
+                                    />
+                                </div>
+                            </div>
+                        </x-slot:label>
+                    </x-number>
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="reference_unit_id"
+                >
+                    <x-select.styled
+                        label="{{ __('Reference Unit') }}"
+                        wire:model.number="product.reference_unit_id"
+                        select="label:name|value:id"
+                        :options="$units"
+                    />
+                </x-flux::product.inheritance-indicator>
             </div>
             @show
+            </x-card>
+            <x-card class="space-y-2.5" :header="__('Purchase')">
+                @section('purchase')
+                <div x-bind:class="{ 'pointer-events-none': !isEditing }">
+                    <x-select.styled
+                        label="{{ __('Purchase Unit') }}"
+                        wire:model.number="product.purchase_unit_id"
+                        select="label:name|value:id"
+                        :options="$units"
+                    />
+                </div>
+                <div
+                    class="grid grid-cols-1 gap-4 sm:grid-cols-2"
+                    x-bind:class="{ 'pointer-events-none': !isEditing }"
+                >
+                    <x-number
+                        x-bind:readonly="!isEditing"
+                        wire:model.number="product.min_purchase"
+                    >
+                        <x-slot:label>
+                            <div class="flex items-center justify-between">
+                                <div>{{ __('Min Purchase') }}</div>
+                                <div>
+                                    <x-tooltip
+                                        :text="__('Smallest amount that can be purchased from this supplier.')"
+                                    />
+                                </div>
+                            </div>
+                        </x-slot:label>
+                    </x-number>
+                    <x-number
+                        x-bind:readonly="!isEditing"
+                        wire:model.number="product.purchase_steps"
+                    >
+                        <x-slot:label>
+                            <div class="flex items-center justify-between">
+                                <div>{{ __('Purchase Steps') }}</div>
+                                <div>
+                                    <x-tooltip
+                                        :text="__('Amount the supplier sells in. An order position entered in the purchase unit is multiplied by it.')"
+                                    />
+                                </div>
+                            </div>
+                        </x-slot:label>
+                    </x-number>
+                </div>
+                @show
             </x-card>
             <x-card class="flex flex-col gap-4" :header="__('Assignment')">
                 <x-select.styled
@@ -168,18 +314,18 @@
                     select="label:label|value:id"
                     unfiltered
                     :request="[
-                'url' => route('search', \FluxErp\Models\Category::class),
-                'method' => 'POST',
-                'params' => [
-                    'where' => [
-                        [
-                            'model_type',
-                            '=',
-                            morph_alias(\FluxErp\Models\Product::class),
+                        'url' => route('search', \FluxErp\Models\Category::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'where' => [
+                                [
+                                    'model_type',
+                                    '=',
+                                    morph_alias(\FluxErp\Models\Product::class),
+                                ],
+                            ],
                         ],
-                    ],
-                ],
-            ]"
+                    ]"
                 />
                 <x-select.styled
                     multiple
@@ -190,9 +336,9 @@
                     :src="'logo_small_url'"
                     unfiltered
                     :request="[
-                'url' => route('search', \FluxErp\Models\Tenant::class),
-                'method' => 'POST',
-            ]"
+                        'url' => route('search', \FluxErp\Models\Tenant::class),
+                        'method' => 'POST',
+                    ]"
                 />
                 <x-select.styled
                     multiple
@@ -201,18 +347,18 @@
                     select="label:label|value:id"
                     unfiltered
                     :request="[
-                'url' => route('search', \FluxErp\Models\Tag::class),
-                'method' => 'POST',
-                'params' => [
-                    'where' => [
-                        [
-                            'type',
-                            '=',
-                            morph_alias(\FluxErp\Models\Product::class),
+                        'url' => route('search', \FluxErp\Models\Tag::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'where' => [
+                                [
+                                    'type',
+                                    '=',
+                                    morph_alias(\FluxErp\Models\Product::class),
+                                ],
+                            ],
                         ],
-                    ],
-                ],
-            ]"
+                    ]"
                 >
                     <x-slot:label>
                         <div class="flex items-center gap-2">
@@ -348,9 +494,9 @@
                     >
                         <div class="col-span-1 space-y-2">
                             <x-card>
-                                <x-slot:title>
+                                <x-slot:header>
                                     <span x-text="group"></span>
-                                </x-slot:title>
+                                </x-slot:header>
                                 <template
                                     x-for="
                                         (displayedProperties, propertyType) in
@@ -439,8 +585,42 @@
                         <x-slot:actions>
                             <x-input
                                 x-bind:disabled="!isEditing"
+                                x-model="supplier.supplier_product_number"
+                                :label="__('Supplier product number')"
+                            />
+                            <x-input
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.supplier_product_name"
+                                :label="__('Supplier product name')"
+                            />
+                            <x-input
+                                x-bind:disabled="!isEditing"
                                 x-model="supplier.manufacturer_product_number"
                                 :label="__('Manufacturer product number')"
+                            />
+                            <x-number
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.packaging_amount"
+                                :label="__('Amount per Packaging')"
+                                step="0.01"
+                            />
+                            <div
+                                x-bind:class="{
+                                    'pointer-events-none': !isEditing,
+                                }"
+                            >
+                                <x-select.styled
+                                    x-model.number="supplier.packaging_unit_id"
+                                    :label="__('Packaging Unit')"
+                                    select="label:name|value:id"
+                                    :options="$units"
+                                />
+                            </div>
+                            <x-number
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.items_per_packaging"
+                                :label="__('Items per Packaging')"
+                                step="1"
                             />
                             <x-number
                                 x-bind:disabled="!isEditing"
@@ -448,6 +628,12 @@
                                 :label="__('Purchase Price')"
                                 step="0.01"
                             />
+                            <x-input
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.note"
+                                :label="__('Note')"
+                            />
+                            @stack('product-supplier-fields')
                             <div class="mt-6">
                                 <x-button
                                     color="red"
@@ -471,24 +657,24 @@
                         "
                         unfiltered
                         :request="[
-                    'url' => route('search', \FluxErp\Models\Address::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'where' => [
-                            [
-                                'is_main_address',
-                                '=',
-                                true,
+                            'url' => route('search', \FluxErp\Models\Address::class),
+                            'method' => 'POST',
+                            'params' => [
+                                'where' => [
+                                    [
+                                        'is_main_address',
+                                        '=',
+                                        true,
+                                    ],
+                                ],
+                                'option-value' => 'contact_id',
+                                'fields' => [
+                                    'contact_id',
+                                    'name',
+                                ],
+                                'with' => 'contact.media',
                             ],
-                        ],
-                        'option-value' => 'contact_id',
-                        'fields' => [
-                            'contact_id',
-                            'name',
-                        ],
-                        'with' => 'contact.media',
-                    ],
-                ]"
+                        ]"
                     />
                 </div>
                 @show

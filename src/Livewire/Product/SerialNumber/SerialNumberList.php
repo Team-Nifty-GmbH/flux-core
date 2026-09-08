@@ -61,7 +61,7 @@ class SerialNumberList extends BaseSerialNumberList
             $this->stockPosting->purchase_price ??= 0;
             $this->stockPosting->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->stockPosting);
 
             return false;
         }

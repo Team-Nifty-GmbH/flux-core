@@ -17,7 +17,7 @@ beforeEach(function (): void {
     OrderPosition::removeGlobalScopes(['sorted', FamilyTreeScope::class]);
 });
 
-it('applies temporary scopes during eager loading and removes them after', function (): void {
+test('applies temporary scopes during eager loading and removes them after', function (): void {
     $contact = Contact::factory()->create();
 
     $address = Address::factory()->create([
@@ -93,7 +93,7 @@ it('applies temporary scopes during eager loading and removes them after', funct
     expect($sql)->not->toContain('sort_number');
 });
 
-it('does not leak a sorted scope into subsequent queries after removeGlobalScopes', function (): void {
+test('does not leak a sorted scope into subsequent queries after removeGlobalScopes', function (): void {
     resolve_static(OrderPosition::class, 'addGlobalScope', [
         'scope' => 'sorted',
         'implementation' => function (Builder $query): void {

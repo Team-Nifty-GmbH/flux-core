@@ -2,6 +2,7 @@
 
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Actions\OrderPosition\DeleteOrderPosition;
+use FluxErp\Actions\OrderPosition\FillOrderPositions;
 use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
 use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\OrderTypeEnum;
@@ -492,4 +493,107 @@ test('the performance period end may not precede its start', function (): void {
         ],
         'system_delivery_date_end'
     );
+});
+
+test('fill order positions defaults simulate to filling them', function (): void {
+    $result = FillOrderPositions::make([
+        'order_id' => $this->order->getKey(),
+        'order_positions' => [[
+            'order_id' => $this->order->getKey(),
+            'name' => 'Chili con Carne',
+            'vat_rate_id' => $this->vatRate->getKey(),
+            'amount' => 2,
+            'unit_price' => 4.90,
+        ]],
+    ])->validate()->execute();
+
+    expect($result)->toBeArray()
+        ->and(OrderPosition::query()->where('order_id', $this->order->getKey())->count())->toBe(1);
+});
+
+test('fill order positions still simulates when asked to', function (): void {
+    FillOrderPositions::make([
+        'order_id' => $this->order->getKey(),
+        'simulate' => true,
+        'order_positions' => [[
+            'order_id' => $this->order->getKey(),
+            'name' => 'Chili con Carne',
+            'vat_rate_id' => $this->vatRate->getKey(),
+            'amount' => 2,
+            'unit_price' => 4.90,
+        ]],
+    ])->validate()->execute();
+
+    expect(OrderPosition::query()->where('order_id', $this->order->getKey())->count())->toBe(0);
+});
+
+test('create order position recalculates the order when asked to', function (): void {
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'name' => 'Recalculated Position',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 2,
+        'unit_price' => 50.00,
+        'recalculate_order' => true,
+    ])->validate()->execute();
+
+    $order = $this->order->refresh();
+
+    expect($order->total_net_price)
+        ->toEqual(bcround($position->total_net_price, 2));
+});
+
+test('create order position leaves the order totals alone by default', function (): void {
+    $totalNetPrice = $this->order->refresh()->total_net_price;
+
+    CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'name' => 'Untouched Position',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 2,
+        'unit_price' => 50.00,
+    ])->validate()->execute();
+
+    expect($this->order->refresh()->total_net_price)->toEqual($totalNetPrice);
+});
+
+test('update order position recalculates the order when asked to', function (): void {
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'name' => 'Recalculated Position',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 1,
+        'unit_price' => 50.00,
+    ])->validate()->execute();
+
+    $updated = UpdateOrderPosition::make([
+        'id' => $position->getKey(),
+        'amount' => 3,
+        'recalculate_order' => true,
+    ])->validate()->execute();
+
+    $order = $this->order->refresh();
+
+    expect($order->total_net_price)
+        ->toEqual(bcround($updated->total_net_price, 2));
+});
+
+test('delete order position recalculates the order when asked to', function (): void {
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'name' => 'Deleted Position',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 2,
+        'unit_price' => 50.00,
+        'recalculate_order' => true,
+    ])->validate()->execute();
+
+    DeleteOrderPosition::make([
+        'id' => $position->getKey(),
+        'recalculate_order' => true,
+    ])->validate()->execute();
+
+    $order = $this->order->refresh();
+
+    expect($order->total_net_price)->toEqual(bcround(0, 2));
 });

@@ -6,6 +6,7 @@ use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\RestoreProduct;
 use FluxErp\Actions\Product\UpdateProduct;
+use FluxErp\Models\Product;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
 
@@ -60,6 +61,8 @@ class ProductForm extends FluxForm
     public ?bool $is_service = false;
 
     public ?bool $is_shipping_free = false;
+
+    public ?bool $is_shipping_item = false;
 
     public ?int $max_delivery_time = null;
 
@@ -119,22 +122,21 @@ class ProductForm extends FluxForm
 
     public ?float $weight_gram = null;
 
+    protected ?Product $cachedProductModel = null;
+
     public function fill($values): void
     {
         if ($values instanceof Model) {
             $values->loadMissing([
                 'bundleProducts:id',
-                'categories:id',
+                'ownCategories:id',
                 'tenants:id',
                 'coverMedia',
                 'parent',
-                'productProperties:id,product_property_group_id,name,property_type_enum,product_product_property.value',
-                'productProperties.productPropertyGroup:id,name',
-                'suppliers:id,main_address_id,customer_number,' .
-                    'product_supplier.contact_id,' .
-                    'product_supplier.manufacturer_product_number,' .
-                    'product_supplier.purchase_price',
-                'suppliers.mainAddress:id,name',
+                'ownProductProperties:id,product_property_group_id,name,property_type_enum,product_product_property.value',
+                'ownProductProperties.productPropertyGroup:id,name',
+                'ownSuppliers:id,main_address_id,customer_number',
+                'ownSuppliers.mainAddress:id,name',
                 'tags:id',
                 'vatRate:id,rate_percentage',
             ]);
@@ -160,6 +162,17 @@ class ProductForm extends FluxForm
                 'count' => $bundleProduct['pivot']['count'] ?? 0,
             ];
         }, $this->bundle_products);
+    }
+
+    public function getProductModel(): ?Product
+    {
+        if (! $this->id) {
+            return null;
+        }
+
+        return $this->cachedProductModel ??= resolve_static(Product::class, 'query')
+            ->whereKey($this->id)
+            ->first();
     }
 
     protected function getActions(): array

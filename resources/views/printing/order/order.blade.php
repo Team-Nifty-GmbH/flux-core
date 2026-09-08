@@ -117,6 +117,8 @@
     </x-flux::print.first-page-header>
 @show
 <main>
+    @section('order-print.delivery-address')
+    @show
     @section('header')
         <div
             style="

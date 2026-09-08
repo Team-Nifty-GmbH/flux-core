@@ -237,9 +237,19 @@ class SearchController extends Controller
                     $item->only($request->input('appends', [])),
                 );
 
+                $mapping = Arr::wrap($request->input('mapping', []));
+                $avatarUrl = data_get($formatted, 'image');
+
                 // mapping sources are limited to keys already exposed above
-                foreach (Arr::wrap($request->input('mapping', [])) as $target => $source) {
+                foreach ($mapping as $target => $source) {
                     data_set($formatted, $target, data_get($formatted, $source));
+                }
+
+                $formatted = $this->toPlainText($formatted);
+
+                // the avatar is a url, not display text, so it keeps its full value
+                if (! array_key_exists('image', $mapping)) {
+                    $formatted['image'] = $avatarUrl;
                 }
 
                 return $formatted;
@@ -249,5 +259,23 @@ class SearchController extends Controller
         Event::dispatch('tall-datatables-searched', [$request, $result]);
 
         return $result;
+    }
+
+    // a link is not display text, shortening it would break it
+    protected function toPlainText(array $values): array
+    {
+        foreach ($values as $key => $value) {
+            if (is_array($value)) {
+                $values[$key] = $this->toPlainText($value);
+
+                continue;
+            }
+
+            if (is_string($value) && ! Str::isUrl($value)) {
+                $values[$key] = Str::limit(trim(html_entity_decode(strip_tags($value))));
+            }
+        }
+
+        return $values;
     }
 }

@@ -54,9 +54,13 @@ pest()
             'is_default' => true,
         ]);
 
-        $this->defaultLanguage = Language::default() ?? Language::factory()->create([
-            'is_default' => true,
-        ]);
+        $this->defaultLanguage = Language::default() ?? tap(
+            Language::query()->firstOrCreate(
+                ['language_code' => 'en'],
+                Language::factory()->make(['language_code' => 'en'])->toArray()
+            ),
+            fn (Language $language) => $language->update(['is_default' => true])
+        );
 
         VatRate::default() ?? VatRate::factory()->create([
             'is_default' => true,
@@ -240,4 +244,84 @@ function waitForCondition(PendingAwaitablePage|AwaitableWebpage $page, string $c
     JS);
 
     return $page;
+}
+
+/**
+ * Create an order of the given type that a schedule runs on, for the recurring forecast widgets.
+ */
+function makeForecastOrder(
+    FluxErp\Enums\OrderTypeEnum $orderTypeEnum,
+    string $totalNetPrice,
+    string $cronExpression = '0 0 15 * *',
+    array $scheduleAttributes = []
+): FluxErp\Models\Order {
+    $tenant = Tenant::default();
+
+    $orderType = FluxErp\Models\OrderType::factory()
+        ->hasAttached($tenant, relationship: 'tenants')
+        ->create([
+            'order_type_enum' => $orderTypeEnum,
+            'is_active' => true,
+        ]);
+
+    $contact = FluxErp\Models\Contact::factory()
+        ->hasAttached($tenant, relationship: 'tenants')
+        ->create();
+
+    $order = FluxErp\Models\Order::factory()->create([
+        'tenant_id' => $tenant->getKey(),
+        'contact_id' => $contact->getKey(),
+        'address_invoice_id' => FluxErp\Models\Address::factory()->create([
+            'contact_id' => $contact->getKey(),
+            'is_main_address' => true,
+        ])->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'order_type_id' => $orderType->getKey(),
+        'total_net_price' => $totalNetPrice,
+    ]);
+
+    $schedule = FluxErp\Models\Schedule::create(array_merge([
+        'uuid' => Illuminate\Support\Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => FluxErp\Invokable\ProcessSubscriptionOrder::class,
+        'type' => FluxErp\Enums\RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => ['basic' => 'monthlyOn', 'dayConstraint' => null, 'timeConstraint' => null],
+            'parameters' => ['basic' => [15, '00:00'], 'dayConstraint' => [], 'timeConstraint' => []],
+        ],
+        'cron_expression' => $cronExpression,
+        'is_active' => true,
+        'parameters' => ['orderId' => $order->getKey()],
+    ], $scheduleAttributes));
+
+    $order->schedules()->attach($schedule->getKey());
+
+    return $order;
+}
+
+class CountingPermissionRegistrar extends Spatie\Permission\PermissionRegistrar
+{
+    public static int $scans = 0;
+
+    public function getPermissions(array $params = [], bool $onlyOne = false): Illuminate\Database\Eloquent\Collection
+    {
+        static::$scans++;
+
+        return parent::getPermissions($params, $onlyOne);
+    }
+}
+
+function countRegistrarScans(callable $callback): int
+{
+    app()->forgetInstance(Spatie\Permission\PermissionRegistrar::class);
+    app()->singleton(
+        Spatie\Permission\PermissionRegistrar::class,
+        fn ($app) => new CountingPermissionRegistrar($app->make(Illuminate\Cache\CacheManager::class))
+    );
+
+    CountingPermissionRegistrar::$scans = 0;
+    $callback();
+
+    return CountingPermissionRegistrar::$scans;
 }

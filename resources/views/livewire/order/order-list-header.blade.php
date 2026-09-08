@@ -217,6 +217,46 @@
                             class="space-y-4"
                         >
                             @section('order-position-detail-modal.content.right')
+                                <div
+                                    x-cloak
+                                    x-show="
+                                        $wire.order.isPurchase &&
+                                        $wire.orderPosition.packaging
+                                    "
+                                >
+                                    <x-input
+                                        type="number"
+                                        min="0"
+                                        wire:model.live="orderPosition.unit_amount"
+                                    >
+                                        <x-slot:label>
+                                            <div
+                                                class="flex items-center justify-between"
+                                            >
+                                                <div
+                                                    x-text="
+                                                        '{{ __('Quantity in :unit') }}'.replace(
+                                                            ':unit',
+                                                            $wire.orderPosition
+                                                                .packaging?.name ?? '',
+                                                        )
+                                                    "
+                                                ></div>
+                                                <div
+                                                    class="text-xs text-gray-500 dark:text-gray-400"
+                                                    x-text="
+                                                        '\u00d7 ' +
+                                                        $nuxbe.parseNumber(
+                                                            $wire.orderPosition
+                                                                .packaging
+                                                                ?.factor ?? 0,
+                                                        )
+                                                    "
+                                                ></div>
+                                            </div>
+                                        </x-slot:label>
+                                    </x-input>
+                                </div>
                                 <div class="grid grid-cols-2 gap-4">
                                     <x-input
                                         type="number"

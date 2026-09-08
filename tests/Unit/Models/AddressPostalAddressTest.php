@@ -4,7 +4,7 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Tenant;
 
-it('includes both firstname and lastname in postal_address', function (): void {
+test('includes both firstname and lastname in postal_address', function (): void {
     $tenant = Tenant::factory()->create();
     $contact = Contact::factory()
         ->hasAttached($tenant, relationship: 'tenants')
@@ -23,7 +23,7 @@ it('includes both firstname and lastname in postal_address', function (): void {
     expect($address->postal_address)->toContain('Jane Doe');
 });
 
-it('combines zip and city in postal_address', function (): void {
+test('combines zip and city in postal_address', function (): void {
     $tenant = Tenant::factory()->create();
     $contact = Contact::factory()
         ->hasAttached($tenant, relationship: 'tenants')
@@ -42,7 +42,7 @@ it('combines zip and city in postal_address', function (): void {
     expect($address->postal_address)->toContain('12345 Example City');
 });
 
-it('falls back to lastname only when firstname is missing', function (): void {
+test('falls back to lastname only when firstname is missing', function (): void {
     $tenant = Tenant::factory()->create();
     $contact = Contact::factory()
         ->hasAttached($tenant, relationship: 'tenants')
