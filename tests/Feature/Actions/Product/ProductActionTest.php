@@ -175,3 +175,53 @@ test('update product syncs its properties when they are passed', function (): vo
 
     expect($product->productProperties()->pluck('id')->all())->toBe([$wanted->getKey()]);
 });
+
+test('clearing the number on a second product does not collide with the first one that has none', function (): void {
+    $first = Product::factory()->create(['product_number' => 'P-1']);
+    $second = Product::factory()->create(['product_number' => 'P-2']);
+
+    UpdateProduct::make([
+        'id' => $first->getKey(),
+        'product_number' => null,
+    ])
+        ->validate()
+        ->execute();
+
+    $updated = UpdateProduct::make([
+        'id' => $second->getKey(),
+        'product_number' => null,
+        'name' => 'Renamed Widget',
+    ])
+        ->validate()
+        ->execute();
+
+    expect($updated->product_number)->toBeNull()
+        ->and($updated->name)->toBe('Renamed Widget');
+});
+
+test('a product number another product already carries is still rejected', function (): void {
+    Product::factory()->create(['product_number' => 'P-1']);
+    $product = Product::factory()->create(['product_number' => 'P-2']);
+
+    UpdateProduct::assertValidationErrors(
+        [
+            'id' => $product->getKey(),
+            'product_number' => 'P-1',
+        ],
+        'product_number'
+    );
+});
+
+test('a product keeps its own number on update', function (): void {
+    $product = Product::factory()->create(['product_number' => 'P-1']);
+
+    $updated = UpdateProduct::make([
+        'id' => $product->getKey(),
+        'product_number' => 'P-1',
+        'name' => 'Renamed Widget',
+    ])
+        ->validate()
+        ->execute();
+
+    expect($updated->product_number)->toBe('P-1');
+});

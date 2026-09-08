@@ -180,6 +180,8 @@ class UpdateProduct extends DispatchableFluxAction implements SupportsBulkExecut
             ->where('model_type', app(Product::class)->getMorphClass())
             ->where('model_id', $this->data['id'] ?? null);
         $this->rules['product_number'] = [
+            'string',
+            'nullable',
             Rule::unique('products', 'product_number')
                 ->whereNull('deleted_at')
                 ->ignore(data_get($this->data, 'id')),
