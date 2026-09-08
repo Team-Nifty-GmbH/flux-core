@@ -26,6 +26,8 @@ class Price extends FluxModel
 
     public ?string $discountPercentage = null;
 
+    public bool $isInherited = false;
+
     public ?string $rootDiscountFlat = null;
 
     public ?string $rootDiscountPercentage = null;
