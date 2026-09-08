@@ -616,11 +616,11 @@ test('can rename media', function (): void {
     $permission = Permission::findOrCreate('action.media.update', 'web');
     $this->user->givePermissionTo($permission);
 
-    $media = $this->contact
+    $media = $this->product
         ->addMedia(UploadedFile::fake()->image('test.jpg'))
-        ->toMediaCollection('attachments');
+        ->toMediaCollection('images');
 
-    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()])
         ->call('saveMedia', [
             'id' => $media->getKey(),
             'name' => 'Renamed file',
@@ -640,12 +640,12 @@ test('cannot rename media of another model', function (): void {
     $permission = Permission::findOrCreate('action.media.update', 'web');
     $this->user->givePermissionTo($permission);
 
-    $foreignContact = Contact::factory()->create();
-    $media = $foreignContact
+    $foreignProduct = Product::factory()->create();
+    $media = $foreignProduct
         ->addMedia(UploadedFile::fake()->image('test.jpg'))
-        ->toMediaCollection('attachments');
+        ->toMediaCollection('images');
 
-    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()])
         ->call('saveMedia', [
             'id' => $media->getKey(),
             'name' => 'Renamed file',
@@ -656,7 +656,7 @@ test('cannot rename media of another model', function (): void {
 });
 
 test('the tree is rendered with the component instead of fetched afterwards', function (): void {
-    $component = Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+    $component = Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()])
         ->assertOk();
 
     expect($component->get('mediaTree'))->not->toBeEmpty();
