@@ -39,7 +39,7 @@ class DeleteMediaCollection extends FluxAction
                 $query->where('media_folders.parent_collection', 'LIKE', $this->getData('collection_name') . '.%')
                     ->orWhere('media_folders.parent_collection', $this->getData('collection_name'));
             })
-            ->delete();
+            ->each(fn (MediaFolder $folder) => $folder->delete());
 
         return $deleted;
     }

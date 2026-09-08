@@ -16,6 +16,7 @@ use FluxErp\Traits\Livewire\WithFilePond;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -258,7 +259,11 @@ abstract class FolderTree extends Component
                 resolve_static(Media::class, 'query')
                     ->where('model_type', morph_alias($this->modelType))
                     ->where('model_id', $this->modelId)
-                    ->where('collection_name', 'like', $path . '%')
+                    ->where('collection_name', 'LIKE', $path . '%')
+                    ->where(function (Builder $query) use ($path): void {
+                        $query->where('collection_name', 'LIKE', $path . '.%')
+                            ->orWhere('collection_name', $path);
+                    })
                     ->update([
                         'collection_name' => DB::raw('CONCAT(\'' . $replace
                             . '\', SUBSTRING(collection_name, ' . strlen($path) + 1 . '))'
@@ -269,10 +274,13 @@ abstract class FolderTree extends Component
                     ->join('media_folder_model AS mfm', 'media_folders.id', '=', 'mfm.media_folder_id')
                     ->where('mfm.model_type', morph_alias($this->modelType))
                     ->where('mfm.model_id', $this->modelId)
-                    ->where('media_folders.parent_collection', $path)
-                    ->update([
-                        'parent_collection' => $replace,
-                    ]);
+                    ->where(function (Builder $query) use ($path): void {
+                        $query->where('media_folders.parent_collection', 'LIKE', $path . '.%')
+                            ->orWhere('media_folders.parent_collection', $path);
+                    })
+                    ->each(fn (MediaFolder $folder) => $folder->update([
+                        'parent_collection' => $replace . substr($folder->parent_collection, strlen($path)),
+                    ]));
             }
 
             return $attributes;

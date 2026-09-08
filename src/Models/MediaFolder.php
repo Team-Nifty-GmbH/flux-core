@@ -17,6 +17,10 @@ class MediaFolder extends FluxModel implements HasMedia
 {
     use CascadeSoftDeletes, HasParentChildRelations, HasUserModification, HasUuid, InteractsWithMedia;
 
+    protected array $cascadeDeletes = [
+        'children',
+    ];
+
     protected static function booted(): void
     {
         static::saving(function (MediaFolder $model): void {
