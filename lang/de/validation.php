@@ -637,7 +637,6 @@ return [
         'serial_number_range_id' => 'Seriennummernbereich-ID',
         'session_id' => 'Sitzungs-ID',
         'settings' => 'Einstellungen',
-        'shipping_costs_net_price' => 'Versandkosten Nettopreis',
         'signed_date' => 'Unterschriftsdatum',
         'simulate' => 'Simulieren',
         'slug' => 'Slug',

@@ -304,7 +304,6 @@ test('retoure total equals negative of original total', function (): void {
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
-        'shipping_costs_net_price' => 0,
         'invoice_number' => Str::random(),
         'is_locked' => true,
     ]);
@@ -401,7 +400,6 @@ test('handles vat rate mix correctly when creating retoure', function (): void {
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
-        'shipping_costs_net_price' => 0,
         'invoice_number' => Str::random(),
         'is_locked' => true,
     ]);
@@ -519,7 +517,6 @@ test('preserves discounts when creating split order', function (): void {
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
-        'shipping_costs_net_price' => 0,
         'invoice_number' => null,
         'is_locked' => true,
     ]);
@@ -601,7 +598,6 @@ test('calculates order with 100 percent position discount correctly', function (
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
-        'shipping_costs_net_price' => 0,
         'is_locked' => false,
     ]);
 
@@ -679,7 +675,6 @@ test('returned split order makes amount available again for original', function 
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
-        'shipping_costs_net_price' => 0,
         'invoice_number' => null,
         'is_locked' => true,
     ]);
@@ -852,7 +847,6 @@ test('partially returned split order reduces available amount proportionally', f
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
-        'shipping_costs_net_price' => 0,
         'invoice_number' => null,
         'is_locked' => true,
     ]);
@@ -1015,7 +1009,6 @@ test('direct retoure still reduces available amount to zero', function (): void 
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
-        'shipping_costs_net_price' => 0,
         'invoice_number' => Str::random(),
         'is_locked' => true,
     ]);
@@ -1147,7 +1140,6 @@ test('calculates order lock recalculation correctly', function (): void {
         'tenant_id' => $this->dbTenant->getKey(),
         'total_net_price' => 0,
         'total_gross_price' => 0,
-        'shipping_costs_net_price' => 0,
         'is_locked' => false,
     ]);
 
