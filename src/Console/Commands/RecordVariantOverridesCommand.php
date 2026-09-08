@@ -68,10 +68,7 @@ class RecordVariantOverridesCommand extends Command
         $differing = [];
 
         foreach ($fields as $field) {
-            $own = $variant->getAttribute($field);
-            $inherited = $variant->parent->getAttribute($field);
-
-            if ((is_null($own) !== is_null($inherited)) || $own != $inherited) {
+            if ($variant->getRawOriginal($field) !== $variant->parent->getRawOriginal($field)) {
                 $differing[] = $field;
             }
         }
