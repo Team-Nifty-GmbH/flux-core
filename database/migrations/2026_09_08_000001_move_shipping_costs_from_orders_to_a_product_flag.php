@@ -47,7 +47,6 @@ return new class() extends Migration
         });
 
         Schema::table('products', function (Blueprint $table): void {
-            $table->dropIndex(['is_shipping_item']);
             $table->dropColumn('is_shipping_item');
         });
     }
