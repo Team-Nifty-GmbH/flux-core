@@ -36,6 +36,7 @@
                 @endif
 
                 <div class="flex flex-col gap-4 pt-4">
+                    @section('create-order-modal.contact')
                     <x-select.styled
                         :label="__('Contact')"
                         class="pb-4"
@@ -69,6 +70,7 @@
                             ],
                         ]"
                     />
+                    @show
                     <div id="invoice-address-id">
                         <x-select.styled
                             class="pb-4"
