@@ -26,13 +26,6 @@ class Price extends FluxModel
 
     public ?string $discountPercentage = null;
 
-    /**
-     * Set by PriceHelper when the price was resolved from a parent price list
-     * rather than from the product's own row on the requested list.
-     *
-     * Not the same thing as the `is_inherited` column, which marks a row that
-     * variant inheritance copied down from the parent product.
-     */
     public bool $isInherited = false;
 
     public ?string $rootDiscountFlat = null;
