@@ -39,9 +39,7 @@ class CreateProductBundleProduct extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->rules['bundle_product_id'] = [
-            Rule::unique('bundle_product_product', 'bundle_product_id')
-                ->where('product_id', $this->data['product_id'] ?? 0),
-        ];
+        $this->rules['bundle_product_id'][] = Rule::unique('bundle_product_product', 'bundle_product_id')
+            ->where('product_id', $this->data['product_id'] ?? 0);
     }
 }

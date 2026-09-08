@@ -34,10 +34,8 @@ class UpdateProductBundleProduct extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->rules['bundle_product_id'] = [
-            Rule::unique('bundle_product_product', 'bundle_product_id')
-                ->where('product_id', $this->getData('product_id') ?? 0)
-                ->ignore($this->getData('pivot_id') ?? 0, 'pivot_id'),
-        ];
+        $this->rules['bundle_product_id'][] = Rule::unique('bundle_product_product', 'bundle_product_id')
+            ->where('product_id', $this->getData('product_id') ?? 0)
+            ->ignore($this->getData('pivot_id') ?? 0, 'pivot_id');
     }
 }
