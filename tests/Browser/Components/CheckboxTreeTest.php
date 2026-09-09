@@ -30,7 +30,9 @@ test('the checkbox tree keeps writing to the bound property after unchecking', f
 
     $read = <<<'JS'
         () => JSON.stringify(
-            window.Livewire.all().map((component) => component.ephemeral.selected)
+            window.Livewire.all()
+                .map((component) => component.ephemeral.selected)
+                .filter((value) => Array.isArray(value))
         )
     JS;
 
