@@ -703,3 +703,41 @@ test('a product without a price in the list leaves the position as it was', func
     expect((float) $updated->unit_price)->toBe(5.90)
         ->and($updated->product_id)->toBe($unpriced->getKey());
 });
+
+test('changing only the price list takes the price of that list', function (): void {
+    $product = Product::factory()->create(['vat_rate_id' => $this->vatRate->getKey()]);
+
+    Price::factory()->create([
+        'price_list_id' => $this->order->price_list_id,
+        'product_id' => $product->getKey(),
+        'price' => 5.90,
+    ]);
+
+    $otherList = PriceList::factory()->create([
+        'is_net' => PriceList::query()->whereKey($this->order->price_list_id)->value('is_net'),
+    ]);
+    Price::factory()->create([
+        'price_list_id' => $otherList->getKey(),
+        'product_id' => $product->getKey(),
+        'price' => 12.90,
+    ]);
+
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'product_id' => $product->getKey(),
+        'amount' => 1,
+    ])
+        ->validate()
+        ->execute();
+
+    expect((float) $position->unit_price)->toBe(5.90);
+
+    $updated = UpdateOrderPosition::make([
+        'id' => $position->getKey(),
+        'price_list_id' => $otherList->getKey(),
+    ])
+        ->validate()
+        ->execute();
+
+    expect((float) $updated->unit_price)->toBe(12.90);
+});
