@@ -7,16 +7,14 @@ use Illuminate\Support\Facades\Validator;
 
 function availabilityFails(int $resourceId, string $start, string $end, ?int $ignoreId = null): bool
 {
-    $rule = app(ResourceAvailable::class, [
-        'resourceId' => $resourceId,
-        'start' => $start,
-        'end' => $end,
-        'ignoreId' => $ignoreId,
-    ]);
-
     return Validator::make(
-        ['start' => $start],
-        ['start' => [$rule]]
+        array_filter([
+            'id' => $ignoreId,
+            'resource_id' => $resourceId,
+            'start' => $start,
+            'end' => $end,
+        ]),
+        ['start' => [app(ResourceAvailable::class)]]
     )->fails();
 }
 
