@@ -8,6 +8,7 @@ use FluxErp\Models\ResourceBooking;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
+use FluxErp\Rules\ResourceAvailable;
 use FluxErp\Rulesets\FluxRuleset;
 
 class CreateResourceBookingRuleset extends FluxRuleset
@@ -41,7 +42,7 @@ class CreateResourceBookingRuleset extends FluxRuleset
                 'integer',
                 app(MorphExists::class, ['modelAttribute' => 'assignable_type']),
             ],
-            'start' => ['required', 'date'],
+            'start' => ['required', 'date', app(ResourceAvailable::class)],
             'end' => ['required', 'date', 'after:start'],
             'description' => 'nullable|string',
         ];

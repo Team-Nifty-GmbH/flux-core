@@ -11,9 +11,12 @@ return new class() extends Migration
         Schema::create('resources', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->foreignId('product_id')->nullable()->constrained('products')->nullOnDelete();
+            $table->foreignId('product_id')
+                ->nullable()
+                ->constrained('products')
+                ->nullOnDelete();
             $table->string('name');
-            $table->string('resource_number')->nullable()->unique();
+            $table->string('resource_number')->nullable();
             $table->text('description')->nullable();
             $table->boolean('allow_overbooking')->default(false);
             $table->boolean('is_active')->default(true);

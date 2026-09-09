@@ -66,7 +66,6 @@ class ResourceView extends Component
     public function newBooking(): void
     {
         $this->resourceBookingForm->reset();
-        $this->resourceBookingForm->resource_id = $this->resourceForm->id;
 
         $this->modalOpen($this->resourceBookingForm->modalName());
     }
@@ -92,6 +91,7 @@ class ResourceView extends Component
     public function saveBooking(): bool
     {
         try {
+            $this->resourceBookingForm->resource_id = $this->resourceForm->id;
             $this->resourceBookingForm->save();
         } catch (Exception $e) {
             exception_to_notifications($e, $this);

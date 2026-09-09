@@ -21,7 +21,7 @@ class DeleteResource extends FluxAction
     public function performAction(): ?bool
     {
         $resource = resolve_static(Resource::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
 
         $resource->bookings()->delete();

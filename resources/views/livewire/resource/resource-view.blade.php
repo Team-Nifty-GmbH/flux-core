@@ -169,17 +169,15 @@
                     {{ __('Employee') }}
                 </option>
                 <option
-                    value="{{ morph_alias(\FluxErp\Models\Contact::class) }}"
+                    value="{{ morph_alias(\FluxErp\Models\Address::class) }}"
                 >
-                    {{ __('Contact') }}
+                    {{ __('Address') }}
                 </option>
             </x-select.native>
 
             @php
                 $assignableModel = $resourceBookingForm->assignable_type
-                    ? \Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel(
-                        $resourceBookingForm->assignable_type
-                    )
+                    ? morphed_model($resourceBookingForm->assignable_type)
                     : null;
             @endphp
 

@@ -8,6 +8,7 @@ use FluxErp\Models\ResourceBooking;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
+use FluxErp\Rules\ResourceAvailable;
 use FluxErp\Rulesets\FluxRuleset;
 
 class UpdateResourceBookingRuleset extends FluxRuleset
@@ -26,13 +27,13 @@ class UpdateResourceBookingRuleset extends FluxRuleset
                 'sometimes',
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Order::class]),
+                app(ModelExists::class, ['model' => Order::class, 'subject' => ResourceBooking::class]),
             ],
             'resource_id' => [
                 'sometimes',
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Resource::class])
+                app(ModelExists::class, ['model' => Resource::class, 'subject' => ResourceBooking::class])
                     ->where('is_active', true),
             ],
             'assignable_type' => [
@@ -47,8 +48,8 @@ class UpdateResourceBookingRuleset extends FluxRuleset
                 'integer',
                 app(MorphExists::class, ['modelAttribute' => 'assignable_type']),
             ],
-            'start' => ['sometimes', 'required', 'date'],
-            'end' => ['sometimes', 'required', 'date', 'after:start'],
+            'start' => ['required_with:end', 'date', app(ResourceAvailable::class)],
+            'end' => ['required_with:start', 'date', 'after:start'],
             'description' => 'sometimes|nullable|string',
         ];
     }

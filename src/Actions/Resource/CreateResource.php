@@ -20,9 +20,9 @@ class CreateResource extends FluxAction
 
     public function performAction(): Resource
     {
-        $resource = app(Resource::class, ['attributes' => $this->data]);
+        $resource = app(Resource::class, ['attributes' => $this->getData()]);
         $resource->save();
 
-        return $resource->fresh();
+        return $resource->refresh();
     }
 }

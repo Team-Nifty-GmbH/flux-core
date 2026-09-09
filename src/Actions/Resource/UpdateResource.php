@@ -23,10 +23,10 @@ class UpdateResource extends FluxAction
     public function performAction(): Model
     {
         $resource = resolve_static(Resource::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
 
-        $resource->fill($this->data);
+        $resource->fill($this->getData());
         $resource->save();
 
         return $resource->withoutRelations()->fresh();
@@ -34,14 +34,10 @@ class UpdateResource extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->rules['resource_number'] = [
-            'sometimes',
-            'nullable',
-            'string',
-            'max:255',
-            Rule::unique('resources', 'resource_number')
+        $this->addRules([
+            'resource_number' => Rule::unique('resources', 'resource_number')
                 ->whereNull('deleted_at')
                 ->ignore($this->getData('id')),
-        ];
+        ]);
     }
 }

@@ -6,6 +6,7 @@ use FluxErp\Models\Product;
 use FluxErp\Models\Resource;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Validation\Rule;
 
 class CreateResourceRuleset extends FluxRuleset
 {
@@ -26,10 +27,17 @@ class CreateResourceRuleset extends FluxRuleset
             'product_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Product::class]),
+                app(ModelExists::class, ['model' => Product::class])
+                    ->where('is_bundle', false)
+                    ->where('is_variant_parent', false),
             ],
             'name' => 'required|string|max:255',
-            'resource_number' => 'nullable|string|max:255|unique:resources,resource_number',
+            'resource_number' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('resources', 'resource_number')->whereNull('deleted_at'),
+            ],
             'description' => 'nullable|string',
             'allow_overbooking' => 'boolean',
             'is_active' => 'boolean',

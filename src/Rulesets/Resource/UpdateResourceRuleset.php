@@ -31,10 +31,12 @@ class UpdateResourceRuleset extends FluxRuleset
                 'sometimes',
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Product::class]),
+                app(ModelExists::class, ['model' => Product::class, 'subject' => Resource::class])
+                    ->where('is_bundle', false)
+                    ->where('is_variant_parent', false),
             ],
             'name' => 'sometimes|required|string|max:255',
-            'resource_number' => 'sometimes|nullable|string|max:255',
+            'resource_number' => ['sometimes', 'nullable', 'string', 'max:255'],
             'description' => 'sometimes|nullable|string',
             'allow_overbooking' => 'sometimes|boolean',
             'is_active' => 'sometimes|boolean',
