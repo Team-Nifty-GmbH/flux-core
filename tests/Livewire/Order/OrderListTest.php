@@ -16,6 +16,7 @@ use FluxErp\States\Order\PaymentState\Paid;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
@@ -263,4 +264,23 @@ test('creating payment reminders skips orders without a mailable address', funct
 
     expect(PaymentReminder::query()->where('order_id', $mailable->getKey())->exists())->toBeTrue()
         ->and(PaymentReminder::query()->where('order_id', $unmailable->getKey())->exists())->toBeFalse();
+});
+
+/**
+ * A project that has to narrow the contact picker of the new order modal, to the
+ * customers of one order type for instance, had to copy this whole view to do it. A
+ * copy of a view drifts silently: it keeps rendering while the original grows fields
+ * it no longer shows. The block is a section so it can be replaced on its own.
+ */
+test('the contact picker of the new order modal can be replaced on its own', function (): void {
+    $view = file_get_contents(
+        __DIR__ . '/../../../resources/views/livewire/order/order-list.blade.php'
+    );
+
+    expect($view)->toContain("@section('create-order-modal.contact')");
+
+    $section = Str::between($view, "@section('create-order-modal.contact')", '@show');
+
+    expect($section)->toContain('wire:model="order.contact_id"')
+        ->and($section)->not->toContain('order.address_invoice_id');
 });

@@ -36,39 +36,41 @@
                 @endif
 
                 <div class="flex flex-col gap-4 pt-4">
-                    <x-select.styled
-                        :label="__('Contact')"
-                        class="pb-4"
-                        wire:model="order.contact_id"
-                        required
-                        x-on:select="
-                            updateContactId($event.detail.select.contact_id)
-                        "
-                        select="label:label|value:contact_id"
-                        unfiltered
-                        :request="[
-                            'url' => route('search', \FluxErp\Models\Address::class),
-                            'method' => 'POST',
-                            'params' => [
-                                'option-value' => 'contact_id',
-                                'fields' => [
-                                    'name',
-                                    'contact_id',
-                                    'firstname',
-                                    'lastname',
-                                    'company',
-                                ],
-                                'where' => [
-                                    [
-                                        'is_main_address',
-                                        '=',
-                                        true,
+                    @section('create-order-modal.contact')
+                        <x-select.styled
+                            :label="__('Contact')"
+                            class="pb-4"
+                            wire:model="order.contact_id"
+                            required
+                            x-on:select="
+                                updateContactId($event.detail.select.contact_id)
+                            "
+                            select="label:label|value:contact_id"
+                            unfiltered
+                            :request="[
+                                'url' => route('search', \FluxErp\Models\Address::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'option-value' => 'contact_id',
+                                    'fields' => [
+                                        'name',
+                                        'contact_id',
+                                        'firstname',
+                                        'lastname',
+                                        'company',
                                     ],
+                                    'where' => [
+                                        [
+                                            'is_main_address',
+                                            '=',
+                                            true,
+                                        ],
+                                    ],
+                                    'with' => ['contact.media', 'country:id,name'],
                                 ],
-                                'with' => ['contact.media', 'country:id,name'],
-                            ],
-                        ]"
-                    />
+                            ]"
+                        />
+                    @show
                     <div id="invoice-address-id">
                         <x-select.styled
                             class="pb-4"
