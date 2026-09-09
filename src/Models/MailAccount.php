@@ -15,6 +15,9 @@ use Illuminate\Contracts\Mail\Mailer;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Mail;
+use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
+use Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream;
+use Throwable;
 use Webklex\IMAP\Facades\Client as ImapClient;
 use Webklex\PHPIMAP\Client;
 use Webklex\PHPIMAP\Exceptions\AuthFailedException;
@@ -43,6 +46,10 @@ class MailAccount extends FluxModel
         return [
             'password' => 'encrypted',
             'smtp_password' => 'encrypted',
+            'has_auto_assign' => 'boolean',
+            'has_o_auth' => 'boolean',
+            'has_valid_certificate' => 'boolean',
+            'smtp_has_valid_certificate' => 'boolean',
         ];
     }
 
@@ -96,6 +103,17 @@ class MailAccount extends FluxModel
         return null;
     }
 
+    public function disconnectImapClient(): void
+    {
+        $client = $this->imapClient;
+        $this->imapClient = null;
+
+        try {
+            $client?->disconnect();
+        } catch (Throwable) {
+        }
+    }
+
     public function getImapClient(): ?Client
     {
         if (is_null($this->imapClient)) {
@@ -103,6 +121,21 @@ class MailAccount extends FluxModel
         }
 
         return $this->imapClient;
+    }
+
+    /**
+     * Drop the cached client and connect again.
+     *
+     * The client is held for the lifetime of the model, so once the server has
+     * closed the connection every later call hands out the same dead stream.
+     * Anything recovering from a lost connection has to clear the cache first,
+     * otherwise it retries into the same broken socket.
+     */
+    public function reconnectImapClient(): ?Client
+    {
+        $this->disconnectImapClient();
+
+        return $this->getImapClient();
     }
 
     public function syncFolders(): array
@@ -151,6 +184,21 @@ class MailAccount extends FluxModel
         ];
 
         $mailer = Mail::build($config);
+
+        if ($this->smtp_has_valid_certificate === false) {
+            $transport = $mailer->getSymfonyTransport();
+            $stream = $transport instanceof EsmtpTransport ? $transport->getStream() : null;
+
+            if ($stream instanceof SocketStream) {
+                $stream->setStreamOptions([
+                    'ssl' => [
+                        'verify_peer' => false,
+                        'verify_peer_name' => false,
+                        'allow_self_signed' => true,
+                    ],
+                ]);
+            }
+        }
 
         $mailer->alwaysFrom($this->smtp_email, $fromName);
 

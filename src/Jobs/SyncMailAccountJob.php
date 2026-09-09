@@ -74,43 +74,48 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
 
     public function handle(): void
     {
-        $driver = app(MailDriverManager::class)->driver($this->mailAccount->protocol);
-
-        $driver->syncFolders($this->mailAccount);
-
-        if ($this->onlyFolders) {
-            return;
-        }
-
-        $folders = $this->mailAccount->mailFolders()
-            ->where('is_active', true)
-            ->get();
-        $total = $folders->count();
-
         try {
-            $folders->each(function (MailFolder $folder, int $index) use ($driver, $total): void {
-                if ($driver instanceof ReportsSyncProgress) {
-                    $driver->withProgressCallback(
-                        fn (int $processed, int $totalMessages) => $this->queueUpdate([
-                            'progress' => ($index + ($totalMessages > 0 ? min($processed / $totalMessages, 1) : 1))
-                                / $total
-                                * 100,
-                            'message' => __(':processed of :total mails (:folder)', [
-                                'processed' => $processed,
-                                'total' => $totalMessages,
-                                'folder' => $folder->name,
-                            ]),
-                        ])
-                    );
-                }
+            $driver = app(MailDriverManager::class)->driver($this->mailAccount->protocol);
 
-                $driver->syncMessages($folder);
-                $this->queueProgressChunk($total, 1);
-            });
-        } finally {
-            if ($driver instanceof ReportsSyncProgress) {
-                $driver->withProgressCallback(null);
+            $driver->syncFolders($this->mailAccount);
+
+            if ($this->onlyFolders) {
+                return;
             }
+
+            $folders = $this->mailAccount->mailFolders()
+                ->where('is_active', true)
+                ->get()
+                ->each(fn (MailFolder $folder) => $folder->setRelation('mailAccount', $this->mailAccount));
+            $total = $folders->count();
+
+            try {
+                $folders->each(function (MailFolder $folder, int $index) use ($driver, $total): void {
+                    if ($driver instanceof ReportsSyncProgress) {
+                        $driver->withProgressCallback(
+                            fn (int $processed, int $totalMessages) => $this->queueUpdate([
+                                'progress' => ($index + ($totalMessages > 0 ? min($processed / $totalMessages, 1) : 1))
+                                    / $total
+                                    * 100,
+                                'message' => __(':processed of :total mails (:folder)', [
+                                    'processed' => $processed,
+                                    'total' => $totalMessages,
+                                    'folder' => $folder->name,
+                                ]),
+                            ])
+                        );
+                    }
+
+                    $driver->syncMessages($folder);
+                    $this->queueProgressChunk($total, 1);
+                });
+            } finally {
+                if ($driver instanceof ReportsSyncProgress) {
+                    $driver->withProgressCallback(null);
+                }
+            }
+        } finally {
+            $this->mailAccount->disconnectImapClient();
         }
     }
 

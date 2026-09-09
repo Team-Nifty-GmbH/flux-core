@@ -100,13 +100,19 @@ class OrderPositionForm extends FluxForm
 
     public null|string|float $total_net_price = null;
 
+    public null|float|string $unit_amount = null;
+
     public ?string $unit_gram_weight = null;
 
     public null|string|float $unit_gross_price = null;
 
     public null|string|float $unit_net_price = null;
 
+    public ?int $unit_id = null;
+
     public null|string|float $unit_price = null;
+
+    public ?array $packaging = null;
 
     public null|string|float $vat_price = null;
 
@@ -163,6 +169,50 @@ class OrderPositionForm extends FluxForm
         }
     }
 
+    public function applyUnitAmount(): void
+    {
+        $unitId = data_get($this->packaging, 'unit_id');
+
+        if (! $unitId || ! is_numeric($this->unit_amount)) {
+            $this->unit_amount = null;
+            $this->unit_id = null;
+
+            return;
+        }
+
+        $this->unit_id = $unitId;
+        $this->amount = $this->trimDecimals(
+            bcmul($this->unit_amount, data_get($this->packaging, 'factor'))
+        );
+    }
+
+    public function deriveUnitAmount(): void
+    {
+        $unitId = data_get($this->packaging, 'unit_id');
+        $factor = data_get($this->packaging, 'factor');
+
+        if (! $unitId || ! $factor || ! is_numeric($this->amount) || $this->unit_id !== $unitId) {
+            $this->unit_amount = null;
+            $this->unit_id = null;
+
+            return;
+        }
+
+        $unitAmount = $this->trimDecimals(bcdiv($this->amount, $factor));
+
+        // Only a packaging amount that multiplies back to the exact article amount may
+        // stand. Anything else would silently move the amount on the next save, and the
+        // position would keep claiming a packaging its quantity no longer matches.
+        if (bccomp($this->trimDecimals(bcmul($unitAmount, $factor)), $this->amount) !== 0) {
+            $this->unit_amount = null;
+            $this->unit_id = null;
+
+            return;
+        }
+
+        $this->unit_amount = $unitAmount;
+    }
+
     public function getProduct(): Product
     {
         return $this->product;
@@ -188,9 +238,22 @@ class OrderPositionForm extends FluxForm
             }
         }
 
-        unset($data['discount_flat'], $data['discount_is_percentage'], $data['is_bundle_parent']);
+        unset(
+            $data['discount_flat'],
+            $data['discount_is_percentage'],
+            $data['is_bundle_parent'],
+            $data['packaging'],
+            $data['unit_amount']
+        );
 
         return $data;
+    }
+
+    protected function trimDecimals(string $value): string
+    {
+        return str_contains($value, '.')
+            ? rtrim(rtrim($value, '0'), '.')
+            : $value;
     }
 
     protected function getActions(): array

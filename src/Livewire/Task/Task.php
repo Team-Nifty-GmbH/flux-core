@@ -101,7 +101,7 @@ class Task extends Component
 
             $this->redirectRoute('tasks', navigate: true);
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->task);
         }
     }
 
@@ -136,7 +136,7 @@ class Task extends Component
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->replica);
 
             return;
         }
@@ -160,7 +160,7 @@ class Task extends Component
         try {
             $this->task->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->task);
 
             return false;
         }

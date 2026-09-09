@@ -209,6 +209,11 @@
                 wire:model="schedule.is_active"
                 :label="__('Is Active')"
             />
+            <x-toggle
+                wire:model="order.is_self_billed"
+                :label="__('Supplier sends no invoice')"
+                :hint="__('The recurring order is the document itself and gets its own invoice number, for rent, insurance or fees. Leave it off where the supplier sends an invoice that is taken over onto the order.')"
+            />
             <div
                 x-cloak
                 x-show="$wire.schedule.nextExecutionDates.length > 0"

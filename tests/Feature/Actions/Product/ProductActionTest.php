@@ -3,7 +3,11 @@
 use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\UpdateProduct;
+use FluxErp\Models\Price;
+use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\ProductProperty;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 
 test('create product with defaults', function (): void {
@@ -60,6 +64,79 @@ test('delete product with children fails', function (): void {
     )->toThrow(Illuminate\Validation\ValidationException::class);
 });
 
+test('does not copy parent prices into variant when inheritance is enabled', function (): void {
+    $listA = PriceList::factory()->create();
+    $parent = Product::factory()->create(['vat_rate_id' => VatRate::default()?->getKey()]);
+    $parent->tenants()->attach(Tenant::default()->getKey());
+    Price::factory()->create([
+        'product_id' => $parent->getKey(),
+        'price_list_id' => $listA->getKey(),
+        'price' => 100,
+    ]);
+
+    $variant = CreateProduct::make([
+        'parent_id' => $parent->getKey(),
+        'name' => 'Variant',
+        'product_number' => 'V-INHERIT',
+        'vat_rate_id' => VatRate::default()?->getKey(),
+    ])->validate()->execute();
+
+    expect($variant->ownPrices()->count())->toBe(0);
+    expect($variant->prices->where('price_list_id', $listA->getKey())->first()->price)->toEqual(100);
+});
+
+test('still copies parent prices into variant when inheritance is disabled', function (): void {
+    app(FluxErp\Settings\ProductSettings::class)->fill(['variant_inheritance_enabled' => false])->save();
+
+    $listA = PriceList::factory()->create();
+    $parent = Product::factory()->create(['vat_rate_id' => VatRate::default()?->getKey()]);
+    $parent->tenants()->attach(Tenant::default()->getKey());
+    Price::factory()->create([
+        'product_id' => $parent->getKey(),
+        'price_list_id' => $listA->getKey(),
+        'price' => 100,
+    ]);
+
+    $variant = CreateProduct::make([
+        'parent_id' => $parent->getKey(),
+        'name' => 'Variant',
+        'product_number' => 'V-LEGACY',
+    ])->validate()->execute();
+
+    expect($variant->ownPrices()->count())->toBe(1);
+});
+
+test('demoting a variant parent to standalone via update product', function (): void {
+    $parent = Product::factory()->create();
+    Product::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'is_active' => false,
+    ]);
+
+    UpdateProduct::make([
+        'id' => $parent->getKey(),
+        'is_variant_parent' => false,
+    ])
+        ->validate()
+        ->execute();
+
+    expect($parent->fresh()->is_variant_parent)->toBeFalse();
+});
+
+test('rejects demoting a variant parent while active variants exist', function (): void {
+    $parent = Product::factory()->create();
+    Product::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'is_active' => true,
+    ]);
+
+    UpdateProduct::make([
+        'id' => $parent->getKey(),
+        'is_variant_parent' => false,
+    ])
+        ->validate()
+        ->execute();
+})->throws(Illuminate\Validation\ValidationException::class);
 test('create product rejects a purchase-only vat rate', function (): void {
     $purchaseOnlyVatRate = VatRate::factory()->create([
         'is_purchase' => true,
@@ -70,4 +147,81 @@ test('create product rejects a purchase-only vat rate', function (): void {
         'name' => 'Test Widget',
         'vat_rate_id' => $purchaseOnlyVatRate->getKey(),
     ], 'vat_rate_id');
+});
+
+test('update product keeps its properties when none are passed', function (): void {
+    $product = Product::factory()->create();
+    $property = ProductProperty::factory()->create();
+    $product->productProperties()->attach($property->getKey(), ['value' => 'kept']);
+
+    UpdateProduct::make([
+        'id' => $product->getKey(),
+        'name' => 'Updated Widget',
+    ])->validate()->execute();
+
+    expect($product->productProperties()->pluck('id')->all())->toBe([$property->getKey()]);
+});
+
+test('update product syncs its properties when they are passed', function (): void {
+    $product = Product::factory()->create();
+    $stale = ProductProperty::factory()->create();
+    $wanted = ProductProperty::factory()->create();
+    $product->productProperties()->attach($stale->getKey(), ['value' => 'gone']);
+
+    UpdateProduct::make([
+        'id' => $product->getKey(),
+        'product_properties' => [['id' => $wanted->getKey(), 'value' => 'set']],
+    ])->validate()->execute();
+
+    expect($product->productProperties()->pluck('id')->all())->toBe([$wanted->getKey()]);
+});
+
+test('clearing the number on a second product does not collide with the first one that has none', function (): void {
+    $first = Product::factory()->create(['product_number' => 'P-1']);
+    $second = Product::factory()->create(['product_number' => 'P-2']);
+
+    UpdateProduct::make([
+        'id' => $first->getKey(),
+        'product_number' => null,
+    ])
+        ->validate()
+        ->execute();
+
+    $updated = UpdateProduct::make([
+        'id' => $second->getKey(),
+        'product_number' => null,
+        'name' => 'Renamed Widget',
+    ])
+        ->validate()
+        ->execute();
+
+    expect($updated->product_number)->toBeNull()
+        ->and($updated->name)->toBe('Renamed Widget');
+});
+
+test('a product number another product already carries is still rejected', function (): void {
+    Product::factory()->create(['product_number' => 'P-1']);
+    $product = Product::factory()->create(['product_number' => 'P-2']);
+
+    UpdateProduct::assertValidationErrors(
+        [
+            'id' => $product->getKey(),
+            'product_number' => 'P-1',
+        ],
+        'product_number'
+    );
+});
+
+test('a product keeps its own number on update', function (): void {
+    $product = Product::factory()->create(['product_number' => 'P-1']);
+
+    $updated = UpdateProduct::make([
+        'id' => $product->getKey(),
+        'product_number' => 'P-1',
+        'name' => 'Renamed Widget',
+    ])
+        ->validate()
+        ->execute();
+
+    expect($updated->product_number)->toBe('P-1');
 });

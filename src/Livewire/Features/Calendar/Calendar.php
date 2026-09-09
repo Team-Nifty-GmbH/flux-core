@@ -101,7 +101,7 @@ class Calendar extends Component
         try {
             $this->calendar->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->calendar);
 
             return false;
         }
@@ -130,7 +130,6 @@ class Calendar extends Component
 
         if ($trigger === 'event-change' && ! $isEditable) {
             $this->skipRender();
-            CalendarEventEdit::$skipNextRender = true;
 
             return;
         }
@@ -170,7 +169,6 @@ class Calendar extends Component
 
         if ($trigger === 'event-change') {
             $this->skipRender();
-            CalendarEventEdit::$skipNextRender = true;
 
             if ($this->event->was_repeatable) {
                 $this->js(<<<'JS'
@@ -194,13 +192,12 @@ class Calendar extends Component
                     ->success(__(':model saved', ['model' => __(Str::headline(morph_alias($model)))]))
                     ->send();
             } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+                exception_to_notifications($e, $this, form: $this->event);
 
                 return;
             }
         } elseif ($previousEditComponent === $this->event->edit_component) {
             $this->skipRender();
-            CalendarEventEdit::$skipNextRender = true;
 
             $this->js(<<<'JS'
                 window.dispatchEvent(new CustomEvent('sync-calendar-event', {
@@ -398,7 +395,7 @@ class Calendar extends Component
         try {
             $this->calendar->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->calendar);
 
             return false;
         }

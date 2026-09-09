@@ -26,7 +26,7 @@ class UpdateScheduleRuleset extends FluxRuleset
             'cron' => 'sometimes|required|array',
             'cron.methods' => 'sometimes|required|array',
             'cron.methods.basic' => [
-                'nullable',
+                'required_with:cron',
                 Rule::in(FrequenciesEnum::getBasicFrequencies()),
             ],
             'cron.methods.dayConstraint' => [

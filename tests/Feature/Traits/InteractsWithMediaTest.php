@@ -3,6 +3,8 @@
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Media;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 test('getMediaAsTree keeps all sibling branches under a shared dotted prefix', function (): void {
     $contact = Contact::factory()->create();
@@ -41,4 +43,22 @@ test('getMediaAsTree keeps all sibling branches under a shared dotted prefix', f
         'Berater.Nextcloud.Beta',
         'Berater.Nextcloud.Gamma',
     ]);
+});
+
+test('deleting a media record removes its file from the disk', function (): void {
+    Storage::fake(config('media-library.disk_name'));
+
+    $contact = Contact::factory()->create();
+
+    $media = $contact
+        ->addMedia(UploadedFile::fake()->create('contract.pdf', 12))
+        ->toMediaCollection();
+
+    $path = $media->id . '/' . $media->file_name;
+
+    Storage::disk($media->disk)->assertExists($path);
+
+    $media->delete();
+
+    Storage::disk($media->disk)->assertMissing($path);
 });

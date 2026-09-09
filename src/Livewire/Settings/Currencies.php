@@ -61,7 +61,7 @@ class Currencies extends CurrencyList
         try {
             $this->selectedCurrency->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->selectedCurrency);
 
             return false;
         }
@@ -76,7 +76,7 @@ class Currencies extends CurrencyList
         try {
             $this->selectedCurrency->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->selectedCurrency);
 
             return false;
         }

@@ -16,7 +16,9 @@ use FluxErp\Models\Product;
 use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 test('copies position discounts when creating retoure', function (): void {
     // Arrange: Create an order with a position that has a discount
@@ -303,7 +305,6 @@ test('retoure total equals negative of original total', function (): void {
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
-        'shipping_costs_net_price' => 0,
         'invoice_number' => Str::random(),
         'is_locked' => true,
     ]);
@@ -400,7 +401,6 @@ test('handles vat rate mix correctly when creating retoure', function (): void {
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
-        'shipping_costs_net_price' => 0,
         'invoice_number' => Str::random(),
         'is_locked' => true,
     ]);
@@ -518,7 +518,6 @@ test('preserves discounts when creating split order', function (): void {
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
-        'shipping_costs_net_price' => 0,
         'invoice_number' => null,
         'is_locked' => true,
     ]);
@@ -600,7 +599,6 @@ test('calculates order with 100 percent position discount correctly', function (
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
-        'shipping_costs_net_price' => 0,
         'is_locked' => false,
     ]);
 
@@ -678,7 +676,6 @@ test('returned split order makes amount available again for original', function 
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
-        'shipping_costs_net_price' => 0,
         'invoice_number' => null,
         'is_locked' => true,
     ]);
@@ -749,7 +746,7 @@ test('returned split order makes amount available again for original', function 
 
     // Step 4: Calculate available amount from original order
     // The split order was fully returned, so original should have 10 available again
-    $signedAmounts = Illuminate\Support\Facades\DB::select(
+    $signedAmounts = DB::select(
         'WITH RECURSIVE siblings AS (
             SELECT id, origin_position_id, signed_amount
             FROM order_positions
@@ -851,7 +848,6 @@ test('partially returned split order reduces available amount proportionally', f
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
-        'shipping_costs_net_price' => 0,
         'invoice_number' => null,
         'is_locked' => true,
     ]);
@@ -918,7 +914,7 @@ test('partially returned split order reduces available amount proportionally', f
         ->and((float) $retourePosition->signed_amount)->toBe(-3.0);
 
     // Step 4: Calculate available amount from original order
-    $signedAmounts = Illuminate\Support\Facades\DB::select(
+    $signedAmounts = DB::select(
         'WITH RECURSIVE siblings AS (
             SELECT id, origin_position_id, signed_amount
             FROM order_positions
@@ -1014,7 +1010,6 @@ test('direct retoure still reduces available amount to zero', function (): void 
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
-        'shipping_costs_net_price' => 0,
         'invoice_number' => Str::random(),
         'is_locked' => true,
     ]);
@@ -1060,7 +1055,7 @@ test('direct retoure still reduces available amount to zero', function (): void 
         ->and((float) $retourePosition->signed_amount)->toBe(-10.0);
 
     // Step 3: Calculate available amount from original order
-    $signedAmounts = Illuminate\Support\Facades\DB::select(
+    $signedAmounts = DB::select(
         'WITH RECURSIVE siblings AS (
             SELECT id, origin_position_id, signed_amount
             FROM order_positions
@@ -1146,7 +1141,6 @@ test('calculates order lock recalculation correctly', function (): void {
         'tenant_id' => $this->dbTenant->getKey(),
         'total_net_price' => 0,
         'total_gross_price' => 0,
-        'shipping_costs_net_price' => 0,
         'is_locked' => false,
     ]);
 
@@ -1180,7 +1174,7 @@ test('calculates order lock recalculation correctly', function (): void {
         ->and(bccomp($order->total_gross_price, '238', 2))->toBe(0);
 });
 
-test('does not set parent_id when creating refund', function (): void {
+test('hangs a refund under the order it was created from', function (): void {
     $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
 
     $address = Address::factory()->create([
@@ -1225,17 +1219,15 @@ test('does not set parent_id when creating refund', function (): void {
         'is_free_text' => true,
     ]);
 
-    // Simulate what the Livewire component does: passing parent_id explicitly
     $refund = ReplicateOrder::make([
         'id' => $order->getKey(),
         'address_invoice_id' => $address->getKey(),
         'order_type_id' => $refundOrderType->getKey(),
-        'parent_id' => $order->getKey(),
     ])
         ->validate()
         ->execute();
 
-    expect($refund->parent_id)->toBeNull()
+    expect($refund->parent_id)->toBe($order->getKey())
         ->and($refund->created_from_id)->toBe($order->getKey());
 });
 
@@ -1376,3 +1368,292 @@ test('replicates with null agent_id when contact agent was deleted', function (O
     'retoure' => OrderTypeEnum::Retoure,
     'split order' => OrderTypeEnum::SplitOrder,
 ]);
+
+test('replicates an order whose address snapshot points at a deleted address', function (): void {
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
+
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $deletedAddress = Address::factory()->create(['contact_id' => $contact->getKey()]);
+    $snapshot = ['id' => $deletedAddress->getKey(), 'company' => $deletedAddress->company];
+    $deletedAddress->delete();
+
+    $orderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+    ]);
+
+    $order = Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'address_delivery_id' => $address->getKey(),
+        'address_delivery' => $snapshot,
+        'contact_id' => $contact->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => $orderType->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
+
+    $replicated = ReplicateOrder::make($order)
+        ->validate()
+        ->execute();
+
+    expect($replicated->exists)->toBeTrue()
+        ->and($replicated->getKey())->not->toBe($order->getKey());
+});
+
+test('creates a refund from an order which itself has a parent', function (): void {
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
+
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $orderOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+    ]);
+
+    $refundOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Refund,
+        'is_active' => true,
+    ]);
+
+    $orderAttributes = [
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => $orderOrderType->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+    ];
+
+    $newOrder = Order::factory()->create($orderAttributes);
+
+    $order = Order::factory()->create($orderAttributes + [
+        'parent_id' => $newOrder->getKey(),
+        'invoice_number' => Str::random(),
+        'is_locked' => true,
+    ]);
+
+    $refund = ReplicateOrder::make([
+        'id' => $order->getKey(),
+        'parent_id' => $order->parent_id,
+        'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $refundOrderType->getKey(),
+    ])
+        ->validate()
+        ->execute();
+
+    expect($refund->order_type_id)->toBe($refundOrderType->getKey())
+        ->and($refund->parent_id)->toBe($order->getKey());
+});
+
+test('still refuses a retoure from an order without an invoice number', function (): void {
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
+
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $order = Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => OrderType::factory()->create([
+            'order_type_enum' => OrderTypeEnum::Order,
+            'is_active' => true,
+        ])->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => null,
+    ]);
+
+    $retoureOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Retoure,
+        'is_active' => true,
+    ]);
+
+    expect(fn () => ReplicateOrder::make([
+        'id' => $order->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $retoureOrderType->getKey(),
+    ])->validate())
+        ->toThrow(ValidationException::class);
+});
+
+test('still refuses a split order from an order which is already invoiced', function (): void {
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
+
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $order = Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => OrderType::factory()->create([
+            'order_type_enum' => OrderTypeEnum::Order,
+            'is_active' => true,
+        ])->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => Str::random(),
+    ]);
+
+    $splitOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::SplitOrder,
+        'is_active' => true,
+    ]);
+
+    expect(fn () => ReplicateOrder::make([
+        'id' => $order->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $splitOrderType->getKey(),
+    ])->validate())
+        ->toThrow(ValidationException::class);
+});
+
+test('still refuses a retoure from a retoure', function (): void {
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
+
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $retoureOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Retoure,
+        'is_active' => true,
+    ]);
+
+    $retoure = Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => $retoureOrderType->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => Str::random(),
+    ]);
+
+    expect(fn () => ReplicateOrder::make([
+        'id' => $retoure->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $retoureOrderType->getKey(),
+    ])->validate())
+        ->toThrow(ValidationException::class);
+});
+
+test('refuses a refund from an order without an invoice number', function (): void {
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
+
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $order = Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => OrderType::factory()->create([
+            'order_type_enum' => OrderTypeEnum::Order,
+            'is_active' => true,
+        ])->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => null,
+    ]);
+
+    $refundOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Refund,
+        'is_active' => true,
+    ]);
+
+    expect(fn () => ReplicateOrder::make([
+        'id' => $order->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $refundOrderType->getKey(),
+    ])->validate())
+        ->toThrow(ValidationException::class);
+});
+
+test('rebuilds the slug positions once instead of once per position', function (): void {
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+    $currency = Currency::factory()->create();
+    $priceList = PriceList::factory()->create();
+    $vatRate = VatRate::factory()->create();
+    $paymentType = PaymentType::factory()->hasAttached(factory: $this->dbTenant, relationship: 'tenants')->create();
+    $product = Product::factory()->create();
+
+    $orderOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+    ]);
+    $order = Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'currency_id' => $currency->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => $orderOrderType->getKey(),
+        'payment_type_id' => $paymentType->getKey(),
+        'price_list_id' => $priceList->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => Str::random(),
+        'is_locked' => true,
+    ]);
+
+    $warehouse = Warehouse::factory()->create();
+
+    OrderPosition::factory()->count(6)->create([
+        'order_id' => $order->getKey(),
+        'product_id' => $product->getKey(),
+        'warehouse_id' => $warehouse->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'amount' => 1,
+    ]);
+
+    $rebuilds = 0;
+    DB::listen(function ($query) use (&$rebuilds): void {
+        if (str_contains($query->sql, 'position_hierarchy')) {
+            $rebuilds++;
+        }
+    });
+
+    $copy = ReplicateOrder::make([
+        'id' => $order->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $orderOrderType->getKey(),
+    ])
+        ->validate()
+        ->execute();
+
+    expect($rebuilds)->toBe(1)
+        ->and($copy->orderPositions()->count())->toBe(6)
+        ->and($copy->orderPositions()->pluck('slug_position')->filter()->count())->toBe(6);
+});

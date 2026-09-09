@@ -203,3 +203,49 @@ test('create ticket from mail message', function (): void {
         'created_by' => $this->address->getMorphClass() . ':' . $this->address->getKey(),
     ]);
 });
+
+test('keeps special characters in the subject', function (string $subject, string $expected): void {
+    $result = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'from' => 'Tester McTestFace <' . $this->address->email_primary . '>',
+        'to' => [$this->mailAccount->email],
+        'subject' => $subject,
+        'text_body' => faker()->text(),
+        'html_body' => '<p>' . faker()->text() . '</p>',
+        'communication_type_enum' => 'mail',
+        'date' => now()->format('Y-m-d H:i:s'),
+        'tags' => [],
+    ])
+        ->validate()
+        ->execute();
+
+    expect($expected)->toBe($result->subject);
+})->with([
+    'umlauts' => ['Kündigung des Tee Abo Vertrags', 'Kündigung des Tee Abo Vertrags'],
+    'dash and umlaut' => ['Gmund Colors – mehr Möglichkeiten', 'Gmund Colors – mehr Möglichkeiten'],
+    'emoji' => ['📦 Dein Paket wurde geliefert', '📦 Dein Paket wurde geliefert'],
+    'encoded word' => ['=?UTF-8?Q?Login_nicht_m=C3=B6glich?=', 'Login nicht möglich'],
+    'partly encoded' => ['Neu =?utf-8?b?ZsO8cg==?= Sie', 'Neu für Sie'],
+    'iso encoded word' => ['=?iso-8859-1?Q?Restbest=E4nde_2026?=', 'Restbestände 2026'],
+    'question marks' => ['Preis: 5? oder 6?', 'Preis: 5? oder 6?'],
+]);
+
+test('keeps special characters in the html body', function (): void {
+    $result = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'from' => 'Tester McTestFace <' . $this->address->email_primary . '>',
+        'to' => [$this->mailAccount->email],
+        'subject' => Str::uuid()->toString(),
+        'text_body' => faker()->text(),
+        'html_body' => '<p>Grüße aus München – 100 % Bio 🍵</p>',
+        'communication_type_enum' => 'mail',
+        'date' => now()->format('Y-m-d H:i:s'),
+        'tags' => [],
+    ])
+        ->validate()
+        ->execute();
+
+    expect('<p>Grüße aus München – 100 % Bio 🍵</p>')->toBe($result->html_body);
+});

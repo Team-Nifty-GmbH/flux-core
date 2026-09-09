@@ -3,6 +3,9 @@
 namespace FluxErp\Livewire\Product;
 
 use Exception;
+use FluxErp\Actions\Product\ResetProductFields;
+use FluxErp\Actions\Product\ResetProductRelations;
+use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Enums\PropertyTypeEnum;
 use FluxErp\Facades\ProductType;
@@ -192,15 +195,16 @@ class Product extends Component
             return;
         }
 
-        $this->product->suppliers[] = [
-            'contact_id' => $contact->id,
-            'customer_number' => $contact->customer_number,
-            'manufacturer_product_number' => null,
-            'purchase_price' => null,
-            'main_address' => [
-                'name' => $contact->mainAddress->name,
-            ],
-        ];
+        $this->product->suppliers[] = array_merge(
+            array_fill_keys(app(ProductModel::class)->suppliers()->getPivotColumns(), null),
+            [
+                'contact_id' => $contact->getKey(),
+                'customer_number' => $contact->customer_number,
+                'main_address' => [
+                    'name' => $contact->mainAddress?->name,
+                ],
+            ]
+        );
 
         $this->product->suppliers = array_values($this->product->suppliers);
     }
@@ -238,7 +242,7 @@ class Product extends Component
 
             return true;
         } catch (Exception $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->product);
         }
 
         return false;
@@ -250,6 +254,11 @@ class Product extends Component
         $product = resolve_static(ProductModel::class, 'query')
             ->whereKey($this->product->id)
             ->first();
+
+        $variantOwnPriceListIds = $product?->isVariant()
+            ? $product->ownPrices()->pluck('price_list_id')->all()
+            : [];
+
         $priceListHelper = PriceHelper::make($product)->useDefault(false);
 
         $priceLists = resolve_static(PriceList::class, 'query')
@@ -270,7 +279,7 @@ class Product extends Component
                 'is_default',
                 'is_purchase',
             ])
-            ->map(function (PriceList $priceList) use ($priceListHelper) {
+            ->map(function (PriceList $priceList) use ($priceListHelper, $variantOwnPriceListIds) {
                 $price = $priceListHelper
                     ->setPriceList($priceList)
                     ->price();
@@ -288,6 +297,7 @@ class Product extends Component
                     'is_default' => $priceList->is_default,
                     'is_purchase' => $priceList->is_purchase,
                     'is_editable' => ! is_null(data_get($price, 'id')) || ! is_null($price?->parent) || is_null($price),
+                    'variant_owns_price' => in_array($priceList->id, $variantOwnPriceListIds, strict: true),
                 ];
             });
 
@@ -392,6 +402,66 @@ class Product extends Component
         $this->recalculateDisplayedProductProperties();
     }
 
+    /**
+     * Drop the overrides on inheritable fields so they follow the parent again. Called on a
+     * variant it resets that variant, called on a parent it resets every variant under it.
+     */
+    public function resetFields(array|string $fields): bool
+    {
+        return $this->resetInheritance(
+            ResetProductFields::class,
+            ['fields' => Arr::wrap($fields)]
+        );
+    }
+
+    /**
+     * Same for inheritable relations. $relatedIds narrows the reset to single related rows,
+     * for instance one price list on the prices tab; leave it empty to reset the whole relation.
+     */
+    public function resetRelations(array|string $relations, array $relatedIds = []): bool
+    {
+        return $this->resetInheritance(
+            ResetProductRelations::class,
+            [
+                'relations' => array_map(
+                    fn (string $relation): array => [
+                        'relation' => $relation,
+                        'related_ids' => $relatedIds ?: null,
+                    ],
+                    Arr::wrap($relations)
+                ),
+            ]
+        );
+    }
+
+    public function promoteToStandalone(): bool
+    {
+        try {
+            UpdateProduct::make([
+                'id' => $this->product->id,
+                'is_variant_parent' => false,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this, form: $this->product);
+
+            return false;
+        }
+
+        $this->resetProduct();
+
+        return true;
+    }
+
+    public function deactivate(): bool
+    {
+        $this->product->is_active = false;
+
+        return $this->save();
+    }
+
     public function save(): bool
     {
         if ($this->priceLists !== null) {
@@ -445,7 +515,7 @@ class Product extends Component
         try {
             $this->product->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->product);
 
             return false;
         }
@@ -480,6 +550,78 @@ class Product extends Component
             ->toArray();
     }
 
+    #[Computed]
+    public function inheritanceState(): ?array
+    {
+        $product = $this->product->getProductModel();
+        if (! $product?->isVariant()) {
+            return null;
+        }
+
+        $overriddenFields = count($product->overridden_fields ?? []);
+        $overriddenPrices = $product->ownPrices()->count();
+
+        if ($overriddenFields === 0 && $overriddenPrices === 0) {
+            return null;
+        }
+
+        return [
+            'fields' => $overriddenFields,
+            'prices' => $overriddenPrices,
+        ];
+    }
+
+    #[Computed]
+    public function inheritanceCounters(): array
+    {
+        $product = $this->product->getProductModel();
+        if (! $product) {
+            return [];
+        }
+
+        $hasChildren = $product->children()->exists();
+        if (! $product->is_variant_parent && ! $hasChildren) {
+            return [];
+        }
+
+        $children = $product->children()->get(['id', 'overridden_fields']);
+        $totalVariants = $children->count();
+
+        if ($totalVariants === 0) {
+            return [];
+        }
+
+        $counters = [];
+        foreach ($product->getInheritableFields() as $field) {
+            $overriding = $children
+                ->filter(
+                    fn (ProductModel $variant) => in_array($field, $variant->overridden_fields ?? [], strict: true)
+                )
+                ->count();
+
+            $counters[$field] = [
+                'inheriting' => $totalVariants - $overriding,
+                'total' => $totalVariants,
+            ];
+        }
+
+        return $counters;
+    }
+
+    #[Computed]
+    public function isOrphanedParent(): bool
+    {
+        $product = $this->product->getProductModel();
+
+        if (! $product?->is_variant_parent) {
+            return false;
+        }
+
+        return ! $product->children()
+            ->where('is_active', true)
+            ->exists();
+    }
+
     #[Computed(persist: true)]
     public function viewName()
     {
@@ -488,6 +630,40 @@ class Product extends Component
             ->value('product_type');
 
         return data_get(ProductType::get($productType) ?? ProductType::getDefault(), 'view') ?? $this->view;
+    }
+
+    /**
+     * @param  class-string<\FluxErp\Actions\FluxAction>  $action
+     */
+    protected function resetInheritance(string $action, array $payload): bool
+    {
+        $product = $this->product->getProductModel();
+
+        if (! $product) {
+            return false;
+        }
+
+        $isVariant = $product->isVariant();
+
+        try {
+            $action::make(
+                array_merge($payload, [
+                    'parent_id' => $isVariant ? $product->parent_id : $product->getKey(),
+                    'variant_ids' => $isVariant ? [$product->getKey()] : null,
+                ])
+            )
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this, form: $this->product);
+
+            return false;
+        }
+
+        $this->resetProduct();
+
+        return true;
     }
 
     protected function recalculateDisplayedProductProperties(): void

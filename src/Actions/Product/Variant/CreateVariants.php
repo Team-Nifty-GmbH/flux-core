@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Models\Product;
 use FluxErp\Rulesets\Product\Variant\CreateVariantsRuleset;
+use FluxErp\Settings\ProductSettings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -25,7 +26,7 @@ class CreateVariants extends FluxAction
     {
         $parentProduct = resolve_static(Product::class, 'query')
             ->whereKey($this->data['parent_id'])
-            ->with(['tenants:id', 'categories:id', 'prices:id,price_list_id,price', 'tags:id'])
+            ->with(['tenants:id', 'categories:id', 'ownPrices:id,price_list_id,price', 'tags:id'])
             ->first();
 
         $product = array_merge($parentProduct->toArray(), $this->data);
@@ -38,11 +39,31 @@ class CreateVariants extends FluxAction
             $product['product_number'],
             $product['ean'],
             $product['is_bundle'],
+            $product['own_prices'],
         );
         $product['parent_id'] = $parentProduct->id;
         $product['tenants'] = $parentProduct->tenants->pluck('id')->toArray();
-        $product['categories'] = $parentProduct->categories?->pluck('id')->toArray();
+        // Tags have no is_inherited concept (no such column on the taggables table), so
+        // they are always plainly copied as owned, regardless of the inheritance toggle.
         $product['tags'] = $parentProduct->tags?->pluck('id')->toArray();
+
+        $inheritanceEnabled = app(ProductSettings::class)->variant_inheritance_enabled;
+
+        if ($inheritanceEnabled) {
+            // Categories/prices are not seeded here — they are materialized onto the new
+            // variant as real is_inherited=true copies via the existing parent -> children
+            // propagation helpers below, right after the variant exists as a child.
+            unset($product['categories'], $product['prices']);
+        } else {
+            $product['categories'] = $parentProduct->categories?->pluck('id')->toArray();
+            $product['prices'] = $parentProduct->ownPrices
+                ->map(fn ($price) => [
+                    'id' => $price->getKey(),
+                    'price_list_id' => $price->price_list_id,
+                    'price' => $price->price,
+                ])
+                ->toArray();
+        }
 
         foreach (data_get($this->data, 'product_options') as $variantCreate) {
             if ($this->variantExists($variantCreate)) {

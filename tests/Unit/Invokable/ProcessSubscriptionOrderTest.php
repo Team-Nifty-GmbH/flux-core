@@ -786,3 +786,73 @@ test('a position with an own period is carried forward like the order', function
         ->and($secondPosition->system_delivery_date->toDateString())
         ->toBe($secondRate->system_delivery_date->toDateString());
 });
+
+test('a purchase subscription that gets an invoice leaves its child unnumbered', function (): void {
+    $purchaseSubscriptionType = OrderType::factory()
+        ->hasAttached(factory: $this->tenant, relationship: 'tenants')
+        ->create([
+            'order_type_enum' => OrderTypeEnum::PurchaseSubscription,
+            'is_active' => true,
+        ]);
+
+    $contract = Order::factory()->create([
+        'tenant_id' => $this->tenant->getKey(),
+        'contact_id' => $this->contact->getKey(),
+        'address_invoice_id' => $this->address->getKey(),
+        'order_type_id' => $purchaseSubscriptionType->getKey(),
+        'currency_id' => $this->currency->getKey(),
+        'language_id' => $this->language->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+        'payment_type_id' => $this->paymentType->getKey(),
+        'is_self_billed' => false,
+    ]);
+
+    (new ProcessSubscriptionOrder())(
+        orderId: $contract->getKey(),
+        orderTypeId: $purchaseSubscriptionType->getKey()
+    );
+
+    $child = Order::query()
+        ->where('created_from_id', $contract->getKey())
+        ->first();
+
+    expect($child)->not->toBeNull()
+        ->and($child->invoice_number)->toBeNull()
+        ->and($child->invoice_date)->toBeNull();
+});
+
+test('a self billed purchase subscription numbers its own child', function (): void {
+    $purchaseSubscriptionType = OrderType::factory()
+        ->hasAttached(factory: $this->tenant, relationship: 'tenants')
+        ->create([
+            'order_type_enum' => OrderTypeEnum::PurchaseSubscription,
+            'is_active' => true,
+        ]);
+
+    $contract = Order::factory()->create([
+        'tenant_id' => $this->tenant->getKey(),
+        'contact_id' => $this->contact->getKey(),
+        'address_invoice_id' => $this->address->getKey(),
+        'order_type_id' => $purchaseSubscriptionType->getKey(),
+        'currency_id' => $this->currency->getKey(),
+        'language_id' => $this->language->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+        'payment_type_id' => $this->paymentType->getKey(),
+        'is_self_billed' => true,
+    ]);
+
+    (new ProcessSubscriptionOrder())(
+        orderId: $contract->getKey(),
+        orderTypeId: $purchaseSubscriptionType->getKey()
+    );
+
+    $child = Order::query()
+        ->where('created_from_id', $contract->getKey())
+        ->first();
+
+    expect($child)->not->toBeNull()
+        ->and($child->invoice_number)->toBe(
+            $contract->order_number . '-' . $child->system_delivery_date?->format('Y-m')
+        )
+        ->and($child->invoice_date)->not->toBeNull();
+});

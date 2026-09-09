@@ -18,6 +18,15 @@ class CreateMailMessage extends FluxAction
         return [Communication::class];
     }
 
+    protected static function decodeMimeHeader(mixed $value): mixed
+    {
+        if (! is_string($value) || ! preg_match('/=\\?[^?]*\\?[BbQq]\\?[^?]*\\?=/', $value)) {
+            return $value;
+        }
+
+        return mb_decode_mimeheader($value);
+    }
+
     protected function getRulesets(): string|array
     {
         return CreateCommunicationRuleset::class;
@@ -27,12 +36,8 @@ class CreateMailMessage extends FluxAction
     {
         $tags = Arr::pull($this->data, 'tags');
         $attachments = Arr::pull($this->data, 'attachments', []);
-        $this->data['html_body'] = is_string(data_get($this->data, 'html_body'))
-            ? iconv_mime_decode(data_get($this->data, 'html_body'), 2, 'UTF-8')
-            : data_get($this->data, 'html_body');
-        $this->data['subject'] = is_string(data_get($this->data, 'subject'))
-            ? iconv_mime_decode(data_get($this->data, 'subject'), 2, 'UTF-8')
-            : data_get($this->data, 'subject');
+        $this->data['html_body'] = static::decodeMimeHeader(data_get($this->data, 'html_body'));
+        $this->data['subject'] = static::decodeMimeHeader(data_get($this->data, 'subject'));
         $this->data['from'] = Str::replace('"', '', data_get($this->data, 'from'));
 
         $mailMessage = app(Communication::class, ['attributes' => $this->data]);

@@ -135,8 +135,8 @@ class UpdateOrderRuleset extends FluxRuleset
                 'nullable',
             ],
             'address_delivery.id' => [
+                'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Address::class]),
             ],
 
             'state' => [
@@ -155,7 +155,6 @@ class UpdateOrderRuleset extends FluxRuleset
             'payment_discount_target' => 'integer|min:0|nullable|lte:payment_target',
             'payment_discount_percent' => 'numeric|min:0|nullable',
             'header_discount' => 'numeric|min:0|nullable',
-            'shipping_costs_net_price' => 'numeric|nullable',
             'margin' => 'sometimes|numeric|nullable',
             'contract_total_amount' => [
                 'nullable',
@@ -197,6 +196,7 @@ class UpdateOrderRuleset extends FluxRuleset
             'has_logistic_notify_phone_number' => 'sometimes|boolean',
             'has_logistic_notify_number' => 'sometimes|boolean',
             'is_locked' => 'sometimes|boolean',
+            'is_self_billed' => 'sometimes|boolean',
             'is_new_customer' => 'sometimes|boolean',
             'is_imported' => 'sometimes|boolean',
             'is_merge_invoice' => 'sometimes|boolean',

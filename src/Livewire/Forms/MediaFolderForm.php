@@ -13,6 +13,8 @@ class MediaFolderForm extends FluxForm
 
     public ?int $parent_id = null;
 
+    public ?string $parent_collection = null;
+
     public ?string $name = null;
 
     public ?int $max_files = null;

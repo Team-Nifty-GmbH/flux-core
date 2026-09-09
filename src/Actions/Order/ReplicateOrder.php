@@ -84,7 +84,10 @@ class ReplicateOrder extends FluxAction
 
         if (
             $originalOrder['contact_id'] === $orderData['contact_id']
-            && in_array($orderTypeEnum, [OrderTypeEnum::SplitOrder, OrderTypeEnum::Retoure])
+            && in_array(
+                $orderTypeEnum,
+                [OrderTypeEnum::SplitOrder, OrderTypeEnum::Retoure, OrderTypeEnum::Refund]
+            )
         ) {
             $orderData['parent_id'] = data_get($originalOrder, 'id');
         }
@@ -159,74 +162,80 @@ class ReplicateOrder extends FluxAction
         }
 
         $positionIdMap = [];
-        foreach ($orderPositions as $orderPosition) {
-            $orderPosition['order_id'] = $order->id;
+        resolve_static(OrderPosition::class, 'withoutSlugPositionRecalculation', [
+            function () use ($orderPositions, $order, &$positionIdMap): void {
+                foreach ($orderPositions as $orderPosition) {
+                    $orderPosition['order_id'] = $order->id;
 
-            if ($parentId = data_get($orderPosition, 'parent_id')) {
-                $orderPosition['parent_id'] = $positionIdMap[$parentId] ?? null;
-            }
+                    if ($parentId = data_get($orderPosition, 'parent_id')) {
+                        $orderPosition['parent_id'] = $positionIdMap[$parentId] ?? null;
+                    }
 
-            $originalPositionId = data_get($orderPosition, 'id');
-            $orderPosition['created_from_id'] = $originalPositionId;
+                    $originalPositionId = data_get($orderPosition, 'id');
+                    $orderPosition['created_from_id'] = $originalPositionId;
 
-            if (
-                ! data_get($orderPosition, 'is_free_text')
-                && is_null(data_get($orderPosition, 'discount_percentage'))
-            ) {
-                $originalAmount = data_get($orderPosition, 'original_amount')
-                    ?? data_get($orderPosition, 'amount')
-                    ?? 0;
+                    if (
+                        ! data_get($orderPosition, 'is_free_text')
+                        && is_null(data_get($orderPosition, 'discount_percentage'))
+                    ) {
+                        $originalAmount = data_get($orderPosition, 'original_amount')
+                            ?? data_get($orderPosition, 'amount')
+                            ?? 0;
 
-                if (data_get($orderPosition, 'is_net')) {
-                    $originalTotal = bcabs(data_get($orderPosition, 'total_net_price') ?? 0);
-                    $expectedOriginalTotal = bcmul(
-                        data_get($orderPosition, 'unit_net_price') ?? 0,
-                        $originalAmount
+                        if (data_get($orderPosition, 'is_net')) {
+                            $originalTotal = bcabs(data_get($orderPosition, 'total_net_price') ?? 0);
+                            $expectedOriginalTotal = bcmul(
+                                data_get($orderPosition, 'unit_net_price') ?? 0,
+                                $originalAmount
+                            );
+                        } else {
+                            $originalTotal = bcabs(data_get($orderPosition, 'total_gross_price') ?? 0);
+                            $expectedOriginalTotal = bcmul(
+                                data_get($orderPosition, 'unit_gross_price') ?? 0,
+                                $originalAmount
+                            );
+                        }
+
+                        if (bccomp($expectedOriginalTotal, 0) === 1
+                            && bccomp($expectedOriginalTotal, $originalTotal) !== 0
+                        ) {
+                            $orderPosition['discount_percentage'] = diff_percentage($expectedOriginalTotal, $originalTotal);
+                        }
+                    }
+
+                    unset(
+                        $orderPosition['id'],
+                        $orderPosition['uuid'],
+                        $orderPosition['sort_number'],
+                        $orderPosition['amount_packed_products'],
+                        $orderPosition['original_amount'],
+                        $orderPosition['total_net_price'],
+                        $orderPosition['total_gross_price'],
                     );
-                } else {
-                    $originalTotal = bcabs(data_get($orderPosition, 'total_gross_price') ?? 0);
-                    $expectedOriginalTotal = bcmul(
-                        data_get($orderPosition, 'unit_gross_price') ?? 0,
-                        $originalAmount
+
+                    if (! data_get($orderPosition, 'is_free_text')) {
+                        $orderPosition['unit_price'] = data_get($orderPosition, 'is_net')
+                            ? data_get($orderPosition, 'unit_net_price')
+                            : data_get($orderPosition, 'unit_gross_price');
+                    }
+
+                    $newPosition = CreateOrderPosition::make($orderPosition)
+                        ->checkPermission()
+                        ->validate()
+                        ->execute();
+
+                    $positionIdMap[$originalPositionId] = $newPosition->getKey();
+
+                    $this->replicateDiscounts(
+                        modelType: morph_alias(OrderPosition::class),
+                        fromModelId: $originalPositionId,
+                        toModelId: $newPosition->getKey(),
                     );
                 }
+            },
+        ]);
 
-                if (bccomp($expectedOriginalTotal, 0) === 1
-                    && bccomp($expectedOriginalTotal, $originalTotal) !== 0
-                ) {
-                    $orderPosition['discount_percentage'] = diff_percentage($expectedOriginalTotal, $originalTotal);
-                }
-            }
-
-            unset(
-                $orderPosition['id'],
-                $orderPosition['uuid'],
-                $orderPosition['sort_number'],
-                $orderPosition['amount_packed_products'],
-                $orderPosition['original_amount'],
-                $orderPosition['total_net_price'],
-                $orderPosition['total_gross_price'],
-            );
-
-            if (! data_get($orderPosition, 'is_free_text')) {
-                $orderPosition['unit_price'] = data_get($orderPosition, 'is_net')
-                    ? data_get($orderPosition, 'unit_net_price')
-                    : data_get($orderPosition, 'unit_gross_price');
-            }
-
-            $newPosition = CreateOrderPosition::make($orderPosition)
-                ->checkPermission()
-                ->validate()
-                ->execute();
-
-            $positionIdMap[$originalPositionId] = $newPosition->getKey();
-
-            $this->replicateDiscounts(
-                modelType: morph_alias(OrderPosition::class),
-                fromModelId: $originalPositionId,
-                toModelId: $newPosition->getKey(),
-            );
-        }
+        $order->recalculateOrderPositionSlugPositions();
 
         $order->calculatePrices()->save();
 
@@ -245,7 +254,10 @@ class ReplicateOrder extends FluxAction
         $errors = [];
         $order = resolve_static(Order::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first(['id', 'contact_id', 'tenant_id']);
+            ->with([
+                'orderType:id,order_type_enum',
+            ])
+            ->first(['id', 'contact_id', 'order_type_id', 'tenant_id', 'invoice_number']);
         $tenantId = $order->tenant_id;
         $hasTenants = [
             'contact_id' => Contact::class,
@@ -279,59 +291,35 @@ class ReplicateOrder extends FluxAction
             }
         }
 
-        $parentId = $this->getData('parent_id');
         $orderTypeEnum = resolve_static(OrderType::class, 'query')
             ->whereKey($this->getData('order_type_id'))
             ->value('order_type_enum');
 
-        if (
-            ! $parentId
-            && $order->contact_id === ($this->getData('contact_id') ?? $order->contact_id)
-            && in_array($orderTypeEnum, [OrderTypeEnum::SplitOrder, OrderTypeEnum::Retoure])
+        // Disallow creation of split-orders if order has an invoice_number
+        if ($orderTypeEnum === OrderTypeEnum::SplitOrder
+            && (
+                $order->orderType->order_type_enum !== OrderTypeEnum::Order
+                || $order->invoice_number
+            )
         ) {
-            $parentId = $order->getKey();
+            $errors += [
+                'order_type_id' => ['Unable to create split-order on given parent order.'],
+            ];
         }
 
-        if ($parentId) {
-            $parentOrder = resolve_static(Order::class, 'query')
-                ->whereKey($parentId)
-                ->with([
-                    'orderType:id,order_type_enum',
-                ])
-                ->first(['id', 'order_type_id', 'parent_id', 'tenant_id', 'invoice_number']);
-
-            if ($parentOrder->tenant_id !== $tenantId) {
-                $errors += [
-                    'parent_id' => ['Parent order not found on given tenant.'],
-                ];
-            }
-
-            // Disallow creation of split-orders if order has an invoice_number
-            if ($orderTypeEnum === OrderTypeEnum::SplitOrder
-                && (
-                    $parentOrder->orderType->order_type_enum !== OrderTypeEnum::Order
-                    || $parentOrder->invoice_number
+        // Disallow creation of retoures/refunds if order doesn't have an invoice number
+        if (in_array($orderTypeEnum, [OrderTypeEnum::Retoure, OrderTypeEnum::Refund])
+            && (
+                ! in_array(
+                    $order->orderType->order_type_enum,
+                    [OrderTypeEnum::Order, OrderTypeEnum::SplitOrder]
                 )
-            ) {
-                $errors += [
-                    'order_type_id' => ['Unable to create split-order on given parent order.'],
-                ];
-            }
-
-            // Disallow creation of retoures/refunds if order doesn't have an invoice number
-            if (in_array($orderTypeEnum, [OrderTypeEnum::Retoure, OrderTypeEnum::Refund])
-                && (
-                    ! in_array(
-                        $parentOrder->orderType->order_type_enum,
-                        [OrderTypeEnum::Order, OrderTypeEnum::SplitOrder]
-                    )
-                    || ! $parentOrder->invoice_number
-                )
-            ) {
-                $errors += [
-                    'order_type_id' => ['Unable to create a retoure or refund on given parent order.'],
-                ];
-            }
+                || ! $order->invoice_number
+            )
+        ) {
+            $errors += [
+                'order_type_id' => ['Unable to create a retoure or refund on given parent order.'],
+            ];
         }
 
         $orderPositions = data_get($this->data, 'order_positions', []);

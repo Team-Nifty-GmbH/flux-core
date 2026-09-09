@@ -12,11 +12,13 @@ use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\Tenant;
+use FluxErp\Models\Unit;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Fluent;
 use Illuminate\Validation\Rule;
 
@@ -85,7 +87,12 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 ),
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Product::class]),
+                app(ModelExists::class, ['model' => Product::class])
+                    ->where('is_variant_parent', false)
+                    ->whereDoesntHave(
+                        'children',
+                        fn (Builder $query) => $query->where('is_active', true)
+                    ),
             ],
             'supplier_contact_id' => [
                 'integer',
@@ -112,6 +119,13 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => VatRate::class]),
+            ],
+            'unit_id' => [
+                'exclude_if:is_free_text,true',
+                'exclude_without:product_id',
+                'integer',
+                'nullable',
+                app(ModelExists::class, ['model' => Unit::class]),
             ],
             'warehouse_id' => [
                 'exclude_if:is_free_text,true',
@@ -219,6 +233,8 @@ class CreateOrderPositionRuleset extends FluxRuleset
             ],
             'is_free_text' => 'boolean',
             'is_bundle_position' => 'exclude_without:parent_id|boolean',
+
+            'recalculate_order' => 'boolean',
         ];
     }
 }
