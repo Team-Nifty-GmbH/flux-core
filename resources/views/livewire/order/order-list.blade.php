@@ -48,27 +48,27 @@
                             select="label:label|value:contact_id"
                             unfiltered
                             :request="[
-                            'url' => route('search', \FluxErp\Models\Address::class),
-                            'method' => 'POST',
-                            'params' => [
-                                'option-value' => 'contact_id',
-                                'fields' => [
-                                    'name',
-                                    'contact_id',
-                                    'firstname',
-                                    'lastname',
-                                    'company',
-                                ],
-                                'where' => [
-                                    [
-                                        'is_main_address',
-                                        '=',
-                                        true,
+                                'url' => route('search', \FluxErp\Models\Address::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'option-value' => 'contact_id',
+                                    'fields' => [
+                                        'name',
+                                        'contact_id',
+                                        'firstname',
+                                        'lastname',
+                                        'company',
                                     ],
+                                    'where' => [
+                                        [
+                                            'is_main_address',
+                                            '=',
+                                            true,
+                                        ],
+                                    ],
+                                    'with' => ['contact.media', 'country:id,name'],
                                 ],
-                                'with' => ['contact.media', 'country:id,name'],
-                            ],
-                        ]"
+                            ]"
                         />
                     @show
                     <div id="invoice-address-id">
