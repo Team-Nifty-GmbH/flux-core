@@ -4,10 +4,12 @@ namespace FluxErp\Actions\OrderPosition;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
+use FluxErp\Helpers\PriceHelper;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Price;
+use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Rulesets\OrderPosition\UpdateOrderPositionRuleset;
 use FluxErp\View\Printing\Order\FinalInvoice;
@@ -68,6 +70,22 @@ class UpdateOrderPosition extends FluxAction
                 $orderPosition->ean_code : $product->ean_code;
             $orderPosition->unit_gram_weight = $orderPosition->isDirty('unit_gram_weight') ?
                 $orderPosition->unit_gram_weight : $product->unit_gram_weight;
+
+            // the price of the previous product says nothing about this one. Only clear the
+            // carried price when the new product actually has one, so a product without a
+            // price in this list leaves the position as it was instead of emptying it.
+            if (! array_key_exists('unit_price', $this->data)
+                && PriceHelper::make($product)
+                    ->setPriceList(
+                        resolve_static(PriceList::class, 'query')
+                            ->whereKey($this->data['price_list_id'])
+                            ->first()
+                    )
+                    ->price()
+            ) {
+                $orderPosition->unit_net_price = null;
+                $orderPosition->unit_gross_price = null;
+            }
         }
 
         $priceRelevantFields = [
