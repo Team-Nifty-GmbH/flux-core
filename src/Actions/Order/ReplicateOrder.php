@@ -162,74 +162,78 @@ class ReplicateOrder extends FluxAction
         }
 
         $positionIdMap = [];
-        foreach ($orderPositions as $orderPosition) {
-            $orderPosition['order_id'] = $order->id;
+        OrderPosition::withoutSlugPositionRecalculation(function () use ($orderPositions, $order, &$positionIdMap): void {
+            foreach ($orderPositions as $orderPosition) {
+                $orderPosition['order_id'] = $order->id;
 
-            if ($parentId = data_get($orderPosition, 'parent_id')) {
-                $orderPosition['parent_id'] = $positionIdMap[$parentId] ?? null;
-            }
-
-            $originalPositionId = data_get($orderPosition, 'id');
-            $orderPosition['created_from_id'] = $originalPositionId;
-
-            if (
-                ! data_get($orderPosition, 'is_free_text')
-                && is_null(data_get($orderPosition, 'discount_percentage'))
-            ) {
-                $originalAmount = data_get($orderPosition, 'original_amount')
-                    ?? data_get($orderPosition, 'amount')
-                    ?? 0;
-
-                if (data_get($orderPosition, 'is_net')) {
-                    $originalTotal = bcabs(data_get($orderPosition, 'total_net_price') ?? 0);
-                    $expectedOriginalTotal = bcmul(
-                        data_get($orderPosition, 'unit_net_price') ?? 0,
-                        $originalAmount
-                    );
-                } else {
-                    $originalTotal = bcabs(data_get($orderPosition, 'total_gross_price') ?? 0);
-                    $expectedOriginalTotal = bcmul(
-                        data_get($orderPosition, 'unit_gross_price') ?? 0,
-                        $originalAmount
-                    );
+                if ($parentId = data_get($orderPosition, 'parent_id')) {
+                    $orderPosition['parent_id'] = $positionIdMap[$parentId] ?? null;
                 }
 
-                if (bccomp($expectedOriginalTotal, 0) === 1
-                    && bccomp($expectedOriginalTotal, $originalTotal) !== 0
+                $originalPositionId = data_get($orderPosition, 'id');
+                $orderPosition['created_from_id'] = $originalPositionId;
+
+                if (
+                    ! data_get($orderPosition, 'is_free_text')
+                    && is_null(data_get($orderPosition, 'discount_percentage'))
                 ) {
-                    $orderPosition['discount_percentage'] = diff_percentage($expectedOriginalTotal, $originalTotal);
+                    $originalAmount = data_get($orderPosition, 'original_amount')
+                        ?? data_get($orderPosition, 'amount')
+                        ?? 0;
+
+                    if (data_get($orderPosition, 'is_net')) {
+                        $originalTotal = bcabs(data_get($orderPosition, 'total_net_price') ?? 0);
+                        $expectedOriginalTotal = bcmul(
+                            data_get($orderPosition, 'unit_net_price') ?? 0,
+                            $originalAmount
+                        );
+                    } else {
+                        $originalTotal = bcabs(data_get($orderPosition, 'total_gross_price') ?? 0);
+                        $expectedOriginalTotal = bcmul(
+                            data_get($orderPosition, 'unit_gross_price') ?? 0,
+                            $originalAmount
+                        );
+                    }
+
+                    if (bccomp($expectedOriginalTotal, 0) === 1
+                        && bccomp($expectedOriginalTotal, $originalTotal) !== 0
+                    ) {
+                        $orderPosition['discount_percentage'] = diff_percentage($expectedOriginalTotal, $originalTotal);
+                    }
                 }
+
+                unset(
+                    $orderPosition['id'],
+                    $orderPosition['uuid'],
+                    $orderPosition['sort_number'],
+                    $orderPosition['amount_packed_products'],
+                    $orderPosition['original_amount'],
+                    $orderPosition['total_net_price'],
+                    $orderPosition['total_gross_price'],
+                );
+
+                if (! data_get($orderPosition, 'is_free_text')) {
+                    $orderPosition['unit_price'] = data_get($orderPosition, 'is_net')
+                        ? data_get($orderPosition, 'unit_net_price')
+                        : data_get($orderPosition, 'unit_gross_price');
+                }
+
+                $newPosition = CreateOrderPosition::make($orderPosition)
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+
+                $positionIdMap[$originalPositionId] = $newPosition->getKey();
+
+                $this->replicateDiscounts(
+                    modelType: morph_alias(OrderPosition::class),
+                    fromModelId: $originalPositionId,
+                    toModelId: $newPosition->getKey(),
+                );
             }
+        });
 
-            unset(
-                $orderPosition['id'],
-                $orderPosition['uuid'],
-                $orderPosition['sort_number'],
-                $orderPosition['amount_packed_products'],
-                $orderPosition['original_amount'],
-                $orderPosition['total_net_price'],
-                $orderPosition['total_gross_price'],
-            );
-
-            if (! data_get($orderPosition, 'is_free_text')) {
-                $orderPosition['unit_price'] = data_get($orderPosition, 'is_net')
-                    ? data_get($orderPosition, 'unit_net_price')
-                    : data_get($orderPosition, 'unit_gross_price');
-            }
-
-            $newPosition = CreateOrderPosition::make($orderPosition)
-                ->checkPermission()
-                ->validate()
-                ->execute();
-
-            $positionIdMap[$originalPositionId] = $newPosition->getKey();
-
-            $this->replicateDiscounts(
-                modelType: morph_alias(OrderPosition::class),
-                fromModelId: $originalPositionId,
-                toModelId: $newPosition->getKey(),
-            );
-        }
+        $order->recalculateOrderPositionSlugPositions();
 
         $order->calculatePrices()->save();
 
