@@ -21,7 +21,7 @@ class UpdateCountryRegionRuleset extends FluxRuleset
             ],
             'country_id' => [
                 'integer',
-                app(ModelExists::class, ['model' => Country::class]),
+                app(ModelExists::class, ['model' => Country::class, 'subject' => CountryRegion::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
         ];

@@ -121,6 +121,9 @@ use FluxErp\Actions\LeadState\UpdateLeadState;
 use FluxErp\Actions\LedgerAccount\CreateLedgerAccount;
 use FluxErp\Actions\LedgerAccount\DeleteLedgerAccount;
 use FluxErp\Actions\LedgerAccount\UpdateLedgerAccount;
+use FluxErp\Actions\LedgerAccountTransaction\CreateLedgerAccountTransaction;
+use FluxErp\Actions\LedgerAccountTransaction\DeleteLedgerAccountTransaction;
+use FluxErp\Actions\LedgerAccountTransaction\UpdateLedgerAccountTransaction;
 use FluxErp\Actions\Location\CreateLocation;
 use FluxErp\Actions\Location\DeleteLocation;
 use FluxErp\Actions\Location\UpdateLocation;
@@ -193,6 +196,8 @@ use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\CreateProductBundleProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\DeleteProductBundleProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\UpdateProductBundleProduct;
+use FluxErp\Actions\Product\ResetProductFields;
+use FluxErp\Actions\Product\ResetProductRelations;
 use FluxErp\Actions\Product\RestoreProduct;
 use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
@@ -316,10 +321,11 @@ use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\RoleController;
 use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Controllers\SettingController;
-use FluxErp\Http\Controllers\TaskController;
-use FluxErp\Http\Controllers\TicketController;
 use FluxErp\Http\Middleware\SetAcceptHeaders;
 use FluxErp\Livewire\Widgets\Employee\CurrentWorkTimeModel;
+use FluxErp\Livewire\Widgets\Employee\OvertimeBalanceBox;
+use FluxErp\Livewire\Widgets\MyTasks;
+use FluxErp\Livewire\Widgets\MyTickets;
 use FluxErp\Models\AbsencePolicy;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\AbsenceType;
@@ -370,6 +376,7 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Pivots\BundleProductProduct;
 use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
+use FluxErp\Models\Pivots\LedgerAccountTransaction;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Price;
@@ -850,6 +857,15 @@ Route::prefix('api')
                 Route::put('/order-transactions', UpdateOrderTransaction::class);
                 Route::delete('/order-transactions/{id}', DeleteOrderTransaction::class);
 
+                // LedgerAccountTransactions
+                Route::get('/ledger-account-transactions/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', LedgerAccountTransaction::class);
+                Route::get('/ledger-account-transactions', [BaseController::class, 'index'])
+                    ->defaults('model', LedgerAccountTransaction::class);
+                Route::post('/ledger-account-transactions', CreateLedgerAccountTransaction::class);
+                Route::put('/ledger-account-transactions', UpdateLedgerAccountTransaction::class);
+                Route::delete('/ledger-account-transactions/{id}', DeleteLedgerAccountTransaction::class);
+
                 // OrderTypes
                 Route::get('/order-types/{id}', [BaseController::class, 'show'])->defaults('model', OrderType::class);
                 Route::get('/order-types', [BaseController::class, 'index'])->defaults('model', OrderType::class);
@@ -951,6 +967,8 @@ Route::prefix('api')
                 Route::put('/products', UpdateProduct::class);
                 Route::delete('/products/{id}', DeleteProduct::class);
                 Route::post('/products/{id}/restore', RestoreProduct::class);
+                Route::post('/products/variants/reset-fields', ResetProductFields::class);
+                Route::post('/products/variants/reset-relations', ResetProductRelations::class);
 
                 // Product bundle products
                 Route::get('/product-bundle-products/{id}', [BaseController::class, 'show'])
@@ -1142,7 +1160,6 @@ Route::prefix('api')
                 Route::put('/tasks', UpdateTask::class);
                 Route::delete('/tasks/{id}', DeleteTask::class);
                 Route::post('/tasks/{id}/replicate', ReplicateTask::class);
-                Route::get('/user/tasks', [TaskController::class, 'userIndex']);
 
                 // Tenants
                 Route::get('/tenants/{id}', [BaseController::class, 'show'])->defaults('model', Tenant::class);
@@ -1158,7 +1175,6 @@ Route::prefix('api')
                 Route::post('/tickets', CreateTicket::class);
                 Route::put('/tickets', UpdateTicket::class);
                 Route::delete('/tickets/{id}', DeleteTicket::class);
-                Route::get('/user/tickets', [TicketController::class, 'userIndex']);
 
                 // TicketTypes
                 Route::get('/ticket-types/{id}', [BaseController::class, 'show'])->defaults('model', TicketType::class);
@@ -1254,6 +1270,9 @@ Route::prefix('api')
 
                 // Widgets
                 Route::get('/widgets/current-work-time-model', CurrentWorkTimeModel::class);
+                Route::get('/widgets/my-tasks', MyTasks::class);
+                Route::get('/widgets/my-tickets', MyTickets::class);
+                Route::get('/widgets/overtime-balance-box', OvertimeBalanceBox::class);
 
                 // WorkTimeModels
                 Route::get('/work-time-models/{id}', [BaseController::class, 'show'])

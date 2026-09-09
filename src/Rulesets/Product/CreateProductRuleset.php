@@ -50,12 +50,14 @@ class CreateProductRuleset extends FluxRuleset
             'parent_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Product::class]),
+                app(ModelExists::class, ['model' => Product::class])
+                    ->whereNull('parent_id'),
             ],
             'vat_rate_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => VatRate::class]),
+                app(ModelExists::class, ['model' => VatRate::class])
+                    ->where('is_sales', true),
             ],
             'unit_id' => [
                 'integer',
@@ -118,6 +120,7 @@ class CreateProductRuleset extends FluxRuleset
             'is_bundle' => 'boolean',
             'is_service' => 'boolean',
             'is_shipping_free' => 'boolean',
+            'is_shipping_item' => 'boolean',
             'has_serial_numbers' => 'boolean',
             'is_nos' => 'boolean',
             'is_active_export_to_web_shop' => 'boolean',

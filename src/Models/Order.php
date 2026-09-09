@@ -15,6 +15,7 @@ use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Events\Order\OrderApprovalRequestEvent;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\OrderPaymentRun;
@@ -31,6 +32,7 @@ use FluxErp\States\Order\PaymentState\Open;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\States\Order\PaymentState\PartialPaid;
 use FluxErp\States\Order\PaymentState\PaymentState;
+use FluxErp\States\PaymentRun\NotSuccessful;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Support\Collection\OrderCollection;
 use FluxErp\Traits\HasStates;
@@ -47,6 +49,7 @@ use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\Mentionable;
 use FluxErp\Traits\Model\Printable;
 use FluxErp\Traits\Model\Trackable;
 use FluxErp\Traits\Scout\Searchable;
@@ -56,6 +59,7 @@ use FluxErp\View\Printing\Order\FinalInvoice;
 use FluxErp\View\Printing\Order\Invoice;
 use FluxErp\View\Printing\Order\Offer;
 use FluxErp\View\Printing\Order\OrderConfirmation;
+use FluxErp\View\Printing\Order\ProformaInvoice;
 use FluxErp\View\Printing\Order\Refund;
 use FluxErp\View\Printing\Order\Retoure;
 use FluxErp\View\Printing\Order\SupplierOrder;
@@ -69,7 +73,6 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Number;
@@ -83,7 +86,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 {
     use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasFrontendAttributes,
         HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasStates, HasTenantAssignment,
-        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
+        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Mentionable, Printable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -220,6 +223,10 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                 $order->calculateBalanceDueDiscount();
             }
 
+            if ($order->isDirty('contract_total_amount')) {
+                $order->calculateBalance();
+            }
+
             if ($order->isDirty('iban')
                 && $order->iban
                 && str_replace(' ', '', strtoupper($order->iban)) !== $order->contactBankConnection?->iban
@@ -265,6 +272,23 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                 && $order->responsible_user_id
             ) {
                 $order->responsibleUser?->subscribeNotificationChannel($order->broadcastChannel());
+            }
+
+            // Every write to a generated order routes through here, so the parent
+            // contract's remaining balance stays current no matter which action
+            // created or adjusted the child.
+            if (
+                ($order->wasRecentlyCreated || $order->wasChanged('total_gross_price'))
+                && $order->created_from_id
+            ) {
+                $contract = $order->createdFrom;
+
+                if (
+                    ! is_null($contract?->contract_total_amount)
+                    && $contract->orderType?->order_type_enum?->isSubscription()
+                ) {
+                    $contract->calculateBalance()->save();
+                }
             }
         });
 
@@ -417,6 +441,11 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         ];
     }
 
+    public static function mentionTypeIcon(): string
+    {
+        return 'document-text';
+    }
+
     protected function casts(): array
     {
         return [
@@ -425,10 +454,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             'state' => OrderState::class,
             'payment_state' => PaymentState::class,
             'delivery_state' => DeliveryState::class,
-            'shipping_costs_net_price' => Money::class,
-            'shipping_costs_gross_price' => Money::class,
-            'shipping_costs_vat_price' => Money::class,
-            'shipping_costs_vat_rate_percentage' => Percentage::class,
             'total_base_net_price' => Money::class,
             'total_base_gross_price' => Money::class,
             'total_base_discounted_net_price' => Money::class,
@@ -448,6 +473,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             'total_position_discount_percentage' => Percentage::class,
             'total_position_discount_flat' => Money::class,
             'balance' => Money::class,
+            'contract_total_amount' => Money::class,
             'payment_reminder_next_date' => 'date',
             'order_date' => 'date',
             'invoice_date' => 'date',
@@ -458,6 +484,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             'customer_delivery_date' => 'date',
             'date_of_approval' => 'date',
             'is_locked' => 'boolean',
+            'is_self_billed' => 'boolean',
             'is_imported' => 'boolean',
             'is_confirmed' => 'boolean',
             'requires_approval' => 'boolean',
@@ -537,6 +564,11 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);
+    }
+
+    public function ledgerBookings(): MorphMany
+    {
+        return $this->morphMany(LedgerBooking::class, 'source');
     }
 
     public function lead(): BelongsTo
@@ -650,7 +682,10 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     {
         return $this->getFirstMedia('invoice')
             ?? $this->getFirstMedia('final-invoice')
-            ?? $this->getFirstMedia('refund');
+            ?? $this->getFirstMedia('refund')
+            ?? ($this->createdFrom?->orderType?->order_type_enum?->isSubscription()
+                ? $this->createdFrom->getFirstMedia('invoice')
+                : null);
     }
 
     public function refund(): ?Media
@@ -661,6 +696,27 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     // Public methods
     public function calculateBalance(): static
     {
+        // Subscription contracts are never invoiced themselves; their balance tracks
+        // the remaining contract volume instead of an open invoice amount. Generated
+        // rates store their totals signed inconsistently (replication applies the
+        // type multiplier, AdjustOrderTotal counteracts it), so sum absolutes.
+        if ($this->orderType?->order_type_enum?->isSubscription()) {
+            $this->balance = is_null($this->contract_total_amount)
+                ? null
+                : bcround(
+                    bcsub(
+                        $this->contract_total_amount,
+                        (string) $this->createdOrders()
+                            ->selectRaw('COALESCE(SUM(ABS(total_gross_price)), 0) AS aggregate')
+                            ->value('aggregate'),
+                        9
+                    ),
+                    2
+                );
+
+            return $this;
+        }
+
         $this->balance = bcround(
             bcsub(
                 $this->total_gross_price,
@@ -753,7 +809,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     public function calculatePaymentState(): static
     {
-        if (! $this->transactions()->exists()) {
+        if (! $this->transactions()->exists() && ! $this->ledgerBookings()->exists()) {
             // Don't reset to Open if order is in a payment run state
             // Payment run lifecycle manages InOpenPaymentRun and InPayment
             if (
@@ -849,10 +905,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ->where('is_alternative', false)
             ->sum('total_base_gross_price');
 
-        $this->total_base_gross_price = bcround(
-            bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0),
-            2
-        );
+        $this->total_base_gross_price = bcround($totalBaseGross, 2);
         $this->total_base_discounted_gross_price = $this->total_gross_price;
 
         return $this;
@@ -869,14 +922,8 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ->where(fn ($q) => $q->where('is_free_text', false)->orWhereDoesntHave('children'))
             ->sum('total_base_net_price');
 
-        $this->total_net_price = bcround(
-            bcadd($totalNet, $this->shipping_costs_net_price ?: 0, 9),
-            2
-        );
-        $this->total_base_net_price = bcround(
-            bcadd($totalBaseNet, $this->shipping_costs_net_price ?: 0, 9),
-            2
-        );
+        $this->total_net_price = bcround($totalNet, 2);
+        $this->total_base_net_price = bcround($totalBaseNet, 2);
         $this->total_base_discounted_net_price = $this->total_net_price;
 
         $this->total_position_discount_percentage = diff_percentage(
@@ -962,30 +1009,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                     ),
                 ];
             })
-            ->when($this->shipping_costs_vat_price, function (SupportCollection $vats): SupportCollection {
-                return $vats->put(
-                    $this->shipping_costs_vat_rate_percentage,
-                    [
-                        'vat_rate_percentage' => $this->shipping_costs_vat_rate_percentage,
-                        'total_vat_price' => bcadd(
-                            $this->shipping_costs_vat_price,
-                            data_get(
-                                $vats->get($this->shipping_costs_vat_rate_percentage),
-                                'total_vat_price'
-                            ) ?? 0,
-                            9
-                        ),
-                        'total_net_price' => bcadd(
-                            $this->shipping_costs_net_price,
-                            data_get(
-                                $vats->get($this->shipping_costs_vat_rate_percentage),
-                                'total_net_price'
-                            ) ?? 0,
-                            9
-                        ),
-                    ]
-                );
-            })
             ->sortBy('vat_rate_percentage')
             ->values()
             ->toArray();
@@ -1048,6 +1071,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return [
             'invoice' => Invoice::class,
             'final-invoice' => FinalInvoice::class,
+            'proforma-invoice' => ProformaInvoice::class,
             'offer' => Offer::class,
             'order-confirmation' => OrderConfirmation::class,
             'retoure' => Retoure::class,
@@ -1206,6 +1230,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                     [
                         'invoice' => Invoice::class,
                         'final-invoice' => FinalInvoice::class,
+                        'proforma-invoice' => ProformaInvoice::class,
                         'offer' => Offer::class,
                         'order-confirmation' => OrderConfirmation::class,
                         'retoure' => Retoure::class,
@@ -1279,7 +1304,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     public function totalPaid(): string|float|int
     {
-        return $this->transactions()
+        $paid = $this->transactions()
             ->withPivot(['amount', 'order_currency_amount'])
             ->get()
             ->reduce(
@@ -1290,6 +1315,22 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                 ),
                 '0'
             );
+
+        return bcadd($paid, $this->totalSettledByLedgerBookings(), 9);
+    }
+
+    /**
+     * Ledger bookings pointing at this order settle it without a bank transaction,
+     * e.g. an invoice paid directly by a loan. Their amount is always positive, so
+     * the order type decides the direction it settles in.
+     */
+    public function totalSettledByLedgerBookings(): string
+    {
+        return bcmul(
+            (string) $this->ledgerBookings()->sum('amount'),
+            $this->orderType?->order_type_enum?->multiplier() ?? '1',
+            9
+        );
     }
 
     public function toCalendarEvent(?array $info = null): array
@@ -1440,11 +1481,33 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     protected function scopeWherePaymentReminderEligible(Builder $query): Builder
     {
+        $remindableOrderTypes = collect(OrderTypeEnum::cases())
+            ->filter(fn (OrderTypeEnum $case) => ! $case->isPurchase()
+                && bccomp($case->multiplier(), '1') === 0
+            )
+            ->map(fn (OrderTypeEnum $case) => $case->value)
+            ->all();
+
         return $query
             ->whereNotNull('invoice_number')
             ->where('is_locked', true)
-            ->whereNotState('payment_state', Paid::class)
             ->where('balance', '>', 0)
+            ->whereNotState('payment_state', [Paid::class, InPayment::class, InOpenPaymentRun::class])
+            ->whereHas(
+                'orderType',
+                fn (Builder $query) => $query->whereIn('order_type_enum', $remindableOrderTypes)
+            )
+            // Direct debit invoices are collected by us, so they only become
+            // remindable once at least one debit run for them has failed.
+            ->where(fn (Builder $query) => $query
+                ->whereRelation('paymentType', 'is_direct_debit', false)
+                ->orWhereHas(
+                    'paymentRuns',
+                    fn (Builder $query) => $query
+                        ->where('payment_run_type_enum', PaymentRunTypeEnum::DirectDebit)
+                        ->where('state', NotSuccessful::$name)
+                )
+            )
             ->whereHasMailablePaymentReminderAddress();
     }
 

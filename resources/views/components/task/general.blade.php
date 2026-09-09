@@ -30,7 +30,7 @@
                 @section('task-content.selects.project')
                     <div
                         x-show="$wire.task.id"
-                        x-bind:class="!isEditing && 'pointer-events-none'"
+                        x-bind:class="{ 'pointer-events-none': !isEditing }"
                     >
                         <x-select.styled
                             wire:model="task.project_id"
@@ -38,9 +38,9 @@
                             select="label:label|value:id"
                             unfiltered
                             :request="[
-                    'url' => route('search', \FluxErp\Models\Project::class),
-                    'method' => 'POST',
-                ]"
+                                'url' => route('search', \FluxErp\Models\Project::class),
+                                'method' => 'POST',
+                            ]"
                         >
                             <x-slot:label>
                                 <x-link
@@ -56,7 +56,7 @@
                     </div>
                 @show
                 @section('task-content.selects.responsible-users')
-                    <div x-bind:class="!isEditing && 'pointer-events-none'">
+                    <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                         <x-select.styled
                             :label="__('Responsible User')"
                             autocomplete="off"
@@ -65,19 +65,19 @@
                             select="label:label|value:id"
                             unfiltered
                             :request="[
-                    'url' => route('search', \FluxErp\Models\User::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'with' => 'media',
-                    ],
-                ]"
+                                'url' => route('search', \FluxErp\Models\User::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'with' => 'media',
+                                ],
+                            ]"
                         />
                     </div>
                 @show
             @show
             <div
                 class="flex justify-between gap-x-4"
-                x-bind:class="!isEditing && 'pointer-events-none'"
+                x-bind:class="{ 'pointer-events-none': !isEditing }"
             >
                 @section('task-content.dates')
                     @section('task-content.start')
@@ -99,9 +99,9 @@
                                 class="flex flex-col gap-2"
                                 x-cloak
                                 x-show="$wire.task.start_date"
-                                x-bind:class="
-                                    !isEditing && 'pointer-events-none'
-                                "
+                                x-bind:class="{
+                                    'pointer-events-none': !isEditing,
+                                }"
                             >
                                 <x-toggle
                                     :label="__('Start Reminder')"
@@ -142,9 +142,9 @@
                                 class="flex flex-col gap-2"
                                 x-cloak
                                 x-show="$wire.task.due_date"
-                                x-bind:class="
-                                    !isEditing && 'pointer-events-none'
-                                "
+                                x-bind:class="{
+                                    'pointer-events-none': !isEditing,
+                                }"
                             >
                                 <x-toggle
                                     :label="__('Due Reminder')"
@@ -170,7 +170,7 @@
             </div>
             @section('task-content.multi-selects')
                 <x-flux::state
-                    x-bind:class="!isEditing && 'pointer-events-none'"
+                    x-bind:class="{ 'pointer-events-none': !isEditing }"
                     class="w-full"
                     align="bottom-start"
                     :label="__('Task state')"
@@ -191,7 +191,7 @@
                 scope="task"
                 :label="__('Description')"
             />
-            <div x-bind:class="!isEditing && 'pointer-events-none'">
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                 <x-select.styled
                     :label="__('Categories')"
                     wire:model="task.categories"
@@ -200,21 +200,21 @@
                     select="label:label|value:id"
                     unfiltered
                     :request="[
-                    'url' => route('search', \FluxErp\Models\Category::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'where' => [
-                            [
-                                'model_type',
-                                '=',
-                                morph_alias(\FluxErp\Models\Task::class),
+                        'url' => route('search', \FluxErp\Models\Category::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'where' => [
+                                [
+                                    'model_type',
+                                    '=',
+                                    morph_alias(\FluxErp\Models\Task::class),
+                                ],
                             ],
                         ],
-                    ],
-                ]"
+                    ]"
                 />
             </div>
-            <div x-bind:class="!isEditing && 'pointer-events-none'">
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                 <x-select.styled
                     :label="__('Assigned')"
                     autocomplete="off"
@@ -224,17 +224,17 @@
                     select="label:label|value:id"
                     unfiltered
                     :request="[
-                    'url' => route('search', \FluxErp\Models\User::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'with' => 'media',
-                    ],
-                ]"
+                        'url' => route('search', \FluxErp\Models\User::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'with' => 'media',
+                        ],
+                    ]"
                 />
             </div>
             <div
                 class="col-span-2"
-                x-bind:class="!isEditing && 'pointer-events-none'"
+                x-bind:class="{ 'pointer-events-none': !isEditing }"
             >
                 <x-select.styled
                     multiple
@@ -243,19 +243,19 @@
                     select="label:label|value:id"
                     unfiltered
                     :request="[
-                    'url' => route('search', \FluxErp\Models\Tag::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'option-value' => 'id',
-                        'where' => [
-                            [
-                                'type',
-                                '=',
-                                morph_alias(\FluxErp\Models\Task::class),
+                        'url' => route('search', \FluxErp\Models\Tag::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'option-value' => 'id',
+                            'where' => [
+                                [
+                                    'type',
+                                    '=',
+                                    morph_alias(\FluxErp\Models\Task::class),
+                                ],
                             ],
                         ],
-                    ],
-                ]"
+                    ]"
                 >
                     <x-slot:label>
                         <div class="flex items-center gap-2">

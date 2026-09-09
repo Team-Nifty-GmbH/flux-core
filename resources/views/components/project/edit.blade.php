@@ -20,7 +20,7 @@
             class="space-y-2.5 p-0.5"
         >
             <div
-                x-bind:class="!isEditing && 'pointer-events-none'"
+                x-bind:class="{ 'pointer-events-none': !isEditing }"
                 x-show="!$wire.project.id"
                 x-cloak
             >
@@ -41,20 +41,20 @@
                     <x-date
                         without-time
                         x-bind:readonly="!isEditing"
-                        x-bind:class="!isEditing && 'pointer-events-none'"
+                        x-bind:class="{ 'pointer-events-none': !isEditing }"
                         wire:model="project.start_date"
                         :label="__('Start Date')"
                     />
                     <x-date
                         without-time
                         x-bind:readonly="!isEditing"
-                        x-bind:class="!isEditing && 'pointer-events-none'"
+                        x-bind:class="{ 'pointer-events-none': !isEditing }"
                         wire:model="project.end_date"
                         :label="__('End Date')"
                     />
                 @show
             </div>
-            <div x-bind:class="!isEditing && 'pointer-events-none'">
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                 <x-flux::state
                     x-bind:readonly="!isEditing"
                     class="w-full"
@@ -71,7 +71,7 @@
                 :label="__('Description')"
             />
             @section('connections')
-                <div x-bind:class="!isEditing && 'pointer-events-none'">
+                <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                     <x-select.styled
                         x-bind:readonly="!isEditing"
                         :label="__('Responsible User')"
@@ -80,39 +80,39 @@
                         select="label:label|value:id|description:description"
                         unfiltered
                         :request="[
-                        'url' => route('search', \FluxErp\Models\User::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'with' => 'media',
-                        ],
-                    ]"
+                            'url' => route('search', \FluxErp\Models\User::class),
+                            'method' => 'POST',
+                            'params' => [
+                                'with' => 'media',
+                            ],
+                        ]"
                     />
                 </div>
-                <div x-bind:class="!isEditing && 'pointer-events-none'">
+                <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                     <x-select.styled
                         x-bind:readonly="!isEditing"
                         wire:model="project.contact_id"
                         select="label:label|value:contact_id"
                         unfiltered
                         :request="[
-                        'url' => route('search', \FluxErp\Models\Address::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'where' => [
-                                [
-                                    'is_main_address',
-                                    '=',
-                                    true,
+                            'url' => route('search', \FluxErp\Models\Address::class),
+                            'method' => 'POST',
+                            'params' => [
+                                'where' => [
+                                    [
+                                        'is_main_address',
+                                        '=',
+                                        true,
+                                    ],
                                 ],
+                                'option-value' => 'contact_id',
+                                'fields' => [
+                                    'contact_id',
+                                    'name',
+                                ],
+                                'with' => 'contact.media',
                             ],
-                            'option-value' => 'contact_id',
-                            'fields' => [
-                                'contact_id',
-                                'name',
-                            ],
-                            'with' => 'contact.media',
-                        ],
-                    ]"
+                        ]"
                     >
                         <x-slot:label>
                             <x-link
@@ -126,16 +126,16 @@
                         </x-slot:label>
                     </x-select.styled>
                 </div>
-                <div x-bind:class="!isEditing && 'pointer-events-none'">
+                <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                     <x-select.styled
                         x-bind:readonly="!isEditing"
                         wire:model="project.order_id"
                         select="label:label|value:id"
                         unfiltered
                         :request="[
-                        'url' => route('search', \FluxErp\Models\Order::class),
-                        'method' => 'POST',
-                    ]"
+                            'url' => route('search', \FluxErp\Models\Order::class),
+                            'method' => 'POST',
+                        ]"
                     >
                         <x-slot:label>
                             <x-link
@@ -181,7 +181,7 @@
                 </x-slot:text>
                 <x-slot:left
                     class="relative flex h-2 w-2 items-center transition-transform"
-                    x-bind:class="expanded && '-rotate-180'"
+                    x-bind:class="{ '-rotate-180': expanded }"
                 >
                     <x-icon name="chevron-down" class="h-4 w-4 shrink-0" />
                 </x-slot:left>

@@ -5,6 +5,10 @@
                 return 0;
             }
 
+            if (position.is_alternative) {
+                return 0;
+            }
+
             const unitPrice = position.is_net
                 ? position.unit_net_price
                 : position.unit_gross_price;
@@ -152,6 +156,12 @@
                                                 <span>
                                                     {{ data_get($position, "name") }}
                                                 </span>
+                                                @if (data_get($position, "is_alternative"))
+                                                    <x-badge
+                                                        :text="__('Alternative')"
+                                                        color="red"
+                                                    />
+                                                @endif
                                                 <div
                                                     class="text-sm text-gray-600 dark:text-gray-400"
                                                 >

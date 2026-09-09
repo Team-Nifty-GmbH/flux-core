@@ -1,3 +1,6 @@
+@php
+    $units = resolve_static(\FluxErp\Models\Unit::class, 'query')->get(['id', 'name'])->toArray();
+@endphp
 <div class="space-y-5" x-data wire:key="products-general">
     <x-card class="space-y-2.5" :header="__('General')">
         @section('general')
@@ -6,17 +9,27 @@
                 label="{{ __('Product number') }}"
                 wire:model="product.product_number"
             />
-            <x-input
-                x-bind:readonly="!isEditing"
-                label="{{ __('Name') }}"
-                wire:model="product.name"
-            />
-            <x-flux::editor
-                x-model="isEditing"
-                wire:model="product.description"
-                scope="product"
-                :label="__('Description')"
-            />
+            <x-flux::product.inheritance-indicator
+                :product="$this->product->getProductModel()"
+                field="name"
+            >
+                <x-input
+                    x-bind:readonly="!isEditing"
+                    label="{{ __('Name') }}"
+                    wire:model="product.name"
+                />
+            </x-flux::product.inheritance-indicator>
+            <x-flux::product.inheritance-indicator
+                :product="$this->product->getProductModel()"
+                field="description"
+            >
+                <x-flux::editor
+                    x-model="isEditing"
+                    wire:model="product.description"
+                    scope="product"
+                    :label="__('Description')"
+                />
+            </x-flux::product.inheritance-indicator>
         @show
     </x-card>
     <x-card class="space-y-2.5" :header="__('Attributes')">
@@ -27,32 +40,67 @@
                     label="{{ __('Is active') }}"
                     wire:model="product.is_active"
                 />
-                <x-checkbox
-                    x-bind:disabled="!isEditing"
-                    label="{{ __('Is highlight') }}"
-                    wire:model="product.is_highlight"
-                />
-                <x-checkbox
-                    x-bind:disabled="!isEditing"
-                    label="{{ __('Is NOS') }}"
-                    wire:model="product.is_nos"
-                />
-                <x-checkbox
-                    x-bind:disabled="!isEditing"
-                    label="{{ __('Export to Webshop') }}"
-                    wire:model="product.is_active_export_to_web_shop"
-                />
-                <x-checkbox
-                    x-bind:disabled="!isEditing"
-                    label="{{ __('Is service') }}"
-                    wire:model="product.is_service"
-                />
-                <div x-cloak x-show="$wire.product.is_service">
-                    <x-select.styled
-                        label="{{ __('Time unit') }}"
-                        wire:model="product.time_unit_enum"
-                        :options="\FluxErp\Enums\TimeUnitEnum::valuesLocalized()"
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="is_highlight"
+                >
+                    <x-checkbox
+                        x-bind:disabled="!isEditing"
+                        label="{{ __('Is highlight') }}"
+                        wire:model="product.is_highlight"
                     />
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="is_nos"
+                >
+                    <x-checkbox
+                        x-bind:disabled="!isEditing"
+                        label="{{ __('Is NOS') }}"
+                        wire:model="product.is_nos"
+                    />
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="is_active_export_to_web_shop"
+                >
+                    <x-checkbox
+                        x-bind:disabled="!isEditing"
+                        label="{{ __('Export to Webshop') }}"
+                        wire:model="product.is_active_export_to_web_shop"
+                    />
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="is_shipping_item"
+                >
+                    <x-checkbox
+                        x-bind:disabled="!isEditing"
+                        label="{{ __('Is shipping item') }}"
+                        wire:model="product.is_shipping_item"
+                    />
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="is_service"
+                >
+                    <x-checkbox
+                        x-bind:disabled="!isEditing"
+                        label="{{ __('Is service') }}"
+                        wire:model="product.is_service"
+                    />
+                </x-flux::product.inheritance-indicator>
+                <div x-cloak x-show="$wire.product.is_service">
+                    <x-flux::product.inheritance-indicator
+                        :product="$this->product->getProductModel()"
+                        field="time_unit_enum"
+                    >
+                        <x-select.styled
+                            label="{{ __('Time unit') }}"
+                            wire:model="product.time_unit_enum"
+                            :options="\FluxErp\Enums\TimeUnitEnum::valuesLocalized()"
+                        />
+                    </x-flux::product.inheritance-indicator>
                 </div>
             @show
             <hr />
@@ -61,428 +109,574 @@
                 label="{{ __('EAN') }}"
                 wire:model="product.ean"
             />
-            <x-input
-                x-bind:readonly="!isEditing"
-                label="{{ __('Customs Tariff Number') }}"
-                wire:model="product.customs_tariff_number"
-            />
+            <x-flux::product.inheritance-indicator
+                :product="$this->product->getProductModel()"
+                field="customs_tariff_number"
+            >
+                <x-input
+                    x-bind:readonly="!isEditing"
+                    label="{{ __('Customs Tariff Number') }}"
+                    wire:model="product.customs_tariff_number"
+                />
+            </x-flux::product.inheritance-indicator>
             <x-input
                 x-bind:readonly="!isEditing"
                 label="{{ __('Manufacturer product number') }}"
                 wire:model="product.manufacturer_product_number"
             />
-            <x-select.styled
-                x-bind:readonly="!isEditing"
-                label="{{ __('Unit') }}"
-                wire:model.number="product.unit_id"
-                select="label:name|value:id"
-                :options="resolve_static(\FluxErp\Models\Unit::class, 'query')->get(['id', 'name'])->toArray()"
-            />
+            <x-flux::product.inheritance-indicator
+                :product="$this->product->getProductModel()"
+                field="unit_id"
+            >
+                <x-select.styled
+                    x-bind:readonly="!isEditing"
+                    label="{{ __('Unit') }}"
+                    wire:model.number="product.unit_id"
+                    select="label:name|value:id"
+                    :options="$units"
+                />
+            </x-flux::product.inheritance-indicator>
             <div
                 class="grid grid-cols-1 gap-4 sm:grid-cols-4"
-                x-bind:class="!isEditing && 'pointer-events-none'"
+                x-bind:class="{ 'pointer-events-none': !isEditing }"
             >
-                <x-number
-                    x-bind:readonly="!isEditing"
-                    wire:model.number="product.dimension_length_mm"
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="dimension_length_mm"
                 >
-                    <x-slot:label>
-                        <div class="flex items-center justify-between">
-                            <div>{{ __('Length') }}</div>
-                            <div>{{ __('mm') }}</div>
-                        </div>
-                    </x-slot:label>
-                </x-number>
-                <x-number
-                    x-bind:readonly="!isEditing"
-                    wire:model.number="product.dimension_width_mm"
-                >
-                    <x-slot:label>
-                        <div class="flex items-center justify-between">
-                            <div>{{ __('Width') }}</div>
-                            <div>{{ __('mm') }}</div>
-                        </div>
-                    </x-slot:label>
-                </x-number>
-                <x-number
-                    x-bind:readonly="!isEditing"
-                    wire:model.number="product.dimension_height_mm"
-                >
-                    <x-slot:label>
-                        <div class="flex items-center justify-between">
-                            <div>{{ __('Height') }}</div>
-                            <div>{{ __('mm') }}</div>
-                        </div>
-                    </x-slot:label>
-                </x-number>
-                <x-number
-                    x-bind:readonly="!isEditing"
-                    wire:model.number="product.weight_gram"
-                >
-                    <x-slot:label>
-                        <div class="flex items-center justify-between">
-                            <div>{{ __('Weight') }}</div>
-                            <div>{{ __('Gram') }}</div>
-                        </div>
-                    </x-slot:label>
-                </x-number>
-                <x-number
-                    x-bind:readonly="!isEditing"
-                    wire:model.number="product.selling_unit"
-                >
-                    <x-slot:label>
-                        <div class="flex items-center justify-between">
-                            <div>{{ __('Selling Unit') }}</div>
-                            <div>
-                                <x-tooltip
-                                    :text="__('Required to calculate the product\'s unit price. The value to be entered depends on the selected scale unit.<br><br>Unit price = (product price * basic unit) / selling unit.<br><br>Unit price not displayed, if selling unit and basic unit have the same value.')"
-                                />
-                            </div>
-                        </div>
-                    </x-slot:label>
-                </x-number>
-                <x-number
-                    x-bind:readonly="!isEditing"
-                    wire:model.number="product.basic_unit"
-                >
-                    <x-slot:label>
-                        <div class="flex items-center justify-between">
-                            <div>{{ __('Basic Unit') }}</div>
-                            <div>
-                                <x-tooltip
-                                    :text="__('Required to calculate the product\'s unit price. The value to be entered depends on the selected scale unit.<br><br>Unit price = (product price * basic unit) / selling unit.<br><br>Unit price not displayed, if selling unit and basic unit have the same value.')"
-                                />
-                            </div>
-                        </div>
-                    </x-slot:label>
-                </x-number>
-            </div>
-        @show
-    </x-card>
-    <x-card class="flex flex-col gap-4" :header="__('Assignment')">
-        <x-select.styled
-            multiple
-            x-bind:disabled="!isEditing"
-            wire:model.number="product.categories"
-            :label="__('Categories')"
-            select="label:label|value:id"
-            unfiltered
-            :request="[
-                'url' => route('search', \FluxErp\Models\Category::class),
-                'method' => 'POST',
-                'params' => [
-                    'where' => [
-                        [
-                            'model_type',
-                            '=',
-                            morph_alias(\FluxErp\Models\Product::class),
-                        ],
-                    ],
-                ],
-            ]"
-        />
-        <x-select.styled
-            multiple
-            x-bind:disabled="!isEditing"
-            wire:model.number="product.tenants"
-            :label="__('Tenants')"
-            select="label:name|value:id"
-            :src="'logo_small_url'"
-            unfiltered
-            :request="[
-                'url' => route('search', \FluxErp\Models\Tenant::class),
-                'method' => 'POST',
-            ]"
-        />
-        <x-select.styled
-            multiple
-            x-bind:disabled="!isEditing"
-            wire:model.number="product.tags"
-            select="label:label|value:id"
-            unfiltered
-            :request="[
-                'url' => route('search', \FluxErp\Models\Tag::class),
-                'method' => 'POST',
-                'params' => [
-                    'where' => [
-                        [
-                            'type',
-                            '=',
-                            morph_alias(\FluxErp\Models\Product::class),
-                        ],
-                    ],
-                ],
-            ]"
-        >
-            <x-slot:label>
-                <div class="flex items-center gap-2">
-                    <x-label :label="__('Tags')" />
-                    @canAction(\FluxErp\Actions\Tag\CreateTag::class)
-                        <x-button.circle
-                            sm
-                            icon="plus"
-                            color="emerald"
-                            wire:click="addTag($nuxbe.promptValue())"
-                            wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
-                        />
-                    @endcanAction
-                </div>
-            </x-slot:label>
-        </x-select.styled>
-        <x-tag
-            :label="__('Search Aliases')"
-            wire:model="product.search_aliases"
-        />
-    </x-card>
-    <x-card
-        class="dark:bg-secondary-700 space-y-2.5 bg-gray-50"
-        :header="__('Product Properties')"
-        x-data="{ productPropertyGroup: null }"
-    >
-        @section('product-properties')
-            <x-modal
-                id="edit-product-properties-modal"
-                size="6xl"
-                :title="__('Edit Product Properties')"
-            >
-                <div
-                    class="flex gap-4"
-                    x-on:data-table-row-clicked="
-                        $wire.loadProductProperties(
-                            $event.detail.id ?? $event.detail.record.id,
-                        );
-                        productPropertyGroup =
-                            $event.detail.record ?? $event.detail;
-                    "
-                >
-                    <div class="grow">
-                        <livewire:product.product-property-group-list />
-                    </div>
-                    <div
-                        x-collapse
-                        x-show="
-                            Object.values($wire.productProperties).length > 0
-                        "
-                        x-cloak
-                        class="w-1/2"
+                    <x-number
+                        x-bind:readonly="!isEditing"
+                        wire:model.number="product.dimension_length_mm"
                     >
-                        <x-card>
-                            <x-slot:header>
-                                <span
-                                    x-text="productPropertyGroup?.name"
-                                ></span>
-                            </x-slot:header>
-                            <template
-                                x-for="
-                                    productProperty in $wire.productProperties
-                                "
-                                :key="productProperty.id"
-                            >
-                                <div class="flex gap-1.5">
-                                    <x-checkbox
-                                        x-bind:id="
-                                            'product-property' +
-                                            productProperty.id
-                                        "
-                                        x-bind:value="productProperty.id"
-                                        x-model.number="
-                                            $wire.selectedProductProperties[
-                                                productProperty.id
-                                            ]
-                                        "
+                        <x-slot:label>
+                            <div class="flex items-center justify-between">
+                                <div>{{ __('Length') }}</div>
+                                <div>{{ __('mm') }}</div>
+                            </div>
+                        </x-slot:label>
+                    </x-number>
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="dimension_width_mm"
+                >
+                    <x-number
+                        x-bind:readonly="!isEditing"
+                        wire:model.number="product.dimension_width_mm"
+                    >
+                        <x-slot:label>
+                            <div class="flex items-center justify-between">
+                                <div>{{ __('Width') }}</div>
+                                <div>{{ __('mm') }}</div>
+                            </div>
+                        </x-slot:label>
+                    </x-number>
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="dimension_height_mm"
+                >
+                    <x-number
+                        x-bind:readonly="!isEditing"
+                        wire:model.number="product.dimension_height_mm"
+                    >
+                        <x-slot:label>
+                            <div class="flex items-center justify-between">
+                                <div>{{ __('Height') }}</div>
+                                <div>{{ __('mm') }}</div>
+                            </div>
+                        </x-slot:label>
+                    </x-number>
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="weight_gram"
+                >
+                    <x-number
+                        x-bind:readonly="!isEditing"
+                        wire:model.number="product.weight_gram"
+                    >
+                        <x-slot:label>
+                            <div class="flex items-center justify-between">
+                                <div>{{ __('Weight') }}</div>
+                                <div>{{ __('Gram') }}</div>
+                            </div>
+                        </x-slot:label>
+                    </x-number>
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="selling_unit"
+                >
+                    <x-number
+                        x-bind:readonly="!isEditing"
+                        wire:model.number="product.selling_unit"
+                    >
+                        <x-slot:label>
+                            <div class="flex items-center justify-between">
+                                <div>{{ __('Selling Unit') }}</div>
+                                <div>
+                                    <x-tooltip
+                                        :text="__('Required to calculate the product\'s unit price. The value to be entered depends on the selected scale unit.<br><br>Unit price = (product price * basic unit) / selling unit.<br><br>Unit price not displayed, if selling unit and basic unit have the same value.')"
                                     />
-                                    <label
-                                        x-text="productProperty.name"
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-50"
-                                        x-bind:for="
-                                            'product-property' +
-                                            productProperty.id
-                                        "
-                                    ></label>
                                 </div>
-                            </template>
-                        </x-card>
-                    </div>
-                </div>
-                <x-slot:footer>
-                    <x-button
-                        color="secondary"
-                        light
-                        flat
-                        :text="__('Cancel')"
-                        x-on:click="
-                            $tsui.close.modal('edit-product-properties-modal')
-                        "
+                            </div>
+                        </x-slot:label>
+                    </x-number>
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="basic_unit"
+                >
+                    <x-number
+                        x-bind:readonly="!isEditing"
+                        wire:model.number="product.basic_unit"
+                    >
+                        <x-slot:label>
+                            <div class="flex items-center justify-between">
+                                <div>{{ __('Basic Unit') }}</div>
+                                <div>
+                                    <x-tooltip
+                                        :text="__('Required to calculate the product\'s unit price. The value to be entered depends on the selected scale unit.<br><br>Unit price = (product price * basic unit) / selling unit.<br><br>Unit price not displayed, if selling unit and basic unit have the same value.')"
+                                    />
+                                </div>
+                            </div>
+                        </x-slot:label>
+                    </x-number>
+                </x-flux::product.inheritance-indicator>
+                <x-flux::product.inheritance-indicator
+                    :product="$this->product->getProductModel()"
+                    field="reference_unit_id"
+                >
+                    <x-select.styled
+                        label="{{ __('Reference Unit') }}"
+                        wire:model.number="product.reference_unit_id"
+                        select="label:name|value:id"
+                        :options="$units"
                     />
-                    <x-button
-                        color="indigo"
-                        :text="__('Save')"
-                        x-on:click="
-                            $wire.addProductProperties().then(() => {
+                </x-flux::product.inheritance-indicator>
+            </div>
+            @show
+            </x-card>
+            <x-card class="space-y-2.5" :header="__('Purchase')">
+                @section('purchase')
+                <div x-bind:class="{ 'pointer-events-none': !isEditing }">
+                    <x-select.styled
+                        label="{{ __('Purchase Unit') }}"
+                        wire:model.number="product.purchase_unit_id"
+                        select="label:name|value:id"
+                        :options="$units"
+                    />
+                </div>
+                <div
+                    class="grid grid-cols-1 gap-4 sm:grid-cols-2"
+                    x-bind:class="{ 'pointer-events-none': !isEditing }"
+                >
+                    <x-number
+                        x-bind:readonly="!isEditing"
+                        wire:model.number="product.min_purchase"
+                    >
+                        <x-slot:label>
+                            <div class="flex items-center justify-between">
+                                <div>{{ __('Min Purchase') }}</div>
+                                <div>
+                                    <x-tooltip
+                                        :text="__('Smallest amount that can be purchased from this supplier.')"
+                                    />
+                                </div>
+                            </div>
+                        </x-slot:label>
+                    </x-number>
+                    <x-number
+                        x-bind:readonly="!isEditing"
+                        wire:model.number="product.purchase_steps"
+                    >
+                        <x-slot:label>
+                            <div class="flex items-center justify-between">
+                                <div>{{ __('Purchase Steps') }}</div>
+                                <div>
+                                    <x-tooltip
+                                        :text="__('Amount the supplier sells in. An order position entered in the purchase unit is multiplied by it.')"
+                                    />
+                                </div>
+                            </div>
+                        </x-slot:label>
+                    </x-number>
+                </div>
+                @show
+            </x-card>
+            <x-card class="flex flex-col gap-4" :header="__('Assignment')">
+                <x-select.styled
+                    multiple
+                    x-bind:disabled="!isEditing"
+                    wire:model.number="product.categories"
+                    :label="__('Categories')"
+                    select="label:label|value:id"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\Category::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'where' => [
+                                [
+                                    'model_type',
+                                    '=',
+                                    morph_alias(\FluxErp\Models\Product::class),
+                                ],
+                            ],
+                        ],
+                    ]"
+                />
+                <x-select.styled
+                    multiple
+                    x-bind:disabled="!isEditing"
+                    wire:model.number="product.tenants"
+                    :label="__('Tenants')"
+                    select="label:name|value:id"
+                    :src="'logo_small_url'"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\Tenant::class),
+                        'method' => 'POST',
+                    ]"
+                />
+                <x-select.styled
+                    multiple
+                    x-bind:disabled="!isEditing"
+                    wire:model.number="product.tags"
+                    select="label:label|value:id"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\Tag::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'where' => [
+                                [
+                                    'type',
+                                    '=',
+                                    morph_alias(\FluxErp\Models\Product::class),
+                                ],
+                            ],
+                        ],
+                    ]"
+                >
+                    <x-slot:label>
+                        <div class="flex items-center gap-2">
+                            <x-label :label="__('Tags')" />
+                            @canAction(\FluxErp\Actions\Tag\CreateTag::class)
+                            <x-button.circle
+                                sm
+                                icon="plus"
+                                color="emerald"
+                                wire:click="addTag($nuxbe.promptValue())"
+                                wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
+                            />
+                            @endcanAction
+                        </div>
+                    </x-slot:label>
+                </x-select.styled>
+                <x-tag
+                    :label="__('Search Aliases')"
+                    wire:model="product.search_aliases"
+                />
+            </x-card>
+            <x-card
+                class="dark:bg-secondary-700 space-y-2.5 bg-gray-50"
+                :header="__('Product Properties')"
+                x-data="{ productPropertyGroup: null }"
+            >
+                @section('product-properties')
+                <x-modal
+                    id="edit-product-properties-modal"
+                    size="6xl"
+                    :title="__('Edit Product Properties')"
+                >
+                    <div
+                        class="flex gap-4"
+                        x-on:data-table-row-clicked="
+                            $wire.loadProductProperties(
+                                $event.detail.id ?? $event.detail.record.id,
+                            );
+                            productPropertyGroup =
+                                $event.detail.record ?? $event.detail;
+                        "
+                    >
+                        <div class="grow">
+                            <livewire:product.product-property-group-list />
+                        </div>
+                        <div
+                            x-collapse
+                            x-show="
+                                Object.values($wire.productProperties).length >
+                                0
+                            "
+                            x-cloak
+                            class="w-1/2"
+                        >
+                            <x-card>
+                                <x-slot:header>
+                                    <span
+                                        x-text="productPropertyGroup?.name"
+                                    ></span>
+                                </x-slot:header>
+                                <template
+                                    x-for="
+                                        productProperty in
+                                        $wire.productProperties
+                                    "
+                                    :key="productProperty.id"
+                                >
+                                    <div class="flex gap-1.5">
+                                        <x-checkbox
+                                            x-bind:id="
+                                                'product-property' +
+                                                productProperty.id
+                                            "
+                                            x-bind:value="productProperty.id"
+                                            x-model.number="
+                                                $wire.selectedProductProperties[
+                                                    productProperty.id
+                                                ]
+                                            "
+                                        />
+                                        <label
+                                            x-text="productProperty.name"
+                                            class="block text-sm font-medium text-gray-700 dark:text-gray-50"
+                                            x-bind:for="
+                                                'product-property' +
+                                                productProperty.id
+                                            "
+                                        ></label>
+                                    </div>
+                                </template>
+                            </x-card>
+                        </div>
+                    </div>
+                    <x-slot:footer>
+                        <x-button
+                            color="secondary"
+                            light
+                            flat
+                            :text="__('Cancel')"
+                            x-on:click="
                                 $tsui.close.modal(
                                     'edit-product-properties-modal',
-                                );
-                            })
+                                )
+                            "
+                        />
+                        <x-button
+                            color="indigo"
+                            :text="__('Save')"
+                            x-on:click="
+                                $wire.addProductProperties().then(() => {
+                                    $tsui.close.modal(
+                                        'edit-product-properties-modal',
+                                    );
+                                })
+                            "
+                        />
+                    </x-slot:footer>
+                </x-modal>
+                <x-button
+                    color="indigo"
+                    x-show="isEditing"
+                    x-cloak
+                    :text="__('Edit')"
+                    wire:click="showProductPropertiesModal()"
+                />
+                <div class="grid grid-cols-3 gap-x-4">
+                    <template
+                        x-for="
+                            (propertyTypes, group) in
+                            $wire.displayedProductProperties
                         "
-                    />
-                </x-slot:footer>
-            </x-modal>
-            <x-button
-                color="indigo"
-                x-show="isEditing"
-                x-cloak
-                :text="__('Edit')"
-                wire:click="showProductPropertiesModal()"
-            />
-            <div class="grid grid-cols-3 gap-x-4">
-                <template
-                    x-for="
-                        (propertyTypes, group) in
-                        $wire.displayedProductProperties
-                    "
-                    :key="group"
-                >
-                    <div class="col-span-1 space-y-2">
-                        <x-card>
-                            <x-slot:title>
-                                <span x-text="group"></span>
-                            </x-slot:title>
-                            <template
-                                x-for="
-                                    (displayedProperties, propertyType) in
-                                    propertyTypes
-                                "
-                            >
-                                <div>
-                                    <div
-                                        class="flex flex-wrap gap-1.5"
-                                        x-cloak
-                                        x-show="propertyType === 'option'"
-                                    >
-                                        <template
-                                            x-for="
-                                                displayedProperty in
-                                                displayedProperties
-                                            "
+                        :key="group"
+                    >
+                        <div class="col-span-1 space-y-2">
+                            <x-card>
+                                <x-slot:header>
+                                    <span x-text="group"></span>
+                                </x-slot:header>
+                                <template
+                                    x-for="
+                                        (displayedProperties, propertyType) in
+                                        propertyTypes
+                                    "
+                                >
+                                    <div>
+                                        <div
+                                            class="flex flex-wrap gap-1.5"
+                                            x-cloak
+                                            x-show="propertyType === 'option'"
                                         >
-                                            <x-badge
-                                                x-text="displayedProperty.name"
-                                            />
-                                        </template>
-                                    </div>
-                                    <div
-                                        class="space-y-2.5"
-                                        x-cloak
-                                        x-show="propertyType !== 'option'"
-                                    >
-                                        <template
-                                            x-for="
-                                                displayedProperty in
-                                                displayedProperties
-                                            "
+                                            <template
+                                                x-for="
+                                                    displayedProperty in
+                                                    displayedProperties
+                                                "
+                                            >
+                                                <x-badge
+                                                    x-text="
+                                                        displayedProperty.name
+                                                    "
+                                                />
+                                            </template>
+                                        </div>
+                                        <div
+                                            class="space-y-2.5"
+                                            x-cloak
+                                            x-show="propertyType !== 'option'"
                                         >
-                                            <div>
-                                                <div class="mb-1">
-                                                    <x-label
-                                                        x-bind:for="
+                                            <template
+                                                x-for="
+                                                    displayedProperty in
+                                                    displayedProperties
+                                                "
+                                            >
+                                                <div>
+                                                    <div class="mb-1">
+                                                        <x-label
+                                                            x-bind:for="
+                                                                'displayed-property-' +
+                                                                displayedProperty.id
+                                                            "
+                                                            x-text="
+                                                                displayedProperty.name
+                                                            "
+                                                        />
+                                                    </div>
+                                                    <x-input
+                                                        x-model="
+                                                            displayedProperty.value
+                                                        "
+                                                        x-bind:id="
                                                             'displayed-property-' +
                                                             displayedProperty.id
                                                         "
-                                                        x-text="
-                                                            displayedProperty.name
+                                                        x-bind:disabled="
+                                                            !isEditing
                                                         "
                                                     />
                                                 </div>
-                                                <x-input
-                                                    x-model="
-                                                        displayedProperty.value
-                                                    "
-                                                    x-bind:id="
-                                                        'displayed-property-' +
-                                                        displayedProperty.id
-                                                    "
-                                                    x-bind:disabled="!isEditing"
-                                                />
-                                            </div>
-                                        </template>
+                                            </template>
+                                        </div>
                                     </div>
-                                </div>
-                            </template>
-                        </x-card>
-                    </div>
-                </template>
-            </div>
-        @show
-    </x-card>
+                                </template>
+                            </x-card>
+                        </div>
+                    </template>
+                </div>
+                @show
+            </x-card>
 
-    <x-card class="flex flex-col gap-4" :header="__('Suppliers')">
-        @section('suppliers')
-            <template x-for="(supplier, index) in $wire.product.suppliers">
-                <x-flux::list-item :item="[]">
-                    <x-slot:value>
-                        <span x-text="supplier.main_address.name"></span>
-                    </x-slot:value>
-                    <x-slot:sub-value>
-                        <div class="flex gap-2">
-                            <span>{{ __('Customer Number') . ':' }}</span>
-                            <span x-text="supplier.customer_number"></span>
-                        </div>
-                    </x-slot:sub-value>
-                    <x-slot:actions>
-                        <x-input
-                            x-bind:disabled="!isEditing"
-                            x-model="supplier.manufacturer_product_number"
-                            :label="__('Manufacturer product number')"
-                        />
-                        <x-number
-                            x-bind:disabled="!isEditing"
-                            x-model="supplier.purchase_price"
-                            :label="__('Purchase Price')"
-                            step="0.01"
-                        />
-                        <div class="mt-6">
-                            <x-button
-                                color="red"
-                                icon="trash"
+            <x-card class="flex flex-col gap-4" :header="__('Suppliers')">
+                @section('suppliers')
+                <template x-for="(supplier, index) in $wire.product.suppliers">
+                    <x-flux::list-item :item="[]">
+                        <x-slot:value>
+                            <span x-text="supplier.main_address.name"></span>
+                        </x-slot:value>
+                        <x-slot:sub-value>
+                            <div class="flex gap-2">
+                                <span>{{ __('Customer Number') . ':' }}</span>
+                                <span x-text="supplier.customer_number"></span>
+                            </div>
+                        </x-slot:sub-value>
+                        <x-slot:actions>
+                            <x-input
                                 x-bind:disabled="!isEditing"
-                                x-on:click="
-                                    $wire.product.suppliers.splice(index, 1)
-                                "
+                                x-model="supplier.supplier_product_number"
+                                :label="__('Supplier product number')"
                             />
-                        </div>
-                    </x-slot:actions>
-                </x-flux::list-item>
-            </template>
-            <div x-show="isEditing" x-cloak x-transition>
-                <x-select.styled
-                    :label="__('Contact')"
-                    select="label:label|value:contact_id"
-                    x-on:select="
-                        $wire.addSupplier($event.detail.select.contact_id);
-                        clear();
-                    "
-                    unfiltered
-                    :request="[
-                    'url' => route('search', \FluxErp\Models\Address::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'where' => [
-                            [
-                                'is_main_address',
-                                '=',
-                                true,
+                            <x-input
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.supplier_product_name"
+                                :label="__('Supplier product name')"
+                            />
+                            <x-input
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.manufacturer_product_number"
+                                :label="__('Manufacturer product number')"
+                            />
+                            <x-number
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.packaging_amount"
+                                :label="__('Amount per Packaging')"
+                                step="0.01"
+                            />
+                            <div
+                                x-bind:class="{
+                                    'pointer-events-none': !isEditing,
+                                }"
+                            >
+                                <x-select.styled
+                                    x-model.number="supplier.packaging_unit_id"
+                                    :label="__('Packaging Unit')"
+                                    select="label:name|value:id"
+                                    :options="$units"
+                                />
+                            </div>
+                            <x-number
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.items_per_packaging"
+                                :label="__('Items per Packaging')"
+                                step="1"
+                            />
+                            <x-number
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.purchase_price"
+                                :label="__('Purchase Price')"
+                                step="0.01"
+                            />
+                            <x-input
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.note"
+                                :label="__('Note')"
+                            />
+                            @stack('product-supplier-fields')
+                            <div class="mt-6">
+                                <x-button
+                                    color="red"
+                                    icon="trash"
+                                    x-bind:disabled="!isEditing"
+                                    x-on:click="
+                                        $wire.product.suppliers.splice(index, 1)
+                                    "
+                                />
+                            </div>
+                        </x-slot:actions>
+                    </x-flux::list-item>
+                </template>
+                <div x-show="isEditing" x-cloak x-transition>
+                    <x-select.styled
+                        :label="__('Contact')"
+                        select="label:label|value:contact_id"
+                        x-on:select="
+                            $wire.addSupplier($event.detail.select.contact_id);
+                            clear();
+                        "
+                        unfiltered
+                        :request="[
+                            'url' => route('search', \FluxErp\Models\Address::class),
+                            'method' => 'POST',
+                            'params' => [
+                                'where' => [
+                                    [
+                                        'is_main_address',
+                                        '=',
+                                        true,
+                                    ],
+                                ],
+                                'option-value' => 'contact_id',
+                                'fields' => [
+                                    'contact_id',
+                                    'name',
+                                ],
+                                'with' => 'contact.media',
                             ],
-                        ],
-                        'option-value' => 'contact_id',
-                        'fields' => [
-                            'contact_id',
-                            'name',
-                        ],
-                        'with' => 'contact.media',
-                    ],
-                ]"
-                />
+                        ]"
+                    />
+                </div>
+                @show
+            </x-card>
             </div>
-        @show
-    </x-card>
-</div>

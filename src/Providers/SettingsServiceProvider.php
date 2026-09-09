@@ -1,0 +1,32 @@
+<?php
+
+namespace FluxErp\Providers;
+
+use FluxErp\Settings\SettingsManager;
+use Illuminate\Support\ServiceProvider;
+use Spatie\LaravelSettings\SettingsContainer;
+
+class SettingsServiceProvider extends ServiceProvider
+{
+    public function boot(): void
+    {
+        config([
+            'settings.cache.enabled' => config('flux.settings.cache'),
+            'settings.cache.memo' => config('flux.settings.memo'),
+        ]);
+
+        $manager = $this->app->make(SettingsManager::class);
+
+        $manager->autoDiscover(flux_path('src/Settings'), 'FluxErp\Settings');
+        $manager->autoDiscover();
+
+        $this->app->booted(function (): void {
+            $this->app->make(SettingsContainer::class)->clearCache()->registerBindings();
+        });
+    }
+
+    public function register(): void
+    {
+        $this->app->singleton(SettingsManager::class);
+    }
+}

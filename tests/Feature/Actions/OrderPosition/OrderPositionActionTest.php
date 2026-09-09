@@ -2,6 +2,7 @@
 
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Actions\OrderPosition\DeleteOrderPosition;
+use FluxErp\Actions\OrderPosition\FillOrderPositions;
 use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
 use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\OrderTypeEnum;
@@ -12,6 +13,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
+use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\VatRate;
@@ -419,4 +421,323 @@ test('rescale uses positive previous amount as baseline only', function (): void
     ])->validate()->execute();
 
     expect($child->refresh()->amount)->toEqual(16.0);
+});
+
+test('the performance period falls back to the order', function (): void {
+    $this->order->update([
+        'system_delivery_date' => '2026-07-01',
+        'system_delivery_date_end' => '2026-07-31',
+    ]);
+
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'name' => 'Ohne eigenen Zeitraum',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 1,
+        'unit_price' => 50.00,
+    ])->validate()->execute();
+
+    expect($position->system_delivery_date)->toBeNull()
+        ->and($position->performance_period_start->toDateString())->toBe('2026-07-01')
+        ->and($position->performance_period_end->toDateString())->toBe('2026-07-31');
+});
+
+test('an own performance period wins over the order', function (): void {
+    $this->order->update([
+        'system_delivery_date' => '2026-07-01',
+        'system_delivery_date_end' => '2026-07-31',
+    ]);
+
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'name' => 'Mit eigenem Zeitraum',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 1,
+        'unit_price' => 50.00,
+        'system_delivery_date' => '2026-09-01',
+        'system_delivery_date_end' => '2026-09-30',
+    ])->validate()->execute();
+
+    expect($position->performance_period_start->toDateString())->toBe('2026-09-01')
+        ->and($position->performance_period_end->toDateString())->toBe('2026-09-30');
+});
+
+test('an own start without an end does not borrow the end of the order', function (): void {
+    $this->order->update([
+        'system_delivery_date' => '2026-07-01',
+        'system_delivery_date_end' => '2026-07-31',
+    ]);
+
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'name' => 'Nur Startdatum',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 1,
+        'unit_price' => 50.00,
+        'system_delivery_date' => '2026-09-01',
+    ])->validate()->execute();
+
+    expect($position->performance_period_start->toDateString())->toBe('2026-09-01')
+        ->and($position->performance_period_end)->toBeNull();
+});
+
+test('the performance period end may not precede its start', function (): void {
+    CreateOrderPosition::assertValidationErrors(
+        [
+            'order_id' => $this->order->getKey(),
+            'name' => 'Falscher Zeitraum',
+            'vat_rate_id' => $this->vatRate->getKey(),
+            'amount' => 1,
+            'unit_price' => 50.00,
+            'system_delivery_date' => '2026-09-30',
+            'system_delivery_date_end' => '2026-09-01',
+        ],
+        'system_delivery_date_end'
+    );
+});
+
+test('fill order positions defaults simulate to filling them', function (): void {
+    $result = FillOrderPositions::make([
+        'order_id' => $this->order->getKey(),
+        'order_positions' => [[
+            'order_id' => $this->order->getKey(),
+            'name' => 'Chili con Carne',
+            'vat_rate_id' => $this->vatRate->getKey(),
+            'amount' => 2,
+            'unit_price' => 4.90,
+        ]],
+    ])->validate()->execute();
+
+    expect($result)->toBeArray()
+        ->and(OrderPosition::query()->where('order_id', $this->order->getKey())->count())->toBe(1);
+});
+
+test('fill order positions still simulates when asked to', function (): void {
+    FillOrderPositions::make([
+        'order_id' => $this->order->getKey(),
+        'simulate' => true,
+        'order_positions' => [[
+            'order_id' => $this->order->getKey(),
+            'name' => 'Chili con Carne',
+            'vat_rate_id' => $this->vatRate->getKey(),
+            'amount' => 2,
+            'unit_price' => 4.90,
+        ]],
+    ])->validate()->execute();
+
+    expect(OrderPosition::query()->where('order_id', $this->order->getKey())->count())->toBe(0);
+});
+
+test('create order position recalculates the order when asked to', function (): void {
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'name' => 'Recalculated Position',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 2,
+        'unit_price' => 50.00,
+        'recalculate_order' => true,
+    ])->validate()->execute();
+
+    $order = $this->order->refresh();
+
+    expect($order->total_net_price)
+        ->toEqual(bcround($position->total_net_price, 2));
+});
+
+test('create order position leaves the order totals alone by default', function (): void {
+    $totalNetPrice = $this->order->refresh()->total_net_price;
+
+    CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'name' => 'Untouched Position',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 2,
+        'unit_price' => 50.00,
+    ])->validate()->execute();
+
+    expect($this->order->refresh()->total_net_price)->toEqual($totalNetPrice);
+});
+
+test('update order position recalculates the order when asked to', function (): void {
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'name' => 'Recalculated Position',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 1,
+        'unit_price' => 50.00,
+    ])->validate()->execute();
+
+    $updated = UpdateOrderPosition::make([
+        'id' => $position->getKey(),
+        'amount' => 3,
+        'recalculate_order' => true,
+    ])->validate()->execute();
+
+    $order = $this->order->refresh();
+
+    expect($order->total_net_price)
+        ->toEqual(bcround($updated->total_net_price, 2));
+});
+
+test('delete order position recalculates the order when asked to', function (): void {
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'name' => 'Deleted Position',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 2,
+        'unit_price' => 50.00,
+        'recalculate_order' => true,
+    ])->validate()->execute();
+
+    DeleteOrderPosition::make([
+        'id' => $position->getKey(),
+        'recalculate_order' => true,
+    ])->validate()->execute();
+
+    $order = $this->order->refresh();
+
+    expect($order->total_net_price)->toEqual(bcround(0, 2));
+});
+
+test('swapping the product on a position takes the price of the new product', function (): void {
+    $priceListId = $this->order->price_list_id;
+
+    $cheap = Product::factory()->create(['vat_rate_id' => $this->vatRate->getKey()]);
+    Price::factory()->create([
+        'price_list_id' => $priceListId,
+        'product_id' => $cheap->getKey(),
+        'price' => 5.90,
+    ]);
+
+    $expensive = Product::factory()->create(['vat_rate_id' => $this->vatRate->getKey()]);
+    Price::factory()->create([
+        'price_list_id' => $priceListId,
+        'product_id' => $expensive->getKey(),
+        'price' => 12.90,
+    ]);
+
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'product_id' => $cheap->getKey(),
+        'amount' => 1,
+    ])
+        ->validate()
+        ->execute();
+
+    expect((float) $position->unit_price)->toBe(5.90);
+
+    $updated = UpdateOrderPosition::make([
+        'id' => $position->getKey(),
+        'product_id' => $expensive->getKey(),
+    ])
+        ->validate()
+        ->execute();
+
+    expect((float) $updated->unit_price)->toBe(12.90)
+        ->and($updated->product_id)->toBe($expensive->getKey());
+});
+
+test('a price given with the new product wins over the price list', function (): void {
+    $priceListId = $this->order->price_list_id;
+
+    $product = Product::factory()->create(['vat_rate_id' => $this->vatRate->getKey()]);
+    Price::factory()->create([
+        'price_list_id' => $priceListId,
+        'product_id' => $product->getKey(),
+        'price' => 5.90,
+    ]);
+
+    $other = Product::factory()->create(['vat_rate_id' => $this->vatRate->getKey()]);
+    Price::factory()->create([
+        'price_list_id' => $priceListId,
+        'product_id' => $other->getKey(),
+        'price' => 12.90,
+    ]);
+
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'product_id' => $product->getKey(),
+        'amount' => 1,
+    ])
+        ->validate()
+        ->execute();
+
+    $updated = UpdateOrderPosition::make([
+        'id' => $position->getKey(),
+        'product_id' => $other->getKey(),
+        'unit_price' => 9.99,
+    ])
+        ->validate()
+        ->execute();
+
+    expect((float) $updated->unit_price)->toBe(9.99);
+});
+
+test('a product without a price in the list leaves the position as it was', function (): void {
+    $priceListId = $this->order->price_list_id;
+
+    $priced = Product::factory()->create(['vat_rate_id' => $this->vatRate->getKey()]);
+    Price::factory()->create([
+        'price_list_id' => $priceListId,
+        'product_id' => $priced->getKey(),
+        'price' => 5.90,
+    ]);
+
+    $unpriced = Product::factory()->create(['vat_rate_id' => $this->vatRate->getKey()]);
+
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'product_id' => $priced->getKey(),
+        'amount' => 1,
+    ])
+        ->validate()
+        ->execute();
+
+    $updated = UpdateOrderPosition::make([
+        'id' => $position->getKey(),
+        'product_id' => $unpriced->getKey(),
+    ])
+        ->validate()
+        ->execute();
+
+    expect((float) $updated->unit_price)->toBe(5.90)
+        ->and($updated->product_id)->toBe($unpriced->getKey());
+});
+
+test('changing only the price list takes the price of that list', function (): void {
+    $product = Product::factory()->create(['vat_rate_id' => $this->vatRate->getKey()]);
+
+    Price::factory()->create([
+        'price_list_id' => $this->order->price_list_id,
+        'product_id' => $product->getKey(),
+        'price' => 5.90,
+    ]);
+
+    $otherList = PriceList::factory()->create([
+        'is_net' => PriceList::query()->whereKey($this->order->price_list_id)->value('is_net'),
+    ]);
+    Price::factory()->create([
+        'price_list_id' => $otherList->getKey(),
+        'product_id' => $product->getKey(),
+        'price' => 12.90,
+    ]);
+
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'product_id' => $product->getKey(),
+        'amount' => 1,
+    ])
+        ->validate()
+        ->execute();
+
+    expect((float) $position->unit_price)->toBe(5.90);
+
+    $updated = UpdateOrderPosition::make([
+        'id' => $position->getKey(),
+        'price_list_id' => $otherList->getKey(),
+    ])
+        ->validate()
+        ->execute();
+
+    expect((float) $updated->unit_price)->toBe(12.90);
 });

@@ -26,17 +26,17 @@ class UpdateProjectRuleset extends FluxRuleset
             'contact_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Contact::class]),
+                app(ModelExists::class, ['model' => Contact::class, 'subject' => Project::class]),
             ],
             'order_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Order::class]),
+                app(ModelExists::class, ['model' => Order::class, 'subject' => Project::class]),
             ],
             'responsible_user_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => User::class]),
+                app(ModelExists::class, ['model' => User::class, 'subject' => Project::class]),
             ],
             'project_number' => 'sometimes|required|string|max:255',
             'name' => 'sometimes|required|string|max:255',

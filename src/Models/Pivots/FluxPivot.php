@@ -11,6 +11,13 @@ abstract class FluxPivot extends Pivot
 {
     use BroadcastsEvents, ResolvesRelationsThroughContainer;
 
+    /**
+     * Columns a relation using this pivot should carry, for withPivot().
+     *
+     * @var list<string>
+     */
+    protected static array $pivotColumns = [];
+
     public $incrementing = true;
 
     public $timestamps = false;
@@ -18,6 +25,11 @@ abstract class FluxPivot extends Pivot
     protected $primaryKey = 'pivot_id';
 
     protected $guarded = ['pivot_id'];
+
+    public static function pivotColumns(): array
+    {
+        return static::$pivotColumns;
+    }
 
     public function resolveCollectionFromAttribute(): ?string
     {

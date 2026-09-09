@@ -159,19 +159,19 @@
                                 select="label:label|value:id"
                                 unfiltered
                                 :request="[
-                                'url' => route('search', \FluxErp\Models\User::class),
-                                'method' => 'POST',
-                                'params' => [
-                                    'with' => 'media',
-                                    'where' => [
-                                        [
-                                            'field' => 'is_active',
-                                            'operator' => '=',
-                                            'value' => true,
+                                    'url' => route('search', \FluxErp\Models\User::class),
+                                    'method' => 'POST',
+                                    'params' => [
+                                        'with' => 'media',
+                                        'where' => [
+                                            [
+                                                'field' => 'is_active',
+                                                'operator' => '=',
+                                                'value' => true,
+                                            ],
                                         ],
                                     ],
-                                ],
-                            ]"
+                                ]"
                             />
                             <x-button
                                 x-cloak
@@ -205,14 +205,14 @@
                                             outline
                                             icon="eye"
                                             wire:navigate
-                                            x-bind:class="
-                                                ($wire.get(
-                                                    'authorTypeContact',
-                                                ) !== true ||
+                                            x-bind:class="{
+                                                'cursor-not-allowed':
+                                                    $wire.get(
+                                                        'authorTypeContact',
+                                                    ) !== true ||
                                                     !$wire.ticket
-                                                        .authenticatable_id) &&
-                                                'cursor-not-allowed'
-                                            "
+                                                        .authenticatable_id,
+                                            }"
                                             x-bind:href="($wire.get('authorTypeContact') === true && $wire.ticket.authenticatable.contact_id) && '{{ route('contacts.id?', ':id') }}'.replace(':id', $wire.ticket.authenticatable.contact_id) + '?address=' + $wire.ticket.authenticatable_id"
                                         ></x-button>
                                     </div>
@@ -226,19 +226,19 @@
                                         select="label:label|value:id"
                                         unfiltered
                                         :request="[
-                                        'url' => route('search', $ticket->authenticatable_type ?? morph_alias(\FluxErp\Models\User::class)),
-                                        'method' => 'POST',
-                                        'params' => [
-                                            'with' => $ticket->authenticatable_type === morph_alias(\FluxErp\Models\Address::class) ? 'contact.media' : 'media',
-                                            'where' => [
-                                                [
-                                                    'field' => 'is_active',
-                                                    'operator' => '=',
-                                                    'value' => true,
+                                            'url' => route('search', $ticket->authenticatable_type ?? morph_alias(\FluxErp\Models\User::class)),
+                                            'method' => 'POST',
+                                            'params' => [
+                                                'with' => $ticket->authenticatable_type === morph_alias(\FluxErp\Models\Address::class) ? 'contact.media' : 'media',
+                                                'where' => [
+                                                    [
+                                                        'field' => 'is_active',
+                                                        'operator' => '=',
+                                                        'value' => true,
+                                                    ],
                                                 ],
                                             ],
-                                        ],
-                                    ]"
+                                        ]"
                                     />
                                 </div>
                             </div>

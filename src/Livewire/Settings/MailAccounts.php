@@ -86,7 +86,7 @@ class MailAccounts extends MailAccountList
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->mailAccount);
 
             return false;
         }
@@ -129,7 +129,7 @@ class MailAccounts extends MailAccountList
             $this->mailAccount->save();
             $this->mailAccount->reset();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->mailAccount);
 
             return false;
         }
@@ -146,7 +146,7 @@ class MailAccounts extends MailAccountList
             $this->mailFolder->reset();
             $this->loadFolders();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->mailFolder);
         }
     }
 
@@ -209,21 +209,7 @@ class MailAccounts extends MailAccountList
                 ->success(__('Connection successful'))
                 ->send();
         } catch (ValidationException|Exception $e) {
-            exception_to_notifications($e, $this);
-        }
-    }
-
-    #[Renderless]
-    public function testSmtpConnection(): void
-    {
-        try {
-            $this->mailAccount->testSmtpConnection();
-
-            $this->toast()
-                ->success(__('Connection successful'))
-                ->send();
-        } catch (ValidationException|TransportExceptionInterface $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->mailAccount);
         }
     }
 

@@ -117,6 +117,8 @@
     </x-flux::print.first-page-header>
 @show
 <main>
+    @section('order-print.delivery-address')
+    @show
     @section('header')
         <div
             style="
@@ -179,7 +181,7 @@
                                     border-bottom: 2px solid black;
                                 "
                             >
-                                {{ __('Amount') }}
+                                {{ __('Quantity') }}
                             </th>
                             <th
                                 style="

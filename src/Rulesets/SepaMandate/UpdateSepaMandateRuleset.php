@@ -21,7 +21,7 @@ class UpdateSepaMandateRuleset extends FluxRuleset
             ],
             'contact_bank_connection_id' => [
                 'integer',
-                app(ModelExists::class, ['model' => ContactBankConnection::class]),
+                app(ModelExists::class, ['model' => ContactBankConnection::class, 'subject' => SepaMandate::class]),
             ],
             'signed_date' => 'date|nullable',
         ];

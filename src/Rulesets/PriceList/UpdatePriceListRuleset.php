@@ -30,7 +30,7 @@ class UpdatePriceListRuleset extends FluxRuleset
             'parent_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => PriceList::class]),
+                app(ModelExists::class, ['model' => PriceList::class, 'subject' => PriceList::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
             'price_list_code' => 'sometimes|required|string|max:255',

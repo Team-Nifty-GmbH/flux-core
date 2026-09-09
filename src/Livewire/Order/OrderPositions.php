@@ -175,7 +175,7 @@ class OrderPositions extends OrderPositionList
         try {
             $this->orderPosition->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->orderPosition);
 
             return false;
         }
@@ -229,6 +229,8 @@ class OrderPositions extends OrderPositionList
             : $this->order->getPriceList();
         $this->orderPosition->vat_rate_id = $this->order->vat_rate_id;
         $this->orderPosition->fillFromProduct($product);
+        $this->loadPositionPackaging($product);
+        $this->orderPosition->applyUnitAmount();
         $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
         $this->orderPosition->unit_price = PriceHelper::make($this->orderPosition->getProduct())
             ->setPriceList($priceList ?? $this->order->getPriceList())
@@ -279,7 +281,7 @@ class OrderPositions extends OrderPositionList
         try {
             $this->orderPosition->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->orderPosition);
 
             return false;
         }
@@ -357,11 +359,15 @@ class OrderPositions extends OrderPositionList
         $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
         if ($orderPosition?->exists) {
             $this->orderPosition->fill($orderPosition);
+            $this->loadPositionPackaging();
+            $this->orderPosition->deriveUnitAmount();
             $this->orderPosition->is_bundle_parent = $orderPosition->is_free_text
                 && $orderPosition->children()->whereNotNull('amount')->exists();
         } else {
             $this->orderPosition->vat_rate_id ??= resolve_static(VatRate::class, 'default')?->getKey();
         }
+
+        $this->dispatch('load-order-position-activities', orderPositionId: $this->orderPosition->id);
 
         $this->js(<<<'JS'
             $tsui.open.modal('edit-order-position');
@@ -424,6 +430,7 @@ class OrderPositions extends OrderPositionList
             parent::getViewData(),
             [
                 'vatRates' => resolve_static(VatRate::class, 'query')
+                    ->where($this->order->isPurchase ? 'is_purchase' : 'is_sales', true)
                     ->get(['id', 'name', 'rate_percentage'])
                     ->toArray(),
             ]
@@ -449,7 +456,7 @@ class OrderPositions extends OrderPositionList
 
             $this->forceRender();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->orderPosition);
         }
     }
 
@@ -569,6 +576,18 @@ class OrderPositions extends OrderPositionList
         JS);
     }
 
+    public function updatedOrderPositionAmount(): void
+    {
+        $this->loadPositionPackaging();
+        $this->orderPosition->deriveUnitAmount();
+    }
+
+    public function updatedOrderPositionUnitAmount(): void
+    {
+        $this->loadPositionPackaging();
+        $this->orderPosition->applyUnitAmount();
+    }
+
     public function switchView(string $view): void
     {
         if ($view === $this->orderPositionsView) {
@@ -593,6 +612,17 @@ class OrderPositions extends OrderPositionList
         $this->cacheState();
     }
 
+    protected function loadPositionPackaging(?Product $product = null): void
+    {
+        $product ??= $this->orderPosition->product_id
+            ? resolve_static(Product::class, 'query')
+                ->whereKey($this->orderPosition->product_id)
+                ->first(['id', 'purchase_unit_id', 'purchase_steps'])
+            : null;
+
+        $this->orderPosition->packaging = $this->order->isPurchase ? $product?->packaging() : null;
+    }
+
     protected function updatePositionNameAndDescription(OrderPosition $position): void
     {
         $product = $position->product;
@@ -611,7 +641,7 @@ class OrderPositions extends OrderPositionList
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->orderPosition);
         }
     }
 

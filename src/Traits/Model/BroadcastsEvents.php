@@ -2,18 +2,20 @@
 
 namespace FluxErp\Traits\Model;
 
+use FluxErp\Events\BroadcastableModelEventOccurred;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\PendingBroadcast;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Database\Eloquent\BroadcastableModelEventOccurred;
 use Illuminate\Support\Str;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents as BaseBroadcastsEvents;
+use function Illuminate\Support\defer;
 
 trait BroadcastsEvents
 {
     use BaseBroadcastsEvents {
         BaseBroadcastsEvents::broadcastWith as protected baseBroadcastWith;
         BaseBroadcastsEvents::bootBroadcastsEvents as protected baseBootBroadcastsEvents;
+        BaseBroadcastsEvents::broadcastIfBroadcastChannelsExistForEvent as protected baseBroadcastIfBroadcastChannelsExistForEvent;
     }
 
     protected static bool $broadcastOnlyKey = true;
@@ -79,6 +81,23 @@ trait BroadcastsEvents
         return static::getBroadcastOnlyKey() && method_exists($this, 'getKey')
             ? ['model' => [$this->getKeyName() => $this->getKey()]]
             : $this->baseBroadcastWith();
+    }
+
+    protected function broadcastIfBroadcastChannelsExistForEvent(
+        $instance,
+        $event,
+        $channels = null
+    ): ?PendingBroadcast {
+        if ($instance instanceof BroadcastableModelEventOccurred) {
+            $instance->broadcastNow();
+        }
+
+        defer(
+            fn () => $this->baseBroadcastIfBroadcastChannelsExistForEvent($instance, $event, $channels),
+            always: true
+        );
+
+        return null;
     }
 
     protected function broadcastToEveryone(): bool

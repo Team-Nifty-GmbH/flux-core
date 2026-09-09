@@ -61,13 +61,10 @@ class Composer extends BaseComposer
             ARRAY_FILTER_USE_KEY
         );
 
+        $metadata = $this->installedMetadata();
+
         foreach ($installed['installed'] as $key => &$package) {
-            $packageInfo = json_decode($this->getProcess([
-                ...$this->findComposer($composerBinary),
-                'show',
-                '--format=json',
-                $package['name'],
-            ])->mustRun()->getOutput(), true);
+            $packageInfo = data_get($metadata, $package['name'], []);
 
             $package = array_merge($package, $packageInfo);
             unset($uninstalled[$key]);
@@ -160,29 +157,27 @@ class Composer extends BaseComposer
             '--format=json',
         ];
 
-        if (! $withPackagist) {
-            // disable packagist
-            $disableCommand = [
-                ...$this->findComposer($composerBinary),
-                'config',
-                'repo.packagist',
-                'false',
-            ];
-            $this->getProcess($disableCommand)->mustRun();
+        if ($withPackagist) {
+            return json_decode($this->getProcess($command)->mustRun()->getOutput(), true);
         }
 
-        $available = json_decode($this->getProcess($command)->mustRun()->getOutput(), true);
-
-        // enable packagist
-        $enableCommand = [
+        $this->getProcess([
             ...$this->findComposer($composerBinary),
             'config',
-            '--unset',
             'repo.packagist',
-        ];
-        $this->getProcess($enableCommand)->mustRun();
+            'false',
+        ])->mustRun();
 
-        return $available;
+        try {
+            return json_decode($this->getProcess($command)->mustRun()->getOutput(), true);
+        } finally {
+            $this->getProcess([
+                ...$this->findComposer($composerBinary),
+                'config',
+                '--unset',
+                'repo.packagist',
+            ])->mustRun();
+        }
     }
 
     /**
@@ -217,5 +212,35 @@ class Composer extends BaseComposer
         );
 
         return parent::getProcess($command, $env);
+    }
+
+    protected function installedMetadata(): array
+    {
+        $path = $this->workingPath . DIRECTORY_SEPARATOR . 'vendor'
+            . DIRECTORY_SEPARATOR . 'composer' . DIRECTORY_SEPARATOR . 'installed.json';
+
+        if (! $this->files->exists($path)) {
+            return [];
+        }
+
+        $contents = json_decode($this->files->get($path), true);
+
+        return collect(data_get($contents, 'packages') ?? $contents)
+            ->mapWithKeys(fn (array $package): array => [
+                data_get($package, 'name') => array_filter([
+                    'description' => data_get($package, 'description'),
+                    'homepage' => data_get($package, 'homepage'),
+                    'keywords' => data_get($package, 'keywords'),
+                    'type' => data_get($package, 'type'),
+                    'licenses' => data_get($package, 'license'),
+                    'support' => data_get($package, 'support'),
+                    'requires' => data_get($package, 'require'),
+                    'devRequires' => data_get($package, 'require-dev'),
+                    'suggests' => data_get($package, 'suggest'),
+                    'provides' => data_get($package, 'provide'),
+                    'conflicts' => data_get($package, 'conflict'),
+                ], fn (mixed $value): bool => ! is_null($value)),
+            ])
+            ->all();
     }
 }

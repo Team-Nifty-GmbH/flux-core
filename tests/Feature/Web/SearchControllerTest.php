@@ -2,6 +2,7 @@
 
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Product;
 
 test('search controller returns soft deleted record when selected', function (): void {
     $contact = Contact::factory()->create();
@@ -51,33 +52,6 @@ test('search controller returns multiple selected records including soft deleted
     $response->assertJsonFragment(['id' => $softDeletedAddress->getKey()]);
 });
 
-test('search controller applies where filter to selected records', function (): void {
-    $contact = Contact::factory()->create();
-
-    $mainAddress = Address::factory()->create([
-        'contact_id' => $contact->getKey(),
-        'is_main_address' => true,
-    ]);
-
-    Address::factory()->create([
-        'contact_id' => $contact->getKey(),
-        'is_main_address' => false,
-    ]);
-
-    $response = $this->post(
-        route('search', Address::class),
-        [
-            'option-value' => 'contact_id',
-            'selected' => [$contact->getKey()],
-            'where' => [['is_main_address', '=', true]],
-        ]
-    );
-
-    $response->assertOk();
-    $response->assertJsonCount(1);
-    $response->assertJsonFragment(['id' => $mainAddress->getKey()]);
-});
-
 test('search controller maps response keys to the requested mapping', function (): void {
     $contact = Contact::factory()->create();
     $address = Address::factory()->create([
@@ -99,4 +73,102 @@ test('search controller maps response keys to the requested mapping', function (
 
     expect($item)->not->toBeNull()
         ->and(data_get($item, 'description'))->toBe($address->getLabel());
+});
+
+test('search controller strips markup from the strings it returns', function (): void {
+    $product = Product::factory()->create([
+        'name' => 'Widget',
+        'description' => '<p style="text-align: left;">Erste Zeile&nbsp;&amp; mehr</p><p>zweite</p>',
+    ]);
+
+    $response = $this->post(
+        route('search', Product::class),
+        ['selected' => [$product->getKey()]]
+    );
+
+    $response->assertOk();
+
+    $description = data_get($response->json(), '0.description');
+
+    expect($description)->not->toContain('<')
+        ->and($description)->not->toContain('&amp;')
+        ->and($description)->toContain('Erste Zeile')
+        ->and($description)->toContain('& mehr');
+});
+
+test('search controller shortens a long string and keeps the image url whole', function (): void {
+    $product = Product::factory()->create([
+        'description' => str_repeat('sehr lange beschreibung ', 40),
+    ]);
+
+    $response = $this->post(
+        route('search', Product::class),
+        ['selected' => [$product->getKey()]]
+    );
+
+    $response->assertOk();
+
+    $result = data_get($response->json(), '0');
+
+    expect(mb_strlen(data_get($result, 'description')))->toBeLessThanOrEqual(104)
+        ->and(data_get($result, 'description'))->toEndWith('...')
+        ->and(data_get($result, 'image'))->toBe($product->getAvatarUrl());
+});
+
+test('search controller strips markup below the top level', function (): void {
+    $product = Product::factory()->create([
+        'description' => '<p>Nested markup</p>',
+    ]);
+
+    $response = $this->post(
+        route('search', Product::class),
+        [
+            'selected' => [$product->getKey()],
+            'mapping' => ['meta.text' => 'description'],
+        ]
+    );
+
+    $response->assertOk();
+
+    expect(data_get($response->json(), '0.meta.text'))->toBe('Nested markup');
+});
+
+test('search controller strips markup that was mapped onto the image key', function (): void {
+    $product = Product::factory()->create([
+        'description' => '<p>Mapped markup</p>',
+    ]);
+
+    $response = $this->post(
+        route('search', Product::class),
+        [
+            'selected' => [$product->getKey()],
+            'mapping' => ['image' => 'description'],
+        ]
+    );
+
+    $response->assertOk();
+
+    expect(data_get($response->json(), '0.image'))->toBe('Mapped markup');
+});
+
+test('search controller leaves a link in a requested field whole', function (): void {
+    $contact = Contact::factory()->create();
+    $url = 'https://example.com/' . str_repeat('a-very-long-path-segment/', 8);
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+        'url' => $url,
+    ]);
+
+    $response = $this->post(
+        route('search', Address::class),
+        [
+            'selected' => [$address->getKey()],
+            'fields' => ['url'],
+        ]
+    );
+
+    $response->assertOk();
+
+    expect(data_get($response->json(), '0.url'))->toBe($url);
 });

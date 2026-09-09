@@ -53,7 +53,7 @@
                         {{ $cartFormItem['name'] ?? ($cartFormItem['product']['name'] ?? __('Product')) }}
                     </div>
                     <div class="text-secondary-500 text-sm">
-                        {{ __('Amount') }}: {{ $cartFormItem['amount'] ?? 1 }}
+                        {{ __('Quantity') }}: {{ $cartFormItem['amount'] ?? 1 }}
                     </div>
                 </div>
             </div>

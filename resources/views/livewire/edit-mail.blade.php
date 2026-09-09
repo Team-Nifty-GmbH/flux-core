@@ -59,7 +59,7 @@
             <x-flux::pillbox
                 wire:model="mailMessage.to"
                 class="flex flex-col gap-1.5"
-                x-bind:class="$wire.multiple && 'pointer-events-none opacity-50'"
+                x-bind:class="{ 'pointer-events-none opacity-50': $wire.multiple }"
                 :label="__('To')"
                 :placeholder="__('Add a new to')"
                 lazy="2"
@@ -119,7 +119,7 @@
                                 <x-slot:text>
                                     <div
                                         x-on:click.prevent="file.id && $wire.download(file.id)"
-                                        x-bind:class="file.id ? 'cursor-pointer' : ''"
+                                        x-bind:class="{ 'cursor-pointer': file.id }"
                                     >
                                         <span x-text="file.name"></span>
                                     </div>

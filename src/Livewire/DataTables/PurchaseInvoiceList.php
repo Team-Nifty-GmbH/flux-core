@@ -23,6 +23,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\ComponentAttributeBag;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Renderless;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -31,6 +33,9 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 class PurchaseInvoiceList extends BaseDataTable
 {
     use WithDocumentScanning, WithFilePond, WithFileUploads;
+
+    #[Locked]
+    public ?int $assignToOrderId = null;
 
     public bool $positiveEmptyState = true;
 
@@ -119,7 +124,7 @@ class PurchaseInvoiceList extends BaseDataTable
         try {
             $this->purchaseInvoiceForm->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->purchaseInvoiceForm);
 
             return false;
         }
@@ -139,6 +144,8 @@ class PurchaseInvoiceList extends BaseDataTable
             $this->fillEditFormFromPurchaseInvoice($purchaseInvoice);
         }
 
+        $this->refreshAssignableOrders();
+
         $this->js(<<<'JS'
             $tsui.open.modal('edit-purchase-invoice-modal');
         JS);
@@ -150,6 +157,9 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->resetErrorBag();
         $this->purchaseInvoiceForm->reset();
         $this->mediaForm->reset();
+        $this->reset('assignToOrderId');
+
+        $this->refreshAssignableOrders();
     }
 
     #[Renderless]
@@ -169,6 +179,8 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->purchaseInvoiceForm->iban = $bankConnection?->iban;
 
         $this->purchaseInvoiceForm->findMostUsedLedgerAccountId();
+
+        $this->refreshAssignableOrders();
     }
 
     #[Renderless]
@@ -185,7 +197,7 @@ class PurchaseInvoiceList extends BaseDataTable
         try {
             $this->createContactForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->createContactForm);
 
             return false;
         }
@@ -199,16 +211,35 @@ class PurchaseInvoiceList extends BaseDataTable
     }
 
     #[Renderless]
+    public function refreshAssignableOrders(): void
+    {
+        $this->dispatch(
+            'assignable-orders.load',
+            contactId: $this->purchaseInvoiceForm->contact_id,
+            invoiceTotal: $this->purchaseInvoiceForm->total_gross_price,
+        );
+    }
+
+    #[Renderless]
+    #[On('assignable-orders.selected')]
+    public function assignableOrderSelected(?int $orderId = null): void
+    {
+        $this->assignToOrderId = $orderId;
+    }
+
+    #[Renderless]
     public function finish(): bool
     {
         try {
-            $this->purchaseInvoiceForm->finish();
+            $this->purchaseInvoiceForm->finish($this->assignToOrderId);
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->purchaseInvoiceForm);
 
             return false;
         }
 
+        $this->reset('assignToOrderId');
+        $this->refreshAssignableOrders();
         $this->loadData();
 
         return true;
@@ -264,7 +295,7 @@ class PurchaseInvoiceList extends BaseDataTable
 
                 $successCount++;
             } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+                exception_to_notifications($e, $this, form: $this->purchaseInvoiceForm);
 
                 $errorCount++;
             }
@@ -295,7 +326,7 @@ class PurchaseInvoiceList extends BaseDataTable
         try {
             $this->purchaseInvoiceForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->purchaseInvoiceForm);
 
             return false;
         }
@@ -365,6 +396,7 @@ class PurchaseInvoiceList extends BaseDataTable
                     ->get(['id', 'name', 'requires_manual_transfer'])
                     ->toArray(),
                 'vatRates' => resolve_static(VatRate::class, 'query')
+                    ->where('is_purchase', true)
                     ->get(['id', 'name', 'rate_percentage'])
                     ->toArray(),
             ]

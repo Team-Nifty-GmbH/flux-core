@@ -22,7 +22,7 @@ class UpdateWarehouseRuleset extends FluxRuleset
             'address_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Address::class]),
+                app(ModelExists::class, ['model' => Address::class, 'subject' => Warehouse::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
             'is_default' => 'boolean',

@@ -14,13 +14,14 @@ class BundlePaymentRemindersRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'order_ids' => 'required|array|min:1',
-            'order_ids.*' => [
+            'orders' => 'required|array|min:1',
+            'orders.*.id' => [
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => Order::class])
                     ->wherePaymentReminderEligible(),
             ],
+            'orders.*.recipient' => 'nullable|email',
         ];
     }
 }

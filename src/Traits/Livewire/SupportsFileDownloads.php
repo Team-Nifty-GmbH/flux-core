@@ -19,9 +19,14 @@ trait SupportsFileDownloads
     use EnsureUsedInLivewire;
 
     #[Renderless]
-    public function download(Media $media): void
+    public function download(?Media $media): void
     {
-        if (! Storage::disk($media->disk)->exists($media->getPathRelativeToRoot())) {
+        // Guards against stale frontend state calling download without an id,
+        // e.g. a staged upload whose media row does not exist yet.
+        if (
+            ! $media?->exists
+            || ! Storage::disk($media->disk)->exists($media->getPathRelativeToRoot())
+        ) {
             $this->toast()
                 ->error(__('The file does not exist anymore.'))
                 ->send();

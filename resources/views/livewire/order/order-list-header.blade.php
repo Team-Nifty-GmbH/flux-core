@@ -104,7 +104,7 @@
                                     <x-input
                                         type="number"
                                         min="0"
-                                        :label="__('Amount')"
+                                        :label="__('Quantity')"
                                         wire:model="orderPosition.amount"
                                     />
                                 </div>
@@ -217,11 +217,51 @@
                             class="space-y-4"
                         >
                             @section('order-position-detail-modal.content.right')
+                                <div
+                                    x-cloak
+                                    x-show="
+                                        $wire.order.isPurchase &&
+                                        $wire.orderPosition.packaging
+                                    "
+                                >
+                                    <x-input
+                                        type="number"
+                                        min="0"
+                                        wire:model.live="orderPosition.unit_amount"
+                                    >
+                                        <x-slot:label>
+                                            <div
+                                                class="flex items-center justify-between"
+                                            >
+                                                <div
+                                                    x-text="
+                                                        '{{ __('Quantity in :unit') }}'.replace(
+                                                            ':unit',
+                                                            $wire.orderPosition
+                                                                .packaging?.name ?? '',
+                                                        )
+                                                    "
+                                                ></div>
+                                                <div
+                                                    class="text-xs text-gray-500 dark:text-gray-400"
+                                                    x-text="
+                                                        '\u00d7 ' +
+                                                        $nuxbe.parseNumber(
+                                                            $wire.orderPosition
+                                                                .packaging
+                                                                ?.factor ?? 0,
+                                                        )
+                                                    "
+                                                ></div>
+                                            </div>
+                                        </x-slot:label>
+                                    </x-input>
+                                </div>
                                 <div class="grid grid-cols-2 gap-4">
                                     <x-input
                                         type="number"
                                         min="0"
-                                        :label="__('Amount')"
+                                        :label="__('Quantity')"
                                         wire:model="orderPosition.amount"
                                         x-ref="amount"
                                     />
@@ -411,9 +451,9 @@
                                         <x-icon
                                             name="chevron-down"
                                             class="h-4 w-4 transition-transform"
-                                            x-bind:class="
-                                                showAdvanced && 'rotate-180'
-                                            "
+                                            x-bind:class="{
+                                                'rotate-180': showAdvanced,
+                                            }"
                                         />
                                     </button>
                                     <div
@@ -520,6 +560,23 @@
                         </div>
                     </div>
 
+                    @section('order-position-detail-modal.content.performance-period')
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <x-date
+                                wire:model="orderPosition.system_delivery_date"
+                                :without-time="true"
+                                :label="__('Performance/Delivery date')"
+                            />
+                            <x-date
+                                wire:model="orderPosition.system_delivery_date_end"
+                                :without-time="true"
+                                :label="__('Performance/Delivery date end')"
+                            />
+                        </div>
+                        <div class="text-secondary-500 text-xs">
+                            {{ __('Leave empty to use the period of the order.') }}
+                        </div>
+                    @show
                     @section('order-position-detail-modal.content.bottom')
                         <x-flux::editor
                             wire:model="orderPosition.description"
@@ -529,6 +586,19 @@
                         />
                     @show
                     @stack('order-edit-position-modal-fields')
+                    @section('order-position-detail-modal.content.activities')
+                        <div
+                            id="order-position-activities"
+                            x-cloak
+                            x-show="$wire.orderPosition.id"
+                        >
+                            <x-card :header="__('Activities')" minimize="mount">
+                                <div class="px-2 py-5">
+                                    <livewire:order-position.activities />
+                                </div>
+                            </x-card>
+                        </div>
+                    @show
                 </div>
                 <x-errors />
             </div>

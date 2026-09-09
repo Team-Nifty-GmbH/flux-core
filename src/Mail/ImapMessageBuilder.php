@@ -3,6 +3,7 @@
 namespace FluxErp\Mail;
 
 use Closure;
+use ErrorException;
 use FluxErp\Actions\Communication\UpdateCommunication;
 use FluxErp\Actions\MailMessage\CreateMailMessage;
 use FluxErp\Actions\Tag\CreateTag;
@@ -10,8 +11,13 @@ use FluxErp\Models\Communication;
 use FluxErp\Models\MailFolder;
 use FluxErp\Models\Tag;
 use Illuminate\Support\Collection;
+use RuntimeException;
+use Throwable;
+use Webklex\PHPIMAP\Exceptions\ConnectionFailedException;
+use Webklex\PHPIMAP\Exceptions\GetMessagesFailedException;
 use Webklex\PHPIMAP\Exceptions\ResponseException;
 use Webklex\PHPIMAP\Folder;
+use Webklex\PHPIMAP\Message;
 
 class ImapMessageBuilder
 {
@@ -114,23 +120,25 @@ class ImapMessageBuilder
 
     public function fetchAndStore(): static
     {
-        $imapFolder = $this->resolveImapFolder();
+        $this->overConnection(function (): void {
+            $imapFolder = $this->resolveImapFolder();
 
-        if (! $imapFolder) {
-            return $this;
-        }
+            if (! $imapFolder) {
+                return;
+            }
 
-        $onMessage = function (ImapMessage $imapMessage): void {
-            $this->storeMessage($imapMessage);
-        };
+            $onMessage = function (ImapMessage $imapMessage): void {
+                $this->storeMessage($imapMessage);
+            };
 
-        if (! is_null($this->sinceUid)) {
-            $this->fetchNewMessages($imapFolder, $onMessage);
-        }
+            if (! is_null($this->sinceUid)) {
+                $this->fetchNewMessages($imapFolder, $onMessage);
+            }
 
-        if ($this->filterUnseen || $this->filterSeen || is_null($this->sinceUid)) {
-            $this->fetchFilteredMessages($imapFolder, $onMessage);
-        }
+            if ($this->filterUnseen || $this->filterSeen || is_null($this->sinceUid)) {
+                $this->fetchFilteredMessages($imapFolder, $onMessage);
+            }
+        });
 
         return $this;
     }
@@ -149,11 +157,11 @@ class ImapMessageBuilder
 
     public function syncReadStatus(): static
     {
-        $unreadUids = $this->messages
-            ->reject(fn (ImapMessage $message) => $message->isSeen)
-            ->map(fn (ImapMessage $message) => $message->uid)
-            ->values()
-            ->toArray();
+        $unreadUids = $this->overConnection(fn (): ?array => $this->resolveUnseenUids());
+
+        if (is_null($unreadUids)) {
+            return $this;
+        }
 
         resolve_static(Communication::class, 'query')
             ->where('mail_account_id', $this->folder->mailAccount->getKey())
@@ -197,6 +205,86 @@ class ImapMessageBuilder
         return $this->messages->count();
     }
 
+    /**
+     * Run one piece of work against the mail server and repeat it once on a
+     * fresh connection when the old one dies underneath it.
+     *
+     * The server closes an idle or long running connection on its own, and the
+     * next write into that stream raises a PHP warning that Laravel turns into
+     * an ErrorException, which ends the whole sync run. Repeating is safe
+     * because storeMessage() looks a message up by its message id and updates
+     * the existing row rather than writing a second one.
+     *
+     * @template TReturn
+     *
+     * @param  Closure(): TReturn  $operation
+     * @return TReturn
+     */
+    protected function overConnection(Closure $operation): mixed
+    {
+        try {
+            return $operation();
+        } catch (Throwable $exception) {
+            if (! $this->isLostConnection($exception)) {
+                throw $exception;
+            }
+        }
+
+        // The account caches its client, so the retry only reaches a live stream
+        // once that cache is cleared.
+        try {
+            $this->reconnect();
+        } catch (Throwable) {
+            // The server is not answering at all. Report the lost connection
+            // rather than the failed dial, which says nothing about the cause.
+            throw $exception;
+        }
+
+        $this->progressProcessed = 0;
+
+        return $operation();
+    }
+
+    /**
+     * Build a new connection for the retry. Its own seam so a test can drive the
+     * retry without an IMAP server behind it.
+     */
+    protected function reconnect(): void
+    {
+        $this->folder->mailAccount->reconnectImapClient();
+    }
+
+    /**
+     * Whether the server took the connection away, as opposed to any other
+     * failure. Everything else is left alone rather than retried blindly.
+     */
+    protected function isLostConnection(Throwable $exception): bool
+    {
+        if ($exception instanceof ConnectionFailedException
+            || $exception instanceof GetMessagesFailedException
+        ) {
+            return true;
+        }
+
+        if (! $exception instanceof ErrorException && ! $exception instanceof RuntimeException) {
+            return false;
+        }
+
+        // A stream failure only counts when it happened inside the imap client.
+        // The same words turn up in unrelated failures, and retrying one of
+        // those would repeat work that never touched the connection.
+        if (! str_contains($exception->getFile(), 'webklex/php-imap')) {
+            return false;
+        }
+
+        // php-imap reports the loss as a failed stream write, and PHP itself as
+        // a broken pipe or a reset by the peer.
+        return (bool) preg_match(
+            '/broken pipe|connection closed|connection reset|fwrite|fread/i',
+            $exception->getMessage()
+        );
+    }
+
     protected function resolveImapFolder(): ?Folder
     {
         $client = $this->folder
@@ -208,6 +296,43 @@ class ImapMessageBuilder
         }
 
         return $client->getFolderByPath($this->folder->slug, utf7: true);
+    }
+
+    /**
+     * Return the UIDs of the currently unseen messages on the server, or null
+     * when the state could not be determined.
+     *
+     * Uses a plain IMAP SEARCH (a single round-trip returning only UIDs) instead
+     * of fetching full message objects, so the read-status reconciliation no
+     * longer scales with the number of unseen mails times a per-message fetch.
+     *
+     * Returns null (not an empty array) when the folder cannot be resolved or
+     * the search fails, so the caller can skip reconciliation instead of
+     * treating the failure as "nothing is unseen".
+     *
+     * @return array<int, int>|null
+     */
+    protected function resolveUnseenUids(): ?array
+    {
+        $imapFolder = $this->resolveImapFolder();
+
+        if (! $imapFolder) {
+            return null;
+        }
+
+        try {
+            return $imapFolder->messages()
+                ->setFetchBody(false)
+                ->leaveUnread()
+                ->unseen()
+                ->since($this->folder->mailAccount->created_at)
+                ->search()
+                ->map(fn (mixed $uid): int => (int) $uid)
+                ->values()
+                ->toArray();
+        } catch (ResponseException) {
+            return null;
+        }
     }
 
     protected function fetchNewMessages(Folder $imapFolder, ?Closure $onMessage = null): void
@@ -227,7 +352,11 @@ class ImapMessageBuilder
             $messages = $query->paginate(100, $page);
 
             foreach ($messages as $message) {
-                $imapMessage = ImapMessage::fromImapMessage($message, $this->fetchBody);
+                $imapMessage = $this->makeMessage($message);
+
+                if (! $imapMessage) {
+                    continue;
+                }
 
                 if ($onMessage) {
                     $onMessage($imapMessage);
@@ -262,7 +391,11 @@ class ImapMessageBuilder
             $messages = $query->paginate(100, $page);
 
             foreach ($messages as $message) {
-                $imapMessage = ImapMessage::fromImapMessage($message, $this->fetchBody);
+                $imapMessage = $this->makeMessage($message);
+
+                if (! $imapMessage) {
+                    continue;
+                }
 
                 if ($onMessage) {
                     $onMessage($imapMessage);
@@ -272,6 +405,21 @@ class ImapMessageBuilder
                 }
             }
         } while ($page !== $messages->lastPage());
+    }
+
+    protected function makeMessage(Message $message): ?ImapMessage
+    {
+        try {
+            return ImapMessage::fromImapMessage($message, $this->fetchBody);
+        } catch (Throwable $exception) {
+            if ($this->isLostConnection($exception)) {
+                throw $exception;
+            }
+
+            report($exception);
+
+            return null;
+        }
     }
 
     protected function storeMessage(ImapMessage $imapMessage): void

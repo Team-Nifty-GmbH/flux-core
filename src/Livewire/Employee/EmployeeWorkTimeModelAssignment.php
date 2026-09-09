@@ -49,7 +49,7 @@ class EmployeeWorkTimeModelAssignment extends Component
 
             return true;
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->employeeWorkTimeModelForm);
 
             return false;
         }

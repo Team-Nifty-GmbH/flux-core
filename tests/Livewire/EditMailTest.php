@@ -51,3 +51,29 @@ test('batch send merge logic preserves individual communicatables and attachment
         expect($mergedData[$index]['subject'])->toBe('Edited Subject');
     }
 });
+
+test('create from session fills mail message from session data', function (): void {
+    $key = 'mail_' . str()->uuid()->toString();
+    session()->put($key, [
+        [
+            'to' => ['customer@example.com'],
+            'subject' => 'Cancellation Confirmation',
+            'html_body' => '<p>Test</p>',
+        ],
+    ]);
+
+    Livewire::actingAs($this->user)
+        ->test(EditMail::class)
+        ->call('createFromSession', $key)
+        ->assertOk()
+        ->assertSet('mailMessage.subject', 'Cancellation Confirmation');
+
+    expect(session()->has($key))->toBeFalse();
+});
+
+test('create from session with already consumed key fails gracefully', function (): void {
+    Livewire::actingAs($this->user)
+        ->test(EditMail::class)
+        ->call('createFromSession', 'mail_' . str()->uuid()->toString())
+        ->assertOk();
+});

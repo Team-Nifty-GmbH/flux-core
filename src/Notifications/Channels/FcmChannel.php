@@ -4,6 +4,7 @@ namespace FluxErp\Notifications\Channels;
 
 use FluxErp\Models\DeviceToken;
 use Illuminate\Notifications\Notification;
+use Kreait\Firebase\Contract\Messaging;
 use Kreait\Firebase\Exception\FirebaseException;
 use Kreait\Firebase\Exception\MessagingException;
 use Kreait\Firebase\Factory;
@@ -33,17 +34,17 @@ class FcmChannel
             ->whereMorphedTo('authenticatable', $notifiable)
             ->where('is_active', true)
             ->get([
+                'id',
                 'token',
                 'device_id',
                 'device_name',
-                'token',
             ]);
 
         if ($deviceTokens->isEmpty()) {
             return;
         }
 
-        $messaging = new Factory()->withServiceAccount($credentialsPath)->createMessaging();
+        $messaging = $this->messaging($credentialsPath);
 
         foreach ($deviceTokens as $deviceToken) {
             try {
@@ -63,13 +64,23 @@ class FcmChannel
                     'error' => $e->getMessage(),
                 ]);
 
+                $message = strtolower($e->getMessage());
+
                 if (
-                    str_contains($e->getMessage(), 'not-found')
-                    || str_contains($e->getMessage(), 'invalid-registration-token')
+                    str_contains($message, 'not-found')
+                    || str_contains($message, 'invalid-registration-token')
+                    || str_contains($message, 'notregistered')
+                    || str_contains($message, 'not-registered')
+                    || str_contains($message, 'unregistered')
                 ) {
                     $deviceToken->update(['is_active' => false]);
                 }
             }
         }
+    }
+
+    protected function messaging(string $credentialsPath): Messaging
+    {
+        return new Factory()->withServiceAccount($credentialsPath)->createMessaging();
     }
 }

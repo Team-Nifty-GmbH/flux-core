@@ -1,6 +1,6 @@
 <div
     class="flex flex-col gap-4"
-    x-bind:class="!$wire.$parent.$parent.edit && 'pointer-events-none'"
+    x-bind:class="{ 'pointer-events-none': !$wire.$parent.$parent.edit }"
 >
     @section('commercial')
         <x-card>
@@ -47,12 +47,12 @@
                     select="label:label|value:id"
                     unfiltered
                     :request="[
-                    'url' => route('search', \FluxErp\Models\User::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'with' => 'media',
-                    ],
-                ]"
+                        'url' => route('search', \FluxErp\Models\User::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'with' => 'media',
+                        ],
+                    ]"
                 />
                 <x-select.styled
                     x-bind:disabled="!$wire.$parent.$parent.edit"
@@ -61,12 +61,12 @@
                     select="label:label|value:id"
                     unfiltered
                     :request="[
-                    'url' => route('search', \FluxErp\Models\User::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'with' => 'media',
-                    ],
-                ]"
+                        'url' => route('search', \FluxErp\Models\User::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'with' => 'media',
+                        ],
+                    ]"
                 />
             </div>
         </x-card>

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Order;
 
+use Cron\CronExpression;
 use Exception;
 use FluxErp\Actions\Discount\DeleteDiscount;
 use FluxErp\Actions\Discount\UpdateDiscount;
@@ -45,6 +46,7 @@ use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\SerializableClosure\SerializableClosure;
@@ -159,9 +161,13 @@ class Order extends Component
                     ->get(['id', 'contact_id', 'iban'])
                     ?->toArray() ?? [],
                 'vatRates' => resolve_static(VatRate::class, 'query')
+                    ->where($this->order->isPurchase ? 'is_purchase' : 'is_sales', true)
                     ->where('is_tax_exemption', true)
                     ->get(['id', 'name'])
                     ->toArray(),
+                'canCreateCancellationConfirmation' => $this->view === 'flux::livewire.order.'
+                        . OrderTypeEnum::Subscription->value
+                    && array_key_exists('cancellation-confirmation', $this->getPrintLayouts()),
             ]
         );
     }
@@ -220,7 +226,7 @@ class Order extends Component
 
             $this->redirect(route('orders.orders'), true);
         } catch (Exception $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
         }
     }
 
@@ -233,7 +239,7 @@ class Order extends Component
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->discount);
 
             return;
         }
@@ -264,7 +270,12 @@ class Order extends Component
 
         $address = resolve_static(Address::class, 'query')
             ->with('country:id,name')
-            ->whereKey($this->order->{$addressKey . '_id'})
+            ->whereKey(
+                resolve_static(Contact::class, 'query')
+                    ->whereKey($this->order->contact_id)
+                    ->value($type . '_address_id')
+                    ?? $this->order->{$addressKey . '_id'}
+            )
             ->first();
 
         if ($address) {
@@ -273,15 +284,17 @@ class Order extends Component
             try {
                 $updatedOrder = UpdateOrder::make([
                     'id' => $this->order->id,
+                    $addressKey . '_id' => $address->getKey(),
                     $addressKey => $addressArray,
                 ])
                     ->checkPermission()
                     ->validate()
                     ->execute();
 
+                $this->order->{$addressKey . '_id'} = $updatedOrder->{$addressKey . '_id'};
                 $this->order->{$addressKey} = $updatedOrder->{$addressKey};
             } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+                exception_to_notifications($e, $this, form: $this->order);
             }
         }
     }
@@ -408,7 +421,9 @@ class Order extends Component
             ->latest()
             ->value('id');
         $this->{$orderFormName}->address_invoice_id = $contact?->invoice_address_id ?? $contact?->mainAddress?->id;
-        $this->{$orderFormName}->address_delivery_id = $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
+        $this->{$orderFormName}->address_delivery_id = $this->{$orderFormName}->isPurchase
+            ? null
+            : $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
         $this->{$orderFormName}->language_id = $contact?->mainAddress?->language_id
             ?? resolve_static(Language::class, 'default')->getKey();
         $this->{$orderFormName}->price_list_id = $contact?->price_list_id
@@ -652,7 +667,7 @@ class Order extends Component
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->discount);
 
             return false;
         }
@@ -734,7 +749,7 @@ class Order extends Component
 
             $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
 
             return false;
         }
@@ -756,7 +771,7 @@ class Order extends Component
         try {
             $this->discount->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->discount);
 
             return false;
         }
@@ -774,12 +789,66 @@ class Order extends Component
         try {
             $this->replicateOrder->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->replicateOrder);
 
             return;
         }
 
         $this->redirectRoute('orders.id', ['id' => $this->replicateOrder->id], navigate: true);
+    }
+
+    #[Renderless]
+    public function prefillContractTotal(): void
+    {
+        $schedule = resolve_static(Schedule::class, 'query')
+            ->whereRelation('orders', 'orders.id', $this->order->id)
+            ->where('class', ProcessSubscriptionOrder::class)
+            ->first();
+
+        if (is_null($schedule)) {
+            $this->toast()
+                ->warning(__('Create a schedule with an end date first.'))
+                ->send();
+
+            return;
+        }
+
+        if (! $schedule->ends_at || ! $schedule->cron_expression) {
+            $this->toast()
+                ->warning(__('Set an end date on the schedule first.'))
+                ->send();
+
+            return;
+        }
+
+        $cron = new CronExpression($schedule->cron_expression);
+        $current = Carbon::parse($schedule->due_at ?? now());
+        $cycles = $current->lessThanOrEqualTo($schedule->ends_at) ? 1 : 0;
+        $limit = 10000;
+
+        while ($cycles < $limit) {
+            $current = Carbon::instance($cron->getNextRunDate($current));
+
+            if ($current->greaterThan($schedule->ends_at)) {
+                break;
+            }
+
+            $cycles++;
+        }
+
+        if ($cycles >= $limit) {
+            $this->toast()
+                ->warning(__('Too many cycles until the end date, enter the total manually.'))
+                ->send();
+
+            return;
+        }
+
+        $this->order->contract_total_amount = bcmul(
+            $cycles,
+            str_replace('-', '', (string) $this->order->total_gross_price ?: '0'),
+            2
+        );
     }
 
     #[Renderless]
@@ -803,7 +872,7 @@ class Order extends Component
         try {
             $this->schedule->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->schedule);
 
             return false;
         }
@@ -815,6 +884,25 @@ class Order extends Component
     public function previewSchedule(): void
     {
         $this->schedule->nextExecutionDates = $this->schedule->getNextExecutionDates();
+    }
+
+    public function updatingScheduleCronMethodsBasic(?string $value): void
+    {
+        $defaults = [
+            FrequenciesEnum::WeeklyOn->value => [1, '00:00'],
+            FrequenciesEnum::MonthlyOn->value => [1, '00:00'],
+            FrequenciesEnum::QuarterlyOn->value => [1, '00:00'],
+            FrequenciesEnum::YearlyOn->value => [1, 1, '00:00'],
+        ];
+
+        if (
+            $value === data_get($this->schedule->cron, 'methods.basic')
+            || ! array_key_exists($value, $defaults)
+        ) {
+            return;
+        }
+
+        $this->schedule->cron['parameters']['basic'] = $defaults[$value];
     }
 
     #[Renderless]
@@ -862,12 +950,12 @@ class Order extends Component
                 ->validate()
                 ->execute();
 
-            if ($generateDocument) {
+            if ($generateDocument || $sendEmail) {
                 $this->selectedPrintLayouts = [
                     'print' => [],
                     'email' => $sendEmail ? ['cancellation-confirmation'] : [],
                     'download' => [],
-                    'force' => ['cancellation-confirmation'],
+                    'force' => $generateDocument ? ['cancellation-confirmation'] : [],
                 ];
 
                 $this->createDocumentFromItems($order);
@@ -903,7 +991,7 @@ class Order extends Component
 
             $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
         }
     }
 
@@ -915,7 +1003,7 @@ class Order extends Component
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
 
             return;
         }
@@ -961,7 +1049,7 @@ class Order extends Component
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
         }
 
         $this->toast()
@@ -1023,6 +1111,7 @@ class Order extends Component
             $this->order->invoice = [
                 'url' => $invoice->getUrl(),
                 'mime_type' => $invoice->mime_type,
+                'name' => $invoice->name,
             ];
         }
 

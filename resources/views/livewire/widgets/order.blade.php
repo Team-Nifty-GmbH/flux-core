@@ -97,7 +97,7 @@
                     {{ __('Name') }}
                 </x-flux::table.head-cell>
                 <x-flux::table.head-cell>
-                    {{ __('Amount') }}
+                    {{ __('Quantity') }}
                 </x-flux::table.head-cell>
                 <x-flux::table.head-cell>
                     {{ __('Total Net Price') }}

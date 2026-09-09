@@ -3,7 +3,7 @@
 use FluxErp\Models\Country;
 use FluxErp\Settings\SearchSettings;
 
-test('injects meilisearch embedder when semantic search enabled', function (): void {
+test('provides meilisearch embedders when semantic search enabled', function (): void {
     config(['scout.driver' => 'meilisearch']);
 
     SearchSettings::fake([
@@ -15,7 +15,7 @@ test('injects meilisearch embedder when semantic search enabled', function (): v
         'semantic_ratio' => 0.5,
     ]);
 
-    $embedder = data_get(Country::scoutIndexSettings(), 'embedders.default');
+    $embedder = data_get(Country::scoutEmbedders(), 'default');
 
     expect($embedder)->toMatchArray([
         'source' => 'rest',
@@ -26,7 +26,28 @@ test('injects meilisearch embedder when semantic search enabled', function (): v
     expect(data_get($embedder, 'request.model'))->toBe('text-embedding-3-small');
 });
 
-test('resets embedder to null when semantic search disabled', function (): void {
+test('mirrors the batch repetition marker in request and response', function (): void {
+    config(['scout.driver' => 'meilisearch']);
+
+    SearchSettings::fake([
+        'semantic_search_enabled' => true,
+        'embedder_url' => 'https://litellm.test/v1/embeddings',
+        'embedder_api_key' => 'sk-test',
+        'embedder_model' => 'text-embedding-3-small',
+        'embedder_dimensions' => 1536,
+        'semantic_ratio' => 0.5,
+    ]);
+
+    $embedder = data_get(Country::scoutEmbedders(), 'default');
+
+    // Meilisearch requires the '{{..}}' marker in both request and response when
+    // batching; a request-only marker is rejected with "response has a single
+    // embedding, but request has multiple texts to embed".
+    expect(data_get($embedder, 'request.input'))->toBe(['{{text}}', '{{..}}'])
+        ->and(data_get($embedder, 'response.data'))->toBe([['embedding' => '{{embedding}}'], '{{..}}']);
+});
+
+test('provides no embedders when semantic search disabled', function (): void {
     config(['scout.driver' => 'meilisearch']);
 
     SearchSettings::fake([
@@ -34,7 +55,15 @@ test('resets embedder to null when semantic search disabled', function (): void 
         'embedder_url' => 'https://litellm.test/v1/embeddings',
     ]);
 
-    expect(data_get(Country::scoutIndexSettings(), 'embedders'))->toBeNull();
+    expect(Country::scoutEmbedders())->toBeNull();
+});
+
+test('returns null index settings when nothing is configured', function (): void {
+    config(['scout.driver' => 'meilisearch']);
+
+    SearchSettings::fake(['semantic_search_enabled' => false]);
+
+    expect(Country::scoutIndexSettings())->toBeNull();
 });
 
 test('adds hybrid search options when semantic search enabled', function (): void {
@@ -60,4 +89,30 @@ test('adds no hybrid options when semantic search disabled', function (): void {
     SearchSettings::fake(['semantic_search_enabled' => false]);
 
     expect(data_get(Country::search('berlin')->options, 'hybrid'))->toBeNull();
+});
+
+test('adds the ranking score threshold to hybrid options when configured', function (): void {
+    config(['scout.driver' => 'meilisearch']);
+
+    SearchSettings::fake([
+        'semantic_search_enabled' => true,
+        'embedder_url' => 'https://litellm.test/v1/embeddings',
+        'semantic_ratio' => 0.5,
+        'semantic_score_threshold' => 0.78,
+    ]);
+
+    expect(data_get(Country::search('berlin')->options, 'rankingScoreThreshold'))->toBe(0.78);
+});
+
+test('omits the ranking score threshold when it is zero', function (): void {
+    config(['scout.driver' => 'meilisearch']);
+
+    SearchSettings::fake([
+        'semantic_search_enabled' => true,
+        'embedder_url' => 'https://litellm.test/v1/embeddings',
+        'semantic_ratio' => 0.5,
+        'semantic_score_threshold' => 0,
+    ]);
+
+    expect(data_get(Country::search('berlin')->options, 'rankingScoreThreshold'))->toBeNull();
 });

@@ -6,6 +6,10 @@ use FluxErp\Models\EmployeeBalanceAdjustment;
 
 class EmployeeBalanceAdjustmentList extends BaseDataTable
 {
+    public array $columnLabels = [
+        'amount' => 'Value',
+    ];
+
     public array $enabledCols = [
         'employee.name',
         'type',

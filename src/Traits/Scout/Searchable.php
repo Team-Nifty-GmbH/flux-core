@@ -14,36 +14,48 @@ trait Searchable
         BaseSearchable::search as protected baseScoutSearch;
     }
 
+    /**
+     * The Meilisearch embedders derived from SearchSettings, or null when semantic search is off.
+     */
+    public static function scoutEmbedders(): ?array
+    {
+        if (config('scout.driver') !== 'meilisearch') {
+            return null;
+        }
+
+        return ($search = static::activeSearchSettings())
+            ? ['default' => static::embedderDefinition($search)]
+            : null;
+    }
+
+    public static function scoutIndexSettings(): ?array
+    {
+        return config('scout.' . config('scout.driver') . '.index-settings.' . static::class) ?: null;
+    }
+
     public static function search($query = '', $callback = null): Builder
     {
         $builder = static::baseScoutSearch($query, $callback);
 
         // Semantic search: turn the keyword query into a hybrid (keyword + vector) query.
         if (config('scout.driver') === 'meilisearch' && $search = static::activeSearchSettings()) {
-            // options() replaces, so merge to preserve any caller-provided options.
-            $builder->options(array_merge($builder->options ?? [], [
+            $options = [
                 'hybrid' => [
                     'embedder' => 'default',
                     'semanticRatio' => $search->semantic_ratio,
                 ],
-            ]));
+            ];
+
+            // Drop hits scoring below the configured relevance threshold; 0 disables the cut.
+            if (($search->semantic_score_threshold ?? 0) > 0) {
+                $options['rankingScoreThreshold'] = $search->semantic_score_threshold;
+            }
+
+            // options() replaces, so merge to preserve any caller-provided options.
+            $builder->options(array_merge($builder->options ?? [], $options));
         }
 
         return $builder;
-    }
-
-    public static function scoutIndexSettings(): ?array
-    {
-        $settings = config('scout.' . config('scout.driver') . '.index-settings.' . static::class) ?? [];
-
-        // Semantic search: inject (or reset via null) the Meilisearch embedder from SearchSettings.
-        if (config('scout.driver') === 'meilisearch') {
-            $settings['embedders'] = ($search = static::activeSearchSettings())
-                ? ['default' => static::embedderDefinition($search)]
-                : null;
-        }
-
-        return $settings ?: null;
     }
 
     /**
@@ -77,8 +89,11 @@ trait Searchable
                 'model' => $search->embedder_model,
                 'input' => ['{{text}}', '{{..}}'],
             ],
+            // The '{{..}}' repetition marker must appear in both request and response
+            // when batching; without it Meilisearch rejects the embedder with
+            // "response has a single embedding, but request has multiple texts to embed".
             'response' => [
-                'data' => [['embedding' => '{{embedding}}']],
+                'data' => [['embedding' => '{{embedding}}'], '{{..}}'],
             ],
         ];
     }

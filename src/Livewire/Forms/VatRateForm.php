@@ -17,6 +17,10 @@ class VatRateForm extends FluxForm
 
     public bool $is_default = false;
 
+    public bool $is_purchase = true;
+
+    public bool $is_sales = true;
+
     public bool $is_tax_exemption = false;
 
     public ?string $name = null;

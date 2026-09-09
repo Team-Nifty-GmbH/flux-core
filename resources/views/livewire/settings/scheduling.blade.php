@@ -65,7 +65,6 @@
         >
             <x-time
                 :label="__('Time')"
-                format="24"
                 wire:model="schedule.cron.parameters.basic.0"
             />
         </div>
@@ -132,7 +131,6 @@
             />
             <x-time
                 :label="__('Time')"
-                format="24"
                 wire:model="schedule.cron.parameters.basic.1"
             />
         </div>
@@ -153,7 +151,6 @@
             />
             <x-time
                 :label="__('Time')"
-                format="24"
                 wire:model="schedule.cron.parameters.basic.1"
             />
         </div>
@@ -178,7 +175,6 @@
             </div>
             <x-time
                 :label="__('Time')"
-                format="24"
                 wire:model="schedule.cron.parameters.basic.2"
             />
         </div>
@@ -223,7 +219,6 @@
             />
             <x-time
                 :label="__('Time')"
-                format="24"
                 wire:model="schedule.cron.parameters.basic.2"
             />
         </div>
@@ -264,7 +259,6 @@
         >
             <x-time
                 :label="__('Time')"
-                format="24"
                 wire:model="schedule.cron.parameters.timeConstraint.0"
             />
         </div>
@@ -278,12 +272,10 @@
         >
             <x-time
                 :label="__('Start')"
-                format="24"
                 wire:model="schedule.cron.parameters.timeConstraint.0"
             />
             <x-time
                 :label="__('End')"
-                format="24"
                 wire:model="schedule.cron.parameters.timeConstraint.1"
             />
         </div>

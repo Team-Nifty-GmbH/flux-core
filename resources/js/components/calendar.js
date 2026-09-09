@@ -1,5 +1,3 @@
-import momentTimezonePlugin from '@fullcalendar/moment-timezone';
-
 const calendar = () => {
     return {
         calendarItem: {},
@@ -42,7 +40,7 @@ const calendar = () => {
             }
 
             let calendarObj = JSON.parse(
-                JSON.stringify(this.$wire.calendarObject),
+                JSON.stringify(await this.$wire.calendarToCalendarObject()),
             );
             calendarObj.parentId ??= 'my-calendars';
 
@@ -62,8 +60,6 @@ const calendar = () => {
             } else {
                 this.getFolderTree().updateNode(calendarObj);
             }
-
-            this.$wire.$set('calendarObject', calendarObj);
 
             return true;
         },
@@ -378,8 +374,15 @@ const calendar = () => {
                     timeGridPlugin,
                     listPlugin,
                     interactionPlugin,
-                    momentTimezonePlugin,
+                    classicThemePlugin,
                 ],
+                // v7 hashes its own class names, so expose stable hooks for the
+                // application stylesheet and the calendar-week title suffix below.
+                viewClass: 'fc-view',
+                toolbarTitleClass: 'fc-toolbar-title',
+                headerToolbarClass: 'fc-header-toolbar',
+                dayHeaderClass: 'fc-day-header',
+                blockEventClass: 'fc-block-event',
                 initialView: 'dayGridMonth',
                 slotDuration: '00:15:00',
                 initialDate: new Date(),

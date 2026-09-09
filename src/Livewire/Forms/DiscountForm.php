@@ -54,9 +54,14 @@ class DiscountForm extends FluxForm
     public function toActionData(): array
     {
         $data = parent::toActionData();
-        $data['discount'] = $this->is_percentage
-            ? bcdiv($this->discount, 100)
-            : $this->discount;
+
+        $data['discount'] = is_null($this->discount)
+            ? null
+            : (
+                $this->is_percentage
+                    ? bcdiv($this->discount, 100)
+                    : $this->discount
+            );
 
         return $data;
     }

@@ -46,7 +46,7 @@ class UpdateTicketRuleset extends FluxRuleset
             'ticket_type_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => TicketType::class]),
+                app(ModelExists::class, ['model' => TicketType::class, 'subject' => Ticket::class]),
             ],
             'title' => 'sometimes|required|string|max:255',
             'description' => 'string|nullable',

@@ -2,6 +2,8 @@
 
 namespace FluxErp\Livewire\Contact;
 
+use FluxErp\Actions\Address\DetachAddress;
+use FluxErp\Actions\Address\MoveAddress;
 use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\AddressForm;
@@ -39,6 +41,8 @@ class Addresses extends Component
     public ContactForm $contact;
 
     public bool $edit = false;
+
+    public ?int $moveToContactId = null;
 
     public string $tab = 'address.address';
 
@@ -130,7 +134,7 @@ class Addresses extends Component
         try {
             $this->address->delete();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->address);
 
             return;
         }
@@ -140,12 +144,26 @@ class Addresses extends Component
             fn ($address) => $address['id'] !== $this->addressId
         ));
 
-        $address = resolve_static(Address::class, 'query')
-            ->whereKey($this->addresses[0]['id'])
-            ->first();
-        $this->select($address);
+        $this->selectFirstAddress();
 
         $this->edit = false;
+    }
+
+    #[Renderless]
+    public function detach(): void
+    {
+        try {
+            $address = DetachAddress::make(['id' => $this->addressId])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this, form: $this->address);
+
+            return;
+        }
+
+        $this->redirect($address->contact->getUrl(), true);
     }
 
     #[Renderless]
@@ -243,8 +261,31 @@ class Addresses extends Component
     }
 
     #[Renderless]
+    public function move(): void
+    {
+        try {
+            $address = MoveAddress::make([
+                'id' => $this->addressId,
+                'contact_id' => $this->moveToContactId,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this, form: $this->address);
+
+            return;
+        }
+
+        $this->reset('moveToContactId');
+
+        $this->redirect($address->contact->getUrl(), true);
+    }
+
+    #[Renderless]
     public function new(): void
     {
+        $this->resetErrorBag();
         $this->address->reset();
 
         $this->address->contact_id = $this->contact->id;
@@ -258,12 +299,7 @@ class Addresses extends Component
     public function reloadAddress(): void
     {
         if (! $this->address->id) {
-            $this->select(
-                resolve_static(Address::class, 'query')
-                    ->whereKey($this->addresses[0]['id'])
-                    ->with('contactOptions')
-                    ->first()
-            );
+            $this->selectFirstAddress();
 
             return;
         }
@@ -282,6 +318,7 @@ class Addresses extends Component
     public function replicate(): void
     {
         $this->tab = 'address.address';
+        $this->resetErrorBag();
         $this->address->reset(
             'id',
             'email',
@@ -309,7 +346,7 @@ class Addresses extends Component
             $result->loadMissing('contactOptions');
             $this->address->fill($result);
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->address);
 
             return;
         }
@@ -332,9 +369,26 @@ class Addresses extends Component
             $this->skipRender();
         }
 
+        $this->resetErrorBag();
         $this->address->reset();
         $this->address->fill($address);
 
         $this->addressId = $this->address->id;
+    }
+
+    protected function selectFirstAddress(): void
+    {
+        $address = resolve_static(Address::class, 'query')
+            ->whereKey(data_get(array_first($this->addresses ?? []), 'id'))
+            ->with('contactOptions')
+            ->first();
+
+        if (is_null($address)) {
+            $this->redirectRoute('contacts.contacts', navigate: true);
+
+            return;
+        }
+
+        $this->select($address);
     }
 }

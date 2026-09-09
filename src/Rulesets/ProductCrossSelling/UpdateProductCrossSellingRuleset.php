@@ -30,7 +30,7 @@ class UpdateProductCrossSellingRuleset extends FluxRuleset
             'product_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Product::class]),
+                app(ModelExists::class, ['model' => Product::class, 'subject' => ProductCrossSelling::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
             'order_column' => 'integer',

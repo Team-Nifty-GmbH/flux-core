@@ -93,10 +93,10 @@ class PurchaseInvoiceForm extends FluxForm
             ->value('ledger_account_id');
     }
 
-    public function finish(): void
+    public function finish(?int $orderId = null): void
     {
         $this->save();
-        $this->makeAction('create-order')
+        $this->makeAction('create-order', array_merge($this->toActionData(), ['order_id' => $orderId]))
             ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
             ->validate()
             ->execute();

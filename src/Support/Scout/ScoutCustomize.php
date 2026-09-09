@@ -27,17 +27,17 @@ class ScoutCustomize
 
     public function toSearchableArray(): array
     {
-        if ($this->fresh) {
-            $this->model->withoutRelations()->refresh();
-        }
+        $model = $this->fresh
+            ? $this->model->withoutRelations()->refresh()
+            : $this->model;
 
         if ($this->with) {
-            $this->model->loadMissing($this->with);
+            $model->loadMissing($this->with);
         }
 
         return Arr::sortByPattern(
             Arr::except(
-                $this->model->toArray(),
+                $model->toArray(),
                 $this->except
             ),
             config('scout.sorted_searchable_keys.' . get_class($this->model), []),

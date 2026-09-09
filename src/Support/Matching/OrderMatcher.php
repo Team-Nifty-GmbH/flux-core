@@ -1,0 +1,401 @@
+<?php
+
+namespace FluxErp\Support\Matching;
+
+use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
+use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Models\Address;
+use FluxErp\Models\ContactBankConnection;
+use FluxErp\Models\Order;
+use FluxErp\Models\Pivots\OrderTransaction;
+use FluxErp\Models\SerialNumberRange;
+use FluxErp\Models\Transaction;
+use FluxErp\Settings\AccountingSettings;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\MultipleRecordsFoundException;
+use Illuminate\Support\Collection;
+
+/**
+ * The order side of the automatic transaction matching, moved out of the job so
+ * the job only decides which matcher runs first.
+ */
+class OrderMatcher
+{
+    protected ?Collection $patternOnlySubscriptionContracts = null;
+
+    protected ?Collection $subscriptionContracts = null;
+
+    public function invoiceNumberPatterns(): Collection
+    {
+        return $this->loadInvoiceNumberPatterns();
+    }
+
+    public function match(Transaction $transaction, Collection $invoiceNumberPatterns): void
+    {
+        $this->processTransaction($transaction, $invoiceNumberPatterns);
+    }
+
+    protected function findMatchingOrders(Transaction $transaction, Collection $invoiceNumberPatterns): Collection
+    {
+        $profileChild = $this->findOrderBySubscriptionProfile($transaction);
+
+        if ($profileChild) {
+            return collect([$profileChild]);
+        }
+
+        $contactId = resolve_static(ContactBankConnection::class, 'query')
+            ->latest()
+            ->where('iban', $transaction->counterpart_iban)
+            ->value('contact_id')
+            ?? resolve_static(Order::class, 'query')
+                ->latest()
+                ->where('iban', $transaction->counterpart_iban)
+                ->value('contact_id');
+
+        try {
+            $contactId ??= resolve_static(Address::class, 'query')
+                ->whereRaw(
+                    'JSON_CONTAINS(LOWER(search_aliases), LOWER(?))',
+                    [json_encode($transaction->counterpart_name)]
+                )
+                ->sole('contact_id')
+                ->value('contact_id');
+        } catch (ModelNotFoundException|MultipleRecordsFoundException) {
+        }
+
+        $bookingDate = $transaction->booking_date->format('Y-m-d');
+
+        $matches = collect();
+        if ($contactId) {
+            $order = $this->findOrderByContactAndBalance($transaction, $contactId, $bookingDate);
+
+            if ($order) {
+                // exact match for contact and balance
+                $matches->push($order);
+
+                return $matches;
+            }
+        }
+
+        if ($transaction->purpose) {
+            $orders = $this->findOrderByPurpose($transaction, $contactId, $bookingDate, $invoiceNumberPatterns);
+
+            if ($orders?->isNotEmpty()) {
+                $matches = $matches->merge($orders);
+            }
+        }
+
+        if ($transaction->counterpart_name) {
+            $order = $this->findOrderByCounterpartName($transaction, $bookingDate);
+
+            if ($order) {
+                $matches->push($order);
+            }
+        }
+
+        return $matches->unique('id');
+    }
+
+    protected function findOrderByContactAndBalance(
+        Transaction $transaction,
+        int $contactId,
+        string $bookingDate
+    ): ?Order {
+        return resolve_static(Order::class, 'query')
+            ->whereNotNull('invoice_number')
+            ->where('contact_id', $contactId)
+            ->whereRaw('ROUND(balance, 2) = ROUND(?, 2)', $transaction->amount)
+            ->orderByRaw('ABS(DATEDIFF(invoice_date, ?))', [$bookingDate])
+            ->first();
+    }
+
+    protected function findOrderByCounterpartName(Transaction $transaction, string $bookingDate): ?Order
+    {
+        return resolve_static(Order::class, 'query')
+            ->whereNotNull('invoice_number')
+            ->whereHas(
+                'contact.addresses',
+                function (Builder $query) use ($transaction) {
+                    return $query->whereRaw(
+                        'LOWER(addresses.name) like ?',
+                        '%' . strtolower($transaction->counterpart_name) . '%'
+                    );
+                }
+            )
+            ->orderByRaw('ABS(DATEDIFF(invoice_date, ?))', [$bookingDate])
+            ->whereRaw('ROUND(balance, 2) = ?', $transaction->amount)
+            ->first();
+    }
+
+    protected function findOrderByPurpose(
+        Transaction $transaction,
+        ?int $contactId,
+        string $bookingDate,
+        Collection $invoiceNumberPatterns
+    ): ?Collection {
+        $potentialMatches = collect();
+
+        $invoiceNumbers = $this->extractInvoiceNumbers($transaction->purpose, $invoiceNumberPatterns);
+
+        foreach ($invoiceNumbers as $invoiceNumber) {
+            try {
+                $matches = $this->findPotentialOrderMatches($invoiceNumber, $transaction, $contactId);
+                $potentialMatches = $potentialMatches->merge($matches);
+            } catch (ModelNotFoundException) {
+            }
+        }
+
+        $invoiceFragments = $invoiceNumbers->flatMap(fn (string $invoiceNumber) => array_merge(
+            explode(' ', $invoiceNumber),
+            explode('.', $invoiceNumber),
+            explode('-', $invoiceNumber),
+            explode(',', $invoiceNumber),
+            [$invoiceNumber],
+        ))
+            ->filter()
+            ->map(fn (string $word) => strtolower(trim($word)))
+            ->unique();
+
+        $search = collect(array_merge(
+            explode(' ', $transaction->purpose),
+            explode('.', $transaction->purpose),
+            explode('-', $transaction->purpose),
+            explode(',', $transaction->purpose),
+        ))
+            ->filter()
+            ->map(fn (string $word) => trim($word))
+            ->unique()
+            ->values();
+
+        foreach ($search as $word) {
+            if (
+                strlen($word) < 5
+                || $word === $transaction->counterpart_iban
+                || $word === $transaction->counterpart_bic
+                || $invoiceFragments->contains(strtolower($word))
+            ) {
+                continue;
+            }
+
+            try {
+                $matches = $this->findPotentialOrderMatches($word, $transaction, $contactId);
+                $potentialMatches = $potentialMatches->merge($matches);
+            } catch (ModelNotFoundException) {
+            }
+        }
+
+        if ($potentialMatches->isEmpty()) {
+            return null;
+        }
+
+        return $potentialMatches
+            ->unique('id')
+            ->sortBy([
+                fn (Order $order) => abs(
+                    bcsub(
+                        bcround($order->balance ?? 0, 2),
+                        $transaction->amount
+                    )
+                ) > 0.01 ? 1 : 0,
+                fn (Order $order) => $order->invoice_date
+                    ? abs(strtotime($order->invoice_date) - strtotime($bookingDate))
+                    : PHP_INT_MAX,
+                fn (Order $order) => $contactId && $order->contact_id == $contactId ? 0 : 1,
+            ])
+            ->values();
+    }
+
+    protected function findOrderBySubscriptionProfile(Transaction $transaction): ?Order
+    {
+        $normalizedIban = str_replace(' ', '', strtoupper($transaction->counterpart_iban ?? ''));
+        $purpose = strtolower($transaction->purpose ?? '');
+
+        $this->loadSubscriptionContracts();
+
+        $patternFits = fn (Order $contract): bool => $contract->payment_purpose_pattern
+            && $purpose
+            && str_contains($purpose, strtolower($contract->payment_purpose_pattern));
+
+        $matching = ($normalizedIban ? $this->subscriptionContracts->get($normalizedIban, collect()) : collect())
+            ->filter(fn (Order $contract): bool => ! $contract->payment_purpose_pattern || $patternFits($contract))
+            ->merge($this->patternOnlySubscriptionContracts->filter($patternFits));
+
+        // prefer a purpose-pattern hit when several contracts share the creditor iban
+        $contract = $matching->sortByDesc(
+            fn (Order $contract) => $contract->payment_purpose_pattern ? 1 : 0
+        )
+            ->first();
+
+        return $contract
+            ?->createdOrders()
+            ->whereNot('balance', 0)
+            ->orderBy('invoice_date')
+            ->first();
+    }
+
+    protected function loadInvoiceNumberPatterns(): Collection
+    {
+        $marker = "\x00WILDCARD\x00";
+        $quotedMarker = preg_quote($marker, '/');
+
+        return resolve_static(SerialNumberRange::class, 'query')
+            ->where('type', 'invoice_number')
+            ->where('model_type', morph_alias(Order::class))
+            ->whereNotNull('prefix')
+            ->get()
+            ->map(function (SerialNumberRange $range) use ($marker, $quotedMarker): string {
+                $prefix = preg_replace('/:[a-z_]+/i', $marker, $range->prefix);
+                $suffix = preg_replace('/:[a-z_]+/i', $marker, $range->suffix ?? '');
+
+                $prefixPattern = str_replace($quotedMarker, '\\S+', preg_quote($prefix, '/'));
+                $suffixPattern = str_replace($quotedMarker, '\\S+', preg_quote($suffix, '/'));
+
+                $digitPattern = $range->length
+                    ? '\\d{' . $range->length . ',}'
+                    : '\\d+';
+
+                return '/' . $prefixPattern . $digitPattern . $suffixPattern . '/i';
+            });
+    }
+
+    protected function loadSubscriptionContracts(): void
+    {
+        if (! is_null($this->subscriptionContracts)) {
+            return;
+        }
+
+        $contracts = resolve_static(Order::class, 'query')
+            ->whereHas(
+                'orderType',
+                fn (Builder $query) => $query
+                    ->where('is_active', true)
+                    ->whereIn('order_type_enum', [
+                        OrderTypeEnum::Subscription->value,
+                        OrderTypeEnum::PurchaseSubscription->value,
+                    ])
+            )
+            ->where(function (Builder $query): void {
+                $query->whereNotNull('iban')
+                    ->orWhereNotNull('payment_purpose_pattern');
+            })
+            ->get(['id', 'iban', 'payment_purpose_pattern']);
+
+        $this->subscriptionContracts = $contracts
+            ->filter(fn (Order $contract): bool => (bool) $contract->iban)
+            ->groupBy(fn (Order $contract): string => str_replace(' ', '', strtoupper($contract->iban)));
+
+        $this->patternOnlySubscriptionContracts = $contracts
+            ->filter(fn (Order $contract): bool => ! $contract->iban && $contract->payment_purpose_pattern);
+    }
+
+    protected function extractInvoiceNumbers(string $purpose, Collection $patterns): Collection
+    {
+        return $patterns
+            ->flatMap(function (string $regex) use ($purpose): array {
+                if (preg_match_all($regex, $purpose, $matches)) {
+                    return $matches[0];
+                }
+
+                return [];
+            })
+            ->unique()
+            ->values();
+    }
+
+    protected function findPotentialOrderMatches(string $word, Transaction $transaction, ?int $contactId): Collection
+    {
+        return resolve_static(Order::class, 'query')
+            ->where(function (Builder $query) use ($word, $transaction, $contactId): void {
+                // exact invoice number match with non-zero balance
+                $query->where(function (Builder $query) use ($word, $contactId): void {
+                    $query->whereRaw('LOWER(invoice_number) = ?', strtolower($word))
+                        ->whereNot('balance', 0)
+                        ->when($contactId, fn (Builder $subQuery) => $subQuery->where('contact_id', $contactId));
+                })
+                    // partial invoice number match with exact amount
+                    ->orWhere(function (Builder $query) use ($word, $transaction): void {
+                        $query->where('invoice_number', 'like', '%' . $word . '%')
+                            ->whereRaw('ROUND(balance, 2) = ROUND(?, 2)', $transaction->amount);
+                    })
+                    // contact id with exact amount (only if contactId exists)
+                    ->when($contactId, function (Builder $query) use ($contactId, $transaction): void {
+                        $query->orWhere(function (Builder $query) use ($contactId, $transaction): void {
+                            $query->whereNotNull('invoice_number')
+                                ->where('contact_id', $contactId)
+                                ->whereRaw('ROUND(balance, 2) = ?', $transaction->amount);
+                        });
+                    })
+                    // customer number relation with exact amount
+                    ->orWhere(function (Builder $query) use ($word, $transaction): void {
+                        $query->whereNotNull('invoice_number')
+                            ->whereRelation('contact', 'customer_number', $word)
+                            ->whereRaw('ROUND(balance, 2) = ?', $transaction->amount);
+                    })
+                    // partial invoice match with total gross price
+                    ->orWhere(function (Builder $query) use ($word, $transaction): void {
+                        $query->whereNotNull('invoice_number')
+                            ->where('invoice_number', 'like', '%' . $word . '%')
+                            ->whereNot('balance', 0)
+                            ->whereRaw('ROUND(total_gross_price, 2) = ?', $transaction->amount);
+                    });
+            })
+            ->get()
+            ->unique('id');
+    }
+
+    protected function processTransaction(Transaction $transaction, Collection $invoiceNumberPatterns): void
+    {
+        $orders = $this->findMatchingOrders($transaction, $invoiceNumberPatterns);
+
+        $orders->each(function (Order $order) use ($transaction): void {
+            if (! resolve_static(OrderTransaction::class, 'query')
+                ->where('order_id', $order->getKey())
+                ->where('transaction_id', $transaction->getKey())
+                ->exists()
+            ) {
+                $transaction->refresh();
+                $amount = $transaction->amount > 0
+                    ? min($order->balance, $transaction->balance)
+                    : max($order->balance, $transaction->balance);
+
+                CreateOrderTransaction::make([
+                    'transaction_id' => $transaction->getKey(),
+                    'order_id' => $order->getKey(),
+                    'amount' => $amount,
+                    'is_accepted' => $this->shouldAutoAccept($transaction, $order),
+                ])
+                    ->validate()
+                    ->execute();
+            }
+        });
+    }
+
+    protected function shouldAutoAccept(Transaction $transaction, Order $order): bool
+    {
+        if (! app(AccountingSettings::class)->auto_accept_secure_transaction_matches) {
+            return false;
+        }
+
+        // Condition 1: The invoice date of the order is before or equal to the booking date of the transaction
+        if (! $order->invoice_date || $transaction->booking_date->lessThanOrEqualTo($order->invoice_date)) {
+            return false;
+        }
+
+        // Condition 2: The purpose of the transaction contains the invoice number of the order
+        if (! $order->invoice_number || ! $transaction->purpose) {
+            return false;
+        }
+
+        if (! str_contains(strtolower($transaction->purpose), strtolower($order->invoice_number))) {
+            return false;
+        }
+
+        // Condition 3: The balance of the order is equal to the amount of the transaction
+        if (bccomp(bcround($order->balance, 2), $transaction->amount, 2) !== 0) {
+            return false;
+        }
+
+        return true;
+    }
+}

@@ -19,6 +19,14 @@
                 />
             </div>
             <x-toggle
+                wire:model.boolean="vatRate.is_purchase"
+                :label="__('Is Purchase')"
+            />
+            <x-toggle
+                wire:model.boolean="vatRate.is_sales"
+                :label="__('Is Sales')"
+            />
+            <x-toggle
                 wire:model.boolean="vatRate.is_tax_exemption"
                 :label="__('Is Tax Exemption')"
             />

@@ -24,16 +24,38 @@
                     this.uploadFiles(event.dataTransfer.files, event)
                 }
             },
-            uploadError() {
+            uploadError(message = null) {
                 this.isUploading = false
                 this.progress = 0
                 $tsui
                     .interaction('dialog')
                     .error(
                         '{{ __('File upload failed') }}',
-                        '{{ __('Your file upload failed. Please try again.') }}',
+                        message ??
+                            '{{ __('Your file upload failed. Please try again.') }}',
                     )
                     .send()
+            },
+            rejectFiles(rejected) {
+                let name = $nuxbe.escapeHtml(rejected.file.name)
+
+                if (rejected.reason === 'size') {
+                    return this.uploadError(
+                        '{{ __('The file :name is :size. The maximum upload size is :max.') }}'
+                            .replace(':name', () => name)
+                            .replace(':size', () => rejected.size)
+                            .replace(':max', () => rejected.maxSize),
+                    )
+                }
+
+                this.uploadError(
+                    '{{ __('The file type of :name is not accepted. Allowed types: :types.') }}'
+                        .replace(':name', () => name)
+                        .replace(
+                            ':types',
+                            () => $nuxbe.escapeHtml(rejected.accept),
+                        ),
+                )
             },
             uploadSuccess(success, files) {
                 this.isUploading = false
@@ -43,6 +65,17 @@
                 this.progress = progress
             },
             uploadFiles(files, event) {
+                let rejected = $nuxbe.validateFiles(files, {
+                    maxSize: {{ \FluxErp\Helpers\Helper::getMaxUploadSizeInBytes() }},
+                    accept: '{{ $attributes->get('accept') }}',
+                })
+
+                if (rejected) {
+                    event.target.value = ''
+
+                    return this.rejectFiles(rejected)
+                }
+
                 this.isUploading = true
                 let $this = this
                 $wire.uploadMultiple(
@@ -114,45 +147,76 @@
             />
         </div>
         <div class="flex flex-col gap-4">
-            <template
-                x-for="(file, index) in $wire.{{ $wireModel }}.stagedFiles"
-            >
-                <x-card class="px-0! py-0!" x-show="!file.shouldDelete" x-cloak>
-                    <div class="flex items-center justify-between text-sm">
-                        <div class="flex w-0 flex-1 items-center gap-1.5">
-                            <div class="shrink-0 rounded-md object-contain">
-                                <img
-                                    x-bind:src="
-                                        file.preview_url
-                                            ? file.preview_url
-                                            : '#'
-                                    "
-                                    class="h-16 w-16 rounded-md object-cover"
-                                    alt=""
-                                />
+            <div class="flex flex-col gap-4" wire:ignore>
+                <template
+                    x-for="(file, index) in $wire.{{ $wireModel }}.stagedFiles"
+                    x-bind:key="file.id ?? file.temporary_filename ?? index"
+                >
+                    <div x-show="!file.shouldDelete" x-cloak>
+                        <x-card class="px-0! py-0!">
+                            <div
+                                class="flex items-center justify-between text-sm"
+                            >
+                                <div
+                                    class="flex w-0 flex-1 items-center gap-1.5"
+                                >
+                                    <div
+                                        class="shrink-0 rounded-md object-contain"
+                                    >
+                                        <img
+                                            x-bind:src="
+                                                file.preview_url
+                                                    ? file.preview_url
+                                                    : '#'
+                                            "
+                                            class="h-16 w-16 rounded-md object-cover"
+                                            alt=""
+                                        />
+                                    </div>
+                                    <span
+                                        class="w-0 flex-1 truncate pl-1"
+                                        x-text="file.name"
+                                    ></span>
+                                </div>
+                                <div class="flex shrink-0 items-center gap-1.5">
+                                    <x-button
+                                        color="indigo"
+                                        icon="eye"
+                                        :title="__('Preview')"
+                                        x-cloak
+                                        x-show="file.lightbox_url"
+                                        x-on:click="
+                                            $nuxbe.openLightbox(
+                                                file.lightbox_url,
+                                                {
+                                                    mime: file.mime_type,
+                                                    title: file.name,
+                                                },
+                                            )
+                                        "
+                                    />
+                                    <x-button
+                                        color="indigo"
+                                        icon="arrow-down-tray"
+                                        x-cloak
+                                        x-show="file.id"
+                                        x-on:click="
+                                            file?.id && $wire.download(file.id)
+                                        "
+                                    />
+                                </div>
+                                <div class="flex shrink-0 px-4">
+                                    <x-button
+                                        color="red"
+                                        x-on:click="file.shouldDelete = true"
+                                        :text="__('Delete')"
+                                    />
+                                </div>
                             </div>
-                            <span
-                                class="w-0 flex-1 truncate pl-1"
-                                x-text="file.name"
-                            ></span>
-                        </div>
-                        <div x-cloak x-show="file.id">
-                            <x-button
-                                color="indigo"
-                                icon="arrow-down-tray"
-                                wire:click="download(file.id)"
-                            />
-                        </div>
-                        <div class="flex shrink-0 px-4">
-                            <x-button
-                                color="red"
-                                x-on:click="file.shouldDelete = true"
-                                :text="__('Delete')"
-                            />
-                        </div>
+                        </x-card>
                     </div>
-                </x-card>
-            </template>
+                </template>
+            </div>
             {{ $footer ?? '' }}
         </div>
     </div>

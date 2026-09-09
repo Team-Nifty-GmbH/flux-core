@@ -5,23 +5,30 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\Calendar\CreateCalendar;
 use FluxErp\Actions\Calendar\DeleteCalendar;
 use FluxErp\Actions\Calendar\UpdateCalendar;
+use FluxErp\Models\Calendar;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 
 class CalendarForm extends FluxForm
 {
+    #[Locked]
+    public int|string|null $id = null;
+
+    public string|int|null $parent_id = null;
+
+    public ?string $model_type = null;
+
+    public ?string $name = null;
+
+    public ?string $description = null;
+
     public ?string $color = null;
 
     public ?array $custom_properties = null;
 
-    public ?string $description = null;
-
     public bool $has_notifications = true;
 
     public bool $has_repeatable_events = true;
-
-    #[Locked]
-    public int|string|null $id = null;
 
     #[Locked]
     public bool $is_editable = true;
@@ -30,13 +37,18 @@ class CalendarForm extends FluxForm
 
     public bool $is_public = false;
 
-    public ?string $model_type = null;
-
-    public ?string $name = null;
-
-    public string|int|null $parent_id = null;
-
+    // Non calendar model properties
     public ?int $user_id = null;
+
+    #[Locked]
+    public bool $is_new = false;
+
+    public function create(): void
+    {
+        parent::create();
+
+        $this->is_new = true;
+    }
 
     public function fill($values): void
     {
@@ -50,6 +62,7 @@ class CalendarForm extends FluxForm
 
         $this->user_id ??= auth()->id();
         $this->color ??= '#' . dechex(rand(0x000000, 0xFFFFFF));
+        $this->is_new = false;
     }
 
     public function fromCalendarObject(?array $calendar): void

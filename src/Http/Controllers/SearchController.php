@@ -9,8 +9,10 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Laravel\Scout\SearchableScope;
+use Spatie\EloquentSortable\Sortable;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class SearchController extends Controller
@@ -43,8 +45,6 @@ class SearchController extends Controller
                 ? $query->whereIn($optionValue, Arr::wrap($selected))
                 : $query->where($optionValue, $selected);
 
-            $this->applyRequestConstraints($query, $request, $model);
-
             return $this->formatAndDispatch($query->get(), $model, $request);
         } elseif ($request->has('search') && $isSearchable && ! $request->input('searchFields')) {
             /** @var Builder $perPageSearch */
@@ -64,7 +64,14 @@ class SearchController extends Controller
             $query = resolve_static($model, 'query');
             $query->where(function (Builder $query) use ($request): void {
                 foreach (Arr::wrap($request->input('searchFields')) as $field) {
-                    $query->orWhere($field, 'like', '%' . $request->input('search') . '%');
+                    str_contains($field, '.')
+                        ? $query->orWhereRelation(
+                            Str::beforeLast($field, '.'),
+                            Str::afterLast($field, '.'),
+                            'like',
+                            '%' . $request->input('search') . '%'
+                        )
+                        : $query->orWhere($field, 'like', '%' . $request->input('search') . '%');
                 }
             });
         } else {
@@ -88,7 +95,13 @@ class SearchController extends Controller
 
         $this->applyRequestConstraints($query, $request, $model);
 
-        $result = $query->latest()->get();
+        $result = $query
+            ->when(
+                is_a(resolve_static($model, 'class'), Sortable::class, true),
+                fn (Builder $query): Builder => $query->ordered()
+            )
+            ->latest()
+            ->get();
 
         if ($request->has('appends')) {
             $result->each(function ($item) use ($request): void {
@@ -224,9 +237,19 @@ class SearchController extends Controller
                     $item->only($request->input('appends', [])),
                 );
 
+                $mapping = Arr::wrap($request->input('mapping', []));
+                $avatarUrl = data_get($formatted, 'image');
+
                 // mapping sources are limited to keys already exposed above
-                foreach (Arr::wrap($request->input('mapping', [])) as $target => $source) {
+                foreach ($mapping as $target => $source) {
                     data_set($formatted, $target, data_get($formatted, $source));
+                }
+
+                $formatted = $this->toPlainText($formatted);
+
+                // the avatar is a url, not display text, so it keeps its full value
+                if (! array_key_exists('image', $mapping)) {
+                    $formatted['image'] = $avatarUrl;
                 }
 
                 return $formatted;
@@ -236,5 +259,23 @@ class SearchController extends Controller
         Event::dispatch('tall-datatables-searched', [$request, $result]);
 
         return $result;
+    }
+
+    // a link is not display text, shortening it would break it
+    protected function toPlainText(array $values): array
+    {
+        foreach ($values as $key => $value) {
+            if (is_array($value)) {
+                $values[$key] = $this->toPlainText($value);
+
+                continue;
+            }
+
+            if (is_string($value) && ! Str::isUrl($value)) {
+                $values[$key] = Str::limit(trim(html_entity_decode(strip_tags($value))));
+            }
+        }
+
+        return $values;
     }
 }

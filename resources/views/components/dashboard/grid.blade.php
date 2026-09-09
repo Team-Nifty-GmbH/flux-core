@@ -37,7 +37,7 @@
             >
                 <div
                     class="grid-stack-item-content"
-                    x-bind:class="editGrid ? 'border-4 border-primary-500' : ''"
+                    x-bind:class="{ 'border-4 border-primary-500': editGrid }"
                 >
                     <div class="absolute top-2 right-2 z-10">
                         <x-button.circle
@@ -52,7 +52,7 @@
                     </div>
                     <div
                         class="w-full"
-                        x-bind:class="editGrid ? 'pointer-events-none' : ''"
+                        x-bind:class="{ 'pointer-events-none': editGrid }"
                     >
                         @livewire(
                             $widget['component_name'] ?? $widget['class'],

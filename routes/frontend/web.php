@@ -6,13 +6,16 @@ use FluxErp\Actions\PushSubscription\UpsertPushSubscription;
 use FluxErp\Http\Controllers\AuthController;
 use FluxErp\Http\Controllers\CalendarEventController;
 use FluxErp\Http\Controllers\CalendarSearchController;
+use FluxErp\Http\Controllers\MentionableSearchController;
 use FluxErp\Http\Controllers\PrivateMediaController;
 use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\AbsenceRequest\AbsenceRequest;
 use FluxErp\Livewire\Accounting\DirectDebit;
+use FluxErp\Livewire\Accounting\LedgerBookings;
+use FluxErp\Livewire\Accounting\Loan;
+use FluxErp\Livewire\Accounting\Loans;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
-use FluxErp\Livewire\Accounting\PaymentReminder;
 use FluxErp\Livewire\Accounting\PaymentReminderRun;
 use FluxErp\Livewire\Accounting\PaymentRunPreview;
 use FluxErp\Livewire\Accounting\TransactionAssignments;
@@ -129,6 +132,7 @@ use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Livewire\Ticket\Ticket;
 use FluxErp\Models\Address;
 use FluxErp\Support\MediaLibrary\ContentDisposition;
+use FluxErp\Support\MediaLibrary\StreamedFile;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -192,7 +196,8 @@ Route::middleware('web')
                 Route::name('contacts.')->prefix('contacts')
                     ->group(function (): void {
                         Route::get('/contacts', ContactList::class)->name('contacts');
-                        Route::get('/contacts/{id?}', Contact::class)->where('id', '[0-9]+')->name('id?');
+                        Route::get('/contacts/{id?}', Contact::class)->where('id', '[0-9]+')->name('id?')
+                            ->metadata(['model' => 'contact']);
                         Route::get('/addresses', AddressList::class)->name('addresses');
                         Route::get('/communications', CommunicationList::class)->name('communications');
                     });
@@ -213,32 +218,40 @@ Route::middleware('web')
                     ->prefix('sales')
                     ->group(function (): void {
                         Route::get('/leads', LeadList::class)->name('leads');
-                        Route::get('/leads/{id}', Lead::class)->name('lead.id');
+                        Route::get('/leads/{id}', Lead::class)->name('lead.id')
+                            ->metadata(['model' => 'lead']);
                     });
 
                 Route::name('orders.')
                     ->prefix('orders')
                     ->group(function (): void {
                         Route::get('/list', OrderList::class)->name('orders');
-                        Route::get('/list/{orderType}', OrderListByOrderType::class)->name('order-type');
+                        Route::get('/list/{orderType}', OrderListByOrderType::class)->name('order-type')
+                            ->metadata(['title' => 'Orders', 'model' => 'order_type']);
                         Route::get('/order-positions/list', OrderPositionList::class)->name('order-positions');
                         Route::get('/create-child-order', CreateChildOrder::class)->name('create-child-order');
-                        Route::get('/{id}', Order::class)->where('id', '[0-9]+')->name('id');
+                        Route::get('/{id}', Order::class)->where('id', '[0-9]+')->name('id')
+                            ->metadata(['model' => 'order']);
                     });
 
                 Route::get('/tasks', TaskList::class)->name('tasks');
-                Route::get('/tasks/{id}', Task::class)->name('tasks.id');
+                Route::get('/tasks/{id}', Task::class)->name('tasks.id')
+                    ->metadata(['model' => 'task']);
                 Route::get('/tickets', TicketList::class)->name('tickets');
-                Route::get('/tickets/{id}', Ticket::class)->name('tickets.id');
+                Route::get('/tickets/{id}', Ticket::class)->name('tickets.id')
+                    ->metadata(['model' => 'ticket']);
                 Route::get('/projects', ProjectList::class)->name('projects');
-                Route::get('/projects/{id}', Project::class)->name('projects.id');
+                Route::get('/projects/{id}', Project::class)->name('projects.id')
+                    ->metadata(['model' => 'project']);
 
                 Route::name('products.')->prefix('products')
                     ->group(function (): void {
                         Route::get('/list', ProductList::class)->name('products');
                         Route::get('/serial-numbers', SerialNumberList::class)->name('serial-numbers');
-                        Route::get('/serial-numbers/{id?}', SerialNumber::class)->name('serial-numbers.id?');
-                        Route::get('/{id}', Product::class)->where('id', '[0-9]+')->name('id');
+                        Route::get('/serial-numbers/{id?}', SerialNumber::class)->name('serial-numbers.id?')
+                            ->metadata(['model' => 'serial_number']);
+                        Route::get('/{id}', Product::class)->where('id', '[0-9]+')->name('id')
+                            ->metadata(['model' => 'product']);
                     });
 
                 Route::name('resources.')->prefix('resources')
@@ -252,7 +265,8 @@ Route::middleware('web')
                         Route::get('/absence-requests', AbsenceRequests::class)
                             ->name('absence-requests');
                         Route::get('/absence-requests/{id}', AbsenceRequest::class)
-                            ->name('absence-requests.show');
+                            ->name('absence-requests.show')
+                            ->metadata(['model' => 'absence_request']);
 
                         Route::get('/attendance-overview', AttendanceOverview::class)
                             ->name('attendance-overview');
@@ -262,17 +276,21 @@ Route::middleware('web')
                         Route::get('/employee-days', EmployeeDays::class)
                             ->name('employee-days');
                         Route::get('/employee-days/{id}', EmployeeDay::class)
-                            ->name('employee-days.show');
+                            ->name('employee-days.show')
+                            ->metadata(['model' => 'employee_day']);
 
                         Route::get('/employees', Employees::class)->name('employees');
-                        Route::get('/employees/{id}', Employee::class)->name('employees.id');
+                        Route::get('/employees/{id}', Employee::class)->name('employees.id')
+                            ->metadata(['model' => 'employee']);
 
                         Route::get('/my-employee-profile', MyEmployeeProfile::class)
                             ->name('my-employee-profile');
                         Route::get('/my-employee-profile/employee-day/{id}', MyEmployeeDay::class)
-                            ->name('my-employee-profile.my-employee-day');
+                            ->name('my-employee-profile.my-employee-day')
+                            ->metadata(['model' => 'employee_day']);
                         Route::get('/my-employee-profile/absence-request/{id}', MyAbsenceRequest::class)
-                            ->name('my-employee-profile.my-absence-request');
+                            ->name('my-employee-profile.my-absence-request')
+                            ->metadata(['model' => 'absence_request']);
 
                         Route::get('/work-times', WorkTimes::class)->name('work-times');
                     });
@@ -280,7 +298,10 @@ Route::middleware('web')
                 Route::name('accounting.')->prefix('accounting')
                     ->group(function (): void {
                         Route::get('/commissions', CommissionList::class)->name('commissions');
-                        Route::get('/payment-reminders', PaymentReminder::class)->name('payment-reminders');
+                        Route::get('/ledger-bookings', LedgerBookings::class)->name('ledger-bookings');
+                        Route::get('/loans', Loans::class)->name('loans');
+                        Route::get('/loans/{id}', Loan::class)->where('id', '[0-9]+')->name('loans.id')
+                            ->metadata(['model' => 'loan']);
                         Route::get('/payment-reminder-run', PaymentReminderRun::class)->name('payment-reminder-run');
                         Route::get('/purchase-invoices', PurchaseInvoiceList::class)->name('purchase-invoices');
                         Route::get('/transactions', TransactionList::class)->name('transactions');
@@ -355,7 +376,8 @@ Route::middleware('web')
                         Route::get('/vacation-carryover-rules', VacationCarryoverRules::class)->name('vacation-carryover-rules');
                         Route::get('/vat-rates', VatRates::class)->name('vat-rates');
                         Route::get('/warehouses', Warehouses::class)->name('warehouses');
-                        Route::get('/work-time-model/{id}', WorkTimeModel::class)->name('work-time-model');
+                        Route::get('/work-time-model/{id}', WorkTimeModel::class)->name('work-time-model')
+                            ->metadata(['model' => 'work_time_model']);
                         Route::get('/work-time-models', WorkTimeModels::class)->name('work-time-models');
                         Route::get('/work-time-types', WorkTimeTypes::class)->name('work-time-types');
                     });
@@ -374,7 +396,9 @@ Route::middleware('web')
             })->name('media');
         });
 
-        Route::group(['middleware' => ['auth:web']], function (): void {
+        Route::middleware('auth:web')->group(function (): void {
+            Route::post('/search/mentionable', MentionableSearchController::class)
+                ->name('search.mentionable');
             Route::any('/search/{model?}', SearchController::class)
                 ->where('model', '(.*)')
                 ->name('search');
@@ -390,7 +414,7 @@ Route::middleware('web')
                 ->defaults('html', false);
         });
 
-        Route::middleware('signed')->group(function (): void {
+        Route::middleware('media.signed')->group(function (): void {
             Route::get('/media-private/{media}/{filename}', PrivateMediaController::class)
                 ->name('media.private');
 
@@ -415,14 +439,17 @@ Route::middleware('web')
                     );
                 }
 
-                return $disk->response(
+                return StreamedFile::response(
+                    $disk,
                     $path,
                     $media->file_name,
                     ['Content-Disposition' => $disposition],
                 );
             })
                 ->name('media.show');
+        });
 
+        Route::middleware('signed')->group(function (): void {
             Route::get('/media-collection-download/{token}', function (string $token) {
                 $payload = Crypt::decrypt($token);
 

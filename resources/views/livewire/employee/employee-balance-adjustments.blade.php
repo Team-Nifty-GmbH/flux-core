@@ -7,7 +7,7 @@
                 :options="\FluxErp\Enums\EmployeeBalanceAdjustmentTypeEnum::valuesLocalized()"
             />
             <x-number
-                :label="__('Amount')"
+                :label="__('Value')"
                 wire:model="employeeBalanceAdjustmentForm.amount"
                 :hint="__('Positive = Addition, Negative = Deduction')"
                 step="0.01"

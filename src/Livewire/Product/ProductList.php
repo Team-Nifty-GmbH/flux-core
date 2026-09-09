@@ -46,6 +46,7 @@ class ProductList extends BaseProductList
         parent::mount();
 
         $this->vatRates = resolve_static(VatRate::class, 'query')
+            ->where('is_sales', true)
             ->get(['id', 'name', 'rate_percentage'])
             ->toArray();
         $priceList = resolve_static(PriceList::class, 'default')?->toArray() ?? [];
@@ -136,7 +137,7 @@ class ProductList extends BaseProductList
         try {
             $this->product->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->product);
 
             return false;
         }
@@ -159,7 +160,7 @@ class ProductList extends BaseProductList
         try {
             $this->product->restore();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->product);
 
             return;
         }
@@ -182,16 +183,15 @@ class ProductList extends BaseProductList
             ))
                 ->checkPermission()
                 ->validate()
-                ->execute();
+                ->executeAsync();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->productPricesUpdate);
 
             return false;
         }
 
         $this->reset('selected');
         $this->productPricesUpdate->reset();
-        $this->loadData();
 
         return true;
     }
@@ -205,6 +205,7 @@ class ProductList extends BaseProductList
                     ->get(['id', 'name'])
                     ->toArray(),
                 'vatRates' => resolve_static(VatRate::class, 'query')
+                    ->where('is_sales', true)
                     ->get(['id', 'name', 'rate_percentage'])
                     ->toArray(),
                 'roundingMethods' => resolve_static(RoundingMethodEnum::class, 'valuesLocalized'),

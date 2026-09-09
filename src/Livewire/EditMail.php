@@ -145,6 +145,14 @@ class EditMail extends Component
     {
         $data = session()->get($key);
 
+        if (blank($data)) {
+            $this->toast()
+                ->error(__('The mail data is no longer available, please try again.'))
+                ->send();
+
+            return;
+        }
+
         if (Arr::isAssoc($data) || count($data) === 1) {
             $data = count($data) === 1 && Arr::isList($data) ? $data[0] : $data;
             session()->forget($key);

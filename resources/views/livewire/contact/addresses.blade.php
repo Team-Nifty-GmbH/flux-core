@@ -52,18 +52,18 @@
                             >
                                 <div
                                     wire:click="select(addressItem.id)"
-                                    x-bind:class="
-                                        $wire.address.id === addressItem.id &&
-                                        'rounded-lg ring-2 ring-inset ring-primary-500 bg-blue-100 dark:bg-secondary-700'
-                                    "
+                                    x-bind:class="{
+                                        'rounded-lg ring-2 ring-inset ring-primary-500 bg-blue-100 dark:bg-secondary-700':
+                                            $wire.address.id === addressItem.id,
+                                    }"
                                     class="dark:hover:bg-secondary-800 cursor-pointer space-y-2 p-1.5 hover:bg-blue-50"
                                 >
                                     <div
                                         class="flex w-full justify-between gap-1.5 dark:text-gray-50"
-                                        x-bind:class="
-                                            !addressItem.is_active &&
-                                            'text-secondary-400 dark:text-gray-200'
-                                        "
+                                        x-bind:class="{
+                                            'text-secondary-400 dark:text-gray-200':
+                                                !addressItem.is_active,
+                                        }"
                                     >
                                         <div
                                             class="text-sm text-ellipsis whitespace-nowrap"
@@ -118,9 +118,9 @@
                 <x-card>
                     <div
                         class="flex flex-col gap-1.5"
-                        x-bind:class="
-                            !$wire.$parent.edit && 'pointer-events-none'
-                        "
+                        x-bind:class="{
+                            'pointer-events-none': !$wire.$parent.edit,
+                        }"
                     >
                         <x-select.styled
                             x-bind:disabled="!$wire.$parent.edit"
@@ -130,18 +130,18 @@
                             select="label:name|value:id"
                             unfiltered
                             :request="[
-                        'url' => route('search', \FluxErp\Models\Tenant::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'where' => [
-                                [
-                                    'is_active',
-                                    '=',
-                                    true,
+                                'url' => route('search', \FluxErp\Models\Tenant::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'where' => [
+                                        [
+                                            'is_active',
+                                            '=',
+                                            true,
+                                        ],
+                                    ],
                                 ],
-                            ],
-                        ],
-                    ]"
+                            ]"
                         />
                         <x-select.styled
                             multiple
@@ -151,18 +151,18 @@
                             select="label:label|value:id"
                             unfiltered
                             :request="[
-                        'url' => route('search', \FluxErp\Models\Category::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'where' => [
-                                [
-                                    'model_type',
-                                    '=',
-                                    morph_alias(\FluxErp\Models\Contact::class),
+                                'url' => route('search', \FluxErp\Models\Category::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'where' => [
+                                        [
+                                            'model_type',
+                                            '=',
+                                            morph_alias(\FluxErp\Models\Contact::class),
+                                        ],
+                                    ],
                                 ],
-                            ],
-                        ],
-                    ]"
+                            ]"
                         />
                         <x-select.styled
                             multiple
@@ -172,12 +172,12 @@
                             select="label:name|value:id"
                             unfiltered
                             :request="[
-                        'url' => route('search', \FluxErp\Models\Industry::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'searchFields' => ['name'],
-                        ],
-                    ]"
+                                'url' => route('search', \FluxErp\Models\Industry::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'searchFields' => ['name'],
+                                ],
+                            ]"
                         />
                         <x-select.styled
                             searchable
@@ -186,26 +186,26 @@
                             :label="__('Contact Origin')"
                             select="label:name|value:id"
                             :request="[
-                        'url' => route('search', \FluxErp\Models\RecordOrigin::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'searchFields' => [
-                                'name',
-                            ],
-                            'where' => [
-                                [
-                                    'model_type',
-                                    '=',
-                                    morph_alias(\FluxErp\Models\Contact::class),
+                                'url' => route('search', \FluxErp\Models\RecordOrigin::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'searchFields' => [
+                                        'name',
+                                    ],
+                                    'where' => [
+                                        [
+                                            'model_type',
+                                            '=',
+                                            morph_alias(\FluxErp\Models\Contact::class),
+                                        ],
+                                        [
+                                            'is_active',
+                                            '=',
+                                            true,
+                                        ],
+                                    ],
                                 ],
-                                [
-                                    'is_active',
-                                    '=',
-                                    true,
-                                ],
-                            ],
-                        ],
-                    ]"
+                            ]"
                         />
                         <x-rating
                             x-bind:disabled="!$wire.$parent.edit"
@@ -287,6 +287,32 @@
                                 </div>
                             @endcanAction
 
+                            @canAction(\FluxErp\Actions\Address\MoveAddress::class)
+                                <div x-cloak x-show="!$wire.edit">
+                                    <x-button
+                                        color="secondary"
+                                        light
+                                        x-on:click="
+                                            $tsui.open.modal('move-address')
+                                        "
+                                        :text="__('Move To Contact')"
+                                    />
+                                </div>
+                            @endcanAction
+
+                            @canAction(\FluxErp\Actions\Address\DetachAddress::class)
+                                <div x-cloak x-show="!$wire.edit">
+                                    <x-button
+                                        wire:flux-confirm.type.warning="{{ __('wire:confirm.detach_address') }}"
+                                        wire:click="detach()"
+                                        loading="detach()"
+                                        color="secondary"
+                                        light
+                                        :text="__('Move To New Contact')"
+                                    />
+                                </div>
+                            @endcanAction
+
                             @canAction(\FluxErp\Actions\Address\DeleteAddress::class)
                                 <div
                                     x-cloak
@@ -308,4 +334,36 @@
             <x-flux::tabs wire:model.live="tab" :$tabs wire:ignore />
         </x-card>
     </div>
+
+    @canAction(\FluxErp\Actions\Address\MoveAddress::class)
+        <x-modal id="move-address" :title="__('Move To Contact')">
+            <x-select.styled
+                wire:model="moveToContactId"
+                :label="__('Contact')"
+                select="label:label|value:id"
+                required
+                unfiltered
+                :request="[
+                    'url' => route('search', \FluxErp\Models\Contact::class),
+                    'method' => 'POST',
+                ]"
+            />
+            <x-slot:footer>
+                <div class="flex justify-end gap-1.5">
+                    <x-button
+                        color="secondary"
+                        flat
+                        :text="__('Cancel')"
+                        x-on:click="$tsui.close.modal('move-address')"
+                    />
+                    <x-button
+                        color="indigo"
+                        :text="__('Move')"
+                        wire:click="move()"
+                        loading="move()"
+                    />
+                </div>
+            </x-slot:footer>
+        </x-modal>
+    @endcanAction
 </div>

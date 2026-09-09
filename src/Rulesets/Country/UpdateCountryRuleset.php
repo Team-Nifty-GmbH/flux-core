@@ -23,11 +23,11 @@ class UpdateCountryRuleset extends FluxRuleset
             ],
             'language_id' => [
                 'integer',
-                app(ModelExists::class, ['model' => Language::class]),
+                app(ModelExists::class, ['model' => Language::class, 'subject' => Country::class]),
             ],
             'currency_id' => [
                 'integer',
-                app(ModelExists::class, ['model' => Currency::class]),
+                app(ModelExists::class, ['model' => Currency::class, 'subject' => Country::class]),
             ],
             'name' => 'string|max:255',
             'iso_alpha2' => 'sometimes|required|string|max:255|unique:countries,iso_alpha2',

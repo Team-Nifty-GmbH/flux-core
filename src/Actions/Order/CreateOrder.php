@@ -38,18 +38,6 @@ class CreateOrder extends FluxAction
         $addresses = Arr::pull($this->data, 'addresses', []);
 
         $order = app(Order::class, ['attributes' => $this->data]);
-        if ($order->shipping_costs_net_price) {
-            $order->shipping_costs_vat_rate_percentage = 0.190000000;   // TODO: Make this percentage NOT hardcoded!
-            $order->shipping_costs_gross_price = net_to_gross(
-                $order->shipping_costs_net_price,
-                $order->shipping_costs_vat_rate_percentage
-            );
-            $order->shipping_costs_vat_price = bcsub(
-                $order->shipping_costs_gross_price,
-                $order->shipping_costs_net_price
-            );
-        }
-
         $order->save();
 
         if ($addresses) {
@@ -234,6 +222,18 @@ class CreateOrder extends FluxAction
                     'invoice_number' => [__('validation.unique', ['attribute' => 'invoice_number'])],
                 ];
             }
+        }
+
+        if (
+            ! is_null($this->getData('contract_total_amount'))
+            && ! resolve_static(OrderType::class, 'query')
+                ->whereKey($this->getData('order_type_id'))
+                ->value('order_type_enum')
+                ?->isSubscription()
+        ) {
+            $errors += [
+                'contract_total_amount' => ['Only subscription orders can carry a contract total amount.'],
+            ];
         }
 
         if ($errors) {

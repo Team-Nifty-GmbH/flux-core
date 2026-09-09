@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Spatie\MediaLibrary\MediaCollections\FileAdder;
 
 class UpdateMedia extends FluxAction
 {
@@ -41,21 +42,31 @@ class UpdateMedia extends FluxAction
         $currentFileName = Str::beforeLast($media->file_name, '.');
         $paths = [];
         if (data_get($this->data, 'file_name')) {
-            $this->data['file_name'] = Str::finish($this->data['file_name'], '.' . $media->extension);
+            $this->data['file_name'] = Str::finish(
+                app(FileAdder::class)->defaultSanitizer($this->data['file_name']),
+                '.' . $media->extension
+            );
 
-            $paths[] = $media->getPath();
+            $paths[$media->disk][] = $media->getPathRelativeToRoot();
 
             foreach ($media->getGeneratedConversions() as $conversion => $generated) {
-                $paths[] = $media->getPath($conversion);
+                $paths[$media->conversions_disk][] = $media->getPathRelativeToRoot($conversion);
             }
         }
 
         $media->fill($this->data);
         $media->save();
 
-        foreach ($paths as $path) {
-            Storage::disk($media->disk)
-                ->move($path, str_replace($currentFileName, Str::beforeLast($media->file_name, '.'), $path));
+        $newFileName = Str::beforeLast($media->file_name, '.');
+
+        foreach ($paths as $disk => $diskPaths) {
+            foreach ($diskPaths as $path) {
+                Storage::disk($disk)->move(
+                    $path,
+                    Str::beforeLast($path, '/') . '/'
+                        . str_replace($currentFileName, $newFileName, basename($path))
+                );
+            }
         }
 
         return $media->withoutRelations();

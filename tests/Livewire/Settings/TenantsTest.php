@@ -32,3 +32,11 @@ test('edit with model fills form and opens modal', function (): void {
         ->assertSet('tenant.name', $tenant->name)
         ->assertOpensModal('edit-tenant');
 });
+
+test('download with null media shows an error toast instead of crashing', function (): void {
+    Livewire::actingAs($this->user)
+        ->test(Tenants::class)
+        ->call('download', null)
+        ->assertOk()
+        ->assertHasNoErrors();
+});

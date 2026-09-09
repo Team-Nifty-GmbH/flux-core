@@ -222,13 +222,13 @@ export default ($wire) => ({
             return;
         }
 
-        if (window.cv?.HEAPU8) {
+        if (window.cv?.Mat) {
             this.openCvReady = true;
 
             return;
         }
 
-        // OpenCV ships as a ~10 MB UMD bundle. iOS WKWebView's ESM /
+        // OpenCV ships as a ~13 MB UMD bundle. iOS WKWebView's ESM /
         // dynamic-import pipeline hangs indefinitely on a chunk that size,
         // so we load it via classic <script> tag — the HTML-parser path
         // streams large scripts reliably across mobile WebViews. Cache the
@@ -264,7 +264,17 @@ export default ($wire) => ({
 
                         return;
                     }
-                    if (window.cv.HEAPU8) {
+                    if (typeof window.cv.then === 'function') {
+                        window.cv
+                            .then((module) => {
+                                window.cv = module;
+                                succeed();
+                            })
+                            .catch(fail);
+
+                        return;
+                    }
+                    if (window.cv.Mat) {
                         succeed();
 
                         return;

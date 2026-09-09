@@ -22,7 +22,7 @@ class UpdatePaymentReminderRuleset extends FluxRuleset
             'media_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Media::class]),
+                app(ModelExists::class, ['model' => Media::class, 'subject' => PaymentReminder::class]),
             ],
         ];
     }

@@ -36,16 +36,16 @@ class UpdateUserRuleset extends FluxRuleset
             'contact_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Contact::class]),
+                app(ModelExists::class, ['model' => Contact::class, 'subject' => User::class]),
             ],
             'language_id' => [
                 'integer',
-                app(ModelExists::class, ['model' => Language::class]),
+                app(ModelExists::class, ['model' => Language::class, 'subject' => User::class]),
             ],
             'parent_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => User::class]),
+                app(ModelExists::class, ['model' => User::class, 'subject' => User::class]),
             ],
             'email' => 'sometimes|required|email|max:255|unique:users,email',
             'firstname' => 'sometimes|required|string|max:255',

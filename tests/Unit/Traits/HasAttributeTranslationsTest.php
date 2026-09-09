@@ -27,7 +27,8 @@ test('model can be localized', function (): void {
 });
 
 test('retrieved hook localizes model based on app locale when session is empty', function (): void {
-    $language = Language::factory()->create(['language_code' => 'fr']);
+    $language = Language::query()->where('language_code', 'fr')->first()
+        ?? Language::factory()->create(['language_code' => 'fr']);
 
     $product = Product::factory()->create(['name' => 'English Name']);
 
@@ -46,7 +47,8 @@ test('retrieved hook localizes model based on app locale when session is empty',
 });
 
 test('localize falls back to app locale when no language id given and session is empty', function (): void {
-    $language = Language::factory()->create(['language_code' => 'de']);
+    $language = Language::query()->where('language_code', 'de')->first()
+        ?? Language::factory()->create(['language_code' => 'de']);
 
     $product = Product::factory()->create(['name' => 'English Name']);
 

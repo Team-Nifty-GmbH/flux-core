@@ -30,6 +30,7 @@ use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\Mentionable;
 use FluxErp\Traits\Model\MonitorsQueue;
 use FluxErp\Traits\Model\Notifiable;
 use FluxErp\Traits\Model\Printable;
@@ -56,7 +57,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 {
     use Commentable, Communicatable, Filterable, HasCalendars, HasCart, HasDefaultTargetableColumns,
         HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags, HasTenantAssignment, HasTenants,
-        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, MonitorsQueue, Notifiable, Printable,
+        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Mentionable, MonitorsQueue, Notifiable, Printable,
         SoftDeletes;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
@@ -218,6 +219,17 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     ->where('contact_id', $address->contact_id)
                     ->update($addressesUpdates);
             }
+
+            if ($address->is_main_address
+                && ($address->wasRecentlyCreated
+                    || $address->wasChanged(['name', 'company', 'firstname', 'lastname', 'is_main_address'])
+                )
+            ) {
+                resolve_static(Contact::class, 'query')
+                    ->whereKey($address->contact_id)
+                    ->first()
+                    ?->searchable();
+            }
         });
 
         static::deleted(function (Address $address): void {
@@ -279,6 +291,8 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     ->update($contactUpdates);
 
                 $mainAddress->update($addressUpdates);
+
+                $address->updateQuietly(array_fill_keys(array_keys($addressUpdates), false));
             }
         });
     }

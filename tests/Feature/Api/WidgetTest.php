@@ -53,6 +53,7 @@ test('widget api returns the computed result for the given parameters', function
 
     expect($response->json('data.sum'))->toEqual(Number::format(8, 2) . 'h')
         ->and($response->json('data.subValue'))->toContain('5')
+        ->and($response->json('data.dailyTarget'))->toEqual(8.0)
         ->and($response->json('data.weeklyTarget'))->toEqual(40.0);
 });
 

@@ -2,12 +2,14 @@
 
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
+use FluxErp\Models\Comment;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use Illuminate\Http\UploadedFile;
 
 beforeEach(function (): void {
     $contact = Contact::factory()->create();
@@ -41,4 +43,41 @@ test('comment editor initializes with tiptap', function (): void {
     clickTab($page, 'Comments', 'Kommentare');
 
     $page->assertScript('!!document.querySelector(".ProseMirror, [contenteditable=\\"true\\"]")');
+});
+
+test('comment attachment preview opens the lightbox', function (): void {
+    // The preview button only renders once the preview conversion exists; run
+    // conversions synchronously as no queue worker is available in tests.
+    config(['media-library.queue_conversions_by_default' => false]);
+
+    $comment = Comment::factory()->create([
+        'model_type' => morph_alias(Order::class),
+        'model_id' => $this->order->getKey(),
+        'is_internal' => false,
+    ]);
+    $comment->addMedia(UploadedFile::fake()->image('attachment.png'))
+        ->toMediaCollection();
+
+    $page = visit(route('orders.id', ['id' => $this->order->getKey()]))
+        ->assertNoSmoke();
+
+    waitForElement($page, '[data-tab-name="order.comments"]');
+    $page->click('[data-tab-name="order.comments"]');
+
+    $page->script(<<<'JS'
+        () => {
+            window.__lightboxOpened = false;
+            window.addEventListener('nuxbe:lightbox:open', () => {
+                window.__lightboxOpened = true;
+            });
+        }
+    JS);
+
+    waitForElement($page, '[data-testid="comment-attachment-preview"]', 10000);
+
+    $page->click('[data-testid="comment-attachment-preview"]');
+
+    $page->wait(0.5)
+        ->assertScript('window.__lightboxOpened === true')
+        ->assertNoJavascriptErrors();
 });

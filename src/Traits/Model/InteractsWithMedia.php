@@ -4,6 +4,7 @@ namespace FluxErp\Traits\Model;
 
 use FluxErp\Models\Media as FluxMedia;
 use FluxErp\Models\MediaFolder;
+use FluxErp\Models\Scopes\FamilyTreeScope;
 use FluxErp\Support\MediaLibrary\MediaCollection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -30,6 +31,7 @@ trait InteractsWithMedia
         $mediaFolders = resolve_static(MediaFolder::class, 'familyTree')
             ->whereKey($this->mediaFolders()->pluck('id')->toArray())
             ->whereKeyNot($exclude)
+            ->whereNull('parent_collection')
             ->get()
             ->flatten();
 
@@ -82,37 +84,44 @@ trait InteractsWithMedia
         foreach ($mediaCollections as $mediaCollection) {
             $slug = data_get($mediaCollection, 'slug') ?? '';
 
-            if (
-                is_null(data_get($mediaCollection, 'id'))
-                && str_contains($slug, '.')
-            ) {
-                $cursor = &$undotted;
-                $childSlug = '';
+            if (! str_contains($slug, '.')) {
+                Arr::set($undotted, $slug, $mediaCollection);
 
-                foreach (explode('.', $slug) as $part) {
-                    $childSlug = $childSlug === '' ? $part : $childSlug . '.' . $part;
+                continue;
+            }
 
-                    if (! array_key_exists($part, $cursor) || ! is_array($cursor[$part])) {
-                        $cursor[$part] = [
-                            'name' => Str::headline($part),
-                            'slug' => $childSlug,
-                        ];
-                    }
+            $parts = explode('.', $slug);
+            $lastIndex = count($parts) - 1;
+            $cursor = &$undotted;
+            $childSlug = '';
 
-                    if (
-                        ! array_key_exists('children', $cursor[$part])
-                        || ! is_array($cursor[$part]['children'])
-                    ) {
-                        $cursor[$part]['children'] = [];
-                    }
+            foreach ($parts as $index => $part) {
+                $childSlug = $childSlug === '' ? $part : $childSlug . '.' . $part;
 
-                    $cursor = &$cursor[$part]['children'];
+                if ($index === $lastIndex && ! is_null(data_get($mediaCollection, 'id'))) {
+                    $cursor[$part] = $mediaCollection;
+
+                    break;
                 }
 
-                unset($cursor);
-            } else {
-                Arr::set($undotted, $slug, $mediaCollection);
+                if (! array_key_exists($part, $cursor) || ! is_array($cursor[$part])) {
+                    $cursor[$part] = [
+                        'name' => Str::headline($part),
+                        'slug' => $childSlug,
+                    ];
+                }
+
+                if (
+                    ! array_key_exists('children', $cursor[$part])
+                    || ! is_array($cursor[$part]['children'])
+                ) {
+                    $cursor[$part]['children'] = [];
+                }
+
+                $cursor = &$cursor[$part]['children'];
             }
+
+            unset($cursor);
         }
 
         return $this->calculateTree($undotted);
@@ -180,7 +189,21 @@ trait InteractsWithMedia
                 'is_readonly' => data_get($item, 'is_readonly') ?? false,
                 'is_static' => data_get($item, 'is_static') ?? false,
                 'children' => array_merge(
-                    $this->calculateTree(data_get($item, 'children') ?? []),
+                    $this->calculateTree(
+                        array_merge(
+                            data_get($item, 'children') ?? [],
+                            is_null($id) ?
+                                $this->mediaFolders()
+                                    ->where('parent_collection', $slug)
+                                    ->withGlobalScope(
+                                        resolve_static(FamilyTreeScope::class, 'class'),
+                                        app(FamilyTreeScope::class)
+                                    )
+                                    ->get()
+                                    ->toArray()
+                                : []
+                        )
+                    ),
                     resolve_static(FluxMedia::class, 'query')
                         ->when(
                             $id,

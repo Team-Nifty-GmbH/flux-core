@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Support;
 use Exception;
 use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Actions\Media\DeleteMediaCollection;
+use FluxErp\Actions\Media\UpdateMedia;
 use FluxErp\Actions\MediaFolder\DeleteMediaFolder;
 use FluxErp\Actions\MediaFolder\UpdateMediaFolder;
 use FluxErp\Livewire\Forms\MediaFolderForm;
@@ -12,10 +13,12 @@ use FluxErp\Models\Media;
 use FluxErp\Models\Media as MediaModel;
 use FluxErp\Models\MediaFolder;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\LoadsMediaTree;
 use FluxErp\Traits\Livewire\WithFilePond;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -28,11 +31,14 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 abstract class FolderTree extends Component
 {
-    use Actions, WithFilePond;
+    use Actions, LoadsMediaTree, WithFilePond;
 
     public $files = [];
 
     public MediaFolderForm $folder;
+
+    #[Locked]
+    public array $mediaTree = [];
 
     #[Modelable]
     public ?int $modelId = null;
@@ -77,7 +83,7 @@ abstract class FolderTree extends Component
                     ->validate()
                     ->execute();
             } catch (UnauthorizedException|ValidationException $e) {
-                exception_to_notifications($e, $this);
+                exception_to_notifications($e, $this, form: $this->folder);
 
                 return false;
             }
@@ -175,8 +181,12 @@ abstract class FolderTree extends Component
     }
 
     #[Renderless]
-    public function moveItem(array $subject, array $target, ?string $subjectPath, ?string $targetPath): bool
-    {
+    public function moveItem(
+        array $subject,
+        array $target,
+        ?string $subjectPath,
+        ?string $targetPath
+    ): bool {
         $subjectPath = $this->resolveSubjectPath($subject, $subjectPath);
         $targetPath = $this->resolveTargetPath($target, $targetPath);
 
@@ -235,11 +245,12 @@ abstract class FolderTree extends Component
     public function saveFolder(array $attributes): false|array
     {
         $isNew = data_get($attributes, 'is_new', false);
-        $hasStringParent = is_string(data_get($attributes, 'parent_id'));
+        $parentId = data_get($attributes, 'parent_id');
+        $hasStringParent = is_string($parentId);
         $hasStringId = is_string(data_get($attributes, 'id'));
 
         // Handle virtual folder updates (renaming collections)
-        if (($hasStringParent || $hasStringId) && ! $isNew) {
+        if ($hasStringId && ! $isNew) {
             $attributes['slug'] = Str::of(data_get($attributes, 'name') ?? '')
                 ->lower()
                 ->replace('.', '')
@@ -253,18 +264,35 @@ abstract class FolderTree extends Component
                 resolve_static(Media::class, 'query')
                     ->where('model_type', morph_alias($this->modelType))
                     ->where('model_id', $this->modelId)
-                    ->where('collection_name', 'like', $path . '%')
+                    ->where('collection_name', 'LIKE', $path . '%')
+                    ->where(function (Builder $query) use ($path): void {
+                        $query->where('collection_name', 'LIKE', $path . '.%')
+                            ->orWhere('collection_name', $path);
+                    })
                     ->update([
                         'collection_name' => DB::raw('CONCAT(\'' . $replace
                             . '\', SUBSTRING(collection_name, ' . strlen($path) + 1 . '))'
                         ),
                     ]);
+
+                resolve_static(MediaFolder::class, 'query')
+                    ->join('media_folder_model AS mfm', 'media_folders.id', '=', 'mfm.media_folder_id')
+                    ->where('mfm.model_type', morph_alias($this->modelType))
+                    ->where('mfm.model_id', $this->modelId)
+                    ->where(function (Builder $query) use ($path): void {
+                        $query->where('media_folders.parent_collection', 'LIKE', $path . '.%')
+                            ->orWhere('media_folders.parent_collection', $path);
+                    })
+                    ->each(fn (MediaFolder $folder) => $folder->update([
+                        'parent_collection' => $replace . substr($folder->parent_collection, strlen($path)),
+                    ]));
             }
 
             return $attributes;
         }
 
-        if ($isNew && $hasStringParent) {
+        // a collection is not a record, the folder is positioned by its path instead
+        if ($hasStringParent) {
             $attributes['parent_id'] = null;
         }
 
@@ -272,9 +300,6 @@ abstract class FolderTree extends Component
         if ($hasStringId) {
             unset($attributes['id']);
         }
-
-        $this->folder->reset();
-        $this->folder->fill($attributes);
 
         try {
             $this->folder->reset();
@@ -284,18 +309,19 @@ abstract class FolderTree extends Component
             $this->folder->model_id = $this->modelId;
             $this->folder->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->folder);
 
             return false;
         }
 
-        return array_merge(
-            ['children' => []],
+        $folder = array_merge(
+            ['children' => data_get($attributes, 'children') ?? []],
             array_intersect_key(
                 $this->folder->getActionResult()->toArray(),
                 array_flip([
                     'id',
                     'parent_id',
+                    'parent_collection',
                     'name',
                     'slug',
                     'is_readonly',
@@ -304,6 +330,38 @@ abstract class FolderTree extends Component
                 ])
             )
         );
+
+        if ($hasStringParent) {
+            $folder['parent_id'] = $parentId;
+        }
+
+        return $folder;
+    }
+
+    #[Renderless]
+    public function saveMedia(array $media): false|array
+    {
+        $mediaId = (int) data_get($media, 'id');
+
+        if ($this->isReadonly || ! $this->findMedia($mediaId)) {
+            return false;
+        }
+
+        try {
+            $updated = UpdateMedia::make([
+                'id' => $mediaId,
+                'name' => data_get($media, 'name'),
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        return array_merge($media, $updated->only(['name']));
     }
 
     protected function resolveSubjectPath(array $subject, ?string $subjectPath): ?string
@@ -352,7 +410,6 @@ abstract class FolderTree extends Component
         return ! $this->isReadonly
             && $targetType !== 'media'
             && ! ($subjectType === 'folder' && $targetType !== 'folder')
-            && ! ($subjectType === 'collection' && $targetType !== 'collection')
             && ($subjectType === 'media' || ! $this->readOnly(data_get($subject, 'id'), $subjectPath))
             && ! $this->readOnly(data_get($target, 'id'), $targetPath);
     }
@@ -362,7 +419,8 @@ abstract class FolderTree extends Component
         try {
             UpdateMediaFolder::make([
                 'id' => data_get($subject, 'id'),
-                'parent_id' => data_get($target, 'id'),
+                'parent_id' => is_int($parentId = data_get($target, 'id')) ? $parentId : null,
+                'parent_collection' => data_get($target, 'slug'),
                 'model_type' => morph_alias($this->modelType),
                 'model_id' => $this->modelId,
             ])
@@ -370,7 +428,7 @@ abstract class FolderTree extends Component
                 ->validate()
                 ->execute();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->folder);
 
             return false;
         }
@@ -396,6 +454,15 @@ abstract class FolderTree extends Component
                         'CONCAT(\'' . $newCollectionName . '\', SUBSTRING(collection_name, ' . (strlen($subjectPath) + 1) . '))'
                     ),
                 ]);
+
+            resolve_static(MediaFolder::class, 'query')
+                ->join('media_folder_model AS mfm', 'media_folders.id', '=', 'mfm.media_folder_id')
+                ->where('mfm.model_type', morph_alias($this->modelType))
+                ->where('mfm.model_id', $this->modelId)
+                ->where('media_folders.parent_collection', $subjectPath)
+                ->update([
+                    'parent_collection' => $newCollectionName,
+                ]);
         }
 
         $this->toast()
@@ -405,8 +472,12 @@ abstract class FolderTree extends Component
         return true;
     }
 
-    protected function moveMedia(array $subject, array $target, string $targetPath, string $targetType): bool
-    {
+    protected function moveMedia(
+        array $subject,
+        array $target,
+        string $targetPath,
+        string $targetType
+    ): bool {
         $targetModel = $targetType === 'collection'
             ? resolve_static($this->modelType, 'query')->whereKey($this->modelId)->first()
             : resolve_static(MediaFolder::class, 'query')->whereKey(data_get($target, 'id'))->first();
@@ -421,11 +492,16 @@ abstract class FolderTree extends Component
             return false;
         }
 
-        $collectionName = $targetType === 'folder'
-            ? $targetPath
-            : data_get($subject, 'collection_name', $targetPath);
+        $isAlreadyInTarget = $targetType === 'folder'
+            ? $media->model_type === morph_alias(MediaFolder::class)
+                && (int) $media->model_id === (int) data_get($target, 'id')
+            : $media->model_type === morph_alias($this->modelType)
+                && (int) $media->model_id === (int) $this->modelId
+                && $media->collection_name === $targetPath;
 
-        $media->move($targetModel, $collectionName);
+        if (! $isAlreadyInTarget) {
+            $media->move($targetModel, $targetPath);
+        }
 
         $this->toast()
             ->success(__('Moved successfully'))

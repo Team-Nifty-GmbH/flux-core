@@ -52,6 +52,12 @@ test('show in task list creates session filter scoped to own tasks', function ()
         'state' => 'open',
     ]);
 
+    $responsibleOnlyTask = Task::factory()->create([
+        'name' => Str::uuid(),
+        'state' => 'open',
+        'responsible_user_id' => $this->user->getKey(),
+    ]);
+
     Livewire::actingAs($this->user)
         ->test(MyTasks::class)
         ->call('showInTaskList');
@@ -66,7 +72,8 @@ test('show in task list creates session filter scoped to own tasks', function ()
     $filtered = $query->get();
 
     expect($filtered->contains($ownTask->getKey()))->toBeTrue()
-        ->and($filtered->contains($foreignTask->getKey()))->toBeFalse();
+        ->and($filtered->contains($foreignTask->getKey()))->toBeFalse()
+        ->and($filtered->contains($responsibleOnlyTask->getKey()))->toBeFalse();
 });
 
 test('show in task list excludes end state tasks', function (): void {

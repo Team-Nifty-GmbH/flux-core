@@ -24,7 +24,7 @@ class SupportAutoInjectedAssets
         }
 
         return $html
-            ->replaceMatches('/(<\s*html(?:\s[^>])*>)/i', '$1' . $assetsHead)
+            ->replaceMatches('/(<\s*html(?:\s[^>]*)?>)/i', '$1' . $assetsHead)
             ->replaceMatches('/(<\s*\/\s*html\s*>)/i', $assetsBody . '$1')
             ->toString();
     }

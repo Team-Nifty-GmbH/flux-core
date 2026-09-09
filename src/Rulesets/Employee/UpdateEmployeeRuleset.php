@@ -28,27 +28,27 @@ class UpdateEmployeeRuleset extends FluxRuleset
             'country_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Country::class]),
+                app(ModelExists::class, ['model' => Country::class, 'subject' => Employee::class]),
             ],
             'employee_department_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => EmployeeDepartment::class]),
+                app(ModelExists::class, ['model' => EmployeeDepartment::class, 'subject' => Employee::class]),
             ],
             'location_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Location::class]),
+                app(ModelExists::class, ['model' => Location::class, 'subject' => Employee::class]),
             ],
             'supervisor_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Employee::class]),
+                app(ModelExists::class, ['model' => Employee::class, 'subject' => Employee::class]),
             ],
             'vacation_carryover_rule_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => VacationCarryoverRule::class]),
+                app(ModelExists::class, ['model' => VacationCarryoverRule::class, 'subject' => Employee::class]),
             ],
             'salutation' => [
                 'nullable',

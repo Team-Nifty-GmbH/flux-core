@@ -41,55 +41,55 @@ class UpdateContactRuleset extends FluxRuleset
             'approval_user_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => User::class])
+                app(ModelExists::class, ['model' => User::class, 'subject' => Contact::class])
                     ->where('is_active', true),
             ],
             'agent_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => User::class])
+                app(ModelExists::class, ['model' => User::class, 'subject' => Contact::class])
                     ->where('is_active', true),
             ],
             'record_origin_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => RecordOrigin::class])
+                app(ModelExists::class, ['model' => RecordOrigin::class, 'subject' => Contact::class])
                     ->where('model_type', morph_alias(Contact::class))
                     ->where('is_active', true),
             ],
             'currency_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Currency::class]),
+                app(ModelExists::class, ['model' => Currency::class, 'subject' => Contact::class]),
             ],
             'payment_type_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => PaymentType::class])
+                app(ModelExists::class, ['model' => PaymentType::class, 'subject' => Contact::class])
                     ->where('is_active', true)
                     ->where('is_sales', true),
             ],
             'purchase_payment_type_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => PaymentType::class])
+                app(ModelExists::class, ['model' => PaymentType::class, 'subject' => Contact::class])
                     ->where('is_active', true)
                     ->where('is_purchase', true),
             ],
             'price_list_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => PriceList::class]),
+                app(ModelExists::class, ['model' => PriceList::class, 'subject' => Contact::class]),
             ],
             'expense_ledger_account_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => LedgerAccount::class]),
+                app(ModelExists::class, ['model' => LedgerAccount::class, 'subject' => Contact::class]),
             ],
             'vat_rate_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => VatRate::class])
+                app(ModelExists::class, ['model' => VatRate::class, 'subject' => Contact::class])
                     ->where('is_tax_exemption', true),
             ],
             'customer_number' => 'sometimes|string|max:255',

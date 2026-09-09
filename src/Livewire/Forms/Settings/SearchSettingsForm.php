@@ -21,6 +21,8 @@ class SearchSettingsForm extends SettingsForm
 
     public float $semantic_ratio = 0.5;
 
+    public float $semantic_score_threshold = 0;
+
     public function getSettingsClass(): string
     {
         return SearchSettings::class;

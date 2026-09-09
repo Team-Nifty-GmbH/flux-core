@@ -4,6 +4,7 @@ namespace FluxErp\Rulesets\PurchaseInvoice;
 
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PurchaseInvoice;
@@ -62,6 +63,11 @@ class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => User::class])
                     ->where('is_active', true),
+            ],
+            'order_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Order::class]),
             ],
             'order_type_id' => [
                 'required',

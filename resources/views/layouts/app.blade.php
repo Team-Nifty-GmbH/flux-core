@@ -19,6 +19,7 @@
         'dark bg-secondary-800': darkTheme,
         'bg-slate-50': !darkTheme,
     }"
+    x-bind:data-color-scheme="darkTheme ? 'dark' : 'light'"
     class="text-secondary-600 dark:text-secondary-50 h-full transition duration-300"
 >
     @section('wire.navigate.spinner')
@@ -105,6 +106,9 @@
         @persist('record-merging')
             <livewire:record-merging lazy />
         @endpersist
+        @persist('layout-global-components')
+            @stack('layout-global-components')
+        @endpersist
     @endauth
 
     <x-flux::layout>
@@ -125,7 +129,7 @@
                     />
                     @auth('web')
                         <div
-                            x-persist="layout.header.search - bar"
+                            x-persist="layout.header.searchBar"
                             class="hidden grow sm:block"
                         >
                             <livewire:features.search-bar />
@@ -136,9 +140,7 @@
 
                     <div class="flex shrink-0 gap-2">
                         @auth('web')
-                            <div
-                                x-persist="layout.header.search - bar - mobile"
-                            >
+                            <div x-persist="layout.header.searchBarMobile">
                                 <livewire:features.search-bar
                                     :mobile="true"
                                     lazy

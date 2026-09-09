@@ -37,25 +37,25 @@
                             select="label:label|value:id|description:product_number"
                             unfiltered
                             :request="[
-                        'url' => route('search', \FluxErp\Models\Product::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'whereDoesntHave' => 'children',
-                            'where' => [
-                                [
-                                    'is_active',
-                                    '=',
-                                    true,
+                                'url' => route('search', \FluxErp\Models\Product::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'whereDoesntHave' => 'children',
+                                    'where' => [
+                                        [
+                                            'is_active',
+                                            '=',
+                                            true,
+                                        ],
+                                    ],
+                                    'fields' => [
+                                        'id',
+                                        'name',
+                                        'product_number',
+                                    ],
+                                    'with' => 'media',
                                 ],
-                            ],
-                            'fields' => [
-                                'id',
-                                'name',
-                                'product_number',
-                            ],
-                            'with' => 'media',
-                        ],
-                    ]"
+                            ]"
                         />
                         <div
                             x-transition
@@ -66,7 +66,7 @@
                         >
                             <x-number
                                 :step="0.01"
-                                :label="__('Amount')"
+                                :label="__('Quantity')"
                                 wire:model="orderPosition.amount"
                             />
                         </div>

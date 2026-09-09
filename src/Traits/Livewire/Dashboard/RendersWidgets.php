@@ -5,13 +5,12 @@ namespace FluxErp\Traits\Livewire\Dashboard;
 use FluxErp\Enums\ComparisonTypeEnum;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Facades\Widget;
-use FluxErp\Models\Permission;
+use FluxErp\Support\Auth\PermissionSet;
 use FluxErp\Traits\Livewire\EnsureUsedInLivewire;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Js;
 use Livewire\Attributes\Renderless;
-use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 trait RendersWidgets
 {
@@ -205,36 +204,15 @@ trait RendersWidgets
 
     protected function filterWidgets(array $widgets): array
     {
+        $permissions = PermissionSet::make();
+
         $widgets = array_filter(
             $widgets,
-            function (array $widget) {
-                $name = $widget['component_name'];
-
-                if (
-                    collect(Arr::wrap(data_get($widget, 'dashboard_component')))
-                        ->map(fn (string $dashboardClass) => resolve_static($dashboardClass, 'class'))
-                        ->doesntContain(static::class)
-                ) {
-                    return false;
-                }
-
-                try {
-                    $permissionExists = ! is_null(
-                        resolve_static(
-                            Permission::class,
-                            'findByName',
-                            [
-                                'name' => 'widget.' . $name,
-                            ]
-                        )
-                    );
-                } catch (PermissionDoesNotExist) {
-                    $permissionExists = false;
-                }
-
-                return (! $permissionExists || auth()->user()->can('widget.' . $name))
-                    && ! is_null(Widget::get($name));
-            }
+            fn (array $widget): bool => collect(Arr::wrap(data_get($widget, 'dashboard_component')))
+                ->map(fn (string $dashboardClass): string => resolve_static($dashboardClass, 'class'))
+                ->contains(static::class)
+                && $permissions->allows('widget.' . $widget['component_name'])
+                && ! is_null(Widget::get($widget['component_name']))
         );
 
         ksort($widgets);

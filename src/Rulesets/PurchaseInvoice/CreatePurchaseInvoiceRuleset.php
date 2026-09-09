@@ -53,7 +53,8 @@ class CreatePurchaseInvoiceRuleset extends FluxRuleset
             'lay_out_user_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => User::class])->where('is_active', true),
+                app(ModelExists::class, ['model' => User::class])
+                    ->where('is_active', true),
             ],
             'order_type_id' => [
                 'nullable',

@@ -3,7 +3,6 @@
 namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Contracts\HasWidgetOptions;
-use FluxErp\Livewire\Accounting\PaymentReminder;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Support\Widgets\ValueBox;
@@ -77,6 +76,10 @@ class Outstanding extends ValueBox implements HasWidgetOptions
                 'label' => __('Show overdue'),
                 'method' => 'showOverdue',
             ],
+            [
+                'label' => __('Payment Reminders'),
+                'method' => 'showPaymentReminders',
+            ],
         ];
     }
 
@@ -97,13 +100,19 @@ class Outstanding extends ValueBox implements HasWidgetOptions
     public function showOverdue(): void
     {
         SessionFilter::make(
-            Livewire::new(resolve_static(PaymentReminder::class, 'class'))->getCacheKey(),
+            Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $this->getOverdueQuery($query),
             __('Overdue'),
         )
             ->store();
 
-        $this->redirectRoute('accounting.payment-reminders', navigate: true);
+        $this->redirectRoute('orders.orders', navigate: true);
+    }
+
+    #[Renderless]
+    public function showPaymentReminders(): void
+    {
+        $this->redirectRoute('accounting.payment-reminder-run', navigate: true);
     }
 
     protected function getListeners(): array

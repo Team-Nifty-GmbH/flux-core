@@ -46,38 +46,39 @@ class UpdatePurchaseInvoiceRuleset extends FluxRuleset
             'approval_user_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => User::class])
+                app(ModelExists::class, ['model' => User::class, 'subject' => PurchaseInvoice::class])
                     ->where('is_active', true),
             ],
             'contact_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Contact::class]),
+                app(ModelExists::class, ['model' => Contact::class, 'subject' => PurchaseInvoice::class]),
             ],
             'lay_out_user_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => User::class])->where('is_active', true),
+                app(ModelExists::class, ['model' => User::class, 'subject' => PurchaseInvoice::class])
+                    ->where('is_active', true),
             ],
             'currency_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Currency::class]),
+                app(ModelExists::class, ['model' => Currency::class, 'subject' => PurchaseInvoice::class]),
             ],
             'order_type_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => OrderType::class]),
+                app(ModelExists::class, ['model' => OrderType::class, 'subject' => PurchaseInvoice::class]),
             ],
             'payment_type_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => PaymentType::class]),
+                app(ModelExists::class, ['model' => PaymentType::class, 'subject' => PurchaseInvoice::class]),
             ],
             'tenant_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Tenant::class]),
+                app(ModelExists::class, ['model' => Tenant::class, 'subject' => PurchaseInvoice::class]),
             ],
             'invoice_date' => 'date',
             'payment_target_date' => 'nullable|date',

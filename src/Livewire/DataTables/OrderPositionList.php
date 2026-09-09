@@ -7,6 +7,12 @@ use Illuminate\Database\Eloquent\Builder;
 
 class OrderPositionList extends BaseDataTable
 {
+    public array $columnLabels = [
+        'amount' => 'Quantity',
+        'amount_bundle' => 'Bundle Quantity',
+        'amount_packed_products' => 'Packed Quantity',
+    ];
+
     public array $enabledCols = [
         'product_number',
         'order.order_number',
