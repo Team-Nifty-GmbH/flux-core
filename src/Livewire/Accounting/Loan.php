@@ -222,33 +222,34 @@ class Loan extends Component
     #[Computed]
     public function extraRepaymentPreview(): array
     {
-        $amount = (float) $this->extraRepayment->amount;
+        $amount = bcadd((string) $this->extraRepayment->amount, '0', 2);
 
-        if ($amount <= 0) {
+        if (bccomp($amount, '0', 2) !== 1) {
             return [];
         }
 
         $loan = $this->loadLoan($this->loan->id);
-        $scheduler = app(ExtraRepaymentScheduler::class);
-        $open = $scheduler->openInstallments($loan);
+        $scheduler = ExtraRepaymentScheduler::make($loan);
 
-        if ($open->isEmpty() || bccomp((string) $amount, (string) $loan->remaining, 2) === 1) {
+        if ($scheduler->getOpenInstallments()->isEmpty()
+            || bccomp($amount, (string) $loan->remaining, 2) === 1
+        ) {
             return [];
         }
 
-        $schedule = $scheduler->reschedule(
-            $loan,
-            $amount,
-            ScheduleAdjustmentTypeEnum::from($this->extraRepayment->schedule_adjustment_type_enum),
-            $open
-        );
-        $savings = $scheduler->savings($schedule, $open);
+        $schedule = $scheduler
+            ->reschedule(
+                $amount,
+                ScheduleAdjustmentTypeEnum::from($this->extraRepayment->schedule_adjustment_type_enum)
+            )
+            ->getSchedule();
+        $savings = $scheduler->savings();
         $lastInstallment = array_last($schedule);
 
         return [
             'interest_saved' => $this->money($savings['interest_saved']),
             'installments_saved' => $savings['installments_saved'],
-            'remaining' => $this->money(bcsub((string) $loan->remaining, (string) $amount, 2)),
+            'remaining' => $this->money(bcsub((string) $loan->remaining, $amount, 2)),
             'ends_at' => $lastInstallment
                 ? Carbon::parse($lastInstallment['due_date'])
                     ->locale(app()->getLocale())

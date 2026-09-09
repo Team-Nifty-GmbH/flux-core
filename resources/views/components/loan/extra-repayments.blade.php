@@ -4,15 +4,15 @@
     >
         <div class="px-4 py-3">
             <div class="text-xs text-gray-500 dark:text-gray-400">
-                {{ __('Allowance') }} {{ $this->allowance['year'] }}
+                {{ __('Allowance') }} {{ data_get($this->allowance, 'year') }}
             </div>
             <div
                 class="mt-1 text-lg font-semibold text-gray-900 tabular-nums dark:text-gray-50"
             >
-                @if (! $this->allowance['is_allowed'])
+                @if (! data_get($this->allowance, 'is_allowed'))
                     {{ __('Not allowed') }}
-                @elseif ($this->allowance['is_capped'])
-                    {{ $this->allowance['allowance'] }}
+                @elseif (data_get($this->allowance, 'is_capped'))
+                    {{ data_get($this->allowance, 'allowance') }}
                 @else
                     {{ __('Unlimited') }}
                 @endif
@@ -25,7 +25,7 @@
             <div
                 class="mt-1 text-lg font-semibold text-gray-900 tabular-nums dark:text-gray-50"
             >
-                {{ $this->allowance['used'] }}
+                {{ data_get($this->allowance, 'used') }}
             </div>
         </div>
         <div class="bg-gray-50/70 px-4 py-3 dark:bg-white/5">
@@ -35,7 +35,7 @@
             <div
                 class="mt-1 text-lg font-semibold text-gray-900 tabular-nums dark:text-gray-50"
             >
-                {{ $this->allowance['remaining'] ?? __('Unlimited') }}
+                {{ data_get($this->allowance, 'remaining') ?? __('Unlimited') }}
             </div>
         </div>
     </div>
@@ -50,7 +50,7 @@
         <x-button
             color="indigo"
             :text="__('New Extra Repayment')"
-            :disabled="! $this->allowance['is_allowed']"
+            :disabled="! data_get($this->allowance, 'is_allowed')"
             x-on:click="$tsui.open.modal('create-extra-repayment-modal')"
         />
     </x-slot:footer>
@@ -99,7 +99,7 @@
                             {{ __('Interest Saved') }}
                         </div>
                         <div class="font-semibold tabular-nums">
-                            {{ $this->extraRepaymentPreview['interest_saved'] }}
+                            {{ data_get($this->extraRepaymentPreview, 'interest_saved') }}
                         </div>
                     </div>
                     <div>
@@ -107,7 +107,7 @@
                             {{ __('Installments Saved') }}
                         </div>
                         <div class="font-semibold tabular-nums">
-                            {{ $this->extraRepaymentPreview['installments_saved'] }}
+                            {{ data_get($this->extraRepaymentPreview, 'installments_saved') }}
                         </div>
                     </div>
                     <div>
@@ -115,7 +115,7 @@
                             {{ __('Remaining') }}
                         </div>
                         <div class="font-semibold tabular-nums">
-                            {{ $this->extraRepaymentPreview['remaining'] }}
+                            {{ data_get($this->extraRepaymentPreview, 'remaining') }}
                         </div>
                     </div>
                     <div>
@@ -123,7 +123,7 @@
                             {{ __('Ends At') }}
                         </div>
                         <div class="font-semibold tabular-nums">
-                            {{ $this->extraRepaymentPreview['ends_at'] }}
+                            {{ data_get($this->extraRepaymentPreview, 'ends_at') }}
                         </div>
                     </div>
                 </div>

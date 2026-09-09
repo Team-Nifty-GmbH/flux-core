@@ -12,6 +12,8 @@ use Illuminate\Validation\ValidationException;
 
 class CreateLoanExtraRepayment extends FluxAction
 {
+    protected ?Loan $loan = null;
+
     public static function models(): array
     {
         return [LoanExtraRepayment::class];
@@ -24,24 +26,23 @@ class CreateLoanExtraRepayment extends FluxAction
 
     public function performAction(): LoanExtraRepayment
     {
-        $loan = $this->loan();
-        $scheduler = app(ExtraRepaymentScheduler::class);
+        $loan = $this->loan ?? resolve_static(Loan::class, 'query')
+            ->whereKey($this->getData('loan_id'))
+            ->firstOrFail();
 
         $extraRepayment = app(LoanExtraRepayment::class, ['attributes' => $this->getData()]);
 
-        $open = $scheduler->openInstallments($loan);
-        $schedule = $scheduler->reschedule(
-            $loan,
-            $extraRepayment->amount,
-            $extraRepayment->schedule_adjustment_type_enum,
-            $open
-        );
+        $scheduler = ExtraRepaymentScheduler::make($loan);
+        $open = $scheduler->getOpenInstallments();
+        $schedule = $scheduler
+            ->reschedule($extraRepayment->amount, $extraRepayment->schedule_adjustment_type_enum)
+            ->getSchedule();
 
-        $extraRepayment->fill($scheduler->savings($schedule, $open));
+        $extraRepayment->fill($scheduler->savings());
         $extraRepayment->save();
 
         $loan->installments()
-            ->whereIn('id', $open->modelKeys())
+            ->whereKey($open->modelKeys())
             ->delete();
 
         foreach ($schedule as $installment) {
@@ -50,7 +51,10 @@ class CreateLoanExtraRepayment extends FluxAction
 
         $lastInstallment = array_last($schedule);
         $firstRepayment = array_first(
-            array_filter($schedule, fn (array $installment): bool => bccomp($installment['principal_amount'], '0', 2) === 1)
+            array_filter(
+                $schedule,
+                fn (array $installment): bool => bccomp($installment['principal_amount'], '0', 2) === 1
+            )
         );
 
         $loan->fill([
@@ -73,7 +77,9 @@ class CreateLoanExtraRepayment extends FluxAction
     {
         parent::validateData();
 
-        $loan = $this->loan();
+        $loan = $this->loan = resolve_static(Loan::class, 'query')
+            ->whereKey($this->getData('loan_id'))
+            ->firstOrFail();
 
         if (! $loan->allows_extra_repayments) {
             throw ValidationException::withMessages([
@@ -81,39 +87,31 @@ class CreateLoanExtraRepayment extends FluxAction
             ]);
         }
 
+        $executedAt = Carbon::parse($this->getData('executed_at'));
         $amount = bcadd((string) $this->getData('amount'), '0', 2);
         $outstanding = bcadd((string) $loan->remaining, '0', 2);
+        $remainingAllowance = $loan->remainingExtraRepaymentAllowance($executedAt->year);
+        $errors = [];
+
+        if ($executedAt->lt($loan->starts_at)) {
+            $errors['executed_at'][] = __('The extra repayment cannot be executed before the loan starts.');
+        }
 
         if (bccomp($amount, $outstanding, 2) === 1) {
-            throw ValidationException::withMessages([
-                'amount' => [
-                    __('The extra repayment exceeds the outstanding principal of :amount.', [
-                        'amount' => $outstanding,
-                    ]),
-                ],
+            $errors['amount'][] = __('The extra repayment exceeds the outstanding principal of :amount.', [
+                'amount' => $outstanding,
             ]);
         }
-
-        $remainingAllowance = $loan->remainingExtraRepaymentAllowance(
-            Carbon::parse($this->getData('executed_at'))->year
-        );
 
         if (! is_null($remainingAllowance) && bccomp($amount, $remainingAllowance, 2) === 1) {
-            throw ValidationException::withMessages([
-                'amount' => [
-                    __('The extra repayment exceeds the allowance of :amount left for :year.', [
-                        'amount' => $remainingAllowance,
-                        'year' => Carbon::parse($this->getData('executed_at'))->year,
-                    ]),
-                ],
+            $errors['amount'][] = __('The extra repayment exceeds the allowance of :amount left for :year.', [
+                'amount' => $remainingAllowance,
+                'year' => $executedAt->year,
             ]);
         }
-    }
 
-    protected function loan(): Loan
-    {
-        return resolve_static(Loan::class, 'query')
-            ->whereKey($this->getData('loan_id'))
-            ->firstOrFail();
+        if ($errors) {
+            throw ValidationException::withMessages($errors);
+        }
     }
 }

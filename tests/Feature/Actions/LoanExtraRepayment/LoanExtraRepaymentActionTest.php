@@ -195,3 +195,16 @@ test('settled installments and their sequence survive the reschedule', function 
         ->and($installments->first()->sequence)->toBe(1)
         ->and($installments->get(2)->sequence)->toBe(3);
 });
+
+test('an extra repayment executed before the loan starts is rejected', function (): void {
+    $loan = loanFor();
+
+    extraRepaymentFor($loan, ['executed_at' => '2025-12-31']);
+})->throws(ValidationException::class);
+
+test('an allowance takes either a percentage or an amount, not both', function (): void {
+    loanFor([
+        'extra_repayment_allowance_percentage' => 0.05,
+        'extra_repayment_allowance_amount' => 1000,
+    ]);
+})->throws(ValidationException::class);

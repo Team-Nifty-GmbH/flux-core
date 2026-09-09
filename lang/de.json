@@ -2858,6 +2858,7 @@
     "The debit and credit account must differ.": "Sollkonto und Habenkonto müssen sich unterscheiden.",
     "The default mail account must be one of the selected mail accounts.": "Das Standard-Mailkonto muss eines der ausgewählten Mailkonten sein.",
     "The employee is already assigned to this work time model": "Der Mitarbeiter ist bereits diesem Arbeitszeitmodell zugewiesen",
+    "The extra repayment cannot be executed before the loan starts.": "Die Sondertilgung kann nicht vor dem Beginn des Darlehens ausgeführt werden.",
     "The extra repayment exceeds the allowance of :amount left for :year.": "Die Sondertilgung übersteigt den für :year verbleibenden Freibetrag von :amount.",
     "The extra repayment exceeds the outstanding principal of :amount.": "Die Sondertilgung übersteigt die Restschuld von :amount.",
     "The file :name is :size. The maximum upload size is :max.": "Die Datei :name ist :size groß. Die maximale Uploadgröße beträgt :max.",

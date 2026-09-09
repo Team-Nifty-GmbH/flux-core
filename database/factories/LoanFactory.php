@@ -22,10 +22,12 @@ class LoanFactory extends Factory
             'number_of_installments' => fake()->numberBetween(12, 120),
             'installment_interval_enum' => InstallmentIntervalEnum::Monthly,
             'grace_period_installments' => 0,
-            'allows_extra_repayments' => true,
             'installment_amount' => fake()->randomFloat(2, 100, 5000),
+            'extra_repayment_allowance_percentage' => null,
+            'extra_repayment_allowance_amount' => null,
             'starts_at' => fake()->date(),
             'ends_at' => fake()->dateTimeBetween('+1 year', '+10 years')->format('Y-m-d'),
+            'allows_extra_repayments' => true,
         ];
     }
 }

@@ -31,14 +31,14 @@ class Loan extends FluxModel implements HasMedia, InteractsWithDataTables
             'amount' => Money::class,
             'repayment_type_enum' => RepaymentTypeEnum::class,
             'installment_interval_enum' => InstallmentIntervalEnum::class,
-            'allows_extra_repayments' => 'boolean',
-            'extra_repayment_allowance_percentage' => 'decimal:10',
-            'extra_repayment_allowance_amount' => Money::class,
             'installment_amount' => Money::class,
             'remaining' => Money::class,
             'total_interest' => Money::class,
+            'extra_repayment_allowance_percentage' => 'decimal:10',
+            'extra_repayment_allowance_amount' => Money::class,
             'starts_at' => 'date',
             'ends_at' => 'date',
+            'allows_extra_repayments' => 'boolean',
         ];
     }
 
@@ -79,57 +79,6 @@ class Loan extends FluxModel implements HasMedia, InteractsWithDataTables
     }
 
     // Public methods
-    public function extraRepaymentAllowance(): ?string
-    {
-        if (! $this->allows_extra_repayments) {
-            return '0.00';
-        }
-
-        if (is_null($this->extra_repayment_allowance_percentage)
-            && is_null($this->extra_repayment_allowance_amount)
-        ) {
-            return null;
-        }
-
-        return bcround(
-            bcadd(
-                bcmul(
-                    (string) $this->amount,
-                    (string) ($this->extra_repayment_allowance_percentage ?? 0),
-                    10
-                ),
-                (string) ($this->extra_repayment_allowance_amount ?? 0),
-                10
-            ),
-            2
-        );
-    }
-
-    public function remainingExtraRepaymentAllowance(int $year): ?string
-    {
-        $allowance = $this->extraRepaymentAllowance();
-
-        if (is_null($allowance)) {
-            return null;
-        }
-
-        $used = $this->usedExtraRepayments($year);
-
-        return bccomp($allowance, $used, 2) === 1
-            ? bcsub($allowance, $used, 2)
-            : '0.00';
-    }
-
-    public function usedExtraRepayments(int $year): string
-    {
-        return bcround(
-            (string) $this->extraRepayments()
-                ->whereYear('executed_at', $year)
-                ->sum('amount'),
-            2
-        );
-    }
-
     public function calculateProgress(): static
     {
         $this->progress = bccomp((string) $this->amount, '0', 10) === 1
@@ -162,6 +111,30 @@ class Loan extends FluxModel implements HasMedia, InteractsWithDataTables
         return $this;
     }
 
+    public function extraRepaymentAllowance(): ?string
+    {
+        if (! $this->allows_extra_repayments) {
+            return '0.00';
+        }
+
+        if (! is_null($this->extra_repayment_allowance_amount)) {
+            return bcround((string) $this->extra_repayment_allowance_amount, 2);
+        }
+
+        if (is_null($this->extra_repayment_allowance_percentage)) {
+            return null;
+        }
+
+        return bcround(
+            bcmul(
+                (string) $this->amount,
+                (string) $this->extra_repayment_allowance_percentage,
+                10
+            ),
+            2
+        );
+    }
+
     public function getAvatarUrl(): ?string
     {
         return null;
@@ -187,5 +160,30 @@ class Loan extends FluxModel implements HasMedia, InteractsWithDataTables
         $this->addMediaCollection('contract')
             ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png'])
             ->singleFile();
+    }
+
+    public function remainingExtraRepaymentAllowance(int $year): ?string
+    {
+        $allowance = $this->extraRepaymentAllowance();
+
+        if (is_null($allowance)) {
+            return null;
+        }
+
+        $used = $this->usedExtraRepayments($year);
+
+        return bccomp($allowance, $used, 2) === 1
+            ? bcsub($allowance, $used, 2)
+            : '0.00';
+    }
+
+    public function usedExtraRepayments(int $year): string
+    {
+        return bcround(
+            (string) $this->extraRepayments()
+                ->whereYear('executed_at', $year)
+                ->sum('amount'),
+            2
+        );
     }
 }

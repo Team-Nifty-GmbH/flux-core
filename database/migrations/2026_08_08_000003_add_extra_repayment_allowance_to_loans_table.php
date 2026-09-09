@@ -9,15 +9,15 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('loans', function (Blueprint $table): void {
-            $table->boolean('allows_extra_repayments')
-                ->default(true)
-                ->after('grace_period_installments');
-            $table->decimal('extra_repayment_allowance_percentage', 40, 10)
+            $table->decimal('extra_repayment_allowance_percentage', 11, 10)
                 ->nullable()
-                ->after('allows_extra_repayments');
+                ->after('progress');
             $table->decimal('extra_repayment_allowance_amount', 40, 10)
                 ->nullable()
                 ->after('extra_repayment_allowance_percentage');
+            $table->boolean('allows_extra_repayments')
+                ->default(true)
+                ->after('ends_at');
         });
     }
 
