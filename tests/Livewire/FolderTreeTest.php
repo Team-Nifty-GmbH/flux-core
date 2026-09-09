@@ -1,9 +1,9 @@
 <?php
 
-use FluxErp\Models\Contact;
 use FluxErp\Models\Media;
 use FluxErp\Models\MediaFolder;
 use FluxErp\Models\Permission;
+use FluxErp\Models\Product;
 use FluxErp\Tests\Livewire\FolderTreeReadonlyTestClass;
 use FluxErp\Tests\Livewire\FolderTreeTestClass;
 use Illuminate\Http\UploadedFile;
@@ -12,10 +12,63 @@ use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
-    $this->contact = Contact::factory()->create();
+    $this->product = Product::factory()->create();
 
-    $permission = Permission::findOrCreate('action.media-folder.update', 'web');
-    $this->user->givePermissionTo($permission);
+    $this->user->givePermissionTo([
+        Permission::findOrCreate('action.media-folder.create', 'web'),
+        Permission::findOrCreate('action.media-folder.update', 'web'),
+    ]);
+});
+
+test('can create a folder below a collection', function (): void {
+    Storage::fake('local');
+
+    $this->product
+        ->addMedia(UploadedFile::fake()->image('test.jpg'))
+        ->toMediaCollection('images');
+
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()])
+        ->call('saveFolder', [
+            'parent_id' => Str::uuid()->toString(),
+            'parent_collection' => 'images',
+            'name' => 'New folder',
+            'is_new' => true,
+            'children' => [],
+        ]);
+
+    $folder = MediaFolder::query()
+        ->where('name', 'New folder')
+        ->firstOrFail();
+
+    expect($folder->parent_collection)->toBe('images')
+        ->and($folder->slug)->toBe('images.new_folder|' . $folder->getKey());
+
+    $collectionNode = collect($this->product->refresh()->getMediaAsTree())
+        ->firstWhere('slug', 'images');
+
+    expect(data_get($collectionNode, 'children.*.id'))->toContain($folder->getKey());
+});
+
+test('can rename a folder below a collection', function (): void {
+    $folder = MediaFolder::create([
+        'name' => 'New folder',
+        'parent_collection' => 'images',
+    ]);
+    $this->product->mediaFolders()->attach($folder->getKey());
+
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()])
+        ->call('saveFolder', [
+            'id' => $folder->getKey(),
+            'parent_id' => Str::uuid()->toString(),
+            'parent_collection' => 'images',
+            'name' => 'Renamed folder',
+            'slug' => $folder->slug,
+            'children' => [],
+        ]);
+
+    expect($folder->refresh()->name)->toBe('Renamed folder')
+        ->and($folder->parent_collection)->toBe('images')
+        ->and($folder->slug)->toBe('images.renamed_folder|' . $folder->getKey());
 });
 
 test('renders successfully', function (): void {
@@ -28,14 +81,14 @@ test('can move media from one folder to another', function (): void {
 
     $sourceFolder = MediaFolder::create([
         'name' => 'Source Folder',
-        'model_type' => morph_alias(Contact::class),
-        'model_id' => $this->contact->getKey(),
+        'model_type' => morph_alias(Product::class),
+        'model_id' => $this->product->getKey(),
     ]);
 
     $targetFolder = MediaFolder::create([
         'name' => 'Target Folder',
-        'model_type' => morph_alias(Contact::class),
-        'model_id' => $this->contact->getKey(),
+        'model_type' => morph_alias(Product::class),
+        'model_id' => $this->product->getKey(),
     ]);
 
     $media = $sourceFolder
@@ -58,7 +111,7 @@ test('can move media from one folder to another', function (): void {
         'slug' => $targetFolder->slug,
     ];
 
-    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()])
         ->call('moveItem', $subject, $target, null, null)
         ->assertReturned(true);
 
@@ -78,11 +131,11 @@ test('can move media from parent model to folder', function (): void {
 
     $targetFolder = MediaFolder::create([
         'name' => 'Target Folder',
-        'model_type' => morph_alias(Contact::class),
-        'model_id' => $this->contact->getKey(),
+        'model_type' => morph_alias(Product::class),
+        'model_id' => $this->product->getKey(),
     ]);
 
-    $media = $this->contact
+    $media = $this->product
         ->addMedia(UploadedFile::fake()->image('test.jpg'))
         ->toMediaCollection('files');
 
@@ -101,7 +154,7 @@ test('can move media from parent model to folder', function (): void {
         'slug' => $targetFolder->slug,
     ];
 
-    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()])
         ->call('moveItem', $subject, $target, null, null)
         ->assertReturned(true);
 
@@ -121,8 +174,8 @@ test('same-folder drag keeps the existing media row', function (): void {
 
     $folder = MediaFolder::create([
         'name' => 'Folder',
-        'model_type' => morph_alias(Contact::class),
-        'model_id' => $this->contact->getKey(),
+        'model_type' => morph_alias(Product::class),
+        'model_id' => $this->product->getKey(),
     ]);
 
     $media = $folder
@@ -142,7 +195,7 @@ test('same-folder drag keeps the existing media row', function (): void {
         'slug' => $folder->slug,
     ];
 
-    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()])
         ->call('moveItem', $subject, $target, null, null)
         ->assertReturned(true);
 
@@ -160,10 +213,10 @@ test('moving media between a folder and a fixed collection keeps the model attac
 
     $folder = MediaFolder::create([
         'name' => 'Source Folder',
-        'model_type' => morph_alias(Contact::class),
-        'model_id' => $this->contact->getKey(),
+        'model_type' => morph_alias(Product::class),
+        'model_id' => $this->product->getKey(),
     ]);
-    $this->contact->mediaFolders()->attach($folder->getKey());
+    $this->product->mediaFolders()->attach($folder->getKey());
 
     $media = $folder
         ->addMedia(UploadedFile::fake()->image('test.jpg'))
@@ -171,7 +224,7 @@ test('moving media between a folder and a fixed collection keeps the model attac
 
     $fileName = $media->file_name;
 
-    $component = Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()]);
+    $component = Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()]);
 
     // folder -> fixed collection on the owner model
     $component
@@ -197,11 +250,11 @@ test('moving media between a folder and a fixed collection keeps the model attac
         ->where('file_name', $fileName)
         ->firstOrFail();
 
-    expect($movedMedia->model_type)->toBe(morph_alias(Contact::class))
-        ->and($movedMedia->model_id)->toBe($this->contact->getKey())
+    expect($movedMedia->model_type)->toBe(morph_alias(Product::class))
+        ->and($movedMedia->model_id)->toBe($this->product->getKey())
         ->and($movedMedia->collection_name)->toBe('files');
 
-    $collectionNode = collect($this->contact->refresh()->getMediaAsTree())
+    $collectionNode = collect($this->product->refresh()->getMediaAsTree())
         ->firstWhere('slug', 'files');
 
     expect(data_get($collectionNode, 'children.*.id'))->toContain($movedMedia->getKey());
@@ -234,7 +287,7 @@ test('moving media between a folder and a fixed collection keeps the model attac
         ->and($returnedMedia->model_id)->toBe($folder->getKey())
         ->and($returnedMedia->collection_name)->toBe($folder->slug);
 
-    $folderNode = collect($this->contact->refresh()->getMediaAsTree())
+    $folderNode = collect($this->product->refresh()->getMediaAsTree())
         ->firstWhere('id', $folder->getKey());
 
     expect(data_get($folderNode, 'children.*.id'))->toContain($returnedMedia->getKey());
@@ -243,17 +296,17 @@ test('moving media between a folder and a fixed collection keeps the model attac
 test('can move folder to another folder', function (): void {
     $parentFolder = MediaFolder::create([
         'name' => 'Parent Folder',
-        'model_type' => morph_alias(Contact::class),
-        'model_id' => $this->contact->getKey(),
+        'model_type' => morph_alias(Product::class),
+        'model_id' => $this->product->getKey(),
     ]);
-    $this->contact->mediaFolders()->attach($parentFolder->getKey());
+    $this->product->mediaFolders()->attach($parentFolder->getKey());
 
     $childFolder = MediaFolder::create([
         'name' => 'Child Folder',
-        'model_type' => morph_alias(Contact::class),
-        'model_id' => $this->contact->getKey(),
+        'model_type' => morph_alias(Product::class),
+        'model_id' => $this->product->getKey(),
     ]);
-    $this->contact->mediaFolders()->attach($childFolder->getKey());
+    $this->product->mediaFolders()->attach($childFolder->getKey());
 
     $subject = [
         'id' => $childFolder->getKey(),
@@ -267,7 +320,7 @@ test('can move folder to another folder', function (): void {
         'slug' => $parentFolder->slug,
     ];
 
-    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()])
         ->call('moveItem', $subject, $target, $childFolder->slug, $parentFolder->slug)
         ->assertReturned(true);
 
@@ -281,14 +334,14 @@ test('cannot move to readonly folder', function (): void {
 
     $sourceFolder = MediaFolder::create([
         'name' => 'Source Folder',
-        'model_type' => morph_alias(Contact::class),
-        'model_id' => $this->contact->getKey(),
+        'model_type' => morph_alias(Product::class),
+        'model_id' => $this->product->getKey(),
     ]);
 
     $readonlyFolder = MediaFolder::create([
         'name' => 'Readonly Folder',
-        'model_type' => morph_alias(Contact::class),
-        'model_id' => $this->contact->getKey(),
+        'model_type' => morph_alias(Product::class),
+        'model_id' => $this->product->getKey(),
         'is_readonly' => true,
     ]);
 
@@ -309,7 +362,7 @@ test('cannot move to readonly folder', function (): void {
         'slug' => $readonlyFolder->slug,
     ];
 
-    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()])
         ->call('moveItem', $subject, $target, null, null)
         ->assertReturned(false);
 
@@ -323,14 +376,14 @@ test('cannot move when component is readonly', function (): void {
 
     $sourceFolder = MediaFolder::create([
         'name' => 'Source Folder',
-        'model_type' => morph_alias(Contact::class),
-        'model_id' => $this->contact->getKey(),
+        'model_type' => morph_alias(Product::class),
+        'model_id' => $this->product->getKey(),
     ]);
 
     $targetFolder = MediaFolder::create([
         'name' => 'Target Folder',
-        'model_type' => morph_alias(Contact::class),
-        'model_id' => $this->contact->getKey(),
+        'model_type' => morph_alias(Product::class),
+        'model_id' => $this->product->getKey(),
     ]);
 
     $media = $sourceFolder
@@ -350,7 +403,7 @@ test('cannot move when component is readonly', function (): void {
         'slug' => $targetFolder->slug,
     ];
 
-    Livewire::test(FolderTreeReadonlyTestClass::class, ['modelId' => $this->contact->getKey()])
+    Livewire::test(FolderTreeReadonlyTestClass::class, ['modelId' => $this->product->getKey()])
         ->call('moveItem', $subject, $target, null, null)
         ->assertReturned(false);
 
@@ -362,8 +415,8 @@ test('cannot move when component is readonly', function (): void {
 test('returns false when media not found', function (): void {
     $targetFolder = MediaFolder::create([
         'name' => 'Target Folder',
-        'model_type' => morph_alias(Contact::class),
-        'model_id' => $this->contact->getKey(),
+        'model_type' => morph_alias(Product::class),
+        'model_id' => $this->product->getKey(),
     ]);
 
     $subject = [
@@ -379,7 +432,7 @@ test('returns false when media not found', function (): void {
         'slug' => $targetFolder->slug,
     ];
 
-    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()])
         ->call('moveItem', $subject, $target, 'files', $targetFolder->slug)
         ->assertReturned(false);
 });
@@ -387,8 +440,8 @@ test('returns false when media not found', function (): void {
 test('returns false when subject path cannot be determined', function (): void {
     $targetFolder = MediaFolder::create([
         'name' => 'Target Folder',
-        'model_type' => morph_alias(Contact::class),
-        'model_id' => $this->contact->getKey(),
+        'model_type' => morph_alias(Product::class),
+        'model_id' => $this->product->getKey(),
     ]);
 
     $subject = [
@@ -402,7 +455,7 @@ test('returns false when subject path cannot be determined', function (): void {
         'slug' => $targetFolder->slug,
     ];
 
-    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()])
         ->call('moveItem', $subject, $target, null, $targetFolder->slug)
         ->assertReturned(false);
 });
@@ -412,8 +465,8 @@ test('returns false when target path cannot be determined', function (): void {
 
     $sourceFolder = MediaFolder::create([
         'name' => 'Source Folder',
-        'model_type' => morph_alias(Contact::class),
-        'model_id' => $this->contact->getKey(),
+        'model_type' => morph_alias(Product::class),
+        'model_id' => $this->product->getKey(),
     ]);
 
     $media = $sourceFolder
@@ -432,7 +485,7 @@ test('returns false when target path cannot be determined', function (): void {
         'name' => 'Some Target',
     ];
 
-    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()])
         ->call('moveItem', $subject, $target, null, null)
         ->assertReturned(false);
 });
@@ -442,13 +495,13 @@ test('moving media with dot in name does not create subfolder', function (): voi
 
     $targetFolder = MediaFolder::create([
         'name' => 'Target Folder',
-        'model_type' => morph_alias(Contact::class),
-        'model_id' => $this->contact->getKey(),
+        'model_type' => morph_alias(Product::class),
+        'model_id' => $this->product->getKey(),
     ]);
-    $this->contact->mediaFolders()->attach($targetFolder->getKey());
+    $this->product->mediaFolders()->attach($targetFolder->getKey());
 
     // Create media with a dot in the name (like "document.v2")
-    $media = $this->contact
+    $media = $this->product
         ->addMedia(UploadedFile::fake()->image('test.document.v2.jpg'))
         ->toMediaCollection('files');
 
@@ -467,7 +520,7 @@ test('moving media with dot in name does not create subfolder', function (): voi
         'slug' => $targetFolder->slug,
     ];
 
-    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()])
         ->call('moveItem', $subject, $target, null, null)
         ->assertReturned(true);
 
@@ -487,8 +540,8 @@ test('moving media with dot in name does not create subfolder', function (): voi
 test('cannot move folder to collection', function (): void {
     $folder = MediaFolder::create([
         'name' => 'Folder',
-        'model_type' => morph_alias(Contact::class),
-        'model_id' => $this->contact->getKey(),
+        'model_type' => morph_alias(Product::class),
+        'model_id' => $this->product->getKey(),
     ]);
 
     $subject = [
@@ -503,7 +556,7 @@ test('cannot move folder to collection', function (): void {
         'collection_name' => 'files',
     ];
 
-    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()])
         ->call('moveItem', $subject, $target, $folder->slug, 'files')
         ->assertReturned(false);
 });
@@ -516,20 +569,20 @@ test('can delete collection with path string', function (): void {
     $this->user->givePermissionTo($permission);
 
     // Create media in a nested collection
-    $media = $this->contact
+    $this->product
         ->addMedia(UploadedFile::fake()->image('test.jpg'))
-        ->toMediaCollection('attachments.subfolder');
+        ->toMediaCollection('images.subfolder');
 
     // Verify media exists
-    expect(Media::where('collection_name', 'attachments.subfolder')->exists())->toBeTrue();
+    expect(Media::where('collection_name', 'images.subfolder')->exists())->toBeTrue();
 
     // Delete using path string (as returned by getNodePath in JS)
-    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
-        ->call('deleteCollection', 'virtual-folder-id', 'attachments.subfolder')
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()])
+        ->call('deleteCollection', 'virtual-folder-id', 'images.subfolder')
         ->assertReturned(true);
 
     // Verify media is deleted
-    expect(Media::where('collection_name', 'attachments.subfolder')->exists())->toBeFalse();
+    expect(Media::where('collection_name', 'images.subfolder')->exists())->toBeFalse();
 });
 
 test('can delete real media folder', function (): void {
@@ -541,15 +594,15 @@ test('can delete real media folder', function (): void {
 
     $folder = MediaFolder::create([
         'name' => 'Test Folder',
-        'model_type' => morph_alias(Contact::class),
-        'model_id' => $this->contact->getKey(),
+        'model_type' => morph_alias(Product::class),
+        'model_id' => $this->product->getKey(),
     ]);
-    $this->contact->mediaFolders()->attach($folder->getKey());
+    $this->product->mediaFolders()->attach($folder->getKey());
 
     // Verify folder exists
     expect(MediaFolder::whereKey($folder->getKey())->exists())->toBeTrue();
 
-    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()])
         ->call('deleteCollection', $folder->getKey(), null)
         ->assertReturned(true);
 
@@ -563,11 +616,11 @@ test('can rename media', function (): void {
     $permission = Permission::findOrCreate('action.media.update', 'web');
     $this->user->givePermissionTo($permission);
 
-    $media = $this->contact
+    $media = $this->product
         ->addMedia(UploadedFile::fake()->image('test.jpg'))
-        ->toMediaCollection('attachments');
+        ->toMediaCollection('images');
 
-    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()])
         ->call('saveMedia', [
             'id' => $media->getKey(),
             'name' => 'Renamed file',
@@ -587,12 +640,12 @@ test('cannot rename media of another model', function (): void {
     $permission = Permission::findOrCreate('action.media.update', 'web');
     $this->user->givePermissionTo($permission);
 
-    $foreignContact = Contact::factory()->create();
-    $media = $foreignContact
+    $foreignProduct = Product::factory()->create();
+    $media = $foreignProduct
         ->addMedia(UploadedFile::fake()->image('test.jpg'))
-        ->toMediaCollection('attachments');
+        ->toMediaCollection('images');
 
-    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()])
         ->call('saveMedia', [
             'id' => $media->getKey(),
             'name' => 'Renamed file',
@@ -603,7 +656,7 @@ test('cannot rename media of another model', function (): void {
 });
 
 test('the tree is rendered with the component instead of fetched afterwards', function (): void {
-    $component = Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
+    $component = Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->product->getKey()])
         ->assertOk();
 
     expect($component->get('mediaTree'))->not->toBeEmpty();

@@ -83,9 +83,9 @@
 
                                         if (! this.selection.file_name) {
                                             let path = this.getNodePath(this.selectionProxy, 'slug')
-                                            this.selection.path = path
+                                            this.selection.path = Array.isArray(path)
                                                 ? path[path.length - 1]
-                                                : null
+                                                : path
                                         }
                                     })
 
@@ -104,9 +104,10 @@
                                 this.selection?.slug ?? this.selection?.collection_name,
                                 this.selection?.id,
                             )
+
                             if (! this.selection.file_name) {
                                 let path = this.getNodePath(this.selectionProxy, 'slug')
-                                this.selection.path = path ? path[path.length - 1] : null
+                                this.selection.path = Array.isArray(path) ? path[path.length - 1] : path
                             }
                         },
                         async uploadSuccess(multipleFileUpload) {
@@ -209,6 +210,7 @@
                                             $wire
                                                 .saveFolder({
                                                     parent_id: selection.id,
+                                                    parent_collection: getNodePath(selectionProxy, 'slug'),
                                                     name: '{{ __('New folder') }}',
                                                     is_new: true,
                                                     children: [],
