@@ -29,15 +29,19 @@ test('the checkbox tree keeps writing to the bound property after unchecking', f
     expect($page->script($count))->toBe(3);
 
     $read = <<<'JS'
-        () => window.Livewire.all()[0].$wire.selected
+        () => JSON.stringify(
+            window.Livewire.all().map((component) => component.get('selected'))
+        )
     JS;
 
-    $page->script(clickBox(0));
-    expect($page->script($read))->toContain('alpha');
+    expect($page->script($read))->toBe('[[]]');
 
     $page->script(clickBox(0));
-    expect($page->script($read))->not->toContain('alpha');
+    expect($page->script($read))->toBe('[["alpha"]]');
+
+    $page->script(clickBox(0));
+    expect($page->script($read))->toBe('[[]]');
 
     $page->script(clickBox(1));
-    expect($page->script($read))->toContain('beta');
+    expect($page->script($read))->toBe('[["beta"]]');
 });
