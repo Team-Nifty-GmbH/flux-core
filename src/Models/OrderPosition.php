@@ -41,6 +41,8 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     use CascadeSoftDeletes, Commentable, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations,
         HasSerialNumberRange, HasTags, HasTenantAssignment, HasUserModification, HasUuid, LogsActivity, SortableTrait;
 
+    protected static bool $recalculatesSlugPositions = true;
+
     public array $sortable = [
         'order_column_name' => 'sort_number',
         'sort_when_creating' => true,
@@ -81,12 +83,26 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
                         ]);
                 }
 
-                $orderPosition->order->recalculateOrderPositionSlugPositions();
+                if (static::$recalculatesSlugPositions) {
+                    $orderPosition->order->recalculateOrderPositionSlugPositions();
+                }
             }
         });
     }
 
     // Public static methods
+    public static function withoutSlugPositionRecalculation(callable $callback): mixed
+    {
+        $previous = static::$recalculatesSlugPositions;
+        static::$recalculatesSlugPositions = false;
+
+        try {
+            return $callback();
+        } finally {
+            static::$recalculatesSlugPositions = $previous;
+        }
+    }
+
     public static function aggregateColumns(string $type): array
     {
         return match ($type) {

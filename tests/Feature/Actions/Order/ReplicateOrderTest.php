@@ -16,6 +16,7 @@ use FluxErp\Models\Product;
 use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -745,7 +746,7 @@ test('returned split order makes amount available again for original', function 
 
     // Step 4: Calculate available amount from original order
     // The split order was fully returned, so original should have 10 available again
-    $signedAmounts = Illuminate\Support\Facades\DB::select(
+    $signedAmounts = DB::select(
         'WITH RECURSIVE siblings AS (
             SELECT id, origin_position_id, signed_amount
             FROM order_positions
@@ -913,7 +914,7 @@ test('partially returned split order reduces available amount proportionally', f
         ->and((float) $retourePosition->signed_amount)->toBe(-3.0);
 
     // Step 4: Calculate available amount from original order
-    $signedAmounts = Illuminate\Support\Facades\DB::select(
+    $signedAmounts = DB::select(
         'WITH RECURSIVE siblings AS (
             SELECT id, origin_position_id, signed_amount
             FROM order_positions
@@ -1054,7 +1055,7 @@ test('direct retoure still reduces available amount to zero', function (): void 
         ->and((float) $retourePosition->signed_amount)->toBe(-10.0);
 
     // Step 3: Calculate available amount from original order
-    $signedAmounts = Illuminate\Support\Facades\DB::select(
+    $signedAmounts = DB::select(
         'WITH RECURSIVE siblings AS (
             SELECT id, origin_position_id, signed_amount
             FROM order_positions
@@ -1595,4 +1596,64 @@ test('refuses a refund from an order without an invoice number', function (): vo
         'order_type_id' => $refundOrderType->getKey(),
     ])->validate())
         ->toThrow(ValidationException::class);
+});
+
+test('rebuilds the slug positions once instead of once per position', function (): void {
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+    $currency = Currency::factory()->create();
+    $priceList = PriceList::factory()->create();
+    $vatRate = VatRate::factory()->create();
+    $paymentType = PaymentType::factory()->hasAttached(factory: $this->dbTenant, relationship: 'tenants')->create();
+    $product = Product::factory()->create();
+
+    $orderOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+    ]);
+    $order = Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'currency_id' => $currency->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => $orderOrderType->getKey(),
+        'payment_type_id' => $paymentType->getKey(),
+        'price_list_id' => $priceList->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => Str::random(),
+        'is_locked' => true,
+    ]);
+
+    $warehouse = Warehouse::factory()->create();
+
+    OrderPosition::factory()->count(6)->create([
+        'order_id' => $order->getKey(),
+        'product_id' => $product->getKey(),
+        'warehouse_id' => $warehouse->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'amount' => 1,
+    ]);
+
+    $rebuilds = 0;
+    DB::listen(function ($query) use (&$rebuilds): void {
+        if (str_contains($query->sql, 'position_hierarchy')) {
+            $rebuilds++;
+        }
+    });
+
+    $copy = ReplicateOrder::make([
+        'id' => $order->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $orderOrderType->getKey(),
+    ])
+        ->validate()
+        ->execute();
+
+    expect($rebuilds)->toBe(1)
+        ->and($copy->orderPositions()->count())->toBe(6)
+        ->and($copy->orderPositions()->pluck('slug_position')->filter()->count())->toBe(6);
 });
