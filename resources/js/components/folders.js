@@ -154,7 +154,13 @@ export default function folders(
             this.$dispatch('folder-tree-check-updated', this.checked);
         },
         unCheck(node) {
-            this.checked = this.checked.filter((id) => id !== node.id);
+            // the array is the bound Livewire property, replacing it drops the binding
+            const index = this.checked.indexOf(node.id);
+
+            if (index > -1) {
+                this.checked.splice(index, 1);
+            }
+
             this.$dispatch('folder-tree-uncheck', node, this.checked);
         },
         check(node) {
