@@ -61,6 +61,13 @@ class CommentCreatedNotification extends SubscribableNotification implements Sho
             new HtmlString('<span style="display: none">[flux:quote]</span>')
         );
 
+        foreach ($this->model->getMedia() as $media) {
+            $mail->attach($media->getPath(), [
+                'as' => $media->file_name,
+                'mime' => $media->mime_type,
+            ]);
+        }
+
         return $mail;
     }
 
