@@ -10,6 +10,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 
 beforeEach(function (): void {
@@ -62,4 +63,46 @@ test('continuation-page header keeps the subject heading within its allotted ver
     // first line of body content on page 2+. The header's <h2> must zero its
     // margins so the header's rendered height stays within 20mm.
     expect($html)->toMatch('/<header\b[^>]*>.*?<h2\b[^>]*style="[^"]*\bmargin:\s*0\b/s');
+});
+
+test('the tenant logo travels in the document instead of being fetched over http', function (): void {
+    $this->withoutVite();
+
+    config(['media-library.queue_conversions_by_default' => false]);
+
+    $this->dbTenant->addMedia(UploadedFile::fake()->image('logo.png'))
+        ->toMediaCollection('logo');
+    $this->dbTenant->addMedia(UploadedFile::fake()->image('logo-small.png'))
+        ->toMediaCollection('logo_small');
+
+    $html = Printing::make([
+        'model_type' => $this->order->getMorphClass(),
+        'model_id' => $this->order->getKey(),
+        'view' => 'invoice',
+        'preview' => false,
+        'html' => true,
+    ])
+        ->validate()
+        ->execute()
+        ->toHtml();
+
+    expect($html)->toContain('src="data:image/png;base64,')
+        ->and($html)->not->toMatch('/src="https?:\/\/[^"]*logo/');
+});
+
+test('a tenant without a small logo renders no empty image', function (): void {
+    $this->withoutVite();
+
+    $html = Printing::make([
+        'model_type' => $this->order->getMorphClass(),
+        'model_id' => $this->order->getKey(),
+        'view' => 'invoice',
+        'preview' => false,
+        'html' => true,
+    ])
+        ->validate()
+        ->execute()
+        ->toHtml();
+
+    expect($html)->not->toContain('src=""');
 });

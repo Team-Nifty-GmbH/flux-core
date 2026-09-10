@@ -237,6 +237,23 @@ abstract class PrintableView extends Component implements Responsable
         return Str::kebab(class_basename($this));
     }
 
+    protected function embedMedia(?Media $media): ?string
+    {
+        if (! $media || ! file_exists($media->getPath())) {
+            return null;
+        }
+
+        $path = File::mimeType($media->getPath()) === 'image/svg+xml'
+            ? $media->getPath('png')
+            : $media->getPath();
+
+        if (! file_exists($path)) {
+            return null;
+        }
+
+        return 'data:' . File::mimeType($path) . ';base64,' . base64_encode(file_get_contents($path));
+    }
+
     protected function getPageCss(): array
     {
         return ['margin' => ['32mm', '20mm', '28mm', '18mm']];
@@ -260,16 +277,9 @@ abstract class PrintableView extends Component implements Responsable
             ?? resolve_static(Tenant::class, 'default')
             ?? resolve_static(Tenant::class, 'query')->first();
 
-        if (($logo = $tenant?->getFirstMedia('logo')) && file_exists($logo->getPath())) {
-            $tenant->logo = File::mimeType($logo->getPath()) === 'image/svg+xml'
-                ? $logo->getUrl('png')
-                : $logo->getUrl();
-        }
-
-        if (($logoSmall = $tenant?->getFirstMedia('logo_small')) && file_exists($logoSmall->getPath())) {
-            $tenant->logo_small = File::mimeType($logoSmall->getPath()) === 'image/svg+xml'
-                ? $logoSmall->getUrl('png')
-                : $logoSmall->getUrl();
+        if ($tenant) {
+            $tenant->logo = $this->embedMedia($tenant->getFirstMedia('logo'));
+            $tenant->logo_small = $this->embedMedia($tenant->getFirstMedia('logo_small'));
         }
 
         $signaturePath = null;

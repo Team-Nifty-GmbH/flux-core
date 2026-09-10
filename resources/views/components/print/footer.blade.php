@@ -20,11 +20,13 @@
                     padding-right: 24px;
                 "
             >
-                <img
-                    class="logo-small footer-logo"
-                    style="margin: auto"
-                    src="{{ $tenant->logo_small }}"
-                />
+                @if ($tenant?->logo_small)
+                    <img
+                        class="logo-small footer-logo"
+                        style="margin: auto"
+                        src="{{ $tenant->logo_small }}"
+                    />
+                @endif
             </div>
         @show
         <div style="width: 100%">
