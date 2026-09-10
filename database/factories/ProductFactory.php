@@ -12,7 +12,7 @@ class ProductFactory extends Factory
     public function definition(): array
     {
         return [
-            'product_number' => fake()->word,
+            'product_number' => fake()->word() . '-' . fake()->unique()->numerify('########'),
             'name' => fake()->jobTitle(),
             'description' => fake()->paragraph(),
             'ean' => fake()->ean13(),

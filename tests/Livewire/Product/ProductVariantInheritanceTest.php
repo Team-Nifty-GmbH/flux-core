@@ -418,3 +418,12 @@ test('deactivate banner action persists is_active false', function (): void {
 
     expect($parent->fresh()->is_active)->toBeFalse();
 });
+
+test('two products from the factory never share a product number', function (): void {
+    $numbers = ProductModel::factory()
+        ->count(200)
+        ->create()
+        ->pluck('product_number');
+
+    expect($numbers->unique())->toHaveCount(200);
+});
