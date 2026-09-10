@@ -531,8 +531,7 @@ const calendar = () => {
                         let calendarBadge = document.createElement('div');
                         calendarBadge.className =
                             'size-3 rounded-full shrink-0';
-                        calendarBadge.style.backgroundColor =
-                            info.backgroundColor;
+                        calendarBadge.style.backgroundColor = info.color;
                         leftContent.appendChild(calendarBadge);
                     }
 
