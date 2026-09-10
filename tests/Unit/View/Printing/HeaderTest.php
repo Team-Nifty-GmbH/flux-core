@@ -90,13 +90,15 @@ test('the tenant logo travels in the document instead of being fetched over http
         ->and($html)->not->toMatch('/src="https?:\/\/[^"]*logo/');
 });
 
-test('a tenant without a small logo renders no empty image', function (): void {
+test('a tenant without a small logo renders no empty image', function (string $view, string $model): void {
     $this->withoutVite();
 
+    $printable = $model === 'order' ? $this->order : $this->order->addressInvoice;
+
     $html = Printing::make([
-        'model_type' => $this->order->getMorphClass(),
-        'model_id' => $this->order->getKey(),
-        'view' => 'invoice',
+        'model_type' => $printable->getMorphClass(),
+        'model_id' => $printable->getKey(),
+        'view' => $view,
         'preview' => false,
         'html' => true,
     ])
@@ -105,4 +107,7 @@ test('a tenant without a small logo renders no empty image', function (): void {
         ->toHtml();
 
     expect($html)->not->toContain('src=""');
-});
+})->with([
+    ['invoice', 'order'],
+    ['address-label', 'address'],
+]);

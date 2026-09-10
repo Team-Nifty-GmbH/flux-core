@@ -24,11 +24,13 @@
                         text-align: right;
                     "
                 >
-                    <img
-                        class="logo-small"
-                        src="{{ $tenant->logo_small }}"
-                        alt="logo-small"
-                    />
+                    @if ($tenant?->logo_small)
+                        <img
+                            class="logo-small"
+                            src="{{ $tenant->logo_small }}"
+                            alt="logo-small"
+                        />
+                    @endif
                 </div>
             @show
         </td>
