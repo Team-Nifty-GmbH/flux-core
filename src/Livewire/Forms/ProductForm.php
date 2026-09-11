@@ -141,6 +141,8 @@ class ProductForm extends FluxForm
                 'vatRate:id,rate_percentage',
             ]);
 
+            $values->setRelation('productProperties', $values->ownProductProperties);
+
             $values->append('avatar_url');
         }
 
