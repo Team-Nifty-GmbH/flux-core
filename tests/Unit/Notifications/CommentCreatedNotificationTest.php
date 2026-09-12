@@ -6,6 +6,7 @@ use FluxErp\Models\Task;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
 use FluxErp\Notifications\Comment\CommentCreatedNotification;
+use Illuminate\Http\UploadedFile;
 
 beforeEach(function (): void {
     $language = Language::factory()->create();
@@ -92,4 +93,32 @@ test('toArray includes url in accept action', function (): void {
         ->toHaveKey('url')
         ->and($array['accept']['url'])
         ->toBe($this->task->detailRoute());
+});
+
+test('toMail attaches the media of the comment', function (): void {
+    config(['media-library.queue_conversions_by_default' => false]);
+
+    $media = $this->taskComment
+        ->addMedia(UploadedFile::fake()->createWithContent('extension.zip', 'zip payload'))
+        ->toMediaCollection();
+
+    $notification = new CommentCreatedNotification();
+    $notification->model = $this->taskComment->refresh();
+
+    $mail = $notification->toMail($this->user);
+
+    expect($mail->rawAttachments)->toHaveCount(1)
+        ->and(data_get($mail->rawAttachments, '0.name'))->toBe('extension.zip')
+        ->and(data_get($mail->rawAttachments, '0.options.mime'))->toBe($media->mime_type)
+        ->and(data_get($mail->rawAttachments, '0.data'))->toBe('zip payload');
+});
+
+test('toMail carries no attachments when the comment has no media', function (): void {
+    $notification = new CommentCreatedNotification();
+    $notification->model = $this->taskComment;
+
+    $mail = $notification->toMail($this->user);
+
+    expect($mail->attachments)->toBeEmpty()
+        ->and($mail->rawAttachments)->toBeEmpty();
 });

@@ -15,6 +15,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
@@ -215,13 +216,15 @@ abstract class Comments extends Component
         }
 
         try {
-            $this->commentForm->save();
-            $this->submitFiles(
-                'default',
-                $files,
-                morph_alias(Comment::class),
-                $this->commentForm->id
-            );
+            DB::transaction(function () use ($files): void {
+                $this->commentForm->save();
+                $this->submitFiles(
+                    'default',
+                    $files,
+                    morph_alias(Comment::class),
+                    $this->commentForm->id
+                );
+            });
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this, form: $this->commentForm);
 
