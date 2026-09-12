@@ -2,7 +2,11 @@
 
 use FluxErp\Livewire\Product\Product;
 use FluxErp\Models\Category;
+use FluxErp\Models\Language;
+use FluxErp\Models\Price;
+use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
+use FluxErp\Models\ProductProperty;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 use FluxErp\Settings\ProductSettings;
@@ -133,15 +137,15 @@ test('non-variant edit form does not render inheritance indicator chrome', funct
 });
 
 test('priceLists payload marks variant_owns_price true when variant has own price', function (): void {
-    $listA = FluxErp\Models\PriceList::factory()->create(['is_default' => false]);
+    $listA = PriceList::factory()->create(['is_default' => false]);
     $parent = ProductModel::factory()->create();
-    FluxErp\Models\Price::factory()->create([
+    Price::factory()->create([
         'product_id' => $parent->getKey(),
         'price_list_id' => $listA->getKey(),
         'price' => '10.0000',
     ]);
     $variant = ProductModel::factory()->create(['parent_id' => $parent->getKey()]);
-    FluxErp\Models\Price::factory()->create([
+    Price::factory()->create([
         'product_id' => $variant->getKey(),
         'price_list_id' => $listA->getKey(),
         'price' => '15.0000',
@@ -156,9 +160,9 @@ test('priceLists payload marks variant_owns_price true when variant has own pric
 });
 
 test('priceLists payload marks variant_owns_price false when variant inherits from parent product', function (): void {
-    $listA = FluxErp\Models\PriceList::factory()->create(['is_default' => false]);
+    $listA = PriceList::factory()->create(['is_default' => false]);
     $parent = ProductModel::factory()->create();
-    FluxErp\Models\Price::factory()->create([
+    Price::factory()->create([
         'product_id' => $parent->getKey(),
         'price_list_id' => $listA->getKey(),
         'price' => '10.0000',
@@ -174,9 +178,9 @@ test('priceLists payload marks variant_owns_price false when variant inherits fr
 });
 
 test('priceLists payload marks variant_owns_price false on non-variant products', function (): void {
-    $listA = FluxErp\Models\PriceList::factory()->create(['is_default' => false]);
+    $listA = PriceList::factory()->create(['is_default' => false]);
     $product = ProductModel::factory()->create();
-    FluxErp\Models\Price::factory()->create([
+    Price::factory()->create([
         'product_id' => $product->getKey(),
         'price_list_id' => $listA->getKey(),
         'price' => '10.0000',
@@ -191,9 +195,9 @@ test('priceLists payload marks variant_owns_price false on non-variant products'
 });
 
 test('variant prices tab shows the inherited badge for inherited price lists', function (): void {
-    $listA = FluxErp\Models\PriceList::factory()->create(['is_default' => false, 'name' => 'Liste A']);
+    $listA = PriceList::factory()->create(['is_default' => false, 'name' => 'Liste A']);
     $parent = ProductModel::factory()->create();
-    FluxErp\Models\Price::factory()->create([
+    Price::factory()->create([
         'product_id' => $parent->getKey(),
         'price_list_id' => $listA->getKey(),
         'price' => '10.0000',
@@ -261,10 +265,10 @@ test('variant header shows consistency badge when there are field overrides', fu
 });
 
 test('variant header shows price-override count in consistency badge', function (): void {
-    $listA = FluxErp\Models\PriceList::factory()->create(['is_default' => false]);
+    $listA = PriceList::factory()->create(['is_default' => false]);
     $parent = ProductModel::factory()->create();
     $variant = inheritingVariant($parent);
-    FluxErp\Models\Price::factory()->create([
+    Price::factory()->create([
         'product_id' => $variant->getKey(),
         'price_list_id' => $listA->getKey(),
         'price' => '15.0000',
@@ -417,4 +421,34 @@ test('deactivate banner action persists is_active false', function (): void {
         ->assertReturned(true);
 
     expect($parent->fresh()->is_active)->toBeFalse();
+});
+
+test('saving a parent without changing anything keeps the inherited copies of its variants', function (): void {
+    Language::factory()->create(['is_default' => true]);
+    $priceList = PriceList::factory()->create(['is_default' => true, 'is_net' => true]);
+    $parent = ProductModel::factory()
+        ->for(VatRate::factory()->create(['is_default' => true]))
+        ->has(Price::factory()->state(['price_list_id' => $priceList->getKey()]), 'ownPrices')
+        ->create(['is_bundle' => false]);
+    $parent->tenants()->attach($this->dbTenant->getKey());
+    $variant = inheritingVariant($parent);
+    $property = ProductProperty::factory()->create();
+
+    $parent->productProperties()->attach($property->getKey(), [
+        'value' => 'keep me',
+        'is_inherited' => false,
+    ]);
+    $variant->productProperties()->attach($property->getKey(), [
+        'value' => 'keep me',
+        'is_inherited' => true,
+    ]);
+
+    Livewire::test(Product::class, ['id' => $parent->getKey()])
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($parent->ownProductProperties()->count())->toBe(1)
+        ->and($variant->productProperties()->wherePivot('is_inherited', true)->count())->toBe(1)
+        ->and($variant->productProperties()->first()->pivot->value)->toBe('keep me');
 });

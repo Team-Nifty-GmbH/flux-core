@@ -8,6 +8,7 @@ use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
 use FluxErp\Models\ProductCrossSelling;
+use FluxErp\Models\ProductProperty;
 use FluxErp\Models\Tag;
 use FluxErp\Models\VatRate;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -304,4 +305,22 @@ test('add supplier fills every column the pivot table carries', function (): voi
         ->not->toBeEmpty()
         ->and(data_get($component->get('product.suppliers'), '0'))
         ->toHaveKeys(array_merge($pivotFields, ['customer_number', 'main_address']));
+});
+
+test('saving a product without changing anything keeps its own properties', function (): void {
+    $property = ProductProperty::factory()->create();
+    $this->product->productProperties()->attach($property->getKey(), [
+        'value' => 'keep me',
+        'is_inherited' => false,
+    ]);
+
+    expect($this->product->productProperties()->count())->toBe(1);
+
+    Livewire::test(Product::class, ['id' => $this->product->getKey()])
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($this->product->productProperties()->count())->toBe(1)
+        ->and($this->product->productProperties()->first()->pivot->value)->toBe('keep me');
 });
