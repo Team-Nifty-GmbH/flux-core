@@ -136,7 +136,10 @@ test('load comments returns empty for no model id', function (): void {
 });
 
 test('the notification of a comment is sent after its files are attached', function (): void {
-    config(['media-library.queue_conversions_by_default' => false]);
+    config([
+        'media-library.queue_conversions_by_default' => false,
+        'queue.default' => 'sync',
+    ]);
 
     $address = Address::factory()
         ->for(Contact::factory()->create())
