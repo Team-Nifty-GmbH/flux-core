@@ -5,6 +5,8 @@ use FluxErp\Facades\Settings;
 use FluxErp\Settings\CoreSettings;
 use FluxErp\Settings\SearchSettings;
 use FluxErp\Tests\Fixtures\Settings\PackageSettings;
+use Spatie\LaravelSettings\Migrations\SettingsBlueprint;
+use Spatie\LaravelSettings\Migrations\SettingsMigrator;
 use Spatie\LaravelSettings\SettingsContainer;
 
 test('update setting', function (): void {
@@ -26,13 +28,17 @@ test('a setting can be saved while one of its arrays is empty', function (): voi
         'FluxErp\\Tests\\Fixtures\\Settings'
     );
     app(SettingsContainer::class)->clearCache()->registerBindings();
+    app(SettingsMigrator::class)->inGroup('package-fixture', function (SettingsBlueprint $blueprint): void {
+        $blueprint->add('enabled', true);
+        $blueprint->add('layouts', ['sidebar']);
+    });
 
-    $action = UpdateSetting::make([
+    UpdateSetting::make([
         'settings_class' => PackageSettings::class,
         'layouts' => [],
-    ])->validate();
+    ])->validate()->execute();
 
-    expect($action->getData('layouts'))->toBe([]);
+    expect(app(PackageSettings::class)->refresh()->layouts)->toBe([]);
 });
 
 test('a setting still rejects a value of the wrong type', function (): void {
