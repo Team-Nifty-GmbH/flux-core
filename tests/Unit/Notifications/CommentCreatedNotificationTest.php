@@ -99,7 +99,7 @@ test('toMail attaches the media of the comment', function (): void {
     config(['media-library.queue_conversions_by_default' => false]);
 
     $media = $this->taskComment
-        ->addMedia(UploadedFile::fake()->create('extension.zip', 12, 'application/zip'))
+        ->addMedia(UploadedFile::fake()->createWithContent('extension.zip', 'zip payload'))
         ->toMediaCollection();
 
     $notification = new CommentCreatedNotification();
@@ -107,10 +107,10 @@ test('toMail attaches the media of the comment', function (): void {
 
     $mail = $notification->toMail($this->user);
 
-    expect($mail->attachments)->toHaveCount(1)
-        ->and(data_get($mail->attachments, '0.options.as'))->toBe('extension.zip')
-        ->and(data_get($mail->attachments, '0.options.mime'))->toBe($media->mime_type)
-        ->and(data_get($mail->attachments, '0.file'))->toBeReadableFile();
+    expect($mail->rawAttachments)->toHaveCount(1)
+        ->and(data_get($mail->rawAttachments, '0.name'))->toBe('extension.zip')
+        ->and(data_get($mail->rawAttachments, '0.options.mime'))->toBe($media->mime_type)
+        ->and(data_get($mail->rawAttachments, '0.data'))->toBe('zip payload');
 });
 
 test('toMail carries no attachments when the comment has no media', function (): void {
@@ -119,5 +119,6 @@ test('toMail carries no attachments when the comment has no media', function ():
 
     $mail = $notification->toMail($this->user);
 
-    expect($mail->attachments)->toBeEmpty();
+    expect($mail->attachments)->toBeEmpty()
+        ->and($mail->rawAttachments)->toBeEmpty();
 });

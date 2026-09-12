@@ -18,6 +18,13 @@ class CommentCreatedNotification extends SubscribableNotification implements Sho
 {
     use Queueable;
 
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->afterCommit = true;
+    }
+
     public static function sendsTo(): array
     {
         return array_merge(
@@ -62,10 +69,7 @@ class CommentCreatedNotification extends SubscribableNotification implements Sho
         );
 
         foreach ($this->model->getMedia() as $media) {
-            $mail->attach($media->getPath(), [
-                'as' => $media->file_name,
-                'mime' => $media->mime_type,
-            ]);
+            $mail->attach($media);
         }
 
         return $mail;

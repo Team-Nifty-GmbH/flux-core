@@ -1,9 +1,14 @@
 <?php
 
 use FluxErp\Livewire\Ticket\Comments;
+use FluxErp\Models\Address;
 use FluxErp\Models\Comment;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Notifications\Events\NotificationSending;
+use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -128,4 +133,41 @@ test('load comments returns empty for no model id', function (): void {
         ->test(Comments::class)
         ->call('loadComments')
         ->assertReturned([]);
+});
+
+test('the notification of a comment is sent after its files are attached', function (): void {
+    config(['media-library.queue_conversions_by_default' => false]);
+
+    $address = Address::factory()
+        ->for(Contact::factory()->create())
+        ->create([
+            'is_active' => true,
+            'is_main_address' => true,
+        ]);
+    $ticket = Ticket::factory()->create([
+        'authenticatable_type' => morph_alias(Address::class),
+        'authenticatable_id' => $address->getKey(),
+    ]);
+    $address->subscribeNotificationChannel($ticket->broadcastChannel());
+
+    $mediaCounts = [];
+    Event::listen(NotificationSending::class, function (NotificationSending $event) use (&$mediaCounts): bool {
+        $mediaCounts[] = $event->notification->model->getMedia()->count();
+
+        return false;
+    });
+
+    $component = Livewire::withoutLazyLoading()
+        ->actingAs($this->user)
+        ->test(Comments::class, ['modelId' => $ticket->getKey()])
+        ->set('files', [UploadedFile::fake()->image('attachment.png')]);
+
+    $component->call(
+        'saveComment',
+        ['comment' => 'with a file', 'is_internal' => false],
+        [data_get($component->get('files'), '0')->getFilename()]
+    );
+
+    expect($mediaCounts)->not->toBeEmpty()
+        ->and($mediaCounts)->each->toBe(1);
 });
