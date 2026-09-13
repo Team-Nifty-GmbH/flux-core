@@ -52,7 +52,7 @@
     "dependencies": {
         "@simplewebauthn/browser": "^14.0.0",
         "@techstark/opencv-js": "^5.0.0-release.1",
-        "fullcalendar": "^7.0.2",
+        "fullcalendar": "^7.1.0",
         "temporal-polyfill": "^1.0.4"
     }
 }
