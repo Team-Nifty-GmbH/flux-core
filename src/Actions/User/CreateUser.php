@@ -31,15 +31,13 @@ class CreateUser extends FluxAction
         $user->save();
 
         if ($mailAccounts) {
-            $mailAccounts = array_map(
-                fn (int|string $mailAccountId) => [
-                    'mail_account_id' => $mailAccountId,
-                    'is_default' => $mailAccountId === $defaultMailAccountId,
-                ],
-                $mailAccounts
+            $user->mailAccounts()->attach(
+                collect($mailAccounts)
+                    ->mapWithKeys(fn (int|string $mailAccountId) => [
+                        $mailAccountId => ['is_default' => $mailAccountId == $defaultMailAccountId],
+                    ])
+                    ->all()
             );
-
-            $user->mailAccounts()->attach($mailAccounts);
         }
 
         if ($printers) {
