@@ -39,7 +39,7 @@ class UpdateUser extends FluxAction
             $user->mailAccounts()->sync(
                 collect($mailAccounts)
                     ->mapWithKeys(fn (int|string $mailAccountId) => [
-                        $mailAccountId => ['is_default' => $mailAccountId == $defaultMailAccountId],
+                        $mailAccountId => ['is_default' => $mailAccountId === $defaultMailAccountId],
                     ])
                     ->all()
             );
