@@ -45,6 +45,18 @@ test('a logo without readable dimensions renders without size attributes', funct
         ->not->toMatch('/<img[^>]*\swidth="/');
 });
 
+test('an unreadable logo file still renders the mail', function (): void {
+    $this->tenant
+        ->addMedia(UploadedFile::fake()->createWithContent('logo.png', ''))
+        ->toMediaCollection('logo_small');
+
+    $html = (new GenericMail(['html_body' => '<p>Body</p>'], tenant: $this->tenant))->render();
+
+    expect($html)
+        ->toContain('Body</p>')
+        ->not->toMatch('/<img[^>]*\swidth="/');
+});
+
 test('a tenant without logo still renders the mail', function (): void {
     $html = (new GenericMail(['html_body' => '<p>Body</p>'], tenant: $this->tenant))->render();
 

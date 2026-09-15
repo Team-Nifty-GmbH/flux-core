@@ -3,7 +3,9 @@
     @php
         $logo = $tenant->getFirstMedia('logo_small') ?? $tenant->getFirstMedia('logo');
         // Outlook ignores max-width/max-height, it needs width and height attributes
-        $logoSize = $logo && file_exists($logo->getPath()) ? getimagesize($logo->getPath()) : false;
+        $logoSize = $logo && file_exists($logo->getPath())
+            ? rescue(fn () => getimagesize($logo->getPath()), false, false)
+            : false;
         $logoScale = $logoSize ? min(1, 100 / max($logoSize[0], $logoSize[1], 1)) : null;
     @endphp
     <x-slot:header>
