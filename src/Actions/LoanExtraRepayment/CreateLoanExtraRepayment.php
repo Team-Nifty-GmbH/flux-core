@@ -26,13 +26,13 @@ class CreateLoanExtraRepayment extends FluxAction
 
     public function performAction(): LoanExtraRepayment
     {
-        $loan = $this->loan ?? resolve_static(Loan::class, 'query')
+        $this->loan ??= resolve_static(Loan::class, 'query')
             ->whereKey($this->getData('loan_id'))
             ->firstOrFail();
 
         $extraRepayment = app(LoanExtraRepayment::class, ['attributes' => $this->getData()]);
 
-        $scheduler = ExtraRepaymentScheduler::make($loan);
+        $scheduler = ExtraRepaymentScheduler::make($this->loan);
         $open = $scheduler->getOpenInstallments();
         $schedule = $scheduler
             ->reschedule($extraRepayment->amount, $extraRepayment->schedule_adjustment_type_enum)
@@ -41,12 +41,12 @@ class CreateLoanExtraRepayment extends FluxAction
         $extraRepayment->fill($scheduler->savings());
         $extraRepayment->save();
 
-        $loan->installments()
+        $this->loan->installments()
             ->whereKey($open->modelKeys())
             ->delete();
 
         foreach ($schedule as $installment) {
-            $loan->installments()->create($installment);
+            $this->loan->installments()->create($installment);
         }
 
         $lastInstallment = array_last($schedule);
@@ -57,15 +57,15 @@ class CreateLoanExtraRepayment extends FluxAction
             )
         );
 
-        $loan->fill([
+        $this->loan->fill([
             'installment_amount' => $firstRepayment
                 ? bcadd($firstRepayment['principal_amount'], $firstRepayment['interest_amount'], 2)
-                : $loan->installment_amount,
+                : $this->loan->installment_amount,
             'ends_at' => $lastInstallment
                 ? $lastInstallment['due_date']
-                : $loan->installments()->max('due_date'),
+                : $this->loan->installments()->max('due_date'),
         ]);
-        $loan->calculateRemaining()
+        $this->loan->calculateRemaining()
             ->calculateTotalInterest()
             ->calculateProgress()
             ->save();
@@ -77,24 +77,28 @@ class CreateLoanExtraRepayment extends FluxAction
     {
         parent::validateData();
 
-        $loan = $this->loan = resolve_static(Loan::class, 'query')
+        $this->loan = resolve_static(Loan::class, 'query')
             ->whereKey($this->getData('loan_id'))
             ->firstOrFail();
 
-        if (! $loan->allows_extra_repayments) {
+        if (! $this->loan->allows_extra_repayments) {
             throw ValidationException::withMessages([
-                'amount' => [__('This loan does not allow extra repayments.')],
+                'amount' => ['This loan does not allow extra repayments.'],
             ]);
         }
 
         $executedAt = Carbon::parse($this->getData('executed_at'));
         $amount = bcadd((string) $this->getData('amount'), '0', 2);
-        $outstanding = bcadd((string) $loan->remaining, '0', 2);
-        $remainingAllowance = $loan->remainingExtraRepaymentAllowance($executedAt->year);
+        $outstanding = bcadd((string) $this->loan->remaining, '0', 2);
+        $remainingAllowance = $this->loan->remainingExtraRepaymentAllowance($executedAt->year);
         $errors = [];
 
-        if ($executedAt->lt($loan->starts_at)) {
-            $errors['executed_at'][] = __('The extra repayment cannot be executed before the loan starts.');
+        if ($executedAt->lt($this->loan->starts_at)) {
+            $errors['executed_at'][] = 'The extra repayment cannot be executed before the loan starts.';
+        }
+
+        if ($this->loan->ends_at?->lt($executedAt)) {
+            $errors['executed_at'][] = 'The extra repayment cannot be executed after the loan ends.';
         }
 
         if (bccomp($amount, $outstanding, 2) === 1) {

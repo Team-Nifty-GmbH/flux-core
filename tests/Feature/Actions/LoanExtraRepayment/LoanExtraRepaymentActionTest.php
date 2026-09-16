@@ -202,6 +202,15 @@ test('an extra repayment executed before the loan starts is rejected', function 
     extraRepaymentFor($loan, ['executed_at' => '2025-12-31']);
 })->throws(ValidationException::class);
 
+test('an extra repayment executed after the loan ends is rejected', function (): void {
+    $loan = loanFor();
+
+    extraRepaymentFor($loan, [
+        'executed_at' => $loan->ends_at->addDay()->toDateString(),
+        'amount' => 1000,
+    ]);
+})->throws(ValidationException::class, 'The extra repayment cannot be executed after the loan ends.');
+
 test('an allowance takes either a percentage or an amount, not both', function (): void {
     loanFor([
         'extra_repayment_allowance_percentage' => 0.05,
