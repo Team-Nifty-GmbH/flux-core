@@ -8,19 +8,19 @@
                     select="label:label|value:id"
                     unfiltered
                     :request="[
-                    'url' => route('search', \FluxErp\Models\User::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'with' => 'media',
-                        'where' => [
-                            [
-                                'is_active',
-                                '=',
-                                true,
+                        'url' => route('search', \FluxErp\Models\User::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'with' => 'media',
+                            'where' => [
+                                [
+                                    'is_active',
+                                    '=',
+                                    true,
+                                ],
                             ],
                         ],
-                    ],
-                ]"
+                    ]"
                 />
                 <x-slot:footer>
                     <x-button

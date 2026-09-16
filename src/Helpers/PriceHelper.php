@@ -80,9 +80,7 @@ class PriceHelper
     {
         $this->timestamp = $this->timestamp ?? Carbon::now()->toDateTimeString();
 
-        $this->price = $this->priceList?->prices()
-            ->where('product_id', $this->product->getKey())
-            ->first();
+        $this->price = $this->priceForProduct($this->priceList, $this->product);
 
         if (! $this->price && $this->priceList?->parent) {
             $this->price = $this->calculatePriceFromPriceList($this->priceList, []);
@@ -94,17 +92,12 @@ class PriceHelper
         }
 
         if (! $this->price) {
-            $this->price = $this->contact?->priceList?->prices()
-                ->where('product_id', $this->product->getKey())
-                ->first();
+            $this->price = $this->priceForProduct($this->contact?->priceList, $this->product);
         }
 
         if (! $this->price && $this->useDefault) {
             $this->priceList = resolve_static(PriceList::class, 'default');
-            $this->price = resolve_static(Price::class, 'query')
-                ->where('product_id', $this->product->getKey())
-                ->whereRelation('priceList', 'is_default', true)
-                ->first();
+            $this->price = $this->defaultPriceForProduct($this->product);
 
             if ($this->price) {
                 $this->price->isInherited = true;
@@ -379,9 +372,7 @@ class PriceHelper
             })
             ->first();
 
-        $price = $priceList->parent?->prices()
-            ->where('product_id', $this->product->getKey())
-            ->first();
+        $price = $this->priceForProduct($priceList->parent, $this->product);
 
         // If price was found, apply all the discounts in reverse order
         if ($price) {
@@ -421,14 +412,65 @@ class PriceHelper
             return $price;
         }
 
-        $parentPrice = $priceList->parent?->prices()
-            ->where('product_id', $this->product->getKey())
-            ->first();
+        $parentPrice = $this->priceForProduct($priceList->parent, $this->product);
 
         if ($priceList->parent) {
             $price = $this->getRootPrice($priceList->parent, $parentPrice);
         }
 
         return $parentPrice ?? $price;
+    }
+
+    /**
+     * Look up a price for the given product on the given price list, falling
+     * back to the variant's parent product when inheritance is enabled and
+     * the variant has no own price for that price list.
+     */
+    protected function priceForProduct(?PriceList $priceList, ?Product $product): ?Price
+    {
+        if (! $priceList || ! $product) {
+            return null;
+        }
+
+        $price = $priceList->prices()
+            ->where('product_id', $product->getKey())
+            ->first();
+
+        if ($price) {
+            return $price;
+        }
+
+        if ($product->isVariant() && $product->inheritanceEnabled()) {
+            return $priceList->prices()
+                ->where('product_id', $product->parent_id)
+                ->first();
+        }
+
+        return null;
+    }
+
+    /**
+     * Look up a price on the default price list, falling back to the variant's
+     * parent product when inheritance is enabled.
+     */
+    protected function defaultPriceForProduct(Product $product): ?Price
+    {
+        $price = resolve_static(Price::class, 'query')
+            ->where('product_id', $product->getKey())
+            ->whereRelation('priceList', 'is_default', true)
+            ->first();
+
+        if ($price) {
+            return $price;
+        }
+
+        if ($product->isVariant() && $product->inheritanceEnabled()) {
+            return resolve_static(Price::class, 'query')
+                ->where('product_id', $product->parent_id)
+                ->whereRelation('priceList', 'is_default', true)
+                ->first();
+        }
+
+        return null;
     }
 }

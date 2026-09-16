@@ -89,7 +89,7 @@ class StockPostingList extends BaseStockPostingList
         try {
             $this->stockPosting->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->stockPosting);
 
             return false;
         }

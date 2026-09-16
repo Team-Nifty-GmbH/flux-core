@@ -63,7 +63,7 @@ class ProjectList extends BaseProjectList
         try {
             $this->project->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->project);
 
             return false;
         }

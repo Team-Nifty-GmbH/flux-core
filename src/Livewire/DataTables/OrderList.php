@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Models\Order;
+use FluxErp\Support\Bus\BulkExecutor;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -51,27 +52,25 @@ class OrderList extends BaseDataTable
             ->where('is_locked', false)
             ->pluck('id');
 
-        $deleted = 0;
-        foreach ($orders as $orderId) {
-            try {
-                $success = DeleteOrder::make(['id' => $orderId])->checkPermission()->validate()->execute();
-            } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+        if ($orders->isEmpty()) {
+            $this->reset('selected');
 
-                continue;
-            }
-
-            if ($success) {
-                $deleted++;
-            }
+            return;
         }
 
-        $this->toast()
-            ->success(__('Deleted :count orders', ['count' => $deleted]))
-            ->send();
+        try {
+            BulkExecutor::make(
+                DeleteOrder::class,
+                $orders
+                    ->map(fn (int $orderId): array => ['id' => $orderId])
+                    ->all()
+            )
+                ->name(__('Deleting orders'))
+                ->dispatch();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
 
-        if ($deleted > 0) {
-            $this->loadData();
+            return;
         }
 
         $this->reset('selected');

@@ -26,7 +26,7 @@ class LanguageFactory extends Factory
 
         return [
             'name' => fake()->country(),
-            'iso_name' => fake()->country(),
+            'iso_name' => fake()->country() . ' ' . $languageCode,
             'language_code' => $languageCode,
         ];
     }

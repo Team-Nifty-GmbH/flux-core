@@ -124,10 +124,11 @@ class CreateStockPosting extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        if (data_get($this->getData(), 'serial_number.use_supplier_serial_number')) {
+        if ($this->getData('serial_number.use_supplier_serial_number')) {
             data_set(
-                $this->getData(), 'serial_number.serial_number',
-                data_get($this->getData(), 'serial_number.supplier_serial_number')
+                $this->data,
+                'serial_number.serial_number',
+                $this->getData('serial_number.supplier_serial_number')
             );
         }
     }

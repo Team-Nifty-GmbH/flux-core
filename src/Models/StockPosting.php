@@ -63,9 +63,9 @@ class StockPosting extends FluxModel
         return $this->belongsTo(Warehouse::class, 'warehouse_id');
     }
 
-    public function warehouseBin(): BelongsTo
+    public function storageArea(): BelongsTo
     {
-        return $this->belongsTo(WarehouseBin::class, 'warehouse_bin_id');
+        return $this->belongsTo(StorageArea::class, 'storage_area_id');
     }
 
     // Scopes

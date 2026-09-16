@@ -3,7 +3,8 @@
 namespace FluxErp\Actions\Contact;
 
 use FluxErp\Actions\Discount\CreateDiscount;
-use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\DispatchableFluxAction;
+use FluxErp\Contracts\SupportsBulkExecution;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Pivots\ContactTenant;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
-class UpdateContact extends FluxAction
+class UpdateContact extends DispatchableFluxAction implements SupportsBulkExecution
 {
     public static function models(): array
     {

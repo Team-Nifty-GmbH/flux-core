@@ -48,6 +48,11 @@ class AssignableOrders extends Component
 
         $this->contactId = $contactId;
         $this->invoiceTotal = is_null($invoiceTotal) ? null : (float) $invoiceTotal;
+
+        if ($orderId = $this->suggestedOrderId()) {
+            $this->orderId = $orderId;
+            $this->updatedOrderId($orderId);
+        }
     }
 
     public function updatedOrderId(mixed $value): void
@@ -97,6 +102,7 @@ class AssignableOrders extends Component
 
         return $groups
             ->map(fn (Collection $orders, string $group) => [
+                'key' => $group,
                 'label' => $group === 'rates' ? __('Subscription Rates') : __('Orders'),
                 'value' => $orders
                     ->map(fn (Order $order) => [
@@ -128,5 +134,25 @@ class AssignableOrders extends Component
         }
 
         return null;
+    }
+
+    protected function suggestedOrderId(): ?int
+    {
+        if (is_null($this->invoiceTotal)) {
+            return null;
+        }
+
+        $matching = collect(
+            data_get(collect($this->orders)->firstWhere('key', 'rates'), 'value', [])
+        )
+            ->filter(
+                fn (array $option) => bccomp(
+                    bcround((string) data_get($option, 'total_gross_price'), 2),
+                    bcround((string) $this->invoiceTotal, 2),
+                    2
+                ) === 0
+            );
+
+        return $matching->count() === 1 ? data_get($matching->first(), 'value') : null;
     }
 }

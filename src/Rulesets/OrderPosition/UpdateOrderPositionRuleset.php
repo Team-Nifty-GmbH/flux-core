@@ -12,11 +12,13 @@ use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\Tenant;
+use FluxErp\Models\Unit;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Fluent;
 use Illuminate\Validation\Rule;
 
@@ -76,7 +78,12 @@ class UpdateOrderPositionRuleset extends FluxRuleset
                 ),
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Product::class, 'subject' => OrderPosition::class]),
+                app(ModelExists::class, ['model' => Product::class, 'subject' => OrderPosition::class])
+                    ->where('is_variant_parent', false)
+                    ->whereDoesntHave(
+                        'children',
+                        fn (Builder $query) => $query->where('is_active', true)
+                    ),
             ],
             'supplier_contact_id' => [
                 'integer',
@@ -92,6 +99,13 @@ class UpdateOrderPositionRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => VatRate::class, 'subject' => OrderPosition::class]),
+            ],
+            'unit_id' => [
+                'exclude_if:is_free_text,true',
+                'sometimes',
+                'integer',
+                'nullable',
+                app(ModelExists::class, ['model' => Unit::class, 'subject' => OrderPosition::class]),
             ],
             'warehouse_id' => [
                 'exclude_if:is_free_text,true',
@@ -173,6 +187,8 @@ class UpdateOrderPositionRuleset extends FluxRuleset
             'is_alternative' => 'boolean',
             'is_net' => 'boolean',
             'is_free_text' => 'boolean',
+
+            'recalculate_order' => 'boolean',
         ];
     }
 }

@@ -3,12 +3,11 @@
 namespace FluxErp\Menu;
 
 use Closure;
-use FluxErp\Models\Permission;
+use FluxErp\Support\Auth\PermissionSet;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
-use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 class MenuManager
@@ -44,9 +43,14 @@ class MenuManager
     public function forGuard(string $guard, ?string $group = null, bool $ignorePermissions = false): array
     {
         $this->resolve();
+
+        $permissions = $ignorePermissions
+            ? null
+            : PermissionSet::make(guard: $guard);
+
         $menuItems = $this->sortMultiDimensional(
             $this->resolved,
-            function (array $value) use ($guard, $ignorePermissions) {
+            function (array $value) use ($guard, $permissions) {
                 $routeName = data_get($value, 'route_name');
                 if ($routeName && ($when = data_get($this->whenCallbacks, $routeName)) && ! $when()) {
                     return false;
@@ -57,23 +61,8 @@ class MenuManager
                 }
 
                 $permission = data_get($value, 'permission');
-                // first check if a permission exists
-                if ($permission && ! $ignorePermissions) {
-                    try {
-                        resolve_static(
-                            Permission::class,
-                            'findByName',
-                            [
-                                'name' => $permission,
-                                'guardName' => $guard,
-                            ]
-                        );
-                    } catch (PermissionDoesNotExist) {
-                        return true;
-                    }
-
-                    // if the user has the permission, return true
-                    return auth()->user()?->can($permission);
+                if ($permission && $permissions) {
+                    return $permissions->allows($permission);
                 }
 
                 return true;

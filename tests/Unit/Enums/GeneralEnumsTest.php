@@ -11,6 +11,8 @@ use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Enums\PropertyTypeEnum;
 use FluxErp\Enums\RoundingMethodEnum;
 use FluxErp\Enums\SepaMandateTypeEnum;
+use FluxErp\Enums\StockRemovalStrategyEnum;
+use FluxErp\Enums\StorageAreaTypeEnum;
 
 test('BundleTypeEnum has standard and group', function (): void {
     expect(BundleTypeEnum::values())->toBe(['group', 'standard']);
@@ -65,4 +67,17 @@ test('RoundingMethodEnum apply with none returns original', function (): void {
 
 test('SepaMandateTypeEnum has B2B and BASIC', function (): void {
     expect(SepaMandateTypeEnum::values())->toBe(['B2B', 'BASIC']);
+});
+
+test('StockRemovalStrategyEnum has fefo fifo and lifo', function (): void {
+    expect(StockRemovalStrategyEnum::values())->toBe(['fefo', 'fifo', 'lifo']);
+});
+
+test('StockRemovalStrategyEnum is localizable', function (): void {
+    expect(StockRemovalStrategyEnum::toArray())->toHaveKeys(['fefo', 'fifo', 'lifo']);
+});
+
+test('StorageAreaTypeEnum has every storage area type', function (): void {
+    expect(StorageAreaTypeEnum::values())
+        ->toBe(['aisle', 'container', 'goods-in', 'goods-out', 'packing', 'quarantine', 'rack', 'shelf', 'zone']);
 });

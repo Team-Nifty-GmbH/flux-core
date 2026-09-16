@@ -36,18 +36,6 @@ class UpdateOrder extends FluxAction
         $order = resolve_static(Order::class, 'query')
             ->whereKey($this->getData('id'))
             ->first();
-        if ($order->shipping_costs_net_price) {
-            $order->shipping_costs_vat_rate_percentage = 0.190000000;   // TODO: Make this percentage NOT hardcoded!
-            $order->shipping_costs_gross_price = net_to_gross(
-                $order->shipping_costs_net_price,
-                $order->shipping_costs_vat_rate_percentage
-            );
-            $order->shipping_costs_vat_price = bcsub(
-                $order->shipping_costs_gross_price,
-                $order->shipping_costs_net_price
-            );
-        }
-
         if ($this->getData('address_delivery')) {
             // Custom address_delivery provided - use its id if present, otherwise null (custom address)
             $this->data['address_delivery_id'] = $this->getData('address_delivery.id');

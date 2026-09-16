@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Order;
 use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\UpdateLockedOrder;
+use FluxErp\Actions\PaymentReminder\CreatePaymentReminder;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Forms\CollectiveOrderForm;
@@ -13,6 +14,7 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
+use FluxErp\Models\PaymentReminder;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Tenant;
@@ -21,9 +23,12 @@ use FluxErp\Support\Bus\BulkExecutor;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 use Laravel\SerializableClosure\SerializableClosure;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -31,9 +36,14 @@ use Throwable;
 
 class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 {
-    use CreatesDocuments;
+    use CreatesDocuments {
+        openCreateDocumentsModal as protected openDocumentsModal;
+    }
 
     public ?string $cacheKey = 'order.order-list';
+
+    #[Locked]
+    public bool $createsPaymentReminders = false;
 
     public ?int $mapLimit = 100;
 
@@ -74,6 +84,12 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
                 ->text(__('Create Documents'))
                 ->color('indigo')
                 ->wireClick('openCreateDocumentsModal()'),
+            DataTableButton::make()
+                ->icon('bell-alert')
+                ->text(__('Create Payment Reminder'))
+                ->color('indigo')
+                ->when(fn () => resolve_static(CreatePaymentReminder::class, 'canPerformAction', [false]))
+                ->wireClick('openCreatePaymentRemindersModal()'),
             DataTableButton::make()
                 ->icon('banknotes')
                 ->text(__('Mark as paid'))
@@ -137,9 +153,37 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     #[Renderless]
     public function createDocuments(): void
     {
+        if ($this->createsPaymentReminders) {
+            $this->createPaymentReminderDocuments();
+
+            return;
+        }
+
         $this->createDocumentFromItems($this->getSelectedModels());
         $this->loadData();
         $this->reset('selected');
+    }
+
+    public function openCreateDocumentsModal(): void
+    {
+        $this->createsPaymentReminders = false;
+
+        $this->openDocumentsModal();
+    }
+
+    public function openCreatePaymentRemindersModal(): void
+    {
+        try {
+            resolve_static(CreatePaymentReminder::class, 'canPerformAction', [true]);
+        } catch (UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->createsPaymentReminders = true;
+
+        $this->openDocumentsModal();
     }
 
     #[Renderless]
@@ -243,7 +287,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         try {
             $this->order->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
 
             return false;
         }
@@ -259,7 +303,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         try {
             $this->collectiveOrder->create();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->collectiveOrder);
 
             return;
         }
@@ -271,8 +315,8 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         JS);
     }
 
-    #[Renderless]
-    public function getOrdersWithoutCoordinatesCount(): int
+    #[Computed]
+    public function ordersWithoutCoordinatesCount(): int
     {
         return $this->buildSearch()
             ->where(function (Builder $query): void {
@@ -330,8 +374,64 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         $this->dispatch('load-map');
     }
 
+    protected function createPaymentReminderDocuments(): void
+    {
+        $baseQuery = $this->getSelectedModelsQuery();
+
+        $orders = (clone $baseQuery)
+            ->whereHasMailablePaymentReminderAddress()
+            ->get();
+
+        $skippedCount = (clone $baseQuery)->count() - $orders->count();
+
+        if ($skippedCount > 0) {
+            $this->toast()
+                ->warning(
+                    __(':count order(s) skipped due to missing email address.', ['count' => $skippedCount])
+                )
+                ->send();
+        }
+
+        $reminders = collect();
+        foreach ($orders as $order) {
+            try {
+                $reminder = CreatePaymentReminder::make([
+                    'order_id' => $order->getKey(),
+                    'reminder_level' => (int) $order->payment_reminder_current_level + 1,
+                ])
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException $e) {
+                exception_to_notifications($e, $this);
+
+                continue;
+            }
+
+            $reminder->setRelation('order', $order);
+
+            $reminders->push($reminder);
+        }
+
+        $this->createDocumentFromItems($reminders);
+
+        $this->loadData();
+        $this->reset('selected');
+    }
+
     protected function getBladeParameters(OffersPrinting $item): array|SerializableClosure|null
     {
+        if ($item instanceof PaymentReminder) {
+            $reminderId = $item->getKey();
+
+            return new SerializableClosure(
+                fn (): array => [
+                    'paymentReminder' => resolve_static(PaymentReminder::class, 'query')
+                        ->whereKey($reminderId)
+                        ->first(),
+                ]
+            );
+        }
+
         return new SerializableClosure(
             fn () => [
                 'order' => resolve_static(Order::class, 'query')
@@ -343,11 +443,19 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 
     protected function getDefaultTemplateId(OffersPrinting $item): ?int
     {
+        if ($item instanceof PaymentReminder) {
+            return $item->getPaymentReminderText()?->email_template_id;
+        }
+
         return $item->orderType?->email_template_id;
     }
 
     protected function getPrintLayouts(): array
     {
+        if ($this->createsPaymentReminders) {
+            return app(PaymentReminder::class)->resolvePrintViews();
+        }
+
         return resolve_static(Order::class, 'query')
             ->whereKey($this->getSelectedValues())
             ->with('orderType')
@@ -357,11 +465,21 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 
     protected function getPreferredLanguageId(OffersPrinting $item): ?int
     {
+        if ($item instanceof PaymentReminder) {
+            return $item->order->language_id;
+        }
+
         return $item->language_id;
     }
 
     protected function getTo(OffersPrinting $item, array $documents): array
     {
+        if ($item instanceof PaymentReminder) {
+            return array_filter(
+                Arr::wrap($item->order->resolveMailablePaymentReminderAddress()?->email_primary)
+            );
+        }
+
         $printViews = $item->getPrintViews();
 
         $invoiceDocs = array_filter(

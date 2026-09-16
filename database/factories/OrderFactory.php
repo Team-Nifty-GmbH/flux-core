@@ -15,7 +15,6 @@ class OrderFactory extends Factory
             'payment_target' => fake()->numberBetween(10, 20),
             'payment_discount_target' => fake()->numberBetween(3, 5),
             'payment_discount_percent' => fake()->numberBetween(1, 10) / 100,
-            'shipping_costs_net_price' => fake()->numberBetween(1, 5),
             'payment_reminder_days_1' => fake()->numberBetween(1, 10),
             'payment_reminder_days_2' => fake()->numberBetween(1, 10),
             'payment_reminder_days_3' => fake()->numberBetween(1, 10),

@@ -129,7 +129,7 @@
                     />
                     @auth('web')
                         <div
-                            x-persist="layout.header.search - bar"
+                            x-persist="layout.header.searchBar"
                             class="hidden grow sm:block"
                         >
                             <livewire:features.search-bar />
@@ -140,9 +140,7 @@
 
                     <div class="flex shrink-0 gap-2">
                         @auth('web')
-                            <div
-                                x-persist="layout.header.search - bar - mobile"
-                            >
+                            <div x-persist="layout.header.searchBarMobile">
                                 <livewire:features.search-bar
                                     :mobile="true"
                                     lazy

@@ -1,0 +1,53 @@
+name: Build main assets
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: main-dist
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: [self-hosted, Linux]
+    container:
+      image: ghcr.io/team-nifty-gmbh/flux-ci:php8.5
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - name: Fix git ownership
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
+      - name: Configure Composer GitHub auth
+        run: composer config --global github-oauth.github.com ${{ github.token }}
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --prefer-dist --no-dev --no-scripts
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Publish main-dist
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B main-dist
+          git add -f dist/
+          git commit -m "Build assets for ${{ github.sha }}"
+          git push -f origin main-dist
