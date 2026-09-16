@@ -23,13 +23,12 @@ class CreateWarehouseRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Address::class]),
             ],
             'name' => 'required|string|max:255',
-            'is_default' => 'boolean',
-            'requires_bin_location' => 'boolean',
             'stock_removal_strategy_enum' => [
-                'sometimes',
                 'required',
                 Rule::enum(StockRemovalStrategyEnum::class),
             ],
+            'is_default' => 'boolean',
+            'requires_storage_area' => 'boolean',
         ];
     }
 }

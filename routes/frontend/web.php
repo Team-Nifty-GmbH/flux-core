@@ -6,6 +6,7 @@ use FluxErp\Actions\PushSubscription\UpsertPushSubscription;
 use FluxErp\Http\Controllers\AuthController;
 use FluxErp\Http\Controllers\CalendarEventController;
 use FluxErp\Http\Controllers\CalendarSearchController;
+use FluxErp\Http\Controllers\MentionableSearchController;
 use FluxErp\Http\Controllers\PrivateMediaController;
 use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Middleware\TrackVisits;
@@ -131,6 +132,7 @@ use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Livewire\Ticket\Ticket;
 use FluxErp\Models\Address;
 use FluxErp\Support\MediaLibrary\ContentDisposition;
+use FluxErp\Support\MediaLibrary\StreamedFile;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -391,6 +393,8 @@ Route::middleware('web')
         });
 
         Route::middleware('auth:web')->group(function (): void {
+            Route::post('/search/mentionable', MentionableSearchController::class)
+                ->name('search.mentionable');
             Route::any('/search/{model?}', SearchController::class)
                 ->where('model', '(.*)')
                 ->name('search');
@@ -431,7 +435,8 @@ Route::middleware('web')
                     );
                 }
 
-                return $disk->response(
+                return StreamedFile::response(
+                    $disk,
                     $path,
                     $media->file_name,
                     ['Content-Disposition' => $disposition],

@@ -4,8 +4,8 @@ use FluxErp\Actions\StockPosting\CreateStockPosting;
 use FluxErp\Models\Lot;
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
+use FluxErp\Models\StorageArea;
 use FluxErp\Models\Warehouse;
-use FluxErp\Models\WarehouseBin;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 uses(DatabaseTransactions::class);
@@ -13,30 +13,30 @@ uses(DatabaseTransactions::class);
 beforeEach(function (): void {
     $this->warehouse = Warehouse::factory()->create();
     $this->product = Product::factory()->create();
-    $this->bin = WarehouseBin::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+    $this->storageArea = StorageArea::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
 });
 
-test('a warehouse that requires bin locations rejects an incoming posting without one', function (): void {
-    $this->warehouse->update(['requires_bin_location' => true]);
+test('a warehouse that requires storage areas rejects an incoming posting without one', function (): void {
+    $this->warehouse->update(['requires_storage_area' => true]);
 
     CreateStockPosting::assertValidationErrors([
         'warehouse_id' => $this->warehouse->getKey(),
         'product_id' => $this->product->getKey(),
         'posting' => 5,
-    ], 'warehouse_bin_id');
+    ], 'storage_area_id');
 });
 
-test('a warehouse that requires bin locations accepts an incoming posting with one', function (): void {
-    $this->warehouse->update(['requires_bin_location' => true]);
+test('a warehouse that requires storage areas accepts an incoming posting with one', function (): void {
+    $this->warehouse->update(['requires_storage_area' => true]);
 
     $posting = CreateStockPosting::make([
         'warehouse_id' => $this->warehouse->getKey(),
         'product_id' => $this->product->getKey(),
-        'warehouse_bin_id' => $this->bin->getKey(),
+        'storage_area_id' => $this->storageArea->getKey(),
         'posting' => 5,
     ])->validate()->execute();
 
-    expect($posting->warehouse_bin_id)->toBe($this->bin->getKey());
+    expect($posting->storage_area_id)->toBe($this->storageArea->getKey());
 });
 
 test('a lot tracked product rejects an incoming posting without a lot', function (): void {
@@ -118,8 +118,8 @@ test('a withdrawal may not exceed the remaining plus reserved stock of its paren
     ], 'posting');
 });
 
-test('an outgoing posting is exempt from the bin requirement', function (): void {
-    $this->warehouse->update(['requires_bin_location' => true]);
+test('an outgoing posting is exempt from the storage area requirement', function (): void {
+    $this->warehouse->update(['requires_storage_area' => true]);
     $nos = Product::factory()->create(['is_nos' => true]);
 
     $posting = CreateStockPosting::make([
@@ -131,8 +131,8 @@ test('an outgoing posting is exempt from the bin requirement', function (): void
     expect(bccomp($posting->posting, '-2', 10))->toBe(0);
 });
 
-test('an incoming posting into a bin that is not a storage location is rejected', function (): void {
-    $zone = WarehouseBin::factory()->create([
+test('an incoming posting into a storage area that is not a storage location is rejected', function (): void {
+    $zone = StorageArea::factory()->create([
         'warehouse_id' => $this->warehouse->getKey(),
         'is_storage_location' => false,
     ]);
@@ -140,13 +140,13 @@ test('an incoming posting into a bin that is not a storage location is rejected'
     CreateStockPosting::assertValidationErrors([
         'warehouse_id' => $this->warehouse->getKey(),
         'product_id' => $this->product->getKey(),
-        'warehouse_bin_id' => $zone->getKey(),
+        'storage_area_id' => $zone->getKey(),
         'posting' => 5,
-    ], 'warehouse_bin_id');
+    ], 'storage_area_id');
 });
 
-test('an incoming posting into an inactive bin is rejected', function (): void {
-    $inactive = WarehouseBin::factory()->create([
+test('an incoming posting into an inactive storage area is rejected', function (): void {
+    $inactive = StorageArea::factory()->create([
         'warehouse_id' => $this->warehouse->getKey(),
         'is_active' => false,
     ]);
@@ -154,7 +154,7 @@ test('an incoming posting into an inactive bin is rejected', function (): void {
     CreateStockPosting::assertValidationErrors([
         'warehouse_id' => $this->warehouse->getKey(),
         'product_id' => $this->product->getKey(),
-        'warehouse_bin_id' => $inactive->getKey(),
+        'storage_area_id' => $inactive->getKey(),
         'posting' => 5,
-    ], 'warehouse_bin_id');
+    ], 'storage_area_id');
 });

@@ -159,19 +159,19 @@
                                 select="label:label|value:id"
                                 unfiltered
                                 :request="[
-                                'url' => route('search', \FluxErp\Models\User::class),
-                                'method' => 'POST',
-                                'params' => [
-                                    'with' => 'media',
-                                    'where' => [
-                                        [
-                                            'field' => 'is_active',
-                                            'operator' => '=',
-                                            'value' => true,
+                                    'url' => route('search', \FluxErp\Models\User::class),
+                                    'method' => 'POST',
+                                    'params' => [
+                                        'with' => 'media',
+                                        'where' => [
+                                            [
+                                                'field' => 'is_active',
+                                                'operator' => '=',
+                                                'value' => true,
+                                            ],
                                         ],
                                     ],
-                                ],
-                            ]"
+                                ]"
                             />
                             <x-button
                                 x-cloak
@@ -226,19 +226,19 @@
                                         select="label:label|value:id"
                                         unfiltered
                                         :request="[
-                                        'url' => route('search', $ticket->authenticatable_type ?? morph_alias(\FluxErp\Models\User::class)),
-                                        'method' => 'POST',
-                                        'params' => [
-                                            'with' => $ticket->authenticatable_type === morph_alias(\FluxErp\Models\Address::class) ? 'contact.media' : 'media',
-                                            'where' => [
-                                                [
-                                                    'field' => 'is_active',
-                                                    'operator' => '=',
-                                                    'value' => true,
+                                            'url' => route('search', $ticket->authenticatable_type ?? morph_alias(\FluxErp\Models\User::class)),
+                                            'method' => 'POST',
+                                            'params' => [
+                                                'with' => $ticket->authenticatable_type === morph_alias(\FluxErp\Models\Address::class) ? 'contact.media' : 'media',
+                                                'where' => [
+                                                    [
+                                                        'field' => 'is_active',
+                                                        'operator' => '=',
+                                                        'value' => true,
+                                                    ],
                                                 ],
                                             ],
-                                        ],
-                                    ]"
+                                        ]"
                                     />
                                 </div>
                             </div>

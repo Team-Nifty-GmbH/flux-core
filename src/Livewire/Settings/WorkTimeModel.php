@@ -43,7 +43,7 @@ class WorkTimeModel extends Component
 
             $this->redirect(route('settings.work-time-models'));
         } catch (Exception $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->workTimeModelForm);
         }
     }
 
@@ -81,7 +81,7 @@ class WorkTimeModel extends Component
             $this->workTimeModelForm->save();
             $this->workTimeModelForm->loadSchedules($this->workTimeModelForm->getActionResult());
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->workTimeModelForm);
 
             return;
         }

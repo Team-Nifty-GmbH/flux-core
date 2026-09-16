@@ -137,7 +137,7 @@ class ProductList extends BaseProductList
         try {
             $this->product->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->product);
 
             return false;
         }
@@ -160,7 +160,7 @@ class ProductList extends BaseProductList
         try {
             $this->product->restore();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->product);
 
             return;
         }
@@ -185,7 +185,7 @@ class ProductList extends BaseProductList
                 ->validate()
                 ->executeAsync();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->productPricesUpdate);
 
             return false;
         }

@@ -109,7 +109,7 @@ class CreateStockPostingsFromOrder extends FluxAction
                     CreateStockPosting::make([
                         'warehouse_id' => $orderPosition->warehouse_id,
                         'product_id' => $orderPosition->product_id,
-                        'warehouse_bin_id' => $stockPosting->warehouse_bin_id,
+                        'storage_area_id' => $stockPosting->storage_area_id,
                         'lot_id' => $stockPosting->lot_id,
                         'parent_id' => $stockPosting->id,
                         'order_position_id' => $orderPosition->id,
@@ -236,7 +236,7 @@ class CreateStockPostingsFromOrder extends FluxAction
             CreateStockPosting::make([
                 'warehouse_id' => $orderPosition->warehouse_id,
                 'product_id' => $orderPosition->product_id,
-                'warehouse_bin_id' => $stockPosting->warehouse_bin_id,
+                'storage_area_id' => $stockPosting->storage_area_id,
                 'lot_id' => $stockPosting->lot_id,
                 'order_position_id' => $orderPosition->id,
                 'serial_number_id' => $stockPosting->serial_number_id,

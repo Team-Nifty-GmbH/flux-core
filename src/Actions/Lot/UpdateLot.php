@@ -10,7 +10,7 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateLot extends FluxAction
 {
-    private ?Lot $lot = null;
+    protected ?Lot $lot = null;
 
     public static function models(): array
     {
@@ -22,31 +22,36 @@ class UpdateLot extends FluxAction
         return UpdateLotRuleset::class;
     }
 
-    public function performAction(): Model
+    public function performAction(): ?Model
     {
-        $this->lot->fill($this->getData());
-        $this->lot->save();
+        $lot = $this->getLot();
+        $lot?->fill($this->getData());
+        $lot?->save();
 
-        return $this->lot->withoutRelations()->fresh();
+        return $lot?->withoutRelations()->fresh();
     }
 
     protected function validateData(): void
     {
         parent::validateData();
 
-        $this->lot = resolve_static(Lot::class, 'query')
-            ->whereKey($this->getData('id'))
-            ->first();
-
         if (resolve_static(Lot::class, 'query')
-            ->whereKeyNot($this->lot->getKey())
-            ->where('product_id', $this->getData('product_id', $this->lot->product_id))
-            ->where('lot_number', $this->getData('lot_number', $this->lot->lot_number))
+            ->whereKeyNot($this->getData('id'))
+            ->where('product_id', $this->getData('product_id', $this->getLot()?->product_id))
+            ->where('lot_number', $this->getData('lot_number', $this->getLot()?->lot_number))
             ->exists()
         ) {
             throw ValidationException::withMessages([
                 'lot_number' => ['The given lot number is already taken for this product'],
-            ])->errorBag('updateLot');
+            ])
+                ->errorBag('updateLot');
         }
+    }
+
+    protected function getLot(): ?Lot
+    {
+        return $this->lot ??= resolve_static(Lot::class, 'query')
+            ->whereKey($this->getData('id'))
+            ->first();
     }
 }

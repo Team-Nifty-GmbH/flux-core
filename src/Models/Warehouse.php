@@ -20,9 +20,9 @@ class Warehouse extends FluxModel
     protected function casts(): array
     {
         return [
-            'is_default' => 'boolean',
-            'requires_bin_location' => 'boolean',
             'stock_removal_strategy_enum' => StockRemovalStrategyEnum::class,
+            'is_default' => 'boolean',
+            'requires_storage_area' => 'boolean',
         ];
     }
 
@@ -32,8 +32,8 @@ class Warehouse extends FluxModel
         return $this->hasMany(StockPosting::class, 'warehouse_id');
     }
 
-    public function warehouseBins(): HasMany
+    public function storageAreas(): HasMany
     {
-        return $this->hasMany(WarehouseBin::class, 'warehouse_id');
+        return $this->hasMany(StorageArea::class, 'warehouse_id');
     }
 }

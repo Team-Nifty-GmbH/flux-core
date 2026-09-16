@@ -222,7 +222,7 @@ test('create documents with delivery lock fails', function (): void {
         ->call('createDocuments')
         ->assertOk()
         ->assertReturned(null)
-        ->assertHasErrors(['has_contact_delivery_lock', 'order.balance'])
+        ->assertHasErrors(['has_contact_delivery_lock', 'balance'])
         ->assertSet('order.invoice_number', null);
 
     expect($this->order->refresh()->invoice_number)->toBeNull();
@@ -269,6 +269,34 @@ test('fetch contact data', function (): void {
         ->assertSet('order.tenant_id', $newContact->getTenantId())
         ->assertSet('order.address_invoice_id', $newContact->invoice_address_id)
         ->assertSet('order.address_delivery_id', $newContact->delivery_address_id);
+});
+
+test('a purchase order is delivered to the tenant, not to the supplier', function (): void {
+    $supplier = Contact::factory()->create();
+
+    $supplierAddress = Address::factory()->create([
+        'contact_id' => $supplier->id,
+    ]);
+
+    $supplier->update([
+        'delivery_address_id' => $supplierAddress->id,
+        'invoice_address_id' => $supplierAddress->id,
+        'main_address_id' => $supplierAddress->id,
+    ]);
+
+    $this->order->update([
+        'order_type_id' => OrderType::factory()->create([
+            'order_type_enum' => OrderTypeEnum::Purchase,
+            'is_active' => true,
+        ])->getKey(),
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('order.contact_id', $supplier->id)
+        ->call('fetchContactData')
+        ->assertOk()
+        ->assertSet('order.address_invoice_id', $supplier->invoice_address_id)
+        ->assertSet('order.address_delivery_id', null);
 });
 
 test('get additional model actions', function (): void {
@@ -994,9 +1022,6 @@ test('vat calculation prevents negative amounts', function (): void {
             'address_invoice_id' => Address::factory()->create(['contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
-            'shipping_costs_net_price' => 0,
-            'shipping_costs_gross_price' => 0,
-            'shipping_costs_vat_price' => 0,
         ]);
 
     // Add flat discount larger than order total
@@ -1058,9 +1083,6 @@ test('vat calculation with combined discounts', function (): void {
             'address_invoice_id' => Address::factory()->create(['contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
-            'shipping_costs_net_price' => 0,
-            'shipping_costs_gross_price' => 0,
-            'shipping_costs_vat_price' => 0,
         ]);
 
     // Add 50% header discount first
@@ -1137,9 +1159,6 @@ test('vat calculation with flat header discount', function (): void {
             'address_invoice_id' => Address::factory()->create(['contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
-            'shipping_costs_net_price' => 0,
-            'shipping_costs_gross_price' => 0,
-            'shipping_costs_vat_price' => 0,
         ]);
 
     // Add 37.50 flat header discount (25% of 150)
@@ -1220,9 +1239,6 @@ test('vat calculation with floating point precision', function (): void {
             'address_invoice_id' => Address::factory()->create(['contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
-            'shipping_costs_net_price' => 0,
-            'shipping_costs_gross_price' => 0,
-            'shipping_costs_vat_price' => 0,
         ]);
 
     // Add a flat discount that would cause rounding issues
@@ -1298,9 +1314,6 @@ test('vat calculation with percentage header discount', function (): void {
             'address_invoice_id' => Address::factory()->create(['contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
-            'shipping_costs_net_price' => 0,
-            'shipping_costs_gross_price' => 0,
-            'shipping_costs_vat_price' => 0,
         ]);
 
     // Add 50% header discount
@@ -1368,9 +1381,6 @@ test('vat calculation with position discounts', function (): void {
             'address_invoice_id' => Address::factory()->create(['contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
-            'shipping_costs_net_price' => 0,
-            'shipping_costs_gross_price' => 0,
-            'shipping_costs_vat_price' => 0,
         ]);
 
     $order->calculatePrices()->save();
@@ -1457,9 +1467,6 @@ test('order discount with mixed vat rates and position discounts', function (): 
             'address_invoice_id' => Address::factory()->create(['contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
-            'shipping_costs_net_price' => 0,
-            'shipping_costs_gross_price' => 0,
-            'shipping_costs_vat_price' => 0,
         ]);
 
     $order->discounts()->create([
@@ -1515,9 +1522,6 @@ test('vat calculation with repeating decimals', function (): void {
             'address_invoice_id' => Address::factory()->create(['contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
-            'shipping_costs_net_price' => 0,
-            'shipping_costs_gross_price' => 0,
-            'shipping_costs_vat_price' => 0,
         ]);
 
     // Add percentage discount that creates repeating decimal (1/3)

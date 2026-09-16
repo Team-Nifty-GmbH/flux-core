@@ -16,9 +16,9 @@
                     select="label:label|value:id"
                     unfiltered
                     :request="[
-                    'url' => route('search', \FluxErp\Models\Task::class),
-                    'method' => 'POST',
-                ]"
+                        'url' => route('search', \FluxErp\Models\Task::class),
+                        'method' => 'POST',
+                    ]"
                 />
                 <x-input wire:model="replica.name" :label="__('Name')" />
                 <x-select.styled
@@ -27,9 +27,9 @@
                     select="label:label|value:id"
                     unfiltered
                     :request="[
-                    'url' => route('search', \FluxErp\Models\Project::class),
-                    'method' => 'POST',
-                ]"
+                        'url' => route('search', \FluxErp\Models\Project::class),
+                        'method' => 'POST',
+                    ]"
                 />
                 <x-select.styled
                     :label="__('Responsible User')"
@@ -39,12 +39,12 @@
                     select="label:label|value:id"
                     unfiltered
                     :request="[
-                    'url' => route('search', \FluxErp\Models\User::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'with' => 'media',
-                    ],
-                ]"
+                        'url' => route('search', \FluxErp\Models\User::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'with' => 'media',
+                        ],
+                    ]"
                 />
                 <div class="flex justify-between gap-x-4">
                     <div class="flex flex-1 flex-col gap-2">
@@ -135,18 +135,18 @@
                     select="label:label|value:id"
                     unfiltered
                     :request="[
-                    'url' => route('search', \FluxErp\Models\Category::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'where' => [
-                            [
-                                'model_type',
-                                '=',
-                                morph_alias(\FluxErp\Models\Task::class),
+                        'url' => route('search', \FluxErp\Models\Category::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'where' => [
+                                [
+                                    'model_type',
+                                    '=',
+                                    morph_alias(\FluxErp\Models\Task::class),
+                                ],
                             ],
                         ],
-                    ],
-                ]"
+                    ]"
                 />
                 <x-select.styled
                     :label="__('Assigned')"
@@ -157,12 +157,12 @@
                     select="label:label|value:id"
                     unfiltered
                     :request="[
-                    'url' => route('search', \FluxErp\Models\User::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'with' => 'media',
-                    ],
-                ]"
+                        'url' => route('search', \FluxErp\Models\User::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'with' => 'media',
+                        ],
+                    ]"
                 />
                 <x-select.styled
                     multiple
@@ -170,19 +170,19 @@
                     select="label:label|value:id"
                     unfiltered
                     :request="[
-                    'url' => route('search', \FluxErp\Models\Tag::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'option-value' => 'id',
-                        'where' => [
-                            [
-                                'type',
-                                '=',
-                                morph_alias(\FluxErp\Models\Task::class),
+                        'url' => route('search', \FluxErp\Models\Tag::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'option-value' => 'id',
+                            'where' => [
+                                [
+                                    'type',
+                                    '=',
+                                    morph_alias(\FluxErp\Models\Task::class),
+                                ],
                             ],
                         ],
-                    ],
-                ]"
+                    ]"
                 >
                     <x-slot:label>
                         <div class="flex items-center gap-2">

@@ -6,6 +6,10 @@ updates:
     directory: '/'
     schedule:
       interval: 'weekly'
+    groups:
+      tiptap:
+        patterns:
+          - '@tiptap/*'
 
   # Maintain dependencies for Composer
   - package-ecosystem: 'composer'

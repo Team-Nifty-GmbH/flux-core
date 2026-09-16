@@ -17,10 +17,10 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\StockPosting;
+use FluxErp\Models\StorageArea;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
-use FluxErp\Models\WarehouseBin;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Validation\ValidationException;
 
@@ -62,7 +62,6 @@ beforeEach(function (): void {
             'parent_id' => null,
             'order_number' => 'CH-' . fake()->unique()->numberBetween(1000, 9999),
             'is_locked' => false,
-            'shipping_costs_net_price' => 0,
         ]);
     };
 
@@ -155,11 +154,11 @@ test('reserving moves remaining stock into reserved stock and writes the pivot',
 });
 
 test('posting after reserving consumes the reservation', function (): void {
-    $bin = WarehouseBin::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+    $storageArea = StorageArea::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
     $layer = StockPosting::factory()->create([
         'warehouse_id' => $this->warehouse->getKey(),
         'product_id' => $this->product->getKey(),
-        'warehouse_bin_id' => $bin->getKey(),
+        'storage_area_id' => $storageArea->getKey(),
         'posting' => 10,
         'purchase_price' => 5,
     ]);
@@ -180,7 +179,7 @@ test('posting after reserving consumes the reservation', function (): void {
     expect(bccomp($layer->reserved_stock, '0', 10))->toBe(0)
         ->and(bccomp((string) $position->stockPostings()->sum('posting'), '-4', 10))->toBe(0)
         ->and($position->reservedStock()->count())->toBe(0)
-        ->and($withdrawal->warehouse_bin_id)->toBe($bin->getKey());
+        ->and($withdrawal->storage_area_id)->toBe($storageArea->getKey());
 });
 
 test('a never out of stock product posts beyond the available layers', function (): void {
@@ -276,15 +275,15 @@ test('posting a grown order after a partial reservation consumes the reservation
         ->and($position->reservedStock()->count())->toBe(0);
 });
 
-test('stock sitting in an inactive bin does not count as available', function (): void {
-    $bin = WarehouseBin::factory()->create([
+test('stock sitting in an inactive storage area does not count as available', function (): void {
+    $storageArea = StorageArea::factory()->create([
         'warehouse_id' => $this->warehouse->getKey(),
         'is_active' => false,
     ]);
     StockPosting::factory()->create([
         'warehouse_id' => $this->warehouse->getKey(),
         'product_id' => $this->product->getKey(),
-        'warehouse_bin_id' => $bin->getKey(),
+        'storage_area_id' => $storageArea->getKey(),
         'posting' => 10,
         'purchase_price' => 5,
     ]);
@@ -324,15 +323,15 @@ test('stock sitting on a blocked lot does not count as available', function (): 
     expect($position->stockPostings()->count())->toBe(0);
 });
 
-test('reserving against stock in an inactive bin is rejected', function (): void {
-    $bin = WarehouseBin::factory()->create([
+test('reserving against stock in an inactive storage area is rejected', function (): void {
+    $storageArea = StorageArea::factory()->create([
         'warehouse_id' => $this->warehouse->getKey(),
         'is_active' => false,
     ]);
     StockPosting::factory()->create([
         'warehouse_id' => $this->warehouse->getKey(),
         'product_id' => $this->product->getKey(),
-        'warehouse_bin_id' => $bin->getKey(),
+        'storage_area_id' => $storageArea->getKey(),
         'posting' => 10,
         'purchase_price' => 5,
     ]);

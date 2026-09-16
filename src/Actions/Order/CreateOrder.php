@@ -38,18 +38,6 @@ class CreateOrder extends FluxAction
         $addresses = Arr::pull($this->data, 'addresses', []);
 
         $order = app(Order::class, ['attributes' => $this->data]);
-        if ($order->shipping_costs_net_price) {
-            $order->shipping_costs_vat_rate_percentage = 0.190000000;   // TODO: Make this percentage NOT hardcoded!
-            $order->shipping_costs_gross_price = net_to_gross(
-                $order->shipping_costs_net_price,
-                $order->shipping_costs_vat_rate_percentage
-            );
-            $order->shipping_costs_vat_price = bcsub(
-                $order->shipping_costs_gross_price,
-                $order->shipping_costs_net_price
-            );
-        }
-
         $order->save();
 
         if ($addresses) {

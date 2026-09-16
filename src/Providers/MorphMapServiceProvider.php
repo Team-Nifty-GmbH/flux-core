@@ -137,6 +137,7 @@ use FluxErp\Models\SerialNumber;
 use FluxErp\Models\SerialNumberRange;
 use FluxErp\Models\Snapshot;
 use FluxErp\Models\StockPosting;
+use FluxErp\Models\StorageArea;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Target;
 use FluxErp\Models\Task;
@@ -151,7 +152,6 @@ use FluxErp\Models\VacationBlackout;
 use FluxErp\Models\VacationCarryoverRule;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
-use FluxErp\Models\WarehouseBin;
 use FluxErp\Models\Widget;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeModel;
@@ -252,6 +252,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'serial_number_range' => SerialNumberRange::class,
             'snapshot' => Snapshot::class,
             'stock_posting' => StockPosting::class,
+            'storage_area' => StorageArea::class,
             'tag' => Tag::class,
             'target' => Target::class,
             'task' => Task::class,
@@ -266,7 +267,6 @@ class MorphMapServiceProvider extends ServiceProvider
             'vacation_carryover_rule' => VacationCarryoverRule::class,
             'vat_rate' => VatRate::class,
             'warehouse' => Warehouse::class,
-            'warehouse_bin' => WarehouseBin::class,
             'widget' => Widget::class,
             'work_time' => WorkTime::class,
             'work_time_model' => WorkTimeModel::class,

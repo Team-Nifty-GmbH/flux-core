@@ -5,8 +5,8 @@ namespace FluxErp\Rulesets\StockPosting;
 use FluxErp\Models\Lot;
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
+use FluxErp\Models\StorageArea;
 use FluxErp\Models\Warehouse;
-use FluxErp\Models\WarehouseBin;
 use FluxErp\Rules\ExistsWithForeign;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
@@ -19,26 +19,10 @@ class TransferStockRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'warehouse_id' => [
+            'from_storage_area_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Warehouse::class]),
-            ],
-            'product_id' => [
-                'required',
-                'integer',
-                app(ModelExists::class, ['model' => Product::class]),
-            ],
-            'from_warehouse_bin_id' => [
-                'required',
-                'integer',
-                app(ModelExists::class, ['model' => WarehouseBin::class]),
-            ],
-            'to_warehouse_bin_id' => [
-                'required',
-                'integer',
-                'different:from_warehouse_bin_id',
-                app(ModelExists::class, ['model' => WarehouseBin::class]),
+                app(ModelExists::class, ['model' => StorageArea::class]),
             ],
             'lot_id' => [
                 'nullable',
@@ -48,6 +32,22 @@ class TransferStockRuleset extends FluxRuleset
                     'foreignAttribute' => 'product_id',
                     'table' => 'lots',
                 ]),
+            ],
+            'product_id' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => Product::class]),
+            ],
+            'to_storage_area_id' => [
+                'required',
+                'integer',
+                'different:from_storage_area_id',
+                app(ModelExists::class, ['model' => StorageArea::class]),
+            ],
+            'warehouse_id' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => Warehouse::class]),
             ],
             'amount' => [
                 'required',

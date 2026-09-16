@@ -2,11 +2,14 @@
 
 use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Livewire\Product\Product;
+use FluxErp\Models\Address;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
 use FluxErp\Models\ProductCrossSelling;
+use FluxErp\Models\Tag;
 use FluxErp\Models\VatRate;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Session;
@@ -25,7 +28,7 @@ beforeEach(function (): void {
         ->for($this->vatRate)
         ->has(
             Price::factory()->state(['price_list_id' => $this->priceList->id]),
-            'prices'
+            'ownPrices'
         )
         ->create([
             'is_bundle' => false,
@@ -155,10 +158,10 @@ test('save product successfully', function (): void {
 
 test('save product validation fails', function (): void {
     Livewire::test(Product::class, ['id' => $this->product->id])
-        ->set('product.name', '') // Required field
+        ->set('product.name', '')
         ->call('save')
         ->assertOk()
-        ->assertHasErrors()
+        ->assertHasErrors('product.name')
         ->assertReturned(false);
 });
 
@@ -283,4 +286,53 @@ test('can save lot tracking settings', function (): void {
     expect($this->product->is_lot_tracked)->toBeTrue();
     expect($this->product->stock_removal_strategy_enum)->toBe(StockRemovalStrategyEnum::Fefo);
     expect($this->product->min_shelf_life_days)->toBe(30);
+});
+
+test('a tag that already exists does not fault the product name', function (): void {
+    $tag = Tag::findOrCreate('Kenia', morph_alias(ProductModel::class));
+
+    Livewire::test(Product::class, ['id' => $this->product->id])
+        ->call('addTag', $tag->name)
+        ->assertHasNoErrors('product.name')
+        ->assertHasErrors('name');
+});
+
+test('the product property group heading reaches the markup', function (): void {
+    Livewire::test(Product::class, ['id' => $this->product->id])
+        ->assertOk()
+        ->assertSeeHtml('x-text="group"');
+});
+
+test('the purchase fields reach the markup', function (): void {
+    Livewire::test(Product::class, ['id' => $this->product->id])
+        ->assertOk()
+        ->assertSeeHtml('product.purchase_unit_id')
+        ->assertSeeHtml('product.reference_unit_id')
+        ->assertSeeHtml('product.min_purchase')
+        ->assertSeeHtml('product.purchase_steps');
+});
+
+test('the price per basic unit reaches the prices tab', function (): void {
+    Livewire::test(Product::class, ['id' => $this->product->id])
+        ->set('tab', 'product.prices')
+        ->assertOk()
+        ->assertSeeHtml('pricePerBasicUnit');
+});
+
+test('add supplier fills every column the pivot table carries', function (): void {
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
+    $contact->update(['main_address_id' => $address->getKey()]);
+
+    $component = Livewire::test(Product::class, ['id' => $this->product->id])
+        ->call('addSupplier', $contact->getKey())
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    $pivotFields = app(ProductModel::class)->suppliers()->getPivotColumns();
+
+    expect($pivotFields)
+        ->not->toBeEmpty()
+        ->and(data_get($component->get('product.suppliers'), '0'))
+        ->toHaveKeys(array_merge($pivotFields, ['customer_number', 'main_address']));
 });

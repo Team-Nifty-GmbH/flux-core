@@ -124,3 +124,29 @@ test('mount initializes selected options from existing children', function (): v
     $selectedOptions = $component->get('selectedOptions');
     expect($selectedOptions[$group->getKey()])->toContain($option->getKey());
 });
+
+test('recalculate names renames the selected variants', function (): void {
+    config(['queue.default' => 'sync']);
+    $group = ProductOptionGroup::factory()->create();
+    $option = ProductOption::factory()->create([
+        'product_option_group_id' => $group->getKey(),
+        'name' => 'Option A',
+    ]);
+
+    $variant = Product::factory()->create([
+        'parent_id' => $this->product->getKey(),
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'is_bundle' => false,
+        'name' => 'stale name',
+    ]);
+    $variant->tenants()->attach($this->dbTenant->getKey());
+    $variant->productOptions()->attach($option->getKey());
+
+    Livewire::test(VariantList::class, ['product' => $this->productForm])
+        ->set('selected', [$variant->getKey()])
+        ->call('recalculateNames')
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    expect($variant->refresh()->name)->not->toEqual('stale name');
+});

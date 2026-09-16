@@ -4,7 +4,7 @@ namespace FluxErp\Actions\StockPosting;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\StockPosting;
-use FluxErp\Models\WarehouseBin;
+use FluxErp\Models\StorageArea;
 use FluxErp\Rulesets\StockPosting\TransferStockRuleset;
 use FluxErp\Support\Stock\StockAllocator;
 use Illuminate\Validation\ValidationException;
@@ -33,8 +33,9 @@ class TransferStock extends FluxAction
 
         if (bccomp($allocated, (string) $this->getData('amount'), 10) === -1) {
             throw ValidationException::withMessages([
-                'amount' => ['The source bin does not hold enough stock'],
-            ])->errorBag('transferStock');
+                'amount' => ['The source storage area does not hold enough stock'],
+            ])
+                ->errorBag('transferStock');
         }
 
         foreach ($allocation as $item) {
@@ -44,7 +45,7 @@ class TransferStock extends FluxAction
             CreateStockPosting::make([
                 'warehouse_id' => $this->getData('warehouse_id'),
                 'product_id' => $this->getData('product_id'),
-                'warehouse_bin_id' => $this->getData('from_warehouse_bin_id'),
+                'storage_area_id' => $this->getData('from_storage_area_id'),
                 'lot_id' => $stockPosting->lot_id,
                 'parent_id' => $stockPosting->id,
                 'serial_number_id' => $stockPosting->serial_number_id,
@@ -67,7 +68,7 @@ class TransferStock extends FluxAction
             CreateStockPosting::make([
                 'warehouse_id' => $this->getData('warehouse_id'),
                 'product_id' => $this->getData('product_id'),
-                'warehouse_bin_id' => $this->getData('to_warehouse_bin_id'),
+                'storage_area_id' => $this->getData('to_storage_area_id'),
                 'lot_id' => $stockPosting->lot_id,
                 'parent_id' => $stockPosting->id,
                 'serial_number_id' => $stockPosting->serial_number_id,
@@ -87,30 +88,31 @@ class TransferStock extends FluxAction
     {
         parent::validateData();
 
-        $bins = resolve_static(WarehouseBin::class, 'query')
-            ->whereKey([$this->getData('from_warehouse_bin_id'), $this->getData('to_warehouse_bin_id')])
+        $storageAreas = resolve_static(StorageArea::class, 'query')
+            ->whereKey([$this->getData('from_storage_area_id'), $this->getData('to_storage_area_id')])
             ->get()
             ->keyBy('id');
 
-        $target = $bins->get($this->getData('to_warehouse_bin_id'));
-        $source = $bins->get($this->getData('from_warehouse_bin_id'));
+        $source = $storageAreas->get($this->getData('from_storage_area_id'));
+        $target = $storageAreas->get($this->getData('to_storage_area_id'));
+        $warehouseId = (int) $this->getData('warehouse_id');
+        $errors = [];
 
-        if ($source->warehouse_id !== (int) $this->getData('warehouse_id')) {
-            throw ValidationException::withMessages([
-                'from_warehouse_bin_id' => ['The source bin belongs to a different warehouse'],
-            ])->errorBag('transferStock');
+        if ($source && $source->warehouse_id !== $warehouseId) {
+            $errors['from_storage_area_id'][] = 'The source storage area belongs to a different warehouse';
         }
 
-        if ($target->warehouse_id !== (int) $this->getData('warehouse_id')) {
-            throw ValidationException::withMessages([
-                'to_warehouse_bin_id' => ['The target bin belongs to a different warehouse'],
-            ])->errorBag('transferStock');
+        if ($target && $target->warehouse_id !== $warehouseId) {
+            $errors['to_storage_area_id'][] = 'The target storage area belongs to a different warehouse';
         }
 
-        if (! $target->is_storage_location || ! $target->is_active) {
-            throw ValidationException::withMessages([
-                'to_warehouse_bin_id' => ['The target bin cannot hold stock'],
-            ])->errorBag('transferStock');
+        if ($target && (! $target->is_storage_location || ! $target->is_active)) {
+            $errors['to_storage_area_id'][] = 'The target storage area cannot hold stock';
+        }
+
+        if ($errors) {
+            throw ValidationException::withMessages($errors)
+                ->errorBag('transferStock');
         }
     }
 
@@ -119,7 +121,7 @@ class TransferStock extends FluxAction
         return app(StockAllocator::class)
             ->forProduct($this->getData('product_id'))
             ->inWarehouse($this->getData('warehouse_id'))
-            ->inBins([$this->getData('from_warehouse_bin_id')])
+            ->inStorageAreas([$this->getData('from_storage_area_id')])
             ->forLot($this->getData('lot_id', null));
     }
 }

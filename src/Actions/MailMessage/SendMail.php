@@ -44,7 +44,10 @@ class SendMail extends DispatchableFluxAction
                 $mailer = $mailAccount->mailer();
                 $mail->from(
                     $mailAccount->smtp_email ?? config('mail.from.address'),
-                    auth()->user()?->name ?? $mailAccount->smtp_email ?? config('mail.from.address')
+                    $this->getData('from_name')
+                        ?? auth()->user()?->name
+                        ?? $mailAccount->smtp_email
+                        ?? config('mail.from.address')
                 );
                 $useDefaultMailer = false;
             }

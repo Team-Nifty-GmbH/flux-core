@@ -14,6 +14,7 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeType;
+use FluxErp\Support\Bus\BulkExecutor;
 use FluxErp\Traits\Model\Trackable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
@@ -99,7 +100,7 @@ class WorkTimes extends WorkTimeList
                 ->validate()
                 ->executeAsync();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->createOrdersFromWorkTimes);
 
             return;
         }
@@ -117,7 +118,7 @@ class WorkTimes extends WorkTimeList
         try {
             $this->workTime->delete();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->workTime);
 
             return;
         }
@@ -148,7 +149,7 @@ class WorkTimes extends WorkTimeList
         try {
             $this->workTime->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->workTime);
 
             return false;
         }
@@ -161,24 +162,31 @@ class WorkTimes extends WorkTimeList
     #[Renderless]
     public function toggleIsBillable(bool $isBillable): void
     {
-        foreach ($this->getSelectedModelsQuery()->pluck('id') as $id) {
-            try {
-                UpdateLockedWorkTime::make([
-                    'id' => $id,
-                    'is_billable' => $isBillable,
-                ])
-                    ->checkPermission()
-                    ->validate()
-                    ->execute();
-            } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+        $workTimeIds = $this->getSelectedModelsQuery()->pluck('id');
 
-                return;
-            }
+        if ($workTimeIds->isEmpty()) {
+            return;
+        }
+
+        try {
+            BulkExecutor::make(
+                UpdateLockedWorkTime::class,
+                $workTimeIds
+                    ->map(fn (int $id): array => [
+                        'id' => $id,
+                        'is_billable' => $isBillable,
+                    ])
+                    ->all()
+            )
+                ->name(__('Updating work times'))
+                ->dispatch();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
         }
 
         $this->reset('selected');
-        $this->loadData();
     }
 
     protected function getReturnKeys(): array

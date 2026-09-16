@@ -30,6 +30,7 @@ use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\Mentionable;
 use FluxErp\Traits\Model\MonitorsQueue;
 use FluxErp\Traits\Model\Notifiable;
 use FluxErp\Traits\Model\Printable;
@@ -56,7 +57,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 {
     use Commentable, Communicatable, Filterable, HasCalendars, HasCart, HasDefaultTargetableColumns,
         HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags, HasTenantAssignment, HasTenants,
-        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, MonitorsQueue, Notifiable, Printable,
+        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Mentionable, MonitorsQueue, Notifiable, Printable,
         SoftDeletes;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;

@@ -5,6 +5,7 @@ namespace FluxErp\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use function Illuminate\Support\defer;
 
 class TrackVisits
 {

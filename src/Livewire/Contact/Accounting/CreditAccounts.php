@@ -69,7 +69,7 @@ class CreditAccounts extends BankConnections
         try {
             $this->contactBankConnection->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->contactBankConnection);
 
             return false;
         }
@@ -84,7 +84,7 @@ class CreditAccounts extends BankConnections
         try {
             $this->transactionForm->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->transactionForm);
 
             return false;
         }

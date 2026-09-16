@@ -62,7 +62,7 @@ class Countries extends CountryList
         try {
             $this->country->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->country);
 
             return false;
         }
@@ -86,7 +86,7 @@ class Countries extends CountryList
         try {
             $this->country->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->country);
 
             return false;
         }

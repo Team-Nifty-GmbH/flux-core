@@ -9,7 +9,7 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteLot extends FluxAction
 {
-    private ?Lot $lot = null;
+    protected ?Lot $lot = null;
 
     public static function models(): array
     {
@@ -23,21 +23,25 @@ class DeleteLot extends FluxAction
 
     public function performAction(): ?bool
     {
-        return $this->lot->delete();
+        return $this->getLot()?->delete();
     }
 
     protected function validateData(): void
     {
         parent::validateData();
 
-        $this->lot = resolve_static(Lot::class, 'query')
-            ->whereKey($this->getData('id'))
-            ->first();
-
-        if ($this->lot->stockPostings()->exists()) {
+        if ($this->getLot()?->stockPostings()->exists()) {
             throw ValidationException::withMessages([
                 'stock_postings' => ['The given lot has stock postings'],
-            ])->errorBag('deleteLot');
+            ])
+                ->errorBag('deleteLot');
         }
+    }
+
+    protected function getLot(): ?Lot
+    {
+        return $this->lot ??= resolve_static(Lot::class, 'query')
+            ->whereKey($this->getData('id'))
+            ->first();
     }
 }

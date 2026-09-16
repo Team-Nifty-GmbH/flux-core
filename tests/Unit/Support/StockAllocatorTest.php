@@ -4,8 +4,8 @@ use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Models\Lot;
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
+use FluxErp\Models\StorageArea;
 use FluxErp\Models\Warehouse;
-use FluxErp\Models\WarehouseBin;
 use FluxErp\Support\Stock\StockAllocator;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
@@ -87,12 +87,12 @@ test('a blocked lot is excluded', function (): void {
         ->and(bccomp($allocation[0]['amount'], '10', 10))->toBe(0);
 });
 
-test('an inactive bin is excluded', function (): void {
-    $inactive = WarehouseBin::factory()->create([
+test('an inactive storage area is excluded', function (): void {
+    $inactive = StorageArea::factory()->create([
         'warehouse_id' => $this->warehouse->getKey(),
         'is_active' => false,
     ]);
-    ($this->layer)(10, ['warehouse_bin_id' => $inactive->getKey()]);
+    ($this->layer)(10, ['storage_area_id' => $inactive->getKey()]);
     $usable = ($this->layer)(10);
 
     $allocation = ($this->allocator)()->allocate(20);
@@ -101,14 +101,14 @@ test('an inactive bin is excluded', function (): void {
         ->and($allocation[0]['stockPosting']->getKey())->toBe($usable->getKey());
 });
 
-test('the bin scope restricts the allocation to the given bins', function (): void {
-    $wanted = WarehouseBin::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
-    $other = WarehouseBin::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+test('the storage area scope restricts the allocation to the given storage areas', function (): void {
+    $wanted = StorageArea::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+    $other = StorageArea::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
 
-    $inWanted = ($this->layer)(10, ['warehouse_bin_id' => $wanted->getKey()]);
-    ($this->layer)(10, ['warehouse_bin_id' => $other->getKey()]);
+    $inWanted = ($this->layer)(10, ['storage_area_id' => $wanted->getKey()]);
+    ($this->layer)(10, ['storage_area_id' => $other->getKey()]);
 
-    $allocation = ($this->allocator)()->inBins([$wanted->getKey()])->allocate(20);
+    $allocation = ($this->allocator)()->inStorageAreas([$wanted->getKey()])->allocate(20);
 
     expect($allocation)->toHaveCount(1)
         ->and($allocation[0]['stockPosting']->getKey())->toBe($inWanted->getKey());
@@ -146,10 +146,10 @@ test('the warehouse strategy is used when the product has none', function (): vo
     expect($allocation[0]['stockPosting']->getKey())->toBe($second->getKey());
 });
 
-test('an empty bin scope allocates nothing', function (): void {
+test('an empty storage area scope allocates nothing', function (): void {
     ($this->layer)(10);
 
-    $allocation = ($this->allocator)()->inBins([])->allocate(10);
+    $allocation = ($this->allocator)()->inStorageAreas([])->allocate(10);
 
     expect($allocation)->toHaveCount(0);
 });

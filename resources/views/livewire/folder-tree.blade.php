@@ -2,7 +2,7 @@
     <div class="w-full min-w-0 overflow-auto">
         <ul class="flex flex-col gap-1">
             <x-flux::checkbox-tree
-                tree="$wire.getTree()"
+                tree="$wire.mediaTree"
                 name-attribute="name"
                 :search-attributes="['name', 'file_name', 'collection_name']"
                 moved="$wire.moveItem(item, node, item.slug ?? item.collection_name ?? getNodePath(item, 'slug'), node.slug ?? node.collection_name ?? getNodePath(node, 'slug'))"
@@ -83,9 +83,9 @@
 
                                         if (! this.selection.file_name) {
                                             let path = this.getNodePath(this.selectionProxy, 'slug')
-                                            this.selection.path = path
+                                            this.selection.path = Array.isArray(path)
                                                 ? path[path.length - 1]
-                                                : null
+                                                : path
                                         }
                                     })
 
@@ -104,9 +104,10 @@
                                 this.selection?.slug ?? this.selection?.collection_name,
                                 this.selection?.id,
                             )
+
                             if (! this.selection.file_name) {
                                 let path = this.getNodePath(this.selectionProxy, 'slug')
-                                this.selection.path = path ? path[path.length - 1] : null
+                                this.selection.path = Array.isArray(path) ? path[path.length - 1] : path
                             }
                         },
                         async uploadSuccess(multipleFileUpload) {
@@ -209,6 +210,7 @@
                                             $wire
                                                 .saveFolder({
                                                     parent_id: selection.id,
+                                                    parent_collection: getNodePath(selectionProxy, 'slug'),
                                                     name: '{{ __('New folder') }}',
                                                     is_new: true,
                                                     children: [],
@@ -430,6 +432,48 @@
                                     ></div>
                                 </template>
                             </div>
+                            @canAction(\FluxErp\Actions\Media\UpdateMedia::class)
+                                <div
+                                    class="flex flex-col gap-3 md:flex-row md:items-end"
+                                    x-cloak
+                                    x-show="!$wire.isReadonly && !readOnly"
+                                >
+                                    <div class="w-full md:flex-1">
+                                        <x-input
+                                            :label="__('Name')"
+                                            x-model="selection.name"
+                                        />
+                                    </div>
+                                    <x-button
+                                        class="w-full md:w-auto"
+                                        color="indigo"
+                                        :text="__('Save')"
+                                        x-on:click="
+                                            $wire
+                                                .saveMedia(selection)
+                                                .then((media) => {
+                                                    if (media) {
+                                                        this.selectionProxy =
+                                                            JSON.parse(
+                                                                JSON.stringify(
+                                                                    media,
+                                                                ),
+                                                            );
+                                                        this.selection =
+                                                            JSON.parse(
+                                                                JSON.stringify(
+                                                                    media,
+                                                                ),
+                                                            );
+                                                        updateNode(
+                                                            this.selectionProxy,
+                                                        );
+                                                    }
+                                                })
+                                        "
+                                    />
+                                </div>
+                            @endcanAction
                             <div class="flex flex-wrap gap-2">
                                 <x-button
                                     color="indigo"
