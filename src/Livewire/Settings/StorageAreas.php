@@ -7,8 +7,8 @@ use FluxErp\Actions\StorageArea\DeleteStorageArea;
 use FluxErp\Actions\StorageArea\UpdateStorageArea;
 use FluxErp\Livewire\DataTables\StorageAreaList;
 use FluxErp\Livewire\Forms\StorageAreaForm;
-use FluxErp\Models\Warehouse;
 use FluxErp\Models\StorageArea;
+use FluxErp\Models\Warehouse;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -89,7 +89,7 @@ class StorageAreas extends StorageAreaList
         try {
             $this->storageArea->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->storageArea);
 
             return false;
         }
