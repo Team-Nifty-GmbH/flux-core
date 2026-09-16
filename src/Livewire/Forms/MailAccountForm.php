@@ -43,6 +43,8 @@ class MailAccountForm extends FluxForm
 
     public ?string $smtp_from_name = null;
 
+    public bool $smtp_has_valid_certificate = true;
+
     public ?string $smtp_host = null;
 
     public ?string $smtp_mailer = 'smtp';

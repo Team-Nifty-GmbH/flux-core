@@ -130,18 +130,18 @@
                             select="label:name|value:id"
                             unfiltered
                             :request="[
-                        'url' => route('search', \FluxErp\Models\Tenant::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'where' => [
-                                [
-                                    'is_active',
-                                    '=',
-                                    true,
+                                'url' => route('search', \FluxErp\Models\Tenant::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'where' => [
+                                        [
+                                            'is_active',
+                                            '=',
+                                            true,
+                                        ],
+                                    ],
                                 ],
-                            ],
-                        ],
-                    ]"
+                            ]"
                         />
                         <x-select.styled
                             multiple
@@ -151,18 +151,18 @@
                             select="label:label|value:id"
                             unfiltered
                             :request="[
-                        'url' => route('search', \FluxErp\Models\Category::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'where' => [
-                                [
-                                    'model_type',
-                                    '=',
-                                    morph_alias(\FluxErp\Models\Contact::class),
+                                'url' => route('search', \FluxErp\Models\Category::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'where' => [
+                                        [
+                                            'model_type',
+                                            '=',
+                                            morph_alias(\FluxErp\Models\Contact::class),
+                                        ],
+                                    ],
                                 ],
-                            ],
-                        ],
-                    ]"
+                            ]"
                         />
                         <x-select.styled
                             multiple
@@ -172,12 +172,12 @@
                             select="label:name|value:id"
                             unfiltered
                             :request="[
-                        'url' => route('search', \FluxErp\Models\Industry::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'searchFields' => ['name'],
-                        ],
-                    ]"
+                                'url' => route('search', \FluxErp\Models\Industry::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'searchFields' => ['name'],
+                                ],
+                            ]"
                         />
                         <x-select.styled
                             searchable
@@ -186,26 +186,26 @@
                             :label="__('Contact Origin')"
                             select="label:name|value:id"
                             :request="[
-                        'url' => route('search', \FluxErp\Models\RecordOrigin::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'searchFields' => [
-                                'name',
-                            ],
-                            'where' => [
-                                [
-                                    'model_type',
-                                    '=',
-                                    morph_alias(\FluxErp\Models\Contact::class),
+                                'url' => route('search', \FluxErp\Models\RecordOrigin::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'searchFields' => [
+                                        'name',
+                                    ],
+                                    'where' => [
+                                        [
+                                            'model_type',
+                                            '=',
+                                            morph_alias(\FluxErp\Models\Contact::class),
+                                        ],
+                                        [
+                                            'is_active',
+                                            '=',
+                                            true,
+                                        ],
+                                    ],
                                 ],
-                                [
-                                    'is_active',
-                                    '=',
-                                    true,
-                                ],
-                            ],
-                        ],
-                    ]"
+                            ]"
                         />
                         <x-rating
                             x-bind:disabled="!$wire.$parent.edit"

@@ -91,7 +91,7 @@ function createFilledCartFactory(): CartFactory
                 ->set('vat_rate_id', VatRate::default()->getKey())
                 ->afterCreating(function (CartItem $cartItem): void {
                     $cartItem->product_id = Product::factory(['vat_rate_id' => VatRate::default()->getKey()])
-                        ->has(Price::factory()->set('price_list_id', PriceList::default()->id))
+                        ->has(Price::factory()->set('price_list_id', PriceList::default()->id), 'ownPrices')
                         ->create()
                         ->id;
                     $cartItem->save();

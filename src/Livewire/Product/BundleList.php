@@ -89,7 +89,7 @@ class BundleList extends ProductBundleProductList
         try {
             $this->productBundleProductForm->delete();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->productBundleProductForm);
 
             return;
         }
@@ -125,7 +125,7 @@ class BundleList extends ProductBundleProductList
         try {
             $this->productBundleProductForm->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->productBundleProductForm);
 
             return false;
         }

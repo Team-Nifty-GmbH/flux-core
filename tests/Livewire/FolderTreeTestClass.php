@@ -3,9 +3,9 @@
 namespace FluxErp\Tests\Livewire;
 
 use FluxErp\Livewire\Support\FolderTree;
-use FluxErp\Models\Contact;
+use FluxErp\Models\Product;
 
 class FolderTreeTestClass extends FolderTree
 {
-    protected string $modelType = Contact::class;
+    protected string $modelType = Product::class;
 }

@@ -190,6 +190,12 @@
             />
         </x-slot:footer>
     </x-modal>
+    <div class="mb-4 flex items-center gap-2">
+        <x-toggle
+            wire:model.live="onlyOverrides"
+            :label="__('Show overrides only')"
+        />
+    </div>
     <div wire:ignore>
         @include('tall-datatables::livewire.data-table')
     </div>

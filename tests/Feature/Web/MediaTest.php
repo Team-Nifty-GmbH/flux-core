@@ -63,3 +63,36 @@ test('download media without permission', function (): void {
     $this->actingAs($this->user, 'web')->get('/media/' . $this->media->id . '/' . $this->filename)
         ->assertForbidden();
 });
+
+test('download media streams the file without buffering it whole', function (): void {
+    // 4 MB, sparse: large enough that a single write would be visible as one flush.
+    $path = tempnam(sys_get_temp_dir(), 'flux-media-');
+    $handle = fopen($path, 'wb');
+    ftruncate($handle, $size = 4 * 1024 * 1024);
+    fclose($handle);
+
+    $media = $this->user->addMedia($path)
+        ->usingFileName('LargeFile.bin')
+        ->toMediaCollection();
+
+    $response = $this->get(URL::signedRoute('media.show', ['media' => $media->getKey()]))
+        ->assertOk()
+        ->baseResponse;
+
+    $flushes = [];
+    ob_start(
+        function (string $buffer) use (&$flushes): string {
+            $flushes[] = strlen($buffer);
+
+            return '';
+        },
+        1024 * 1024
+    );
+
+    $response->sendContent();
+
+    ob_end_flush();
+
+    expect(array_sum($flushes))->toBe($size)
+        ->and(max($flushes))->toBeLessThan($size);
+});

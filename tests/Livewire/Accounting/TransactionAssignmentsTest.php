@@ -312,3 +312,14 @@ test('a loan installment can be assigned, accepted and detached', function (): v
     expect(LoanInstallmentTransaction::query()->whereKey($pivot->getKey())->exists())->toBeFalse()
         ->and($loan->refresh()->remaining)->toEqual(1000);
 });
+
+test('a ledger account error stays off the sibling transaction forms', function (): void {
+    Livewire::test(TransactionAssignments::class)
+        ->call('saveLedgerAccountTransaction')
+        ->assertHasErrors('ledgerAccountTransactionForm.amount')
+        ->assertHasNoErrors([
+            'loanInstallmentTransactionForm.amount',
+            'orderTransactionForm.amount',
+            'transactionForm.amount',
+        ]);
+});

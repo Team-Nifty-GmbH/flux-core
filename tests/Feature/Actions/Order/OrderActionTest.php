@@ -6,6 +6,7 @@ use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Country;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
@@ -131,4 +132,32 @@ test('delete locked order fails', function (): void {
     DeleteOrder::assertValidationErrors([
         'id' => $order->getKey(),
     ], 'is_locked');
+});
+
+test('update order keeps the country in the invoice address snapshot', function (): void {
+    $country = Country::factory()->create([
+        'currency_id' => $this->currency->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+    ]);
+    $this->address->update(['country_id' => $country->getKey()]);
+
+    $order = CreateOrder::make([
+        'contact_id' => $this->contact->getKey(),
+        'address_invoice_id' => $this->address->getKey(),
+        'order_type_id' => $this->orderType->getKey(),
+        'payment_type_id' => $this->paymentType->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+        'currency_id' => $this->currency->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+    ])->validate()->execute();
+
+    expect($order->address_invoice)->toHaveKey('country_id', $country->getKey());
+
+    $updated = UpdateOrder::make([
+        'id' => $order->getKey(),
+        'address_invoice' => $order->address_invoice,
+    ])->validate()->execute();
+
+    expect($updated->address_invoice)->toHaveKey('country_id', $country->getKey());
 });

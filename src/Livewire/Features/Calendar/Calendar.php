@@ -101,7 +101,7 @@ class Calendar extends Component
         try {
             $this->calendar->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->calendar);
 
             return false;
         }
@@ -192,7 +192,7 @@ class Calendar extends Component
                     ->success(__(':model saved', ['model' => __(Str::headline(morph_alias($model)))]))
                     ->send();
             } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+                exception_to_notifications($e, $this, form: $this->event);
 
                 return;
             }
@@ -395,7 +395,7 @@ class Calendar extends Component
         try {
             $this->calendar->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->calendar);
 
             return false;
         }

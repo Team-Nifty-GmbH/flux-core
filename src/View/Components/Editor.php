@@ -22,6 +22,7 @@ class Editor extends Component
         public bool $fullHeight = false,
         public bool $showEditorPadding = true,
         public array $bladeVariables = [],
+        public array $mentionable = ['user'],
     ) {
         $this->id ??= Str::uuid()->toString();
     }

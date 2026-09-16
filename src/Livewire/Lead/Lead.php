@@ -93,7 +93,7 @@ class Lead extends Component
         try {
             $this->leadForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->leadForm);
 
             return false;
         }

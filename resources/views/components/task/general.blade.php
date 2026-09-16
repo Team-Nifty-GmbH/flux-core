@@ -38,9 +38,9 @@
                             select="label:label|value:id"
                             unfiltered
                             :request="[
-                    'url' => route('search', \FluxErp\Models\Project::class),
-                    'method' => 'POST',
-                ]"
+                                'url' => route('search', \FluxErp\Models\Project::class),
+                                'method' => 'POST',
+                            ]"
                         >
                             <x-slot:label>
                                 <x-link
@@ -65,12 +65,12 @@
                             select="label:label|value:id"
                             unfiltered
                             :request="[
-                    'url' => route('search', \FluxErp\Models\User::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'with' => 'media',
-                    ],
-                ]"
+                                'url' => route('search', \FluxErp\Models\User::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'with' => 'media',
+                                ],
+                            ]"
                         />
                     </div>
                 @show
@@ -200,18 +200,18 @@
                     select="label:label|value:id"
                     unfiltered
                     :request="[
-                    'url' => route('search', \FluxErp\Models\Category::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'where' => [
-                            [
-                                'model_type',
-                                '=',
-                                morph_alias(\FluxErp\Models\Task::class),
+                        'url' => route('search', \FluxErp\Models\Category::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'where' => [
+                                [
+                                    'model_type',
+                                    '=',
+                                    morph_alias(\FluxErp\Models\Task::class),
+                                ],
                             ],
                         ],
-                    ],
-                ]"
+                    ]"
                 />
             </div>
             <div x-bind:class="{ 'pointer-events-none': !isEditing }">
@@ -224,12 +224,12 @@
                     select="label:label|value:id"
                     unfiltered
                     :request="[
-                    'url' => route('search', \FluxErp\Models\User::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'with' => 'media',
-                    ],
-                ]"
+                        'url' => route('search', \FluxErp\Models\User::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'with' => 'media',
+                        ],
+                    ]"
                 />
             </div>
             <div
@@ -243,19 +243,19 @@
                     select="label:label|value:id"
                     unfiltered
                     :request="[
-                    'url' => route('search', \FluxErp\Models\Tag::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'option-value' => 'id',
-                        'where' => [
-                            [
-                                'type',
-                                '=',
-                                morph_alias(\FluxErp\Models\Task::class),
+                        'url' => route('search', \FluxErp\Models\Tag::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'option-value' => 'id',
+                            'where' => [
+                                [
+                                    'type',
+                                    '=',
+                                    morph_alias(\FluxErp\Models\Task::class),
+                                ],
                             ],
                         ],
-                    ],
-                ]"
+                    ]"
                 >
                     <x-slot:label>
                         <div class="flex items-center gap-2">
