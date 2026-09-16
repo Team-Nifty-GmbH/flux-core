@@ -77,7 +77,7 @@ class StockPosting extends FluxModel
      * A best-before date is a calendar date, so the window is anchored in the display timezone
      * rather than in UTC, which would move the boundary by a day for anyone east or west of it.
      */
-    public function scopeExpiringWithin(Builder $query, int $days): void
+    protected function scopeExpiringWithin(Builder $query, int $days): void
     {
         if ($days < 1) {
             throw new InvalidArgumentException('The shelf life window must span at least one day');

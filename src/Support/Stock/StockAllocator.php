@@ -17,7 +17,7 @@ class StockAllocator
 
     protected ?StockRemovalStrategyEnum $resolvedStrategy = null;
 
-    protected ?array $binIds = null;
+    protected ?array $storageAreaIds = null;
 
     protected ?int $lotId = null;
 
@@ -37,9 +37,9 @@ class StockAllocator
         return $this;
     }
 
-    public function inBins(array $binIds): static
+    public function inStorageAreas(array $storageAreaIds): static
     {
-        $this->binIds = $binIds;
+        $this->storageAreaIds = $storageAreaIds;
 
         return $this;
     }
@@ -65,16 +65,16 @@ class StockAllocator
             ->where('stock_postings.warehouse_id', $this->warehouseId)
             ->where('stock_postings.remaining_stock', '>', 0)
             ->where(fn (Builder $query) => $query
-                ->whereNull('stock_postings.warehouse_bin_id')
-                ->orWhereHas('warehouseBin', fn (Builder $query) => $query->where('is_active', true))
+                ->whereNull('stock_postings.storage_area_id')
+                ->orWhereHas('storageArea', fn (Builder $query) => $query->where('is_active', true))
             )
             ->where(fn (Builder $query) => $query
                 ->whereNull('stock_postings.lot_id')
                 ->orWhereHas('lot', fn (Builder $query) => $query->whereNull('blocked_at'))
             );
 
-        if (! is_null($this->binIds)) {
-            $query->whereIn('stock_postings.warehouse_bin_id', $this->binIds);
+        if (! is_null($this->storageAreaIds)) {
+            $query->whereIn('stock_postings.storage_area_id', $this->storageAreaIds);
         }
 
         if (! is_null($this->lotId)) {

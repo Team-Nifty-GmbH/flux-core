@@ -7,8 +7,8 @@ use FluxErp\Actions\SerialNumber\CreateSerialNumber;
 use FluxErp\Models\Order;
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
+use FluxErp\Models\StorageArea;
 use FluxErp\Models\Warehouse;
-use FluxErp\Models\WarehouseBin;
 use FluxErp\Rulesets\StockPosting\CreateStockPostingRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
@@ -72,22 +72,22 @@ class CreateStockPosting extends FluxAction
         if (bccomp($posting, '0', 10) === 1) {
             $requiresBinLocation = resolve_static(Warehouse::class, 'query')
                 ->whereKey($this->getData('warehouse_id'))
-                ->value('requires_bin_location');
+                ->value('requires_storage_area');
 
-            if ($requiresBinLocation && ! ($this->getData('warehouse_bin_id', false))) {
+            if ($requiresBinLocation && ! ($this->getData('storage_area_id', false))) {
                 throw ValidationException::withMessages([
-                    'warehouse_bin_id' => ['The given warehouse requires a bin location'],
+                    'storage_area_id' => ['The given warehouse requires a storage area'],
                 ])->errorBag('createStockPosting');
             }
 
-            if ($warehouseBinId = $this->getData('warehouse_bin_id', false)) {
-                $warehouseBin = resolve_static(WarehouseBin::class, 'query')
-                    ->whereKey($warehouseBinId)
+            if ($storageAreaId = $this->getData('storage_area_id', false)) {
+                $storageArea = resolve_static(StorageArea::class, 'query')
+                    ->whereKey($storageAreaId)
                     ->first();
 
-                if (! $warehouseBin?->is_storage_location || ! $warehouseBin->is_active) {
+                if (! $storageArea?->is_storage_location || ! $storageArea->is_active) {
                     throw ValidationException::withMessages([
-                        'warehouse_bin_id' => ['The given warehouse bin cannot hold stock'],
+                        'storage_area_id' => ['The given storage area cannot hold stock'],
                     ])->errorBag('createStockPosting');
                 }
             }
