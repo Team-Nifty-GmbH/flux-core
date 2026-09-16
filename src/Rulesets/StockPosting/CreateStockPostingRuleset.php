@@ -7,8 +7,8 @@ use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\StockPosting;
+use FluxErp\Models\StorageArea;
 use FluxErp\Models\Warehouse;
-use FluxErp\Models\WarehouseBin;
 use FluxErp\Rules\ExistsWithForeign;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
@@ -31,20 +31,6 @@ class CreateStockPostingRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:stock_postings,uuid',
-            'warehouse_id' => [
-                'required',
-                'integer',
-                app(ModelExists::class, ['model' => Warehouse::class]),
-            ],
-            'warehouse_bin_id' => [
-                'nullable',
-                'integer',
-                app(ModelExists::class, ['model' => WarehouseBin::class]),
-                app(ExistsWithForeign::class, [
-                    'foreignAttribute' => 'warehouse_id',
-                    'table' => 'warehouse_bins',
-                ]),
-            ],
             'lot_id' => [
                 'nullable',
                 'integer',
@@ -54,25 +40,39 @@ class CreateStockPostingRuleset extends FluxRuleset
                     'table' => 'lots',
                 ]),
             ],
-            'product_id' => [
-                'required',
+            'order_position_id' => [
+                'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Product::class]),
+                app(ModelExists::class, ['model' => OrderPosition::class]),
             ],
             'parent_id' => [
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => StockPosting::class]),
             ],
-            'order_position_id' => [
-                'nullable',
+            'product_id' => [
+                'required',
                 'integer',
-                app(ModelExists::class, ['model' => OrderPosition::class]),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'serial_number_id' => [
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => SerialNumber::class]),
+            ],
+            'storage_area_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => StorageArea::class]),
+                app(ExistsWithForeign::class, [
+                    'foreignAttribute' => 'warehouse_id',
+                    'table' => 'storage_areas',
+                ]),
+            ],
+            'warehouse_id' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => Warehouse::class]),
             ],
             'purchase_price' => [
                 'nullable',

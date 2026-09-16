@@ -2,23 +2,22 @@
 
 namespace FluxErp\Database\Factories;
 
-use FluxErp\Enums\WarehouseBinTypeEnum;
-use FluxErp\Models\WarehouseBin;
+use FluxErp\Enums\StorageAreaTypeEnum;
+use FluxErp\Models\StorageArea;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class WarehouseBinFactory extends Factory
+class StorageAreaFactory extends Factory
 {
-    protected $model = WarehouseBin::class;
+    protected $model = StorageArea::class;
 
     public function definition(): array
     {
         return [
             'code' => fake()->unique()->bothify('??-##-##'),
             'name' => fake()->word(),
-            'warehouse_bin_type_enum' => WarehouseBinTypeEnum::Bin,
-            'is_storage_location' => true,
+            'storage_area_type_enum' => StorageAreaTypeEnum::Container,
             'is_active' => true,
-            'sort_order' => 0,
+            'is_storage_location' => true,
         ];
     }
 }

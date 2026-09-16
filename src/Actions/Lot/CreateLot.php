@@ -24,7 +24,7 @@ class CreateLot extends FluxAction
         $lot = app(Lot::class, ['attributes' => $this->getData()]);
         $lot->save();
 
-        return $lot->fresh();
+        return $lot->refresh();
     }
 
     protected function validateData(): void
@@ -38,7 +38,8 @@ class CreateLot extends FluxAction
         ) {
             throw ValidationException::withMessages([
                 'lot_number' => ['The given lot number is already taken for this product'],
-            ])->errorBag('createLot');
+            ])
+                ->errorBag('createLot');
         }
     }
 }

@@ -1,25 +1,26 @@
 <?php
 
+use FluxErp\Actions\Warehouse\CreateWarehouse;
 use FluxErp\Actions\Warehouse\UpdateWarehouse;
 use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Models\Product;
 use FluxErp\Models\Warehouse;
 use Illuminate\Validation\ValidationException;
 
-test('a warehouse defaults to fifo and to optional bin locations', function (): void {
+test('a warehouse defaults to fifo and to optional storage area locations', function (): void {
     $warehouse = Warehouse::factory()->create()->fresh();
 
-    expect($warehouse->requires_bin_location)->toBeFalse()
+    expect($warehouse->requires_storage_area)->toBeFalse()
         ->and($warehouse->stock_removal_strategy_enum)->toBe(StockRemovalStrategyEnum::Fifo);
 });
 
-test('a warehouse can require bin locations and use fefo', function (): void {
+test('a warehouse can require storage area locations and use fefo', function (): void {
     $warehouse = Warehouse::factory()->create([
-        'requires_bin_location' => true,
+        'requires_storage_area' => true,
         'stock_removal_strategy_enum' => StockRemovalStrategyEnum::Fefo,
     ])->fresh();
 
-    expect($warehouse->requires_bin_location)->toBeTrue()
+    expect($warehouse->requires_storage_area)->toBeTrue()
         ->and($warehouse->stock_removal_strategy_enum)->toBe(StockRemovalStrategyEnum::Fefo);
 });
 
@@ -70,4 +71,12 @@ test('a warehouse keeps its strategy when the field is omitted', function (): vo
 
     expect($warehouse->fresh()->stock_removal_strategy_enum)
         ->toBe(StockRemovalStrategyEnum::Fefo);
+});
+
+test('creating a warehouse falls back to the default removal strategy', function (): void {
+    $warehouse = CreateWarehouse::make(['name' => 'Fallback warehouse'])
+        ->validate()
+        ->execute();
+
+    expect($warehouse->stock_removal_strategy_enum)->toBe(StockRemovalStrategyEnum::Fifo);
 });

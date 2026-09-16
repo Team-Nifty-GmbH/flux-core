@@ -20,6 +20,7 @@ return new class() extends Migration
             $table->date('produced_at')->nullable();
             $table->date('expires_at')
                 ->nullable()
+                ->index()
                 ->comment('Best before date, the sort key for FEFO stock removal.');
             $table->timestamp('blocked_at')
                 ->nullable()
@@ -33,8 +34,7 @@ return new class() extends Migration
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
 
-            $table->unique(['product_id', 'lot_number', 'deleted_at']);
-            $table->index('expires_at');
+            $table->index(['product_id', 'lot_number']);
         });
     }
 

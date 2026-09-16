@@ -4,13 +4,13 @@ namespace FluxErp\Enums;
 
 use FluxErp\Enums\Traits\EnumTrait;
 
-enum WarehouseBinTypeEnum: string
+enum StorageAreaTypeEnum: string
 {
     use EnumTrait;
 
     case Aisle = 'aisle';
 
-    case Bin = 'bin';
+    case Container = 'container';
 
     case GoodsIn = 'goods-in';
 

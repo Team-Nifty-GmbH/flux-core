@@ -1,17 +1,17 @@
 <?php
 
-namespace FluxErp\Rulesets\WarehouseBin;
+namespace FluxErp\Rulesets\StorageArea;
 
-use FluxErp\Enums\WarehouseBinTypeEnum;
+use FluxErp\Enums\StorageAreaTypeEnum;
+use FluxErp\Models\StorageArea;
 use FluxErp\Models\Warehouse;
-use FluxErp\Models\WarehouseBin;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 use Illuminate\Validation\Rule;
 
-class UpdateWarehouseBinRuleset extends FluxRuleset
+class UpdateStorageAreaRuleset extends FluxRuleset
 {
-    protected static ?string $model = WarehouseBin::class;
+    protected static ?string $model = StorageArea::class;
 
     public function rules(): array
     {
@@ -19,7 +19,12 @@ class UpdateWarehouseBinRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => WarehouseBin::class]),
+                app(ModelExists::class, ['model' => StorageArea::class]),
+            ],
+            'parent_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => StorageArea::class]),
             ],
             'warehouse_id' => [
                 'sometimes',
@@ -27,21 +32,16 @@ class UpdateWarehouseBinRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Warehouse::class]),
             ],
-            'parent_id' => [
-                'nullable',
-                'integer',
-                app(ModelExists::class, ['model' => WarehouseBin::class]),
-            ],
             'code' => 'sometimes|required|string|max:255',
             'name' => 'nullable|string|max:255',
-            'warehouse_bin_type_enum' => [
+            'storage_area_type_enum' => [
                 'sometimes',
                 'required',
-                Rule::enum(WarehouseBinTypeEnum::class),
+                Rule::enum(StorageAreaTypeEnum::class),
             ],
-            'is_storage_location' => 'boolean',
+            'sort_number' => 'sometimes|required|integer|min:0',
             'is_active' => 'boolean',
-            'sort_order' => 'nullable|integer|min:0',
+            'is_storage_location' => 'boolean',
         ];
     }
 }

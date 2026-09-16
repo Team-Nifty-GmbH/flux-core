@@ -252,6 +252,9 @@ use FluxErp\Actions\Setting\UpdateSetting;
 use FluxErp\Actions\StockPosting\CreateStockPosting;
 use FluxErp\Actions\StockPosting\DeleteStockPosting;
 use FluxErp\Actions\StockPosting\UpdateStockPosting;
+use FluxErp\Actions\StorageArea\CreateStorageArea;
+use FluxErp\Actions\StorageArea\DeleteStorageArea;
+use FluxErp\Actions\StorageArea\UpdateStorageArea;
 use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Actions\Tag\DeleteTag;
 use FluxErp\Actions\Tag\UpdateTag;
@@ -295,9 +298,6 @@ use FluxErp\Actions\VatRate\UpdateVatRate;
 use FluxErp\Actions\Warehouse\CreateWarehouse;
 use FluxErp\Actions\Warehouse\DeleteWarehouse;
 use FluxErp\Actions\Warehouse\UpdateWarehouse;
-use FluxErp\Actions\WarehouseBin\CreateWarehouseBin;
-use FluxErp\Actions\WarehouseBin\DeleteWarehouseBin;
-use FluxErp\Actions\WarehouseBin\UpdateWarehouseBin;
 use FluxErp\Actions\WorkTime\CreateWorkTime;
 use FluxErp\Actions\WorkTime\DeleteWorkTime;
 use FluxErp\Actions\WorkTime\UpdateWorkTime;
@@ -398,6 +398,7 @@ use FluxErp\Models\SepaMandate;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\SerialNumberRange;
 use FluxErp\Models\StockPosting;
+use FluxErp\Models\StorageArea;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Target;
 use FluxErp\Models\Task;
@@ -411,7 +412,6 @@ use FluxErp\Models\VacationBlackout;
 use FluxErp\Models\VacationCarryoverRule;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
-use FluxErp\Models\WarehouseBin;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeModel;
 use FluxErp\Models\WorkTimeType;
@@ -1247,13 +1247,13 @@ Route::prefix('api')
                 Route::put('/vat-rates', UpdateVatRate::class);
                 Route::delete('/vat-rates/{id}', DeleteVatRate::class);
 
-                // WarehouseBins
-                Route::get('/warehouse-bins/{id}', [BaseController::class, 'show'])
-                    ->defaults('model', WarehouseBin::class);
-                Route::get('/warehouse-bins', [BaseController::class, 'index'])->defaults('model', WarehouseBin::class);
-                Route::post('/warehouse-bins', CreateWarehouseBin::class);
-                Route::put('/warehouse-bins', UpdateWarehouseBin::class);
-                Route::delete('/warehouse-bins/{id}', DeleteWarehouseBin::class);
+                // StorageAreas
+                Route::get('/storage-areas/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', StorageArea::class);
+                Route::get('/storage-areas', [BaseController::class, 'index'])->defaults('model', StorageArea::class);
+                Route::post('/storage-areas', CreateStorageArea::class);
+                Route::put('/storage-areas', UpdateStorageArea::class);
+                Route::delete('/storage-areas/{id}', DeleteStorageArea::class);
 
                 // Warehouses
                 Route::get('/warehouses/{id}', [BaseController::class, 'show'])->defaults('model', Warehouse::class);

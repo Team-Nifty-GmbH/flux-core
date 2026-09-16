@@ -14,25 +14,20 @@ return new class() extends Migration
                 ->after('uuid')
                 ->constrained('lots')
                 ->nullOnDelete();
-            $table->foreignId('warehouse_bin_id')
+            $table->foreignId('storage_area_id')
                 ->nullable()
                 ->after('serial_number_id')
-                ->comment('Null means the stock sits in the warehouse without a known bin.')
-                ->constrained('warehouse_bins')
+                ->comment('Null means the stock sits in the warehouse without a known storage area.')
+                ->constrained('storage_areas')
                 ->nullOnDelete();
-
-            $table->index(['warehouse_bin_id', 'product_id']);
-            $table->index(['warehouse_id', 'product_id']);
         });
     }
 
     public function down(): void
     {
         Schema::table('stock_postings', function (Blueprint $table): void {
-            $table->dropIndex(['warehouse_id', 'product_id']);
-            $table->dropIndex(['warehouse_bin_id', 'product_id']);
             $table->dropConstrainedForeignId('lot_id');
-            $table->dropConstrainedForeignId('warehouse_bin_id');
+            $table->dropConstrainedForeignId('storage_area_id');
         });
     }
 };
