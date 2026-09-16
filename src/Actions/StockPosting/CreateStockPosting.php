@@ -5,9 +5,13 @@ namespace FluxErp\Actions\StockPosting;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\SerialNumber\CreateSerialNumber;
 use FluxErp\Models\Order;
+use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
+use FluxErp\Models\StorageArea;
+use FluxErp\Models\Warehouse;
 use FluxErp\Rulesets\StockPosting\CreateStockPostingRuleset;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 
 class CreateStockPosting extends FluxAction
 {
@@ -57,6 +61,65 @@ class CreateStockPosting extends FluxAction
         }
 
         return $stockPosting->withoutRelations()->fresh();
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        $posting = (string) $this->getData('posting');
+
+        if (bccomp($posting, '0', 10) === 1) {
+            $requiresBinLocation = resolve_static(Warehouse::class, 'query')
+                ->whereKey($this->getData('warehouse_id'))
+                ->value('requires_storage_area');
+
+            if ($requiresBinLocation && ! ($this->getData('storage_area_id', false))) {
+                throw ValidationException::withMessages([
+                    'storage_area_id' => ['The given warehouse requires a storage area'],
+                ])->errorBag('createStockPosting');
+            }
+
+            if ($storageAreaId = $this->getData('storage_area_id', false)) {
+                $storageArea = resolve_static(StorageArea::class, 'query')
+                    ->whereKey($storageAreaId)
+                    ->first();
+
+                if (! $storageArea?->is_storage_location || ! $storageArea->is_active) {
+                    throw ValidationException::withMessages([
+                        'storage_area_id' => ['The given storage area cannot hold stock'],
+                    ])->errorBag('createStockPosting');
+                }
+            }
+
+            $isLotTracked = resolve_static(Product::class, 'query')
+                ->whereKey($this->getData('product_id'))
+                ->value('is_lot_tracked');
+
+            if ($isLotTracked && ! ($this->getData('lot_id', false))) {
+                throw ValidationException::withMessages([
+                    'lot_id' => ['The given product requires a lot'],
+                ])->errorBag('createStockPosting');
+            }
+        }
+
+        if (($this->getData('parent_id', false)) && bccomp($posting, '0', 10) === -1) {
+            $parent = resolve_static(StockPosting::class, 'query')
+                ->whereKey($this->getData('parent_id'))
+                ->first();
+
+            $drawable = bcadd(
+                (string) $parent->remaining_stock,
+                (string) $parent->reserved_stock,
+                10
+            );
+
+            if (bccomp(bcabs($posting), $drawable, 10) === 1) {
+                throw ValidationException::withMessages([
+                    'posting' => ['The withdrawal exceeds the drawable stock of the parent posting'],
+                ])->errorBag('createStockPosting');
+            }
+        }
     }
 
     protected function prepareForValidation(): void
