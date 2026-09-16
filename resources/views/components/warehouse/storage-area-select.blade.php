@@ -31,13 +31,13 @@
 
 <x-select.styled
     :wire:model="$model"
-    :label="$label ?? __('Warehouse Bin')"
+    :label="$label ?? __('Storage Area')"
     :required="$required"
     :hint="$hint"
     select="label:label|value:id"
     unfiltered
     :request="[
-        'url' => route('search', \FluxErp\Models\WarehouseBin::class),
+        'url' => route('search', \FluxErp\Models\StorageArea::class),
         'method' => 'POST',
         'params' => [
             'searchFields' => ['code', 'name'],

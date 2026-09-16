@@ -2,7 +2,7 @@
     x-data="{
         setBinSearch() {
             $tallstackuiSelect(
-                'stock-posting-warehouse-bin-id',
+                'stock-posting-storage-area-id',
             ).mergeRequestParams({
                 searchFields: ['code', 'name'],
                 where: [
@@ -31,7 +31,7 @@
     <x-modal
         id="create-stock-posting-modal"
         x-on:open="
-            $tallstackuiSelect('stock-posting-warehouse-bin-id').clear();
+            $tallstackuiSelect('stock-posting-storage-area-id').clear();
             setBinSearch();
         "
     >
@@ -44,12 +44,12 @@
                 x-on:select="setBinSearch()"
                 :options="$warehouses"
             />
-            <div id="stock-posting-warehouse-bin-id">
-                <x-flux::warehouse.bin-select
-                    model="stockPosting.warehouse_bin_id"
+            <div id="stock-posting-storage-area-id">
+                <x-flux::warehouse.storage-area-select
+                    model="stockPosting.storage_area_id"
                     :warehouse-id="$stockPosting->warehouse_id"
                     storage-location-only
-                    :hint="__('Only bins marked as storage location can hold stock')"
+                    :hint="__('Only storage areas marked as storage location can hold stock')"
                 />
             </div>
             <x-select.styled
@@ -131,21 +131,21 @@
                 :options="$warehouses"
             />
             <div id="transfer-from-bin-id">
-                <x-flux::warehouse.bin-select
-                    model="stockTransfer.from_warehouse_bin_id"
-                    :label="__('Source Bin')"
+                <x-flux::warehouse.storage-area-select
+                    model="stockTransfer.from_storage_area_id"
+                    :label="__('Source Storage Area')"
                     :warehouse-id="$stockTransfer->warehouse_id"
                     required
                 />
             </div>
             <div id="transfer-to-bin-id">
-                <x-flux::warehouse.bin-select
-                    model="stockTransfer.to_warehouse_bin_id"
-                    :label="__('Target Bin')"
+                <x-flux::warehouse.storage-area-select
+                    model="stockTransfer.to_storage_area_id"
+                    :label="__('Target Storage Area')"
                     :warehouse-id="$stockTransfer->warehouse_id"
                     storage-location-only
                     required
-                    :hint="__('Only bins marked as storage location can hold stock')"
+                    :hint="__('Only storage areas marked as storage location can hold stock')"
                 />
             </div>
             <x-select.styled

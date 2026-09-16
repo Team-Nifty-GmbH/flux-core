@@ -70,11 +70,11 @@ class CreateStockPosting extends FluxAction
         $posting = (string) $this->getData('posting');
 
         if (bccomp($posting, '0', 10) === 1) {
-            $requiresBinLocation = resolve_static(Warehouse::class, 'query')
+            $requiresStorageArea = resolve_static(Warehouse::class, 'query')
                 ->whereKey($this->getData('warehouse_id'))
                 ->value('requires_storage_area');
 
-            if ($requiresBinLocation && ! ($this->getData('storage_area_id', false))) {
+            if ($requiresStorageArea && ! ($this->getData('storage_area_id', false))) {
                 throw ValidationException::withMessages([
                     'storage_area_id' => ['The given warehouse requires a storage area'],
                 ])->errorBag('createStockPosting');

@@ -2,12 +2,12 @@
 
 namespace FluxErp\Livewire\DataTables;
 
-use FluxErp\Models\WarehouseBin;
+use FluxErp\Models\StorageArea;
 use FluxErp\Traits\Livewire\DataTable\BuildsFlatTreeRows;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
-class WarehouseBinList extends BaseDataTable
+class StorageAreaList extends BaseDataTable
 {
     use BuildsFlatTreeRows;
 
@@ -18,15 +18,15 @@ class WarehouseBinList extends BaseDataTable
     public array $enabledCols = [
         'code',
         'name',
-        'warehouse_bin_type_enum',
+        'storage_area_type_enum',
         'warehouse.name',
         'parent.code',
         'is_storage_location',
         'is_active',
-        'sort_order',
+        'sort_number',
     ];
 
-    protected string $model = WarehouseBin::class;
+    protected string $model = StorageArea::class;
 
     protected function getLeftAppends(): array
     {
@@ -48,7 +48,7 @@ class WarehouseBinList extends BaseDataTable
     protected function prepareFamilyTreeQuery(Builder $query): Builder
     {
         return $query
-            ->orderBy('sort_order')
+            ->orderBy('sort_number')
             ->orderBy('code');
     }
 }

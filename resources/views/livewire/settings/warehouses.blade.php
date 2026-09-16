@@ -9,7 +9,7 @@
         </div>
         <div class="mt-2">
             <x-toggle
-                wire:model.boolean="warehouse.requires_bin_location"
+                wire:model.boolean="warehouse.requires_storage_area"
                 :label="__('Requires Bin Location')"
             />
         </div>

@@ -39,7 +39,7 @@ class StockPostingForm extends FluxForm
 
     public ?int $serial_number_id = null;
 
-    public ?int $warehouse_bin_id = null;
+    public ?int $storage_area_id = null;
 
     public ?int $warehouse_id = null;
 

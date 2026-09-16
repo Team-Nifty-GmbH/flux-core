@@ -22,7 +22,7 @@ class ExpiringStockList extends BaseStockPostingList
         'lot.lot_number',
         'lot.expires_at',
         'warehouse.name',
-        'warehouse_bin.code',
+        'storage_area.code',
         'remaining_stock',
     ];
 

@@ -10,13 +10,13 @@ class StockTransferForm extends FluxForm
 
     public ?string $description = null;
 
-    public ?int $from_warehouse_bin_id = null;
+    public ?int $from_storage_area_id = null;
 
     public ?int $lot_id = null;
 
     public ?int $product_id = null;
 
-    public ?int $to_warehouse_bin_id = null;
+    public ?int $to_storage_area_id = null;
 
     public ?int $warehouse_id = null;
 

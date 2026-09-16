@@ -84,7 +84,7 @@ test('can set bin location requirement and removal strategy', function (): void 
 
     Livewire::test(Warehouses::class)
         ->call('edit', $warehouse->getKey())
-        ->set('warehouse.requires_bin_location', true)
+        ->set('warehouse.requires_storage_area', true)
         ->set('warehouse.stock_removal_strategy_enum', StockRemovalStrategyEnum::Fefo->value)
         ->call('save')
         ->assertOk()
@@ -93,6 +93,6 @@ test('can set bin location requirement and removal strategy', function (): void 
 
     $warehouse->refresh();
 
-    expect($warehouse->requires_bin_location)->toBeTrue();
+    expect($warehouse->requires_storage_area)->toBeTrue();
     expect($warehouse->stock_removal_strategy_enum)->toBe(StockRemovalStrategyEnum::Fefo);
 });

@@ -2,23 +2,23 @@
 
 namespace FluxErp\Livewire\Settings;
 
-use FluxErp\Actions\WarehouseBin\CreateWarehouseBin;
-use FluxErp\Actions\WarehouseBin\DeleteWarehouseBin;
-use FluxErp\Actions\WarehouseBin\UpdateWarehouseBin;
-use FluxErp\Livewire\DataTables\WarehouseBinList;
-use FluxErp\Livewire\Forms\WarehouseBinForm;
+use FluxErp\Actions\StorageArea\CreateStorageArea;
+use FluxErp\Actions\StorageArea\DeleteStorageArea;
+use FluxErp\Actions\StorageArea\UpdateStorageArea;
+use FluxErp\Livewire\DataTables\StorageAreaList;
+use FluxErp\Livewire\Forms\StorageAreaForm;
 use FluxErp\Models\Warehouse;
-use FluxErp\Models\WarehouseBin;
+use FluxErp\Models\StorageArea;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
-class WarehouseBins extends WarehouseBinList
+class StorageAreas extends StorageAreaList
 {
-    public WarehouseBinForm $warehouseBin;
+    public StorageAreaForm $storageArea;
 
-    protected ?string $includeBefore = 'flux::livewire.settings.warehouse-bins';
+    protected ?string $includeBefore = 'flux::livewire.settings.storage-areas';
 
     protected function getTableActions(): array
     {
@@ -27,7 +27,7 @@ class WarehouseBins extends WarehouseBinList
                 ->text(__('New'))
                 ->icon('plus')
                 ->color('indigo')
-                ->when(resolve_static(CreateWarehouseBin::class, 'canPerformAction', [false]))
+                ->when(resolve_static(CreateStorageArea::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit()',
                 ]),
@@ -41,7 +41,7 @@ class WarehouseBins extends WarehouseBinList
                 ->text(__('Edit'))
                 ->icon('pencil')
                 ->color('indigo')
-                ->when(resolve_static(UpdateWarehouseBin::class, 'canPerformAction', [false]))
+                ->when(resolve_static(UpdateStorageArea::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
                 ]),
@@ -49,21 +49,21 @@ class WarehouseBins extends WarehouseBinList
                 ->text(__('Delete'))
                 ->color('red')
                 ->icon('trash')
-                ->when(resolve_static(DeleteWarehouseBin::class, 'canPerformAction', [false]))
+                ->when(resolve_static(DeleteStorageArea::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Warehouse Bin')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Storage Area')]),
                 ]),
         ];
     }
 
-    public function delete(WarehouseBin $warehouseBin): bool
+    public function delete(StorageArea $storageArea): bool
     {
-        $this->warehouseBin->reset();
-        $this->warehouseBin->fill($warehouseBin);
+        $this->storageArea->reset();
+        $this->storageArea->fill($storageArea);
 
         try {
-            $this->warehouseBin->delete();
+            $this->storageArea->delete();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -76,18 +76,18 @@ class WarehouseBins extends WarehouseBinList
     }
 
     #[Renderless]
-    public function edit(WarehouseBin $warehouseBin): void
+    public function edit(StorageArea $storageArea): void
     {
-        $this->warehouseBin->reset();
-        $this->warehouseBin->fill($warehouseBin);
+        $this->storageArea->reset();
+        $this->storageArea->fill($storageArea);
 
-        $this->modalOpen('edit-warehouse-bin-modal');
+        $this->modalOpen('edit-storage-area-modal');
     }
 
     public function save(): bool
     {
         try {
-            $this->warehouseBin->save();
+            $this->storageArea->save();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

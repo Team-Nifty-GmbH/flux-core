@@ -19,7 +19,7 @@ class WarehouseForm extends FluxForm
 
     public ?string $name = null;
 
-    public bool $requires_bin_location = false;
+    public bool $requires_storage_area = false;
 
     public string $stock_removal_strategy_enum = StockRemovalStrategyEnum::Fifo->value;
 

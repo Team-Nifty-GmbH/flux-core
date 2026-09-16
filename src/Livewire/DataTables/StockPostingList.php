@@ -7,13 +7,13 @@ use FluxErp\Models\StockPosting;
 class StockPostingList extends BaseDataTable
 {
     public array $columnLabels = [
-        'warehouse_bin.code' => 'Warehouse Bin',
+        'storage_area.code' => 'Storage Area',
         'lot.lot_number' => 'Lot',
     ];
 
     public array $enabledCols = [
         'warehouse.name',
-        'warehouse_bin.code',
+        'storage_area.code',
         'lot.lot_number',
         'posting',
         'description',

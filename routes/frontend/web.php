@@ -108,6 +108,7 @@ use FluxErp\Livewire\Settings\SearchSettings;
 use FluxErp\Livewire\Settings\SecuritySettings;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\Settings;
+use FluxErp\Livewire\Settings\StorageAreas;
 use FluxErp\Livewire\Settings\SubscriptionSettings;
 use FluxErp\Livewire\Settings\System;
 use FluxErp\Livewire\Settings\Tags;
@@ -122,7 +123,6 @@ use FluxErp\Livewire\Settings\Users;
 use FluxErp\Livewire\Settings\VacationBlackouts;
 use FluxErp\Livewire\Settings\VacationCarryoverRules;
 use FluxErp\Livewire\Settings\VatRates;
-use FluxErp\Livewire\Settings\WarehouseBins;
 use FluxErp\Livewire\Settings\Warehouses;
 use FluxErp\Livewire\Settings\WorkTimeModel;
 use FluxErp\Livewire\Settings\WorkTimeModels;
@@ -370,7 +370,7 @@ Route::middleware('web')
                         Route::get('/vacation-blackouts', VacationBlackouts::class)->name('vacation-blackouts');
                         Route::get('/vacation-carryover-rules', VacationCarryoverRules::class)->name('vacation-carryover-rules');
                         Route::get('/vat-rates', VatRates::class)->name('vat-rates');
-                        Route::get('/warehouse-bins', WarehouseBins::class)->name('warehouse-bins');
+                        Route::get('/storage-areas', StorageAreas::class)->name('storage-areas');
                         Route::get('/warehouses', Warehouses::class)->name('warehouses');
                         Route::get('/work-time-model/{id}', WorkTimeModel::class)->name('work-time-model')
                             ->metadata(['model' => 'work_time_model']);
