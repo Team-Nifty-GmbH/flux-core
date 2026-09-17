@@ -8,6 +8,7 @@ use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
 use FluxErp\Models\ProductCrossSelling;
+use FluxErp\Models\ProductProperty;
 use FluxErp\Models\Tag;
 use FluxErp\Models\VatRate;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -304,4 +305,22 @@ test('add supplier fills every column the pivot table carries', function (): voi
         ->not->toBeEmpty()
         ->and(data_get($component->get('product.suppliers'), '0'))
         ->toHaveKeys(array_merge($pivotFields, ['customer_number', 'main_address']));
+});
+
+test('the form shows the suppliers and properties the product owns', function (): void {
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
+    $contact->update(['main_address_id' => $address->getKey()]);
+    $this->product->suppliers()->attach($contact->getKey(), ['purchase_price' => 16.32]);
+
+    $property = ProductProperty::factory()->create();
+    $this->product->productProperties()->attach($property->getKey(), ['value' => 'Assam']);
+
+    $component = Livewire::test(Product::class, ['id' => $this->product->id])
+        ->assertOk();
+
+    expect(array_column($component->get('product.suppliers'), 'id'))
+        ->toBe([$contact->getKey()])
+        ->and(array_column($component->get('product.product_properties'), 'id'))
+        ->toBe([$property->getKey()]);
 });
