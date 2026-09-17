@@ -127,6 +127,9 @@ use FluxErp\Actions\LedgerAccountTransaction\UpdateLedgerAccountTransaction;
 use FluxErp\Actions\Location\CreateLocation;
 use FluxErp\Actions\Location\DeleteLocation;
 use FluxErp\Actions\Location\UpdateLocation;
+use FluxErp\Actions\Lot\CreateLot;
+use FluxErp\Actions\Lot\DeleteLot;
+use FluxErp\Actions\Lot\UpdateLot;
 use FluxErp\Actions\MailAccount\CreateMailAccount;
 use FluxErp\Actions\MailAccount\DeleteMailAccount;
 use FluxErp\Actions\MailAccount\UpdateMailAccount;
@@ -251,6 +254,9 @@ use FluxErp\Actions\Setting\UpdateSetting;
 use FluxErp\Actions\StockPosting\CreateStockPosting;
 use FluxErp\Actions\StockPosting\DeleteStockPosting;
 use FluxErp\Actions\StockPosting\UpdateStockPosting;
+use FluxErp\Actions\StorageArea\CreateStorageArea;
+use FluxErp\Actions\StorageArea\DeleteStorageArea;
+use FluxErp\Actions\StorageArea\UpdateStorageArea;
 use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Actions\Tag\DeleteTag;
 use FluxErp\Actions\Tag\UpdateTag;
@@ -357,6 +363,7 @@ use FluxErp\Models\LeadLossReason;
 use FluxErp\Models\LeadState;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Location;
+use FluxErp\Models\Lot;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use FluxErp\Models\MediaFolder;
@@ -393,6 +400,7 @@ use FluxErp\Models\SepaMandate;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\SerialNumberRange;
 use FluxErp\Models\StockPosting;
+use FluxErp\Models\StorageArea;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Target;
 use FluxErp\Models\Task;
@@ -778,6 +786,13 @@ Route::prefix('api')
                 Route::post('/locations', CreateLocation::class);
                 Route::put('/locations', UpdateLocation::class);
                 Route::delete('/locations/{id}', DeleteLocation::class);
+
+                // Lots
+                Route::get('/lots/{id}', [BaseController::class, 'show'])->defaults('model', Lot::class);
+                Route::get('/lots', [BaseController::class, 'index'])->defaults('model', Lot::class);
+                Route::post('/lots', CreateLot::class);
+                Route::put('/lots', UpdateLot::class);
+                Route::delete('/lots/{id}', DeleteLot::class);
 
                 // MailAccounts
                 Route::get('/mail-accounts/{id}', [BaseController::class, 'show'])
@@ -1235,6 +1250,14 @@ Route::prefix('api')
                 Route::post('/vat-rates', CreateVatRate::class);
                 Route::put('/vat-rates', UpdateVatRate::class);
                 Route::delete('/vat-rates/{id}', DeleteVatRate::class);
+
+                // StorageAreas
+                Route::get('/storage-areas/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', StorageArea::class);
+                Route::get('/storage-areas', [BaseController::class, 'index'])->defaults('model', StorageArea::class);
+                Route::post('/storage-areas', CreateStorageArea::class);
+                Route::put('/storage-areas', UpdateStorageArea::class);
+                Route::delete('/storage-areas/{id}', DeleteStorageArea::class);
 
                 // Warehouses
                 Route::get('/warehouses/{id}', [BaseController::class, 'show'])->defaults('model', Warehouse::class);
