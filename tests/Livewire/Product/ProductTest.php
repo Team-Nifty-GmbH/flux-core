@@ -307,6 +307,24 @@ test('add supplier fills every column the pivot table carries', function (): voi
         ->toHaveKeys(array_merge($pivotFields, ['customer_number', 'main_address']));
 });
 
+test('the form shows the suppliers and properties the product owns', function (): void {
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
+    $contact->update(['main_address_id' => $address->getKey()]);
+    $this->product->suppliers()->attach($contact->getKey(), ['purchase_price' => 16.32]);
+
+    $property = ProductProperty::factory()->create();
+    $this->product->productProperties()->attach($property->getKey(), ['value' => 'Assam']);
+
+    $component = Livewire::test(Product::class, ['id' => $this->product->id])
+        ->assertOk();
+
+    expect(array_column($component->get('product.suppliers'), 'id'))
+        ->toBe([$contact->getKey()])
+        ->and(array_column($component->get('product.product_properties'), 'id'))
+        ->toBe([$property->getKey()]);
+});
+
 test('saving a product without changing anything keeps its own properties', function (): void {
     $property = ProductProperty::factory()->create();
     $this->product->productProperties()->attach($property->getKey(), [

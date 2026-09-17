@@ -423,6 +423,15 @@ test('deactivate banner action persists is_active false', function (): void {
     expect($parent->fresh()->is_active)->toBeFalse();
 });
 
+test('two products from the factory never share a product number', function (): void {
+    $numbers = ProductModel::factory()
+        ->count(200)
+        ->create()
+        ->pluck('product_number');
+
+    expect($numbers->unique())->toHaveCount(200);
+});
+
 test('saving a parent without changing anything keeps the inherited copies of its variants', function (): void {
     Language::factory()->create(['is_default' => true]);
     $priceList = PriceList::factory()->create(['is_default' => true, 'is_net' => true]);
