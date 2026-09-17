@@ -319,8 +319,10 @@ test('the form shows the suppliers and properties the product owns', function ()
     $component = Livewire::test(Product::class, ['id' => $this->product->id])
         ->assertOk();
 
-    expect(array_column($component->get('product.suppliers'), 'id'))
+    expect(array_column($component->get('product.suppliers'), 'contact_id'))
         ->toBe([$contact->getKey()])
+        ->and((float) data_get($component->get('product.suppliers'), '0.purchase_price'))
+        ->toBe(16.32)
         ->and(array_column($component->get('product.product_properties'), 'id'))
         ->toBe([$property->getKey()]);
 });
@@ -341,4 +343,23 @@ test('saving a product without changing anything keeps its own properties', func
 
     expect($this->product->productProperties()->count())->toBe(1)
         ->and($this->product->productProperties()->first()->pivot->value)->toBe('keep me');
+});
+
+test('saving a product without changing anything keeps its supplier rows', function (): void {
+    $contact = Contact::factory()->create();
+    $this->product->suppliers()->attach($contact->getKey(), [
+        'supplier_product_number' => '83676',
+        'purchase_price' => 22.48,
+    ]);
+
+    Livewire::test(Product::class, ['id' => $this->product->getKey()])
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    $supplier = $this->product->suppliers()->first();
+
+    expect($supplier?->getKey())->toBe($contact->getKey())
+        ->and($supplier->pivot->supplier_product_number)->toBe('83676')
+        ->and((float) $supplier->pivot->purchase_price)->toBe(22.48);
 });
