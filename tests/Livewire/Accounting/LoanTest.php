@@ -71,7 +71,49 @@ test('every tab renders', function (string $tab): void {
         ->set('tab', $tab)
         ->assertOk()
         ->assertNoRedirect();
-})->with(['loan.general', 'loan.installments', 'loan.payments', 'loan.bookings', 'loan.documents']);
+})->with([
+    'loan.general',
+    'loan.installments',
+    'loan.payments',
+    'loan.extra-repayments',
+    'loan.bookings',
+    'loan.documents',
+]);
+
+test('the extra repayment tab shows the allowance and books a repayment', function (): void {
+    $this->loan->update([
+        'installment_amount' => 6060,
+        'extra_repayment_allowance_amount' => 5000,
+    ]);
+
+    Livewire::test(Loan::class, ['id' => $this->loan->getKey()])
+        ->set('tab', 'loan.extra-repayments')
+        ->assertOk()
+        ->assertSet('allowance.is_allowed', true)
+        ->assertSet('allowance.is_capped', true)
+        ->set('extraRepayment.amount', 3000)
+        ->set('extraRepayment.executed_at', '2026-01-15')
+        ->assertSet('extraRepayments', [])
+        ->call('saveExtraRepayment')
+        ->assertHasNoErrors()
+        ->assertCount('extraRepayments', 1);
+
+    expect($this->loan->refresh()->remaining)->toEqual(9000);
+});
+
+test('the extra repayment tab refuses a loan without an allowance', function (): void {
+    $this->loan->update(['allows_extra_repayments' => false]);
+
+    Livewire::test(Loan::class, ['id' => $this->loan->getKey()])
+        ->set('tab', 'loan.extra-repayments')
+        ->assertOk()
+        ->assertSet('allowance.is_allowed', false)
+        ->set('extraRepayment.amount', 100)
+        ->call('saveExtraRepayment')
+        ->assertReturned(false);
+
+    expect($this->loan->refresh()->extraRepayments()->count())->toBe(0);
+});
 
 test('the schedule tab formats amounts and dates for the locale', function (): void {
     app()->setLocale('de');
