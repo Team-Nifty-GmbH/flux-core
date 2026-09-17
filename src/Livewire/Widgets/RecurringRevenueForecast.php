@@ -89,7 +89,7 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
 
             $cron = new CronExpression($orderSchedule->schedule->cron_expression);
             try {
-                $nextRun = $cron->getNextRunDate();
+                $nextRun = $cron->getNextRunDate(now());
             } catch (Throwable) {
                 continue;
             }
