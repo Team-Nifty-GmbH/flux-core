@@ -280,36 +280,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Fix git ownership
-        run: git config --global --add safe.directory $GITHUB_WORKSPACE
-
-      - name: Configure Composer GitHub auth
-        run: composer config --global github-oauth.github.com ${{ github.token }}
-
-      - name: Change Laravel Version Dependencies
-        run: composer require "laravel/framework:${{ env.LARAVEL_VERSION }}" "orchestra/testbench:${{ env.TESTBENCH_VERSION }}" --no-interaction --no-update
-
-      - name: Install Composer dependencies
-        run: composer install --no-progress --prefer-dist --optimize-autoloader
-
-      - name: Install npm dependencies
-        run: npm i
-
-      - name: Build frontend assets
-        run: npm run build
-
-      - name: Clear Orchestra Testbench Cache
-        run: ./vendor/bin/testbench view:clear
-
-      - name: Create schema
-        run: |
-          ./vendor/bin/testbench migrate --force
-          ./vendor/bin/testbench schema:dump
-
-      - name: Install Playwright Browsers
-        run: npx playwright install chromium
-        env:
-          PLAYWRIGHT_BROWSERS_PATH: /tmp/pw-browsers
+      - name: Prepare
+        uses: ./.github/actions/prepare-browser-tests
+        with:
+          laravel-version: ${{ env.LARAVEL_VERSION }}
+          testbench-version: ${{ env.TESTBENCH_VERSION }}
+          github-token: ${{ github.token }}
 
       - name: Run Browser Tests
         run: composer test-browser
