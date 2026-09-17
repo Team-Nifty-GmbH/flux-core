@@ -324,3 +324,21 @@ test('the form shows the suppliers and properties the product owns', function ()
         ->and(array_column($component->get('product.product_properties'), 'id'))
         ->toBe([$property->getKey()]);
 });
+
+test('saving a product without changing anything keeps its own properties', function (): void {
+    $property = ProductProperty::factory()->create();
+    $this->product->productProperties()->attach($property->getKey(), [
+        'value' => 'keep me',
+        'is_inherited' => false,
+    ]);
+
+    expect($this->product->productProperties()->count())->toBe(1);
+
+    Livewire::test(Product::class, ['id' => $this->product->getKey()])
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($this->product->productProperties()->count())->toBe(1)
+        ->and($this->product->productProperties()->first()->pivot->value)->toBe('keep me');
+});
