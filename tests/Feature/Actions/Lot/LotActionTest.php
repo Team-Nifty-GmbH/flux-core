@@ -7,6 +7,7 @@ use FluxErp\Models\Lot;
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Warehouse;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 beforeEach(function (): void {
     $this->product = Product::factory()->create();
@@ -124,10 +125,10 @@ test('create lot reuses a lot number released by a trashed lot', function (): vo
     ]);
 });
 
-test('delete lot without validation does not fail on a missing lot', function (): void {
-    expect(DeleteLot::make(['id' => 999999])->execute())->toBeNull();
-});
+test('delete lot without validation fails on a missing lot', function (): void {
+    DeleteLot::make(['id' => 999999])->execute();
+})->throws(ModelNotFoundException::class);
 
-test('update lot without validation does not fail on a missing lot', function (): void {
-    expect(UpdateLot::make(['id' => 999999, 'lot_number' => 'CH-2026-10'])->execute())->toBeNull();
-});
+test('update lot without validation fails on a missing lot', function (): void {
+    UpdateLot::make(['id' => 999999, 'lot_number' => 'CH-2026-10'])->execute();
+})->throws(ModelNotFoundException::class);
