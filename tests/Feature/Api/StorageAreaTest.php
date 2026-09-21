@@ -1,8 +1,8 @@
 <?php
 
 use FluxErp\Models\Permission;
-use FluxErp\Models\Warehouse;
 use FluxErp\Models\StorageArea;
+use FluxErp\Models\Warehouse;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
