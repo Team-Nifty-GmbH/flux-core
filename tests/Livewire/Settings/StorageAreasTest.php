@@ -2,8 +2,8 @@
 
 use FluxErp\Enums\StorageAreaTypeEnum;
 use FluxErp\Livewire\Settings\StorageAreas;
-use FluxErp\Models\Warehouse;
 use FluxErp\Models\StorageArea;
+use FluxErp\Models\Warehouse;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
@@ -51,7 +51,7 @@ test('can create warehouse bin', function (): void {
         ->call('edit')
         ->set('storageArea.warehouse_id', $this->warehouse->getKey())
         ->set('storageArea.code', $code)
-        ->set('storageArea.storage_area_type_enum', StorageAreaTypeEnum::Container->value)
+        ->set('storageArea.storage_area_type_enum', StorageAreaTypeEnum::Container)
         ->set('storageArea.is_storage_location', true)
         ->call('save')
         ->assertOk()

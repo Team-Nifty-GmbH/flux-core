@@ -2,8 +2,8 @@
 
 use FluxErp\Enums\StorageAreaTypeEnum;
 use FluxErp\Livewire\DataTables\StorageAreaList;
-use FluxErp\Models\Warehouse;
 use FluxErp\Models\StorageArea;
+use FluxErp\Models\Warehouse;
 use Livewire\Livewire;
 
 beforeEach(function (): void {

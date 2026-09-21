@@ -1,8 +1,8 @@
 <?php
 
 use FluxErp\Enums\StorageAreaTypeEnum;
-use FluxErp\Models\Warehouse;
 use FluxErp\Models\StorageArea;
+use FluxErp\Models\Warehouse;
 
 beforeEach(function (): void {
     $this->warehouse = Warehouse::factory()->create();
