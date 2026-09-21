@@ -20,6 +20,15 @@ class RecentActivities extends ValueList
     public function calculateList(): void
     {
         $this->items = resolve_static(Activity::class, 'query')
+            ->select([
+                'id',
+                'description',
+                'subject_type',
+                'subject_id',
+                'causer_type',
+                'causer_id',
+                'created_at',
+            ])
             ->with(['causer:id,name', 'subject'])
             ->whereNot('event', 'visit')
             ->latest()
@@ -63,9 +72,12 @@ class RecentActivities extends ValueList
     #[Renderless]
     public function hasMore(): bool
     {
-        return $this->limit < resolve_static(Activity::class, 'query')
+        return resolve_static(Activity::class, 'query')
             ->whereNot('event', 'visit')
-            ->count();
+            ->latest()
+            ->offset($this->limit)
+            ->limit(1)
+            ->exists();
     }
 
     #[Renderless]
