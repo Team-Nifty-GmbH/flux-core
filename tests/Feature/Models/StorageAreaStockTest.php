@@ -2,8 +2,8 @@
 
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
-use FluxErp\Models\Warehouse;
 use FluxErp\Models\StorageArea;
+use FluxErp\Models\Warehouse;
 
 test('a storage area reports its stock and its available stock', function (): void {
     $warehouse = Warehouse::factory()->create();

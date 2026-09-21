@@ -3,8 +3,8 @@
 use FluxErp\Models\Lot;
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
-use FluxErp\Models\Warehouse;
 use FluxErp\Models\StorageArea;
+use FluxErp\Models\Warehouse;
 
 beforeEach(function (): void {
     $this->warehouse = Warehouse::factory()->create();
