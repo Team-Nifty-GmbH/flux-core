@@ -10,7 +10,7 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateLot extends FluxAction
 {
-    protected ?Lot $lot = null;
+    protected Lot $lot;
 
     public static function models(): array
     {
@@ -25,10 +25,10 @@ class UpdateLot extends FluxAction
     public function performAction(): ?Model
     {
         $lot = $this->getLot();
-        $lot?->fill($this->getData());
-        $lot?->save();
+        $lot->fill($this->getData());
+        $lot->save();
 
-        return $lot?->withoutRelations()->fresh();
+        return $lot->withoutRelations()->fresh();
     }
 
     protected function validateData(): void
@@ -37,8 +37,8 @@ class UpdateLot extends FluxAction
 
         if (resolve_static(Lot::class, 'query')
             ->whereKeyNot($this->getData('id'))
-            ->where('product_id', $this->getData('product_id', $this->getLot()?->product_id))
-            ->where('lot_number', $this->getData('lot_number', $this->getLot()?->lot_number))
+            ->where('product_id', $this->getData('product_id', $this->getLot()->product_id))
+            ->where('lot_number', $this->getData('lot_number', $this->getLot()->lot_number))
             ->exists()
         ) {
             throw ValidationException::withMessages([
@@ -48,10 +48,10 @@ class UpdateLot extends FluxAction
         }
     }
 
-    protected function getLot(): ?Lot
+    protected function getLot(): Lot
     {
         return $this->lot ??= resolve_static(Lot::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first();
+            ->firstOrFail();
     }
 }

@@ -1131,6 +1131,14 @@ Route::prefix('api')
                 Route::put('/stock-postings', UpdateStockPosting::class);
                 Route::delete('/stock-postings/{id}', DeleteStockPosting::class);
 
+                // StorageAreas
+                Route::get('/storage-areas/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', StorageArea::class);
+                Route::get('/storage-areas', [BaseController::class, 'index'])->defaults('model', StorageArea::class);
+                Route::post('/storage-areas', CreateStorageArea::class);
+                Route::put('/storage-areas', UpdateStorageArea::class);
+                Route::delete('/storage-areas/{id}', DeleteStorageArea::class);
+
                 // Tag
                 Route::get('/tags/{id}', [BaseController::class, 'show'])->defaults('model', Tag::class);
                 Route::get('/tags', [BaseController::class, 'index'])->defaults('model', Tag::class);
@@ -1252,14 +1260,6 @@ Route::prefix('api')
                 Route::post('/vat-rates', CreateVatRate::class);
                 Route::put('/vat-rates', UpdateVatRate::class);
                 Route::delete('/vat-rates/{id}', DeleteVatRate::class);
-
-                // StorageAreas
-                Route::get('/storage-areas/{id}', [BaseController::class, 'show'])
-                    ->defaults('model', StorageArea::class);
-                Route::get('/storage-areas', [BaseController::class, 'index'])->defaults('model', StorageArea::class);
-                Route::post('/storage-areas', CreateStorageArea::class);
-                Route::put('/storage-areas', UpdateStorageArea::class);
-                Route::delete('/storage-areas/{id}', DeleteStorageArea::class);
 
                 // Warehouses
                 Route::get('/warehouses/{id}', [BaseController::class, 'show'])->defaults('model', Warehouse::class);

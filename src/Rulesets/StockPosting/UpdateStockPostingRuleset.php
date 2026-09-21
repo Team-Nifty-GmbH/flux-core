@@ -25,7 +25,7 @@ class UpdateStockPostingRuleset extends FluxRuleset
             'lot_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Lot::class]),
+                app(ModelExists::class, ['model' => Lot::class, 'subject' => StockPosting::class]),
                 app(ExistsWithForeign::class, [
                     'foreignAttribute' => 'product_id',
                     'table' => 'lots',
@@ -35,7 +35,7 @@ class UpdateStockPostingRuleset extends FluxRuleset
             'storage_area_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => StorageArea::class]),
+                app(ModelExists::class, ['model' => StorageArea::class, 'subject' => StockPosting::class]),
                 app(ExistsWithForeign::class, [
                     'foreignAttribute' => 'warehouse_id',
                     'table' => 'storage_areas',
