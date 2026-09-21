@@ -3,26 +3,27 @@
 namespace FluxErp\Enums;
 
 use FluxErp\Enums\Traits\EnumTrait;
+use FluxErp\Support\Enums\FluxEnum;
 
-enum StorageAreaTypeEnum: string
+class StorageAreaTypeEnum extends FluxEnum
 {
     use EnumTrait;
 
-    case Aisle = 'aisle';
+    final public const string Aisle = 'aisle';
 
-    case Container = 'container';
+    final public const string Container = 'container';
 
-    case GoodsIn = 'goods-in';
+    final public const string GoodsIn = 'goods-in';
 
-    case GoodsOut = 'goods-out';
+    final public const string GoodsOut = 'goods-out';
 
-    case Packing = 'packing';
+    final public const string Packing = 'packing';
 
-    case Quarantine = 'quarantine';
+    final public const string Quarantine = 'quarantine';
 
-    case Rack = 'rack';
+    final public const string Rack = 'rack';
 
-    case Shelf = 'shelf';
+    final public const string Shelf = 'shelf';
 
-    case Zone = 'zone';
+    final public const string Zone = 'zone';
 }

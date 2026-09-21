@@ -6,8 +6,9 @@ use FluxErp\Actions\StorageArea\UpdateStorageArea;
 use FluxErp\Enums\StorageAreaTypeEnum;
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
-use FluxErp\Models\Warehouse;
 use FluxErp\Models\StorageArea;
+use FluxErp\Models\Warehouse;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 beforeEach(function (): void {
     $this->warehouse = Warehouse::factory()->create();
@@ -18,13 +19,13 @@ test('create storage area', function (): void {
         'warehouse_id' => $this->warehouse->getKey(),
         'code' => 'A-01-03-B',
         'name' => 'Container B',
-        'storage_area_type_enum' => StorageAreaTypeEnum::Container->value,
+        'storage_area_type_enum' => StorageAreaTypeEnum::Container,
         'is_storage_location' => true,
     ])->validate()->execute();
 
     expect($storageArea)->toBeInstanceOf(StorageArea::class)
         ->code->toBe('A-01-03-B')
-        ->and($storageArea->storage_area_type_enum)->toBe(StorageAreaTypeEnum::Container);
+        ->and($storageArea->storage_area_type_enum->value)->toBe(StorageAreaTypeEnum::Container);
 
     $this->assertDatabaseHas('storage_areas', [
         'id' => $storageArea->getKey(),
@@ -46,7 +47,7 @@ test('create storage area rejects a duplicate code in the same warehouse', funct
     CreateStorageArea::assertValidationErrors([
         'warehouse_id' => $this->warehouse->getKey(),
         'code' => 'A-01',
-        'storage_area_type_enum' => StorageAreaTypeEnum::Container->value,
+        'storage_area_type_enum' => StorageAreaTypeEnum::Container,
     ], 'code');
 });
 
@@ -58,7 +59,7 @@ test('create storage area rejects a parent from another warehouse', function ():
         'warehouse_id' => $this->warehouse->getKey(),
         'parent_id' => $foreignParent->getKey(),
         'code' => 'A-02',
-        'storage_area_type_enum' => StorageAreaTypeEnum::Container->value,
+        'storage_area_type_enum' => StorageAreaTypeEnum::Container,
     ], 'parent_id');
 });
 
@@ -121,7 +122,7 @@ test('create storage area reuses a code released by a trashed storage area', fun
     $storageArea = CreateStorageArea::make([
         'warehouse_id' => $this->warehouse->getKey(),
         'code' => 'A-01',
-        'storage_area_type_enum' => StorageAreaTypeEnum::Container->value,
+        'storage_area_type_enum' => StorageAreaTypeEnum::Container,
     ])
         ->validate()
         ->execute();
@@ -258,13 +259,13 @@ test('update storage area allows moving to another warehouse when its only child
     expect($updated->warehouse_id)->toBe($other->getKey());
 });
 
-test('delete storage area without validation does not fail on a missing storage area', function (): void {
-    expect(DeleteStorageArea::make(['id' => 999999])->execute())->toBeNull();
-});
+test('delete storage area without validation fails on a missing storage area', function (): void {
+    DeleteStorageArea::make(['id' => 999999])->execute();
+})->throws(ModelNotFoundException::class);
 
-test('update storage area without validation does not fail on a missing storage area', function (): void {
-    expect(UpdateStorageArea::make(['id' => 999999, 'name' => 'Ghost'])->execute())->toBeNull();
-});
+test('update storage area without validation fails on a missing storage area', function (): void {
+    UpdateStorageArea::make(['id' => 999999, 'name' => 'Ghost'])->execute();
+})->throws(ModelNotFoundException::class);
 
 test('create storage area pools every validation failure', function (): void {
     $other = Warehouse::factory()->create();
@@ -275,6 +276,6 @@ test('create storage area pools every validation failure', function (): void {
         'warehouse_id' => $this->warehouse->getKey(),
         'parent_id' => $foreignParent->getKey(),
         'code' => 'A-01',
-        'storage_area_type_enum' => StorageAreaTypeEnum::Container->value,
+        'storage_area_type_enum' => StorageAreaTypeEnum::Container,
     ], ['parent_id', 'code']);
 });

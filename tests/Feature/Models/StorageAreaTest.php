@@ -1,8 +1,8 @@
 <?php
 
 use FluxErp\Enums\StorageAreaTypeEnum;
-use FluxErp\Models\Warehouse;
 use FluxErp\Models\StorageArea;
+use FluxErp\Models\Warehouse;
 
 test('storage area belongs to a warehouse', function (): void {
     $warehouse = Warehouse::factory()->create();
@@ -18,7 +18,7 @@ test('storage area casts its type to an enum', function (): void {
         'storage_area_type_enum' => StorageAreaTypeEnum::Shelf,
     ]);
 
-    expect($storageArea->fresh()->storage_area_type_enum)->toBe(StorageAreaTypeEnum::Shelf);
+    expect($storageArea->fresh()->storage_area_type_enum->value)->toBe(StorageAreaTypeEnum::Shelf);
 });
 
 test('storage area nests arbitrarily deep', function (): void {
