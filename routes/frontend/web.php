@@ -56,6 +56,7 @@ use FluxErp\Livewire\Order\CreateChildOrder;
 use FluxErp\Livewire\Order\Order;
 use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Order\OrderListByOrderType;
+use FluxErp\Livewire\Product\ExpiringStockList;
 use FluxErp\Livewire\Product\Product;
 use FluxErp\Livewire\Product\ProductList;
 use FluxErp\Livewire\Product\SerialNumber\SerialNumber;
@@ -107,6 +108,7 @@ use FluxErp\Livewire\Settings\SearchSettings;
 use FluxErp\Livewire\Settings\SecuritySettings;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\Settings;
+use FluxErp\Livewire\Settings\StorageAreas;
 use FluxErp\Livewire\Settings\SubscriptionSettings;
 use FluxErp\Livewire\Settings\System;
 use FluxErp\Livewire\Settings\Tags;
@@ -244,6 +246,7 @@ Route::middleware('web')
 
                 Route::name('products.')->prefix('products')
                     ->group(function (): void {
+                        Route::get('/expiring-stock', ExpiringStockList::class)->name('expiring-stock');
                         Route::get('/list', ProductList::class)->name('products');
                         Route::get('/serial-numbers', SerialNumberList::class)->name('serial-numbers');
                         Route::get('/serial-numbers/{id?}', SerialNumber::class)->name('serial-numbers.id?')
@@ -367,6 +370,7 @@ Route::middleware('web')
                         Route::get('/vacation-blackouts', VacationBlackouts::class)->name('vacation-blackouts');
                         Route::get('/vacation-carryover-rules', VacationCarryoverRules::class)->name('vacation-carryover-rules');
                         Route::get('/vat-rates', VatRates::class)->name('vat-rates');
+                        Route::get('/storage-areas', StorageAreas::class)->name('storage-areas');
                         Route::get('/warehouses', Warehouses::class)->name('warehouses');
                         Route::get('/work-time-model/{id}', WorkTimeModel::class)->name('work-time-model')
                             ->metadata(['model' => 'work_time_model']);
