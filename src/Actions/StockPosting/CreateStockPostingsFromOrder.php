@@ -8,6 +8,7 @@ use FluxErp\Models\OrderPosition;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rulesets\StockPosting\CreateStockPostingsFromOrderRuleset;
+use FluxErp\Support\Stock\StockAllocator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -54,9 +55,9 @@ class CreateStockPostingsFromOrder extends FluxAction
             // Handle Purchase Orders and alike.
             if ($multiplier === -1 && $postStock) {
                 CreateStockPosting::make([
-                    'warehouse_id' => $orderPosition->warehouse_id,
-                    'product_id' => $orderPosition->product_id,
                     'order_position_id' => $orderPosition->id,
+                    'product_id' => $orderPosition->product_id,
+                    'warehouse_id' => $orderPosition->warehouse_id,
                     'purchase_price' => $orderPosition->unit_net_price,
                     'posting' => $open,
                     'description' => $description,
@@ -82,10 +83,12 @@ class CreateStockPostingsFromOrder extends FluxAction
                 continue;
             }
 
-            $availableStock = resolve_static(StockPosting::class, 'query')
-                ->where('product_id', $orderPosition->product_id)
-                ->where('warehouse_id', $orderPosition->warehouse_id)
-                ->sum('remaining_stock');
+            $allocator = StockAllocator::make(
+                productId: $orderPosition->product_id,
+                warehouseId: $orderPosition->warehouse_id,
+            );
+
+            $availableStock = $allocator->query()->sum('remaining_stock');
 
             if (bccomp($open, bcadd($availableStock, $reserved)) === 1 && ! $orderPosition->product->is_nos) {
                 throw ValidationException::withMessages([
@@ -101,33 +104,27 @@ class CreateStockPostingsFromOrder extends FluxAction
                 ]);
             }
 
-            $stockPostings = resolve_static(StockPosting::class, 'query')
-                ->where('product_id', $orderPosition->product_id)
-                ->where('warehouse_id', $orderPosition->warehouse_id)
-                ->where('remaining_stock', '>', 0)
-                ->get(['id', 'remaining_stock', 'reserved_stock', 'purchase_price']);
-
             if ($postStock) {
                 // Post reserved stock
                 $this->postReservedStock($orderPosition, $open, $order->order_number);
 
                 // Post remaining stock
                 $open = bcsub($open, $reserved);
-                foreach ($stockPostings as $stockPosting) {
-                    if (bccomp($open, 0) <= 0) {
-                        break;
-                    }
 
-                    $posting = bccomp($open, $stockPosting->remaining_stock) === 1
-                        ? $stockPosting->remaining_stock
-                        : $open;
+                $allocation = $allocator->allocate($open);
+
+                foreach ($allocation as $item) {
+                    $stockPosting = $item['stockPosting'];
+                    $posting = $item['amount'];
 
                     CreateStockPosting::make([
-                        'warehouse_id' => $orderPosition->warehouse_id,
-                        'product_id' => $orderPosition->product_id,
-                        'parent_id' => $stockPosting->id,
+                        'lot_id' => $stockPosting->lot_id,
                         'order_position_id' => $orderPosition->id,
+                        'parent_id' => $stockPosting->id,
+                        'product_id' => $orderPosition->product_id,
                         'serial_number_id' => $stockPosting->serial_number_id,
+                        'storage_area_id' => $stockPosting->storage_area_id,
+                        'warehouse_id' => $orderPosition->warehouse_id,
                         'posting' => bcmul($posting, -1),
                         'purchase_price' => $stockPosting->purchase_price,
                         'description' => $description,
@@ -149,9 +146,9 @@ class CreateStockPostingsFromOrder extends FluxAction
 
                 if (bccomp($open, 0) === 1 && $orderPosition->product->is_nos) {
                     CreateStockPosting::make([
-                        'warehouse_id' => $orderPosition->warehouse_id,
-                        'product_id' => $orderPosition->product_id,
                         'order_position_id' => $orderPosition->id,
+                        'product_id' => $orderPosition->product_id,
+                        'warehouse_id' => $orderPosition->warehouse_id,
                         'posting' => bcmul($open, -1),
                         'description' => $description,
                     ])
@@ -161,15 +158,13 @@ class CreateStockPostingsFromOrder extends FluxAction
                 }
             } else {
                 $open = bcsub($open, $reserved);
-                // Reserve remaining stock
-                foreach ($stockPostings as $stockPosting) {
-                    if (bccomp($open, 0) === 0) {
-                        break;
-                    }
 
-                    $posting = bccomp($open, $stockPosting->remaining_stock) === 1
-                        ? $stockPosting->remaining_stock
-                        : $open;
+                // Reserve remaining stock
+                $allocation = $allocator->allocate($open);
+
+                foreach ($allocation as $item) {
+                    $stockPosting = $item['stockPosting'];
+                    $posting = $item['amount'];
 
                     $orderPosition->reservedStock()->attach($stockPosting->id, ['reserved_amount' => $posting]);
 
@@ -227,10 +222,12 @@ class CreateStockPostingsFromOrder extends FluxAction
             }
 
             CreateStockPosting::make([
-                'warehouse_id' => $orderPosition->warehouse_id,
-                'product_id' => $orderPosition->product_id,
+                'lot_id' => $stockPosting->lot_id,
                 'order_position_id' => $orderPosition->id,
+                'product_id' => $orderPosition->product_id,
                 'serial_number_id' => $stockPosting->serial_number_id,
+                'storage_area_id' => $stockPosting->storage_area_id,
+                'warehouse_id' => $orderPosition->warehouse_id,
                 'posting' => bcmul($posting, -1),
                 'purchase_price' => $stockPosting->purchase_price,
                 'description' => $description,

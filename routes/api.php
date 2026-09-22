@@ -253,6 +253,7 @@ use FluxErp\Actions\SerialNumberRange\UpdateSerialNumberRange;
 use FluxErp\Actions\Setting\UpdateSetting;
 use FluxErp\Actions\StockPosting\CreateStockPosting;
 use FluxErp\Actions\StockPosting\DeleteStockPosting;
+use FluxErp\Actions\StockPosting\TransferStock;
 use FluxErp\Actions\StockPosting\UpdateStockPosting;
 use FluxErp\Actions\StorageArea\CreateStorageArea;
 use FluxErp\Actions\StorageArea\DeleteStorageArea;
@@ -1122,6 +1123,7 @@ Route::prefix('api')
                 Route::delete('/event-subscriptions/{id}', DeleteEventSubscription::class);
 
                 // StockPostings
+                Route::post('/stock-postings/transfer', TransferStock::class);
                 Route::get('/stock-postings/{id}', [BaseController::class, 'show'])
                     ->defaults('model', StockPosting::class);
                 Route::get('/stock-postings', [BaseController::class, 'index'])->defaults('model', StockPosting::class);
