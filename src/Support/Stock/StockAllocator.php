@@ -83,7 +83,7 @@ class StockAllocator
             ->where('stock_postings.warehouse_id', $this->warehouseId)
             ->where('stock_postings.remaining_stock', '>', 0)
             ->when(
-                ! is_null($this->storageAreaIds),
+                $this->storageAreaIds,
                 fn (Builder $query) => $query
                     ->whereIn('stock_postings.storage_area_id', $this->storageAreaIds)
                     ->whereHas('storageArea', fn (Builder $query) => $query->where('is_active', true)),
@@ -93,7 +93,7 @@ class StockAllocator
                 )
             )
             ->when(
-                ! is_null($this->lotId),
+                $this->lotId,
                 fn (Builder $query) => $query
                     ->where('stock_postings.lot_id', $this->lotId)
                     ->whereHas('lot', fn (Builder $query) => $query->whereNull('blocked_at')),

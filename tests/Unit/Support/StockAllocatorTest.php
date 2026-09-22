@@ -146,12 +146,13 @@ test('the warehouse strategy is used when the product has none', function (): vo
     expect($allocation[0]['stockPosting']->getKey())->toBe($second->getKey());
 });
 
-test('an empty storage area scope allocates nothing', function (): void {
-    ($this->layer)(10);
+test('an empty storage area scope does not restrict the allocation', function (): void {
+    $layer = ($this->layer)(10);
 
     $allocation = ($this->allocator)()->inStorageAreas([])->allocate(10);
 
-    expect($allocation)->toHaveCount(0);
+    expect($allocation)->toHaveCount(1)
+        ->and($allocation[0]['stockPosting']->getKey())->toBe($layer->getKey());
 });
 
 test('allocating zero returns an empty collection without touching any layer', function (): void {

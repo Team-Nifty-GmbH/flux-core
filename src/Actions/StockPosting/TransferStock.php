@@ -25,7 +25,14 @@ class TransferStock extends FluxAction
     {
         $description = $this->getData('description', 'Stock transfer');
 
-        $allocation = $this->allocator()->allocate($this->getData('amount'));
+        $allocation = StockAllocator::make(
+            productId: $this->getData('product_id'),
+            warehouseId: $this->getData('warehouse_id'),
+            storageAreaIds: [$this->getData('from_storage_area_id')],
+            lotId: $this->getData('lot_id'),
+        )
+            ->allocate($this->getData('amount'));
+
         $allocated = $allocation->reduce(
             fn (string $carry, array $item) => bcadd($carry, $item['amount'], 10),
             '0'
@@ -111,15 +118,5 @@ class TransferStock extends FluxAction
             throw ValidationException::withMessages($errors)
                 ->errorBag('transferStock');
         }
-    }
-
-    protected function allocator(): StockAllocator
-    {
-        return StockAllocator::make(
-            productId: $this->getData('product_id'),
-            warehouseId: $this->getData('warehouse_id'),
-            storageAreaIds: [$this->getData('from_storage_area_id')],
-            lotId: $this->getData('lot_id'),
-        );
     }
 }
