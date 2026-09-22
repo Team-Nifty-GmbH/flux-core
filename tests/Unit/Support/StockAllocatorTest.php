@@ -161,3 +161,21 @@ test('allocating zero returns an empty collection without touching any layer', f
 
     expect($allocation)->toHaveCount(0);
 });
+
+test('the constructor takes the same scope as the fluent setters', function (): void {
+    $wanted = StorageArea::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+    $other = StorageArea::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+
+    $inWanted = ($this->layer)(10, ['storage_area_id' => $wanted->getKey()]);
+    ($this->layer)(10, ['storage_area_id' => $other->getKey()]);
+
+    $allocation = StockAllocator::make(
+        productId: $this->product->getKey(),
+        warehouseId: $this->warehouse->getKey(),
+        storageAreaIds: [$wanted->getKey()],
+    )->allocate(20);
+
+    expect($allocation)->toHaveCount(1)
+        ->and($allocation[0]['stockPosting']->getKey())->toBe($inWanted->getKey())
+        ->and(bccomp($allocation[0]['amount'], '10', 10))->toBe(0);
+});

@@ -43,12 +43,12 @@ class TransferStock extends FluxAction
             $amount = $item['amount'];
 
             CreateStockPosting::make([
-                'warehouse_id' => $this->getData('warehouse_id'),
-                'product_id' => $this->getData('product_id'),
-                'storage_area_id' => $this->getData('from_storage_area_id'),
                 'lot_id' => $stockPosting->lot_id,
                 'parent_id' => $stockPosting->id,
+                'product_id' => $this->getData('product_id'),
                 'serial_number_id' => $stockPosting->serial_number_id,
+                'storage_area_id' => $this->getData('from_storage_area_id'),
+                'warehouse_id' => $this->getData('warehouse_id'),
                 'posting' => bcmul($amount, -1),
                 'purchase_price' => $stockPosting->purchase_price,
                 'description' => $description,
@@ -66,12 +66,12 @@ class TransferStock extends FluxAction
                 ->execute();
 
             CreateStockPosting::make([
-                'warehouse_id' => $this->getData('warehouse_id'),
-                'product_id' => $this->getData('product_id'),
-                'storage_area_id' => $this->getData('to_storage_area_id'),
                 'lot_id' => $stockPosting->lot_id,
                 'parent_id' => $stockPosting->id,
+                'product_id' => $this->getData('product_id'),
                 'serial_number_id' => $stockPosting->serial_number_id,
+                'storage_area_id' => $this->getData('to_storage_area_id'),
+                'warehouse_id' => $this->getData('warehouse_id'),
                 'posting' => $amount,
                 'purchase_price' => $stockPosting->purchase_price,
                 'description' => $description,
@@ -90,23 +90,20 @@ class TransferStock extends FluxAction
 
         $storageAreas = resolve_static(StorageArea::class, 'query')
             ->whereKey([$this->getData('from_storage_area_id'), $this->getData('to_storage_area_id')])
+            ->where('warehouse_id', $this->getData('warehouse_id'))
             ->get()
             ->keyBy('id');
 
-        $source = $storageAreas->get($this->getData('from_storage_area_id'));
         $target = $storageAreas->get($this->getData('to_storage_area_id'));
-        $warehouseId = (int) $this->getData('warehouse_id');
         $errors = [];
 
-        if ($source && $source->warehouse_id !== $warehouseId) {
+        if (! $storageAreas->has($this->getData('from_storage_area_id'))) {
             $errors['from_storage_area_id'][] = 'The source storage area belongs to a different warehouse';
         }
 
-        if ($target && $target->warehouse_id !== $warehouseId) {
+        if (! $target) {
             $errors['to_storage_area_id'][] = 'The target storage area belongs to a different warehouse';
-        }
-
-        if ($target && (! $target->is_storage_location || ! $target->is_active)) {
+        } elseif (! $target->is_storage_location || ! $target->is_active) {
             $errors['to_storage_area_id'][] = 'The target storage area cannot hold stock';
         }
 
@@ -122,6 +119,6 @@ class TransferStock extends FluxAction
             ->forProduct($this->getData('product_id'))
             ->inWarehouse($this->getData('warehouse_id'))
             ->inStorageAreas([$this->getData('from_storage_area_id')])
-            ->forLot($this->getData('lot_id', null));
+            ->forLot($this->getData('lot_id'));
     }
 }

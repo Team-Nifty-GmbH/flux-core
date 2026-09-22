@@ -55,9 +55,9 @@ class CreateStockPostingsFromOrder extends FluxAction
             // Handle Purchase Orders and alike.
             if ($multiplier === -1 && $postStock) {
                 CreateStockPosting::make([
-                    'warehouse_id' => $orderPosition->warehouse_id,
-                    'product_id' => $orderPosition->product_id,
                     'order_position_id' => $orderPosition->id,
+                    'product_id' => $orderPosition->product_id,
+                    'warehouse_id' => $orderPosition->warehouse_id,
                     'purchase_price' => $orderPosition->unit_net_price,
                     'posting' => $open,
                     'description' => $description,
@@ -90,7 +90,17 @@ class CreateStockPostingsFromOrder extends FluxAction
             $availableStock = $allocator->query()->sum('remaining_stock');
 
             if (bccomp($open, bcadd($availableStock, $reserved)) === 1 && ! $orderPosition->product->is_nos) {
-                throw $this->notEnoughStock($orderPosition);
+                throw ValidationException::withMessages([
+                    'orderPositions' => [
+                        __(
+                            'Not enough stock available in warehouse :warehouse for product :product.',
+                            [
+                                'warehouse' => $orderPosition->warehouse?->name,
+                                'product' => $orderPosition->product->name,
+                            ]
+                        ),
+                    ],
+                ]);
             }
 
             if ($postStock) {
@@ -107,13 +117,13 @@ class CreateStockPostingsFromOrder extends FluxAction
                     $posting = $item['amount'];
 
                     CreateStockPosting::make([
-                        'warehouse_id' => $orderPosition->warehouse_id,
-                        'product_id' => $orderPosition->product_id,
-                        'storage_area_id' => $stockPosting->storage_area_id,
                         'lot_id' => $stockPosting->lot_id,
-                        'parent_id' => $stockPosting->id,
                         'order_position_id' => $orderPosition->id,
+                        'parent_id' => $stockPosting->id,
+                        'product_id' => $orderPosition->product_id,
                         'serial_number_id' => $stockPosting->serial_number_id,
+                        'storage_area_id' => $stockPosting->storage_area_id,
+                        'warehouse_id' => $orderPosition->warehouse_id,
                         'posting' => bcmul($posting, -1),
                         'purchase_price' => $stockPosting->purchase_price,
                         'description' => $description,
@@ -133,15 +143,11 @@ class CreateStockPostingsFromOrder extends FluxAction
                     $open = bcsub($open, $posting);
                 }
 
-                if (bccomp($open, 0) === 1 && ! $orderPosition->product->is_nos) {
-                    throw $this->notEnoughStock($orderPosition);
-                }
-
                 if (bccomp($open, 0) === 1 && $orderPosition->product->is_nos) {
                     CreateStockPosting::make([
-                        'warehouse_id' => $orderPosition->warehouse_id,
-                        'product_id' => $orderPosition->product_id,
                         'order_position_id' => $orderPosition->id,
+                        'product_id' => $orderPosition->product_id,
+                        'warehouse_id' => $orderPosition->warehouse_id,
                         'posting' => bcmul($open, -1),
                         'description' => $description,
                     ])
@@ -172,29 +178,10 @@ class CreateStockPostingsFromOrder extends FluxAction
 
                     $open = bcsub($open, $posting);
                 }
-
-                if (bccomp($open, 0) === 1 && ! $orderPosition->product->is_nos) {
-                    throw $this->notEnoughStock($orderPosition);
-                }
             }
         }
 
         return true;
-    }
-
-    protected function notEnoughStock(OrderPosition $orderPosition): ValidationException
-    {
-        return ValidationException::withMessages([
-            'orderPositions' => [
-                __(
-                    'Not enough stock available in warehouse :warehouse for product :product.',
-                    [
-                        'warehouse' => $orderPosition->warehouse?->name,
-                        'product' => $orderPosition->product->name,
-                    ]
-                ),
-            ],
-        ]);
     }
 
     protected function postReservedStock(
@@ -234,12 +221,12 @@ class CreateStockPostingsFromOrder extends FluxAction
             }
 
             CreateStockPosting::make([
-                'warehouse_id' => $orderPosition->warehouse_id,
-                'product_id' => $orderPosition->product_id,
-                'storage_area_id' => $stockPosting->storage_area_id,
                 'lot_id' => $stockPosting->lot_id,
                 'order_position_id' => $orderPosition->id,
+                'product_id' => $orderPosition->product_id,
                 'serial_number_id' => $stockPosting->serial_number_id,
+                'storage_area_id' => $stockPosting->storage_area_id,
+                'warehouse_id' => $orderPosition->warehouse_id,
                 'posting' => bcmul($posting, -1),
                 'purchase_price' => $stockPosting->purchase_price,
                 'description' => $description,
