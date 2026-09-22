@@ -115,10 +115,11 @@ class TransferStock extends FluxAction
 
     protected function allocator(): StockAllocator
     {
-        return app(StockAllocator::class)
-            ->forProduct($this->getData('product_id'))
-            ->inWarehouse($this->getData('warehouse_id'))
-            ->inStorageAreas([$this->getData('from_storage_area_id')])
-            ->forLot($this->getData('lot_id'));
+        return StockAllocator::make(
+            productId: $this->getData('product_id'),
+            warehouseId: $this->getData('warehouse_id'),
+            storageAreaIds: [$this->getData('from_storage_area_id')],
+            lotId: $this->getData('lot_id'),
+        );
     }
 }

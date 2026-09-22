@@ -83,9 +83,10 @@ class CreateStockPostingsFromOrder extends FluxAction
                 continue;
             }
 
-            $allocator = app(StockAllocator::class)
-                ->forProduct($orderPosition->product_id)
-                ->inWarehouse($orderPosition->warehouse_id);
+            $allocator = StockAllocator::make(
+                productId: $orderPosition->product_id,
+                warehouseId: $orderPosition->warehouse_id,
+            );
 
             $availableStock = $allocator->query()->sum('remaining_stock');
 
