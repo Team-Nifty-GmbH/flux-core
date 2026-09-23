@@ -8,6 +8,7 @@ use FluxErp\Actions\Product\RestoreProduct;
 use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Models\Product;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
 
 class ProductForm extends FluxForm
@@ -165,6 +166,15 @@ class ProductForm extends FluxForm
                 'count' => $bundleProduct['pivot']['count'] ?? 0,
             ];
         }, $this->bundle_products);
+
+        $supplierColumns = array_merge(app(Product::class)->suppliers()->getPivotColumns(), ['contact_id']);
+        $this->suppliers = array_map(
+            fn (array $supplier): array => array_merge(
+                Arr::only($supplier['pivot'] ?? $supplier, $supplierColumns),
+                Arr::only($supplier, ['customer_number', 'main_address'])
+            ),
+            $this->suppliers
+        );
     }
 
     public function getProductModel(): ?Product
