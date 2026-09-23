@@ -72,8 +72,18 @@ class CreateLoanRuleset extends FluxRuleset
                 'prohibited_unless:repayment_type_enum,' . RepaymentTypeEnum::Annuity->value,
                 app(Numeric::class, ['min' => 0]),
             ],
+            'extra_repayment_allowance_percentage' => [
+                'nullable',
+                'prohibits:extra_repayment_allowance_amount',
+                app(Numeric::class, ['min' => 0, 'max' => 1]),
+            ],
+            'extra_repayment_allowance_amount' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0]),
+            ],
             'starts_at' => 'required|date',
             'ends_at' => 'nullable|date|after_or_equal:starts_at',
+            'allows_extra_repayments' => 'nullable|boolean',
         ];
     }
 }
