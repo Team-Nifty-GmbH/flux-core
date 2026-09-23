@@ -6,6 +6,7 @@ use Exception;
 use FluxErp\Actions\Product\SyncVariantInheritance;
 use FluxErp\Contracts\HasMediaForeignKey;
 use FluxErp\Enums\BundleTypeEnum;
+use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Models\Pivots\BundleProductProduct;
@@ -197,6 +198,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         return [
             'bundle_type_enum' => BundleTypeEnum::class,
             'time_unit_enum' => TimeUnitEnum::class,
+            'stock_removal_strategy_enum' => StockRemovalStrategyEnum::class,
             'search_aliases' => 'array',
             'overridden_fields' => 'array',
             'has_serial_numbers' => 'boolean',
@@ -204,6 +206,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             'is_active_export_to_web_shop' => 'boolean',
             'is_bundle' => 'boolean',
             'is_highlight' => 'boolean',
+            'is_lot_tracked' => 'boolean',
             'is_nos' => 'boolean',
             'is_service' => 'boolean',
             'is_shipping_free' => 'boolean',
@@ -233,6 +236,11 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     public function coverMedia(): BelongsTo
     {
         return $this->belongsTo(Media::class, 'cover_media_id');
+    }
+
+    public function lots(): HasMany
+    {
+        return $this->hasMany(Lot::class, 'product_id');
     }
 
     public function orderPositions(): HasMany

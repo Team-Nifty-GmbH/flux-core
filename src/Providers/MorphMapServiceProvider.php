@@ -50,6 +50,7 @@ use FluxErp\Models\Loan;
 use FluxErp\Models\LoanInstallment;
 use FluxErp\Models\Location;
 use FluxErp\Models\Log;
+use FluxErp\Models\Lot;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use FluxErp\Models\Media;
@@ -136,6 +137,7 @@ use FluxErp\Models\SerialNumber;
 use FluxErp\Models\SerialNumberRange;
 use FluxErp\Models\Snapshot;
 use FluxErp\Models\StockPosting;
+use FluxErp\Models\StorageArea;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Target;
 use FluxErp\Models\Task;
@@ -211,6 +213,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'loan_installment' => LoanInstallment::class,
             'location' => Location::class,
             'log' => Log::class,
+            'lot' => Lot::class,
             'mail_account' => MailAccount::class,
             'mail_folder' => MailFolder::class,
             'media' => Media::class,
@@ -249,6 +252,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'serial_number_range' => SerialNumberRange::class,
             'snapshot' => Snapshot::class,
             'stock_posting' => StockPosting::class,
+            'storage_area' => StorageArea::class,
             'tag' => Tag::class,
             'target' => Target::class,
             'task' => Task::class,

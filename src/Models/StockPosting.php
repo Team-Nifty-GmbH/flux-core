@@ -46,9 +46,19 @@ class StockPosting extends FluxModel
     }
 
     // Relations
+    public function lot(): BelongsTo
+    {
+        return $this->belongsTo(Lot::class, 'lot_id');
+    }
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function storageArea(): BelongsTo
+    {
+        return $this->belongsTo(StorageArea::class, 'storage_area_id');
     }
 
     public function warehouse(): BelongsTo
