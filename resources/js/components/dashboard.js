@@ -209,7 +209,7 @@ export default function () {
                     margin: 10,
                     cellHeight: 250,
                     alwaysShowResizeHandle: true,
-                    float: true,
+                    mode: 'float',
                     columnOpts: {
                         breakpointForWindow: true,
                         breakpoints: [
@@ -231,7 +231,7 @@ export default function () {
             this.grid = GridStack.init({
                 margin: 10,
                 cellHeight: 250,
-                float: true,
+                mode: 'float',
                 columnOpts: {
                     breakpointForWindow: true,
                     breakpoints: [
