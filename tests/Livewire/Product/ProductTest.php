@@ -11,7 +11,6 @@ use FluxErp\Models\ProductCrossSelling;
 use FluxErp\Models\ProductProperty;
 use FluxErp\Models\Tag;
 use FluxErp\Models\VatRate;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Session;
 use Livewire\Livewire;
 
@@ -114,9 +113,8 @@ test('mount initializes component', function (): void {
 });
 
 test('mount with invalid id fails', function (): void {
-    $this->expectException(ModelNotFoundException::class);
-
-    Livewire::test(Product::class, ['id' => 999999]);
+    Livewire::test(Product::class, ['id' => 999999])
+        ->assertNotFound();
 });
 
 test('renders successfully', function (): void {
