@@ -97,6 +97,7 @@ use FluxErp\Models\Pivots\MediaFolderModel;
 use FluxErp\Models\Pivots\OrderPaymentRun;
 use FluxErp\Models\Pivots\OrderPositionStockPosting;
 use FluxErp\Models\Pivots\OrderPositionTask;
+use FluxErp\Models\Pivots\OrderProject;
 use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Pivots\OrderTypeTenant;
@@ -302,6 +303,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'order_payment_run' => OrderPaymentRun::class,
             'order_position_stock_posting' => OrderPositionStockPosting::class,
             'order_position_task' => OrderPositionTask::class,
+            'order_project' => OrderProject::class,
             'order_schedule' => OrderSchedule::class,
             'order_transaction' => OrderTransaction::class,
             'order_type_tenant' => OrderTypeTenant::class,
