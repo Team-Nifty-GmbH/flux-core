@@ -11,6 +11,10 @@ on:
         required: false
         default: '0'
 
+concurrency:
+  group: performance
+  cancel-in-progress: false
+
 permissions:
   contents: read
   packages: read
@@ -25,6 +29,7 @@ jobs:
   routes:
     name: Route Performance
     runs-on: [self-hosted, Linux]
+    timeout-minutes: 60
     container:
       image: ghcr.io/team-nifty-gmbh/flux-ci:php8.5
       credentials:
@@ -45,9 +50,6 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
-      meilisearch:
-        image: getmeili/meilisearch:latest
-        options: --health-cmd="curl -s http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
       - uses: actions/checkout@v5
 
@@ -78,7 +80,6 @@ jobs:
           DB_DATABASE=testing
           DB_USERNAME=root
           DB_PASSWORD=password
-          MEILISEARCH_HOST=http://meilisearch:7700
           ENV
 
       - name: Seed the demo database
@@ -92,13 +93,32 @@ jobs:
       # of this job and the database is thrown away with it.
       - name: Prepare the account and the route list
         run: |
-          echo "PERFORMANCE_EMAIL=$(php -d memory_limit=-1 ./vendor/bin/testbench tinker --execute="\$user = FluxErp\Models\User::query()->first(); \$user->password = 'performance-run'; \$user->save(); echo \$user->email;" | tail -1)" >> "$GITHUB_ENV"
+          echo "PERFORMANCE_EMAIL=$(php -d memory_limit=-1 ./vendor/bin/testbench tinker --execute="\$user = FluxErp\Models\User::query()->where('is_active', true)->first(); \$user->password = 'performance-run'; \$user->save(); echo \$user->email;" | tail -1)" >> "$GITHUB_ENV"
           php -d memory_limit=-1 ./vendor/bin/testbench route:list --json > routes.json
 
       - name: Serve the application
         run: |
-          php -d memory_limit=-1 -d display_errors=0 ./vendor/bin/testbench serve --host=127.0.0.1 --port=8000 &
-          until curl -sf -o /dev/null http://127.0.0.1:8000/login; do sleep 2; done
+          php -d memory_limit=-1 -d display_errors=0 ./vendor/bin/testbench serve --host=127.0.0.1 --port=8000 --no-reload &
+          SERVE_PID=$!
+          for attempt in $(seq 60); do
+            if ! kill -0 "$SERVE_PID" 2>/dev/null; then
+              echo '::error::The server exited before it answered.'
+              exit 1
+            fi
+            STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/login || true)
+            if [ "$STATUS" = 200 ]; then
+              exit 0
+            fi
+            if [ "$STATUS" != 000 ]; then
+              echo "::error::The server answered /login with $STATUS."
+              exit 1
+            fi
+            sleep 2
+          done
+          echo '::error::The server did not answer /login within 120 seconds.'
+          exit 1
+        env:
+          PHP_CLI_SERVER_WORKERS: 4
 
       - name: Measure every route
         run: node tests/Performance/measure-routes.mjs

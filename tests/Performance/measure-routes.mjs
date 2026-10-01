@@ -49,42 +49,59 @@ const routes = [
     ),
 ].sort();
 
+if (routes.length === 0) {
+    throw new Error(
+        'The route list yields no route to measure. Check the route:list --json shape and the Authenticate middleware filter.',
+    );
+}
+
 // livewire:navigated fires once the DOM is swapped, before the browser has laid
 // the new markup out. Two frames later the paint has happened, which is the
 // moment the page stands in front of the user.
 async function measure(page, target) {
-    await page.evaluate((path) => {
-        delete window.fluxRoutePerformance;
-
-        const started = performance.now();
-
-        document.addEventListener(
-            'livewire:navigated',
-            () =>
-                requestAnimationFrame(() =>
-                    requestAnimationFrame(() => {
-                        window.fluxRoutePerformance = {
-                            ms: Math.round(performance.now() - started),
-                            rows: document.querySelectorAll(
-                                '[tall-datatable] tbody tr',
-                            ).length,
-                            elements: document.querySelectorAll('*').length,
-                        };
-                    }),
-                ),
-            { once: true },
-        );
-
-        window.Livewire.navigate(path);
-    }, target);
-
     try {
+        await page.evaluate((path) => {
+            delete window.fluxRoutePerformance;
+
+            const started = performance.now();
+
+            document.addEventListener(
+                'livewire:navigated',
+                () =>
+                    requestAnimationFrame(() =>
+                        requestAnimationFrame(() => {
+                            window.fluxRoutePerformance = {
+                                ms: Math.round(performance.now() - started),
+                                rows: document.querySelectorAll(
+                                    '[tall-datatable] tbody tr[wire\\:key]',
+                                ).length,
+                                elements: document.querySelectorAll('*').length,
+                            };
+                        }),
+                    ),
+                { once: true },
+            );
+
+            window.Livewire.navigate(path);
+        }, target);
+
         await page.waitForFunction(
             () => window.fluxRoutePerformance ?? null,
             null,
             { timeout },
         );
+
+        return {
+            route: target,
+            ...(await page.evaluate(() => window.fluxRoutePerformance)),
+            settled: true,
+        };
     } catch {
+        await page.goto(home);
+        await page.waitForFunction(() => window.Livewire ?? null, null, {
+            timeout,
+        });
+
         return {
             route: target,
             ms: timeout,
@@ -93,12 +110,6 @@ async function measure(page, target) {
             settled: false,
         };
     }
-
-    return {
-        route: target,
-        ...(await page.evaluate(() => window.fluxRoutePerformance)),
-        settled: true,
-    };
 }
 
 function report(measured, seedSeconds) {
@@ -159,37 +170,40 @@ await page.press('#password', 'Enter');
 await page.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout });
 await page.waitForFunction(() => window.Livewire ?? null, null, { timeout });
 
+const home = page.url();
 const measured = [];
 
-for (const target of routes) {
-    // A route's first visit compiles its blade templates, a cost paid once per
-    // deploy rather than per user. The second run is the measurement.
-    await measure(page, target);
+try {
+    for (const target of routes) {
+        // A route's first visit compiles its blade templates, a cost paid once per
+        // deploy rather than per user. The second run is the measurement.
+        await measure(page, target);
 
-    const measurement = await measure(page, target);
+        const measurement = await measure(page, target);
 
-    process.stdout.write(
-        `  ${target.padEnd(45)} ${String(measurement.ms).padStart(6)} ms  ${
-            measurement.settled ? '' : 'never finished'
-        }  ${measurement.rows} rows\n`,
+        process.stdout.write(
+            `  ${target.padEnd(45)} ${String(measurement.ms).padStart(6)} ms  ${
+                measurement.settled ? '' : 'never finished'
+            }  ${measurement.rows} rows\n`,
+        );
+
+        measured.push(measurement);
+    }
+} finally {
+    await browser.close();
+
+    writeFileSync(
+        reportPath,
+        report(measured, process.env.PERFORMANCE_SEED_SECONDS ?? 'unknown'),
     );
-
-    measured.push(measurement);
 }
 
-await browser.close();
-
-writeFileSync(
-    reportPath,
-    report(measured, process.env.PERFORMANCE_SEED_SECONDS ?? 'unknown'),
-);
-
 const overBudget =
-    budget > 0 ? measured.filter((row) => row.settled && row.ms > budget) : [];
+    budget > 0 ? measured.filter((row) => !row.settled || row.ms > budget) : [];
 
 if (overBudget.length > 0) {
     process.stdout.write(
-        `\n${overBudget.length} routes over the ${budget} ms budget.\n`,
+        `\n${overBudget.length} routes over the ${budget} ms budget or never finished rendering.\n`,
     );
     process.exit(1);
 }
