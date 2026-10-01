@@ -197,3 +197,23 @@ test('replacing a file with a blocked one reports a validation error', function 
         'file_name' => 'logo.txt',
     ])->validate()->execute())->toThrow(Illuminate\Validation\ValidationException::class);
 });
+
+test('replacing a file with a blocked stream closes the stream', function (): void {
+    $media = ($this->storeFile)('first content', morph_alias(Contact::class), $this->contact->getKey());
+    BlockedFile::query()->create(['hash' => md5('logo content'), 'file_name' => 'logo.txt']);
+    $stream = fopen('php://memory', 'r+');
+    fwrite($stream, 'logo content');
+    rewind($stream);
+
+    try {
+        FluxErp\Actions\Media\ReplaceMedia::make([
+            'id' => $media->getKey(),
+            'media' => $stream,
+            'media_type' => 'stream',
+            'file_name' => 'logo.txt',
+        ])->validate()->execute();
+    } catch (Illuminate\Validation\ValidationException) {
+    }
+
+    expect(is_resource($stream))->toBeFalse();
+});

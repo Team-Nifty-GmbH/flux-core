@@ -97,10 +97,10 @@ class ReplaceMedia extends FluxAction
             throw ValidationException::withMessages([
                 'media' => [$e->getMessage()],
             ]);
-        }
-
-        if (strtolower($this->getData('media_type')) === 'stream') {
-            fclose($this->getData('media'));
+        } finally {
+            if (strtolower($this->getData('media_type') ?? '') === 'stream' && is_resource($this->getData('media'))) {
+                fclose($this->getData('media'));
+            }
         }
 
         $this->replaceOldMediaOnModels($this->getData('id'), $media);
