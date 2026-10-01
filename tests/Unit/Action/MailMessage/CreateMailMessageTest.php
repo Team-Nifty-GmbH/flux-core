@@ -249,3 +249,46 @@ test('keeps special characters in the html body', function (): void {
 
     expect('<p>Grüße aus München – 100 % Bio 🍵</p>')->toBe($result->html_body);
 });
+
+test('skips a blocked attachment and keeps the others', function (): void {
+    $blocked = tempnam(sys_get_temp_dir(), 'logo_');
+    file_put_contents($blocked, 'logo content');
+    $allowed = tempnam(sys_get_temp_dir(), 'invoice_');
+    file_put_contents($allowed, 'invoice content');
+    FluxErp\Models\BlockedFile::query()->create(['hash' => md5_file($blocked), 'file_name' => 'logo.txt']);
+
+    $message = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'from' => 'Tester McTestFace <' . $this->address->email_primary . '>',
+        'to' => [$this->mailAccount->email],
+        'subject' => Str::uuid()->toString(),
+        'communication_type_enum' => 'mail',
+        'date' => now()->format('Y-m-d H:i:s'),
+        'attachments' => [
+            ['file_name' => 'logo.txt', 'name' => 'logo.txt', 'media' => $blocked],
+            ['file_name' => 'invoice.txt', 'name' => 'invoice.txt', 'media' => $allowed],
+        ],
+    ])->validate()->execute();
+
+    expect($message->getMedia('attachments')->pluck('file_name')->all())->toBe(['invoice.txt']);
+});
+
+test('skips a blocked attachment given as content', function (): void {
+    FluxErp\Models\BlockedFile::query()->create(['hash' => md5('logo content'), 'file_name' => 'logo.txt']);
+
+    $message = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'from' => 'Tester McTestFace <' . $this->address->email_primary . '>',
+        'to' => [$this->mailAccount->email],
+        'subject' => Str::uuid()->toString(),
+        'communication_type_enum' => 'mail',
+        'date' => now()->format('Y-m-d H:i:s'),
+        'attachments' => [
+            ['file_name' => 'logo.txt', 'name' => 'logo.txt', 'media' => 'logo content'],
+        ],
+    ])->validate()->execute();
+
+    expect($message->getMedia('attachments'))->toHaveCount(0);
+});
