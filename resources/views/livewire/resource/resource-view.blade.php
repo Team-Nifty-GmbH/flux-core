@@ -76,6 +76,12 @@
                     :request="[
                         'url' => route('search', \FluxErp\Models\Product::class),
                         'method' => 'POST',
+                        'params' => [
+                            'where' => [
+                                ['is_bundle', '=', false],
+                                ['is_variant_parent', '=', false],
+                            ],
+                        ],
                     ]"
                 />
             </div>

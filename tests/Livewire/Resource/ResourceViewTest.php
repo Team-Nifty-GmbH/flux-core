@@ -98,3 +98,11 @@ test('editBooking formats start and end for datetime-local input', function (): 
         ->assertSet('resourceBookingForm.end', '2026-07-01T11:00')
         ->assertOk();
 });
+
+test('the product search only offers products eligible for a resource', function (): void {
+    $resource = Resource::factory()->create();
+
+    Livewire::test(ResourceView::class, ['id' => $resource->getKey()])
+        ->assertSeeHtml('is_bundle')
+        ->assertSeeHtml('is_variant_parent');
+});
