@@ -431,3 +431,70 @@ test('hourly salary type with half day sick leave plus matching work covers the 
 
     expect($dayData->get('plus_minus_overtime_hours'))->toBe('0.00');
 });
+
+test('a work time model without fixed hours builds no overtime on a weekday', function (): void {
+    $this->workTimeModel->update(['has_fixed_hours' => false]);
+    $employee = reloadEmployeeWithWorkTimeModel($this->employee);
+    $testDate = Carbon::now()->next(Carbon::MONDAY);
+
+    $employee->workTimes()->create([
+        'started_at' => $testDate->copy()->setTime(8, 0),
+        'ended_at' => $testDate->copy()->setTime(12, 0),
+        'total_time_ms' => 4 * 3600000,
+        'paused_time_ms' => 0,
+        'is_daily_work_time' => true,
+        'is_pause' => false,
+        'is_locked' => true,
+    ]);
+
+    $dayData = CloseEmployeeDay::calculateDayData($employee, $testDate);
+
+    expect($dayData->get('target_hours'))->toBe('0.00')
+        ->and($dayData->get('actual_hours'))->toBe('4.00')
+        ->and($dayData->get('plus_minus_overtime_hours'))->toBe('0.00')
+        ->and($dayData->get('is_work_day'))->toBeFalse();
+});
+
+test('a work time model without fixed hours builds no overtime on a weekend', function (): void {
+    $this->workTimeModel->update(['has_fixed_hours' => false]);
+    $employee = reloadEmployeeWithWorkTimeModel($this->employee);
+    $testDate = Carbon::now()->next(Carbon::SATURDAY);
+
+    $employee->workTimes()->create([
+        'started_at' => $testDate->copy()->setTime(8, 0),
+        'ended_at' => $testDate->copy()->setTime(11, 0),
+        'total_time_ms' => 3 * 3600000,
+        'paused_time_ms' => 0,
+        'is_daily_work_time' => true,
+        'is_pause' => false,
+        'is_locked' => true,
+    ]);
+
+    $dayData = CloseEmployeeDay::calculateDayData($employee, $testDate);
+
+    expect($dayData->get('actual_hours'))->toBe('3.00')
+        ->and($dayData->get('plus_minus_overtime_hours'))->toBe('0.00');
+});
+
+test('a work time model without fixed hours builds no minus hours on a day without work', function (): void {
+    $this->workTimeModel->update(['has_fixed_hours' => false]);
+    $employee = reloadEmployeeWithWorkTimeModel($this->employee);
+
+    $dayData = CloseEmployeeDay::calculateDayData($employee, Carbon::now()->next(Carbon::MONDAY));
+
+    expect($dayData->get('target_hours'))->toBe('0.00')
+        ->and($dayData->get('plus_minus_overtime_hours'))->toBe('0.00');
+});
+
+test('a day without target hours is no work day', function (): void {
+    $this->workTimeModel->update([
+        'weekly_hours' => 4,
+        'work_days_per_week' => null,
+    ]);
+    $employee = reloadEmployeeWithWorkTimeModel($this->employee);
+
+    $dayData = CloseEmployeeDay::calculateDayData($employee, Carbon::now()->next(Carbon::MONDAY));
+
+    expect($dayData->get('target_hours'))->toBe('0.00')
+        ->and($dayData->get('is_work_day'))->toBeFalse();
+});

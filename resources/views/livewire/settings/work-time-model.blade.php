@@ -70,28 +70,42 @@
                     required
                 />
 
-                <x-number
-                    wire:model="workTimeModelForm.work_days_per_week"
-                    :label="__('Work Days Per Week')"
-                    :hint="__('Number of working days in a standard week')"
-                    min="1"
-                    max="7"
-                    step="1"
-                />
+                <div class="sm:col-span-2">
+                    <x-toggle
+                        wire:model="workTimeModelForm.has_fixed_hours"
+                        :label="__('Fixed Hours')"
+                        :hint="__('Turn off for staff paid by the hour without fixed hours. They get no target hours and no overtime.')"
+                    />
+                </div>
 
-                <x-number
-                    wire:model="workTimeModelForm.max_overtime_hours"
-                    :label="__('Max Overtime Hours')"
-                    step="0.5"
-                    min="0"
-                />
+                <div
+                    x-show="$wire.workTimeModelForm.has_fixed_hours"
+                    x-cloak
+                    class="contents"
+                >
+                    <x-number
+                        wire:model="workTimeModelForm.work_days_per_week"
+                        :label="__('Work Days Per Week')"
+                        :hint="__('Number of working days in a standard week')"
+                        min="1"
+                        max="7"
+                        step="1"
+                    />
 
-                <x-select.styled
-                    wire:model="workTimeModelForm.overtime_compensation"
-                    :label="__('Overtime Compensation')"
-                    select="label:label|value:value"
-                    :options="\FluxErp\Enums\OvertimeCompensationEnum::valuesLocalized()"
-                />
+                    <x-number
+                        wire:model="workTimeModelForm.max_overtime_hours"
+                        :label="__('Max Overtime Hours')"
+                        step="0.5"
+                        min="0"
+                    />
+
+                    <x-select.styled
+                        wire:model="workTimeModelForm.overtime_compensation"
+                        :label="__('Overtime Compensation')"
+                        select="label:label|value:value"
+                        :options="\FluxErp\Enums\OvertimeCompensationEnum::valuesLocalized()"
+                    />
+                </div>
 
                 <div class="sm:col-span-2">
                     <x-toggle
@@ -103,9 +117,10 @@
         </x-card>
 
         {{-- Work Schedule Configuration --}}
-        <x-card :header="__('Weekly Schedule')">
-            <div
-                x-data="{
+        <div x-show="$wire.workTimeModelForm.has_fixed_hours" x-cloak>
+            <x-card :header="__('Weekly Schedule')">
+                <div
+                    x-data="{
                     activeWeek: 0,
                     weekdays: {
                         1: '{{ __('Monday') }}',
@@ -117,189 +132,200 @@
                         7: '{{ __('Sunday') }}',
                     },
                 }"
-            >
-                @if ($workTimeModelForm->cycle_weeks > 1)
-                    {{-- Tabs for multiple weeks --}}
-                    <div class="mb-6">
-                        <div
-                            class="border-b border-gray-200 dark:border-gray-700"
-                        >
-                            <nav class="-mb-px flex space-x-4">
-                                @for ($i = 0; $i < $workTimeModelForm->cycle_weeks; $i++)
-                                    <button
-                                        type="button"
-                                        x-on:click="activeWeek = {{ $i }}"
-                                        x-bind:class="
+                >
+                    @if ($workTimeModelForm->cycle_weeks > 1)
+                        {{-- Tabs for multiple weeks --}}
+                        <div class="mb-6">
+                            <div
+                                class="border-b border-gray-200 dark:border-gray-700"
+                            >
+                                <nav class="-mb-px flex space-x-4">
+                                    @for ($i = 0; $i < $workTimeModelForm->cycle_weeks; $i++)
+                                        <button
+                                            type="button"
+                                            x-on:click="activeWeek = {{ $i }}"
+                                            x-bind:class="
                                             activeWeek === {{ $i }}
                                                 ? 'border-primary-500 text-primary-600 dark:text-primary-400'
                                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
                                         "
-                                        class="border-b-2 px-1 py-2 text-sm font-medium whitespace-nowrap transition-colors"
-                                    >
-                                        {{ __('Week :number', ['number' => $i + 1]) }}
-                                    </button>
-                                @endfor
-                            </nav>
+                                            class="border-b-2 px-1 py-2 text-sm font-medium whitespace-nowrap transition-colors"
+                                        >
+                                            {{ __('Week :number', ['number' => $i + 1]) }}
+                                        </button>
+                                    @endfor
+                                </nav>
+                            </div>
                         </div>
-                    </div>
-                @endif
+                    @endif
 
-                {{-- Schedule Table for every single week --}}
-                <template
-                    x-for="
-                        (week, weekIndex) in $wire.workTimeModelForm.schedules
-                    "
-                    :key="weekIndex"
-                >
-                    <div
-                        x-show="
-                            activeWeek === weekIndex ||
-                            $wire.workTimeModelForm.cycle_weeks === 1
+                    {{-- Schedule Table for every single week --}}
+                    <template
+                        x-for="
+                            (week, weekIndex) in
+                            $wire.workTimeModelForm.schedules
                         "
-                        x-cloak
+                        :key="weekIndex"
                     >
-                        <div class="overflow-x-auto">
-                            <table
-                                class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
-                            >
-                                <thead class="bg-gray-50 dark:bg-gray-800">
-                                    <tr>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
-                                        >
-                                            {{ __('Day') }}
-                                        </th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
-                                        >
-                                            {{ __('Start Time') }}
-                                        </th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
-                                        >
-                                            {{ __('End Time') }}
-                                        </th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
-                                        >
-                                            {{ __('Break (Minutes)') }}
-                                        </th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
-                                        >
-                                            {{ __('Work Hours') }}
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody
-                                    class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900"
+                        <div
+                            x-show="
+                                activeWeek === weekIndex ||
+                                $wire.workTimeModelForm.cycle_weeks === 1
+                            "
+                            x-cloak
+                        >
+                            <div class="overflow-x-auto">
+                                <table
+                                    class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
                                 >
-                                    <template
-                                        x-for="(dayName, dayNumber) in weekdays"
-                                        :key="dayNumber"
-                                    >
+                                    <thead class="bg-gray-50 dark:bg-gray-800">
                                         <tr>
-                                            <td
-                                                class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-gray-100"
-                                                x-text="dayName"
-                                            ></td>
-                                            <td
-                                                class="px-6 py-4 whitespace-nowrap"
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
                                             >
-                                                <x-input
-                                                    type="time"
-                                                    x-model="
-                                                        $wire.workTimeModelForm
-                                                            .schedules[
-                                                            weekIndex
-                                                        ].days[dayNumber]
-                                                            .start_time
-                                                    "
-                                                    x-on:change="
-                                                        $wire.updateSchedule(
-                                                            weekIndex,
-                                                            dayNumber,
-                                                            'start_time',
-                                                            $event.target.value,
-                                                        )
-                                                    "
-                                                    class="py-1!"
-                                                />
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-nowrap"
+                                                {{ __('Day') }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
                                             >
-                                                <x-input
-                                                    type="time"
-                                                    x-model="
-                                                        $wire.workTimeModelForm
-                                                            .schedules[
-                                                            weekIndex
-                                                        ].days[dayNumber]
-                                                            .end_time
-                                                    "
-                                                    x-on:change="
-                                                        $wire.updateSchedule(
-                                                            weekIndex,
-                                                            dayNumber,
-                                                            'end_time',
-                                                            $event.target.value,
-                                                        )
-                                                    "
-                                                    class="py-1!"
-                                                />
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-nowrap"
+                                                {{ __('Start Time') }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
                                             >
-                                                <x-number
-                                                    x-model="
-                                                        $wire.workTimeModelForm
-                                                            .schedules[
-                                                            weekIndex
-                                                        ].days[dayNumber]
-                                                            .break_minutes
-                                                    "
-                                                    x-on:change="
-                                                        $wire.updateSchedule(
-                                                            weekIndex,
-                                                            dayNumber,
-                                                            'break_minutes',
-                                                            $event.target.value,
-                                                        )
-                                                    "
-                                                    min="0"
-                                                    max="480"
-                                                    step="15"
-                                                    class="py-1!"
-                                                />
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-gray-100"
+                                                {{ __('End Time') }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
                                             >
-                                                <span
-                                                    class="font-medium"
-                                                    x-html="
-                                                        parseFloat(
+                                                {{ __('Break (Minutes)') }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                            >
+                                                {{ __('Work Hours') }}
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody
+                                        class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900"
+                                    >
+                                        <template
+                                            x-for="
+                                                (dayName, dayNumber) in weekdays
+                                            "
+                                            :key="dayNumber"
+                                        >
+                                            <tr>
+                                                <td
+                                                    class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-gray-100"
+                                                    x-text="dayName"
+                                                ></td>
+                                                <td
+                                                    class="px-6 py-4 whitespace-nowrap"
+                                                >
+                                                    <x-input
+                                                        type="time"
+                                                        x-model="
                                                             $wire
                                                                 .workTimeModelForm
                                                                 .schedules[
                                                                 weekIndex
                                                             ].days[dayNumber]
-                                                                ?.work_hours ??
-                                                                '0.00',
-                                                        ).toFixed(2)
-                                                    "
-                                                ></span>
-                                            </td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
+                                                                .start_time
+                                                        "
+                                                        x-on:change="
+                                                            $wire.updateSchedule(
+                                                                weekIndex,
+                                                                dayNumber,
+                                                                'start_time',
+                                                                $event.target
+                                                                    .value,
+                                                            )
+                                                        "
+                                                        class="py-1!"
+                                                    />
+                                                </td>
+                                                <td
+                                                    class="px-6 py-4 whitespace-nowrap"
+                                                >
+                                                    <x-input
+                                                        type="time"
+                                                        x-model="
+                                                            $wire
+                                                                .workTimeModelForm
+                                                                .schedules[
+                                                                weekIndex
+                                                            ].days[dayNumber]
+                                                                .end_time
+                                                        "
+                                                        x-on:change="
+                                                            $wire.updateSchedule(
+                                                                weekIndex,
+                                                                dayNumber,
+                                                                'end_time',
+                                                                $event.target
+                                                                    .value,
+                                                            )
+                                                        "
+                                                        class="py-1!"
+                                                    />
+                                                </td>
+                                                <td
+                                                    class="px-6 py-4 whitespace-nowrap"
+                                                >
+                                                    <x-number
+                                                        x-model="
+                                                            $wire
+                                                                .workTimeModelForm
+                                                                .schedules[
+                                                                weekIndex
+                                                            ].days[dayNumber]
+                                                                .break_minutes
+                                                        "
+                                                        x-on:change="
+                                                            $wire.updateSchedule(
+                                                                weekIndex,
+                                                                dayNumber,
+                                                                'break_minutes',
+                                                                $event.target
+                                                                    .value,
+                                                            )
+                                                        "
+                                                        min="0"
+                                                        max="480"
+                                                        step="15"
+                                                        class="py-1!"
+                                                    />
+                                                </td>
+                                                <td
+                                                    class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-gray-100"
+                                                >
+                                                    <span
+                                                        class="font-medium"
+                                                        x-html="
+                                                            parseFloat(
+                                                                $wire
+                                                                    .workTimeModelForm
+                                                                    .schedules[
+                                                                    weekIndex
+                                                                ].days[
+                                                                    dayNumber
+                                                                ]?.work_hours ??
+                                                                    '0.00',
+                                                            ).toFixed(2)
+                                                        "
+                                                    ></span>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
-                </template>
-            </div>
-        </x-card>
+                    </template>
+                </div>
+            </x-card>
+        </div>
     </div>
 </div>

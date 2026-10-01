@@ -394,11 +394,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
 
     public function isWorkDay(Carbon $date): bool
     {
-        $workTimeModel = $this->workTimeModelHistory()
-            ->where('valid_from', '<=', $date)
-            ->first();
-
-        if (! $workTimeModel) {
+        if (! $workTimeModel = $this->getWorkTimeModel($date)) {
             return false;
         }
 
@@ -412,24 +408,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
             return false;
         }
 
-        $weekday = $date->dayOfWeekIso;
-        $isWorkDay = $workTimeModel->workTimeModel->schedules()
-            ->where('weekday', $weekday)
-            ->where('work_hours', '>', 0)
-            ->exists();
-
-        // If no schedule exists default to work_days_per_week
-        if (! $isWorkDay) {
-            $workDaysPerWeek = $workTimeModel->workTimeModel->work_days_per_week
-                ?? ceil($workTimeModel->workTimeModel->weekly_hours / 10);
-            for ($i = 1; $i <= $workDaysPerWeek; $i++) {
-                if ($weekday === $i) {
-                    return true;
-                }
-            }
-        }
-
-        return $isWorkDay;
+        return bccomp($workTimeModel->getDailyWorkHours($date), 0) === 1;
     }
 
     public function registerMediaCollections(): void

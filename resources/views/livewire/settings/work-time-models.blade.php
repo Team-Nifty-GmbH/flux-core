@@ -31,7 +31,17 @@
                 />
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <x-toggle
+                wire:model="workTimeModelForm.has_fixed_hours"
+                :label="__('Fixed Hours')"
+                :hint="__('Turn off for staff paid by the hour without fixed hours. They get no target hours and no overtime.')"
+            />
+
+            <div
+                x-show="$wire.workTimeModelForm.has_fixed_hours"
+                x-cloak
+                class="grid grid-cols-2 gap-4"
+            >
                 <x-number
                     wire:model="workTimeModelForm.max_overtime_hours"
                     :label="__('Max Overtime Hours')"

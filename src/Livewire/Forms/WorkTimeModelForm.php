@@ -17,6 +17,8 @@ class WorkTimeModelForm extends FluxForm
 
     public ?int $cycle_weeks = 1;
 
+    public bool $has_fixed_hours = true;
+
     #[Locked]
     public ?int $id = null;
 
