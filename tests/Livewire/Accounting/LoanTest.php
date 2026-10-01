@@ -150,8 +150,9 @@ test('the totals show how much of the loan is settled', function (): void {
 });
 
 test('an unknown loan is not found', function (): void {
-    Livewire::test(Loan::class, ['id' => $this->loan->getKey() + 1]);
-})->throws(Illuminate\Database\Eloquent\ModelNotFoundException::class);
+    Livewire::test(Loan::class, ['id' => $this->loan->getKey() + 1])
+        ->assertNotFound();
+});
 
 test('can save the loan', function (): void {
     Livewire::test(Loan::class, ['id' => $this->loan->getKey()])

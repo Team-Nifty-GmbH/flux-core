@@ -81,3 +81,19 @@ test('delete contact', function (): void {
     expect($result)->toBeTrue();
     expect(Contact::query()->whereKey($contact->getKey())->exists())->toBeFalse();
 });
+
+test('a default payment type the rules reject is not put on a new contact', function (): void {
+    PaymentType::query()->update(['is_default' => false]);
+    PaymentType::factory()->create([
+        'is_default' => true,
+        'is_active' => true,
+        'is_sales' => false,
+    ]);
+
+    $contact = CreateContact::make([])
+        ->validate()
+        ->execute();
+
+    expect($contact)->toBeInstanceOf(Contact::class)
+        ->and($contact->payment_type_id)->toBeNull();
+});
