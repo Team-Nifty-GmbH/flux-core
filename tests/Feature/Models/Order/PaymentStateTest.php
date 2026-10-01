@@ -101,3 +101,57 @@ test('refunding the overpayment makes the invoice paid', function (): void {
 
     expect($this->order->refresh()->payment_state)->toBeInstanceOf(Paid::class);
 });
+
+test('a purchase invoice paid twice is overpaid', function (): void {
+    turnIntoPurchaseInvoice($this->order);
+
+    ($this->assignPayment)(-100);
+    ($this->assignPayment)(-100);
+
+    $order = $this->order->refresh();
+
+    expect($order->payment_state)->toBeInstanceOf(Overpaid::class)
+        ->and($order->balance)->toEqual(100);
+});
+
+test('the supplier refunding an overpaid purchase invoice makes it paid', function (): void {
+    turnIntoPurchaseInvoice($this->order);
+
+    ($this->assignPayment)(-100);
+    ($this->assignPayment)(-100);
+    ($this->assignPayment)(100);
+
+    $order = $this->order->refresh();
+
+    expect($order->payment_state)->toBeInstanceOf(Paid::class)
+        ->and($order->balance)->toEqual(0);
+});
+
+test('a purchase invoice whose payment was charged back is open again', function (): void {
+    turnIntoPurchaseInvoice($this->order);
+
+    ($this->assignPayment)(-100);
+    ($this->assignPayment)(100);
+
+    $order = $this->order->refresh();
+
+    expect($order->payment_state)->toBeInstanceOf(Open::class)
+        ->and($order->balance)->toEqual(-100);
+});
+
+function turnIntoPurchaseInvoice(Order $order): void
+{
+    Order::query()
+        ->whereKey($order->getKey())
+        ->update([
+            'order_type_id' => OrderType::factory()
+                ->create([
+                    'order_type_enum' => OrderTypeEnum::Purchase,
+                    'is_active' => true,
+                    'is_hidden' => false,
+                ])
+                ->getKey(),
+            'total_gross_price' => -100,
+            'balance' => -100,
+        ]);
+}
