@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\DataTables;
 
+use FluxErp\Actions\BlockedFile\BlockFile;
 use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Models\Media;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +20,24 @@ class MediaGrid extends MediaList
     public array $formatters = [
         'url' => 'image',
     ];
+
+    public function blockFile(int $mediaId): bool
+    {
+        try {
+            BlockFile::make(['media_id' => $mediaId])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
 
     public function deleteMedia(Media $media): bool
     {

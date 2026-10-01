@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Support;
 
 use Exception;
+use FluxErp\Actions\BlockedFile\BlockFile;
 use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Actions\Media\DeleteMediaCollection;
 use FluxErp\Actions\Media\UpdateMedia;
@@ -52,6 +53,22 @@ abstract class FolderTree extends Component
     public function render(): View|Factory|Application
     {
         return view('flux::livewire.folder-tree');
+    }
+
+    public function blockFile(int $mediaId): bool
+    {
+        try {
+            BlockFile::make(['media_id' => $mediaId])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (Exception $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        return true;
     }
 
     public function delete(MediaModel $media): bool
