@@ -50,7 +50,34 @@ class Printers extends PrinterList
                 ->color('indigo')
                 ->when(resolve_static(UpdatePrinter::class, 'canPerformAction', [false]))
                 ->wireClick('edit(record.id)'),
+            DataTableButton::make()
+                ->text(__('Delete'))
+                ->color('red')
+                ->icon('trash')
+                ->when(resolve_static(DeletePrinter::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'delete(record.id)',
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Printer')]),
+                ]),
         ];
+    }
+
+    public function delete(Printer $printer): bool
+    {
+        $this->printerForm->reset();
+        $this->printerForm->fill($printer);
+
+        try {
+            $this->printerForm->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this, form: $this->printerForm);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 
     #[Renderless]
