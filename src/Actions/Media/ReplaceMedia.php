@@ -13,6 +13,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\FileUnacceptableForCollection;
 
 class ReplaceMedia extends FluxAction
 {
@@ -62,35 +63,41 @@ class ReplaceMedia extends FluxAction
             $fileAdder = $mediaItem->model->addMedia($file instanceof UploadedFile ? $file->path() : $file);
         }
 
-        $media = $fileAdder
-            ->setName($this->getData('name'))
-            ->usingFileName($this->getData('file_name'))
-            ->withCustomProperties($this->getData('custom_properties') ?? [])
-            ->withProperties(
-                Arr::except(
-                    $this->data,
-                    [
-                        'model_type',
-                        'model_id',
-                        'media',
-                        'media_type',
-                        'categories',
-                        'name',
-                        'file_name',
-                        'disk',
-                        'conversion_disk',
-                        'collection_name',
-                        'mime_type',
-                        'size',
-                        'order_column',
-                        'custom_properties',
-                        'responsive_images',
-                        'manipulations',
-                    ]
+        try {
+            $media = $fileAdder
+                ->setName($this->getData('name'))
+                ->usingFileName($this->getData('file_name'))
+                ->withCustomProperties($this->getData('custom_properties') ?? [])
+                ->withProperties(
+                    Arr::except(
+                        $this->data,
+                        [
+                            'model_type',
+                            'model_id',
+                            'media',
+                            'media_type',
+                            'categories',
+                            'name',
+                            'file_name',
+                            'disk',
+                            'conversion_disk',
+                            'collection_name',
+                            'mime_type',
+                            'size',
+                            'order_column',
+                            'custom_properties',
+                            'responsive_images',
+                            'manipulations',
+                        ]
+                    )
                 )
-            )
-            ->storingConversionsOnDisk(config('flux.media.conversion'))
-            ->toMediaCollection(collectionName: $mediaItem->collection_name, diskName: $diskName);
+                ->storingConversionsOnDisk(config('flux.media.conversion'))
+                ->toMediaCollection(collectionName: $mediaItem->collection_name, diskName: $diskName);
+        } catch (FileUnacceptableForCollection $e) {
+            throw ValidationException::withMessages([
+                'media' => [$e->getMessage()],
+            ]);
+        }
 
         if (strtolower($this->getData('media_type')) === 'stream') {
             fclose($this->getData('media'));

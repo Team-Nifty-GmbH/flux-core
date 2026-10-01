@@ -128,3 +128,72 @@ test('the file of a purchase invoice with an order cannot be blocked', function 
     expect(PurchaseInvoice::query()->whereKey($purchaseInvoice->getKey())->exists())->toBeTrue()
         ->and(BlockedFile::query()->count())->toBe(0);
 });
+
+function createOrderForBlockedFileTest(Contact $contact): Order
+{
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    return Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'language_id' => test()->defaultLanguage->getKey(),
+        'order_type_id' => OrderType::factory()->create()->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'tenant_id' => test()->dbTenant->getKey(),
+    ]);
+}
+
+test('a file of a read-only collection cannot be blocked', function (): void {
+    $order = createOrderForBlockedFileTest($this->contact);
+    $path = tempnam(sys_get_temp_dir(), 'invoice_') . '.png';
+    imagepng(imagecreatetruecolor(1, 1), $path);
+    $media = UploadMedia::make([
+        'model_type' => morph_alias(Order::class),
+        'model_id' => $order->getKey(),
+        'media' => $path,
+        'file_name' => 'invoice.png',
+        'collection_name' => 'invoice',
+    ])
+        ->force()
+        ->validate()
+        ->execute();
+
+    BlockFile::assertValidationErrors(['media_id' => $media->getKey()], 'media_id');
+
+    expect(Media::query()->whereKey($media->getKey())->exists())->toBeTrue();
+});
+
+test('the file of a purchase invoice with an order cannot be blocked from a media list', function (): void {
+    $order = createOrderForBlockedFileTest($this->contact);
+    $purchaseInvoice = ($this->makePurchaseInvoice)($order->getKey());
+
+    BlockFile::assertValidationErrors(['media_id' => $purchaseInvoice->media_id], 'media_id');
+
+    expect(Media::query()->whereKey($purchaseInvoice->media_id)->exists())->toBeTrue();
+});
+
+test('a purchase invoice without file cannot be blocked', function (): void {
+    $purchaseInvoice = PurchaseInvoice::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
+
+    BlockPurchaseInvoiceFile::assertValidationErrors(['id' => $purchaseInvoice->getKey()], 'id');
+
+    expect(PurchaseInvoice::query()->whereKey($purchaseInvoice->getKey())->exists())->toBeTrue();
+});
+
+test('replacing a file with a blocked one reports a validation error', function (): void {
+    $media = ($this->storeFile)('first content', morph_alias(Contact::class), $this->contact->getKey());
+    $blocked = tempnam(sys_get_temp_dir(), 'logo_');
+    file_put_contents($blocked, 'logo content');
+    BlockedFile::query()->create(['hash' => md5('logo content'), 'file_name' => 'logo.txt']);
+
+    expect(fn () => FluxErp\Actions\Media\ReplaceMedia::make([
+        'id' => $media->getKey(),
+        'media' => $blocked,
+        'file_name' => 'logo.txt',
+    ])->validate()->execute())->toThrow(Illuminate\Validation\ValidationException::class);
+});

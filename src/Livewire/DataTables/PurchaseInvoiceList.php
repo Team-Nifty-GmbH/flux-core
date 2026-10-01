@@ -128,6 +128,8 @@ class PurchaseInvoiceList extends BaseDataTable
                 ->text(__('Block File'))
                 ->when(fn () => resolve_static(BlockPurchaseInvoiceFile::class, 'canPerformAction', [false]))
                 ->attributes([
+                    'x-show' => '! record.order_id',
+                    'x-cloak' => true,
                     'wire:flux-confirm.type.error' => __('Block this file? It will be deleted and never stored again.'),
                     'wire:click' => 'blockFile(record.id)',
                 ]),
@@ -387,12 +389,19 @@ class PurchaseInvoiceList extends BaseDataTable
 
     protected function getBuilder(Builder $builder): Builder
     {
-        return $builder->with(['media', 'invoice']);
+        return $builder
+            ->addSelect('purchase_invoices.order_id')
+            ->with(['media', 'invoice']);
     }
 
     protected function getLayout(): string
     {
         return 'tall-datatables::layouts.grid';
+    }
+
+    protected function getReturnKeys(): array
+    {
+        return array_merge(parent::getReturnKeys(), ['order_id']);
     }
 
     protected function getRowAttributes(): ComponentAttributeBag
@@ -448,5 +457,6 @@ class PurchaseInvoiceList extends BaseDataTable
         }
 
         $itemArray['media.file_name'] = $media?->file_name;
+        $itemArray['order_id'] = $item->order_id;
     }
 }

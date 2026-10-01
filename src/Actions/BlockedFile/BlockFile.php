@@ -5,6 +5,7 @@ namespace FluxErp\Actions\BlockedFile;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\BlockedFile;
 use FluxErp\Models\Media;
+use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Rulesets\BlockedFile\BlockFileRuleset;
 use Illuminate\Validation\ValidationException;
 
@@ -45,15 +46,24 @@ class BlockFile extends FluxAction
     {
         parent::validateData();
 
-        $path = resolve_static(Media::class, 'query')
+        $media = resolve_static(Media::class, 'query')
             ->whereKey($this->getData('media_id'))
-            ->first()
-            ?->getPath();
+            ->first();
 
-        if (! $path || ! is_readable($path)) {
-            throw ValidationException::withMessages([
-                'media_id' => [__('The file could not be read.')],
-            ])
+        $error = match (true) {
+            ! is_readable($media->getPath()) => __('The file could not be read.'),
+            data_get($media->getCollection(), 'readOnly') === true => __(
+                'The media collection is read-only and cannot be modified.'
+            ),
+            resolve_static(PurchaseInvoice::class, 'query')
+                ->where('media_id', $media->getKey())
+                ->whereNotNull('order_id')
+                ->exists() => __('The purchase invoice already has an order, its file cannot be blocked.'),
+            default => null,
+        };
+
+        if ($error) {
+            throw ValidationException::withMessages(['media_id' => [$error]])
                 ->errorBag('blockFile');
         }
     }

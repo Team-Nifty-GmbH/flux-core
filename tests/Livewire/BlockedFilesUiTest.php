@@ -116,3 +116,15 @@ test('the settings page lists blocked files and unblocks them', function (): voi
 
     expect(BlockedFile::query()->count())->toBe(0);
 });
+
+test('the purchase invoice list knows whether a row has an order', function (): void {
+    $purchaseInvoice = PurchaseInvoice::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
+
+    $data = Livewire::test(PurchaseInvoiceList::class)
+        ->call('loadData')
+        ->instance()
+        ->getDataForTesting();
+
+    expect(collect(data_get($data, 'data'))->firstWhere('id', $purchaseInvoice->getKey()))
+        ->toHaveKey('order_id');
+});
