@@ -18,7 +18,7 @@ class Orders extends OrderList
     #[Locked]
     public ?int $contactId = null;
 
-    public ?string $includeBefore = 'flux::livewire.project.orders';
+    public bool $isSelectable = false;
 
     #[Locked]
     public ?int $mainOrderId = null;
@@ -27,6 +27,8 @@ class Orders extends OrderList
     public int $projectId;
 
     public ?int $supplementaryOrderId = null;
+
+    protected ?string $includeBefore = 'flux::livewire.project.orders';
 
     public function mount(): void
     {

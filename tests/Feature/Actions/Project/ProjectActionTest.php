@@ -165,3 +165,42 @@ test('the contact check uses the contact from the same update', function (): voi
 
     expect($project->supplementaryOrders()->pluck('orders.id')->all())->toBe([$order->getKey()]);
 });
+
+test('a supplementary order that becomes the main order leaves the supplementary orders', function (): void {
+    $contact = Contact::factory()->hasAttached(factory: $this->dbTenant, relationship: 'tenants')->create();
+    $project = createProjectForContact($contact);
+    $order = createOrderForContact($contact);
+    $project->supplementaryOrders()->attach($order->getKey());
+
+    UpdateProject::make(['id' => $project->getKey(), 'order_id' => $order->getKey()])->validate()->execute();
+
+    expect($project->refresh()->order_id)->toBe($order->getKey())
+        ->and($project->supplementaryOrders()->count())->toBe(0);
+});
+
+test('the contact cannot change while supplementary orders of the old contact are attached', function (): void {
+    $contact = Contact::factory()->hasAttached(factory: $this->dbTenant, relationship: 'tenants')->create();
+    $newContact = Contact::factory()->hasAttached(factory: $this->dbTenant, relationship: 'tenants')->create();
+    $project = createProjectForContact($contact);
+    $project->supplementaryOrders()->attach(createOrderForContact($contact)->getKey());
+
+    UpdateProject::assertValidationErrors(
+        ['id' => $project->getKey(), 'contact_id' => $newContact->getKey()],
+        'contact_id'
+    );
+});
+
+test('the main order check also holds for ids sent as strings', function (): void {
+    $contact = Contact::factory()->hasAttached(factory: $this->dbTenant, relationship: 'tenants')->create();
+    $project = createProjectForContact($contact);
+    $order = createOrderForContact($contact);
+
+    UpdateProject::assertValidationErrors(
+        [
+            'id' => $project->getKey(),
+            'order_id' => (string) $order->getKey(),
+            'supplementary_orders' => [(string) $order->getKey()],
+        ],
+        'supplementary_orders'
+    );
+});

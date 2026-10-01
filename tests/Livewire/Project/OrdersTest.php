@@ -101,3 +101,14 @@ test('rejects the main order as supplementary order', function (): void {
 
     expect($this->project->supplementaryOrders()->count())->toBe(0);
 });
+
+test('offers no mass actions that would delete the orders', function (): void {
+    $component = Livewire::test(Orders::class, ['projectId' => $this->project->getKey()]);
+
+    expect($component->instance()->isSelectable)->toBeFalse();
+});
+
+test('the included view cannot be changed from the client', function (): void {
+    Livewire::test(Orders::class, ['projectId' => $this->project->getKey()])
+        ->set('includeBefore', 'flux::livewire.project.orders');
+})->throws(Exception::class);

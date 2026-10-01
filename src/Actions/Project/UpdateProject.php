@@ -37,6 +37,10 @@ class UpdateProject extends FluxAction
             $project->supplementaryOrders()->sync($supplementaryOrders);
         }
 
+        if ($project->order_id) {
+            $project->supplementaryOrders()->detach($project->order_id);
+        }
+
         return $project->withoutRelations()->fresh();
     }
 
@@ -44,7 +48,9 @@ class UpdateProject extends FluxAction
     {
         parent::validateData();
 
-        if (! $this->getData('supplementary_orders')) {
+        $hasSupplementaryOrders = array_key_exists('supplementary_orders', $this->data);
+
+        if (! $hasSupplementaryOrders && ! array_key_exists('contact_id', $this->data)) {
             return;
         }
 
@@ -52,17 +58,39 @@ class UpdateProject extends FluxAction
             ->whereKey($this->getData('id'))
             ->first(['id', 'contact_id', 'order_id']);
 
-        $mainOrderId = array_key_exists('order_id', $this->data)
-            ? $this->getData('order_id')
-            : $project->order_id;
-        $contactId = array_key_exists('contact_id', $this->data)
-            ? $this->getData('contact_id')
-            : $project->contact_id;
+        $mainOrderId = $this->toNullableInt(
+            array_key_exists('order_id', $this->data) ? $this->getData('order_id') : $project->order_id
+        );
+        $contactId = $this->toNullableInt(
+            array_key_exists('contact_id', $this->data) ? $this->getData('contact_id') : $project->contact_id
+        );
 
         $orders = resolve_static(Order::class, 'query')
-            ->whereIntegerInRaw('id', $this->getData('supplementary_orders'))
+            ->whereIntegerInRaw(
+                'id',
+                $hasSupplementaryOrders
+                    ? array_map('intval', $this->getData('supplementary_orders') ?? [])
+                    : $project->supplementaryOrders()->pluck('orders.id')->all()
+            )
             ->with('orderType:id,order_type_enum')
             ->get(['id', 'contact_id', 'order_type_id']);
+
+        if ($orders->isEmpty()) {
+            return;
+        }
+
+        if (! $hasSupplementaryOrders) {
+            if ($orders->contains(fn (Order $order): bool => $order->contact_id !== $contactId)) {
+                throw ValidationException::withMessages([
+                    'contact_id' => [
+                        __('The project has supplementary orders of another contact. Remove them before changing the contact.'),
+                    ],
+                ])
+                    ->errorBag('updateProject');
+            }
+
+            return;
+        }
 
         $errors = [];
 
@@ -82,5 +110,10 @@ class UpdateProject extends FluxAction
             throw ValidationException::withMessages(['supplementary_orders' => $errors])
                 ->errorBag('updateProject');
         }
+    }
+
+    protected function toNullableInt(mixed $value): ?int
+    {
+        return is_null($value) ? null : (int) $value;
     }
 }
