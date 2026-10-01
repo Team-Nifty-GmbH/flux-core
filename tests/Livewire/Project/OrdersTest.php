@@ -112,3 +112,8 @@ test('the included view cannot be changed from the client', function (): void {
     Livewire::test(Orders::class, ['projectId' => $this->project->getKey()])
         ->set('includeBefore', 'flux::livewire.project.orders');
 })->throws(Exception::class);
+
+test('shows the main order above the list', function (): void {
+    Livewire::test(Orders::class, ['projectId' => $this->project->getKey()])
+        ->assertSee($this->mainOrder->getLabel());
+});

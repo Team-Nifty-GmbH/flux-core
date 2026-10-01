@@ -23,6 +23,9 @@ class Orders extends OrderList
     #[Locked]
     public ?int $mainOrderId = null;
 
+    #[Locked]
+    public ?string $mainOrderLabel = null;
+
     #[Modelable]
     public int $projectId;
 
@@ -40,6 +43,7 @@ class Orders extends OrderList
 
         $this->contactId = $project?->contact_id;
         $this->mainOrderId = $project?->order_id;
+        $this->mainOrderLabel = $project?->order()->first()?->getLabel();
     }
 
     protected function getTableActions(): array

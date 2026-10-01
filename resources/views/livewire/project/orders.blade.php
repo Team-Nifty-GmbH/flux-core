@@ -7,7 +7,7 @@
                 wire:navigate
                 class="text-primary-600 dark:text-primary-400 font-medium"
             >
-                {{ resolve_static(\FluxErp\Models\Order::class, 'query')->whereKey($mainOrderId)->first()?->getLabel() }}
+                {{ $mainOrderLabel }}
             </a>
         </div>
     @endif
