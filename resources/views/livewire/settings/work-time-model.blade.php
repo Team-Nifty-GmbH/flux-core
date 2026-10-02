@@ -41,26 +41,6 @@
                 </div>
 
                 <x-number
-                    wire:model.live="workTimeModelForm.cycle_weeks"
-                    x-on:change="$wire.dispatch('cycle-weeks-updated')"
-                    :label="__('Cycle Weeks')"
-                    :hint="__('Number of weeks before the schedule repeats')"
-                    min="1"
-                    max="12"
-                    required
-                />
-
-                <x-number
-                    wire:model="workTimeModelForm.weekly_hours"
-                    :label="__('Weekly Hours')"
-                    :hint="__('Standard working hours per week')"
-                    step="0.5"
-                    min="0"
-                    max="60"
-                    required
-                />
-
-                <x-number
                     wire:model="workTimeModelForm.annual_vacation_days"
                     :label="__('Annual Vacation Days')"
                     :hint="__('Total vacation days per year')"
@@ -83,6 +63,26 @@
                     x-cloak
                     class="contents"
                 >
+                    <x-number
+                        wire:model.live="workTimeModelForm.cycle_weeks"
+                        x-on:change="$wire.dispatch('cycle-weeks-updated')"
+                        :label="__('Cycle Weeks')"
+                        :hint="__('Number of weeks before the schedule repeats')"
+                        min="1"
+                        max="12"
+                        required
+                    />
+
+                    <x-number
+                        wire:model="workTimeModelForm.weekly_hours"
+                        :label="__('Weekly Hours')"
+                        :hint="__('Standard working hours per week')"
+                        step="0.5"
+                        min="0"
+                        max="60"
+                        required
+                    />
+
                     <x-number
                         wire:model="workTimeModelForm.work_days_per_week"
                         :label="__('Work Days Per Week')"

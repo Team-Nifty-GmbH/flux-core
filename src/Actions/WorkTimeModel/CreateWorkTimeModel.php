@@ -25,4 +25,11 @@ class CreateWorkTimeModel extends FluxAction
 
         return $workTimeModel->refresh();
     }
+
+    protected function prepareForValidation(): void
+    {
+        if (data_get($this->data, 'has_fixed_hours') === false) {
+            $this->data['weekly_hours'] = 0;
+        }
+    }
 }
