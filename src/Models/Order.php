@@ -19,6 +19,7 @@ use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Events\Order\OrderApprovalRequestEvent;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\OrderPaymentRun;
+use FluxErp\Models\Pivots\OrderProject;
 use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Pivots\OrderUser;
@@ -631,6 +632,12 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     {
         return $this->belongsToMany(Schedule::class, 'order_schedule')
             ->using(OrderSchedule::class);
+    }
+
+    public function supplementedProjects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'order_project')
+            ->using(OrderProject::class);
     }
 
     public function tasks(): HasManyThrough

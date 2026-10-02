@@ -71,7 +71,9 @@ class ProjectMargin extends ValueBox implements HasWidgetOptions
 
         return $query->where(function (Builder $query): void {
             $query->whereRelation('projects', 'id', $this->projectId)
-                ->orWhereRelation('parent.projects', 'id', $this->projectId);
+                ->orWhereRelation('parent.projects', 'id', $this->projectId)
+                ->orWhereRelation('supplementedProjects', 'projects.id', $this->projectId)
+                ->orWhereRelation('parent.supplementedProjects', 'projects.id', $this->projectId);
         });
     }
 
