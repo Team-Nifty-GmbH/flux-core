@@ -38,15 +38,12 @@ class MoneyTransfer extends DirectDebit
             ->where('balance', '<', 0)
             ->whereNotNull('invoice_number')
             ->where(fn (Builder $query) => $query
-                ->where(fn (Builder $query) => $query
-                    ->whereIntegerInRaw('order_type_id', $outgoingOrderTypes)
-                    ->whereState('payment_state', Open::class)
-                    ->whereHas('paymentType', function (Builder $query): void {
-                        $query->where('is_direct_debit', false)
-                            ->where('requires_manual_transfer', true);
-                    })
-                )
-                // An overpaid invoice is refunded by transfer, whatever way the customer paid it.
+                ->whereIntegerInRaw('order_type_id', $outgoingOrderTypes)
+                ->whereState('payment_state', Open::class)
+                ->whereHas('paymentType', function (Builder $query): void {
+                    $query->where('is_direct_debit', false)
+                        ->where('requires_manual_transfer', true);
+                })
                 ->orWhere(fn (Builder $query) => $query
                     ->whereIntegerInRaw('order_type_id', $incomingOrderTypes)
                     ->whereState('payment_state', [Open::class, Overpaid::class])
