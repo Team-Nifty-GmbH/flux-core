@@ -8,7 +8,7 @@ use Livewire\Attributes\Modelable;
 class Statistics extends BaseDashboard
 {
     #[Modelable]
-    public ?int $contactId = null;
+    public int $contactId;
 
     public function getWidgetAttributes(): array
     {

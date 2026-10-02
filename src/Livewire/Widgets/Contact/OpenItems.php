@@ -15,15 +15,15 @@ class OpenItems extends Outstanding
         return Statistics::class;
     }
 
-    protected function getOutstandingQuery(Builder $builder): Builder
+    protected function getOutstandingQuery(Builder $query): Builder
     {
-        return parent::getOutstandingQuery($builder)
+        return parent::getOutstandingQuery($query)
             ->where('contact_id', $this->contactId);
     }
 
-    protected function getOverdueQuery(Builder $builder): Builder
+    protected function getOverdueQuery(Builder $query): Builder
     {
-        return parent::getOverdueQuery($builder)
+        return parent::getOverdueQuery($query)
             ->where('contact_id', $this->contactId);
     }
 }

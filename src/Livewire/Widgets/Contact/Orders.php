@@ -2,12 +2,14 @@
 
 namespace FluxErp\Livewire\Widgets\Contact;
 
+use Carbon\CarbonInterface;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Contact\Statistics;
 use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Renderless;
 
@@ -28,7 +30,8 @@ class Orders extends ValueBox
         $orders = resolve_static(Order::class, 'query')
             ->where('contact_id', $this->contactId)
             ->whereRelation('orderType', 'order_type_enum', OrderTypeEnum::Order)
-            ->whereBetween('order_date', [$this->getStart(), $this->getEnd()]);
+            ->when($this->getStart(), fn (Builder $query, CarbonInterface $start) => $query->whereDate('order_date', '>=', $start))
+            ->when($this->getEnd(), fn (Builder $query, CarbonInterface $end) => $query->whereDate('order_date', '<=', $end));
 
         $this->sum = $orders->clone()->count();
         $this->subValue = e(

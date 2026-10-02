@@ -4,7 +4,7 @@ use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Widgets\Contact\OpenItems;
 use FluxErp\Livewire\Widgets\Contact\Orders;
-use FluxErp\Livewire\Widgets\Contact\PaymentBehaviour;
+use FluxErp\Livewire\Widgets\Contact\PaymentBehavior;
 use FluxErp\Livewire\Widgets\Contact\RevenueOverTime;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -149,10 +149,20 @@ test('payment behaviour shows the average days until payment and the overdue sha
         'payment_target_date' => now()->addWeek(),
     ]);
 
-    $component = Livewire::test(PaymentBehaviour::class, ['contactId' => $this->contact->getKey()])
+    $component = Livewire::test(PaymentBehavior::class, ['contactId' => $this->contact->getKey()])
         ->set('timeFrame', TimeFrameEnum::ThisYear)
         ->call('calculateSum');
 
     expect($component->get('sum'))->toStartWith('12')
         ->and($component->get('subValue'))->toContain('50');
+});
+
+test('orders count all orders of the contact when the time frame has no bounds', function (): void {
+    ($this->makeOrder)($this->contact, ['order_date' => now()->subYears(3), 'total_net_price' => 100]);
+
+    $component = Livewire::test(Orders::class, ['contactId' => $this->contact->getKey()])
+        ->set('timeFrame', TimeFrameEnum::Custom)
+        ->call('calculateSum');
+
+    expect($component->get('sum'))->toEqual(1);
 });

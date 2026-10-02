@@ -15,9 +15,9 @@ class RevenueOverTime extends TotalRevenue
         return Statistics::class;
     }
 
-    protected function getRevenueQuery(Builder $builder): Builder
+    protected function getRevenueQuery(Builder $query): Builder
     {
-        return parent::getRevenueQuery($builder)
+        return parent::getRevenueQuery($query)
             ->where('contact_id', $this->contactId);
     }
 }

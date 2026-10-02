@@ -2,17 +2,19 @@
 
 namespace FluxErp\Livewire\Widgets\Contact;
 
+use Carbon\CarbonInterface;
 use FluxErp\Livewire\Contact\Statistics;
 use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\Order;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Renderless;
 
-class PaymentBehaviour extends ValueBox
+class PaymentBehavior extends ValueBox
 {
     use IsTimeFrameAwareWidget;
 
@@ -30,11 +32,13 @@ class PaymentBehaviour extends ValueBox
             ->where('contact_id', $this->contactId)
             ->whereNotNull('invoice_date')
             ->whereNotNull('invoice_number')
-            ->whereBetween('invoice_date', [$this->getStart(), $this->getEnd()])
+            ->when($this->getStart(), fn (Builder $query, CarbonInterface $start) => $query->whereDate('invoice_date', '>=', $start))
+            ->when($this->getEnd(), fn (Builder $query, CarbonInterface $end) => $query->whereDate('invoice_date', '<=', $end))
             ->revenue();
 
         $averageDays = $invoices->clone()
             ->whereState('payment_state', Paid::class)
+            ->whereHas('transactions')
             ->with([
                 'transactions' => fn (BelongsToMany $query) => $query->select([
                     'transactions.id',
@@ -42,7 +46,6 @@ class PaymentBehaviour extends ValueBox
                 ]),
             ])
             ->get(['id', 'invoice_date'])
-            ->filter(fn (Order $order): bool => $order->transactions->isNotEmpty())
             ->avg(fn (Order $order): int => (int) $order->invoice_date->diffInDays(
                 Carbon::parse($order->transactions->max('value_date'))
             ));
@@ -59,7 +62,7 @@ class PaymentBehaviour extends ValueBox
             ? '-'
             : __(':days days', ['days' => Number::format($averageDays, 0)]);
         $this->subValue = e(__(':percent % of open invoices overdue', [
-            'percent' => $openCount ? Number::format($overdueCount / $openCount * 100, 0) : 0,
+            'percent' => $openCount ? Number::format(bcmul(bcdiv($overdueCount, $openCount, 9), 100, 9), 0) : 0,
         ]));
     }
 
