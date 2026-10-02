@@ -66,48 +66,41 @@ class UpdateProject extends FluxAction
         );
 
         $orders = resolve_static(Order::class, 'query')
-            ->whereIntegerInRaw(
-                'id',
+            ->whereKey(
                 $hasSupplementaryOrders
-                    ? array_map('intval', $this->getData('supplementary_orders') ?? [])
+                    ? $this->getData('supplementary_orders') ?? []
                     : $project->supplementaryOrders()->pluck('orders.id')->all()
             )
             ->with('orderType:id,order_type_enum')
             ->get(['id', 'contact_id', 'order_type_id']);
 
-        if ($orders->isEmpty()) {
-            return;
-        }
+        $errors = [];
 
         if (! $hasSupplementaryOrders) {
             if ($orders->contains(fn (Order $order): bool => $order->contact_id !== $contactId)) {
-                throw ValidationException::withMessages([
-                    'contact_id' => [
-                        __('The project has supplementary orders of another contact. Remove them before changing the contact.'),
-                    ],
-                ])
-                    ->errorBag('updateProject');
+                $errors['contact_id'][] =
+                    'The project has supplementary orders of another contact. Remove them before changing the contact.';
+            }
+        } else {
+            if ($orders->contains(fn (Order $order): bool => $order->getKey() === $mainOrderId)) {
+                $errors['supplementary_orders'][] =
+                    'The main order of the project cannot be a supplementary order.';
             }
 
-            return;
-        }
+            if ($orders->contains(
+                fn (Order $order): bool => (bool) $order->orderType?->order_type_enum?->isPurchase()
+            )) {
+                $errors['supplementary_orders'][] = 'A purchase order cannot be a supplementary order.';
+            }
 
-        $errors = [];
-
-        if ($orders->contains(fn (Order $order): bool => $order->getKey() === $mainOrderId)) {
-            $errors[] = __('The main order of the project cannot be a supplementary order.');
-        }
-
-        if ($orders->contains(fn (Order $order): bool => (bool) $order->orderType?->order_type_enum?->isPurchase())) {
-            $errors[] = __('A purchase order cannot be a supplementary order.');
-        }
-
-        if ($orders->contains(fn (Order $order): bool => $order->contact_id !== $contactId)) {
-            $errors[] = __('A supplementary order must belong to the contact of the project.');
+            if ($orders->contains(fn (Order $order): bool => $order->contact_id !== $contactId)) {
+                $errors['supplementary_orders'][] =
+                    'A supplementary order must belong to the contact of the project.';
+            }
         }
 
         if ($errors) {
-            throw ValidationException::withMessages(['supplementary_orders' => $errors])
+            throw ValidationException::withMessages($errors)
                 ->errorBag('updateProject');
         }
     }

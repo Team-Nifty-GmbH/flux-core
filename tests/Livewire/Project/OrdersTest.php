@@ -76,27 +76,30 @@ test('lists supplementary orders of a project without main order', function (): 
     expect(collect(data_get($data, 'data'))->pluck('id')->all())->toBe([$supplementaryOrder->getKey()]);
 });
 
-test('adds and removes a supplementary order', function (): void {
+test('adds several supplementary orders at once and removes one', function (): void {
     $order = ($this->makeOrder)();
+    $otherOrder = ($this->makeOrder)();
 
     Livewire::test(Orders::class, ['projectId' => $this->project->getKey()])
-        ->set('supplementaryOrderId', $order->getKey())
-        ->call('addSupplementaryOrder')
-        ->assertReturned(true);
+        ->set('supplementaryOrders', [$order->getKey(), $otherOrder->getKey()])
+        ->call('addSupplementaryOrders')
+        ->assertReturned(true)
+        ->assertSet('supplementaryOrders', []);
 
-    expect($this->project->supplementaryOrders()->pluck('orders.id')->all())->toBe([$order->getKey()]);
+    expect($this->project->supplementaryOrders()->pluck('orders.id')->sort()->values()->all())
+        ->toBe([$order->getKey(), $otherOrder->getKey()]);
 
     Livewire::test(Orders::class, ['projectId' => $this->project->getKey()])
         ->call('removeSupplementaryOrder', $order->getKey())
         ->assertReturned(true);
 
-    expect($this->project->supplementaryOrders()->count())->toBe(0);
+    expect($this->project->supplementaryOrders()->pluck('orders.id')->all())->toBe([$otherOrder->getKey()]);
 });
 
 test('rejects the main order as supplementary order', function (): void {
     Livewire::test(Orders::class, ['projectId' => $this->project->getKey()])
-        ->set('supplementaryOrderId', $this->mainOrder->getKey())
-        ->call('addSupplementaryOrder')
+        ->set('supplementaryOrders', [$this->mainOrder->getKey()])
+        ->call('addSupplementaryOrders')
         ->assertReturned(false);
 
     expect($this->project->supplementaryOrders()->count())->toBe(0);

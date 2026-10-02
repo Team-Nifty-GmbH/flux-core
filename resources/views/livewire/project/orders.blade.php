@@ -17,9 +17,10 @@
         :title="__('Add Supplementary Order')"
     >
         <x-select.styled
-            wire:model="supplementaryOrderId"
-            :label="__('Order')"
+            wire:model="supplementaryOrders"
+            :label="__('Orders')"
             select="value:id"
+            multiple
             unfiltered
             :request="[
                 'url' => route('search', \FluxErp\Models\Order::class),
@@ -42,7 +43,7 @@
             <x-button
                 :text="__('Save')"
                 color="primary"
-                wire:click="addSupplementaryOrder()"
+                wire:click="addSupplementaryOrders()"
             />
         </x-slot:footer>
     </x-modal>

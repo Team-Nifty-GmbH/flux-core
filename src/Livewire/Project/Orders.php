@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Project;
 
 use FluxErp\Actions\Project\UpdateProject;
 use FluxErp\Livewire\DataTables\OrderList;
+use FluxErp\Models\Pivots\OrderProject;
 use FluxErp\Models\Project;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
@@ -29,7 +30,7 @@ class Orders extends OrderList
     #[Modelable]
     public int $projectId;
 
-    public ?int $supplementaryOrderId = null;
+    public array $supplementaryOrders = [];
 
     protected ?string $includeBefore = 'flux::livewire.project.orders';
 
@@ -78,18 +79,18 @@ class Orders extends OrderList
     }
 
     #[Renderless]
-    public function addSupplementaryOrder(): bool
+    public function addSupplementaryOrders(): bool
     {
-        if (! $this->supplementaryOrderId) {
+        if (! $this->supplementaryOrders) {
             return false;
         }
 
         $saved = $this->syncSupplementaryOrders(
-            array_merge($this->supplementaryOrderIds(), [$this->supplementaryOrderId])
+            array_values(array_unique(array_merge($this->supplementaryOrderIds(), $this->supplementaryOrders)))
         );
 
         if ($saved) {
-            $this->supplementaryOrderId = null;
+            $this->supplementaryOrders = [];
             $this->modalClose('add-supplementary-order-modal');
         }
 
@@ -120,12 +121,10 @@ class Orders extends OrderList
 
     protected function supplementaryOrderIds(): array
     {
-        return resolve_static(Project::class, 'query')
-            ->whereKey($this->projectId)
-            ->first()
-            ?->supplementaryOrders()
-            ->pluck('orders.id')
-            ->all() ?? [];
+        return resolve_static(OrderProject::class, 'query')
+            ->where('project_id', $this->projectId)
+            ->pluck('order_id')
+            ->all();
     }
 
     protected function syncSupplementaryOrders(array $orderIds): bool

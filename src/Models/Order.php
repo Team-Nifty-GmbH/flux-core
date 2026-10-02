@@ -637,8 +637,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     public function supplementedProjects(): BelongsToMany
     {
         return $this->belongsToMany(Project::class, 'order_project')
-            ->using(OrderProject::class)
-            ->withTimestamps();
+            ->using(OrderProject::class);
     }
 
     public function tasks(): HasManyThrough

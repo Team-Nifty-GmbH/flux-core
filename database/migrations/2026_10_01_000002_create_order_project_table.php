@@ -16,7 +16,6 @@ return new class() extends Migration
             $table->foreignId('project_id')
                 ->constrained('projects')
                 ->cascadeOnDelete();
-            $table->timestamps();
 
             $table->unique(['order_id', 'project_id']);
         });
