@@ -8,6 +8,7 @@ use FluxErp\Actions\Product\RestoreProduct;
 use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Models\Product;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
 
 class ProductForm extends FluxForm
@@ -165,6 +166,12 @@ class ProductForm extends FluxForm
                 'count' => $bundleProduct['pivot']['count'] ?? 0,
             ];
         }, $this->bundle_products);
+
+        // The supplier fields live on the pivot, the form binds and saves them flat.
+        $this->suppliers = array_map(
+            fn (array $supplier) => array_merge(Arr::except($supplier, 'pivot'), $supplier['pivot'] ?? []),
+            $this->suppliers
+        );
     }
 
     public function getProductModel(): ?Product
