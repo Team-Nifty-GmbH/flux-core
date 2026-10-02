@@ -132,6 +132,20 @@ test('shipping without goods keeps its own rate', function (): void {
     expect($shipping->refresh()->vat_rate_id)->toBe($this->standard->getKey());
 });
 
+test('shipping falls back to its own rate once the goods are gone', function (): void {
+    $goods = ($this->addPosition)($this->reduced, '10.70');
+    $shipping = ($this->addPosition)($this->standard, '5.50', true);
+    ($this->recalculate)();
+
+    $goods->delete();
+    ($this->recalculate)();
+    $shipping->refresh();
+
+    expect($shipping->vat_rate_id)->toBe($this->standard->getKey())
+        ->and(bcround($shipping->total_gross_price, 2))->toEqual('5.50')
+        ->and(bcround($shipping->total_net_price, 2))->toEqual('4.62');
+});
+
 test('an invoiced order keeps the shipping rate it was invoiced with', function (): void {
     Order::query()->whereKey($this->order->getKey())->update(['invoice_number' => 'RE-1']);
     ($this->addPosition)($this->reduced, '74.90');
