@@ -144,7 +144,9 @@ class Contact extends Component
                 ->isLivewireComponent()
                 ->wireModel('contact'),
             TabButton::make('contact.statistics')
-                ->text(__('Statistics')),
+                ->text(__('Statistics'))
+                ->isLivewireComponent()
+                ->wireModel('contact.id'),
         ];
     }
 
