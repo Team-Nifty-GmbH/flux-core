@@ -62,6 +62,7 @@ class Printers extends PrinterList
         ];
     }
 
+    #[Renderless]
     public function delete(Printer $printer): bool
     {
         $this->printerForm->reset();
