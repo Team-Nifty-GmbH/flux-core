@@ -543,6 +543,36 @@
                                         />
                                     </div>
                                 @endcanAction
+
+                                @canAction(\FluxErp\Actions\BlockedFile\BlockFile::class)
+                                    <div
+                                        x-cloak
+                                        x-show="!$wire.isReadonly && !readOnly"
+                                    >
+                                        <x-button
+                                            color="red"
+                                            light
+                                            icon="no-symbol"
+                                            :text="__('Block File')"
+                                            wire:flux-confirm.type.error="{{ __('Block this file? It will be deleted and never stored again.') }}"
+                                            x-on:click="
+                                                $wire
+                                                    .blockFile(selection.id)
+                                                    .then((blocked) => {
+                                                        if (!blocked) {
+                                                            return;
+                                                        }
+
+                                                        removeNode(
+                                                            selection.id,
+                                                        );
+                                                        this.selected = null;
+                                                        this.selection = {};
+                                                    })
+                                            "
+                                        />
+                                    </div>
+                                @endcanAction
                             </div>
                         @show
                     </div>

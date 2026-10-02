@@ -70,6 +70,7 @@ use FluxErp\Livewire\Settings\AccountingSettings;
 use FluxErp\Livewire\Settings\ActivityLogs;
 use FluxErp\Livewire\Settings\AddressTypes;
 use FluxErp\Livewire\Settings\BankConnections;
+use FluxErp\Livewire\Settings\BlockedFiles;
 use FluxErp\Livewire\Settings\Categories;
 use FluxErp\Livewire\Settings\CoreSettings;
 use FluxErp\Livewire\Settings\Countries;
@@ -324,6 +325,7 @@ Route::middleware('web')
                         Route::get('/activity-logs', ActivityLogs::class)->name('activity-logs');
                         Route::get('/address-types', AddressTypes::class)->name('address-types');
                         Route::get('/bank-connections', BankConnections::class)->name('bank-connections');
+                        Route::get('/blocked-files', BlockedFiles::class)->name('blocked-files');
                         Route::get('/categories', Categories::class)->name('categories');
                         Route::get('/core-settings', CoreSettings::class)->name('core-settings');
                         Route::get('/countries', Countries::class)->name('countries');

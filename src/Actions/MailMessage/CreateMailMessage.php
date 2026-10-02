@@ -4,6 +4,7 @@ namespace FluxErp\Actions\MailMessage;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Media\UploadMedia;
+use FluxErp\Models\BlockedFile;
 use FluxErp\Models\Communication;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\Tag;
@@ -64,6 +65,10 @@ class CreateMailMessage extends FluxAction
                     ? null
                     : 'string';
 
+                if ($this->isBlocked(data_get($attachment, 'media'))) {
+                    continue;
+                }
+
                 UploadMedia::make($attachment)
                     ->validate()
                     ->execute();
@@ -85,6 +90,19 @@ class CreateMailMessage extends FluxAction
         }
 
         return $mailMessage->withoutRelations()->fresh();
+    }
+
+    protected function isBlocked(mixed $media): bool
+    {
+        if (! is_string($media)) {
+            return false;
+        }
+
+        return resolve_static(
+            BlockedFile::class,
+            'isBlocked',
+            ['hash' => is_file($media) ? md5_file($media) : md5($media)]
+        );
     }
 
     protected function prepareForValidation(): void
