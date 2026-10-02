@@ -32,8 +32,14 @@ class PaymentBehavior extends ValueBox
             ->where('contact_id', $this->contactId)
             ->whereNotNull('invoice_date')
             ->whereNotNull('invoice_number')
-            ->when($this->getStart(), fn (Builder $query, CarbonInterface $start) => $query->whereDate('invoice_date', '>=', $start))
-            ->when($this->getEnd(), fn (Builder $query, CarbonInterface $end) => $query->whereDate('invoice_date', '<=', $end))
+            ->when(
+                $this->getStart(),
+                fn (Builder $query, CarbonInterface $start) => $query->whereDate('invoice_date', '>=', $start)
+            )
+            ->when(
+                $this->getEnd(),
+                fn (Builder $query, CarbonInterface $end) => $query->whereDate('invoice_date', '<=', $end)
+            )
             ->revenue();
 
         $averageDays = $invoices->clone()
@@ -61,9 +67,11 @@ class PaymentBehavior extends ValueBox
         $this->sum = is_null($averageDays)
             ? '-'
             : __(':days days', ['days' => Number::format($averageDays, 0)]);
-        $this->subValue = e(__(':percent % of open invoices overdue', [
-            'percent' => $openCount ? Number::format(bcmul(bcdiv($overdueCount, $openCount, 9), 100, 9), 0) : 0,
-        ]));
+        $this->subValue = __(':percent % of open invoices overdue', [
+            'percent' => $openCount
+                ? Number::format(bcmul(bcdiv($overdueCount, $openCount, 9), 100, 9), 0)
+                : 0,
+        ]);
     }
 
     protected function icon(): string

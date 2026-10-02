@@ -30,14 +30,18 @@ class Orders extends ValueBox
         $orders = resolve_static(Order::class, 'query')
             ->where('contact_id', $this->contactId)
             ->whereRelation('orderType', 'order_type_enum', OrderTypeEnum::Order)
-            ->when($this->getStart(), fn (Builder $query, CarbonInterface $start) => $query->whereDate('order_date', '>=', $start))
-            ->when($this->getEnd(), fn (Builder $query, CarbonInterface $end) => $query->whereDate('order_date', '<=', $end));
+            ->when(
+                $this->getStart(),
+                fn (Builder $query, CarbonInterface $start) => $query->whereDate('order_date', '>=', $start)
+            )
+            ->when(
+                $this->getEnd(),
+                fn (Builder $query, CarbonInterface $end) => $query->whereDate('order_date', '<=', $end)
+            );
 
         $this->sum = $orders->clone()->count();
-        $this->subValue = e(
-            Number::format($orders->clone()->sum('total_net_price'), 2)
-            . ' ' . resolve_static(Currency::class, 'default')?->symbol
-        );
+        $this->subValue = Number::format($orders->clone()->sum('total_net_price'), 2)
+            . ' ' . resolve_static(Currency::class, 'default')?->symbol;
     }
 
     protected function icon(): string
