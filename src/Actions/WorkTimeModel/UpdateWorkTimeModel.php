@@ -54,4 +54,11 @@ class UpdateWorkTimeModel extends FluxAction
 
         return $workTimeModel->fresh('schedules');
     }
+
+    protected function prepareForValidation(): void
+    {
+        if (data_get($this->data, 'has_fixed_hours') === false) {
+            $this->data['weekly_hours'] = 0;
+        }
+    }
 }

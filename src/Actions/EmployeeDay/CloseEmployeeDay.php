@@ -80,9 +80,9 @@ class CloseEmployeeDay extends FluxAction
             ->select(['id', 'is_half_day', 'day_part'])
             ->first();
 
+        $workTimeModel = $employee->getWorkTimeModel($date);
         $targetHours = 0;
         if ($isWorkDay = $employee->isWorkDay($date)) {
-            $workTimeModel = $employee->getWorkTimeModel($date);
             $targetHours = $workTimeModel->getDailyWorkHours($date);
 
             // Reduce target hours for half-day holidays
@@ -168,6 +168,10 @@ class CloseEmployeeDay extends FluxAction
         );
 
         if ($employee->salary_type === SalaryTypeEnum::Hourly && bccomp($plusMinusOvertimeHours, 0) === -1) {
+            $plusMinusOvertimeHours = 0;
+        }
+
+        if ($workTimeModel && ! $workTimeModel->has_fixed_hours) {
             $plusMinusOvertimeHours = 0;
         }
 

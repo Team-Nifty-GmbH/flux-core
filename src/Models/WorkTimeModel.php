@@ -19,6 +19,7 @@ class WorkTimeModel extends FluxModel
     {
         return [
             'overtime_compensation' => OvertimeCompensationEnum::class,
+            'has_fixed_hours' => 'boolean',
             'is_active' => 'boolean',
         ];
     }
@@ -38,6 +39,10 @@ class WorkTimeModel extends FluxModel
     // Public methods
     public function getDailyWorkHours(?Carbon $date = null): string
     {
+        if (! $this->has_fixed_hours) {
+            return 0;
+        }
+
         $weekday = $date?->dayOfWeekIso;
 
         $scheduledHours = $weekday
