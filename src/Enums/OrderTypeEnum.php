@@ -50,7 +50,10 @@ enum OrderTypeEnum: string
 
     public static function getPostsStock(self $value): bool
     {
-        return ! in_array($value, [self::PurchaseRefund, self::PurchaseSubscription, self::Refund]);
+        return ! in_array(
+            $value,
+            [self::PurchaseRefund, self::PurchaseSubscription, self::Refund, self::Subscription]
+        );
     }
 
     public static function getPostsStockIn(self $value): bool

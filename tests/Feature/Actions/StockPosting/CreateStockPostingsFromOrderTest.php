@@ -142,7 +142,7 @@ test('a retoure books its amount back into stock', function (): void {
         ->toEqual(2);
 });
 
-test('refunds and purchase subscriptions book no stock', function (OrderTypeEnum $orderTypeEnum): void {
+test('refunds and subscriptions book no stock', function (OrderTypeEnum $orderTypeEnum): void {
     $stock = StockPosting::factory()->create([
         'warehouse_id' => $this->warehouse->getKey(),
         'product_id' => $this->product->getKey(),
@@ -162,4 +162,5 @@ test('refunds and purchase subscriptions book no stock', function (OrderTypeEnum
     'refund' => OrderTypeEnum::Refund,
     'purchase refund' => OrderTypeEnum::PurchaseRefund,
     'purchase subscription' => OrderTypeEnum::PurchaseSubscription,
+    'subscription' => OrderTypeEnum::Subscription,
 ]);
