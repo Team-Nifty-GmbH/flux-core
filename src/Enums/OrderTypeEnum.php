@@ -48,6 +48,16 @@ enum OrderTypeEnum: string
         };
     }
 
+    public static function getPostsStock(self $value): bool
+    {
+        return ! in_array($value, [self::PurchaseRefund, self::PurchaseSubscription, self::Refund]);
+    }
+
+    public static function getPostsStockIn(self $value): bool
+    {
+        return in_array($value, [self::Purchase, self::Retoure]);
+    }
+
     public function isPurchase(): bool
     {
         return self::getIsPurchase($this);
@@ -61,5 +71,15 @@ enum OrderTypeEnum: string
     public function multiplier(): string
     {
         return self::getMultiplier($this);
+    }
+
+    public function postsStock(): bool
+    {
+        return self::getPostsStock($this);
+    }
+
+    public function postsStockIn(): bool
+    {
+        return self::getPostsStockIn($this);
     }
 }

@@ -130,3 +130,36 @@ test('posting reserved stock books the share of the purchase price', function ()
         ->and($withdrawal->purchase_price)->toEqual(-30)
         ->and($stock->refresh()->remaining_stock)->toEqual(1);
 });
+
+test('a retoure books its amount back into stock', function (): void {
+    $order = ($this->makeOrder)(OrderTypeEnum::Retoure, '2');
+
+    CreateStockPostingsFromOrder::make(['id' => $order->getKey()])
+        ->validate()
+        ->execute();
+
+    expect(StockPosting::query()->where('product_id', $this->product->getKey())->sum('posting'))
+        ->toEqual(2);
+});
+
+test('refunds and purchase subscriptions book no stock', function (OrderTypeEnum $orderTypeEnum): void {
+    $stock = StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'posting' => 5,
+        'remaining_stock' => 5,
+        'reserved_stock' => 0,
+    ]);
+    $order = ($this->makeOrder)($orderTypeEnum, '2');
+
+    CreateStockPostingsFromOrder::make(['id' => $order->getKey()])
+        ->validate()
+        ->execute();
+
+    expect(StockPosting::query()->where('product_id', $this->product->getKey())->count())->toBe(1)
+        ->and($stock->refresh()->remaining_stock)->toEqual(5);
+})->with([
+    'refund' => OrderTypeEnum::Refund,
+    'purchase refund' => OrderTypeEnum::PurchaseRefund,
+    'purchase subscription' => OrderTypeEnum::PurchaseSubscription,
+]);
