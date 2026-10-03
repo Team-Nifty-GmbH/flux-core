@@ -52,7 +52,7 @@ class CreateStockPostingsFromOrder extends FluxAction
             $open = bcsub($orderPosition->amount, $posting);
 
             // Handle Purchase Orders and alike.
-            if ($multiplier === -1 && $postStock) {
+            if (bccomp($multiplier, -1) === 0 && $postStock) {
                 CreateStockPosting::make([
                     'warehouse_id' => $orderPosition->warehouse_id,
                     'product_id' => $orderPosition->product_id,
@@ -66,7 +66,7 @@ class CreateStockPostingsFromOrder extends FluxAction
                     ->execute();
 
                 continue;
-            } elseif ($multiplier === -1) {
+            } elseif (bccomp($multiplier, -1) === 0) {
                 continue;
             }
 
