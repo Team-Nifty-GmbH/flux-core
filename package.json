@@ -47,7 +47,7 @@
         "signature_pad": "^5.1.4",
         "tailwindcss": "^4.3.3",
         "uuid": "^14.0.2",
-        "vite": "^8.3.1"
+        "vite": "^8.3.2"
     },
     "dependencies": {
         "@simplewebauthn/browser": "^14.0.0",
