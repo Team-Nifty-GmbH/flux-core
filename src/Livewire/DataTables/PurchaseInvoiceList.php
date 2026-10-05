@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Actions\Media\UploadMedia;
+use FluxErp\Actions\PurchaseInvoice\BlockPurchaseInvoiceFile;
 use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Forms\ContactForm;
@@ -116,6 +117,42 @@ class PurchaseInvoiceList extends BaseDataTable
                     $tsui.open.modal('bulk-pdf-upload-modal')
                 JS),
         ];
+    }
+
+    protected function getRowActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->icon('no-symbol')
+                ->color('red')
+                ->text(__('Block File'))
+                ->when(fn () => resolve_static(BlockPurchaseInvoiceFile::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'x-show' => '! record.order_id',
+                    'x-cloak' => true,
+                    'wire:flux-confirm.type.error' => __('Block this file? It will be deleted and never stored again.'),
+                    'wire:click' => 'blockFile(record.id)',
+                ]),
+        ];
+    }
+
+    #[Renderless]
+    public function blockFile(int $purchaseInvoiceId): bool
+    {
+        try {
+            BlockPurchaseInvoiceFile::make(['id' => $purchaseInvoiceId])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 
     #[Renderless]
@@ -352,12 +389,19 @@ class PurchaseInvoiceList extends BaseDataTable
 
     protected function getBuilder(Builder $builder): Builder
     {
-        return $builder->with(['media', 'invoice']);
+        return $builder
+            ->addSelect('purchase_invoices.order_id')
+            ->with(['media', 'invoice']);
     }
 
     protected function getLayout(): string
     {
         return 'tall-datatables::layouts.grid';
+    }
+
+    protected function getReturnKeys(): array
+    {
+        return array_merge(parent::getReturnKeys(), ['order_id']);
     }
 
     protected function getRowAttributes(): ComponentAttributeBag
@@ -413,5 +457,6 @@ class PurchaseInvoiceList extends BaseDataTable
         }
 
         $itemArray['media.file_name'] = $media?->file_name;
+        $itemArray['order_id'] = $item->order_id;
     }
 }

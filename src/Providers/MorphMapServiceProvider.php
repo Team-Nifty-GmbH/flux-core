@@ -10,6 +10,7 @@ use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
 use FluxErp\Models\AttributeTranslation;
 use FluxErp\Models\BankConnection;
+use FluxErp\Models\BlockedFile;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Models\CalendarUserSetting;
@@ -177,6 +178,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'address_type' => AddressType::class,
             'attribute_translation' => AttributeTranslation::class,
             'bank_connection' => BankConnection::class,
+            'blocked_file' => BlockedFile::class,
             'calendar' => Calendar::class,
             'calendar_event' => CalendarEvent::class,
             'calendar_user_setting' => CalendarUserSetting::class,

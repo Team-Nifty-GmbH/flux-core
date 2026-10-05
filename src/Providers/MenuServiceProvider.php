@@ -136,6 +136,7 @@ class MenuServiceProvider extends ServiceProvider
             closure: function (): void {
                 // General
                 Menu::group(path: 'settings.children.general', label: 'General');
+                Menu::register(route: 'settings.blocked-files', path: 'settings.children.general.children.blocked-files');
                 Menu::register(route: 'settings.categories', path: 'settings.children.general.children.categories');
                 Menu::register(route: 'settings.countries', path: 'settings.children.general.children.countries');
                 Menu::register(route: 'settings.country-regions', path: 'settings.children.general.children.country-regions');
