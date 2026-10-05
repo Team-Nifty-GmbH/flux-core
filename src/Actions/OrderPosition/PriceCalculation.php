@@ -100,7 +100,10 @@ class PriceCalculation
             : $discountedPrice;
 
         $totalDiscountPercentage = diff_percentage($preDiscountedPrice, $discountedPrice);
-        $margin = bcsub($discountedNetPrice, bcmul($this->orderPosition->purchase_price, $this->orderPosition->amount));
+        $margin = bcsub(
+            $discountedNetPrice,
+            bcmul($this->orderPosition->purchase_price ?? 0, $this->orderPosition->amount)
+        );
 
         $multiplier = $this->orderPosition->order->orderType->order_type_enum->multiplier();
         $this->orderPosition->margin = bcmul($margin, $multiplier);
@@ -129,30 +132,21 @@ class PriceCalculation
 
     protected function calculatePurchasePrice(): void
     {
-        if (! is_null($this->orderPosition->purchase_price)) {
-            return;
-        }
-
         $stockPosting = resolve_static(StockPosting::class, 'query')
             ->where('product_id', $this->orderPosition->product_id)
             ->where('warehouse_id', $this->orderPosition->warehouse_id)
-            ->whereNot('posting', 0)
+            ->where('posting', '>', 0)
+            ->whereNotNull('purchase_price')
             ->orderByDesc('id')
-            ->first();
+            ->first(['id', 'purchase_price']);
 
         if ($stockPosting) {
-            $purchasePrice = bcdiv($stockPosting->purchase_price, $stockPosting->posting);
-        } else {
-            $purchasePrice = $this->orderPosition->product
-                ?->prices
-                ?->first(fn (Price $price) => (bool) $price->priceList?->is_purchase)
-                ?->getNet($this->orderPosition->vat_rate_percentage);
+            $this->orderPosition->purchase_price = $stockPosting->purchase_price;
+
+            return;
         }
 
-        $this->orderPosition->purchase_price = bcmul(
-            $purchasePrice ?? 0,
-            $this->orderPosition->amount ?? 0
-        );
+        $this->orderPosition->purchase_price ??= $this->orderPosition->product?->purchasePrice();
     }
 
     protected function calculateTotalPrices(): void
