@@ -11,26 +11,9 @@ trait BuildsFlatTreeRows
 {
     protected function buildFlatTreeRows(Builder $query): array
     {
-        // A match may sit anywhere in the tree, so every matched record is resolved to the root of
-        // its family before the tree is fetched. The parent keys of the whole table are read once
-        // and walked in memory instead of asking the database for the ancestors of every record.
-        // ponytail: reads id and parent of every row, fine for trees of a few thousand nodes
-        $parentKeys = resolve_static($this->getModel(), 'query')
-            ->pluck($this->familyParentKey(), $this->modelKeyName);
-
-        $rootIds = $query->pluck($this->modelTable . '.' . $this->modelKeyName)
-            ->map(function (int|string $id) use ($parentKeys): int|string {
-                $depth = 0;
-
-                // The depth limit only guards against a cycle in broken data.
-                while (($parentId = $parentKeys->get($id)) && $depth++ < $parentKeys->count()) {
-                    $id = $parentId;
-                }
-
-                return $id;
-            })
-            ->unique()
-            ->values();
+        $rootIds = $this->resolvesMatchesToRoots()
+            ? $this->resolveRootIds($query)
+            : $query->pluck($this->modelTable . '.' . $this->modelKeyName);
 
         $records = $this->prepareFamilyTreeQuery(
             resolve_static($this->getModel(), 'familyTree')
@@ -95,5 +78,34 @@ trait BuildsFlatTreeRows
     protected function prepareFamilyTreeQuery(Builder $query): Builder
     {
         return $query;
+    }
+
+    protected function resolveRootIds(Builder $query): Collection
+    {
+        // A match may sit anywhere in the tree, so every matched record is resolved to the root of
+        // its family before the tree is fetched. The parent keys of the whole table are read once
+        // and walked in memory instead of asking the database for the ancestors of every record.
+        // ponytail: reads id and parent of every row, fine for trees of a few thousand nodes
+        $parentKeys = resolve_static($this->getModel(), 'query')
+            ->pluck($this->familyParentKey(), $this->modelKeyName);
+
+        return $query->pluck($this->modelTable . '.' . $this->modelKeyName)
+            ->map(function (int|string $id) use ($parentKeys): int|string {
+                $depth = 0;
+
+                // The depth limit only guards against a cycle in broken data.
+                while (($parentId = $parentKeys->get($id)) && $depth++ < $parentKeys->count()) {
+                    $id = $parentId;
+                }
+
+                return $id;
+            })
+            ->unique()
+            ->values();
+    }
+
+    protected function resolvesMatchesToRoots(): bool
+    {
+        return true;
     }
 }

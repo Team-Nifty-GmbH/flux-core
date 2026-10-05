@@ -39,4 +39,9 @@ class CategoryList extends BaseDataTable
     {
         return $query->ordered();
     }
+
+    protected function resolvesMatchesToRoots(): bool
+    {
+        return false;
+    }
 }
