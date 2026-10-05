@@ -4,6 +4,7 @@ use FluxErp\Enums\StorageAreaTypeEnum;
 use FluxErp\Livewire\DataTables\StorageAreaList;
 use FluxErp\Models\StorageArea;
 use FluxErp\Models\Warehouse;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -125,4 +126,36 @@ test('filtering for a nested bin returns its family instead of nothing', functio
         ->getDataForTesting()['data'];
 
     expect(array_column($rows, 'id'))->toBe([$zone->getKey(), $nested->getKey()]);
+});
+
+test('resolving the roots does not query once per child', function (): void {
+    $zone = StorageArea::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'storage_area_type_enum' => StorageAreaTypeEnum::Zone,
+    ]);
+    $component = Livewire::test(StorageAreaList::class);
+
+    $countQueries = function () use ($component): int {
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+        $component->call('loadData');
+        DB::disableQueryLog();
+
+        return count(DB::getQueryLog());
+    };
+
+    StorageArea::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'parent_id' => $zone->getKey(),
+        'storage_area_type_enum' => StorageAreaTypeEnum::Container,
+    ]);
+    $withOneChild = $countQueries();
+
+    StorageArea::factory()->count(5)->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'parent_id' => $zone->getKey(),
+        'storage_area_type_enum' => StorageAreaTypeEnum::Container,
+    ]);
+
+    expect($countQueries())->toBe($withOneChild);
 });
