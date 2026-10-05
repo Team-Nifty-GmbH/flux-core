@@ -30,3 +30,14 @@ test('delete communication', function (): void {
     expect(DeleteCommunication::make(['id' => $comm->getKey()])
         ->validate()->execute())->toBeTrue();
 });
+
+test('create communication stores attachment given as string content', function (): void {
+    $comm = CreateCommunication::make([
+        'communication_type_enum' => 'mail',
+        'attachments' => [
+            ['name' => 'note.txt', 'media' => 'string content'],
+        ],
+    ])->validate()->execute();
+
+    expect(file_get_contents($comm->getFirstMedia('attachments')->getPath()))->toBe('string content');
+});

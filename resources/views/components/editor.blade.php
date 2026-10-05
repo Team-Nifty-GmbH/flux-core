@@ -128,7 +128,7 @@
                         />
                         <div x-collapse x-cloak x-show="expanded" class="pt-2">
                             @foreach ($collapsible->dropdownContent() as $action)
-                                {!! $action->render() !!}
+                                {!! $action instanceof \Stringable ? $action : $action->render() !!}
                             @endforeach
                         </div>
                     </div>

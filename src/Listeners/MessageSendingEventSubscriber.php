@@ -7,6 +7,7 @@ use FluxErp\Actions\Communication\UpdateCommunication;
 use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Models\Communication;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Http\File;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Support\Str;
 use Symfony\Component\Mime\Email;
@@ -38,8 +39,9 @@ class MessageSendingEventSubscriber
                 function ($attachment) {
                     $attachment['model_type'] = morph_alias(Communication::class);
                     $attachment['collection_name'] = 'attachments';
-                    $attachment['media_type'] = 'string';
-                    $attachment['media'] = data_get($attachment, 'path');
+                    $attachment['media'] = is_file(data_get($attachment, 'path') ?? '')
+                        ? new File($attachment['path'])
+                        : null;
 
                     return $attachment;
                 },

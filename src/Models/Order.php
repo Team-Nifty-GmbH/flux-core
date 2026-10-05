@@ -19,6 +19,7 @@ use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Events\Order\OrderApprovalRequestEvent;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\OrderPaymentRun;
+use FluxErp\Models\Pivots\OrderProject;
 use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Pivots\OrderUser;
@@ -29,6 +30,7 @@ use FluxErp\States\Order\OrderState;
 use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
 use FluxErp\States\Order\PaymentState\InPayment;
 use FluxErp\States\Order\PaymentState\Open;
+use FluxErp\States\Order\PaymentState\Overpaid;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\States\Order\PaymentState\PartialPaid;
 use FluxErp\States\Order\PaymentState\PaymentState;
@@ -633,6 +635,12 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ->using(OrderSchedule::class);
     }
 
+    public function supplementedProjects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'order_project')
+            ->using(OrderProject::class);
+    }
+
     public function tasks(): HasManyThrough
     {
         return $this->hasManyThrough(Task::class, Project::class);
@@ -809,32 +817,35 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     public function calculatePaymentState(): static
     {
-        if (! $this->transactions()->exists() && ! $this->ledgerBookings()->exists()) {
-            // Don't reset to Open if order is in a payment run state
-            // Payment run lifecycle manages InOpenPaymentRun and InPayment
-            if (
-                ! $this->payment_state instanceof InOpenPaymentRun
-                && ! $this->payment_state instanceof InPayment
-                && $this->payment_state->canTransitionTo(Open::class)
-            ) {
-                $this->payment_state->transitionTo(Open::class);
-            }
-        } else {
-            if (
-                bccomp(
-                    bcround($this->totalPaid(), 2),
-                    bcround($this->total_gross_price, 2),
-                    2
-                ) === 0
-            ) {
-                if ($this->payment_state->canTransitionTo(Paid::class)) {
-                    $this->payment_state->transitionTo(Paid::class);
-                }
-            } else {
-                if ($this->payment_state->canTransitionTo(PartialPaid::class)) {
-                    $this->payment_state->transitionTo(PartialPaid::class);
-                }
-            }
+        $paymentState = Open::class;
+
+        if ($this->transactions()->exists() || $this->ledgerBookings()->exists()) {
+            $totalPaid = bcround($this->totalPaid(), 2);
+            $totalGrossPrice = bcround($this->total_gross_price, 2);
+
+            $paymentState = match (true) {
+                bccomp($totalPaid, $totalGrossPrice, 2) === 0 => Paid::class,
+                // e.g. a payment and its charge back cancel each other out
+                bccomp($totalPaid, 0, 2) === 0 => Open::class,
+                bccomp($totalPaid, 0, 2) === bccomp($totalGrossPrice, 0, 2)
+                    && bccomp(bcabs($totalPaid), bcabs($totalGrossPrice), 2) === 1 => Overpaid::class,
+                default => PartialPaid::class,
+            };
+        }
+
+        // Don't reset to Open if order is in a payment run state
+        // Payment run lifecycle manages InOpenPaymentRun and InPayment
+        if (
+            ! (
+                $paymentState === Open::class
+                && (
+                    $this->payment_state instanceof InOpenPaymentRun
+                    || $this->payment_state instanceof InPayment
+                )
+            )
+            && $this->payment_state->canTransitionTo($paymentState)
+        ) {
+            $this->payment_state->transitionTo($paymentState);
         }
 
         $this->calculateBalance();

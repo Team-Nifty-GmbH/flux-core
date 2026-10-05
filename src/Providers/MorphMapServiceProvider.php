@@ -47,6 +47,7 @@ use FluxErp\Models\LeadState;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\LedgerBooking;
 use FluxErp\Models\Loan;
+use FluxErp\Models\LoanExtraRepayment;
 use FluxErp\Models\LoanInstallment;
 use FluxErp\Models\Location;
 use FluxErp\Models\Log;
@@ -98,6 +99,7 @@ use FluxErp\Models\Pivots\MediaFolderModel;
 use FluxErp\Models\Pivots\OrderPaymentRun;
 use FluxErp\Models\Pivots\OrderPositionStockPosting;
 use FluxErp\Models\Pivots\OrderPositionTask;
+use FluxErp\Models\Pivots\OrderProject;
 use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Pivots\OrderTypeTenant;
@@ -130,6 +132,8 @@ use FluxErp\Models\PurchaseInvoicePosition;
 use FluxErp\Models\PushSubscription;
 use FluxErp\Models\QueueMonitor;
 use FluxErp\Models\RecordOrigin;
+use FluxErp\Models\Resource;
+use FluxErp\Models\ResourceBooking;
 use FluxErp\Models\Role;
 use FluxErp\Models\Schedule;
 use FluxErp\Models\SepaMandate;
@@ -210,6 +214,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'ledger_account' => LedgerAccount::class,
             'ledger_booking' => LedgerBooking::class,
             'loan' => Loan::class,
+            'loan_extra_repayment' => LoanExtraRepayment::class,
             'loan_installment' => LoanInstallment::class,
             'location' => Location::class,
             'log' => Log::class,
@@ -245,6 +250,8 @@ class MorphMapServiceProvider extends ServiceProvider
             'push_subscription' => PushSubscription::class,
             'queue_monitor' => QueueMonitor::class,
             'record_origin' => RecordOrigin::class,
+            'resource' => Resource::class,
+            'resource_booking' => ResourceBooking::class,
             'role' => Role::class,
             'schedule' => Schedule::class,
             'sepa_mandate' => SepaMandate::class,
@@ -306,6 +313,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'order_payment_run' => OrderPaymentRun::class,
             'order_position_stock_posting' => OrderPositionStockPosting::class,
             'order_position_task' => OrderPositionTask::class,
+            'order_project' => OrderProject::class,
             'order_schedule' => OrderSchedule::class,
             'order_transaction' => OrderTransaction::class,
             'order_type_tenant' => OrderTypeTenant::class,

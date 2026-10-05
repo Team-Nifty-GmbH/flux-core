@@ -8,9 +8,9 @@ use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
 use FluxErp\Models\ProductCrossSelling;
+use FluxErp\Models\ProductProperty;
 use FluxErp\Models\Tag;
 use FluxErp\Models\VatRate;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Session;
 use Livewire\Livewire;
 
@@ -113,9 +113,8 @@ test('mount initializes component', function (): void {
 });
 
 test('mount with invalid id fails', function (): void {
-    $this->expectException(ModelNotFoundException::class);
-
-    Livewire::test(Product::class, ['id' => 999999]);
+    Livewire::test(Product::class, ['id' => 999999])
+        ->assertNotFound();
 });
 
 test('renders successfully', function (): void {
@@ -304,4 +303,77 @@ test('add supplier fills every column the pivot table carries', function (): voi
         ->not->toBeEmpty()
         ->and(data_get($component->get('product.suppliers'), '0'))
         ->toHaveKeys(array_merge($pivotFields, ['customer_number', 'main_address']));
+});
+
+test('the form shows the suppliers and properties the product owns', function (): void {
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
+    $contact->update(['main_address_id' => $address->getKey()]);
+    $this->product->suppliers()->attach($contact->getKey(), ['purchase_price' => 16.32]);
+
+    $property = ProductProperty::factory()->create();
+    $this->product->productProperties()->attach($property->getKey(), ['value' => 'Assam']);
+
+    $component = Livewire::test(Product::class, ['id' => $this->product->id])
+        ->assertOk();
+
+    expect(array_column($component->get('product.suppliers'), 'id'))
+        ->toBe([$contact->getKey()])
+        ->and(array_column($component->get('product.product_properties'), 'id'))
+        ->toBe([$property->getKey()]);
+});
+
+test('saving a product without changing anything keeps its own properties', function (): void {
+    $property = ProductProperty::factory()->create();
+    $this->product->productProperties()->attach($property->getKey(), [
+        'value' => 'keep me',
+        'is_inherited' => false,
+    ]);
+
+    expect($this->product->productProperties()->count())->toBe(1);
+
+    Livewire::test(Product::class, ['id' => $this->product->getKey()])
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($this->product->productProperties()->count())->toBe(1)
+        ->and($this->product->productProperties()->first()->pivot->value)->toBe('keep me');
+});
+
+test('the form exposes the supplier pivot values', function (): void {
+    $contact = Contact::factory()->create();
+    $this->product->suppliers()->attach($contact->getKey(), [
+        'supplier_product_number' => 'SUP-1',
+        'purchase_price' => 16.32,
+        'note' => 'keep me',
+    ]);
+
+    $supplier = data_get(
+        Livewire::test(Product::class, ['id' => $this->product->getKey()])->get('product.suppliers'),
+        '0'
+    );
+
+    expect($supplier['contact_id'])->toBe($contact->getKey())
+        ->and($supplier['supplier_product_number'])->toBe('SUP-1')
+        ->and((float) $supplier['purchase_price'])->toBe(16.32)
+        ->and($supplier['note'])->toBe('keep me');
+});
+
+test('saving a product without changing anything keeps its supplier values', function (): void {
+    $contact = Contact::factory()->create();
+    $this->product->suppliers()->attach($contact->getKey(), [
+        'supplier_product_number' => 'SUP-1',
+        'note' => 'keep me',
+    ]);
+
+    Livewire::test(Product::class, ['id' => $this->product->getKey()])
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    $pivot = $this->product->suppliers()->first()?->pivot;
+
+    expect($pivot?->supplier_product_number)->toBe('SUP-1')
+        ->and($pivot?->note)->toBe('keep me');
 });
