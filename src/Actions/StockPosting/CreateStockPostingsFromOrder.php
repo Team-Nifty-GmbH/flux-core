@@ -29,7 +29,7 @@ class CreateStockPostingsFromOrder extends FluxAction
             ->where('id', $this->data['id'])
             ->with([
                 'orderPositions' => fn ($query) => $query->where('is_free_text', false)
-                    ->select(['id', 'order_id', 'product_id', 'warehouse_id', 'amount']),
+                    ->select(['id', 'order_id', 'product_id', 'warehouse_id', 'amount', 'unit_net_price']),
                 'orderPositions.reservedStock',
                 'orderPositions.stockPostings',
                 'orderPositions.product:id,name,is_nos',
@@ -37,8 +37,12 @@ class CreateStockPostingsFromOrder extends FluxAction
             ])
             ->first(['id', 'order_type_id', 'order_number']);
 
+        if (! $order->orderType->order_type_enum->postsStock()) {
+            return true;
+        }
+
         $postStock = ! data_get($this->data, 'only_reserve_stock', false);
-        $multiplier = $order->orderType->order_type_enum->multiplier();
+        $postsStockIn = $order->orderType->order_type_enum->postsStockIn();
         $description = __(Str::headline($order->orderType->order_type_enum->value)) . ' ' . $order->order_number;
 
         foreach ($order->orderPositions as $orderPosition) {
@@ -52,7 +56,7 @@ class CreateStockPostingsFromOrder extends FluxAction
             $open = bcsub($orderPosition->amount, $posting);
 
             // Handle Purchase Orders and alike.
-            if ($multiplier === -1 && $postStock) {
+            if ($postsStockIn && $postStock) {
                 CreateStockPosting::make([
                     'warehouse_id' => $orderPosition->warehouse_id,
                     'product_id' => $orderPosition->product_id,
@@ -66,7 +70,7 @@ class CreateStockPostingsFromOrder extends FluxAction
                     ->execute();
 
                 continue;
-            } elseif ($multiplier === -1) {
+            } elseif ($postsStockIn) {
                 continue;
             }
 
@@ -105,6 +109,7 @@ class CreateStockPostingsFromOrder extends FluxAction
                 ->where('product_id', $orderPosition->product_id)
                 ->where('warehouse_id', $orderPosition->warehouse_id)
                 ->where('remaining_stock', '>', 0)
+                ->orderBy('id')
                 ->get(['id', 'remaining_stock', 'reserved_stock', 'purchase_price']);
 
             if ($postStock) {
