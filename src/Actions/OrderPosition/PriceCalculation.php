@@ -138,10 +138,10 @@ class PriceCalculation
             ->where('posting', '>', 0)
             ->whereNotNull('purchase_price')
             ->orderByDesc('id')
-            ->first(['id', 'posting', 'purchase_price']);
+            ->first(['id', 'purchase_price']);
 
         if ($stockPosting) {
-            $this->orderPosition->purchase_price = bcdiv($stockPosting->purchase_price, $stockPosting->posting, 9);
+            $this->orderPosition->purchase_price = $stockPosting->purchase_price;
 
             return;
         }

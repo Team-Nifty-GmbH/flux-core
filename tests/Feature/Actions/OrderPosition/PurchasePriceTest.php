@@ -127,7 +127,7 @@ test('the last purchase booked into stock beats every other price', function ():
         'product_id' => $this->product->getKey(),
         'posting' => 4,
         'remaining_stock' => 4,
-        'purchase_price' => 40,
+        'purchase_price' => 10,
     ]);
 
     expect(bcround(($this->addPosition)()->purchase_price, 2))->toEqual('10.00');
