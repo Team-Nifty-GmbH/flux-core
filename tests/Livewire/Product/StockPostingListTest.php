@@ -219,6 +219,15 @@ test('transfer fails when the source bin holds too little stock', function (): v
     ]);
 });
 
+test('transfer validation errors land on the transfer form fields', function (): void {
+    Livewire::test(StockPostingList::class, ['productId' => $this->product->getKey()])
+        ->call('transfer')
+        ->call('saveTransfer')
+        ->assertOk()
+        ->assertReturned(false)
+        ->assertHasErrors('stockTransfer.amount');
+});
+
 test('the bin selects send search fields so the search endpoint accepts them', function (): void {
     $html = html_entity_decode(
         Livewire::test(StockPostingList::class, ['productId' => $this->product->getKey()])

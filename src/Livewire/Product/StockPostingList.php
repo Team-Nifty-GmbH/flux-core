@@ -119,7 +119,7 @@ class StockPostingList extends BaseStockPostingList
                 ->validate()
                 ->execute();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->stockTransfer);
 
             return false;
         }
