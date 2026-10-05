@@ -146,12 +146,13 @@ test('the warehouse strategy is used when the product has none', function (): vo
     expect($allocation[0]['stockPosting']->getKey())->toBe($second->getKey());
 });
 
-test('an empty storage area scope allocates nothing', function (): void {
-    ($this->layer)(10);
+test('an empty storage area scope does not restrict the allocation', function (): void {
+    $layer = ($this->layer)(10);
 
     $allocation = ($this->allocator)()->inStorageAreas([])->allocate(10);
 
-    expect($allocation)->toHaveCount(0);
+    expect($allocation)->toHaveCount(1)
+        ->and($allocation[0]['stockPosting']->getKey())->toBe($layer->getKey());
 });
 
 test('allocating zero returns an empty collection without touching any layer', function (): void {
@@ -160,4 +161,22 @@ test('allocating zero returns an empty collection without touching any layer', f
     $allocation = ($this->allocator)()->allocate(0);
 
     expect($allocation)->toHaveCount(0);
+});
+
+test('the constructor takes the same scope as the fluent setters', function (): void {
+    $wanted = StorageArea::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+    $other = StorageArea::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+
+    $inWanted = ($this->layer)(10, ['storage_area_id' => $wanted->getKey()]);
+    ($this->layer)(10, ['storage_area_id' => $other->getKey()]);
+
+    $allocation = StockAllocator::make(
+        productId: $this->product->getKey(),
+        warehouseId: $this->warehouse->getKey(),
+        storageAreaIds: [$wanted->getKey()],
+    )->allocate(20);
+
+    expect($allocation)->toHaveCount(1)
+        ->and($allocation[0]['stockPosting']->getKey())->toBe($inWanted->getKey())
+        ->and(bccomp($allocation[0]['amount'], '10', 10))->toBe(0);
 });

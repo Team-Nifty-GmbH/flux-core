@@ -7,8 +7,8 @@ use FluxErp\Models\StockPosting;
 use FluxErp\Models\StorageArea;
 use FluxErp\Models\Warehouse;
 use FluxErp\Support\Stock\StockAllocator;
+use FluxErp\Tests\Fixtures\FallingShortStockAllocatorFixture;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
 uses(DatabaseTransactions::class);
@@ -267,13 +267,7 @@ test('an allocation that falls short between validation and execution is rejecte
         'posting' => 10,
     ]);
 
-    app()->bind(StockAllocator::class, fn () => new class() extends StockAllocator
-    {
-        public function allocate(string|int|float $amount): Collection
-        {
-            return parent::allocate(bcsub((string) $amount, '1', 10));
-        }
-    });
+    app()->bind(StockAllocator::class, FallingShortStockAllocatorFixture::class);
 
     expect(fn () => TransferStock::make([
         'warehouse_id' => $this->warehouse->getKey(),
