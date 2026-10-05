@@ -36,3 +36,35 @@ test('renders successfully', function (): void {
     Livewire::test(CurrentWorkTimeModel::class, ['employeeId' => $employee->getKey()])
         ->assertOk();
 });
+
+test('a work time model without fixed hours has no weekly target', function (): void {
+    $workTimeModel = app(WorkTimeModel::class)->create([
+        'name' => 'Aushilfe',
+        'weekly_hours' => 4,
+        'annual_vacation_days' => 0,
+        'overtime_compensation' => OvertimeCompensationEnum::None,
+        'has_fixed_hours' => false,
+        'is_active' => true,
+    ]);
+
+    $employee = app(Employee::class)->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'user_id' => $this->user->getKey(),
+        'firstname' => 'Test',
+        'lastname' => 'Employee',
+        'is_active' => true,
+    ]);
+
+    app(EmployeeWorkTimeModel::class)->create([
+        'employee_id' => $employee->getKey(),
+        'work_time_model_id' => $workTimeModel->getKey(),
+        'valid_from' => now()->subYear(),
+        'valid_until' => null,
+        'annual_vacation_days' => 0,
+    ]);
+
+    Livewire::test(CurrentWorkTimeModel::class, ['employeeId' => $employee->getKey()])
+        ->call('calculateSum')
+        ->assertSet('weeklyTarget', 0.0)
+        ->assertSet('subValue', __('No fixed hours'));
+});
