@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\Warehouse;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rulesets\Warehouse\CreateWarehouseRuleset;
 
@@ -24,5 +25,10 @@ class CreateWarehouse extends FluxAction
         $warehouse->save();
 
         return $warehouse->fresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->data['stock_removal_strategy_enum'] ??= StockRemovalStrategyEnum::Fifo->value;
     }
 }

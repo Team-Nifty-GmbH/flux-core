@@ -21,10 +21,10 @@ class UpdateStockPosting extends FluxAction
     public function performAction(): StockPosting
     {
         $stockPosting = resolve_static(StockPosting::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
 
-        $stockPosting->fill($this->data);
+        $stockPosting->fill($this->getData());
         $stockPosting->save();
 
         return $stockPosting->withoutRelations()->fresh();

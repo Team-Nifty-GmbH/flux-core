@@ -66,6 +66,30 @@ test('can update printer visibility', function (): void {
     expect($printer->refresh()->is_visible)->toBeTrue();
 });
 
+test('can delete a single printer', function (): void {
+    $printer = Printer::query()->create([
+        'name' => 'Gone Printer',
+        'spooler_name' => 'test-spooler',
+        'media_sizes' => ['A4'],
+        'is_active' => true,
+    ]);
+    $other = Printer::query()->create([
+        'name' => 'Other Printer',
+        'spooler_name' => 'test-spooler',
+        'media_sizes' => ['A4'],
+        'is_active' => true,
+    ]);
+
+    Livewire::test(Printers::class)
+        ->call('delete', $printer->getKey())
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect(Printer::query()->whereKey($printer->getKey())->exists())->toBeFalse();
+    expect(Printer::query()->whereKey($other->getKey())->exists())->toBeTrue();
+});
+
 test('can delete spooler and associated printers', function (): void {
     $spoolerName = 'test-spooler-delete';
 

@@ -54,9 +54,11 @@ class CurrentWorkTimeModel extends ValueBox implements HasApiResponse
         $dailyWorkHours = $workTimeModel->getDailyWorkHours();
 
         $this->sum = Number::format($dailyWorkHours, 2) . 'h';
-        $this->subValue = __(':days days per week', ['days' => $workTimeModel->work_days_per_week]);
+        $this->subValue = $workTimeModel->has_fixed_hours
+            ? __(':days days per week', ['days' => $workTimeModel->work_days_per_week])
+            : __('No fixed hours');
         $this->dailyTarget = (float) $dailyWorkHours;
-        $this->weeklyTarget = (float) $workTimeModel->weekly_hours;
+        $this->weeklyTarget = $workTimeModel->has_fixed_hours ? (float) $workTimeModel->weekly_hours : 0.0;
     }
 
     protected function apiResponseProperties(): array
