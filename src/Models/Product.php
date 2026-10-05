@@ -398,15 +398,26 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         ];
     }
 
-    public function purchasePrice(float|int|null $amount = 1): ?Price
+    public function purchasePrice(): ?string
     {
-        return $amount
+        $supplierPrices = $this->suppliers()
+            ->wherePivotNotNull('purchase_price')
+            ->pluck('product_supplier.purchase_price');
+
+        if ($supplierPrices->count() === 1) {
+            return $supplierPrices->first();
+        }
+
+        $purchasePriceList = resolve_static(PriceList::class, 'query')
+            ->where('is_purchase', true)
+            ->first();
+
+        return $purchasePriceList
             ? PriceHelper::make($this)
-                ->setPriceList(resolve_static(PriceList::class, 'query')
-                    ->where('is_purchase', true)
-                    ->first()
-                )
+                ->setPriceList($purchasePriceList)
+                ->useDefault(false)
                 ->price()
+                ?->getNet($this->vatRate?->rate_percentage)
             : null;
     }
 
