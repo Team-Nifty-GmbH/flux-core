@@ -111,6 +111,7 @@ class CreateStockPostingsFromOrder extends FluxAction
                 ->where('product_id', $orderPosition->product_id)
                 ->where('warehouse_id', $orderPosition->warehouse_id)
                 ->where('remaining_stock', '>', 0)
+                ->orderBy('id')
                 ->get(['id', 'posting', 'remaining_stock', 'reserved_stock', 'purchase_price']);
 
             if ($postStock) {
@@ -272,6 +273,6 @@ class CreateStockPostingsFromOrder extends FluxAction
             return null;
         }
 
-        return bcmul(bcdiv($stockPosting->purchase_price, $stockPosting->posting, 9), $posting, 9);
+        return bcdiv(bcmul($stockPosting->purchase_price, $posting, 10), $stockPosting->posting, 10);
     }
 }

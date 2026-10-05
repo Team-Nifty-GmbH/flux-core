@@ -131,6 +131,28 @@ test('posting reserved stock books the share of the purchase price', function ()
         ->and($stock->refresh()->remaining_stock)->toEqual(1);
 });
 
+test('taking out a whole posting books its full purchase price', function (): void {
+    $stock = StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'posting' => 3,
+        'remaining_stock' => 3,
+        'reserved_stock' => 0,
+        'purchase_price' => 10,
+    ]);
+    $order = ($this->makeOrder)(OrderTypeEnum::Order, '3');
+
+    CreateStockPostingsFromOrder::make(['id' => $order->getKey()])
+        ->validate()
+        ->execute();
+
+    $withdrawal = StockPosting::query()
+        ->where('parent_id', $stock->getKey())
+        ->sole();
+
+    expect($withdrawal->purchase_price)->toEqual(-10);
+});
+
 test('a retoure books its amount back into stock', function (): void {
     $order = ($this->makeOrder)(OrderTypeEnum::Retoure, '2');
 
