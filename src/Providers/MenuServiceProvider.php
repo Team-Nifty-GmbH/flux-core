@@ -102,7 +102,7 @@ class MenuServiceProvider extends ServiceProvider
             }
         );
 
-        Menu::register(route: 'resources.resources', icon: 'cube', label: 'Resources');
+        Menu::register(route: 'resources.resources', icon: 'cube', label: 'Resources', path: 'resources');
 
         Menu::group(
             path: 'human-resources',
