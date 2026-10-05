@@ -340,3 +340,40 @@ test('saving a product without changing anything keeps its own properties', func
     expect($this->product->productProperties()->count())->toBe(1)
         ->and($this->product->productProperties()->first()->pivot->value)->toBe('keep me');
 });
+
+test('the form exposes the supplier pivot values', function (): void {
+    $contact = Contact::factory()->create();
+    $this->product->suppliers()->attach($contact->getKey(), [
+        'supplier_product_number' => 'SUP-1',
+        'purchase_price' => 16.32,
+        'note' => 'keep me',
+    ]);
+
+    $supplier = data_get(
+        Livewire::test(Product::class, ['id' => $this->product->getKey()])->get('product.suppliers'),
+        '0'
+    );
+
+    expect($supplier['contact_id'])->toBe($contact->getKey())
+        ->and($supplier['supplier_product_number'])->toBe('SUP-1')
+        ->and((float) $supplier['purchase_price'])->toBe(16.32)
+        ->and($supplier['note'])->toBe('keep me');
+});
+
+test('saving a product without changing anything keeps its supplier values', function (): void {
+    $contact = Contact::factory()->create();
+    $this->product->suppliers()->attach($contact->getKey(), [
+        'supplier_product_number' => 'SUP-1',
+        'note' => 'keep me',
+    ]);
+
+    Livewire::test(Product::class, ['id' => $this->product->getKey()])
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    $pivot = $this->product->suppliers()->first()?->pivot;
+
+    expect($pivot?->supplier_product_number)->toBe('SUP-1')
+        ->and($pivot?->note)->toBe('keep me');
+});

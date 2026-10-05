@@ -115,6 +115,10 @@ class Project extends Component
                 ->isLivewireComponent()
                 ->wireModel('project.id')
                 ->text(__('Work Times')),
+            TabButton::make('project.orders')
+                ->isLivewireComponent()
+                ->wireModel('project.id')
+                ->text(__('Orders')),
             TabButton::make('project.dashboard')
                 ->isLivewireComponent()
                 ->wireModel('project.id')

@@ -50,6 +50,13 @@ class UpdateProjectRuleset extends FluxRuleset
             'progress' => 'integer|nullable|min:0|max:100',
             'time_budget' => 'nullable|regex:/[0-9]*:[0-5][0-9]/',
             'budget' => 'numeric|nullable|min:0',
+            'supplementary_orders' => 'array',
+            'supplementary_orders.*' => [
+                'required',
+                'integer',
+                'distinct',
+                app(ModelExists::class, ['model' => Order::class]),
+            ],
         ];
     }
 }

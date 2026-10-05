@@ -44,10 +44,7 @@ class TotalRevenue extends LineChart implements HasWidgetOptions
     #[Renderless]
     public function calculateChart(): void
     {
-        $query = resolve_static(Order::class, 'query')
-            ->whereNotNull('invoice_date')
-            ->whereNotNull('invoice_number')
-            ->revenue();
+        $query = $this->getRevenueQuery(resolve_static(Order::class, 'query'));
 
         $metric = Line::make($query)
             ->setDateColumn('invoice_date')
@@ -122,10 +119,7 @@ class TotalRevenue extends LineChart implements HasWidgetOptions
 
         SessionFilter::make(
             Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
-            fn (Builder $query) => $query
-                ->whereNotNull('invoice_date')
-                ->whereNotNull('invoice_number')
-                ->revenue()
+            fn (Builder $query) => $this->getRevenueQuery($query)
                 ->whereBetween('invoice_date', [$start, $end]),
             __(static::getLabel()) . ' ' .
             __('between :start and :end', ['start' => $start, 'end' => $end]),
@@ -141,5 +135,13 @@ class TotalRevenue extends LineChart implements HasWidgetOptions
             'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
                 . ',.OrderLocked' => 'calculateByTimeFrame',
         ];
+    }
+
+    protected function getRevenueQuery(Builder $query): Builder
+    {
+        return $query
+            ->whereNotNull('invoice_date')
+            ->whereNotNull('invoice_number')
+            ->revenue();
     }
 }
