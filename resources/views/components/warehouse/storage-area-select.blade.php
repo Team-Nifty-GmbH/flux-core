@@ -12,11 +12,11 @@
 @php
     $where = [];
 
-    if ($warehouseId !== null) {
+    if (! is_null($warehouseId)) {
         $where[] = ['warehouse_id', '=', $warehouseId];
     }
 
-    if ($excludeId !== null) {
+    if (! is_null($excludeId)) {
         $where[] = ['id', '!=', $excludeId];
     }
 

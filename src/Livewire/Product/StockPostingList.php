@@ -7,7 +7,6 @@ use FluxErp\Actions\StockPosting\TransferStock;
 use FluxErp\Livewire\DataTables\StockPostingList as BaseStockPostingList;
 use FluxErp\Livewire\Forms\StockPostingForm;
 use FluxErp\Livewire\Forms\StockTransferForm;
-use FluxErp\Models\Lot;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumberRange;
@@ -27,6 +26,9 @@ class StockPostingList extends BaseStockPostingList
     public bool $hasSerialNumbers = false;
 
     #[Locked]
+    public bool $isLotTracked = false;
+
+    #[Locked]
     public int $productId;
 
     public StockPostingForm $stockPosting;
@@ -40,9 +42,12 @@ class StockPostingList extends BaseStockPostingList
 
     public function mount(): void
     {
-        $this->hasSerialNumbers = resolve_static(Product::class, 'query')
+        $product = resolve_static(Product::class, 'query')
             ->whereKey($this->productId)
-            ->value('has_serial_numbers');
+            ->first(['id', 'has_serial_numbers', 'is_lot_tracked']);
+
+        $this->hasSerialNumbers = (bool) $product?->has_serial_numbers;
+        $this->isLotTracked = (bool) $product?->is_lot_tracked;
 
         parent::mount();
     }
@@ -196,11 +201,6 @@ class StockPostingList extends BaseStockPostingList
         $viewData = [
             'warehouses' => resolve_static(Warehouse::class, 'query')
                 ->get(['id', 'name'])
-                ->toArray(),
-            'lots' => resolve_static(Lot::class, 'query')
-                ->where('product_id', $this->productId)
-                ->whereNull('blocked_at')
-                ->get(['id', 'lot_number'])
                 ->toArray(),
         ];
 

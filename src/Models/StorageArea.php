@@ -47,8 +47,11 @@ class StorageArea extends FluxModel implements InteractsWithDataTables, Sortable
             return null;
         }
 
-        return collect(StorageAreaTypeEnum::valuesLocalized())
-            ->firstWhere('value', $this->storage_area_type_enum->value)['label'] ?? null;
+        return data_get(
+            collect(StorageAreaTypeEnum::valuesLocalized())
+                ->firstWhere('value', $this->storage_area_type_enum->value),
+            'label'
+        );
     }
 
     public function getLabel(): ?string

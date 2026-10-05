@@ -5,16 +5,14 @@ namespace FluxErp\Livewire\Product;
 use FluxErp\Livewire\DataTables\StockPostingList as BaseStockPostingList;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Url;
-use Livewire\Attributes\Validate;
 
 class ExpiringStockList extends BaseStockPostingList
 {
-    public const DAYS_RULES = 'required|integer|min:1|max:3650';
+    protected const DAYS_RULES = 'required|integer|min:1|max:3650';
 
-    public const DEFAULT_DAYS = 30;
+    protected const DEFAULT_DAYS = 30;
 
     #[Url]
-    #[Validate(self::DAYS_RULES)]
     public int $days = self::DEFAULT_DAYS;
 
     public array $enabledCols = [
@@ -37,8 +35,6 @@ class ExpiringStockList extends BaseStockPostingList
 
     public function updatedDays(): void
     {
-        $this->validateOnly('days');
-
         $this->loadData();
     }
 

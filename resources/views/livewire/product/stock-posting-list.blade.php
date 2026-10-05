@@ -52,12 +52,25 @@
                     :hint="__('Only storage areas marked as storage location can hold stock')"
                 />
             </div>
-            <x-select.styled
-                wire:model="stockPosting.lot_id"
-                :label="__('Lot')"
-                select="label:lot_number|value:id"
-                :options="$lots"
-            />
+            @if ($isLotTracked)
+                <x-select.styled
+                    wire:model="stockPosting.lot_id"
+                    :label="__('Lot')"
+                    select="label:lot_number|value:id"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\Lot::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'searchFields' => ['lot_number'],
+                            'where' => [
+                                ['product_id', '=', $productId],
+                            ],
+                            'whereNull' => ['blocked_at'],
+                        ],
+                    ]"
+                />
+            @endif
             <x-number
                 wire:model="stockPosting.posting"
                 :label="__('Posting')"
@@ -148,12 +161,25 @@
                     :hint="__('Only storage areas marked as storage location can hold stock')"
                 />
             </div>
-            <x-select.styled
-                wire:model="stockTransfer.lot_id"
-                :label="__('Lot')"
-                select="label:lot_number|value:id"
-                :options="$lots"
-            />
+            @if ($isLotTracked)
+                <x-select.styled
+                    wire:model="stockTransfer.lot_id"
+                    :label="__('Lot')"
+                    select="label:lot_number|value:id"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\Lot::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'searchFields' => ['lot_number'],
+                            'where' => [
+                                ['product_id', '=', $productId],
+                            ],
+                            'whereNull' => ['blocked_at'],
+                        ],
+                    ]"
+                />
+            @endif
             <x-number wire:model="stockTransfer.amount" :label="__('Amount')" />
             <x-textarea
                 wire:model="stockTransfer.description"

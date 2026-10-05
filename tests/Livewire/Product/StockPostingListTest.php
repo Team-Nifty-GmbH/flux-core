@@ -131,13 +131,35 @@ test('can save stock posting with bin and lot', function (): void {
     ]);
 });
 
-test('view data lists only the lots of the product', function (): void {
+test('mount detects lot tracking', function (): void {
+    $lotTrackedProduct = Product::factory()
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
+        ->create(['is_lot_tracked' => true]);
+
+    Livewire::test(StockPostingList::class, ['productId' => $lotTrackedProduct->getKey()])
+        ->assertSet('isLotTracked', true);
+});
+
+test('mount detects no lot tracking', function (): void {
+    Livewire::test(StockPostingList::class, ['productId' => $this->product->getKey()])
+        ->assertSet('isLotTracked', false);
+});
+
+test('lot search lists only the unblocked lots of the product', function (): void {
     $lot = Lot::factory()->create(['product_id' => $this->product->getKey()]);
+    Lot::factory()->blocked()->create(['product_id' => $this->product->getKey()]);
     Lot::factory()->create(['product_id' => Product::factory()]);
 
-    Livewire::test(StockPostingList::class, ['productId' => $this->product->getKey()])
+    $this->post(route('search', Lot::class), [
+        'searchFields' => ['lot_number'],
+        'where' => [
+            ['product_id', '=', $this->product->getKey()],
+        ],
+        'whereNull' => ['blocked_at'],
+    ])
         ->assertOk()
-        ->assertViewHas('lots', fn (array $lots): bool => array_column($lots, 'id') === [$lot->getKey()]);
+        ->assertJsonCount(1)
+        ->assertJsonFragment(['id' => $lot->getKey()]);
 });
 
 test('transfer resets form and opens modal', function (): void {

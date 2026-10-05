@@ -6,6 +6,7 @@
                 where: [
                     ['warehouse_id', '=', $wire.storageArea.warehouse_id],
                     ['id', '!=', $wire.storageArea.id],
+                    ['is_active', '=', true],
                 ],
             });
         },

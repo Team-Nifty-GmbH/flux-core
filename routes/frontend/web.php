@@ -356,6 +356,7 @@ Route::middleware('web')
                         Route::get('/search-settings', SearchSettings::class)->name('search-settings');
                         Route::get('/security-settings', SecuritySettings::class)->name('security-settings');
                         Route::get('/serial-number-ranges', SerialNumberRanges::class)->name('serial-number-ranges');
+                        Route::get('/storage-areas', StorageAreas::class)->name('storage-areas');
                         Route::get('/subscription-settings', SubscriptionSettings::class)->name('subscription-settings');
                         Route::get('/system', System::class)->name('system');
                         Route::get('/tags', Tags::class)->name('tags');
@@ -370,7 +371,6 @@ Route::middleware('web')
                         Route::get('/vacation-blackouts', VacationBlackouts::class)->name('vacation-blackouts');
                         Route::get('/vacation-carryover-rules', VacationCarryoverRules::class)->name('vacation-carryover-rules');
                         Route::get('/vat-rates', VatRates::class)->name('vat-rates');
-                        Route::get('/storage-areas', StorageAreas::class)->name('storage-areas');
                         Route::get('/warehouses', Warehouses::class)->name('warehouses');
                         Route::get('/work-time-model/{id}', WorkTimeModel::class)->name('work-time-model')
                             ->metadata(['model' => 'work_time_model']);
