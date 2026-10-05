@@ -3,8 +3,10 @@
 namespace FluxErp\Livewire\Product;
 
 use FluxErp\Actions\StockPosting\CreateStockPosting;
+use FluxErp\Actions\StockPosting\TransferStock;
 use FluxErp\Livewire\DataTables\StockPostingList as BaseStockPostingList;
 use FluxErp\Livewire\Forms\StockPostingForm;
+use FluxErp\Livewire\Forms\StockTransferForm;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumberRange;
@@ -24,9 +26,14 @@ class StockPostingList extends BaseStockPostingList
     public bool $hasSerialNumbers = false;
 
     #[Locked]
+    public bool $isLotTracked = false;
+
+    #[Locked]
     public int $productId;
 
     public StockPostingForm $stockPosting;
+
+    public StockTransferForm $stockTransfer;
 
     #[Modelable]
     public ?int $warehouseId = null;
@@ -35,9 +42,12 @@ class StockPostingList extends BaseStockPostingList
 
     public function mount(): void
     {
-        $this->hasSerialNumbers = resolve_static(Product::class, 'query')
+        $product = resolve_static(Product::class, 'query')
             ->whereKey($this->productId)
-            ->value('has_serial_numbers');
+            ->first(['id', 'has_serial_numbers', 'is_lot_tracked']);
+
+        $this->hasSerialNumbers = (bool) $product?->has_serial_numbers;
+        $this->isLotTracked = (bool) $product?->is_lot_tracked;
 
         parent::mount();
     }
@@ -51,6 +61,12 @@ class StockPostingList extends BaseStockPostingList
                 ->color('indigo')
                 ->wireClick('create()')
                 ->when(resolve_static(CreateStockPosting::class, 'canPerformAction', [false])),
+            DataTableButton::make()
+                ->text(__('Transfer Stock'))
+                ->icon('arrows-right-left')
+                ->color('indigo')
+                ->wireClick('transfer()')
+                ->when(resolve_static(TransferStock::class, 'canPerformAction', [false])),
         ];
     }
 
@@ -73,7 +89,7 @@ class StockPostingList extends BaseStockPostingList
     {
         $this->stockPosting->reset();
         $this->stockPosting->warehouse_id =
-            $this->warehouseId ?? resolve_static(Warehouse::class, 'default')->getKey();
+            $this->warehouseId ?? resolve_static(Warehouse::class, 'default')?->getKey();
 
         $this->modalOpen('create-stock-posting-modal');
     }
@@ -98,6 +114,36 @@ class StockPostingList extends BaseStockPostingList
         $this->dispatch('loadData')->to('product.warehouse-list');
 
         return true;
+    }
+
+    public function saveTransfer(): bool
+    {
+        try {
+            TransferStock::make($this->stockTransfer->toActionData())
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this, form: $this->stockTransfer);
+
+            return false;
+        }
+
+        $this->loadData();
+        $this->dispatch('loadData')->to('product.warehouse-list');
+
+        return true;
+    }
+
+    #[Renderless]
+    public function transfer(): void
+    {
+        $this->stockTransfer->reset();
+        $this->stockTransfer->product_id = $this->productId;
+        $this->stockTransfer->warehouse_id =
+            $this->warehouseId ?? resolve_static(Warehouse::class, 'default')?->getKey();
+
+        $this->modalOpen('transfer-stock-modal');
     }
 
     public function updatedWarehouseId(): void

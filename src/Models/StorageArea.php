@@ -14,9 +14,11 @@ use FluxErp\Traits\Model\SortableTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 use Spatie\EloquentSortable\Sortable;
+use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class StorageArea extends FluxModel implements Sortable
+class StorageArea extends FluxModel implements InteractsWithDataTables, Sortable
 {
     use Filterable, HasPackageFactory, HasParentChildRelations, HasUserModification, HasUuid, LogsActivity,
         SoftDeletes, SortableTrait;
@@ -44,6 +46,31 @@ class StorageArea extends FluxModel implements Sortable
     public function warehouse(): BelongsTo
     {
         return $this->belongsTo(Warehouse::class, 'warehouse_id');
+    }
+
+    // Public methods
+    public function getAvatarUrl(): ?string
+    {
+        return null;
+    }
+
+    public function getDescription(): ?string
+    {
+        if (! $this->storage_area_type_enum) {
+            return null;
+        }
+
+        return __(Str::headline($this->storage_area_type_enum->value));
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->name ? $this->code . ' - ' . $this->name : $this->code;
+    }
+
+    public function getUrl(): ?string
+    {
+        return null;
     }
 
     // Scopes

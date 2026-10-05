@@ -1,7 +1,11 @@
 <?php
 
+use FluxErp\Enums\StorageAreaTypeEnum;
 use FluxErp\Livewire\Product\StockPostingList;
+use FluxErp\Models\Lot;
 use FluxErp\Models\Product;
+use FluxErp\Models\StockPosting;
+use FluxErp\Models\StorageArea;
 use FluxErp\Models\Warehouse;
 use Livewire\Livewire;
 
@@ -99,4 +103,163 @@ test('updated warehouse id sets user filters', function (): void {
     expect($filters)->not->toBeEmpty();
     expect($filters[0][0]['column'])->toEqual('warehouse_id');
     expect($filters[0][0]['value'])->toEqual($otherWarehouse->getKey());
+});
+
+test('can save stock posting with bin and lot', function (): void {
+    $storageArea = StorageArea::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'storage_area_type_enum' => StorageAreaTypeEnum::Container,
+        'is_storage_location' => true,
+    ]);
+    $lot = Lot::factory()->create(['product_id' => $this->product->getKey()]);
+
+    Livewire::test(StockPostingList::class, ['productId' => $this->product->getKey()])
+        ->call('create')
+        ->set('stockPosting.posting', 7)
+        ->set('stockPosting.storage_area_id', $storageArea->getKey())
+        ->set('stockPosting.lot_id', $lot->getKey())
+        ->call('save')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    $this->assertDatabaseHas('stock_postings', [
+        'product_id' => $this->product->getKey(),
+        'storage_area_id' => $storageArea->getKey(),
+        'lot_id' => $lot->getKey(),
+        'posting' => 7,
+    ]);
+});
+
+test('mount detects lot tracking', function (): void {
+    $lotTrackedProduct = Product::factory()
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
+        ->create(['is_lot_tracked' => true]);
+
+    Livewire::test(StockPostingList::class, ['productId' => $lotTrackedProduct->getKey()])
+        ->assertSet('isLotTracked', true);
+});
+
+test('mount detects no lot tracking', function (): void {
+    Livewire::test(StockPostingList::class, ['productId' => $this->product->getKey()])
+        ->assertSet('isLotTracked', false);
+});
+
+test('lot search lists only the unblocked lots of the product', function (): void {
+    $lot = Lot::factory()->create(['product_id' => $this->product->getKey()]);
+    Lot::factory()->blocked()->create(['product_id' => $this->product->getKey()]);
+    Lot::factory()->create(['product_id' => Product::factory()]);
+
+    $this->post(route('search', Lot::class), [
+        'searchFields' => ['lot_number'],
+        'where' => [
+            ['product_id', '=', $this->product->getKey()],
+        ],
+        'whereNull' => ['blocked_at'],
+    ])
+        ->assertOk()
+        ->assertJsonCount(1)
+        ->assertJsonFragment(['id' => $lot->getKey()]);
+});
+
+test('transfer resets form and opens modal', function (): void {
+    Livewire::test(StockPostingList::class, ['productId' => $this->product->getKey()])
+        ->call('transfer')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertSet('stockTransfer.product_id', $this->product->getKey())
+        ->assertSet('stockTransfer.warehouse_id', $this->warehouse->getKey())
+        ->assertSet('stockTransfer.from_storage_area_id', null)
+        ->assertOpensModal('transfer-stock-modal');
+});
+
+test('can transfer stock between bins', function (): void {
+    $source = StorageArea::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'storage_area_type_enum' => StorageAreaTypeEnum::Container,
+        'is_storage_location' => true,
+    ]);
+    $target = StorageArea::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'storage_area_type_enum' => StorageAreaTypeEnum::Container,
+        'is_storage_location' => true,
+    ]);
+
+    StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'storage_area_id' => $source->getKey(),
+        'posting' => 10,
+        'remaining_stock' => 10,
+    ]);
+
+    Livewire::test(StockPostingList::class, ['productId' => $this->product->getKey()])
+        ->call('transfer')
+        ->set('stockTransfer.from_storage_area_id', $source->getKey())
+        ->set('stockTransfer.to_storage_area_id', $target->getKey())
+        ->set('stockTransfer.amount', '4')
+        ->call('saveTransfer')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    $this->assertDatabaseHas('stock_postings', [
+        'storage_area_id' => $target->getKey(),
+        'product_id' => $this->product->getKey(),
+        'posting' => 4,
+    ]);
+    $this->assertDatabaseHas('stock_postings', [
+        'storage_area_id' => $source->getKey(),
+        'product_id' => $this->product->getKey(),
+        'posting' => -4,
+    ]);
+});
+
+test('transfer fails when the source bin holds too little stock', function (): void {
+    $source = StorageArea::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'storage_area_type_enum' => StorageAreaTypeEnum::Container,
+        'is_storage_location' => true,
+    ]);
+    $target = StorageArea::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'storage_area_type_enum' => StorageAreaTypeEnum::Container,
+        'is_storage_location' => true,
+    ]);
+
+    Livewire::test(StockPostingList::class, ['productId' => $this->product->getKey()])
+        ->call('transfer')
+        ->set('stockTransfer.from_storage_area_id', $source->getKey())
+        ->set('stockTransfer.to_storage_area_id', $target->getKey())
+        ->set('stockTransfer.amount', '5')
+        ->call('saveTransfer')
+        ->assertOk()
+        ->assertReturned(false);
+
+    $this->assertDatabaseMissing('stock_postings', [
+        'storage_area_id' => $target->getKey(),
+    ]);
+});
+
+test('transfer validation errors land on the transfer form fields', function (): void {
+    Livewire::test(StockPostingList::class, ['productId' => $this->product->getKey()])
+        ->call('transfer')
+        ->call('saveTransfer')
+        ->assertOk()
+        ->assertReturned(false)
+        ->assertHasErrors('stockTransfer.amount');
+});
+
+test('the bin selects send search fields so the search endpoint accepts them', function (): void {
+    $html = html_entity_decode(
+        Livewire::test(StockPostingList::class, ['productId' => $this->product->getKey()])
+            ->assertOk()
+            ->html()
+    );
+
+    expect(substr_count($html, 'searchFields'))->toBeGreaterThanOrEqual(6)
+        ->and(substr_count($html, __('Only storage areas marked as storage location can hold stock')))->toBe(2)
+        ->and($html)->toContain('stock-posting-storage-area-id')
+        ->and($html)->toContain('transfer-from-storage-area-id')
+        ->and($html)->toContain('transfer-to-storage-area-id');
 });

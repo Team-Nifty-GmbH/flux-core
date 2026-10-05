@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use DateTimeInterface;
 use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
@@ -83,14 +84,17 @@ class StockPosting extends FluxModel
             throw new InvalidArgumentException('The shelf life window must span at least one day');
         }
 
+        $query->expiringUntil(
+            today(config('flux.display_timezone') ?? config('app.timezone'))->addDays($days)
+        );
+    }
+
+    protected function scopeExpiringUntil(Builder $query, DateTimeInterface $date): void
+    {
         $query->where('remaining_stock', '>', 0)
             ->whereHas('lot', fn (Builder $query) => $query
                 ->whereNotNull('expires_at')
-                ->where(
-                    'expires_at',
-                    '<=',
-                    today(config('flux.display_timezone') ?? config('app.timezone'))->addDays($days)
-                )
+                ->whereDate('expires_at', '<=', $date)
             );
     }
 }

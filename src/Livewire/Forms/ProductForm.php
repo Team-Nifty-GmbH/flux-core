@@ -57,6 +57,8 @@ class ProductForm extends FluxForm
 
     public ?bool $is_highlight = false;
 
+    public ?bool $is_lot_tracked = false;
+
     public ?bool $is_nos = false;
 
     public ?bool $is_service = false;
@@ -72,6 +74,8 @@ class ProductForm extends FluxForm
     public ?int $min_delivery_time = null;
 
     public ?float $min_purchase = null;
+
+    public ?int $min_shelf_life_days = null;
 
     public ?string $name = null;
 
@@ -106,6 +110,8 @@ class ProductForm extends FluxForm
     public ?string $seo_keywords = null;
 
     public ?int $stock = null;
+
+    public ?string $stock_removal_strategy_enum = null;
 
     public array $suppliers = [];
 

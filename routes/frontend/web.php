@@ -56,6 +56,7 @@ use FluxErp\Livewire\Order\CreateChildOrder;
 use FluxErp\Livewire\Order\Order;
 use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Order\OrderListByOrderType;
+use FluxErp\Livewire\Product\ExpiringStockList;
 use FluxErp\Livewire\Product\Product;
 use FluxErp\Livewire\Product\ProductList;
 use FluxErp\Livewire\Product\SerialNumber\SerialNumber;
@@ -109,6 +110,7 @@ use FluxErp\Livewire\Settings\SearchSettings;
 use FluxErp\Livewire\Settings\SecuritySettings;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\Settings;
+use FluxErp\Livewire\Settings\StorageAreas;
 use FluxErp\Livewire\Settings\SubscriptionSettings;
 use FluxErp\Livewire\Settings\System;
 use FluxErp\Livewire\Settings\Tags;
@@ -246,6 +248,7 @@ Route::middleware('web')
 
                 Route::name('products.')->prefix('products')
                     ->group(function (): void {
+                        Route::get('/expiring-stock', ExpiringStockList::class)->name('expiring-stock');
                         Route::get('/list', ProductList::class)->name('products');
                         Route::get('/serial-numbers', SerialNumberList::class)->name('serial-numbers');
                         Route::get('/serial-numbers/{id?}', SerialNumber::class)->name('serial-numbers.id?')
@@ -361,6 +364,7 @@ Route::middleware('web')
                         Route::get('/search-settings', SearchSettings::class)->name('search-settings');
                         Route::get('/security-settings', SecuritySettings::class)->name('security-settings');
                         Route::get('/serial-number-ranges', SerialNumberRanges::class)->name('serial-number-ranges');
+                        Route::get('/storage-areas', StorageAreas::class)->name('storage-areas');
                         Route::get('/subscription-settings', SubscriptionSettings::class)->name('subscription-settings');
                         Route::get('/system', System::class)->name('system');
                         Route::get('/tags', Tags::class)->name('tags');
