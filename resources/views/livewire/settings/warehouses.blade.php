@@ -10,7 +10,7 @@
         <div class="mt-2">
             <x-toggle
                 wire:model.boolean="warehouse.requires_storage_area"
-                :label="__('Requires Bin Location')"
+                :label="__('Requires Storage Area')"
             />
         </div>
         <x-select.styled
