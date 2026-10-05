@@ -33,8 +33,10 @@ trait BuildsFlatTreeRows
             ->values();
 
         $records = $this->prepareFamilyTreeQuery(
-            resolve_static($this->getModel(), 'familyTree')->whereKey($rootIds)
-        )->get();
+            resolve_static($this->getModel(), 'familyTree')
+                ->whereKey($rootIds)
+        )
+            ->get();
 
         $modelsById = $this->collectModelsById($records);
 

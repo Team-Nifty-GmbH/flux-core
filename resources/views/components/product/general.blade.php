@@ -141,12 +141,13 @@
                     :options="$units"
                 />
             </x-flux::product.inheritance-indicator>
-            <x-select.styled
-                x-bind:readonly="!isEditing"
-                :label="__('Stock Removal Strategy')"
-                wire:model="product.stock_removal_strategy_enum"
-                :options="\FluxErp\Enums\StockRemovalStrategyEnum::valuesLocalized()"
-            />
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
+                <x-select.styled
+                    :label="__('Stock Removal Strategy')"
+                    wire:model="product.stock_removal_strategy_enum"
+                    :options="\FluxErp\Enums\StockRemovalStrategyEnum::valuesLocalized()"
+                />
+            </div>
             <x-number
                 x-bind:readonly="!isEditing"
                 :label="__('Min Shelf Life Days')"

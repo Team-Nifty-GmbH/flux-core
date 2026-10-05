@@ -1,6 +1,6 @@
 <div
     x-data="{
-        setBinSearch() {
+        setStorageAreaSearch() {
             $tallstackuiSelect(
                 'stock-posting-storage-area-id',
             ).mergeRequestParams({
@@ -12,16 +12,20 @@
                 ],
             });
         },
-        setTransferBinSearch() {
+        setTransferStorageAreaSearch() {
             const where = [
                 ['warehouse_id', '=', $wire.stockTransfer.warehouse_id],
                 ['is_active', '=', true],
             ];
-            $tallstackuiSelect('transfer-from-bin-id').mergeRequestParams({
+            $tallstackuiSelect(
+                'transfer-from-storage-area-id',
+            ).mergeRequestParams({
                 searchFields: ['code', 'name'],
                 where,
             });
-            $tallstackuiSelect('transfer-to-bin-id').mergeRequestParams({
+            $tallstackuiSelect(
+                'transfer-to-storage-area-id',
+            ).mergeRequestParams({
                 searchFields: ['code', 'name'],
                 where: [...where, ['is_storage_location', '=', true]],
             });
@@ -32,7 +36,7 @@
         id="create-stock-posting-modal"
         x-on:open="
             $tallstackuiSelect('stock-posting-storage-area-id').clear();
-            setBinSearch();
+            setStorageAreaSearch();
         "
     >
         <div class="flex flex-col gap-1.5">
@@ -41,7 +45,7 @@
                 :label="__('Warehouse')"
                 required
                 select="label:name|value:id"
-                x-on:select="setBinSearch()"
+                x-on:select="setStorageAreaSearch()"
                 :options="$warehouses"
             />
             <div id="stock-posting-storage-area-id">
@@ -128,9 +132,9 @@
     <x-modal
         id="transfer-stock-modal"
         x-on:open="
-            $tallstackuiSelect('transfer-from-bin-id').clear();
-            $tallstackuiSelect('transfer-to-bin-id').clear();
-            setTransferBinSearch();
+            $tallstackuiSelect('transfer-from-storage-area-id').clear();
+            $tallstackuiSelect('transfer-to-storage-area-id').clear();
+            setTransferStorageAreaSearch();
         "
         :title="__('Transfer Stock')"
     >
@@ -140,10 +144,10 @@
                 :label="__('Warehouse')"
                 required
                 select="label:name|value:id"
-                x-on:select="setTransferBinSearch()"
+                x-on:select="setTransferStorageAreaSearch()"
                 :options="$warehouses"
             />
-            <div id="transfer-from-bin-id">
+            <div id="transfer-from-storage-area-id">
                 <x-flux::warehouse.storage-area-select
                     model="stockTransfer.from_storage_area_id"
                     :label="__('Source Storage Area')"
@@ -151,7 +155,7 @@
                     required
                 />
             </div>
-            <div id="transfer-to-bin-id">
+            <div id="transfer-to-storage-area-id">
                 <x-flux::warehouse.storage-area-select
                     model="stockTransfer.to_storage_area_id"
                     :label="__('Target Storage Area')"

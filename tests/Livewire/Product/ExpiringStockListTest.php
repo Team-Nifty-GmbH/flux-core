@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Product\ExpiringStockList;
 use FluxErp\Models\Lot;
 use FluxErp\Models\Product;
@@ -8,6 +9,8 @@ use FluxErp\Models\Warehouse;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
+    $this->travelTo(now()->setDate(2026, 10, 7)->startOfDay()->addHours(10));
+
     $this->warehouse = Warehouse::factory()->create();
     $this->product = Product::factory()->create();
 
@@ -32,7 +35,7 @@ test('renders successfully', function (): void {
         ->assertOk();
 });
 
-test('lists only layers expiring inside the default window', function (): void {
+test('lists only layers expiring this month by default', function (): void {
     $soon = ($this->layerExpiringIn)(10);
     ($this->layerExpiringIn)(90);
 
@@ -50,6 +53,7 @@ test('a negative window is clamped to a one day minimum', function (): void {
     ($this->layerExpiringIn)(90);
 
     $rows = Livewire::test(ExpiringStockList::class)
+        ->set('timeFrame', TimeFrameEnum::Custom)
         ->set('days', -5)
         ->call('loadData')
         ->assertOk()
@@ -64,6 +68,7 @@ test('widening the window brings in later layers', function (): void {
     $later = ($this->layerExpiringIn)(90);
 
     $rows = Livewire::test(ExpiringStockList::class)
+        ->set('timeFrame', TimeFrameEnum::Custom)
         ->set('days', 120)
         ->call('loadData')
         ->assertOk()
@@ -73,4 +78,25 @@ test('widening the window brings in later layers', function (): void {
     expect(array_column($rows, 'id'))
         ->toContain($soon->getKey())
         ->toContain($later->getKey());
+});
+
+test('this week lists only layers expiring before the week ends', function (): void {
+    $thisWeek = ($this->layerExpiringIn)(3);
+    ($this->layerExpiringIn)(7);
+
+    $rows = Livewire::test(ExpiringStockList::class)
+        ->set('timeFrame', TimeFrameEnum::ThisWeek)
+        ->call('loadData')
+        ->assertOk()
+        ->instance()
+        ->getDataForTesting()['data'];
+
+    expect(array_column($rows, 'id'))->toBe([$thisWeek->getKey()]);
+});
+
+test('an unknown time frame falls back to this month', function (): void {
+    Livewire::test(ExpiringStockList::class)
+        ->set('timeFrame', TimeFrameEnum::LastYear)
+        ->call('loadData')
+        ->assertSet('timeFrame', TimeFrameEnum::ThisMonth);
 });

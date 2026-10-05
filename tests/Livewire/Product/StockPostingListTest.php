@@ -260,6 +260,6 @@ test('the bin selects send search fields so the search endpoint accepts them', f
     expect(substr_count($html, 'searchFields'))->toBeGreaterThanOrEqual(6)
         ->and(substr_count($html, __('Only storage areas marked as storage location can hold stock')))->toBe(2)
         ->and($html)->toContain('stock-posting-storage-area-id')
-        ->and($html)->toContain('transfer-from-bin-id')
-        ->and($html)->toContain('transfer-to-bin-id');
+        ->and($html)->toContain('transfer-from-storage-area-id')
+        ->and($html)->toContain('transfer-to-storage-area-id');
 });

@@ -17,7 +17,6 @@
             wire:model="warehouse.stock_removal_strategy_enum"
             :label="__('Stock Removal Strategy')"
             required
-            select="label:label|value:value"
             :options="\FluxErp\Enums\StockRemovalStrategyEnum::valuesLocalized()"
         />
     </div>

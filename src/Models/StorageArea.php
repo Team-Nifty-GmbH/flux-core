@@ -36,6 +36,18 @@ class StorageArea extends FluxModel implements InteractsWithDataTables, Sortable
         ];
     }
 
+    // Relations
+    public function stockPostings(): HasMany
+    {
+        return $this->hasMany(StockPosting::class, 'storage_area_id');
+    }
+
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class, 'warehouse_id');
+    }
+
+    // Public methods
     public function getAvatarUrl(): ?string
     {
         return null;
@@ -62,17 +74,6 @@ class StorageArea extends FluxModel implements InteractsWithDataTables, Sortable
     public function getUrl(): ?string
     {
         return null;
-    }
-
-    // Relations
-    public function stockPostings(): HasMany
-    {
-        return $this->hasMany(StockPosting::class, 'storage_area_id');
-    }
-
-    public function warehouse(): BelongsTo
-    {
-        return $this->belongsTo(Warehouse::class, 'warehouse_id');
     }
 
     // Scopes

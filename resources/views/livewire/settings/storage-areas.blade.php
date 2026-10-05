@@ -15,8 +15,9 @@
     <x-modal
         id="edit-storage-area-modal"
         x-on:open="
-            if (!$wire.storageArea.id)
+            if (!$wire.storageArea.id) {
                 $tallstackuiSelect('storage-area-parent-id').clear();
+            }
             setParentSearch();
             $tsui.focus('storage-area-code');
         "
