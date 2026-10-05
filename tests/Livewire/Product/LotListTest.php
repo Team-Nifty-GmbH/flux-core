@@ -103,3 +103,14 @@ test('save fails without lot number', function (): void {
         ->assertHasErrors(['lot.lot_number'])
         ->assertReturned(false);
 });
+
+test('editing a blocked lot fills blocked at in the datetime-local format', function (): void {
+    $lot = Lot::factory()->create([
+        'product_id' => $this->product->getKey(),
+        'blocked_at' => '2026-10-05 10:15:00',
+    ]);
+
+    Livewire::test(LotList::class, ['product' => ($this->productForm)()])
+        ->call('edit', $lot->getKey())
+        ->assertSet('lot.blocked_at', '2026-10-05T10:15');
+});
