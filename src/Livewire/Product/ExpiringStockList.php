@@ -42,22 +42,20 @@ class ExpiringStockList extends BaseStockPostingList
 
     public function booted(): void
     {
-        if (! in_array($this->timeFrame, static::TIME_FRAMES, true)) {
-            $this->timeFrame = TimeFrameEnum::ThisMonth;
-        }
-
-        if (validator(['days' => $this->days], ['days' => static::DAYS_RULES])->fails()) {
-            $this->days = static::DEFAULT_DAYS;
-        }
+        $this->resetInvalidWindow();
     }
 
     public function updatedDays(): void
     {
+        $this->resetInvalidWindow();
+
         $this->loadData();
     }
 
     public function updatedTimeFrame(): void
     {
+        $this->resetInvalidWindow();
+
         $this->loadData();
     }
 
@@ -73,5 +71,16 @@ class ExpiringStockList extends BaseStockPostingList
             TimeFrameEnum::ThisYear => $builder->expiringUntil($today->endOfYear()),
             default => $builder->expiringWithin($this->days),
         };
+    }
+
+    protected function resetInvalidWindow(): void
+    {
+        if (! in_array($this->timeFrame, static::TIME_FRAMES, true)) {
+            $this->timeFrame = TimeFrameEnum::ThisMonth;
+        }
+
+        if (validator(['days' => $this->days], ['days' => static::DAYS_RULES])->fails()) {
+            $this->days = static::DEFAULT_DAYS;
+        }
     }
 }
