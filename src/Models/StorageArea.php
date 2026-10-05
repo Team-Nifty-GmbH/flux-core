@@ -14,6 +14,7 @@ use FluxErp\Traits\Model\SortableTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 use Spatie\EloquentSortable\Sortable;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
@@ -59,11 +60,7 @@ class StorageArea extends FluxModel implements InteractsWithDataTables, Sortable
             return null;
         }
 
-        return data_get(
-            collect(StorageAreaTypeEnum::valuesLocalized())
-                ->firstWhere('value', $this->storage_area_type_enum->value),
-            'label'
-        );
+        return __(Str::headline($this->storage_area_type_enum->value));
     }
 
     public function getLabel(): ?string
