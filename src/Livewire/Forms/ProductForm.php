@@ -8,6 +8,7 @@ use FluxErp\Actions\Product\RestoreProduct;
 use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Models\Product;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
 
 class ProductForm extends FluxForm
@@ -147,7 +148,10 @@ class ProductForm extends FluxForm
                 'vatRate:id,rate_percentage',
             ]);
 
-            $values->append('avatar_url');
+            $values->setRelation('categories', $values->ownCategories)
+                ->setRelation('productProperties', $values->ownProductProperties)
+                ->setRelation('suppliers', $values->ownSuppliers)
+                ->append('avatar_url');
         }
 
         parent::fill($values);
@@ -168,6 +172,12 @@ class ProductForm extends FluxForm
                 'count' => $bundleProduct['pivot']['count'] ?? 0,
             ];
         }, $this->bundle_products);
+
+        // The supplier fields live on the pivot, the form binds and saves them flat.
+        $this->suppliers = array_map(
+            fn (array $supplier) => array_merge(Arr::except($supplier, 'pivot'), $supplier['pivot'] ?? []),
+            $this->suppliers
+        );
     }
 
     public function getProductModel(): ?Product

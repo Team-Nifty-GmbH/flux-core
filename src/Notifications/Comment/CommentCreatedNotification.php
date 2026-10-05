@@ -18,6 +18,13 @@ class CommentCreatedNotification extends SubscribableNotification implements Sho
 {
     use Queueable;
 
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->afterCommit = true;
+    }
+
     public static function sendsTo(): array
     {
         return array_merge(
@@ -60,6 +67,10 @@ class CommentCreatedNotification extends SubscribableNotification implements Sho
             $mail->introLines,
             new HtmlString('<span style="display: none">[flux:quote]</span>')
         );
+
+        foreach ($this->model->getMedia() as $media) {
+            $mail->attach($media);
+        }
 
         return $mail;
     }

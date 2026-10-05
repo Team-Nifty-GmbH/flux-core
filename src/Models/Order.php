@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Exception;
 use FluxErp\Actions\Order\UpdateOrder;
+use FluxErp\Actions\OrderPosition\PriceCalculation;
 use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Actions\Transaction\CreateTransaction;
 use FluxErp\Casts\Money;
@@ -19,6 +20,7 @@ use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Events\Order\OrderApprovalRequestEvent;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\OrderPaymentRun;
+use FluxErp\Models\Pivots\OrderProject;
 use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Pivots\OrderUser;
@@ -29,6 +31,7 @@ use FluxErp\States\Order\OrderState;
 use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
 use FluxErp\States\Order\PaymentState\InPayment;
 use FluxErp\States\Order\PaymentState\Open;
+use FluxErp\States\Order\PaymentState\Overpaid;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\States\Order\PaymentState\PartialPaid;
 use FluxErp\States\Order\PaymentState\PaymentState;
@@ -633,6 +636,12 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ->using(OrderSchedule::class);
     }
 
+    public function supplementedProjects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'order_project')
+            ->using(OrderProject::class);
+    }
+
     public function tasks(): HasManyThrough
     {
         return $this->hasManyThrough(Task::class, Project::class);
@@ -809,32 +818,35 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     public function calculatePaymentState(): static
     {
-        if (! $this->transactions()->exists() && ! $this->ledgerBookings()->exists()) {
-            // Don't reset to Open if order is in a payment run state
-            // Payment run lifecycle manages InOpenPaymentRun and InPayment
-            if (
-                ! $this->payment_state instanceof InOpenPaymentRun
-                && ! $this->payment_state instanceof InPayment
-                && $this->payment_state->canTransitionTo(Open::class)
-            ) {
-                $this->payment_state->transitionTo(Open::class);
-            }
-        } else {
-            if (
-                bccomp(
-                    bcround($this->totalPaid(), 2),
-                    bcround($this->total_gross_price, 2),
-                    2
-                ) === 0
-            ) {
-                if ($this->payment_state->canTransitionTo(Paid::class)) {
-                    $this->payment_state->transitionTo(Paid::class);
-                }
-            } else {
-                if ($this->payment_state->canTransitionTo(PartialPaid::class)) {
-                    $this->payment_state->transitionTo(PartialPaid::class);
-                }
-            }
+        $paymentState = Open::class;
+
+        if ($this->transactions()->exists() || $this->ledgerBookings()->exists()) {
+            $totalPaid = bcround($this->totalPaid(), 2);
+            $totalGrossPrice = bcround($this->total_gross_price, 2);
+
+            $paymentState = match (true) {
+                bccomp($totalPaid, $totalGrossPrice, 2) === 0 => Paid::class,
+                // e.g. a payment and its charge back cancel each other out
+                bccomp($totalPaid, 0, 2) === 0 => Open::class,
+                bccomp($totalPaid, 0, 2) === bccomp($totalGrossPrice, 0, 2)
+                    && bccomp(bcabs($totalPaid), bcabs($totalGrossPrice), 2) === 1 => Overpaid::class,
+                default => PartialPaid::class,
+            };
+        }
+
+        // Don't reset to Open if order is in a payment run state
+        // Payment run lifecycle manages InOpenPaymentRun and InPayment
+        if (
+            ! (
+                $paymentState === Open::class
+                && (
+                    $this->payment_state instanceof InOpenPaymentRun
+                    || $this->payment_state instanceof InPayment
+                )
+            )
+            && $this->payment_state->canTransitionTo($paymentState)
+        ) {
+            $this->payment_state->transitionTo($paymentState);
         }
 
         $this->calculateBalance();
@@ -845,12 +857,105 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     public function calculatePrices(): static
     {
         return $this
+            ->calculateShippingVat()
             ->calculateTotalNetPrice()
             ->calculateDiscounts()
             ->calculateTotalVats()
             ->calculateTotalGrossPrice()
             ->calculateMargin()
             ->when(! is_null($this->invoice_number), fn (Order $order) => $order->calculateBalance());
+    }
+
+    /**
+     * Shipping is an ancillary service and shares the vat rate of the goods it ships
+     * (Art. 78 VAT Directive, Abschn. 3.10 UStAE). Goods with mixed rates give the
+     * shipping a rate weighted by their net value and no vat_rate_id, so the vat totals
+     * split it over the rates of the goods. Without goods the shipping keeps the rate
+     * of its own product.
+     */
+    public function calculateShippingVat(): static
+    {
+        if ($this->invoice_number) {
+            return $this;
+        }
+
+        [$shippingPositions, $goods] = $this->orderPositions()
+            ->where('is_alternative', false)
+            ->where(fn (Builder $query) => $query
+                ->where('is_free_text', false)
+                ->orWhereDoesntHave('children')
+            )
+            ->whereNotNull('vat_rate_percentage')
+            ->with([
+                'product:id,parent_id,vat_rate_id,is_shipping_item',
+                'product.vatRate:id,rate_percentage',
+            ])
+            ->get()
+            ->partition(fn (OrderPosition $orderPosition): bool => (bool) $orderPosition->product?->is_shipping_item);
+
+        if ($shippingPositions->isEmpty()) {
+            return $this;
+        }
+
+        $netByVatRate = $goods
+            ->groupBy(
+                fn (OrderPosition $orderPosition): string => (string) (
+                    $orderPosition->vat_rate_id ?? $orderPosition->vat_rate_percentage
+                )
+            )
+            ->map(fn (Collection $positions): array => [
+                'net' => $positions->reduce(
+                    fn (string $carry, OrderPosition $orderPosition): string => bcadd(
+                        $carry,
+                        $orderPosition->total_net_price,
+                        9
+                    ),
+                    '0'
+                ),
+                'vat_rate_id' => $positions->first()->vat_rate_id,
+                'vat_rate_percentage' => $positions->first()->vat_rate_percentage,
+            ]);
+        $goodsNet = $netByVatRate
+            ->reduce(fn (string $carry, array $rate): string => bcadd($carry, $rate['net'], 9), '0');
+        $sharedVatRatePercentage = bccomp($goodsNet, 0, 9) === 0
+            ? null
+            : $netByVatRate->reduce(
+                fn (string $carry, array $rate): string => bcadd(
+                    $carry,
+                    bcmul(bcdiv($rate['net'], $goodsNet, 9), $rate['vat_rate_percentage'], 9),
+                    9
+                ),
+                '0'
+            );
+
+        foreach ($shippingPositions as $shippingPosition) {
+            if (is_null($sharedVatRatePercentage)) {
+                $vatRateId = $shippingPosition->product?->vat_rate_id;
+                $vatRatePercentage = $shippingPosition->product?->vatRate?->rate_percentage;
+
+                if (is_null($vatRatePercentage)) {
+                    continue;
+                }
+            } else {
+                $vatRateId = $netByVatRate->count() === 1 ? $netByVatRate->first()['vat_rate_id'] : null;
+                $vatRatePercentage = $sharedVatRatePercentage;
+            }
+
+            if (
+                $shippingPosition->vat_rate_id === $vatRateId
+                && bccomp($shippingPosition->vat_rate_percentage, $vatRatePercentage, 9) === 0
+            ) {
+                continue;
+            }
+
+            $shippingPosition->vat_rate_id = $vatRateId;
+            PriceCalculation::make($shippingPosition, ['vat_rate_percentage' => $vatRatePercentage])
+                ->calculate();
+            unset($shippingPosition->unit_price);
+            $shippingPosition->save();
+        }
+
+        return $this;
     }
 
     public function calculateSubscriptionEndDate(): Carbon|CarbonInterface
@@ -939,17 +1044,53 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return $this;
     }
 
+    /**
+     * Shipping with a weighted rate has no vat_rate_id and no rate of its own to report.
+     * Its net amount is spread over the rates of the goods by their share of the goods net,
+     * which is what the weighted rate was derived from.
+     */
     public function calculateTotalVats(): static
     {
         $positionsByVatRate = $this->orderPositions()
             ->where('is_alternative', false)
             ->where(fn ($q) => $q->where('is_free_text', false)->orWhereDoesntHave('children'))
             ->whereNotNull('vat_rate_percentage')
+            ->where(fn (Builder $query) => $query
+                ->whereNotNull('vat_rate_id')
+                ->orWhereDoesntHave('product', fn (Builder $query) => $query->where('is_shipping_item', true))
+            )
             ->reorder()
             ->groupBy(['vat_rate_percentage', 'vat_rate_id'])
             ->selectRaw('sum(total_net_price) as total_net_price, vat_rate_percentage, vat_rate_id')
             ->get()
             ->keyBy(fn (OrderPosition $item) => $item->vat_rate_id ?? $item->vat_rate_percentage);
+
+        $sharedShippingNet = (string) $this->orderPositions()
+            ->where('is_alternative', false)
+            ->whereNull('vat_rate_id')
+            ->whereNotNull('vat_rate_percentage')
+            ->whereRelation('product', 'is_shipping_item', true)
+            ->sum('total_net_price');
+        $goodsNet = $positionsByVatRate->reduce(
+            fn (string $carry, OrderPosition $item) => bcadd($carry, $item->total_net_price, 9),
+            '0'
+        );
+
+        $hasSharedShipping = bccomp($sharedShippingNet, 0, 9) !== 0 && bccomp($goodsNet, 0, 9) !== 0;
+
+        if ($hasSharedShipping) {
+            $positionsByVatRate->transform(
+                function (OrderPosition $item) use ($sharedShippingNet, $goodsNet): OrderPosition {
+                    $item->total_net_price = bcadd(
+                        $item->total_net_price,
+                        bcmul($sharedShippingNet, bcdiv($item->total_net_price, $goodsNet, 9), 9),
+                        9
+                    );
+
+                    return $item;
+                }
+            );
+        }
 
         $baseAmounts = $positionsByVatRate->mapWithKeys(
             fn (OrderPosition $item) => [($item->vat_rate_id ?? $item->vat_rate_percentage) => $item->total_net_price]
@@ -1012,6 +1153,10 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ->sortBy('vat_rate_percentage')
             ->values()
             ->toArray();
+
+        if ($hasSharedShipping) {
+            $this->balanceRoundedTotalVats($positionsByVatRate);
+        }
 
         return $this;
     }
@@ -1519,6 +1664,53 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     }
 
     // Protected methods
+    /**
+     * Rounding every rate on its own can miss the rounded vat of the whole order by a
+     * cent once shipping is split over several rates. The missing cents go to the rates
+     * with the largest rounding remainder, so the vat totals add up to the order.
+     */
+    protected function balanceRoundedTotalVats(Collection $positionsByVatRate): void
+    {
+        $exactVats = $positionsByVatRate->mapWithKeys(
+            fn (OrderPosition $item): array => [
+                (string) ($item->vat_rate_id ?? $item->vat_rate_percentage) => bcmul(
+                    $item->total_net_price ?? 0,
+                    $item->vat_rate_percentage,
+                    9
+                ),
+            ]
+        );
+        $totalVats = collect($this->total_vats);
+        $exactTotalVat = $exactVats->reduce(fn (string $carry, string $vat): string => bcadd($carry, $vat, 9), '0');
+        $roundedTotalVat = $totalVats
+            ->reduce(fn (string $carry, array $vat): string => bcadd($carry, $vat['total_vat_price'], 9), '0');
+        $cents = bcmul(bcsub(bcround($exactTotalVat, 2), $roundedTotalVat, 9), 100, 0);
+
+        if (bccomp($cents, 0) === 0) {
+            return;
+        }
+
+        $isMissing = bccomp($cents, 0) === 1;
+        $remainders = $totalVats->map(
+            fn (array $vat): string => bcsub(
+                $exactVats->get((string) ($vat['vat_rate_id'] ?? $vat['vat_rate_percentage'])) ?? 0,
+                $vat['total_vat_price'],
+                9
+            )
+        );
+        $indexes = ($isMissing ? $remainders->sortDesc() : $remainders->sort())
+            ->keys()
+            ->take((int) ltrim($cents, '-'));
+        $step = $isMissing ? '0.01' : '-0.01';
+
+        $this->total_vats = $totalVats
+            ->map(fn (array $vat, int $index): array => $indexes->contains($index)
+                ? array_merge($vat, ['total_vat_price' => bcadd($vat['total_vat_price'], $step, 2)])
+                : $vat
+            )
+            ->toArray();
+    }
+
     protected function makeAllSearchableUsing(Builder $query): Builder
     {
         return $query->with(
