@@ -54,7 +54,13 @@ class BlockFile extends FluxAction
 
         if (! is_readable($media->getPath())) {
             $errors[] = 'The file could not be read.';
-        } elseif (resolve_static(BlockedFile::class, 'isBlocked', ['hash' => md5_file($media->getPath())])) {
+        } elseif (
+            resolve_static(
+                BlockedFile::class,
+                'isBlocked',
+                ['hash' => md5_file($media->getPath())]
+            )
+        ) {
             $errors[] = 'The file is already blocked.';
         }
 
