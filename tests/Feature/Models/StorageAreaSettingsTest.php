@@ -7,14 +7,14 @@ use FluxErp\Models\Product;
 use FluxErp\Models\Warehouse;
 use Illuminate\Validation\ValidationException;
 
-test('a warehouse defaults to fifo and to optional storage area locations', function (): void {
+test('a warehouse defaults to fifo and to optional storage areas', function (): void {
     $warehouse = Warehouse::factory()->create()->fresh();
 
     expect($warehouse->requires_storage_area)->toBeFalse()
         ->and($warehouse->stock_removal_strategy_enum)->toBe(StockRemovalStrategyEnum::Fifo);
 });
 
-test('a warehouse can require storage area locations and use fefo', function (): void {
+test('a warehouse can require storage areas and use fefo', function (): void {
     $warehouse = Warehouse::factory()->create([
         'requires_storage_area' => true,
         'stock_removal_strategy_enum' => StockRemovalStrategyEnum::Fefo,

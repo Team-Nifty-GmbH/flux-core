@@ -71,7 +71,7 @@ enum OrderTypeEnum: string
         return self::getIsSubscription($this);
     }
 
-    public function multiplier(): string
+    public function multiplier(): int
     {
         return self::getMultiplier($this);
     }
