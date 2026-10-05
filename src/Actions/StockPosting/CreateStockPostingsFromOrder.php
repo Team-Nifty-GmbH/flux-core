@@ -61,9 +61,7 @@ class CreateStockPostingsFromOrder extends FluxAction
                     'warehouse_id' => $orderPosition->warehouse_id,
                     'product_id' => $orderPosition->product_id,
                     'order_position_id' => $orderPosition->id,
-                    'purchase_price' => is_null($orderPosition->unit_net_price)
-                        ? null
-                        : bcmul($orderPosition->unit_net_price, $open, 9),
+                    'purchase_price' => $orderPosition->unit_net_price,
                     'posting' => $open,
                     'description' => $description,
                 ])
@@ -112,7 +110,7 @@ class CreateStockPostingsFromOrder extends FluxAction
                 ->where('warehouse_id', $orderPosition->warehouse_id)
                 ->where('remaining_stock', '>', 0)
                 ->orderBy('id')
-                ->get(['id', 'posting', 'remaining_stock', 'reserved_stock', 'purchase_price']);
+                ->get(['id', 'remaining_stock', 'reserved_stock', 'purchase_price']);
 
             if ($postStock) {
                 // Post reserved stock
@@ -136,7 +134,7 @@ class CreateStockPostingsFromOrder extends FluxAction
                         'order_position_id' => $orderPosition->id,
                         'serial_number_id' => $stockPosting->serial_number_id,
                         'posting' => bcmul($posting, -1),
-                        'purchase_price' => $this->proportionalPurchasePrice($stockPosting, bcmul($posting, -1)),
+                        'purchase_price' => $stockPosting->purchase_price,
                         'description' => $description,
                     ])
                         ->checkPermission()
@@ -239,7 +237,7 @@ class CreateStockPostingsFromOrder extends FluxAction
                 'order_position_id' => $orderPosition->id,
                 'serial_number_id' => $stockPosting->serial_number_id,
                 'posting' => bcmul($posting, -1),
-                'purchase_price' => $this->proportionalPurchasePrice($stockPosting, bcmul($posting, -1)),
+                'purchase_price' => $stockPosting->purchase_price,
                 'description' => $description,
             ])
                 ->checkPermission()
@@ -265,14 +263,5 @@ class CreateStockPostingsFromOrder extends FluxAction
 
             $orderPosition->reservedStock()->detach();
         }
-    }
-
-    protected function proportionalPurchasePrice(StockPosting $stockPosting, string $posting): ?string
-    {
-        if (is_null($stockPosting->purchase_price) || bccomp($stockPosting->posting, 0) === 0) {
-            return null;
-        }
-
-        return bcdiv(bcmul($stockPosting->purchase_price, $posting, 10), $stockPosting->posting, 10);
     }
 }

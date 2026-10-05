@@ -67,7 +67,7 @@ test('a purchase order books its amount into stock', function (): void {
         ->sole();
 
     expect($stockPosting->posting)->toEqual(3)
-        ->and($stockPosting->purchase_price)->toEqual(37.5);
+        ->and($stockPosting->purchase_price)->toEqual(12.5);
 });
 
 test('a sales order takes its amount out of the oldest stock', function (): void {
@@ -77,7 +77,7 @@ test('a sales order takes its amount out of the oldest stock', function (): void
         'posting' => 2,
         'remaining_stock' => 2,
         'reserved_stock' => 0,
-        'purchase_price' => 20,
+        'purchase_price' => 10,
     ]);
     $newest = StockPosting::factory()->create([
         'warehouse_id' => $this->warehouse->getKey(),
@@ -85,7 +85,7 @@ test('a sales order takes its amount out of the oldest stock', function (): void
         'posting' => 5,
         'remaining_stock' => 5,
         'reserved_stock' => 0,
-        'purchase_price' => 60,
+        'purchase_price' => 12,
     ]);
     $order = ($this->makeOrder)(OrderTypeEnum::Order, '3');
 
@@ -100,18 +100,18 @@ test('a sales order takes its amount out of the oldest stock', function (): void
 
     expect($oldest->refresh()->remaining_stock)->toEqual(0)
         ->and($newest->refresh()->remaining_stock)->toEqual(4)
-        ->and($withdrawals[$oldest->getKey()]->purchase_price)->toEqual(-20)
-        ->and($withdrawals[$newest->getKey()]->purchase_price)->toEqual(-12);
+        ->and($withdrawals[$oldest->getKey()]->purchase_price)->toEqual(10)
+        ->and($withdrawals[$newest->getKey()]->purchase_price)->toEqual(12);
 });
 
-test('posting reserved stock books the share of the purchase price', function (): void {
+test('posting reserved stock books the unit purchase price', function (): void {
     $stock = StockPosting::factory()->create([
         'warehouse_id' => $this->warehouse->getKey(),
         'product_id' => $this->product->getKey(),
         'posting' => 4,
         'remaining_stock' => 4,
         'reserved_stock' => 0,
-        'purchase_price' => 40,
+        'purchase_price' => 10,
     ]);
     $order = ($this->makeOrder)(OrderTypeEnum::Order, '3');
 
@@ -127,30 +127,8 @@ test('posting reserved stock books the share of the purchase price', function ()
         ->sole();
 
     expect($withdrawal->posting)->toEqual(-3)
-        ->and($withdrawal->purchase_price)->toEqual(-30)
+        ->and($withdrawal->purchase_price)->toEqual(10)
         ->and($stock->refresh()->remaining_stock)->toEqual(1);
-});
-
-test('taking out a whole posting books its full purchase price', function (): void {
-    $stock = StockPosting::factory()->create([
-        'warehouse_id' => $this->warehouse->getKey(),
-        'product_id' => $this->product->getKey(),
-        'posting' => 3,
-        'remaining_stock' => 3,
-        'reserved_stock' => 0,
-        'purchase_price' => 10,
-    ]);
-    $order = ($this->makeOrder)(OrderTypeEnum::Order, '3');
-
-    CreateStockPostingsFromOrder::make(['id' => $order->getKey()])
-        ->validate()
-        ->execute();
-
-    $withdrawal = StockPosting::query()
-        ->where('parent_id', $stock->getKey())
-        ->sole();
-
-    expect($withdrawal->purchase_price)->toEqual(-10);
 });
 
 test('a retoure books its amount back into stock', function (): void {
