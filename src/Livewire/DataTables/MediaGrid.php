@@ -8,7 +8,9 @@ use FluxErp\Models\Media;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class MediaGrid extends MediaList
 {
@@ -21,6 +23,25 @@ class MediaGrid extends MediaList
         'url' => 'image',
     ];
 
+    protected function getRowActions(): array
+    {
+        return array_merge(
+            parent::getRowActions(),
+            [
+                DataTableButton::make()
+                    ->icon('no-symbol')
+                    ->color('red')
+                    ->text(__('Block File'))
+                    ->when(fn () => resolve_static(BlockFile::class, 'canPerformAction', [false]))
+                    ->attributes([
+                        'wire:flux-confirm.type.error' => __('Block this file? It will be deleted and never stored again.'),
+                        'wire:click' => 'blockFile(record.id).then(() => show = false)',
+                    ]),
+            ]
+        );
+    }
+
+    #[Renderless]
     public function blockFile(int $mediaId): bool
     {
         try {

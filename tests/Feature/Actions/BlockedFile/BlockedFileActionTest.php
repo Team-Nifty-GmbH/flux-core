@@ -67,14 +67,16 @@ test('blocking a file stores its fingerprint and deletes the file for good', fun
         ->and(file_exists($path))->toBeFalse();
 });
 
-test('blocking the same content twice keeps one entry', function (): void {
+test('a file that is already blocked cannot be blocked again', function (): void {
     $first = ($this->storeFile)('logo content', morph_alias(Contact::class), $this->contact->getKey());
     $second = ($this->storeFile)('logo content', morph_alias(Contact::class), $this->contact->getKey());
 
     BlockFile::make(['media_id' => $first->getKey()])->validate()->execute();
-    BlockFile::make(['media_id' => $second->getKey()])->validate()->execute();
 
-    expect(BlockedFile::query()->count())->toBe(1);
+    BlockFile::assertValidationErrors(['media_id' => $second->getKey()], 'media_id');
+
+    expect(BlockedFile::query()->count())->toBe(1)
+        ->and(Media::query()->whereKey($second->getKey())->exists())->toBeTrue();
 });
 
 test('rejects a media without readable file', function (): void {
@@ -216,4 +218,23 @@ test('replacing a file with a blocked stream closes the stream', function (): vo
     }
 
     expect(is_resource($stream))->toBeFalse();
+});
+
+test('blocking the file of a purchase invoice reports every failed check at once', function (): void {
+    $order = createOrderForBlockedFileTest($this->contact);
+    $purchaseInvoice = PurchaseInvoice::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'order_id' => $order->getKey(),
+        'media_id' => null,
+    ]);
+
+    try {
+        BlockPurchaseInvoiceFile::make(['id' => $purchaseInvoice->getKey()])->validate();
+    } catch (Illuminate\Validation\ValidationException $e) {
+        expect($e->errors()['id'])->toHaveCount(2);
+
+        return;
+    }
+
+    $this->fail('No validation exception was thrown.');
 });

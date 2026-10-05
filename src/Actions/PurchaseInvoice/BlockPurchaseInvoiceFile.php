@@ -25,7 +25,7 @@ class BlockPurchaseInvoiceFile extends FluxAction
     {
         $purchaseInvoice = resolve_static(PurchaseInvoice::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first();
+            ->first(['id', 'media_id']);
 
         BlockFile::make(['media_id' => $purchaseInvoice->media_id])
             ->validate()
@@ -44,16 +44,18 @@ class BlockPurchaseInvoiceFile extends FluxAction
             ->whereKey($this->getData('id'))
             ->first(['id', 'media_id', 'order_id']);
 
-        $error = match (true) {
-            ! is_null($purchaseInvoice->order_id) => __(
-                'The purchase invoice already has an order, its file cannot be blocked.'
-            ),
-            is_null($purchaseInvoice->media_id) => __('The purchase invoice has no attached document.'),
-            default => null,
-        };
+        $errors = [];
 
-        if ($error) {
-            throw ValidationException::withMessages(['id' => [$error]])
+        if (! is_null($purchaseInvoice->order_id)) {
+            $errors[] = 'The purchase invoice already has an order, its file cannot be blocked.';
+        }
+
+        if (is_null($purchaseInvoice->media_id)) {
+            $errors[] = 'The purchase invoice has no attached document.';
+        }
+
+        if ($errors) {
+            throw ValidationException::withMessages(['id' => $errors])
                 ->errorBag('blockPurchaseInvoiceFile');
         }
     }

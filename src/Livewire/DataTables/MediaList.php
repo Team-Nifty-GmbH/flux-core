@@ -2,7 +2,6 @@
 
 namespace FluxErp\Livewire\DataTables;
 
-use FluxErp\Actions\BlockedFile\BlockFile;
 use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Livewire\Forms\MediaForm;
 use FluxErp\Models\Media;
@@ -63,15 +62,6 @@ class MediaList extends BaseDataTable
                 ->attributes([
                     'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Media')]),
                     'wire:click' => 'deleteMedia(record.id).then(() => show = false)',
-                ]),
-            DataTableButton::make()
-                ->icon('no-symbol')
-                ->color('red')
-                ->text(__('Block File'))
-                ->when(fn () => resolve_static(BlockFile::class, 'canPerformAction', [false]))
-                ->attributes([
-                    'wire:flux-confirm.type.error' => __('Block this file? It will be deleted and never stored again.'),
-                    'wire:click' => 'blockFile(record.id).then(() => show = false)',
                 ]),
         ];
     }

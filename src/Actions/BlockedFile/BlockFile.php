@@ -27,15 +27,15 @@ class BlockFile extends FluxAction
             ->whereKey($this->getData('media_id'))
             ->first();
 
-        $blockedFile = resolve_static(BlockedFile::class, 'query')
-            ->firstOrCreate(
-                ['hash' => md5_file($media->getPath())],
-                [
-                    'file_name' => $media->file_name,
-                    'mime_type' => $media->mime_type,
-                    'size' => $media->size,
-                ]
-            );
+        $blockedFile = app(BlockedFile::class, [
+            'attributes' => [
+                'hash' => md5_file($media->getPath()),
+                'file_name' => $media->file_name,
+                'mime_type' => $media->mime_type,
+                'size' => $media->size,
+            ],
+        ]);
+        $blockedFile->save();
 
         $media->forceDelete();
 
@@ -50,20 +50,29 @@ class BlockFile extends FluxAction
             ->whereKey($this->getData('media_id'))
             ->first();
 
-        $error = match (true) {
-            ! is_readable($media->getPath()) => __('The file could not be read.'),
-            data_get($media->getCollection(), 'readOnly') === true => __(
-                'The media collection is read-only and cannot be modified.'
-            ),
+        $errors = [];
+
+        if (! is_readable($media->getPath())) {
+            $errors[] = 'The file could not be read.';
+        } elseif (resolve_static(BlockedFile::class, 'isBlocked', ['hash' => md5_file($media->getPath())])) {
+            $errors[] = 'The file is already blocked.';
+        }
+
+        if (data_get($media->getCollection(), 'readOnly') === true) {
+            $errors[] = 'The media collection is read-only and cannot be modified.';
+        }
+
+        if (
             resolve_static(PurchaseInvoice::class, 'query')
                 ->where('media_id', $media->getKey())
                 ->whereNotNull('order_id')
-                ->exists() => __('The purchase invoice already has an order, its file cannot be blocked.'),
-            default => null,
-        };
+                ->exists()
+        ) {
+            $errors[] = 'The purchase invoice already has an order, its file cannot be blocked.';
+        }
 
-        if ($error) {
-            throw ValidationException::withMessages(['media_id' => [$error]])
+        if ($errors) {
+            throw ValidationException::withMessages(['media_id' => $errors])
                 ->errorBag('blockFile');
         }
     }

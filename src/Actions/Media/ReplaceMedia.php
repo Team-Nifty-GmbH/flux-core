@@ -98,7 +98,10 @@ class ReplaceMedia extends FluxAction
                 'media' => [$e->getMessage()],
             ]);
         } finally {
-            if (strtolower($this->getData('media_type') ?? '') === 'stream' && is_resource($this->getData('media'))) {
+            if (
+                strtolower($this->getData('media_type') ?? '') === 'stream'
+                && is_resource($this->getData('media'))
+            ) {
                 fclose($this->getData('media'));
             }
         }
