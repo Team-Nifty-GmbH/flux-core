@@ -19,6 +19,7 @@ abstract class PaymentState extends EndableState implements HasFrontendFormatter
                     [
                         Open::class,
                         PartialPaid::class,
+                        Overpaid::class,
                         InOpenPaymentRun::class,
                         InPayment::class,
                     ],
@@ -28,6 +29,7 @@ abstract class PaymentState extends EndableState implements HasFrontendFormatter
                     [
                         Paid::class,
                         PartialPaid::class,
+                        Overpaid::class,
                         InOpenPaymentRun::class,
                         InPayment::class,
                     ],
@@ -37,13 +39,27 @@ abstract class PaymentState extends EndableState implements HasFrontendFormatter
                     [
                         Paid::class,
                         Open::class,
+                        Overpaid::class,
                         InOpenPaymentRun::class,
                         InPayment::class,
                     ],
                     PartialPaid::class,
                 ],
                 [
-                    Open::class,
+                    [
+                        Paid::class,
+                        Open::class,
+                        PartialPaid::class,
+                        InOpenPaymentRun::class,
+                        InPayment::class,
+                    ],
+                    Overpaid::class,
+                ],
+                [
+                    [
+                        Open::class,
+                        Overpaid::class,
+                    ],
                     InOpenPaymentRun::class,
                 ],
                 [

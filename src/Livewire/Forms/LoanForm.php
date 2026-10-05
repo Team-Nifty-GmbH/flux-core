@@ -9,11 +9,17 @@ use Livewire\Attributes\Locked;
 
 class LoanForm extends FluxForm
 {
+    public bool $allows_extra_repayments = true;
+
     public ?float $amount = null;
 
     public ?int $contact_id = null;
 
     public ?string $ends_at = null;
+
+    public ?float $extra_repayment_allowance_amount = null;
+
+    public ?float $extra_repayment_allowance_percentage = null;
 
     public ?int $grace_period_installments = null;
 
