@@ -38,6 +38,7 @@ class CreateVariants extends FluxAction
             $product['product_options'],
             $product['product_number'],
             $product['ean'],
+            $product['packaging_ean'],
             $product['is_bundle'],
             $product['own_prices'],
         );

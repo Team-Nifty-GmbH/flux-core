@@ -308,7 +308,8 @@ test('the purchase fields reach the markup', function (): void {
         ->assertSeeHtml('product.purchase_unit_id')
         ->assertSeeHtml('product.reference_unit_id')
         ->assertSeeHtml('product.min_purchase')
-        ->assertSeeHtml('product.purchase_steps');
+        ->assertSeeHtml('product.purchase_steps')
+        ->assertSeeHtml('product.packaging_ean');
 });
 
 test('the packaging ean field reaches the supplier block', function (): void {

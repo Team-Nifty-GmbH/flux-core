@@ -79,6 +79,8 @@ class ProductForm extends FluxForm
 
     public ?string $name = null;
 
+    public ?string $packaging_ean = null;
+
     public ?array $parent = null;
 
     public ?int $parent_id = null;

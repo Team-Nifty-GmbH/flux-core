@@ -248,3 +248,20 @@ test('create and update product store the packaging ean of a supplier', function
 
     expect($product->suppliers()->first()->pivot->packaging_ean)->toBe('4012345678901');
 });
+
+test('create and update product store the packaging ean of the product', function (): void {
+    $product = CreateProduct::make([
+        'name' => 'Mineralwasser',
+        'purchase_steps' => 12,
+        'packaging_ean' => '4006381333931',
+    ])->validate()->execute();
+
+    expect($product->refresh()->packaging_ean)->toBe('4006381333931');
+
+    UpdateProduct::make([
+        'id' => $product->getKey(),
+        'packaging_ean' => null,
+    ])->validate()->execute();
+
+    expect($product->refresh()->packaging_ean)->toBeNull();
+});
