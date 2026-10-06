@@ -311,6 +311,12 @@ test('the purchase fields reach the markup', function (): void {
         ->assertSeeHtml('product.purchase_steps');
 });
 
+test('the packaging ean field reaches the supplier block', function (): void {
+    Livewire::test(Product::class, ['id' => $this->product->id])
+        ->assertOk()
+        ->assertSeeHtml('supplier.packaging_ean');
+});
+
 test('the price per basic unit reaches the prices tab', function (): void {
     Livewire::test(Product::class, ['id' => $this->product->id])
         ->set('tab', 'product.prices')

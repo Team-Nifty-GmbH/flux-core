@@ -639,6 +639,11 @@
                                 :label="__('Items per Packaging')"
                                 step="1"
                             />
+                            <x-input
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.packaging_ean"
+                                :label="__('Packaging EAN')"
+                            />
                             <x-number
                                 x-bind:disabled="!isEditing"
                                 x-model="supplier.purchase_price"

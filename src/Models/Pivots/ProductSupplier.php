@@ -16,6 +16,7 @@ class ProductSupplier extends FluxPivot
         'supplier_product_name',
         'packaging_amount',
         'items_per_packaging',
+        'packaging_ean',
         'purchase_price',
         'note',
     ];
