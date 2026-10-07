@@ -135,6 +135,49 @@ test('sync mail account job hands every folder the account it already holds', fu
         ->and($spy->accounts[2])->toBe($mailAccount);
 });
 
+test('sync mail account job keeps syncing the remaining folders when one folder fails', function (): void {
+    $mailAccount = MailAccount::factory()
+        ->has(MailFolder::factory()->count(3)->state(['is_active' => true]))
+        ->create();
+    $broken = $mailAccount->mailFolders->first();
+
+    $spy = new class() implements MailSyncDriver
+    {
+        public ?int $brokenId = null;
+
+        public array $syncedFolders = [];
+
+        public function syncFolders(MailAccount $account): array
+        {
+            return [];
+        }
+
+        public function syncMessages(MailFolder $folder): void
+        {
+            if ($folder->getKey() === $this->brokenId) {
+                throw new RuntimeException('Empty response');
+            }
+
+            $this->syncedFolders[] = $folder->getKey();
+        }
+
+        public function testConnection(MailAccount $account): bool
+        {
+            return true;
+        }
+    };
+    $spy->brokenId = $broken->getKey();
+
+    app(MailDriverManager::class)->extend('imap', fn () => $spy);
+
+    expect(fn () => (new SyncMailAccountJob($mailAccount))->handle())
+        ->toThrow(RuntimeException::class, 'Empty response');
+
+    expect($spy->syncedFolders)->toEqualCanonicalizing(
+        $mailAccount->mailFolders->except($broken->getKey())->modelKeys()
+    );
+});
+
 test('sync mail account job closes the imap client when it is done', function (): void {
     $mailAccount = MailAccount::factory()
         ->has(MailFolder::factory()->state(['is_active' => true]))
