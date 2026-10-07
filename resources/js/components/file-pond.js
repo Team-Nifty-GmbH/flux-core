@@ -15,11 +15,6 @@ function loadLocale(lang) {
     return bundledLocales[lang] || bundledLocales['en'];
 }
 
-const tooManyFilesLabels = {
-    de: 'Zu viele Dateien gleichzeitig, bitte erneut versuchen',
-    en: 'Too many files at once, please try again',
-};
-
 // Livewire's upload error callback carries no status, the resource timing does.
 // An observer instead of getEntriesByType, the timing buffer fills up and then drops entries.
 // Safari reports no responseStatus and falls back to the generic error label.
@@ -132,9 +127,6 @@ export default function (
     inputTranslation,
     { chunked = true } = {},
 ) {
-    const tooManyFilesLabel =
-        tooManyFilesLabels[lang] || tooManyFilesLabels['en'];
-
     return {
         tempFilesId: [],
         isLoadingFiles: [],
@@ -274,7 +266,7 @@ export default function (
                             } catch (e) {
                                 error(
                                     e?.status === 429
-                                        ? tooManyFilesLabel
+                                        ? (inputTranslation.tooManyFiles ?? '')
                                         : e?.message || 'Chunked upload failed',
                                 );
                             }
@@ -300,7 +292,7 @@ export default function (
                         const onError = () => {
                             error(
                                 lastLivewireUploadStatus === 429
-                                    ? tooManyFilesLabel
+                                    ? (inputTranslation.tooManyFiles ?? '')
                                     : '',
                             );
                         };

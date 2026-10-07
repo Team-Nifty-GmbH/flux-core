@@ -45,6 +45,7 @@
                             },
                             {
                                 uploadDisabled: '{{ __('Upload not allowed - Read Only') }}',
+                                tooManyFiles: '{{ __('Too many files at once, please try again') }}',
                                 readyForUpload: '{{ __('Ready for upload') }}',
                                 pending: '{{ __('pending') }}',
                             },
