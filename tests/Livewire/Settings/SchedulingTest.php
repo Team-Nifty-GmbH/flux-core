@@ -37,3 +37,14 @@ test('switching the repeat method clears the parameters of the previous one', fu
         ->assertOk()
         ->assertSet('schedule.cron.parameters.basic', [null, null, null]);
 });
+
+test('renders the time picker without a schedule preview', function (): void {
+    $html = Livewire::test(Scheduling::class)
+        ->set('schedule.cron.methods.basic', 'dailyAt')
+        ->html();
+
+    expect($html)
+        ->toContain('tallstackui_formTime(')
+        ->not->toContain('<x-')
+        ->not->toContain('previewSchedule');
+});
