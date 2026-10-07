@@ -71,6 +71,7 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
 
     protected $hidden = [
         'password',
+        'remember_token',
     ];
 
     protected static function booted(): void
