@@ -104,3 +104,16 @@ test('the combined connection is built from the configured connections', functio
             Illuminate\Broadcasting\Broadcasters\NullBroadcaster::class,
         ]);
 });
+
+test('the combined connection is available to a package that resolves broadcasting before flux boots', function (): void {
+    config([
+        'broadcasting.default' => 'combined',
+        'broadcasting.connections.combined.connections' => ['log', 'null'],
+    ]);
+
+    app()->forgetInstance(Illuminate\Broadcasting\BroadcastManager::class);
+    Broadcast::clearResolvedInstance(Illuminate\Contracts\Broadcasting\Factory::class);
+
+    expect(app(Illuminate\Broadcasting\BroadcastManager::class)->connection())
+        ->toBeInstanceOf(CombinedBroadcaster::class);
+});
