@@ -36,7 +36,7 @@
             :options="$basic"
         />
         <x-flux::schedule.basic-parameters
-            :method="data_get($this->schedule, 'cron.methods.basic')"
+            :frequency="data_get($this->schedule, 'cron.methods.basic')"
         />
         <x-select.styled
             :label="__('Day Constraints')"

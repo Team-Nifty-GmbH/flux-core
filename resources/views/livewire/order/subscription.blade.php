@@ -45,7 +45,7 @@
                 :options="$frequencies"
             />
             <x-flux::schedule.basic-parameters
-                :method="data_get($this->schedule, 'cron.methods.basic')"
+                :frequency="data_get($this->schedule, 'cron.methods.basic')"
                 preview
             />
             <x-date

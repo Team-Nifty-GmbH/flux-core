@@ -1,11 +1,11 @@
 @props([
-    'method' => null,
+    'frequency' => null,
     'preview' => false,
 ])
 
 @php($onChange = $preview ? '$wire.previewSchedule()' : '')
 
-@if (in_array($method, ['hourlyAt', 'everyOddHour', 'everyTwoHours', 'everyThreeHours', 'everyFourHours', 'everySixHours']))
+@if (in_array($frequency, ['hourlyAt', 'everyOddHour', 'everyTwoHours', 'everyThreeHours', 'everyFourHours', 'everySixHours']))
     <div>
         <x-number
             :max="59"
@@ -17,7 +17,7 @@
     </div>
 @endif
 
-@if (in_array($method, ['dailyAt', 'lastDayOfMonth']))
+@if (in_array($frequency, ['dailyAt', 'lastDayOfMonth']))
     <div>
         <x-flux::schedule.time
             model="schedule.cron.parameters.basic.0"
@@ -26,7 +26,7 @@
     </div>
 @endif
 
-@if (in_array($method, ['twiceDaily', 'twiceDailyAt']))
+@if (in_array($frequency, ['twiceDaily', 'twiceDailyAt']))
     <div class="flex flex-col gap-4">
         <x-number
             :max="23"
@@ -42,7 +42,7 @@
             x-on:change="{{ $onChange }}"
             :label="__('Hour')"
         />
-        @if ($method === 'twiceDailyAt')
+        @if ($frequency === 'twiceDailyAt')
             <x-number
                 :max="59"
                 :min="0"
@@ -54,7 +54,7 @@
     </div>
 @endif
 
-@if ($method === 'weeklyOn')
+@if ($frequency === 'weeklyOn')
     <div class="flex flex-col gap-4">
         <x-select.styled
             :label="__('Weekday')"
@@ -78,7 +78,7 @@
     </div>
 @endif
 
-@if (in_array($method, ['monthlyOn', 'quarterlyOn']))
+@if (in_array($frequency, ['monthlyOn', 'quarterlyOn']))
     <div class="flex flex-col gap-4">
         <x-number
             :max="31"
@@ -94,7 +94,7 @@
     </div>
 @endif
 
-@if ($method === 'twiceMonthly')
+@if ($frequency === 'twiceMonthly')
     <div class="flex flex-col gap-4">
         <x-number
             :max="31"
@@ -119,7 +119,7 @@
     </div>
 @endif
 
-@if ($method === 'yearlyOn')
+@if ($frequency === 'yearlyOn')
     <div class="flex flex-col gap-4">
         <x-select.styled
             :label="__('Month')"
