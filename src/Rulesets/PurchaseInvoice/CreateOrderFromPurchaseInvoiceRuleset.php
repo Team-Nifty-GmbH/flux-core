@@ -88,8 +88,9 @@ class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
             'invoice_date' => 'required|date',
             'payment_target_date' => 'nullable|date',
             'payment_discount_target_date' => 'nullable|date',
+            'payment_discount_target' => 'required|integer|min:0',
             'payment_discount_percent' => [
-                'nullable',
+                'required',
                 app(Numeric::class, ['min' => 0, 'max' => 1]),
             ],
             'total_gross_price' => [
