@@ -27,7 +27,7 @@
                         <label for="avatar" style="cursor: pointer">
                             <x-avatar
                                 class="m-auto"
-                                size="w-24 h-24"
+                                size="md"
                                 :image="$avatar"
                             />
                         </label>

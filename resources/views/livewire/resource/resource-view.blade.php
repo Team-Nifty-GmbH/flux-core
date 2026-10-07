@@ -6,7 +6,6 @@
         <div class="flex items-center space-x-5">
             <div>
                 <x-avatar
-                    xl
                     :label="$avatarUrl ? false : strtoupper(substr($resourceForm->name ?? '', 0, 2))"
                     :image="$avatarUrl"
                 />

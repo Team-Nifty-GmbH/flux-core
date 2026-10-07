@@ -160,20 +160,9 @@ class EventServiceProvider extends ServiceProvider
             }
         });
 
+        // Stored times are always H:i, a twelve hour picker would write "02:00 PM" into them.
         $this->app->resolving(Time::class, function (Time $component): void {
-            if ($component->format !== '12') {
-                return;
-            }
-
-            $format = $this->localeFormat('LT');
-
-            if (! $format) {
-                return;
-            }
-
-            if (! str_contains(preg_replace('/\[[^\]]*\]/', '', $format), 'h')) {
-                $component->format = '24';
-            }
+            $component->format = '24';
         });
     }
 

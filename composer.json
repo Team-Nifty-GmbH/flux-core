@@ -31,8 +31,8 @@
         "spatie/laravel-settings": "^3.9",
         "spatie/laravel-tags": "^4.12",
         "spatie/pdf-to-image": "^3.3",
-        "tallstackui/tallstackui": "^3.5.14",
-        "team-nifty-gmbh/tall-datatables": "^2.5.9",
+        "tallstackui/tallstackui": "^4.2",
+        "team-nifty-gmbh/tall-datatables": "dev-feat/tallstackui-v4 as 2.6.99",
         "webklex/laravel-imap": "^6.2"
     },
     "require-dev": {

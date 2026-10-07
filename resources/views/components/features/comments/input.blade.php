@@ -46,7 +46,7 @@
                 })
             "
         >
-            <x-avatar image="{{ route('icons', ['name' => 'user']) }}" xl />
+            <x-avatar image="{{ route('icons', ['name' => 'user']) }}" />
         </div>
         <div class="min-w-0 flex-1">
             <div x-ref="upload">
@@ -93,7 +93,7 @@
                                     if (success) clearPond();
                                 })
                             "
-                            spinner="saveComment"
+                            loading="saveComment"
                             wire:loading.attr="disabled"
                             x-bind:disabled="isLoadingFiles.length > 0"
                             :text="auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true ? __('Save internal') : __('Save')"
@@ -114,7 +114,7 @@
                                         if (success) clearPond();
                                     })
                                 "
-                                spinner="saveComment"
+                                loading="saveComment"
                                 x-bind:disabled="isLoadingFiles.length > 0"
                                 wire:loading.attr="disabled"
                                 :text="__('Answer to customer')"
