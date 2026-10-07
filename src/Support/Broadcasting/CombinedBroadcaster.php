@@ -5,6 +5,7 @@ namespace FluxErp\Support\Broadcasting;
 use Illuminate\Broadcasting\Broadcasters\Broadcaster;
 use Illuminate\Broadcasting\Broadcasters\MercureBroadcaster;
 use Illuminate\Http\Request;
+use Throwable;
 
 /**
  * Sends every event to several broadcast connections at once, e.g. Mercure for the
@@ -24,9 +25,21 @@ class CombinedBroadcaster extends Broadcaster
 
     public function broadcast(array $channels, $event, array $payload = []): void
     {
+        $failures = [];
+
         foreach ($this->broadcasters as $broadcaster) {
-            $broadcaster->broadcast($channels, $event, $payload);
+            try {
+                $broadcaster->broadcast($channels, $event, $payload);
+            } catch (Throwable $e) {
+                $failures[] = $e;
+            }
         }
+
+        if (count($failures) === count($this->broadcasters)) {
+            throw array_first($failures);
+        }
+
+        array_map(report(...), $failures);
     }
 
     /**

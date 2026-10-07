@@ -5,6 +5,7 @@ use Illuminate\Broadcasting\Broadcasters\Broadcaster;
 use Illuminate\Broadcasting\Broadcasters\MercureBroadcaster;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Exceptions;
 
 function recordingBroadcaster(): Broadcaster
 {
@@ -51,6 +52,37 @@ test('an event reaches every connection', function (): void {
 
     expect($first->broadcasts)->toBe([[['private-order.1'], 'OrderUpdated', ['id' => 1]]])
         ->and($second->broadcasts)->toBe([[['private-order.1'], 'OrderUpdated', ['id' => 1]]]);
+});
+
+function failingBroadcaster(): Broadcaster
+{
+    return new class() extends Broadcaster
+    {
+        public function auth($request): void {}
+
+        public function validAuthenticationResponse($request, $result): void {}
+
+        public function broadcast(array $channels, $event, array $payload = []): void
+        {
+            throw new RuntimeException('hub unreachable');
+        }
+    };
+}
+
+test('an event still reaches the other connections when one fails', function (): void {
+    Exceptions::fake();
+    $second = recordingBroadcaster();
+
+    (new CombinedBroadcaster([failingBroadcaster(), $second]))->broadcast(['private-order.1'], 'OrderUpdated');
+
+    expect($second->broadcasts)->toBe([[['private-order.1'], 'OrderUpdated', []]]);
+    Exceptions::assertReported(fn (RuntimeException $e) => $e->getMessage() === 'hub unreachable');
+});
+
+test('a broadcast fails when no connection takes the event', function (): void {
+    expect(fn () => (new CombinedBroadcaster([failingBroadcaster(), failingBroadcaster()]))
+        ->broadcast(['private-order.1'], 'OrderUpdated'))
+        ->toThrow(RuntimeException::class, 'hub unreachable');
 });
 
 test('a channel is registered on every connection', function (): void {

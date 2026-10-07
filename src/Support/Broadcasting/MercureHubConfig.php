@@ -21,17 +21,25 @@ class MercureHubConfig
     }
 
     /**
-     * The connection the browser listens on: Mercure whenever the instance broadcasts with it.
+     * The connection the browser listens on: Mercure whenever the instance broadcasts with it and the hub is reachable.
      */
     public static function browserBroadcaster(): string
     {
         $default = config('broadcasting.default') ?? 'reverb';
+        $combined = config('broadcasting.connections.' . $default . '.driver') === 'combined';
 
         return match (true) {
-            static::usesMercure() => 'mercure',
-            config('broadcasting.connections.' . $default . '.driver') === 'combined' => 'reverb',
+            static::usesMercure() && (! $combined || static::servesHubHost()) => 'mercure',
+            $combined => 'reverb',
             default => $default,
         };
+    }
+
+    public static function servesHubHost(): bool
+    {
+        $hubHost = parse_url((string) config('broadcasting.connections.mercure.public_url'), PHP_URL_HOST);
+
+        return ! $hubHost || $hubHost === request()->getHost();
     }
 
     public static function make(): ?array
