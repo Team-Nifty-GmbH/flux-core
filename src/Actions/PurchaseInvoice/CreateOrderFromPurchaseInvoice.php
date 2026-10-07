@@ -68,6 +68,11 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
                 ->diffInDays(Carbon::parse($paymentDiscountTargetDate));
         }
 
+        // the invoice states the cash discount, without one on it the order must not take
+        // the defaults of contact or payment type, which may even exceed the payment target
+        $this->data['payment_discount_target'] ??= 0;
+        $this->data['payment_discount_percent'] ??= 0;
+
         $order = $this->getData('order_id')
             ? $this->takeOverOrder()
             : CreateOrder::make($this->data)->validate()->execute();

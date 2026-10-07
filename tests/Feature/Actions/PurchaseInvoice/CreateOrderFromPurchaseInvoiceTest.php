@@ -191,3 +191,32 @@ test('an order of another contact cannot be chosen', function (): void {
         'order_id' => $existing->getKey(),
     ])->validate()->execute())->toThrow(ValidationException::class);
 });
+
+test('an invoice without cash discount does not take one from the contact or payment type', function (): void {
+    $this->contact->update(['discount_days' => 40, 'discount_percent' => 0.03]);
+    $this->paymentType->update(['payment_discount_target' => 40, 'payment_discount_percentage' => 0.05]);
+    $purchaseInvoice = ($this->createPurchaseInvoice)();
+
+    $order = CreateOrderFromPurchaseInvoice::make(['id' => $purchaseInvoice->getKey()])
+        ->validate()
+        ->execute();
+
+    expect($order->payment_discount_target)->toBe(0)
+        ->and((float) $order->payment_discount_percent)->toBe(0.0);
+});
+
+test('the cash discount of the invoice is taken over', function (): void {
+    $this->contact->update(['discount_days' => 40, 'discount_percent' => 0.03]);
+    $purchaseInvoice = ($this->createPurchaseInvoice)();
+    $purchaseInvoice->update([
+        'payment_discount_target_date' => '2026-08-11',
+        'payment_discount_percent' => 0.02,
+    ]);
+
+    $order = CreateOrderFromPurchaseInvoice::make(['id' => $purchaseInvoice->getKey()])
+        ->validate()
+        ->execute();
+
+    expect($order->payment_discount_target)->toBe(10)
+        ->and((float) $order->payment_discount_percent)->toBe(0.02);
+});
