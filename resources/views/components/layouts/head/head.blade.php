@@ -14,7 +14,11 @@
 <meta name="ws-key" content="{{ config('flux.vite.reverb_app_key') }}" />
 <meta
     name="ws-broadcaster"
-    content="{{ config('broadcasting.default', 'reverb') }}"
+    content="{{ resolve_static(\FluxErp\Support\Broadcasting\MercureHubConfig::class, 'browserBroadcaster') }}"
+/>
+<meta
+    name="ws-mercure-hub"
+    content="{{ config('broadcasting.connections.mercure.public_url') }}"
 />
 <meta name="ws-host" content="{{ config('flux.vite.reverb_host') }}" />
 <meta name="ws-port" content="{{ config('flux.vite.reverb_port') }}" />
