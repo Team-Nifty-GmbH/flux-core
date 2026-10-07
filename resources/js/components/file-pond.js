@@ -15,6 +15,18 @@ function loadLocale(lang) {
     return bundledLocales[lang] || bundledLocales['en'];
 }
 
+// Livewire's upload error callback carries no status, the resource timing does.
+// An observer instead of getEntriesByType, the timing buffer fills up and then drops entries.
+// Safari reports no responseStatus and falls back to the generic error label.
+let lastLivewireUploadStatus = null;
+new PerformanceObserver((list) => {
+    list.getEntries()
+        .filter((entry) => entry.name.includes('/upload-file'))
+        .forEach((entry) => {
+            lastLivewireUploadStatus = entry.responseStatus;
+        });
+}).observe({ type: 'resource' });
+
 // Files larger than this use the chunked upload endpoint to bypass
 // PHP's post_max_size / Octane FrankenPHP request body limits.
 // 1 MB stays well under the 2 MB upload_max_filesize default once Livewire's
@@ -56,8 +68,9 @@ async function chunkedUpload(file, progress) {
     const initBody = await readJsonSafe(initResponse);
 
     if (!initResponse.ok) {
-        throw new Error(
-            initBody?.statusMessage || 'Chunked upload init failed',
+        throw Object.assign(
+            new Error(initBody?.statusMessage || 'Chunked upload init failed'),
+            { status: initResponse.status },
         );
     }
 
@@ -91,7 +104,10 @@ async function chunkedUpload(file, progress) {
         const patchBody = await readJsonSafe(patchResponse);
 
         if (!patchResponse.ok) {
-            throw new Error(patchBody?.statusMessage || 'Chunk upload failed');
+            throw Object.assign(
+                new Error(patchBody?.statusMessage || 'Chunk upload failed'),
+                { status: patchResponse.status },
+            );
         }
 
         offset = patchBody?.data?.offset ?? end;
@@ -165,6 +181,12 @@ export default function (
                 onaddfilestart: (file) => {
                     this.isLoadingFiles.push(file.id);
                 },
+                // a retry processes the failed file again without adding it
+                onprocessfilestart: (file) => {
+                    if (!this.isLoadingFiles.includes(file.id)) {
+                        this.isLoadingFiles.push(file.id);
+                    }
+                },
                 onremovefile: (error, file) => {
                     if (error) return;
 
@@ -178,11 +200,8 @@ export default function (
                         });
                     }
                 },
+                // a failed file stays in the list with its reason and FilePond's retry button
                 onprocessfile: (error, file) => {
-                    if (error) {
-                        this.pond.removeFile(file.id);
-                    }
-
                     this.isLoadingFiles = this.isLoadingFiles.filter((item) => {
                         return item !== file.id;
                     });
@@ -245,7 +264,11 @@ export default function (
                                     error('Chunked upload rejected');
                                 }
                             } catch (e) {
-                                error(e?.message || 'Chunked upload failed');
+                                error(
+                                    e?.status === 429
+                                        ? (inputTranslation.tooManyFiles ?? '')
+                                        : e?.message || 'Chunked upload failed',
+                                );
                             }
 
                             return;
@@ -261,12 +284,17 @@ export default function (
                                 this.tempFilesId.push(tempFileId);
                                 load(tempFileId);
                             } else {
-                                error(tempFileId);
+                                // the validation message is already shown as a notification
+                                error('');
                             }
                         };
 
                         const onError = () => {
-                            error();
+                            error(
+                                lastLivewireUploadStatus === 429
+                                    ? (inputTranslation.tooManyFiles ?? '')
+                                    : '',
+                            );
                         };
 
                         await $wire.upload(
@@ -283,8 +311,12 @@ export default function (
                 allowMultiple: this.multipleFileUpload,
             });
 
-            // set language
-            setOptions(moduleLanguage);
+            // set language, an error without a reason keeps the generic label
+            setOptions({
+                ...moduleLanguage,
+                labelFileProcessingError: (error) =>
+                    error?.body || moduleLanguage.labelFileProcessingError,
+            });
 
             // set initial label - on label change - translation will be discarded
             // need to persist default label
