@@ -38,6 +38,7 @@ class SupplierRuleset extends FluxRuleset
                 'integer',
                 'min:1',
             ],
+            'suppliers.*.packaging_ean' => 'string|max:255|nullable',
             'suppliers.*.purchase_price' => [
                 'nullable',
                 app(Numeric::class, ['min' => 0]),

@@ -107,3 +107,28 @@ test('seeds a new variant with the parent\'s materialized scalar values, real re
     expect($variant->fresh()->name)->toBe($expectedName)
         ->and($variant->fresh()->name)->not->toBe($parent->name);
 });
+
+test('a new variant does not take over the barcodes of its parent', function (): void {
+    $parent = Product::factory()->create([
+        'vat_rate_id' => VatRate::default()?->getKey(),
+        'ean' => '4006381333931',
+        'packaging_ean' => '4012345678901',
+        'purchase_steps' => 12,
+    ]);
+    $parent->tenants()->attach(Tenant::default()->getKey());
+
+    $optionGroup = ProductOptionGroup::factory()->create();
+    $option = ProductOption::factory()->create(['product_option_group_id' => $optionGroup->getKey()]);
+
+    CreateVariants::make([
+        'parent_id' => $parent->getKey(),
+        'vat_rate_id' => VatRate::default()?->getKey(),
+        'product_options' => [[$option->getKey()]],
+    ])->validate()->execute();
+
+    $variant = $parent->children()->first();
+
+    expect($variant->ean)->toBeNull()
+        ->and($variant->packaging_ean)->toBeNull()
+        ->and($variant->purchase_steps)->toEqual(12);
+});

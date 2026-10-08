@@ -320,6 +320,11 @@
                         </x-slot:label>
                     </x-number>
                 </div>
+                <x-input
+                    x-bind:readonly="!isEditing"
+                    wire:model="product.packaging_ean"
+                    :label="__('Packaging EAN')"
+                />
                 @show
             </x-card>
             <x-card class="flex flex-col gap-4" :header="__('Assignment')">
@@ -638,6 +643,11 @@
                                 x-model="supplier.items_per_packaging"
                                 :label="__('Items per Packaging')"
                                 step="1"
+                            />
+                            <x-input
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.packaging_ean"
+                                :label="__('Packaging EAN')"
                             />
                             <x-number
                                 x-bind:disabled="!isEditing"

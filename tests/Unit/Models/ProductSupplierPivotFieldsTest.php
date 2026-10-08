@@ -17,6 +17,7 @@ test('the pivot model declares the editable columns', function (): void {
             'supplier_product_name',
             'packaging_amount',
             'items_per_packaging',
+            'packaging_ean',
             'purchase_price',
             'note',
         ]);
@@ -63,6 +64,7 @@ test('the purchase data of a supplier survives a save', function (): void {
         'packaging_amount' => 250,
         'packaging_unit_id' => $unit->getKey(),
         'items_per_packaging' => 500,
+        'packaging_ean' => '4006381333931',
         'purchase_price' => 12.5,
         'note' => 'Nur in ganzen Kartons lieferbar.',
     ]);
@@ -77,6 +79,7 @@ test('the purchase data of a supplier survives a save', function (): void {
         ->and($pivot->packaging_amount)->toEqual(250)
         ->and($pivot->packagingUnit->name)->toBe('Karton')
         ->and($pivot->items_per_packaging)->toEqual(500)
+        ->and($pivot->packaging_ean)->toBe('4006381333931')
         ->and($pivot->note)->toBe('Nur in ganzen Kartons lieferbar.');
 });
 
@@ -116,4 +119,21 @@ test('a packaging holds a whole number of items, or none is stated', function ()
         ->and($errorsFor(['items_per_packaging' => null]))->toBeEmpty()
         ->and($errorsFor(['items_per_packaging' => 0]))->toContain('suppliers.0.items_per_packaging')
         ->and($errorsFor(['items_per_packaging' => 2.5]))->toContain('suppliers.0.items_per_packaging');
+});
+
+test('a packaging ean is an optional string', function (): void {
+    $rules = resolve_static(SupplierRuleset::class, 'getRules');
+    $supplier = ['contact_id' => Contact::factory()->create()->getKey()];
+
+    $errorsFor = fn (array $attributes): array => Validator::make(
+        ['suppliers' => [array_merge($supplier, $attributes)]],
+        $rules
+    )
+        ->errors()
+        ->keys();
+
+    expect($errorsFor(['packaging_ean' => '4006381333931']))->toBeEmpty()
+        ->and($errorsFor(['packaging_ean' => null]))->toBeEmpty()
+        ->and($errorsFor(['packaging_ean' => str_repeat('1', 256)]))->toContain('suppliers.0.packaging_ean')
+        ->and($errorsFor(['packaging_ean' => ['4006381333931']]))->toContain('suppliers.0.packaging_ean');
 });

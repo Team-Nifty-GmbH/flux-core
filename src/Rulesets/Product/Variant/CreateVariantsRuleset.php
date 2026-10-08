@@ -26,6 +26,7 @@ class CreateVariantsRuleset extends FluxRuleset
                     'product_number',
                     'product_options',
                     'ean',
+                    'packaging_ean',
                     'is_bundle',
 
                     'product_options',

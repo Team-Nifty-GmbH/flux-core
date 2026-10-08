@@ -3,6 +3,7 @@
 use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\UpdateProduct;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
@@ -224,4 +225,43 @@ test('a product keeps its own number on update', function (): void {
         ->execute();
 
     expect($updated->product_number)->toBe('P-1');
+});
+
+test('create and update product store the packaging ean of a supplier', function (): void {
+    $contact = Contact::factory()->create();
+
+    $product = CreateProduct::make([
+        'name' => 'Mineralwasser',
+        'suppliers' => [
+            ['contact_id' => $contact->getKey(), 'items_per_packaging' => 12, 'packaging_ean' => '4006381333931'],
+        ],
+    ])->validate()->execute();
+
+    expect($product->suppliers()->first()->pivot->packaging_ean)->toBe('4006381333931');
+
+    UpdateProduct::make([
+        'id' => $product->getKey(),
+        'suppliers' => [
+            ['contact_id' => $contact->getKey(), 'items_per_packaging' => 12, 'packaging_ean' => '4012345678901'],
+        ],
+    ])->validate()->execute();
+
+    expect($product->suppliers()->first()->pivot->packaging_ean)->toBe('4012345678901');
+});
+
+test('create and update product store the packaging ean of the product', function (): void {
+    $product = CreateProduct::make([
+        'name' => 'Mineralwasser',
+        'purchase_steps' => 12,
+        'packaging_ean' => '4006381333931',
+    ])->validate()->execute();
+
+    expect($product->refresh()->packaging_ean)->toBe('4006381333931');
+
+    UpdateProduct::make([
+        'id' => $product->getKey(),
+        'packaging_ean' => null,
+    ])->validate()->execute();
+
+    expect($product->refresh()->packaging_ean)->toBeNull();
 });
