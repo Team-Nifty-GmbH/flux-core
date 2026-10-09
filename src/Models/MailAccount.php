@@ -15,6 +15,7 @@ use Illuminate\Contracts\Mail\Mailer;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
 use Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream;
 use Throwable;
@@ -72,6 +73,25 @@ class MailAccount extends FluxModel
     }
 
     // Public methods
+    public function appendToSentFolder(string $message): void
+    {
+        if (! $this->host || ! $this->email) {
+            return;
+        }
+
+        try {
+            $client = $this->getImapClient();
+
+            if ($client && $folder = $this->sentFolder($client)) {
+                $folder->appendMessage($message, ['\Seen']);
+            }
+        } catch (Throwable $e) {
+            report($e);
+        } finally {
+            $this->disconnectImapClient();
+        }
+    }
+
     /**
      * @throws ImapBadRequestException
      * @throws RuntimeException
@@ -210,6 +230,27 @@ class MailAccount extends FluxModel
     }
 
     // Protected methods
+    protected function sentFolder(Client $client): ?Folder
+    {
+        $folders = $client->getConnection()->folders('', '*')->validatedData();
+
+        $path = collect($folders)
+            ->filter(fn (array $folder) => in_array('\sent', array_map(Str::lower(...), $folder['flags'] ?? [])))
+            ->keys()
+            ->first()
+            ?? collect($folders)
+                ->filter(fn (array $folder, int|string $path) => in_array(
+                    Str::lower(Str::afterLast((string) $path, $folder['delimiter'] ?: '/')),
+                    ['sent', 'sent items', 'sent messages', 'sent mail', 'gesendet', 'gesendete objekte', 'gesendete elemente']
+                ))
+                ->keys()
+                ->first();
+
+        return is_null($path)
+            ? null
+            : new Folder($client, (string) $path, $folders[$path]['delimiter'], $folders[$path]['flags'] ?? []);
+    }
+
     protected function syncFolder(Folder $folder, ?int $parentId = null): array
     {
         $folderIds = [];

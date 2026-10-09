@@ -5,10 +5,13 @@ namespace FluxErp\Listeners;
 use FluxErp\Actions\Communication\CreateCommunication;
 use FluxErp\Actions\Communication\UpdateCommunication;
 use FluxErp\Enums\CommunicationTypeEnum;
+use FluxErp\Jobs\AppendMailToSentFolderJob;
 use FluxErp\Models\Communication;
+use FluxErp\Models\MailAccount;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\File;
 use Illuminate\Mail\Events\MessageSending;
+use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Support\Str;
 use Symfony\Component\Mime\Email;
 
@@ -54,6 +57,11 @@ class MessageSendingEventSubscriber
         $communicationForm['subject'] = (string) data_get($communicationForm, 'subject');
         $communicationForm['text_body'] = (string) data_get($communicationForm, 'body');
         $communicationForm['html_body'] = (string) data_get($communicationForm, 'html_body');
+        $communicationForm['message_id'] = $this->ensureMessageId($event->message);
+        $communicationForm['mail_account_id'] = $this->sendingMailAccount(
+            $event->message,
+            data_get($communicationForm, 'mail_account_id')
+        )?->getKey();
 
         $communicationAction = data_get($communicationForm, 'id')
             ? UpdateCommunication::make($communicationForm)
@@ -78,11 +86,53 @@ class MessageSendingEventSubscriber
         $this->injectTracker($event->message, $communication);
     }
 
+    public function handleSent(MessageSent $event): void
+    {
+        if (! $communicationForm = data_get($event->data, 'mailMessageForm')) {
+            return;
+        }
+
+        if ($mailAccount = $this->sendingMailAccount($event->message, data_get($communicationForm, 'mail_account_id'))) {
+            AppendMailToSentFolderJob::dispatch($mailAccount, $event->sent->toString());
+        }
+    }
+
     public function subscribe(): array
     {
         return [
             MessageSending::class => 'handle',
+            MessageSent::class => 'handleSent',
         ];
+    }
+
+    protected function ensureMessageId(Email $email): string
+    {
+        if ($header = $email->getHeaders()->get('Message-ID')) {
+            return $header->getId();
+        }
+
+        $messageId = $email->generateMessageId();
+        $email->getHeaders()->addIdHeader('Message-ID', $messageId);
+
+        return $messageId;
+    }
+
+    protected function sendingMailAccount(Email $email, int|string|null $mailAccountId = null): ?MailAccount
+    {
+        if ($mailAccountId) {
+            return resolve_static(MailAccount::class, 'query')
+                ->whereKey($mailAccountId)
+                ->first();
+        }
+
+        if (! $address = data_get($email->getFrom(), '0')?->getAddress()) {
+            return null;
+        }
+
+        return resolve_static(MailAccount::class, 'query')
+            ->where(fn ($query) => $query->where('smtp_email', $address)->orWhere('email', $address))
+            ->orderBy('id')
+            ->first();
     }
 
     protected function injectTracker(Email $email, Communication $communication): void
