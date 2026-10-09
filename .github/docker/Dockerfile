@@ -7,16 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
       git curl zip unzip jq libpng-dev libjpeg-dev libfreetype6-dev \
       libzip-dev libicu-dev libonig-dev libexif-dev libmagickwand-dev libxslt1-dev \
-      gnupg ca-certificates \
-    && if [ "$(dpkg --print-architecture)" = "amd64" ]; then \
-         curl -sL "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-community-client-core_8.0.42-1debian12_amd64.deb" -o /tmp/mysql-client.deb \
-         && dpkg -x /tmp/mysql-client.deb /tmp/mysql \
-         && cp /tmp/mysql/usr/bin/mysql /usr/local/bin/mysql \
-         && cp /tmp/mysql/usr/bin/mysqldump /usr/local/bin/mysqldump \
-         && rm -rf /tmp/mysql /tmp/mysql-client.deb; \
-       else \
-         apt-get install -y --no-install-recommends default-mysql-client; \
-       fi \
+      gnupg ca-certificates libncurses6 \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) pdo_mysql gd zip bcmath intl exif pcntl sockets xsl \
     && pecl install imagick redis xdebug && docker-php-ext-enable imagick redis xdebug \
@@ -29,7 +20,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && PLAYWRIGHT_BROWSERS_PATH=/tmp/pw-browsers npx playwright install --with-deps chromium \
     && apt-get -y autoremove && apt-get clean && rm -rf /var/lib/apt/lists/* /var/tmp/*
 
+# Oracle's MySQL client, not MariaDB's: the MariaDB client rejects the
+# ssl-mode and column-statistics options in /etc/my.cnf. Oracle ships no
+# Debian package for arm64, but the official mysql image is multi-arch and
+# its client only needs libncurses6 on top of what this image has.
+COPY --from=mysql:8.0 /usr/bin/mysql /usr/bin/mysqldump /usr/local/bin/
+
 RUN git config --global --add safe.directory '*'
 
 # Disable SSL for MySQL client tools (CI MySQL service uses self-signed certs)
-RUN printf "[client]\nssl-mode=DISABLED\n[mysqldump]\nssl-mode=DISABLED\ncolumn-statistics=0\n" > /etc/my.cnf
+RUN printf "[client]\nssl-mode=DISABLED\nget-server-public-key=1\n[mysqldump]\nssl-mode=DISABLED\ncolumn-statistics=0\n" > /etc/my.cnf
