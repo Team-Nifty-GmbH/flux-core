@@ -130,6 +130,15 @@ class Scheduling extends ScheduleList
         $this->schedule->parameters = $this->repeatable[$this->schedule->name]['parameters'];
     }
 
+    public function updatingScheduleCronMethodsBasic(?string $value): void
+    {
+        if ($value === data_get($this->schedule->cron, 'methods.basic')) {
+            return;
+        }
+
+        $this->schedule->cron['parameters']['basic'] = [null, null, null];
+    }
+
     protected function getViewData(): array
     {
         return array_merge(

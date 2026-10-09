@@ -201,7 +201,7 @@
                 <x-button
                     color="secondary"
                     light
-                    spinner
+                    loading="sendTestMail"
                     :text="__('Send test mail')"
                     wire:flux-confirm.prompt="{{  __('Send test mail to') }}||{{  __('Cancel') }}|{{  __('Send') }}"
                     wire:click="sendTestMail($nuxbe.promptValue())"

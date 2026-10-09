@@ -6,7 +6,7 @@
             })
         "
     >
-        <x-avatar image="{{ route('icons', ['name' => 'user']) }}" xl />
+        <x-avatar image="{{ route('icons', ['name' => 'user']) }}" />
     </div>
     <div class="w-full">
         <div class="flex justify-between text-sm">

@@ -895,14 +895,11 @@ class Order extends Component
             FrequenciesEnum::YearlyOn->value => [1, 1, '00:00'],
         ];
 
-        if (
-            $value === data_get($this->schedule->cron, 'methods.basic')
-            || ! array_key_exists($value, $defaults)
-        ) {
+        if ($value === data_get($this->schedule->cron, 'methods.basic')) {
             return;
         }
 
-        $this->schedule->cron['parameters']['basic'] = $defaults[$value];
+        $this->schedule->cron['parameters']['basic'] = $defaults[$value] ?? [null, null, null];
     }
 
     #[Renderless]
