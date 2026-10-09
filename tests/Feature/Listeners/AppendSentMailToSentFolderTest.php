@@ -27,7 +27,7 @@ function imapResponse(array $data = []): Response
 function fakeImapServer(array $folders): ProtocolInterface
 {
     $connection = Mockery::mock(ProtocolInterface::class);
-    $connection->shouldReceive('folders')->andReturn(imapResponse($folders));
+    $connection->shouldReceive('folders')->andReturn(imapResponse($folders))->byDefault();
 
     $client = Mockery::mock(Client::class);
     $client->shouldReceive('connect')->andReturnSelf();
@@ -105,10 +105,11 @@ test('a mail from the default mailer lands in the sent folder of the account wit
 });
 
 test('a mailbox without a sent folder only sends', function (): void {
-    $connection = fakeImapServer([
+    $connection = fakeImapServer([]);
+    $connection->shouldReceive('folders')->once()->andReturn(imapResponse([
         'INBOX' => ['delimiter' => '/', 'flags' => []],
         'Archive' => ['delimiter' => '/', 'flags' => []],
-    ]);
+    ]));
     $connection->shouldNotReceive('appendMessage');
 
     expect(sendFluxMail())->toHaveKey('success', true);
@@ -147,7 +148,7 @@ test('a nested sent folder is found by its name', function (): void {
 
 test('an unreachable imap server does not fail the send', function (): void {
     $client = Mockery::mock(Client::class);
-    $client->shouldReceive('connect')->andThrow(new ConnectionFailedException('connection refused'));
+    $client->shouldReceive('connect')->once()->andThrow(new ConnectionFailedException('connection refused'));
     ImapClient::shouldReceive('make')->andReturn($client);
 
     expect(sendFluxMail(['mail_account_id' => $this->mailAccount->getKey()]))->toHaveKey('success', true);
@@ -217,4 +218,10 @@ test('the sync recognizes the appended copy as the sent communication', function
     expect($communications)->toHaveCount(1)
         ->and($communications->first()->mail_folder_id)->toBe($sentFolder->getKey())
         ->and($communications->first()->message_uid)->toBe('7');
+});
+
+test('a failing queue after delivery does not report the mail as failed', function (): void {
+    Queue::shouldReceive('connection')->andThrow(new RuntimeException('redis is down'));
+
+    expect(sendFluxMail())->toHaveKey('success', true);
 });

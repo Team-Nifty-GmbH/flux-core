@@ -14,6 +14,7 @@ use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Support\Str;
 use Symfony\Component\Mime\Email;
+use Throwable;
 
 class MessageSendingEventSubscriber
 {
@@ -92,8 +93,12 @@ class MessageSendingEventSubscriber
             return;
         }
 
-        if ($mailAccount = $this->sendingMailAccount($event->message, data_get($communicationForm, 'mail_account_id'))) {
-            AppendMailToSentFolderJob::dispatch($mailAccount, $event->sent->toString());
+        try {
+            if ($mailAccount = $this->sendingMailAccount($event->message, data_get($communicationForm, 'mail_account_id'))) {
+                AppendMailToSentFolderJob::dispatch($mailAccount, $event->sent->toString());
+            }
+        } catch (Throwable $e) {
+            report($e);
         }
     }
 
