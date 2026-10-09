@@ -26,7 +26,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # its client only needs libncurses6 on top of what this image has.
 COPY --from=mysql:8.0 /usr/bin/mysql /usr/bin/mysqldump /usr/local/bin/
 
-RUN git config --global --add safe.directory '*'
+# Composer only uses $HOME/.config/composer when /etc/xdg exists (or an XDG_*
+# variable is set), otherwise $HOME/.composer. Many workflows write their
+# auth.json to /github/home/.config/composer, and the trixie base no longer
+# ships /etc/xdg, so keep it explicitly.
+RUN mkdir -p /etc/xdg && git config --global --add safe.directory '*'
 
 # Disable SSL for MySQL client tools (CI MySQL service uses self-signed certs)
 RUN printf "[client]\nssl-mode=DISABLED\nget-server-public-key=1\n[mysqldump]\nssl-mode=DISABLED\ncolumn-statistics=0\n" > /etc/my.cnf
