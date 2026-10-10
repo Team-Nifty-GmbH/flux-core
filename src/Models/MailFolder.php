@@ -13,6 +13,31 @@ class MailFolder extends FluxModel
 {
     use HasPackageFactory, HasParentChildRelations, HasUuid;
 
+    protected static function booted(): void
+    {
+        static::saved(function (MailFolder $mailFolder): void {
+            if (! $mailFolder->is_sent
+                || (! $mailFolder->wasChanged('is_sent') && ! $mailFolder->wasRecentlyCreated)
+            ) {
+                return;
+            }
+
+            // A mail account keeps its sent mails in exactly one folder.
+            resolve_static(MailFolder::class, 'query')
+                ->where('mail_account_id', $mailFolder->mail_account_id)
+                ->whereKeyNot($mailFolder->getKey())
+                ->where('is_sent', true)
+                ->update(['is_sent' => false]);
+        });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'is_sent' => 'boolean',
+        ];
+    }
+
     // Relations
     public function mailAccount(): BelongsTo
     {

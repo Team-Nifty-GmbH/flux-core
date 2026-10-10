@@ -72,6 +72,32 @@ class MailAccount extends FluxModel
     }
 
     // Public methods
+    public function appendToSentFolder(string $message): void
+    {
+        if (! $this->host || ! $this->email) {
+            return;
+        }
+
+        $sentFolder = $this->mailFolders()
+            ->where('is_sent', true)
+            ->first();
+
+        if (! $sentFolder) {
+            return;
+        }
+
+        try {
+            $this->getImapClient()
+                ?->getConnection()
+                ->appendMessage($sentFolder->slug, $message, ['\Seen'])
+                ->validatedData();
+        } catch (Throwable $e) {
+            report($e);
+        } finally {
+            $this->disconnectImapClient();
+        }
+    }
+
     /**
      * @throws ImapBadRequestException
      * @throws RuntimeException
@@ -210,6 +236,17 @@ class MailAccount extends FluxModel
     }
 
     // Protected methods
+    /**
+     * Servers name their sent folder in the language of the mailbox. Only the english defaults
+     * are recognized, and only when the folder first appears, so a folder unmarked by hand stays
+     * unmarked. Any other sent folder is marked by hand.
+     */
+    protected function isNewSentFolder(Folder $folder): bool
+    {
+        return in_array($folder->name, ['Sent', 'Sent Items', 'Sent Messages', 'Sent Mail'])
+            && ! $this->mailFolders()->where('is_sent', true)->exists();
+    }
+
     protected function syncFolder(Folder $folder, ?int $parentId = null): array
     {
         $folderIds = [];
@@ -231,6 +268,7 @@ class MailAccount extends FluxModel
             // A \Noselect folder is a container only (e.g. Exchange "Public Folders"),
             // selecting it fails. Keep it for the tree, but never sync its messages.
             ...($folder->no_select ? ['is_active' => false] : []),
+            ...(! $mailFolder && $this->isNewSentFolder($folder) ? ['is_sent' => true] : []),
         ])
             ->validate()
             ->execute();
