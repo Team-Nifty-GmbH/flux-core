@@ -95,11 +95,24 @@
                     wire:model="mailAccount.protocol"
                     :options="$this->protocolOptions"
                 />
-                <x-input
-                    x-bind:disabled="$wire.mailAccount.id"
-                    wire:model="mailAccount.email"
-                    :label="__('Email')"
-                />
+                <div class="flex items-end gap-1.5">
+                    <div class="grow">
+                        <x-input
+                            x-bind:disabled="$wire.mailAccount.id"
+                            x-on:blur="! $wire.mailAccount.id && $wire.discoverSettings(true)"
+                            wire:model="mailAccount.email"
+                            :label="__('Email')"
+                        />
+                    </div>
+                    <x-button
+                        loading="discoverSettings"
+                        color="secondary"
+                        light
+                        icon="magnifying-glass"
+                        :text="__('Discover settings')"
+                        x-on:click="$wire.discoverSettings(false)"
+                    />
+                </div>
                 <div
                     x-cloak
                     x-show="@js($this->imapProtocols).includes($wire.mailAccount.protocol)"
