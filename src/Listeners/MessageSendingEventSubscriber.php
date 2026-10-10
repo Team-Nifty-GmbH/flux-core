@@ -62,7 +62,8 @@ class MessageSendingEventSubscriber
         $communicationForm['mail_account_id'] = $this->sendingMailAccount(
             $event->message,
             data_get($communicationForm, 'mail_account_id')
-        )?->getKey();
+        )
+            ?->getKey();
 
         $communicationAction = data_get($communicationForm, 'id')
             ? UpdateCommunication::make($communicationForm)
@@ -94,8 +95,13 @@ class MessageSendingEventSubscriber
         }
 
         try {
-            if ($mailAccount = $this->sendingMailAccount($event->message, data_get($communicationForm, 'mail_account_id'))) {
-                AppendMailToSentFolderJob::dispatch($mailAccount, $event->sent->toString());
+            $mailAccount = $this->sendingMailAccount($event->message, data_get($communicationForm, 'mail_account_id'));
+
+            if ($mailAccount) {
+                dispatch(app(
+                    AppendMailToSentFolderJob::class,
+                    ['mailAccount' => $mailAccount, 'message' => $event->sent->toString()]
+                ));
             }
         } catch (Throwable $e) {
             report($e);

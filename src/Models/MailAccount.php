@@ -15,7 +15,6 @@ use Illuminate\Contracts\Mail\Mailer;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
 use Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream;
 use Throwable;
@@ -79,12 +78,19 @@ class MailAccount extends FluxModel
             return;
         }
 
-        try {
-            $client = $this->getImapClient();
+        $sentFolder = $this->mailFolders()
+            ->where('is_sent', true)
+            ->first();
 
-            if ($client && $folder = $this->sentFolder($client)) {
-                $folder->appendMessage($message, ['\Seen']);
-            }
+        if (! $sentFolder) {
+            return;
+        }
+
+        try {
+            $this->getImapClient()
+                ?->getConnection()
+                ->appendMessage($sentFolder->slug, $message, ['\Seen'])
+                ->validatedData();
         } catch (Throwable $e) {
             report($e);
         } finally {
@@ -183,6 +189,8 @@ class MailAccount extends FluxModel
                     ->execute()
             );
 
+        $this->markSentFolder();
+
         return $folderIds;
     }
 
@@ -230,25 +238,26 @@ class MailAccount extends FluxModel
     }
 
     // Protected methods
-    protected function sentFolder(Client $client): ?Folder
+    /**
+     * Servers name their sent folder in the language of the mailbox. Only the english defaults are
+     * recognized, any other folder is marked by hand and never overwritten here.
+     */
+    protected function markSentFolder(): void
     {
-        $folders = $client->getConnection()->folders('', '*')->validatedData();
+        if ($this->mailFolders()->where('is_sent', true)->exists()) {
+            return;
+        }
 
-        $path = collect($folders)
-            ->filter(fn (array $folder) => in_array('\sent', array_map(Str::lower(...), $folder['flags'] ?? [])))
-            ->keys()
-            ->first()
-            ?? collect($folders)
-                ->filter(fn (array $folder, int|string $path) => in_array(
-                    Str::lower(Str::afterLast((string) $path, $folder['delimiter'] ?: '/')),
-                    ['sent', 'sent items', 'sent messages', 'sent mail', 'gesendet', 'gesendete objekte', 'gesendete elemente']
-                ))
-                ->keys()
-                ->first();
+        $sentFolderId = $this->mailFolders()
+            ->whereIn('name', ['Sent', 'Sent Items', 'Sent Messages', 'Sent Mail'])
+            ->orderBy('id')
+            ->value('id');
 
-        return is_null($path)
-            ? null
-            : new Folder($client, (string) $path, $folders[$path]['delimiter'], $folders[$path]['flags'] ?? []);
+        if ($sentFolderId) {
+            UpdateMailFolder::make(['id' => $sentFolderId, 'is_sent' => true])
+                ->validate()
+                ->execute();
+        }
     }
 
     protected function syncFolder(Folder $folder, ?int $parentId = null): array

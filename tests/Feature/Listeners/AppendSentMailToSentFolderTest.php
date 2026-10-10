@@ -24,10 +24,9 @@ function imapResponse(array $data = []): Response
     return $response;
 }
 
-function fakeImapServer(array $folders): ProtocolInterface
+function fakeImapServer(): ProtocolInterface
 {
     $connection = Mockery::mock(ProtocolInterface::class);
-    $connection->shouldReceive('folders')->andReturn(imapResponse($folders))->byDefault();
 
     $client = Mockery::mock(Client::class);
     $client->shouldReceive('connect')->andReturnSelf();
@@ -38,6 +37,16 @@ function fakeImapServer(array $folders): ProtocolInterface
     ImapClient::shouldReceive('make')->andReturn($client);
 
     return $connection;
+}
+
+function sentFolder(MailAccount $mailAccount, string $slug = 'Sent'): MailFolder
+{
+    return MailFolder::factory()->create([
+        'mail_account_id' => $mailAccount->getKey(),
+        'name' => $slug,
+        'slug' => $slug,
+        'is_sent' => true,
+    ]);
 }
 
 function sendFluxMail(array $data = []): array
@@ -66,10 +75,8 @@ beforeEach(function (): void {
 });
 
 test('a mail sent through a mail account lands in its sent folder', function (): void {
-    $connection = fakeImapServer([
-        'INBOX' => ['delimiter' => '.', 'flags' => ['\HasNoChildren']],
-        'INBOX.Postausgang' => ['delimiter' => '.', 'flags' => ['\HasNoChildren', '\Sent']],
-    ]);
+    $connection = fakeImapServer();
+    sentFolder($this->mailAccount, 'INBOX.Postausgang');
 
     $raw = null;
     $connection->shouldReceive('appendMessage')
@@ -91,10 +98,8 @@ test('a mail sent through a mail account lands in its sent folder', function ():
 });
 
 test('a mail from the default mailer lands in the sent folder of the account with that address', function (): void {
-    $connection = fakeImapServer([
-        'INBOX' => ['delimiter' => '/', 'flags' => []],
-        'Gesendete Objekte' => ['delimiter' => '/', 'flags' => []],
-    ]);
+    $connection = fakeImapServer();
+    sentFolder($this->mailAccount, 'Gesendete Objekte');
     $connection->shouldReceive('appendMessage')
         ->once()
         ->withArgs(fn (string $folder) => $folder === 'Gesendete Objekte')
@@ -105,20 +110,16 @@ test('a mail from the default mailer lands in the sent folder of the account wit
 });
 
 test('a mailbox without a sent folder only sends', function (): void {
-    $connection = fakeImapServer([]);
-    $connection->shouldReceive('folders')->once()->andReturn(imapResponse([
-        'INBOX' => ['delimiter' => '/', 'flags' => []],
-        'Archive' => ['delimiter' => '/', 'flags' => []],
-    ]));
-    $connection->shouldNotReceive('appendMessage');
+    MailFolder::factory()->create(['mail_account_id' => $this->mailAccount->getKey(), 'is_sent' => false]);
+
+    ImapClient::shouldReceive('make')->never();
 
     expect(sendFluxMail())->toHaveKey('success', true);
 });
 
 test('a failing append does not fail the send', function (): void {
-    $connection = fakeImapServer([
-        'Sent' => ['delimiter' => '/', 'flags' => []],
-    ]);
+    $connection = fakeImapServer();
+    sentFolder($this->mailAccount);
     $connection->shouldReceive('appendMessage')->once()->andThrow(new RuntimeException('quota exceeded'));
 
     expect(sendFluxMail(['mail_account_id' => $this->mailAccount->getKey()]))->toHaveKey('success', true);
@@ -133,20 +134,8 @@ test('a mail from an address without a mail account is not appended', function (
         ->and(Communication::query()->latest('id')->value('mail_account_id'))->toBeNull();
 });
 
-test('a nested sent folder is found by its name', function (): void {
-    $connection = fakeImapServer([
-        'INBOX' => ['delimiter' => '.', 'flags' => []],
-        'INBOX.Sent' => ['delimiter' => '.', 'flags' => []],
-    ]);
-    $connection->shouldReceive('appendMessage')
-        ->once()
-        ->withArgs(fn (string $folder) => $folder === 'INBOX.Sent')
-        ->andReturn(imapResponse());
-
-    expect(sendFluxMail())->toHaveKey('success', true);
-});
-
 test('an unreachable imap server does not fail the send', function (): void {
+    sentFolder($this->mailAccount);
     $client = Mockery::mock(Client::class);
     $client->shouldReceive('connect')->once()->andThrow(new ConnectionFailedException('connection refused'));
     ImapClient::shouldReceive('make')->andReturn($client);
