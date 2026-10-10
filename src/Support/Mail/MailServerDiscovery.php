@@ -5,20 +5,30 @@ namespace FluxErp\Support\Mail;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Psr\Http\Message\ResponseInterface;
+use RuntimeException;
 use SimpleXMLElement;
 use Throwable;
 
 class MailServerDiscovery
 {
+    protected const int MAX_RESPONSE_BYTES = 1024 * 1024;
+
     protected const array SOCKET_TYPES = [
         'SSL' => 'ssl',
         'STARTTLS' => 'tls',
     ];
 
+    protected float $deadline = 0;
+
+    // The lookup runs inside a form request, so the http sources share one time budget.
+    protected int $deadlineSeconds = 8;
+
     public function discover(string $email): ?array
     {
         $domain = Str::lower(Str::afterLast($email, '@'));
         $query = '?emailaddress=' . urlencode($email);
+        $this->deadline = microtime(true) + $this->deadlineSeconds;
 
         $sources = [
             fn () => $this->fromAutoconfig(
@@ -50,13 +60,27 @@ class MailServerDiscovery
 
     protected function fromAutoconfig(string $url, string $email): ?array
     {
+        if (microtime(true) >= $this->deadline || ! $this->isPublicHost(parse_url($url, PHP_URL_HOST))) {
+            return null;
+        }
+
         try {
-            $response = Http::timeout(5)->get($url);
+            // The domain comes from user input, so a redirect could point anywhere.
+            $response = Http::timeout(min(5, max(1, (int) ceil($this->deadline - microtime(true)))))
+                ->withOptions([
+                    'allow_redirects' => false,
+                    'on_headers' => function (ResponseInterface $response): void {
+                        if ((int) $response->getHeaderLine('Content-Length') > static::MAX_RESPONSE_BYTES) {
+                            throw new RuntimeException('Autoconfig response too large');
+                        }
+                    },
+                ])
+                ->get($url);
         } catch (Throwable) {
             return null;
         }
 
-        if (! $response->successful()) {
+        if (! $response->successful() || strlen($response->body()) > static::MAX_RESPONSE_BYTES) {
             return null;
         }
 
@@ -98,6 +122,29 @@ class MailServerDiscovery
         $settings['source'] = parse_url($url, PHP_URL_HOST);
 
         return $settings;
+    }
+
+    protected function isPublicHost(?string $host): bool
+    {
+        if (! $host) {
+            return false;
+        }
+
+        $addresses = filter_var($host, FILTER_VALIDATE_IP)
+            ? [$host]
+            : array_merge(
+                array_column($this->dnsRecords($host, DNS_A), 'ip'),
+                array_column($this->dnsRecords($host, DNS_AAAA), 'ipv6')
+            );
+
+        return $addresses && array_all(
+            $addresses,
+            fn (string $address) => filter_var(
+                $address,
+                FILTER_VALIDATE_IP,
+                FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+            ) !== false
+        );
     }
 
     protected function fromMxIspdb(string $domain, string $email): ?array

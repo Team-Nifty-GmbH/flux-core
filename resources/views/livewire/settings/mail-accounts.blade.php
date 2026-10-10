@@ -110,6 +110,7 @@
                         light
                         icon="magnifying-glass"
                         :text="__('Discover settings')"
+                        x-on:mousedown.prevent
                         x-on:click="$wire.discoverSettings(false)"
                     />
                 </div>

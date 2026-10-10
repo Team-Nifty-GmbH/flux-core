@@ -3,17 +3,21 @@
 use FluxErp\Support\Mail\MailServerDiscovery;
 use Illuminate\Support\Facades\Http;
 
-function fakeMailDns(array $records = []): void
+function fakeMailDns(array $records = [], int $deadlineSeconds = 8): void
 {
     app()->bind(
         MailServerDiscovery::class,
-        fn () => new class($records) extends MailServerDiscovery
+        fn () => new class($records, $deadlineSeconds) extends MailServerDiscovery
         {
-            public function __construct(private readonly array $records) {}
+            public function __construct(private readonly array $records, int $deadlineSeconds)
+            {
+                $this->deadlineSeconds = $deadlineSeconds;
+            }
 
             protected function dnsRecords(string $host, int $type): array
             {
-                return $this->records[$type][$host] ?? [];
+                // Every host resolves to a public address unless a test says otherwise.
+                return $this->records[$type][$host] ?? ($type === DNS_A ? [['ip' => '93.184.216.34']] : []);
             }
         }
     );
@@ -185,4 +189,35 @@ test('returns null when nothing is found', function (): void {
     Http::fake(['*' => Http::response('', 404)]);
 
     expect(app(MailServerDiscovery::class)->discover('john@example.com'))->toBeNull();
+});
+
+test('a host resolving to a private address is never queried', function (): void {
+    fakeMailDns([DNS_A => ['autoconfig.example.com' => [['ip' => '10.0.0.5']]]]);
+    Http::fake([
+        'autoconfig.example.com/*' => Http::response(autoconfigXml()),
+        '*' => Http::response('', 404),
+    ]);
+
+    expect(app(MailServerDiscovery::class)->discover('john@example.com'))->toBeNull();
+    Http::assertNotSent(fn ($request) => str_contains($request->url(), 'autoconfig.example.com'));
+});
+
+test('an oversized response falls through to the next source', function (): void {
+    Http::fake([
+        'autoconfig.example.com/*' => Http::response(autoconfigXml() . '<!--' . str_repeat('x', 1024 * 1024) . '-->'),
+        '*' => Http::response('', 404),
+    ]);
+
+    expect(app(MailServerDiscovery::class)->discover('john@example.com'))->toBeNull();
+});
+
+test('http sources are skipped once the deadline has passed', function (): void {
+    fakeMailDns([
+        DNS_SRV => ['_imaps._tcp.example.com' => [['target' => 'mail.example.com', 'port' => 993, 'pri' => 0]]],
+    ], deadlineSeconds: 0);
+    Http::fake(['*' => Http::response(autoconfigXml())]);
+
+    expect(app(MailServerDiscovery::class)->discover('john@example.com'))
+        ->toMatchArray(['host' => 'mail.example.com', 'source' => 'DNS SRV']);
+    Http::assertNothingSent();
 });

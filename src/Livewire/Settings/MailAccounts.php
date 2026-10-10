@@ -15,7 +15,6 @@ use FluxErp\Mail\MailDriverManager;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use FluxErp\Support\Mail\MailServerDiscovery;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -137,12 +136,13 @@ class MailAccounts extends MailAccountList
         ];
 
         foreach ($blocks as $key => $fields) {
-            if ($onlyEmpty && filled($this->mailAccount->{$key})) {
+            if (! array_key_exists($key, $settings) || ($onlyEmpty && filled($this->mailAccount->{$key}))) {
                 continue;
             }
 
-            foreach (Arr::only($settings, $fields) as $field => $value) {
-                $this->mailAccount->{$field} = $value;
+            // Set the whole block, so a field the source left out does not keep a stale value.
+            foreach ($fields as $field) {
+                $this->mailAccount->{$field} = data_get($settings, $field);
             }
         }
 

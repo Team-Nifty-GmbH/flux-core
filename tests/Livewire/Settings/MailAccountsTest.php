@@ -110,3 +110,14 @@ test('discover settings does nothing for an invalid email', function (): void {
         ->assertSet('mailAccount.host', null)
         ->assertSet('mailAccount.smtp_host', null);
 });
+
+test('discover settings resets the fields of a block the source left out', function (): void {
+    fakeMailServerDiscovery(array_diff_key(discoveredMailSettings(), ['smtp_user' => true]));
+
+    Livewire::test(MailAccounts::class)
+        ->set('mailAccount.email', 'john@example.com')
+        ->set('mailAccount.smtp_user', 'stale-user')
+        ->call('discoverSettings')
+        ->assertSet('mailAccount.smtp_host', 'smtp.example.com')
+        ->assertSet('mailAccount.smtp_user', null);
+});
