@@ -32,6 +32,7 @@ class RecentActivities extends ValueList
             ->with(['causer:id,name', 'subject'])
             ->whereNot('event', 'visit')
             ->latest()
+            ->latest('id')
             ->limit($this->limit)
             ->get()
             ->map(fn (Activity $item) => [
