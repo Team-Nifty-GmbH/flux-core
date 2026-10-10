@@ -16,7 +16,9 @@ class MailFolder extends FluxModel
     protected static function booted(): void
     {
         static::saved(function (MailFolder $mailFolder): void {
-            if (! $mailFolder->is_sent || ! $mailFolder->wasChanged('is_sent') && ! $mailFolder->wasRecentlyCreated) {
+            if (! $mailFolder->is_sent
+                || (! $mailFolder->wasChanged('is_sent') && ! $mailFolder->wasRecentlyCreated)
+            ) {
                 return;
             }
 

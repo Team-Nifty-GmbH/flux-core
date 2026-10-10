@@ -189,8 +189,6 @@ class MailAccount extends FluxModel
                     ->execute()
             );
 
-        $this->markSentFolder();
-
         return $folderIds;
     }
 
@@ -239,25 +237,14 @@ class MailAccount extends FluxModel
 
     // Protected methods
     /**
-     * Servers name their sent folder in the language of the mailbox. Only the english defaults are
-     * recognized, any other folder is marked by hand and never overwritten here.
+     * Servers name their sent folder in the language of the mailbox. Only the english defaults
+     * are recognized, and only when the folder first appears, so a folder unmarked by hand stays
+     * unmarked. Any other sent folder is marked by hand.
      */
-    protected function markSentFolder(): void
+    protected function isNewSentFolder(Folder $folder): bool
     {
-        if ($this->mailFolders()->where('is_sent', true)->exists()) {
-            return;
-        }
-
-        $sentFolderId = $this->mailFolders()
-            ->whereIn('name', ['Sent', 'Sent Items', 'Sent Messages', 'Sent Mail'])
-            ->orderBy('id')
-            ->value('id');
-
-        if ($sentFolderId) {
-            UpdateMailFolder::make(['id' => $sentFolderId, 'is_sent' => true])
-                ->validate()
-                ->execute();
-        }
+        return in_array($folder->name, ['Sent', 'Sent Items', 'Sent Messages', 'Sent Mail'])
+            && ! $this->mailFolders()->where('is_sent', true)->exists();
     }
 
     protected function syncFolder(Folder $folder, ?int $parentId = null): array
@@ -281,6 +268,7 @@ class MailAccount extends FluxModel
             // A \Noselect folder is a container only (e.g. Exchange "Public Folders"),
             // selecting it fails. Keep it for the tree, but never sync its messages.
             ...($folder->no_select ? ['is_active' => false] : []),
+            ...(! $mailFolder && $this->isNewSentFolder($folder) ? ['is_sent' => true] : []),
         ])
             ->validate()
             ->execute();

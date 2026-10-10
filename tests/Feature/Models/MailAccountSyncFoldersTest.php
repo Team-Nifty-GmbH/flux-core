@@ -112,3 +112,17 @@ test('the folder sync keeps a sent folder marked by hand', function (): void {
     expect($outbox->refresh()->is_sent)->toBeTrue()
         ->and(MailFolder::query()->where('slug', 'Sent')->value('is_sent'))->toBeFalse();
 });
+
+test('the folder sync does not mark a sent folder again that was unmarked by hand', function (): void {
+    $mailAccount = MailAccount::factory()->create();
+    $sent = MailFolder::factory()->create([
+        'mail_account_id' => $mailAccount->getKey(),
+        'name' => 'Sent',
+        'slug' => 'Sent',
+        'is_sent' => false,
+    ]);
+
+    syncFoldersFromServer($mailAccount, ['Sent']);
+
+    expect($sent->refresh()->is_sent)->toBeFalse();
+});
