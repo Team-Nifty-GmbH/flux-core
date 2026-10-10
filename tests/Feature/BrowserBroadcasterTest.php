@@ -33,10 +33,11 @@ test('the browser knows where the mercure hub is', function (): void {
         ->toMatch('#name="ws-mercure-hub"\s+content="https://flux.example.com/.well-known/mercure"#');
 });
 
-test('a combined instance served under another domain listens on reverb', function (string $default, array $combined, string $expected): void {
+test('a combined instance served under another domain listens on the other connection', function (string $default, array $combined, string $expected): void {
     config([
         'broadcasting.default' => $default,
         'broadcasting.connections.combined.connections' => $combined,
+        'broadcasting.connections.reverb-eu' => ['driver' => 'reverb'],
     ]);
     $this->app->instance('request', Request::create('https://connect.example.com/'));
 
@@ -44,5 +45,8 @@ test('a combined instance served under another domain listens on reverb', functi
         ->toMatch('/name="ws-broadcaster"\\s+content="' . $expected . '"/');
 })->with([
     'mercure and reverb' => ['combined', ['mercure', 'reverb'], 'reverb'],
+    'mercure and pusher' => ['combined', ['mercure', 'pusher'], 'pusher'],
+    'mercure and a renamed reverb' => ['combined', ['mercure', 'reverb-eu'], 'reverb'],
+    'combined with only mercure' => ['combined', ['mercure'], 'null'],
     'only mercure' => ['mercure', [], 'mercure'],
 ]);

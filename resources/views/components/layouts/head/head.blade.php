@@ -14,7 +14,7 @@
 <meta name="ws-key" content="{{ config('flux.vite.reverb_app_key') }}" />
 <meta
     name="ws-broadcaster"
-    content="{{ resolve_static(\FluxErp\Support\Broadcasting\MercureHubConfig::class, 'browserBroadcaster') }}"
+    content="{{ resolve_static(\FluxErp\Support\Broadcasting\BrowserBroadcaster::class, 'name') }}"
 />
 <meta
     name="ws-mercure-hub"

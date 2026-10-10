@@ -6,6 +6,7 @@ use Illuminate\Broadcasting\Broadcasters\MercureBroadcaster;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Exceptions;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 function recordingBroadcaster(): Broadcaster
 {
@@ -54,17 +55,19 @@ test('an event reaches every connection', function (): void {
         ->and($second->broadcasts)->toBe([[['private-order.1'], 'OrderUpdated', ['id' => 1]]]);
 });
 
-function failingBroadcaster(): Broadcaster
+function failingBroadcaster(string $message = 'hub unreachable'): Broadcaster
 {
-    return new class() extends Broadcaster
+    return new class($message) extends Broadcaster
     {
+        public function __construct(protected string $message) {}
+
         public function auth($request): void {}
 
         public function validAuthenticationResponse($request, $result): void {}
 
         public function broadcast(array $channels, $event, array $payload = []): void
         {
-            throw new RuntimeException('hub unreachable');
+            throw new RuntimeException($this->message);
         }
     };
 }
@@ -83,6 +86,16 @@ test('a broadcast fails when no connection takes the event', function (): void {
     expect(fn () => (new CombinedBroadcaster([failingBroadcaster(), failingBroadcaster()]))
         ->broadcast(['private-order.1'], 'OrderUpdated'))
         ->toThrow(RuntimeException::class, 'hub unreachable');
+});
+
+test('the other failures are reported when no connection takes the event', function (): void {
+    Exceptions::fake();
+
+    expect(fn () => (new CombinedBroadcaster([failingBroadcaster('mercure down'), failingBroadcaster('reverb down')]))
+        ->broadcast(['private-order.1'], 'OrderUpdated'))
+        ->toThrow(RuntimeException::class, 'mercure down');
+
+    Exceptions::assertReported(fn (RuntimeException $e) => $e->getMessage() === 'reverb down');
 });
 
 test('a channel is registered on every connection', function (): void {
@@ -120,6 +133,17 @@ test('a pusher authorization goes to the other connection', function (): void {
     (new CombinedBroadcaster([$mercure, $pusher]))->auth($request);
 
     expect($pusher->authRequests)->toBe([$request]);
+});
+
+test('an authorization no connection speaks the protocol of is denied', function (): void {
+    $request = Request::create(
+        '/broadcasting/auth',
+        'POST',
+        ['channel_name' => 'private-order.1', 'socket_id' => '1.1']
+    );
+
+    expect(fn () => (new CombinedBroadcaster([mercureBroadcaster()]))->auth($request))
+        ->toThrow(AccessDeniedHttpException::class);
 });
 
 test('the combined connection is built from the configured connections', function (): void {

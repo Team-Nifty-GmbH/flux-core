@@ -5,6 +5,7 @@ namespace FluxErp\Support\Broadcasting;
 use Illuminate\Broadcasting\Broadcasters\Broadcaster;
 use Illuminate\Broadcasting\Broadcasters\MercureBroadcaster;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Throwable;
 
 /**
@@ -35,11 +36,13 @@ class CombinedBroadcaster extends Broadcaster
             }
         }
 
-        if (count($failures) === count($this->broadcasters)) {
-            throw array_first($failures);
-        }
+        $exception = count($failures) === count($this->broadcasters) ? array_shift($failures) : null;
 
         array_map(report(...), $failures);
+
+        if ($exception) {
+            throw $exception;
+        }
     }
 
     /**
@@ -61,7 +64,8 @@ class CombinedBroadcaster extends Broadcaster
 
     public function validAuthenticationResponse($request, $result)
     {
-        return $this->broadcasterFor($request)->validAuthenticationResponse($request, $result);
+        return $this->broadcasterFor($request)
+            ->validAuthenticationResponse($request, $result);
     }
 
     /**
@@ -71,12 +75,9 @@ class CombinedBroadcaster extends Broadcaster
     {
         $wantsMercure = $request->has('channel_names');
 
-        foreach ($this->broadcasters as $broadcaster) {
-            if ($broadcaster instanceof MercureBroadcaster === $wantsMercure) {
-                return $broadcaster;
-            }
-        }
-
-        return array_first($this->broadcasters);
+        return array_find(
+            $this->broadcasters,
+            fn (Broadcaster $broadcaster) => $broadcaster instanceof MercureBroadcaster === $wantsMercure
+        ) ?? throw new AccessDeniedHttpException();
     }
 }

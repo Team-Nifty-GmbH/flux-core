@@ -41,10 +41,7 @@ return [
 
     'broadcasting' => [
         // The connections the "combined" broadcast connection sends every event to.
-        'combined_connections' => array_map(
-            trim(...),
-            explode(',', env('BROADCAST_COMBINED_CONNECTIONS', 'mercure,reverb'))
-        ),
+        'combined_connections' => explode(',', env('BROADCAST_COMBINED_CONNECTIONS', 'mercure,reverb')),
 
         // Events the Mercure hub keeps, so a client that slept can replay what it missed.
         'mercure_history_size' => (int) env('MERCURE_HISTORY_SIZE', 10000),
