@@ -38,7 +38,7 @@
         "laravel-vite-plugin": "^3.2.0",
         "leaflet": "^1.9.4",
         "leaflet.markercluster": "^1.5.3",
-        "playwright": "^1.63.0",
+        "playwright": "^1.64.0",
         "prettier": "^3.9.9",
         "prettier-plugin-blade": "^3.3.3",
         "prettier-plugin-tailwindcss": "^0.8.1",
