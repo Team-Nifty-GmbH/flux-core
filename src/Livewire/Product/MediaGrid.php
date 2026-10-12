@@ -129,6 +129,9 @@ class MediaGrid extends BaseMediaGrid
             }
         }
 
+        // Livewire appends the next upload to this array, so stored files must not stay in it
+        $this->uploads = [];
+
         $this->loadData();
     }
 
