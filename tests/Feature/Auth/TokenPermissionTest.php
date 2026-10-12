@@ -13,6 +13,7 @@ use FluxErp\Console\Commands\Init\InitPermissions;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Token;
+use FluxErp\View\Printing\Contact\BalanceStatement;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
@@ -77,8 +78,31 @@ test('a token only sees the print views it holds', function (): void {
     expect(app(Contact::class)->resolvePrintViews())->toHaveKey('balance-statement');
 });
 
+test('a token only sees the registered print views it holds', function (): void {
+    Contact::registerPrintView('registered-statement', BalanceStatement::class);
+    $permission = print_view_to_permission('registered-statement', morph_alias(Contact::class));
+    forgetPermission($permission, 'token');
+    Auth::setUser($token = createApiToken(['*']));
+
+    try {
+        expect(app(Contact::class)->resolvePrintViews())->not->toHaveKey('registered-statement');
+
+        $token->givePermissionTo(Permission::findOrCreate($permission, 'token'));
+
+        expect(app(Contact::class)->resolvePrintViews())->toHaveKey('registered-statement');
+    } finally {
+        unset(Contact::$registeredPrintViews['registered-statement']);
+    }
+});
+
 test('init permissions creates action and print permissions for the token guard', function (): void {
-    Artisan::call(InitPermissions::class);
+    Contact::registerPrintView('registered-statement', BalanceStatement::class);
+
+    try {
+        Artisan::call(InitPermissions::class);
+    } finally {
+        unset(Contact::$registeredPrintViews['registered-statement']);
+    }
 
     $guards = fn (string $name): array => Permission::query()
         ->where('name', $name)
@@ -88,11 +112,13 @@ test('init permissions creates action and print permissions for the token guard'
 
     expect($guards('action.order.create'))->toBe(['sanctum', 'token', 'web'])
         ->and($guards(print_view_to_permission('balance-statement', morph_alias(Contact::class))))
+        ->toBe(['token', 'web'])
+        ->and($guards(print_view_to_permission('registered-statement', morph_alias(Contact::class))))
         ->toBe(['token', 'web']);
 });
 
 test('existing tokens with full abilities keep every action and print view', function (): void {
-    $full = createApiToken(['*']);
+    $full = createApiToken(['*'], ['action.order.create']);
     $interface = createApiToken(['interface']);
     $shop = createApiToken(['shop']);
 
@@ -111,9 +137,9 @@ test('existing tokens with full abilities keep every action and print view', fun
         ->all();
 
     expect($expected)->toContain('action.order.create', 'action.' . CreateToken::name())
-        ->and($full->getAllPermissions()->pluck('name')->sort()->values()->all())->toBe($expected)
-        ->and($interface->getAllPermissions()->pluck('name')->sort()->values()->all())->toBe($expected)
-        ->and($shop->getAllPermissions())->toBeEmpty();
+        ->and($full->fresh()->getAllPermissions()->pluck('name')->sort()->values()->all())->toBe($expected)
+        ->and($interface->fresh()->getAllPermissions()->pluck('name')->sort()->values()->all())->toBe($expected)
+        ->and($shop->fresh()->getAllPermissions())->toBeEmpty();
 });
 
 test('the printer bridge token may run every action the bridge calls', function (): void {

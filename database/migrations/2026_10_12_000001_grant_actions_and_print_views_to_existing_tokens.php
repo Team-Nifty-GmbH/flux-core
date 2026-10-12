@@ -1,11 +1,11 @@
 <?php
 
-use FluxErp\Console\Commands\Init\InitPermissions;
+use FluxErp\Contracts\OffersPrinting;
+use FluxErp\Facades\Action;
 use FluxErp\Models\Token;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -32,26 +32,44 @@ return new class() extends Migration
             return;
         }
 
-        Artisan::call(InitPermissions::class);
+        $permissionsTable = config('permission.table_names.permissions');
 
-        $permissionIds = DB::table('permissions')
-            ->where('guard_name', 'token')
-            ->where(fn (Builder $query): Builder => $query
-                ->where('name', 'like', 'action.%')
-                ->orWhere('name', 'like', 'print.%')
+        DB::table($permissionsTable)->insertOrIgnore(
+            array_map(
+                fn (string $name): array => [
+                    'name' => $name,
+                    'guard_name' => 'token',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                $this->permissionNames()
             )
-            ->pluck('id');
+        );
 
-        $tokenIds->crossJoin($permissionIds)
-            ->map(fn (array $pair): array => [
-                'permission_id' => $pair[1],
-                'model_type' => morph_alias(Token::class),
-                config('permission.column_names.model_morph_key') => $pair[0],
-            ])
-            ->chunk(1000)
-            ->each(fn (Collection $rows): int => DB::table(config('permission.table_names.model_has_permissions'))
-                ->insertOrIgnore($rows->values()->all())
+        $pivotTable = config('permission.table_names.model_has_permissions');
+        $pivotKey = config('permission.column_names.permission_pivot_key') ?? 'permission_id';
+        $morphKey = config('permission.column_names.model_morph_key');
+
+        foreach ($tokenIds as $tokenId) {
+            DB::table($pivotTable)->insertUsing(
+                [$pivotKey, 'model_type', $morphKey],
+                DB::table($permissionsTable)
+                    ->select('id')
+                    ->selectRaw('?', [morph_alias(Token::class)])
+                    ->selectRaw('?', [$tokenId])
+                    ->where('guard_name', 'token')
+                    ->where(fn (Builder $query): Builder => $query
+                        ->where('name', 'like', 'action.%')
+                        ->orWhere('name', 'like', 'print.%')
+                    )
+                    ->whereNotExists(fn (Builder $query): Builder => $query
+                        ->from($pivotTable)
+                        ->whereColumn($pivotTable . '.' . $pivotKey, $permissionsTable . '.id')
+                        ->where($pivotTable . '.model_type', morph_alias(Token::class))
+                        ->where($pivotTable . '.' . $morphKey, $tokenId)
+                    )
             );
+        }
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
@@ -59,5 +77,28 @@ return new class() extends Migration
     public function down(): void
     {
         //
+    }
+
+    protected function permissionNames(): array
+    {
+        $names = [];
+
+        foreach (Action::all() as $action) {
+            if ($action['class']::hasPermission()) {
+                $names[] = 'action.' . $action['name'];
+            }
+        }
+
+        foreach (Relation::morphMap() as $alias => $class) {
+            $model = app($class);
+
+            if ($model instanceof OffersPrinting) {
+                foreach ($model->getAvailableViews() as $view) {
+                    $names[] = print_view_to_permission($view, $alias);
+                }
+            }
+        }
+
+        return $names;
     }
 };

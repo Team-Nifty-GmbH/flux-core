@@ -204,7 +204,7 @@ class InitPermissions extends Command
         foreach (Relation::morphMap() as $alias => $class) {
             $model = app($class);
             if ($model instanceof OffersPrinting) {
-                foreach ($model->getPrintViews() as $key => $view) {
+                foreach ($model->getAvailableViews() as $key) {
                     $id = $this->keepPermission(print_view_to_permission($key, $alias));
                     $this->keepPermission(print_view_to_permission($key, $alias), 'token');
 
