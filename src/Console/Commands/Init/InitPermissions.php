@@ -49,6 +49,7 @@ class InitPermissions extends Command
 
         $this->registerActionPermission();
         $this->registerActionPermission('sanctum');
+        $this->registerActionPermission('token');
         $this->registerModelGetPermission();
         $this->registerRoutePermissions();
         $this->registerWidgetPermissions();
@@ -205,6 +206,7 @@ class InitPermissions extends Command
             if ($model instanceof OffersPrinting) {
                 foreach ($model->getPrintViews() as $key => $view) {
                     $id = $this->keepPermission(print_view_to_permission($key, $alias));
+                    $this->keepPermission(print_view_to_permission($key, $alias), 'token');
 
                     if (! array_key_exists($id, $this->preexistingPermissions)) {
                         $newPermissions[] = $id;

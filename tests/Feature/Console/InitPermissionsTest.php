@@ -17,7 +17,7 @@ test('creates a permission for every action, model, route, widget, tab and print
         ->and($prefixes->diff($prefixed)->all())->not->toBe([])
         ->and($permissions->pluck('guard_name')->unique()->sort()->values()->all())->toBe(['sanctum', 'token', 'web'])
         ->and($permissions->where('name', 'action.order.create')->pluck('guard_name')->sort()->values()->all())
-        ->toBe(['sanctum', 'web'])
+        ->toBe(['sanctum', 'token', 'web'])
         ->and($permissions->pluck('name'))->toContain('model.order.get');
 });
 

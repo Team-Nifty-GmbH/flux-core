@@ -3,6 +3,7 @@
 namespace FluxErp\Traits\Model;
 
 use Closure;
+use FluxErp\Models\Token;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
@@ -47,7 +48,7 @@ trait Printable
                             ?->hasPermissionTo(print_view_to_permission($key, $this->getMorphClass()))
                             ?? true;
                     } catch (PermissionDoesNotExist) {
-                        return true;
+                        return ! $user instanceof Token;
                     }
                 },
                 ARRAY_FILTER_USE_KEY

@@ -4,6 +4,7 @@ namespace FluxErp\Actions;
 
 use FluxErp\Contracts\SupportsBulkExecution;
 use FluxErp\Models\Permission;
+use FluxErp\Models\Token;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Traits\Action\HasActionEvents;
 use FluxErp\Traits\Action\SupportsApiRequests;
@@ -84,14 +85,19 @@ abstract class FluxAction
 
         $permission = 'action.' . static::name();
 
-        if (auth()->user()?->can($permission)) {
+        $user = auth()->user();
+
+        if ($user?->can($permission)) {
             return true;
         }
 
-        try {
-            resolve_static(Permission::class, 'findByName', ['name' => $permission]);
-        } catch (PermissionDoesNotExist) {
-            return true;
+        // A token holds only what it was granted, a permission missing from the store grants nothing
+        if (! $user instanceof Token) {
+            try {
+                resolve_static(Permission::class, 'findByName', ['name' => $permission]);
+            } catch (PermissionDoesNotExist) {
+                return true;
+            }
         }
 
         if ($throwException) {
