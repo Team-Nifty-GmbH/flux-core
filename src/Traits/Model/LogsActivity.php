@@ -19,8 +19,19 @@ trait LogsActivity
             ->logAll()
             ->dontLogIfAttributesChangedOnly(['created_at', 'updated_at'])
             ->dontLogEmptyChanges()
-            ->logExcept(['created_at', 'updated_at', 'deleted_at'])
+            ->logExcept(array_merge(['created_at', 'updated_at', 'deleted_at'], $this->getSecretAttributes()))
             ->logOnlyDirty();
+    }
+
+    protected function getSecretAttributes(): array
+    {
+        return array_keys(
+            array_filter(
+                $this->getCasts(),
+                fn (mixed $cast): bool => is_string($cast)
+                    && ($cast === 'hashed' || str_starts_with($cast, 'encrypted'))
+            )
+        );
     }
 
     protected function buildChanges(string $processingEvent): array
