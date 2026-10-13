@@ -43,6 +43,7 @@ beforeEach(function (): void {
         'amount' => 12000,
         'interest_rate' => 0.02299,
         'number_of_installments' => 2,
+        'starts_at' => '2026-01-01',
     ]);
     $this->loan->installments()->create([
         'sequence' => 1,
