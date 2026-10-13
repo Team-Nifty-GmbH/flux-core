@@ -41,6 +41,11 @@ trait BroadcastsEvents
         return ['created'];
     }
 
+    public static function getModelChannelEvents(): array
+    {
+        return ['updated', 'deleted', 'trashed', 'restored'];
+    }
+
     public static function getWithoutBroadcasting(): bool
     {
         return static::$withoutBroadcasting;
@@ -68,12 +73,15 @@ trait BroadcastsEvents
     public function broadcastOn(string $event): array|Channel
     {
         $channel = $this->broadcastChannel();
+        $modelChannel = Str::beforeLast($channel, '.') . '.';
 
-        return new PrivateChannel(
-            in_array($event, static::getGenericChannelEvents())
-                ? Str::beforeLast($channel, '.') . '.'
-                : $channel
-        );
+        if (in_array($event, static::getGenericChannelEvents())) {
+            return new PrivateChannel($modelChannel);
+        }
+
+        return in_array($event, static::getModelChannelEvents())
+            ? [new PrivateChannel($channel), new PrivateChannel($modelChannel)]
+            : new PrivateChannel($channel);
     }
 
     public function broadcastWith(): array
