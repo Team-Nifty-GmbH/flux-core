@@ -1,7 +1,10 @@
 <?php
 
+use FluxErp\Enums\ToastType;
 use FluxErp\Models\QueueMonitor;
 use FluxErp\Notifications\QueueMonitor\Job\JobFinishedNotification;
+use FluxErp\States\QueueMonitor\Failed;
+use FluxErp\States\QueueMonitor\Succeeded;
 use FluxErp\Support\Notification\ToastNotification\NotificationAction;
 
 test('generates same notification id for different queue monitors with same job id', function (): void {
@@ -134,4 +137,37 @@ test('finished toast with action can be forced to time out', function (): void {
 
     expect($toast['timeout'])->toBe(10)
         ->and($toast['persistent'] ?? null)->not->toBeTrue();
+});
+
+test('a failed job is reported as failed with its exception message', function (): void {
+    $queueMonitor = QueueMonitor::factory()->create([
+        'name' => 'Import offers',
+        'state' => Failed::class,
+        'message' => null,
+        'exception_message' => 'The given data was invalid.',
+    ]);
+
+    $toast = (new JobFinishedNotification($queueMonitor))
+        ->toToastNotification($this->user)
+        ->toArray();
+
+    expect($toast['title'])->toBe(__(':job_name failed', ['job_name' => __($queueMonitor->getJobName())]))
+        ->and($toast['toastType'])->toBe(ToastType::ERROR)
+        ->and($toast['description'])->toBe('The given data was invalid.');
+});
+
+test('a succeeded job keeps its finished message', function (): void {
+    $queueMonitor = QueueMonitor::factory()->create([
+        'name' => 'Import offers',
+        'state' => Succeeded::class,
+        'message' => '12 offers imported',
+    ]);
+
+    $toast = (new JobFinishedNotification($queueMonitor))
+        ->toToastNotification($this->user)
+        ->toArray();
+
+    expect($toast['title'])->toBe(__(':job_name is finished', ['job_name' => __($queueMonitor->getJobName())]))
+        ->and($toast['toastType'])->toBe(ToastType::INFO)
+        ->and($toast['description'])->toBe('12 offers imported');
 });
