@@ -61,6 +61,20 @@ test('the narrowed select still resolves causer, subject and timestamp', functio
         );
 });
 
+test('activities of the same second are listed newest first', function (): void {
+    Activity::query()->delete();
+    $this->freezeSecond();
+
+    $orderTypes = OrderType::factory()->count(5)->create();
+
+    $items = Livewire::test(RecentActivities::class)
+        ->call('calculateList')
+        ->get('items');
+
+    expect(array_column($items, 'subLabel'))
+        ->toBe($orderTypes->reverse()->map->getLabel()->values()->all());
+});
+
 test('load more asks whether another row exists instead of counting the table', function (): void {
     Activity::query()->delete();
     OrderType::factory()->count(12)->create();
