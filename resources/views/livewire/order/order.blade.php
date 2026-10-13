@@ -274,7 +274,7 @@
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5"
     >
         <div class="flex items-center gap-5">
-            <x-avatar xl :image="data_get($order, 'avatarUrl', '')" />
+            <x-avatar :image="data_get($order, 'avatarUrl', '')" />
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex items-center gap-1.5">

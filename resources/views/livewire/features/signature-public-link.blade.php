@@ -19,10 +19,13 @@
                     >
                         <div class="h-10 w-10">
                             <template x-if="error">
-                                <x-icon name="exclamation-triangle" />
+                                <x-icon
+                                    name="exclamation-triangle"
+                                    class="h-10 w-10"
+                                />
                             </template>
                             <template x-if="id && !error">
-                                <x-icon name="check-circle" />
+                                <x-icon name="check-circle" class="h-10 w-10" />
                             </template>
                         </div>
                         <template x-if="error">

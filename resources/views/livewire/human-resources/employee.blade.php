@@ -10,7 +10,7 @@
             @section('employee.title')
                 @section('employee.title.avatar')
                     <label for="avatar" class="cursor-pointer">
-                        <x-avatar xl :image="$avatar" />
+                        <x-avatar :image="$avatar" />
                     </label>
                     <input
                         type="file"

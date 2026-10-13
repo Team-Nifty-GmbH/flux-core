@@ -1646,3 +1646,99 @@ test('refresh delivery address on locked order fails', function (): void {
         ->assertOk()
         ->assertHasErrors();
 });
+
+test('renders purchase subscription schedule parameters that do not fit the inputs of the other repeat methods', function (string $method, array $parameters): void {
+    $purchaseSubscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::PurchaseSubscription,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $purchaseSubscriptionOrderType->id]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertViewIs('flux::livewire.order.purchase-subscription')
+        ->set('schedule.cron.methods.basic', $method)
+        ->set('schedule.cron.parameters.basic', $parameters)
+        ->assertOk()
+        ->assertSet('schedule.cron.parameters.basic', $parameters);
+})->with([
+    'a day of month above the highest hour' => ['monthlyOn', [31, '15:00', null]],
+    'an hour where another method keeps a time' => ['twiceDaily', [1, 13, null]],
+]);
+
+test('switching the purchase subscription repeat method clears the parameters of the previous one', function (): void {
+    $purchaseSubscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::PurchaseSubscription,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $purchaseSubscriptionOrderType->id]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('schedule.cron.methods.basic', 'monthlyOn')
+        ->set('schedule.cron.parameters.basic', [28, '15:00', null])
+        ->set('schedule.cron.methods.basic', 'dailyAt')
+        ->assertOk()
+        ->assertSet('schedule.cron.parameters.basic', [null, null, null])
+        ->set('schedule.cron.methods.basic', 'weeklyOn')
+        ->assertOk()
+        ->assertSet('schedule.cron.parameters.basic', [1, '00:00']);
+});
+
+test('renders subscription schedule parameters that do not fit the inputs of the other repeat methods', function (string $method, array $parameters): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Subscription,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertViewIs('flux::livewire.order.subscription')
+        ->set('schedule.cron.methods.basic', $method)
+        ->set('schedule.cron.parameters.basic', $parameters)
+        ->assertOk()
+        ->assertSet('schedule.cron.parameters.basic', $parameters);
+})->with([
+    'a day of month where another method keeps a time' => ['monthlyOn', [31, '15:00', null]],
+    'a time where another method keeps a day' => ['dailyAt', ['15:00', null, null]],
+]);
+
+test('switching the subscription repeat method applies the parameters of the new one', function (): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Subscription,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('schedule.cron.methods.basic', 'monthlyOn')
+        ->set('schedule.cron.parameters.basic', [28, '15:00', null])
+        ->set('schedule.cron.methods.basic', 'dailyAt')
+        ->assertOk()
+        ->assertSet('schedule.cron.parameters.basic', [null, null, null]);
+});
+
+test('the subscription time picker previews the schedule when it changes', function (): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Subscription,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    $html = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('schedule.cron.methods.basic', 'dailyAt')
+        ->html();
+
+    expect($html)
+        ->not->toContain('<x-')
+        ->and(Str::of($html)->after('tallstackui_formTime(')->before('<')->toString())
+        ->toContain('previewSchedule');
+});

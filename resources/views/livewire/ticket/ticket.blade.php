@@ -14,7 +14,7 @@
                     })
                 "
             >
-                <x-avatar image="{{ route('icons', ['name' => 'user']) }}" xl />
+                <x-avatar image="{{ route('icons', ['name' => 'user']) }}" />
             </div>
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">

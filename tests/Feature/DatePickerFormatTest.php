@@ -28,42 +28,18 @@ test('keeps a date format that was passed explicitly', function (): void {
     expect($html)->not->toContain('DD.MM.YYYY');
 });
 
-test('renders the time picker without meridiem in german', function (): void {
-    app()->setLocale('de');
+test('renders the time picker on a twenty four hour clock in every locale', function (string $locale): void {
+    app()->setLocale($locale);
 
     $html = Blade::render('<x-time />');
 
     expect($html)->not->toContain('AM');
-});
+})->with(['de', 'en', 'si', 'lb']);
 
-test('renders the time picker with meridiem in english', function (): void {
+test('renders a stored time in a locale that writes twelve hours', function (): void {
     app()->setLocale('en');
 
-    $html = Blade::render('<x-time />');
+    $html = Blade::render('<x-time value="14:30" />');
 
-    expect($html)->toContain('AM');
-});
-
-test('keeps a time format that was passed explicitly', function (): void {
-    app()->setLocale('en');
-
-    $html = Blade::render('<x-time format="24" />');
-
-    expect($html)->not->toContain('AM');
-});
-
-test('renders the time picker with meridiem when the locale writes it in lower case', function (): void {
-    app()->setLocale('si');
-
-    $html = Blade::render('<x-time />');
-
-    expect($html)->toContain('AM');
-});
-
-test('renders the time picker without meridiem when the locale only has one in a literal', function (): void {
-    app()->setLocale('lb');
-
-    $html = Blade::render('<x-time />');
-
-    expect($html)->not->toContain('AM');
+    expect($html)->toContain('14:30');
 });

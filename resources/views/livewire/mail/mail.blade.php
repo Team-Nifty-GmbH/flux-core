@@ -175,7 +175,7 @@
                             color="indigo"
                         />
                         <x-button
-                            spinner="getNewMessages()"
+                            loading="getNewMessages"
                             class="w-full"
                             :text="__('Get new messages')"
                             x-on:click="$wire.getNewMessages()"

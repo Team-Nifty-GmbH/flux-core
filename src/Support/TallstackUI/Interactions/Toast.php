@@ -39,13 +39,13 @@ class Toast extends BaseToast
 
     protected function additional(): array
     {
-        return [
-            'expandable' => $this->expand ?? config('tallstackui.settings.toast.expandable', false),
-            'timeout' => $this->timeout,
-            'persistent' => $this->persistent,
-            'progress' => $this->progress,
-            'toastId' => $this->id,
-        ];
+        return array_merge(
+            parent::additional(),
+            [
+                'progress' => $this->progress,
+                'toastId' => $this->id,
+            ]
+        );
     }
 
     protected function event(): string
