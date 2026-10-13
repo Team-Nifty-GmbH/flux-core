@@ -20,6 +20,8 @@ class MailFolderForm extends FluxForm
 
     public bool $is_active = true;
 
+    public bool $is_sent = false;
+
     public ?string $name = null;
 
     protected function getActions(): array

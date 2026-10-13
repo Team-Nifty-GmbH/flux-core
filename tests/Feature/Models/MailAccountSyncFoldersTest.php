@@ -59,3 +59,70 @@ test('an active folder that turns out to be noselect is deactivated on the next 
 
     expect($mailFolder->refresh()->is_active)->toEqual(false);
 });
+
+function syncFoldersFromServer(MailAccount $mailAccount, array $paths): void
+{
+    $client = Mockery::mock(Client::class);
+    $client->shouldReceive('getDefaultEvents')->andReturn([]);
+    $client->shouldReceive('getFolders')->andReturn(new FolderCollection(
+        array_map(fn (string $path) => new Folder($client, $path, '.', ['\HasNoChildren']), $paths)
+    ));
+
+    (new ReflectionProperty(MailAccount::class, 'imapClient'))->setValue($mailAccount, $client);
+
+    $mailAccount->syncFolders();
+}
+
+test('the folder sync marks an english sent folder', function (): void {
+    $mailAccount = MailAccount::factory()->create();
+
+    syncFoldersFromServer($mailAccount, ['INBOX', 'INBOX.Sent Items']);
+
+    expect(
+        MailFolder::query()
+            ->where('mail_account_id', $mailAccount->getKey())
+            ->pluck('is_sent', 'slug')
+            ->all()
+    )->toEqual([
+        'INBOX' => false,
+        'INBOX.Sent Items' => true,
+    ]);
+});
+
+test('the folder sync leaves a german sent folder to be marked by hand', function (): void {
+    $mailAccount = MailAccount::factory()->create();
+
+    syncFoldersFromServer($mailAccount, ['INBOX', 'Gesendete Objekte']);
+
+    expect(MailFolder::query()->where('mail_account_id', $mailAccount->getKey())->where('is_sent', true)->exists())
+        ->toBeFalse();
+});
+
+test('the folder sync keeps a sent folder marked by hand', function (): void {
+    $mailAccount = MailAccount::factory()->create();
+    $outbox = MailFolder::factory()->create([
+        'mail_account_id' => $mailAccount->getKey(),
+        'name' => 'Postausgang',
+        'slug' => 'Postausgang',
+        'is_sent' => true,
+    ]);
+
+    syncFoldersFromServer($mailAccount, ['Postausgang', 'Sent']);
+
+    expect($outbox->refresh()->is_sent)->toBeTrue()
+        ->and(MailFolder::query()->where('slug', 'Sent')->value('is_sent'))->toBeFalse();
+});
+
+test('the folder sync does not mark a sent folder again that was unmarked by hand', function (): void {
+    $mailAccount = MailAccount::factory()->create();
+    $sent = MailFolder::factory()->create([
+        'mail_account_id' => $mailAccount->getKey(),
+        'name' => 'Sent',
+        'slug' => 'Sent',
+        'is_sent' => false,
+    ]);
+
+    syncFoldersFromServer($mailAccount, ['Sent']);
+
+    expect($sent->refresh()->is_sent)->toBeFalse();
+});

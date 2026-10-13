@@ -33,6 +33,7 @@ class CreateMailFolderRuleset extends FluxRuleset
             'can_create_purchase_invoice' => 'boolean',
             'can_create_lead' => 'boolean',
             'is_active' => 'boolean',
+            'is_sent' => 'boolean',
         ];
     }
 }

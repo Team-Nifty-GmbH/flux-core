@@ -49,6 +49,10 @@
                         wire:model="mailFolder.is_active"
                         :label="__('Active')"
                     />
+                    <x-toggle
+                        wire:model="mailFolder.is_sent"
+                        :label="__('Sent Folder')"
+                    />
                 </div>
                 <x-slot:footer>
                     <x-button
