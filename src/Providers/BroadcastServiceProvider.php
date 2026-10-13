@@ -3,6 +3,7 @@
 namespace FluxErp\Providers;
 
 use FluxErp\Support\Broadcasting\CombinedBroadcaster;
+use FluxErp\Support\Broadcasting\FluxMercureBroadcaster;
 use FluxErp\Support\Broadcasting\MercureHubConfig;
 use Illuminate\Broadcasting\BroadcastManager;
 use Illuminate\Contracts\Broadcasting\Broadcaster;
@@ -23,6 +24,22 @@ class BroadcastServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        $this->callAfterResolving(
+            BroadcastManager::class,
+            fn (BroadcastManager $manager) => $manager->extend(
+                'mercure',
+                function (Application $app, array $config) use ($manager): FluxMercureBroadcaster {
+                    $config['client_events'] ??= false;
+
+                    return resolve_static(
+                        FluxMercureBroadcaster::class,
+                        'fromBroadcaster',
+                        [(fn () => $this->createMercureDriver($config))->call($manager)]
+                    );
+                }
+            )
+        );
+
         $this->callAfterResolving(
             BroadcastManager::class,
             fn (BroadcastManager $manager) => $manager->extend(
