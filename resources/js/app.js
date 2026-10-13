@@ -116,18 +116,30 @@ const createBatchAuthorizer = () => {
     };
 };
 
-window.Echo = new Echo({
-    broadcaster: effectiveBroadcaster,
-    key: key || 'dummy-key',
-    wsHost:
-        document.head.querySelector('meta[name="ws-host"]')?.content ||
-        window.location.hostname,
-    wsPort: document.head.querySelector('meta[name="ws-port"]')?.content || 80,
-    wssPort:
-        document.head.querySelector('meta[name="ws-port"]')?.content || 443,
-    forceTLS:
-        document.head.querySelector('meta[name="ws-protocol"]')?.content ===
-        'https',
-    enabledTransports: ['ws', 'wss'],
-    authorizer: createBatchAuthorizer(),
-});
+// Mercure authorizes all channels in one request, the batch authorizer is only for Pusher.
+window.Echo =
+    broadcaster === 'mercure'
+        ? new Echo({
+              broadcaster: 'mercure',
+              host:
+                  document.head.querySelector('meta[name="ws-mercure-hub"]')
+                      ?.content || undefined,
+          })
+        : new Echo({
+              broadcaster: effectiveBroadcaster,
+              key: key || 'dummy-key',
+              wsHost:
+                  document.head.querySelector('meta[name="ws-host"]')
+                      ?.content || window.location.hostname,
+              wsPort:
+                  document.head.querySelector('meta[name="ws-port"]')
+                      ?.content || 80,
+              wssPort:
+                  document.head.querySelector('meta[name="ws-port"]')
+                      ?.content || 443,
+              forceTLS:
+                  document.head.querySelector('meta[name="ws-protocol"]')
+                      ?.content === 'https',
+              enabledTransports: ['ws', 'wss'],
+              authorizer: createBatchAuthorizer(),
+          });

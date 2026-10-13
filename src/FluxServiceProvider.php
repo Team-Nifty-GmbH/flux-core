@@ -275,6 +275,13 @@ class FluxServiceProvider extends ServiceProvider
                 );
         }
 
+        if (! config()->has('broadcasting.connections.combined')) {
+            config()->set('broadcasting.connections.combined', [
+                'driver' => 'combined',
+                'connections' => config('flux.broadcasting.combined_connections'),
+            ]);
+        }
+
         if (! app()->configurationIsCached()) {
             config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);
         }
