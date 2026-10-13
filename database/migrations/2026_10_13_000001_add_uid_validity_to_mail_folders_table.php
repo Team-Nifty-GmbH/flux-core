@@ -9,7 +9,7 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('mail_folders', function (Blueprint $table): void {
-            $table->unsignedBigInteger('uid_validity')->nullable()->after('delta_link');
+            $table->unsignedInteger('uid_validity')->nullable()->after('delta_link');
         });
     }
 

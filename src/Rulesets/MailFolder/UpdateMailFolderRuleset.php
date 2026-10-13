@@ -27,7 +27,7 @@ class UpdateMailFolderRuleset extends FluxRuleset
             'name' => 'sometimes|required|string|max:255',
             'slug' => 'sometimes|required|string|max:255',
             'delta_link' => 'nullable|string',
-            'uid_validity' => 'nullable|integer|min:0',
+            'uid_validity' => 'nullable|integer|min:1|max:4294967295',
             'can_create_ticket' => 'boolean',
             'can_create_purchase_invoice' => 'boolean',
             'can_create_lead' => 'boolean',

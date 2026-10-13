@@ -194,6 +194,11 @@ class ImapMessageBuilder
         return $this;
     }
 
+    public function status(): array
+    {
+        return $this->overConnection(fn (): array => $this->resolveImapFolder()?->examine() ?? []);
+    }
+
     /** @return Collection<int, ImapMessage> */
     public function get(): Collection
     {
