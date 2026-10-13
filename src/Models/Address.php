@@ -47,6 +47,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
@@ -513,10 +514,10 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
      */
     public function broadcastOn($event): array
     {
-        return [
-            new PrivateChannel($this->broadcastChannel()),
-            new PrivateChannel((app(Contact::class))->broadcastChannel() . $this->contact_id),
-        ];
+        return array_merge(
+            Arr::wrap(parent::broadcastOn($event)),
+            [new PrivateChannel((app(Contact::class))->broadcastChannel() . $this->contact_id)]
+        );
     }
 
     public function detailRouteParams(): array
