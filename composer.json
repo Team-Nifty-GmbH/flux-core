@@ -33,7 +33,7 @@
         "spatie/pdf-to-image": "^3.3",
         "symfony/mercure": "^0.8",
         "tallstackui/tallstackui": "^4.2",
-        "team-nifty-gmbh/tall-datatables": "^3.0",
+        "team-nifty-gmbh/tall-datatables": "^3.2",
         "web-token/jwt-library": "^4.1",
         "webklex/laravel-imap": "^6.2"
     },
