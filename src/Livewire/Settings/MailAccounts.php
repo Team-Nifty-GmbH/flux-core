@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Settings;
 use Exception;
 use FluxErp\Actions\MailAccount\CreateMailAccount;
 use FluxErp\Actions\MailAccount\DeleteMailAccount;
+use FluxErp\Actions\MailAccount\DiscoverMailAccountSettings;
 use FluxErp\Actions\MailAccount\UpdateMailAccount;
 use FluxErp\Actions\MailFolder\UpdateMailFolder;
 use FluxErp\Jobs\SyncMailAccountJob;
@@ -103,6 +104,52 @@ class MailAccounts extends MailAccountList
         $this->mailAccount->fill($mailAccount);
 
         $this->modalOpen('edit-mail-account');
+    }
+
+    #[Renderless]
+    public function discoverSettings(bool $keepExistingSettings = false): void
+    {
+        try {
+            $settings = DiscoverMailAccountSettings::make(['email' => $this->mailAccount->email])
+                ->validate()
+                ->execute();
+        } catch (ValidationException $e) {
+            if (! $keepExistingSettings) {
+                exception_to_notifications($e, $this);
+            }
+
+            return;
+        }
+
+        if (! $settings) {
+            $this->toast()
+                ->warning(__('No settings found, please enter them manually'))
+                ->send();
+
+            return;
+        }
+
+        $blocks = [
+            'host' => ['host', 'port', 'encryption'],
+            'smtp_host' => ['smtp_host', 'smtp_port', 'smtp_encryption', 'smtp_user'],
+        ];
+
+        foreach ($blocks as $key => $fields) {
+            if (! array_key_exists($key, $settings)
+                || ($keepExistingSettings && filled($this->mailAccount->{$key}))
+            ) {
+                continue;
+            }
+
+            // Set the whole block, so a field the source left out does not keep a stale value.
+            foreach ($fields as $field) {
+                $this->mailAccount->{$field} = data_get($settings, $field);
+            }
+        }
+
+        $this->toast()
+            ->success(__('Settings found via :source', ['source' => data_get($settings, 'source')]))
+            ->send();
     }
 
     #[Renderless]
