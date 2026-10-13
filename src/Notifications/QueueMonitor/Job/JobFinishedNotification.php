@@ -61,7 +61,10 @@ class JobFinishedNotification extends Notification implements HasToastNotificati
                     ? __(':job_name failed', ['job_name' => __($this->model->getJobName())])
                     : __(':job_name is finished', ['job_name' => __($this->model->getJobName())])
             )
-            ->description($this->model->message ?? $this->model->exception_message)
+            ->description(
+                $this->model->message
+                    ?? (is_null($this->model->exception_message) ? null : e($this->model->exception_message))
+            )
             ->when(
                 $persistent,
                 fn (ToastNotification $toast): ToastNotification => $toast->persistent(),

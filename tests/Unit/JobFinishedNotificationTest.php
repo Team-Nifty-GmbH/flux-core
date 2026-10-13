@@ -144,7 +144,7 @@ test('a failed job is reported as failed with its exception message', function (
         'name' => 'Import offers',
         'state' => Failed::class,
         'message' => null,
-        'exception_message' => 'The given data was invalid.',
+        'exception_message' => 'The given <b>data</b> was invalid.',
     ]);
 
     $toast = (new JobFinishedNotification($queueMonitor))
@@ -153,7 +153,7 @@ test('a failed job is reported as failed with its exception message', function (
 
     expect($toast['title'])->toBe(__(':job_name failed', ['job_name' => __($queueMonitor->getJobName())]))
         ->and($toast['toastType'])->toBe(ToastType::ERROR)
-        ->and($toast['description'])->toBe('The given data was invalid.');
+        ->and($toast['description'])->toBe('The given &lt;b&gt;data&lt;/b&gt; was invalid.');
 });
 
 test('a succeeded job keeps its finished message', function (): void {

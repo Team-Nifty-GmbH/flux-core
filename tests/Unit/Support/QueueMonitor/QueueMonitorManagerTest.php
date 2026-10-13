@@ -2,9 +2,11 @@
 
 use FluxErp\Jobs\ExportDataTableJob;
 use FluxErp\Models\QueueMonitor;
+use FluxErp\States\QueueMonitor\Failed;
 use FluxErp\States\QueueMonitor\Running;
 use FluxErp\Support\QueueMonitor\QueueMonitorManager;
 use Illuminate\Contracts\Queue\Job;
+use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\Events\JobQueued;
 
@@ -87,4 +89,24 @@ test('jobProcessing reuses the QueueMonitor created by a null-queue dispatch on 
 
     expect(QueueMonitor::count())->toBe(1)
         ->and(QueueMonitor::first()->state)->toBeInstanceOf(Running::class);
+});
+
+test('jobFailed stores the exception that failed the job', function (): void {
+    $queueJob = ($this->makeQueueJob)('job-id-failed', 'default', 'uuid-failed');
+    $queueJob->shouldReceive('hasFailed')->andReturn(true);
+    $queueJob->shouldReceive('isReleased')->andReturn(false);
+
+    $monitor = QueueMonitor::factory()->create([
+        'job_id' => 'job-id-failed',
+        'attempt' => 1,
+        'state' => Running::class,
+        'started_at' => now(),
+        'exception_message' => null,
+    ]);
+
+    QueueMonitorManager::handle(new JobFailed('redis', $queueJob, new RuntimeException('The given data was invalid.')));
+
+    expect($monitor->refresh()->state)->toBeInstanceOf(Failed::class)
+        ->and($monitor->exception_message)->toBe('The given data was invalid.')
+        ->and($monitor->exception_class)->toBe(RuntimeException::class);
 });

@@ -70,7 +70,7 @@ class QueueMonitorManager
 
     protected static function jobFailed(JobFailed $event): void
     {
-        static::jobFinished($event->job, Failed::class);
+        static::jobFinished($event->job, Failed::class, $event->exception);
     }
 
     protected static function jobFinished(Job $job, string $state, ?Throwable $exception = null): void
