@@ -88,3 +88,18 @@ test('the hub reads the token from the cookie laravel sets', function (): void {
 
     expect(MercureHubConfig::make())->not->toHaveKey('cookie_name');
 });
+
+test('the hub expects the audience laravel signs into its tokens', function (): void {
+    config([
+        'broadcasting.default' => 'mercure',
+        'broadcasting.connections.mercure.url' => 'http://127.0.0.1:8000/.well-known/mercure',
+        'broadcasting.connections.mercure.public_url' => 'https://flux.example.com/.well-known/mercure',
+    ]);
+
+    expect(MercureHubConfig::make()['resource_identifier'])
+        ->toBe('https://flux.example.com/.well-known/mercure');
+
+    config(['broadcasting.connections.mercure.claims.aud' => 'https://hub.example.com']);
+
+    expect(MercureHubConfig::make()['resource_identifier'])->toBe('https://hub.example.com');
+});
