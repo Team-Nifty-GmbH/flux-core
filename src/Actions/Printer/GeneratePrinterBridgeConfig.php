@@ -38,14 +38,14 @@ class GeneratePrinterBridgeConfig extends FluxAction
             'api.printers.get',
             'api.print-jobs.get',
             'api.print-jobs.{id}.get',
-            'action.' . CreatePrinter::name(),
-            'action.' . UpdatePrinter::name(),
-            'action.' . DeletePrinter::name(),
-            'action.' . UpdatePrintJob::name(),
-            'action.' . DownloadMedia::name(),
+            'action.' . resolve_static(CreatePrinter::class, 'name'),
+            'action.' . resolve_static(UpdatePrinter::class, 'name'),
+            'action.' . resolve_static(DeletePrinter::class, 'name'),
+            'action.' . resolve_static(UpdatePrintJob::class, 'name'),
+            'action.' . resolve_static(DownloadMedia::class, 'name'),
         ];
 
-        $permissionIds = Permission::query()
+        $permissionIds = resolve_static(Permission::class, 'query')
             ->whereIn('name', $requiredPermissionNames)
             ->where('guard_name', 'token')
             ->pluck('id')

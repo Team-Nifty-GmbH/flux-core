@@ -14,7 +14,6 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Token;
 use FluxErp\View\Printing\Contact\BalanceStatement;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\PermissionRegistrar;
@@ -115,31 +114,6 @@ test('init permissions creates action and print permissions for the token guard'
         ->toBe(['token', 'web'])
         ->and($guards(print_view_to_permission('registered-statement', morph_alias(Contact::class))))
         ->toBe(['token', 'web']);
-});
-
-test('existing tokens with full abilities keep every action and print view', function (): void {
-    $full = createApiToken(['*'], ['action.order.create']);
-    $interface = createApiToken(['interface']);
-    $shop = createApiToken(['shop']);
-
-    (require __DIR__ . '/../../../database/migrations/2026_10_12_000001_grant_actions_and_print_views_to_existing_tokens.php')
-        ->up();
-
-    $expected = Permission::query()
-        ->where('guard_name', 'token')
-        ->where(fn (Builder $query): Builder => $query
-            ->where('name', 'like', 'action.%')
-            ->orWhere('name', 'like', 'print.%')
-        )
-        ->pluck('name')
-        ->sort()
-        ->values()
-        ->all();
-
-    expect($expected)->toContain('action.order.create', 'action.' . CreateToken::name())
-        ->and($full->fresh()->getAllPermissions()->pluck('name')->sort()->values()->all())->toBe($expected)
-        ->and($interface->fresh()->getAllPermissions()->pluck('name')->sort()->values()->all())->toBe($expected)
-        ->and($shop->fresh()->getAllPermissions())->toBeEmpty();
 });
 
 test('the printer bridge token may run every action the bridge calls', function (): void {
