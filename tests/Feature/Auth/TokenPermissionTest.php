@@ -6,6 +6,7 @@ use FluxErp\Actions\Printer\CreatePrinter;
 use FluxErp\Actions\Printer\DeletePrinter;
 use FluxErp\Actions\Printer\GeneratePrinterBridgeConfig;
 use FluxErp\Actions\Printer\UpdatePrinter;
+use FluxErp\Actions\Printing;
 use FluxErp\Actions\PrintJob\DeletePrintJob;
 use FluxErp\Actions\PrintJob\UpdatePrintJob;
 use FluxErp\Actions\Token\CreateToken;
@@ -92,6 +93,37 @@ test('a token only sees the registered print views it holds', function (): void 
     } finally {
         unset(Contact::$registeredPrintViews['registered-statement']);
     }
+});
+
+test('a token is forbidden to print a view it does not hold', function (): void {
+    $contact = Contact::factory()->create();
+    $permission = print_view_to_permission('balance-statement', morph_alias(Contact::class));
+    Permission::findOrCreate($permission, 'token');
+    $token = createApiToken(['*'], ['action.' . Printing::name()]);
+    Auth::forgetGuards();
+
+    $this->withToken($token->token)
+        ->postJson('/api/print/pdf', [
+            'model_type' => morph_alias(Contact::class),
+            'model_id' => $contact->getKey(),
+            'view' => 'balance-statement',
+        ])
+        ->assertForbidden();
+});
+
+test('printing a view the model does not offer is a validation error', function (): void {
+    $contact = Contact::factory()->create();
+    $token = createApiToken(['*'], ['action.' . Printing::name()]);
+    Auth::forgetGuards();
+
+    $this->withToken($token->token)
+        ->postJson('/api/print/pdf', [
+            'model_type' => morph_alias(Contact::class),
+            'model_id' => $contact->getKey(),
+            'view' => 'not-a-view',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('view');
 });
 
 test('init permissions creates action and print permissions for the token guard', function (): void {
