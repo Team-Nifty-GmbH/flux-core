@@ -126,3 +126,37 @@ test('the folder sync does not mark a sent folder again that was unmarked by han
 
     expect($sent->refresh()->is_sent)->toBeFalse();
 });
+
+test('stale folders are removed together with their stale subfolders', function (): void {
+    $mailAccount = MailAccount::factory()->create();
+    $parent = MailFolder::factory()->create(['mail_account_id' => $mailAccount->getKey(), 'slug' => 'Archive']);
+    $child = MailFolder::factory()->create([
+        'mail_account_id' => $mailAccount->getKey(),
+        'parent_id' => $parent->getKey(),
+        'slug' => 'Archive/2024',
+    ]);
+    $grandchild = MailFolder::factory()->create([
+        'mail_account_id' => $mailAccount->getKey(),
+        'parent_id' => $child->getKey(),
+        'slug' => 'Archive/2024/Q1',
+    ]);
+
+    $client = Mockery::mock(Client::class);
+    $client->shouldReceive('getDefaultEvents')->andReturn([]);
+    $client->shouldReceive('getFolders')->andReturn(new FolderCollection([
+        new Folder($client, 'INBOX', '/', ['\HasNoChildren']),
+    ]));
+
+    (new ReflectionProperty(MailAccount::class, 'imapClient'))->setValue($mailAccount, $client);
+
+    $mailAccount->syncFolders();
+
+    expect(
+        MailFolder::query()
+            ->where('mail_account_id', $mailAccount->getKey())
+            ->pluck('slug')
+            ->all()
+    )->toBe(['INBOX'])
+        ->and(MailFolder::query()->whereKey([$parent->getKey(), $child->getKey(), $grandchild->getKey()])->exists())
+        ->toBeFalse();
+});

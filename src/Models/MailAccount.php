@@ -179,10 +179,13 @@ class MailAccount extends FluxModel
             $folderIds = array_merge($folderIds, $this->syncFolder($folder));
         }
 
-        resolve_static(MailFolder::class, 'query')
+        $staleFolders = resolve_static(MailFolder::class, 'query')
             ->whereKeyNot(array_values($folderIds))
             ->where('mail_account_id', $this->getKey())
-            ->get('id')
+            ->get(['id', 'parent_id']);
+
+        $staleFolders
+            ->reject(fn (MailFolder $folder): bool => $staleFolders->contains('id', $folder->parent_id))
             ->each(
                 fn (MailFolder $folder) => DeleteMailFolder::make(['id' => $folder->getKey()])
                     ->validate()
