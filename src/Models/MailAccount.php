@@ -228,6 +228,9 @@ class MailAccount extends FluxModel
             'parent_id' => $parentId,
             'name' => $folder->name,
             'slug' => $folder->path,
+            // A \Noselect folder is a container only (e.g. Exchange "Public Folders"),
+            // selecting it fails. Keep it for the tree, but never sync its messages.
+            ...($folder->no_select ? ['is_active' => false] : []),
         ])
             ->validate()
             ->execute();

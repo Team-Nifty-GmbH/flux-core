@@ -80,7 +80,15 @@ class SearchController extends Controller
         }
 
         if ($request->has('with')) {
-            $query->with($request->input('with'));
+            $query->with(
+                array_map(
+                    fn (mixed $relation): mixed => is_string($relation) && str_contains($relation, ':')
+                        ? Str::before($relation, ':') . ':'
+                            . implode(',', $this->plainColumns(explode(',', Str::after($relation, ':'))))
+                        : $relation,
+                    Arr::wrap($request->input('with'))
+                )
+            );
         }
 
         if ($request->has('limit')) {
@@ -168,7 +176,7 @@ class SearchController extends Controller
         }
 
         if ($request->has('select')) {
-            $query->select($request->input('select'));
+            $query->select($this->plainColumns(Arr::wrap($request->input('select'))));
         }
 
         if ($request->has('whereDoesntHave')) {
@@ -233,8 +241,8 @@ class SearchController extends Controller
                         'description' => $item->getDescription(),
                         'image' => $item->getAvatarUrl(),
                     ],
-                    $item->only($request->input('fields', [])),
-                    $item->only($request->input('appends', [])),
+                    $this->visibleOnly($item, Arr::wrap($request->input('fields', []))),
+                    $this->visibleOnly($item, Arr::wrap($request->input('appends', []))),
                 );
 
                 $mapping = Arr::wrap($request->input('mapping', []));
@@ -259,6 +267,19 @@ class SearchController extends Controller
         Event::dispatch('tall-datatables-searched', [$request, $result]);
 
         return $result;
+    }
+
+    // an alias or another spelling would rename a hidden column past the model's hidden list
+    protected function plainColumns(array $columns): array
+    {
+        return array_values(preg_grep('/^([a-z0-9_]+\.)?([a-z0-9_]+|\*)$/', array_filter($columns, 'is_string')));
+    }
+
+    protected function visibleOnly(Model $item, array $keys): array
+    {
+        $keys = array_diff(array_filter($keys, 'is_string'), $item->getHidden());
+
+        return $item->only($item->getVisible() ? array_intersect($keys, $item->getVisible()) : $keys);
     }
 
     // a link is not display text, shortening it would break it

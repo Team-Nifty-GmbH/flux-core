@@ -39,6 +39,14 @@ return [
         'reverb_protocol' => env('VITE_REVERB_SCHEME', 'https'),
     ],
 
+    'broadcasting' => [
+        // The connections the "combined" broadcast connection sends every event to.
+        'combined_connections' => explode(',', env('BROADCAST_COMBINED_CONNECTIONS', 'mercure,reverb')),
+
+        // Events the Mercure hub keeps, so a client that slept can replay what it missed.
+        'mercure_history_size' => (int) env('MERCURE_HISTORY_SIZE', 10000),
+    ],
+
     'fcm' => [
         'credentials' => env('FCM_CREDENTIALS_PATH'),
     ],

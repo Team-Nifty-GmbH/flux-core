@@ -110,6 +110,7 @@ class CreateProductRuleset extends FluxRuleset
             'restock_time' => 'integer|nullable',
             'min_shelf_life_days' => 'nullable|integer|min:0',
             'purchase_steps' => 'numeric|nullable',
+            'packaging_ean' => 'string|max:255|nullable',
             'min_purchase' => 'numeric|nullable',
             'max_purchase' => 'numeric|nullable',
             'seo_keywords' => 'string|nullable',

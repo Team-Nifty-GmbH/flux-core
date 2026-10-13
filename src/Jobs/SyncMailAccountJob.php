@@ -17,6 +17,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Throwable;
 
 class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUnique, ShouldQueue
 {
@@ -88,9 +89,10 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
                 ->get()
                 ->each(fn (MailFolder $folder) => $folder->setRelation('mailAccount', $this->mailAccount));
             $total = $folders->count();
+            $failure = null;
 
             try {
-                $folders->each(function (MailFolder $folder, int $index) use ($driver, $total): void {
+                $folders->each(function (MailFolder $folder, int $index) use ($driver, $total, &$failure): void {
                     if ($driver instanceof ReportsSyncProgress) {
                         $driver->withProgressCallback(
                             fn (int $processed, int $totalMessages) => $this->queueUpdate([
@@ -106,9 +108,24 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
                         );
                     }
 
-                    $driver->syncMessages($folder);
+                    // One broken folder must not keep the others from syncing.
+                    // The first failure fails the job once all folders had their turn.
+                    try {
+                        $driver->syncMessages($folder);
+                    } catch (Throwable $e) {
+                        if (is_null($failure)) {
+                            $failure = $e;
+                        } else {
+                            report($e);
+                        }
+                    }
+
                     $this->queueProgressChunk($total, 1);
                 });
+
+                if (! is_null($failure)) {
+                    throw $failure;
+                }
             } finally {
                 if ($driver instanceof ReportsSyncProgress) {
                     $driver->withProgressCallback(null);

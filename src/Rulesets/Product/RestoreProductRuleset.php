@@ -86,6 +86,7 @@ class RestoreProductRuleset extends FluxRuleset
             'max_delivery_time' => 'integer|nullable',
             'restock_time' => 'integer|nullable',
             'purchase_steps' => 'numeric|nullable',
+            'packaging_ean' => 'string|max:255|nullable',
             'min_purchase' => 'numeric|nullable',
             'max_purchase' => 'numeric|nullable',
             'seo_keywords' => 'string|nullable',
