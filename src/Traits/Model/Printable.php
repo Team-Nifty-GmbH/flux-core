@@ -3,6 +3,7 @@
 namespace FluxErp\Traits\Model;
 
 use Closure;
+use FluxErp\Models\Token;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
@@ -34,25 +35,22 @@ trait Printable
     {
         $user = Auth::user();
 
-        $printViews = array_merge(
-            array_filter(
-                $this->getPrintViews(),
-                function (string|int $key) use ($user) {
-                    if ($user?->hasRole('Super Admin')) {
-                        return true;
-                    }
+        $printViews = array_filter(
+            array_merge($this->getPrintViews(), static::$registeredPrintViews),
+            function (string|int $key) use ($user) {
+                if ($user?->hasRole('Super Admin')) {
+                    return true;
+                }
 
-                    try {
-                        return $user
-                            ?->hasPermissionTo(print_view_to_permission($key, $this->getMorphClass()))
-                            ?? true;
-                    } catch (PermissionDoesNotExist) {
-                        return true;
-                    }
-                },
-                ARRAY_FILTER_USE_KEY
-            ),
-            static::$registeredPrintViews
+                try {
+                    return $user
+                        ?->hasPermissionTo(print_view_to_permission($key, $this->getMorphClass()))
+                        ?? true;
+                } catch (PermissionDoesNotExist) {
+                    return ! $user instanceof Token;
+                }
+            },
+            ARRAY_FILTER_USE_KEY
         );
 
         foreach ($printViews as $name => $view) {

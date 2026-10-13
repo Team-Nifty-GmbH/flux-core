@@ -3,6 +3,8 @@
 namespace FluxErp\Actions\Printer;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\Media\DownloadMedia;
+use FluxErp\Actions\PrintJob\UpdatePrintJob;
 use FluxErp\Actions\Token\CreateToken;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Printer;
@@ -34,16 +36,16 @@ class GeneratePrinterBridgeConfig extends FluxAction
 
         $requiredPermissionNames = [
             'api.printers.get',
-            'api.printers.create',
-            'api.printers.update',
-            'api.printers.delete',
             'api.print-jobs.get',
             'api.print-jobs.{id}.get',
-            'api.print-jobs.create',
-            'api.print-jobs.update',
+            'action.' . resolve_static(CreatePrinter::class, 'name'),
+            'action.' . resolve_static(UpdatePrinter::class, 'name'),
+            'action.' . resolve_static(DeletePrinter::class, 'name'),
+            'action.' . resolve_static(UpdatePrintJob::class, 'name'),
+            'action.' . resolve_static(DownloadMedia::class, 'name'),
         ];
 
-        $permissionIds = Permission::query()
+        $permissionIds = resolve_static(Permission::class, 'query')
             ->whereIn('name', $requiredPermissionNames)
             ->where('guard_name', 'token')
             ->pluck('id')
