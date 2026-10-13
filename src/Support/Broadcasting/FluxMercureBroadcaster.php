@@ -23,7 +23,12 @@ class FluxMercureBroadcaster extends MercureBroadcaster
     {
         $requested = (array) $request->input('channel_names', []);
 
-        if (! $request->hasSession() || $requested === [] || $requested !== array_filter($requested, 'is_string')) {
+        if (
+            ! $request->hasSession()
+            || $requested === []
+            || count($requested) > 100
+            || $requested !== array_filter($requested, 'is_string')
+        ) {
             return parent::auth($request);
         }
 

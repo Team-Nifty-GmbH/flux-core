@@ -90,6 +90,10 @@ test('channels of the same kind share one url pattern', function (): void {
         ->not->toContain('https://laravel.alt/echo/channel/private-order.1');
 });
 
+test('more than 100 requested channels are still refused', function (): void {
+    authorizeMercure($this, array_map(fn (int $id): string => 'private-order.' . $id, range(1, 101)));
+})->throws(Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException::class);
+
 test('client events are off unless configured', function (): void {
     expect(authorizeMercure($this, ['private-first'])->getData(true)['client_events'])->toBeFalse();
 });
