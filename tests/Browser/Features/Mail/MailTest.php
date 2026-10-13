@@ -1,13 +1,29 @@
 <?php
 
+use Pest\Browser\Api\AwaitableWebpage;
+use Pest\Browser\Api\PendingAwaitablePage;
+
+/**
+ * Headless Chromium starts with its cursor at 0,0, which is on the sidebar, and
+ * fires a mouseover there once the page has loaded. When Alpine is listening by
+ * then, the sidebar expands over the folder column and covers the New Email
+ * button; the click waits for the button forever and never moves the cursor
+ * away. Moving the cursor into the content area closes the sidebar again.
+ */
+function visitMailPage(): AwaitableWebpage|PendingAwaitablePage
+{
+    return visit(route('mail'))
+        ->assertNoSmoke()
+        ->hover('main >> nth=0');
+}
+
 test('mail page loads without js errors', function (): void {
     visit(route('mail'))
         ->assertNoSmoke();
 });
 
 test('new email button opens a blank compose modal', function (): void {
-    $page = visit(route('mail'))
-        ->assertNoSmoke();
+    $page = visitMailPage();
 
     $page->click(__('New Email'));
 
@@ -30,8 +46,7 @@ test('compose to field suggests matching addresses', function (): void {
         'is_main_address' => true,
     ]);
 
-    $page = visit(route('mail'))
-        ->assertNoSmoke();
+    $page = visitMailPage();
 
     $page->click(__('New Email'));
 
@@ -63,8 +78,7 @@ test('selecting a suggestion adds a recipient pill', function (): void {
         'is_main_address' => true,
     ]);
 
-    $page = visit(route('mail'))
-        ->assertNoSmoke();
+    $page = visitMailPage();
 
     $page->click(__('New Email'));
 
@@ -98,8 +112,7 @@ test('selecting a suggestion adds a recipient pill', function (): void {
 });
 
 test('typing a free email address adds a recipient pill on enter', function (): void {
-    $page = visit(route('mail'))
-        ->assertNoSmoke();
+    $page = visitMailPage();
 
     $page->click(__('New Email'));
 
@@ -125,8 +138,7 @@ test('typing a free email address adds a recipient pill on enter', function (): 
 });
 
 test('recipient pill survives closing an autocomplete dropdown', function (): void {
-    $page = visit(route('mail'))
-        ->assertNoSmoke();
+    $page = visitMailPage();
 
     $page->click(__('New Email'));
 
