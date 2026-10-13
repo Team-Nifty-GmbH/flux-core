@@ -184,8 +184,10 @@ class MailAccount extends FluxModel
             ->where('mail_account_id', $this->getKey())
             ->get(['id', 'parent_id']);
 
+        $staleFolderIds = array_flip($staleFolders->modelKeys());
+
         $staleFolders
-            ->reject(fn (MailFolder $folder): bool => $staleFolders->contains('id', $folder->parent_id))
+            ->reject(fn (MailFolder $folder): bool => array_key_exists($folder->parent_id ?? 0, $staleFolderIds))
             ->each(
                 fn (MailFolder $folder) => DeleteMailFolder::make(['id' => $folder->getKey()])
                     ->validate()
