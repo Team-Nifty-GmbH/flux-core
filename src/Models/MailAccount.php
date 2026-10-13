@@ -244,7 +244,9 @@ class MailAccount extends FluxModel
     protected function isNewSentFolder(Folder $folder): bool
     {
         return in_array($folder->name, ['Sent', 'Sent Items', 'Sent Messages', 'Sent Mail'])
-            && ! $this->mailFolders()->where('is_sent', true)->exists();
+            && ! $this->mailFolders()
+                ->where('is_sent', true)
+                ->exists();
     }
 
     protected function syncFolder(Folder $folder, ?int $parentId = null): array

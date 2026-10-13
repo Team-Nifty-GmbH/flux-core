@@ -24,8 +24,8 @@ class MailFolder extends FluxModel
 
             // A mail account keeps its sent mails in exactly one folder.
             resolve_static(MailFolder::class, 'query')
-                ->where('mail_account_id', $mailFolder->mail_account_id)
                 ->whereKeyNot($mailFolder->getKey())
+                ->where('mail_account_id', $mailFolder->mail_account_id)
                 ->where('is_sent', true)
                 ->update(['is_sent' => false]);
         });
@@ -34,6 +34,10 @@ class MailFolder extends FluxModel
     protected function casts(): array
     {
         return [
+            'can_create_lead' => 'boolean',
+            'can_create_purchase_invoice' => 'boolean',
+            'can_create_ticket' => 'boolean',
+            'is_active' => 'boolean',
             'is_sent' => 'boolean',
         ];
     }
