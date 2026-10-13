@@ -2,6 +2,7 @@
 
 namespace FluxErp\Actions;
 
+use FluxErp\Models\Token;
 use FluxErp\Printing\Printable;
 use FluxErp\Rulesets\Printing\PrintingRuleset;
 use FluxErp\View\Printing\PrintableView;
@@ -66,7 +67,8 @@ class Printing extends FluxAction
         try {
             $denied = auth()->user()?->hasPermissionTo($permission) === false;
         } catch (PermissionDoesNotExist) {
-            $denied = false;
+            $denied = auth()->user() instanceof Token
+                && in_array($this->getData('view'), $model->getAvailableViews());
         }
 
         if ($denied) {

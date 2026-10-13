@@ -111,6 +111,21 @@ test('a token is forbidden to print a view it does not hold', function (): void 
         ->assertForbidden();
 });
 
+test('a token is forbidden to print a view whose permission was never created', function (): void {
+    $contact = Contact::factory()->create();
+    forgetPermission(print_view_to_permission('balance-statement', morph_alias(Contact::class)), 'token');
+    $token = createApiToken(['*'], ['action.' . Printing::name()]);
+    Auth::forgetGuards();
+
+    $this->withToken($token->token)
+        ->postJson('/api/print/pdf', [
+            'model_type' => morph_alias(Contact::class),
+            'model_id' => $contact->getKey(),
+            'view' => 'balance-statement',
+        ])
+        ->assertForbidden();
+});
+
 test('printing a view the model does not offer is a validation error', function (): void {
     $contact = Contact::factory()->create();
     $token = createApiToken(['*'], ['action.' . Printing::name()]);
