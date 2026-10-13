@@ -4,7 +4,12 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\OrderType;
+use FluxErp\Traits\Model\LogsActivity;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\AsEncryptedArrayObject;
+use Illuminate\Database\Eloquent\Casts\AsEncryptedCollection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Spatie\Activitylog\Models\Activity;
 
 test('logs old and new attribute changes on update', function (): void {
@@ -65,4 +70,27 @@ test('encrypted and hashed attributes are never logged', function (): void {
     expect($activities)->toHaveCount(3)
         ->and($logged)->toContain('name')
         ->and($logged)->not->toContain('password', 'smtp_password');
+});
+
+test('class based encrypted casts count as secret attributes', function (): void {
+    $model = new class() extends Model
+    {
+        use LogsActivity;
+
+        protected function casts(): array
+        {
+            return [
+                'name' => 'string',
+                'settings' => AsEncryptedArrayObject::class,
+                'tokens' => AsEncryptedCollection::class . ':' . Collection::class,
+            ];
+        }
+
+        public function secretAttributes(): array
+        {
+            return $this->getSecretAttributes();
+        }
+    };
+
+    expect($model->secretAttributes())->toBe(['settings', 'tokens']);
 });

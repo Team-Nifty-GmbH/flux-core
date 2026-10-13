@@ -2,6 +2,7 @@
 
 namespace FluxErp\Traits\Model;
 
+use Illuminate\Support\Str;
 use Spatie\Activitylog\Models\Concerns\LogsActivity as BaseLogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 use Spatie\ModelStates\State;
@@ -29,7 +30,11 @@ trait LogsActivity
             array_filter(
                 $this->getCasts(),
                 fn (mixed $cast): bool => is_string($cast)
-                    && ($cast === 'hashed' || str_starts_with($cast, 'encrypted'))
+                    && (
+                        $cast === 'hashed'
+                        || str_starts_with($cast, 'encrypted')
+                        || str_starts_with(class_basename(Str::before($cast, ':')), 'AsEncrypted')
+                    )
             )
         );
     }
