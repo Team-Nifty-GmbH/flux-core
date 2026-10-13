@@ -1,7 +1,11 @@
 <?php
 
-namespace FluxErp\Support\Mail;
+namespace FluxErp\Actions\MailAccount;
 
+use ErrorException;
+use FluxErp\Actions\FluxAction;
+use FluxErp\Models\MailAccount;
+use FluxErp\Rulesets\MailAccount\DiscoverMailAccountSettingsRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -10,7 +14,7 @@ use RuntimeException;
 use SimpleXMLElement;
 use Throwable;
 
-class MailServerDiscovery
+class DiscoverMailAccountSettings extends FluxAction
 {
     protected const int MAX_RESPONSE_BYTES = 1024 * 1024;
 
@@ -19,13 +23,25 @@ class MailServerDiscovery
         'STARTTLS' => 'tls',
     ];
 
+    protected static bool $hasPermission = false;
+
     protected float $deadline = 0;
 
-    // The lookup runs inside a form request, so the http sources share one time budget.
     protected int $deadlineSeconds = 8;
 
-    public function discover(string $email): ?array
+    public static function models(): array
     {
+        return [MailAccount::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DiscoverMailAccountSettingsRuleset::class;
+    }
+
+    public function performAction(): ?array
+    {
+        $email = $this->getData('email');
         $domain = Str::lower(Str::afterLast($email, '@'));
         $query = '?emailaddress=' . urlencode($email);
         $this->deadline = microtime(true) + $this->deadlineSeconds;
@@ -55,7 +71,11 @@ class MailServerDiscovery
 
     protected function dnsRecords(string $host, int $type): array
     {
-        return @dns_get_record($host, $type) ?: [];
+        try {
+            return dns_get_record($host, $type) ?: [];
+        } catch (ErrorException) {
+            return [];
+        }
     }
 
     protected function fromAutoconfig(string $url, string $email): ?array
@@ -65,7 +85,6 @@ class MailServerDiscovery
         }
 
         try {
-            // The domain comes from user input, so a redirect could point anywhere.
             $response = Http::timeout(min(5, max(1, (int) ceil($this->deadline - microtime(true)))))
                 ->withOptions([
                     'allow_redirects' => false,
@@ -124,29 +143,6 @@ class MailServerDiscovery
         return $settings;
     }
 
-    protected function isPublicHost(?string $host): bool
-    {
-        if (! $host) {
-            return false;
-        }
-
-        $addresses = filter_var($host, FILTER_VALIDATE_IP)
-            ? [$host]
-            : array_merge(
-                array_column($this->dnsRecords($host, DNS_A), 'ip'),
-                array_column($this->dnsRecords($host, DNS_AAAA), 'ipv6')
-            );
-
-        return $addresses && array_all(
-            $addresses,
-            fn (string $address) => filter_var(
-                $address,
-                FILTER_VALIDATE_IP,
-                FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
-            ) !== false
-        );
-    }
-
     protected function fromMxIspdb(string $domain, string $email): ?array
     {
         $mx = collect($this->dnsRecords($domain, DNS_MX))
@@ -157,7 +153,6 @@ class MailServerDiscovery
             return null;
         }
 
-        // The last two labels as registrable domain; wrong for e.g. co.uk, which would need a public suffix list.
         $baseDomain = implode('.', array_slice(explode('.', Str::lower(rtrim($mx, '.'))), -2));
 
         return $baseDomain === $domain
@@ -186,12 +181,42 @@ class MailServerDiscovery
                 ->first();
 
             if ($record) {
-                $settings += array_combine($keys, [rtrim($record['target'], '.'), (int) $record['port'], $encryption]);
+                $settings += array_combine(
+                    $keys,
+                    [
+                        rtrim($record['target'], '.'),
+                        (int) $record['port'],
+                        $encryption,
+                    ]
+                );
             }
         }
 
         return $settings
             ? Arr::add($settings, 'source', 'DNS SRV')
             : null;
+    }
+
+    protected function isPublicHost(?string $host): bool
+    {
+        if (! $host) {
+            return false;
+        }
+
+        $addresses = filter_var($host, FILTER_VALIDATE_IP)
+            ? [$host]
+            : array_merge(
+                array_column($this->dnsRecords($host, DNS_A), 'ip'),
+                array_column($this->dnsRecords($host, DNS_AAAA), 'ipv6')
+            );
+
+        return $addresses && array_all(
+            $addresses,
+            fn (string $address) => filter_var(
+                $address,
+                FILTER_VALIDATE_IP,
+                FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+            ) !== false
+        );
     }
 }

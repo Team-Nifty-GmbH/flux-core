@@ -1,23 +1,24 @@
 <?php
 
+use FluxErp\Actions\MailAccount\DiscoverMailAccountSettings;
 use FluxErp\Livewire\Settings\MailAccounts;
-use FluxErp\Support\Mail\MailServerDiscovery;
 use Livewire\Livewire;
 
 function fakeMailServerDiscovery(?array $result): void
 {
-    app()->bind(
-        MailServerDiscovery::class,
-        fn () => new class($result) extends MailServerDiscovery
-        {
-            public function __construct(private readonly ?array $result) {}
+    $fake = new class() extends DiscoverMailAccountSettings
+    {
+        public static ?array $fakeResult = null;
 
-            public function discover(string $email): ?array
-            {
-                return $this->result;
-            }
+        public function performAction(): ?array
+        {
+            return self::$fakeResult;
         }
-    );
+    };
+
+    $fake::$fakeResult = $result;
+
+    app()->bind(DiscoverMailAccountSettings::class, $fake::class);
 }
 
 function discoveredMailSettings(): array

@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Settings;
 use Exception;
 use FluxErp\Actions\MailAccount\CreateMailAccount;
 use FluxErp\Actions\MailAccount\DeleteMailAccount;
+use FluxErp\Actions\MailAccount\DiscoverMailAccountSettings;
 use FluxErp\Actions\MailAccount\UpdateMailAccount;
 use FluxErp\Actions\MailFolder\UpdateMailFolder;
 use FluxErp\Jobs\SyncMailAccountJob;
@@ -14,7 +15,6 @@ use FluxErp\Livewire\Forms\MailFolderForm;
 use FluxErp\Mail\MailDriverManager;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
-use FluxErp\Support\Mail\MailServerDiscovery;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -107,20 +107,19 @@ class MailAccounts extends MailAccountList
     }
 
     #[Renderless]
-    public function discoverSettings(bool $onlyEmpty = false): void
+    public function discoverSettings(bool $keepExistingSettings = false): void
     {
         try {
-            Validator::make(['email' => $this->mailAccount->email], ['email' => 'required|email'])
-                ->validate();
+            $settings = DiscoverMailAccountSettings::make(['email' => $this->mailAccount->email])
+                ->validate()
+                ->execute();
         } catch (ValidationException $e) {
-            if (! $onlyEmpty) {
+            if (! $keepExistingSettings) {
                 exception_to_notifications($e, $this);
             }
 
             return;
         }
-
-        $settings = app(MailServerDiscovery::class)->discover($this->mailAccount->email);
 
         if (! $settings) {
             $this->toast()
@@ -136,7 +135,9 @@ class MailAccounts extends MailAccountList
         ];
 
         foreach ($blocks as $key => $fields) {
-            if (! array_key_exists($key, $settings) || ($onlyEmpty && filled($this->mailAccount->{$key}))) {
+            if (! array_key_exists($key, $settings)
+                || ($keepExistingSettings && filled($this->mailAccount->{$key}))
+            ) {
                 continue;
             }
 

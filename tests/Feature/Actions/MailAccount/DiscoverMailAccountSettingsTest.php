@@ -1,26 +1,40 @@
 <?php
 
-use FluxErp\Support\Mail\MailServerDiscovery;
+use FluxErp\Actions\MailAccount\DiscoverMailAccountSettings;
 use Illuminate\Support\Facades\Http;
 
 function fakeMailDns(array $records = [], int $deadlineSeconds = 8): void
 {
-    app()->bind(
-        MailServerDiscovery::class,
-        fn () => new class($records, $deadlineSeconds) extends MailServerDiscovery
-        {
-            public function __construct(private readonly array $records, int $deadlineSeconds)
-            {
-                $this->deadlineSeconds = $deadlineSeconds;
-            }
+    $fake = new class() extends DiscoverMailAccountSettings
+    {
+        public static int $fakeDeadlineSeconds = 8;
 
-            protected function dnsRecords(string $host, int $type): array
-            {
-                // Every host resolves to a public address unless a test says otherwise.
-                return $this->records[$type][$host] ?? ($type === DNS_A ? [['ip' => '93.184.216.34']] : []);
-            }
+        public static array $records = [];
+
+        public function performAction(): ?array
+        {
+            $this->deadlineSeconds = self::$fakeDeadlineSeconds;
+
+            return parent::performAction();
         }
-    );
+
+        protected function dnsRecords(string $host, int $type): array
+        {
+            return self::$records[$type][$host] ?? ($type === DNS_A ? [['ip' => '93.184.216.34']] : []);
+        }
+    };
+
+    $fake::$records = $records;
+    $fake::$fakeDeadlineSeconds = $deadlineSeconds;
+
+    app()->bind(DiscoverMailAccountSettings::class, $fake::class);
+}
+
+function discoverMailSettings(string $email = 'john@example.com'): ?array
+{
+    return DiscoverMailAccountSettings::make(['email' => $email])
+        ->validate()
+        ->execute();
 }
 
 function autoconfigXml(
@@ -67,7 +81,7 @@ test('provider autoconfig is used', function (): void {
         '*' => Http::response('', 404),
     ]);
 
-    expect(app(MailServerDiscovery::class)->discover('john@example.com'))->toBe([
+    expect(discoverMailSettings())->toBe([
         'host' => 'imap.example.com',
         'port' => 993,
         'encryption' => 'ssl',
@@ -85,7 +99,7 @@ test('well-known autoconfig is used', function (): void {
         '*' => Http::response('', 404),
     ]);
 
-    expect(app(MailServerDiscovery::class)->discover('john@example.com'))
+    expect(discoverMailSettings())
         ->host->toBe('imap.wk.com')
         ->source->toBe('example.com');
 });
@@ -96,7 +110,7 @@ test('ispdb is used', function (): void {
         '*' => Http::response('', 404),
     ]);
 
-    expect(app(MailServerDiscovery::class)->discover('john@example.com'))
+    expect(discoverMailSettings())
         ->host->toBe('imap.ispdb.com')
         ->source->toBe('autoconfig.thunderbird.net');
 });
@@ -117,7 +131,7 @@ test('ispdb is queried for the base domain of the mx', function (): void {
         '*' => Http::response('', 404),
     ]);
 
-    expect(app(MailServerDiscovery::class)->discover('john@example.com'))
+    expect(discoverMailSettings())
         ->host->toBe('imap.gmail.com')
         ->smtp_host->toBe('smtp.gmail.com')
         ->smtp_encryption->toBe('ssl')
@@ -137,7 +151,7 @@ test('dns srv records are used', function (): void {
     ]);
     Http::fake(['*' => Http::response('', 404)]);
 
-    expect(app(MailServerDiscovery::class)->discover('john@example.com'))->toBe([
+    expect(discoverMailSettings())->toBe([
         'host' => 'mail.example.com',
         'port' => 993,
         'encryption' => 'ssl',
@@ -156,7 +170,7 @@ test('an earlier source wins', function (): void {
         '*' => Http::response('', 404),
     ]);
 
-    expect(app(MailServerDiscovery::class)->discover('john@example.com'))
+    expect(discoverMailSettings())
         ->host->toBe('imap.first.com');
 });
 
@@ -168,7 +182,7 @@ test('username placeholders are resolved and plain maps to no encryption', funct
         '*' => Http::response('', 404),
     ]);
 
-    expect(app(MailServerDiscovery::class)->discover('john@example.com'))
+    expect(discoverMailSettings())
         ->smtp_user->toBe('john+x@example.com')
         ->smtp_encryption->toBeNull();
 });
@@ -181,14 +195,14 @@ test('non 200 and invalid xml fall through to the next source', function (): voi
         '*' => Http::response('', 404),
     ]);
 
-    expect(app(MailServerDiscovery::class)->discover('john@example.com'))
+    expect(discoverMailSettings())
         ->host->toBe('imap.ispdb.com');
 });
 
 test('returns null when nothing is found', function (): void {
     Http::fake(['*' => Http::response('', 404)]);
 
-    expect(app(MailServerDiscovery::class)->discover('john@example.com'))->toBeNull();
+    expect(discoverMailSettings())->toBeNull();
 });
 
 test('a host resolving to a private address is never queried', function (): void {
@@ -198,7 +212,7 @@ test('a host resolving to a private address is never queried', function (): void
         '*' => Http::response('', 404),
     ]);
 
-    expect(app(MailServerDiscovery::class)->discover('john@example.com'))->toBeNull();
+    expect(discoverMailSettings())->toBeNull();
     Http::assertNotSent(fn ($request) => str_contains($request->url(), 'autoconfig.example.com'));
 });
 
@@ -208,7 +222,7 @@ test('an oversized response falls through to the next source', function (): void
         '*' => Http::response('', 404),
     ]);
 
-    expect(app(MailServerDiscovery::class)->discover('john@example.com'))->toBeNull();
+    expect(discoverMailSettings())->toBeNull();
 });
 
 test('http sources are skipped once the deadline has passed', function (): void {
@@ -217,7 +231,19 @@ test('http sources are skipped once the deadline has passed', function (): void 
     ], deadlineSeconds: 0);
     Http::fake(['*' => Http::response(autoconfigXml())]);
 
-    expect(app(MailServerDiscovery::class)->discover('john@example.com'))
+    expect(discoverMailSettings())
         ->toMatchArray(['host' => 'mail.example.com', 'source' => 'DNS SRV']);
     Http::assertNothingSent();
+});
+
+test('a failing dns query counts as no record', function (): void {
+    $action = new class() extends DiscoverMailAccountSettings
+    {
+        public function records(string $host): array
+        {
+            return $this->dnsRecords($host, DNS_A);
+        }
+    };
+
+    expect($action->records(str_repeat('a', 70) . '.com'))->toBe([]);
 });
