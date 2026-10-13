@@ -47,7 +47,7 @@ foreach (Relation::morphMap() as $class) {
     );
 
     $channel = class_to_broadcast_channel($class, false);
-    Broadcast::channel($channel . '.', fn () => true, ['guards' => ['web', 'address']]);
+    Broadcast::channel($channel . '.', fn () => true, ['guards' => ['web', 'token']]);
 }
 
 Broadcast::channel(
