@@ -35,6 +35,9 @@ class MercureHubConfig
                 . "\t\t\t\tpublisher {\n\t\t\t\t\tjwt " . $secret . " HS256\n\t\t\t\t}\n"
                 . "\t\t\t\tsubscriber {\n\t\t\t\t\tjwt " . $secret . " HS256\n\t\t\t\t}\n"
                 . "\t\t\t}",
+            'resource_identifier' => config('broadcasting.connections.mercure.claims.aud')
+                ?: config('broadcasting.connections.mercure.public_url')
+                ?: config('broadcasting.connections.mercure.url'),
             'cors_origins' => config('app.url'),
             // Presence channels read their members from the subscriptions API.
             'subscriptions' => true,
