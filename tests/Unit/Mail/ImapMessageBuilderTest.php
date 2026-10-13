@@ -12,6 +12,7 @@ use Webklex\PHPIMAP\Folder;
 use Webklex\PHPIMAP\Message;
 use Webklex\PHPIMAP\Query\WhereQuery;
 use Webklex\PHPIMAP\Support\AttachmentCollection;
+use Webklex\PHPIMAP\Support\MessageCollection;
 
 test('can be instantiated from a mail folder', function (): void {
     $folder = new MailFolder();
@@ -399,3 +400,56 @@ test('leaves a stream failure alone that did not come from the imap client', fun
         ->and($builder->attempts)->toBe(1)
         ->and($builder->reconnects)->toBe(0);
 });
+
+test('lets go of every new message once it is stored', function (): void {
+    $mailAccount = MailAccount::factory()
+        ->has(MailFolder::factory())
+        ->create();
+    $folder = $mailAccount->mailFolders->first();
+
+    $newMessages = new MessageCollection(
+        array_map(fn (int $uid): Message => makeReadableImapMessage($uid), [11, 12, 13])
+    );
+
+    $query = Mockery::mock(WhereQuery::class);
+    $query->shouldReceive('setFetchBody')->andReturnSelf();
+    $query->shouldReceive('leaveUnread')->andReturnSelf();
+    $query->shouldReceive('getByUidGreater')->with(10)->andReturn($newMessages);
+
+    $imapFolder = Mockery::mock(Folder::class);
+    $imapFolder->shouldReceive('messages')->andReturn($query);
+
+    $stillHeld = [];
+
+    makeTestableBuilder($folder)
+        ->setImapFolder($imapFolder)
+        ->newSince(10)
+        ->onProgress(function (int $processed, int $total) use (&$stillHeld, $newMessages): void {
+            $stillHeld[] = $newMessages->count();
+        })
+        ->fetchAndStore();
+
+    expect($stillHeld)->toBe([2, 1, 0])
+        ->and(Communication::query()->where('mail_folder_id', $folder->getKey())->count())->toBe(3);
+});
+
+function makeReadableImapMessage(int $uid): Message
+{
+    $message = Mockery::mock(Message::class);
+    $message->shouldReceive('parseBody')->andReturnSelf();
+    $message->shouldReceive('getAttachments')->andReturn(new AttachmentCollection());
+    $message->shouldReceive('getMessageId->toString')->andReturn('<' . $uid . '@example.com>');
+    $message->shouldReceive('getUid')->andReturn($uid);
+    $message->shouldReceive('getSubject->toString')->andReturn('Mail ' . $uid);
+    $message->shouldReceive('getFrom')->andReturn([(object) ['full' => 'sender@example.com']]);
+    $message->shouldReceive('getTo->toArray')->andReturn([]);
+    $message->shouldReceive('getCc->toArray')->andReturn([]);
+    $message->shouldReceive('getBcc->toArray')->andReturn([]);
+    $message->shouldReceive('getTextBody')->andReturn('Hello');
+    $message->shouldReceive('getHtmlBody')->andReturn('<p>Hello</p>');
+    $message->shouldReceive('getDate->toDate')->andReturn(new DateTime('2026-01-30 12:00:00'));
+    $message->shouldReceive('hasFlag')->andReturn(false);
+    $message->shouldReceive('getFlags->toArray')->andReturn([]);
+
+    return $message;
+}
