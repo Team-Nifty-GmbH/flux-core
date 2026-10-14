@@ -9,10 +9,13 @@ use FluxErp\Facades\Action;
 use FluxErp\Facades\Widget;
 use FluxErp\Http\Controllers\Controller;
 use FluxErp\Models\Permission;
+use FluxErp\Models\User;
 use FluxErp\Traits\Livewire\WithTabs;
 use FluxErp\Traits\Model\HasModelPermission;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use ReflectionClass;
 use ReflectionException;
@@ -78,11 +81,58 @@ class InitPermissions extends Command
     protected function registerActionPermission(string $guardName = 'web'): void
     {
         $this->info('Registering action permissions for guard ' . $guardName . '…');
+        $newPermissions = [];
+
         foreach (Action::all() as $action) {
             if ($action['class']::hasPermission()) {
-                $this->keepPermission('action.' . $action['name'], $guardName);
+                $id = $this->keepPermission('action.' . $action['name'], $guardName);
+
+                if (! array_key_exists($id, $this->preexistingPermissions)) {
+                    $newPermissions[] = $id;
+                }
             }
         }
+
+        if ($newPermissions && in_array($guardName, resolve_static(User::class, 'guardNames'))) {
+            $this->grantToEveryoneAllowedBefore($newPermissions, $guardName);
+        }
+    }
+
+    protected function grantToEveryoneAllowedBefore(array $permissionIds, string $guardName): void
+    {
+        $registrar = app(PermissionRegistrar::class);
+
+        $roleIds = resolve_static(Role::class, 'query')
+            ->where('guard_name', $guardName)
+            ->where('name', '!=', 'Super Admin')
+            ->pluck('id');
+
+        $userIds = resolve_static(User::class, 'query')
+            ->whereDoesntHave('roles', fn (Builder $query) => $query->where('guard_name', $guardName))
+            ->pluck('id');
+
+        $rolePermissions = $roleIds->crossJoin($permissionIds)
+            ->map(fn (array $pair): array => [
+                $registrar->pivotRole => $pair[0],
+                $registrar->pivotPermission => $pair[1],
+            ]);
+
+        $userPermissions = $userIds->crossJoin($permissionIds)
+            ->map(fn (array $pair): array => [
+                'model_type' => morph_alias(User::class),
+                config('permission.column_names.model_morph_key') => $pair[0],
+                $registrar->pivotPermission => $pair[1],
+            ]);
+
+        foreach ($rolePermissions->chunk(1000) as $chunk) {
+            DB::table(config('permission.table_names.role_has_permissions'))->insertOrIgnore($chunk->values()->all());
+        }
+
+        foreach ($userPermissions->chunk(1000) as $chunk) {
+            DB::table(config('permission.table_names.model_has_permissions'))->insertOrIgnore($chunk->values()->all());
+        }
+
+        $registrar->forgetCachedPermissions();
     }
 
     protected function registerModelGetPermission(): void
