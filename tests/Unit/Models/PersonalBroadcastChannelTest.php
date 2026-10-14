@@ -152,3 +152,30 @@ test('a new comment reaches its record and the channel of the record model', fun
         'private-' . morph_alias(Ticket::class) . '.',
     ]);
 });
+
+test('an order moved to another contact still reaches the previous contact', function (): void {
+    $order = Order::factory()->make(['id' => 5, 'contact_id' => 3, 'approval_user_id' => null]);
+    $order->syncOriginal();
+    $order->contact_id = 4;
+    $order->syncChanges();
+
+    expect(personalChannelNames($order, 'updated'))->toContain('private-contact.3', 'private-contact.4');
+});
+
+test('a task saved again in the same request still notifies the user it was taken from', function (): void {
+    $previous = User::factory()->create();
+    $next = User::factory()->create();
+    $task = Task::factory()->create(['responsible_user_id' => $previous->getKey()]);
+    app(DeferredCallbackCollection::class)->invoke();
+
+    $captured = captureModelBroadcasts();
+
+    $task->update(['responsible_user_id' => $next->getKey()]);
+    $task->update(['name' => 'renamed afterwards']);
+    app(DeferredCallbackCollection::class)->invoke();
+
+    $reassignment = collect($captured->getArrayCopy())
+        ->firstWhere('event', 'TaskUpdated');
+
+    expect(data_get($reassignment, 'channels'))->toContain('private-user.' . $previous->getKey());
+});

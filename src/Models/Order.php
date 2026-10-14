@@ -708,9 +708,15 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     {
         return array_merge(
             Arr::wrap(parent::broadcastOn($event)),
-            $this->contact_id
-                ? [new PrivateChannel(morph_alias(Contact::class) . '.' . $this->contact_id)]
-                : [],
+            array_map(
+                fn (int|string $contactId): PrivateChannel => new PrivateChannel(
+                    morph_alias(Contact::class) . '.' . $contactId
+                ),
+                array_values(array_unique(array_filter([
+                    $this->contact_id,
+                    data_get($this->getPrevious(), 'contact_id'),
+                ])))
+            ),
             $this->userBroadcastChannels([
                 $this->approval_user_id,
                 data_get($this->getPrevious(), 'approval_user_id'),

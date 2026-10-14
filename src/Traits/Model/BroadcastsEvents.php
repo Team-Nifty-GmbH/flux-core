@@ -7,6 +7,7 @@ use FluxErp\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\PendingBroadcast;
 use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents as BaseBroadcastsEvents;
 use function Illuminate\Support\defer;
@@ -16,7 +17,6 @@ trait BroadcastsEvents
     use BaseBroadcastsEvents {
         BaseBroadcastsEvents::broadcastWith as protected baseBroadcastWith;
         BaseBroadcastsEvents::bootBroadcastsEvents as protected baseBootBroadcastsEvents;
-        BaseBroadcastsEvents::broadcastIfBroadcastChannelsExistForEvent as protected baseBroadcastIfBroadcastChannelsExistForEvent;
     }
 
     protected static bool $broadcastOnlyKey = true;
@@ -101,8 +101,14 @@ trait BroadcastsEvents
             $instance->broadcastNow();
         }
 
+        $channels = Arr::wrap($channels ?? $this->broadcastOn($event));
+
         defer(
-            fn () => $this->baseBroadcastIfBroadcastChannelsExistForEvent($instance, $event, $channels),
+            function () use ($instance, $channels): void {
+                if (static::$isBroadcasting && $channels) {
+                    broadcast($instance->onChannels($channels));
+                }
+            },
             always: true
         );
 
