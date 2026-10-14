@@ -35,3 +35,13 @@ test('a token use is refused once another request claimed the last one', functio
         ->and($staleCopy->use())->toBeFalse()
         ->and($token->refresh()->uses)->toBe(1);
 });
+
+test('a claimed use reflects the uses counted by other requests', function (): void {
+    $token = Token::query()->create(['name' => 'limited', 'max_uses' => 2]);
+    $staleCopy = Token::query()->find($token->getKey());
+
+    expect($token->use())->toBeTrue()
+        ->and($staleCopy->use())->toBeTrue()
+        ->and($staleCopy->uses)->toBe(2)
+        ->and($staleCopy->isValid())->toBeFalse();
+});

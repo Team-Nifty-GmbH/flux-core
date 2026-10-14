@@ -87,7 +87,9 @@ class Token extends FluxAuthenticatable
             ->update(['uses' => DB::raw('COALESCE(uses, 0) + 1')]);
 
         if ($claimed) {
-            $this->uses = ($this->uses ?? 0) + 1;
+            $this->uses = static::query()
+                ->whereKey($this->getKey())
+                ->value('uses');
             $this->syncOriginalAttribute('uses');
         }
 
