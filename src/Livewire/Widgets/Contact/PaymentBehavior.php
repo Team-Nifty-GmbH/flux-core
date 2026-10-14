@@ -83,7 +83,7 @@ class PaymentBehavior extends ValueBox
     {
         return [
             $this->contactChannel($this->contactId) => [
-                Order::class => ['updated', 'deleted'],
+                Order::class => ['created', 'updated', 'deleted'],
             ],
         ];
     }

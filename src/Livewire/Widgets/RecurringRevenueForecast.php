@@ -7,6 +7,7 @@ use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
+use FluxErp\Models\Order;
 use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Schedule;
 use FluxErp\Traits\Livewire\Widget\HasTemporalXAxisFormatter;
@@ -187,6 +188,9 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
     protected function liveUpdates(): array
     {
         return [
+            $this->modelChannel(Order::class) => [
+                Order::class => ['updated', 'deleted'],
+            ],
             $this->modelChannel(Schedule::class) => [
                 Schedule::class => ['created', 'updated', 'deleted'],
             ],

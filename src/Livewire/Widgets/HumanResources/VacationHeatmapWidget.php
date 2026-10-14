@@ -136,11 +136,19 @@ class VacationHeatmapWidget extends Component
         }
     }
 
+    protected function isDateDependent(): bool
+    {
+        return true;
+    }
+
     protected function liveUpdates(): array
     {
         return [
             $this->modelChannel(AbsenceRequest::class) => [
                 AbsenceRequest::class => ['created', 'updated', 'deleted'],
+            ],
+            $this->modelChannel(Employee::class) => [
+                Employee::class => ['created', 'updated', 'deleted'],
             ],
         ];
     }

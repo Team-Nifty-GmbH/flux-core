@@ -179,6 +179,11 @@ class VacationYearlyOverview extends Component
         $this->yearlyData = array_reverse($data);
     }
 
+    protected function liveUpdateMethod(): string
+    {
+        return 'calculateYearlyData';
+    }
+
     protected function liveUpdates(): array
     {
         return [

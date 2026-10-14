@@ -1,9 +1,15 @@
 <?php
 
 use FluxErp\Livewire\Widgets\Contact\OpenItems;
+use FluxErp\Livewire\Widgets\Contact\PaymentBehavior;
+use FluxErp\Livewire\Widgets\Employee\VacationYearlyOverview;
+use FluxErp\Livewire\Widgets\HumanResources\VacationHeatmapWidget;
 use FluxErp\Livewire\Widgets\MyOverdueTasks;
 use FluxErp\Livewire\Widgets\MyTasks;
+use FluxErp\Livewire\Widgets\Outstanding;
+use FluxErp\Livewire\Widgets\RecurringRevenueForecast;
 use FluxErp\Livewire\Widgets\Revenue;
+use FluxErp\Models\Employee;
 use FluxErp\Models\Order;
 use FluxErp\Models\Ticket;
 use Livewire\Livewire;
@@ -78,8 +84,47 @@ test('a widget can extend the declared live updates', function (): void {
 test('a date dependent widget schedules a reload at midnight', function (): void {
     $this->actingAs($this->user);
 
-    expect(json_encode(Livewire::test(MyOverdueTasks::class)->effects['xjs'] ?? []))
-        ->toContain('setHours(24');
+    $script = data_get(Livewire::test(MyOverdueTasks::class)->effects, 'xjs.0.expression');
+
+    expect($script)->toContain('setHours(24', "\$wire.call('\$refresh')");
+});
+
+test('a widget whose data depends on the date reloads at midnight', function (string $component): void {
+    $this->actingAs($this->user);
+
+    expect(data_get(Livewire::test($component)->effects, 'xjs.0.expression'))->toContain('setHours(24');
+})->with([VacationHeatmapWidget::class]);
+
+test('a widget declares the order events its data depends on', function (string $component, array $params, string $channel, array $events): void {
+    $this->actingAs($this->user);
+
+    $listeners = widgetListeners($component, $params);
+
+    foreach ($events as $event) {
+        expect($listeners)->toHaveKey('echo-private:' . $channel . ',.' . $event);
+    }
+})->with([
+    'outstanding' => [Outstanding::class, [], 'order.', ['OrderCreated', 'OrderUpdated', 'OrderDeleted']],
+    'open items' => [OpenItems::class, ['contactId' => 42], 'contact.42', ['OrderCreated', 'OrderUpdated', 'OrderDeleted']],
+    'payment behavior' => [PaymentBehavior::class, ['contactId' => 42], 'contact.42', ['OrderCreated', 'OrderUpdated', 'OrderDeleted']],
+    'recurring revenue forecast' => [RecurringRevenueForecast::class, [], 'order.', ['OrderUpdated', 'OrderDeleted']],
+    'vacation heatmap' => [VacationHeatmapWidget::class, [], 'employee.', ['EmployeeCreated', 'EmployeeUpdated', 'EmployeeDeleted']],
+]);
+
+test('a widget that calculates its data on mount reloads through that calculation', function (): void {
+    $this->actingAs($this->user);
+
+    $employee = app(Employee::class)->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'user_id' => $this->user->getKey(),
+        'firstname' => 'Test',
+        'lastname' => 'Employee',
+        'employment_date' => now()->subYear(),
+        'is_active' => true,
+    ]);
+
+    expect(array_values(array_unique(widgetListeners(VacationYearlyOverview::class, ['employeeId' => $employee->getKey()]))))
+        ->toBe(['calculateYearlyData']);
 });
 
 test('a widget that does not depend on the date schedules no reload', function (): void {

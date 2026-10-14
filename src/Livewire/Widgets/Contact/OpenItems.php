@@ -32,7 +32,7 @@ class OpenItems extends Outstanding
     {
         return [
             $this->contactChannel($this->contactId) => [
-                Order::class => ['updated', 'deleted'],
+                Order::class => ['created', 'updated', 'deleted'],
             ],
         ];
     }
