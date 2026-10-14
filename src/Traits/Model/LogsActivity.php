@@ -2,6 +2,7 @@
 
 namespace FluxErp\Traits\Model;
 
+use Illuminate\Support\Str;
 use Spatie\Activitylog\Models\Concerns\LogsActivity as BaseLogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 use Spatie\ModelStates\State;
@@ -19,7 +20,7 @@ trait LogsActivity
             ->logAll()
             ->dontLogIfAttributesChangedOnly(['created_at', 'updated_at'])
             ->dontLogEmptyChanges()
-            ->logExcept(['created_at', 'updated_at', 'deleted_at'])
+            ->logExcept(array_merge(['created_at', 'updated_at', 'deleted_at'], $this->getSecretAttributes()))
             ->logOnlyDirty();
     }
 
@@ -53,5 +54,20 @@ trait LogsActivity
         }
 
         return $changes;
+    }
+
+    protected function getSecretAttributes(): array
+    {
+        return array_keys(
+            array_filter(
+                $this->getCasts(),
+                fn (mixed $cast): bool => is_string($cast)
+                    && (
+                        $cast === 'hashed'
+                        || str_starts_with($cast, 'encrypted')
+                        || str_starts_with(class_basename(Str::before($cast, ':')), 'AsEncrypted')
+                    )
+            )
+        );
     }
 }
