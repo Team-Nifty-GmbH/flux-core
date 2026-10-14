@@ -3,6 +3,7 @@
 namespace FluxErp\Mail;
 
 use Closure;
+use FluxErp\Actions\MailFolder\UpdateMailFolder;
 use FluxErp\Contracts\MailSyncDriver;
 use FluxErp\Contracts\ReportsSyncProgress;
 use FluxErp\Models\Communication;
@@ -20,9 +21,22 @@ class ImapMailSyncDriver implements MailSyncDriver, ReportsSyncProgress
 
     public function syncMessages(MailFolder $folder): void
     {
-        $startUid = $this->resolveStartUid($folder);
-
         $builder = $folder->messages()->onProgress($this->progressCallback);
+
+        $status = $builder->status();
+        $uidValidity = data_get($status, 'uidvalidity');
+        $uidsAreStale = ! is_null($uidValidity)
+            && ! is_null($folder->uid_validity)
+            && $folder->uid_validity !== (int) $uidValidity;
+
+        $startUid = $this->resolveStartUid($folder, $status, $uidsAreStale);
+
+        if ($uidsAreStale) {
+            resolve_static(Communication::class, 'query')
+                ->where('mail_account_id', $folder->mailAccount->getKey())
+                ->where('mail_folder_id', $folder->getKey())
+                ->update(['message_uid' => null]);
+        }
 
         if (! is_null($startUid)) {
             $builder->newSince($startUid);
@@ -31,6 +45,15 @@ class ImapMailSyncDriver implements MailSyncDriver, ReportsSyncProgress
         $builder->fetchAndStore();
 
         $builder->syncReadStatus();
+
+        if (! is_null($uidValidity) && $folder->uid_validity !== (int) $uidValidity) {
+            UpdateMailFolder::make([
+                'id' => $folder->getKey(),
+                'uid_validity' => (int) $uidValidity,
+            ])
+                ->validate()
+                ->execute();
+        }
     }
 
     public function testConnection(MailAccount $account): bool
@@ -45,7 +68,7 @@ class ImapMailSyncDriver implements MailSyncDriver, ReportsSyncProgress
         return $this;
     }
 
-    protected function resolveStartUid(MailFolder $folder): ?int
+    protected function resolveStartUid(MailFolder $folder, array $status, bool $uidsAreStale): ?int
     {
         // message_uid is a string column to accommodate non-numeric provider ids
         // (Graph, Gmail history ids). For IMAP-family drivers the value is always
@@ -57,7 +80,7 @@ class ImapMailSyncDriver implements MailSyncDriver, ReportsSyncProgress
             ->selectRaw('MAX(CAST(message_uid AS UNSIGNED)) AS max_uid')
             ->value('max_uid');
 
-        if ($maxUid) {
+        if ($maxUid && ! $uidsAreStale) {
             return (int) $maxUid;
         }
 
@@ -73,9 +96,16 @@ class ImapMailSyncDriver implements MailSyncDriver, ReportsSyncProgress
             return null;
         }
 
+        $since = $uidsAreStale
+            ? resolve_static(Communication::class, 'query')
+                ->where('mail_account_id', $folder->mailAccount->getKey())
+                ->where('mail_folder_id', $folder->getKey())
+                ->max('date')
+            : null;
+
         $firstMessage = $imapFolder->messages()
             ->all()
-            ->since($folder->mailAccount->created_at)
+            ->since($since ?? $folder->mailAccount->created_at)
             ->limit(1)
             ->get()
             ?->first();
@@ -84,7 +114,7 @@ class ImapMailSyncDriver implements MailSyncDriver, ReportsSyncProgress
             return max($firstMessage->getUid() - 1, 0);
         }
 
-        return ! is_null($uidnext = data_get($imapFolder->examine(), 'uidnext'))
+        return ! is_null($uidnext = data_get($status, 'uidnext'))
             ? max($uidnext - 1, 0)
             : null;
     }
