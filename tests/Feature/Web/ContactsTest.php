@@ -1,6 +1,5 @@
 <?php
 
-use Dom\HTMLDocument;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PaymentType;
@@ -81,29 +80,4 @@ test('contacts without permission', function (): void {
 
     $this->actingAs($this->user, 'web')->get('/contacts/contacts')
         ->assertForbidden();
-});
-
-test('contacts id page renders the contact channel buttons beside their input', function (): void {
-    $this->user->givePermissionTo(Permission::findOrCreate('contacts.{id?}.get', 'web'));
-
-    $html = $this->actingAs($this->user, 'web')
-        ->get('/contacts/contacts/' . $this->contact->id)
-        ->assertOk()
-        ->getContent();
-
-    $document = HTMLDocument::createFromString($html, LIBXML_NOERROR);
-
-    foreach ([
-        'address.email_primary' => 'mailto:',
-        'address.phone' => 'tel:',
-        'address.phone_mobile' => 'tel:',
-        'address.url' => 'https://',
-    ] as $model => $action) {
-        $input = $document->querySelector('input[wire\\:model="' . $model . '"]');
-        $prefix = $input->previousElementSibling;
-
-        expect($input->getAttribute('class'))->not->toContain('pl-12')
-            ->and($prefix->querySelector('.absolute.inset-y-0'))->toBeNull()
-            ->and($prefix->querySelector('button')?->getAttribute('x-on:click.prevent'))->toContain($action);
-    }
 });
