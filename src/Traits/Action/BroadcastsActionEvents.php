@@ -26,7 +26,12 @@ trait BroadcastsActionEvents
 
     public static function getBroadcastChannel(): string
     {
-        return 'action.' . class_to_broadcast_channel(static::class, false);
+        return 'action.' . str_replace('.', '-', static::name());
+    }
+
+    public static function getBroadcastEventName(string $event): string
+    {
+        return class_basename(static::class) . ucfirst($event);
     }
 
     public function broadcastConnection(): ?string

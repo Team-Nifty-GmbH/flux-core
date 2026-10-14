@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Actions\ActionManager;
 use FluxErp\Http\Controllers\BroadcastingBatchAuthController;
 use FluxErp\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -63,7 +64,21 @@ Broadcast::channel(
     ['guards' => ['web', 'sanctum']]
 );
 
-Broadcast::channel('action.*', fn () => true);
+Broadcast::channel(
+    'action.{action}',
+    function (Authenticatable $user, string $action): bool {
+        $class = data_get(app(ActionManager::class)->get(str_replace('-', '.', $action)), 'class');
+
+        if (! $class) {
+            return false;
+        }
+
+        auth()->setUser($user);
+
+        return resolve_static($class, 'canPerformAction', ['throwException' => false]);
+    },
+    ['guards' => ['web', 'sanctum']]
+);
 
 Broadcast::channel(
     'presence',
