@@ -73,6 +73,7 @@ test('a delivered mail leaves its communication without send error', function ()
 });
 
 test('a queued mail that is rejected notifies the sender', function (): void {
+    config()->set('queue.default', 'sync');
     Notification::fake();
     Context::add('user', $this->user->getMorphClass() . ':' . $this->user->getKey());
 
