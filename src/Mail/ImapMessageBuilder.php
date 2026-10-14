@@ -11,6 +11,7 @@ use FluxErp\Models\Communication;
 use FluxErp\Models\MailFolder;
 use FluxErp\Models\Tag;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use Throwable;
@@ -426,31 +427,35 @@ class ImapMessageBuilder
 
     protected function storeMessage(ImapMessage $imapMessage): void
     {
-        $existing = resolve_static(Communication::class, 'query')
-            ->where('mail_account_id', $this->folder->mailAccount->getKey())
-            ->where('message_id', $imapMessage->messageId)
-            ->first();
+        try {
+            $existing = resolve_static(Communication::class, 'query')
+                ->where('mail_account_id', $this->folder->mailAccount->getKey())
+                ->where('message_id', $imapMessage->messageId)
+                ->first();
 
-        if (! $existing) {
-            try {
-                $this->createMessage($imapMessage);
-            } catch (ValidationException $exception) {
-                report(new RuntimeException(
-                    'Skipped IMAP message ' . $imapMessage->uid . ' in mail folder '
-                        . $this->folder->getKey() . ': ' . $exception->getMessage(),
-                    previous: $exception,
-                ));
+            if (! $existing) {
+                try {
+                    $this->createMessage($imapMessage);
+                } catch (ValidationException $exception) {
+                    report(new RuntimeException(
+                        'Skipped IMAP message ' . $imapMessage->uid . ' in mail folder '
+                            . $this->folder->getKey() . ': ' . $exception->getMessage(),
+                        previous: $exception,
+                    ));
+                }
+            } else {
+                UpdateCommunication::make([
+                    'id' => $existing->getKey(),
+                    'mail_folder_id' => $this->folder->getKey(),
+                    'message_uid' => (string) $imapMessage->uid,
+                    'communication_type_enum' => 'mail',
+                    'is_seen' => $imapMessage->isSeen,
+                ])
+                    ->validate()
+                    ->execute();
             }
-        } else {
-            UpdateCommunication::make([
-                'id' => $existing->getKey(),
-                'mail_folder_id' => $this->folder->getKey(),
-                'message_uid' => (string) $imapMessage->uid,
-                'communication_type_enum' => 'mail',
-                'is_seen' => $imapMessage->isSeen,
-            ])
-                ->validate()
-                ->execute();
+        } finally {
+            File::delete(array_column($imapMessage->attachments, 'media'));
         }
     }
 

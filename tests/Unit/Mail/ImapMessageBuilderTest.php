@@ -441,6 +441,7 @@ function makeReadableImapMessage(
     ?string $messageId = null,
     ?string $subject = null,
     string $from = 'sender@example.com',
+    ?string $fromMail = null,
 ): Message {
     $message = Mockery::mock(Message::class);
     $message->shouldReceive('parseBody')->andReturnSelf();
@@ -448,7 +449,7 @@ function makeReadableImapMessage(
     $message->shouldReceive('getMessageId->toString')->andReturn($messageId ?? '<' . $uid . '@example.com>');
     $message->shouldReceive('getUid')->andReturn($uid);
     $message->shouldReceive('getSubject->toString')->andReturn($subject ?? 'Mail ' . $uid);
-    $message->shouldReceive('getFrom')->andReturn([(object) ['full' => $from]]);
+    $message->shouldReceive('getFrom')->andReturn([(object) ['full' => $from, 'mail' => $fromMail]]);
     $message->shouldReceive('getTo->toArray')->andReturn([]);
     $message->shouldReceive('getCc->toArray')->andReturn([]);
     $message->shouldReceive('getBcc->toArray')->andReturn([]);
@@ -529,4 +530,72 @@ test('reports a message that fails validation and still imports the following on
     Exceptions::assertReported(
         fn (RuntimeException $exception): bool => $exception->getPrevious() instanceof ValidationException
     );
+});
+
+test('decodes an overlong mime encoded subject before cutting it', function (): void {
+    $folder = MailAccount::factory()->has(MailFolder::factory())->create()->mailFolders->first();
+    $subject = str_repeat('ä', 150);
+
+    makeTestableBuilder($folder)
+        ->setImapFolder(makeImapFolderServingNew([
+            makeReadableImapMessage(11, subject: '=?UTF-8?B?' . base64_encode($subject) . '?='),
+        ]))
+        ->newSince(10)
+        ->fetchAndStore();
+
+    expect(Communication::query()->where('mail_folder_id', $folder->getKey())->sole()->subject)->toBe($subject);
+});
+
+test('keeps the sender address when a long display name exceeds 255 characters', function (): void {
+    $folder = MailAccount::factory()->has(MailFolder::factory())->create()->mailFolders->first();
+
+    makeTestableBuilder($folder)
+        ->setImapFolder(makeImapFolderServingNew([
+            makeReadableImapMessage(
+                11,
+                from: str_repeat('N', 300) . ' <sender@example.com>',
+                fromMail: 'sender@example.com',
+            ),
+        ]))
+        ->newSince(10)
+        ->fetchAndStore();
+
+    expect(Communication::query()->where('mail_folder_id', $folder->getKey())->sole()->from_mail)
+        ->toBe('sender@example.com');
+});
+
+test('removes the temporary attachment files of a message that fails validation', function (): void {
+    Exceptions::fake();
+    $folder = MailAccount::factory()->has(MailFolder::factory())->create()->mailFolders->first();
+    $tempPath = tempnam(sys_get_temp_dir(), 'imap_');
+    file_put_contents($tempPath, 'attachment');
+
+    $rejecting = new class() extends CreateCommunicationRuleset
+    {
+        public function rules(): array
+        {
+            return array_merge(parent::rules(), ['message_id' => 'nullable|string|max:255|not_in:<rejected@example.com>']);
+        }
+    };
+    app()->bind(CreateCommunicationRuleset::class, $rejecting::class);
+
+    makeTestableBuilder($folder)
+        ->pushMessage(new ImapMessage(
+            messageId: '<rejected@example.com>',
+            uid: 11,
+            subject: 'Rejected',
+            from: 'sender@example.com',
+            to: [],
+            cc: [],
+            bcc: [],
+            textBody: 'Hello',
+            htmlBody: null,
+            date: CarbonImmutable::now(),
+            isSeen: true,
+            flags: [],
+            attachments: [['file_name' => 'a.txt', 'mime_type' => 'text/plain', 'name' => 'a.txt', 'media' => $tempPath]],
+        ))
+        ->store();
+
+    expect(file_exists($tempPath))->toBeFalse();
 });

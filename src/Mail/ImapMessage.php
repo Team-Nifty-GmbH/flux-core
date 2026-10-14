@@ -59,11 +59,23 @@ readonly class ImapMessage
             $messageId = mb_substr($messageId, 0, 214) . '.' . sha1($messageId);
         }
 
+        $subject = static::toUtf8($message->getSubject()->toString());
+
+        if (preg_match('/=\?[^?]*\?[BbQq]\?[^?]*\?=/', $subject)) {
+            $subject = mb_decode_mimeheader($subject);
+        }
+
+        $from = static::toUtf8(data_get($message->getFrom(), '0.full') ?? '');
+
+        if (mb_strlen($from) > 255) {
+            $from = static::toUtf8(data_get($message->getFrom(), '0.mail') ?? '') ?: $from;
+        }
+
         return new ImapMessage(
             messageId: $messageId,
             uid: $message->getUid(),
-            subject: Str::substr(static::toUtf8($message->getSubject()->toString()), 0, 255),
-            from: Str::substr(static::toUtf8(data_get($message->getFrom(), '0.full') ?? ''), 0, 255),
+            subject: Str::substr($subject, 0, 255),
+            from: Str::substr($from, 0, 255),
             to: static::toUtf8($message->getTo()->toArray()),
             cc: static::toUtf8($message->getCc()->toArray()),
             bcc: static::toUtf8($message->getBcc()->toArray()),
