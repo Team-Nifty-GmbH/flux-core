@@ -38,6 +38,9 @@ class CommunicationForm extends FluxForm
 
     public ?int $mail_folder_id = null;
 
+    #[Locked]
+    public ?string $send_error = null;
+
     public ?string $slug = null;
 
     public ?string $subject = null;
