@@ -67,10 +67,6 @@ Broadcast::channel('action.*', fn () => true);
 
 Broadcast::channel(
     'presence',
-    function (User $user) {
-        return [
-            'id' => $user->getKey(),
-        ];
-    },
+    fn (User $user): array => ['id' => $user->getKey()],
     ['guards' => ['web', 'sanctum']]
 );
