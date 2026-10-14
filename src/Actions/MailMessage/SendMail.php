@@ -70,6 +70,12 @@ class SendMail extends DispatchableFluxAction
                 'message' => __('Email(s) sent successfully!'),
             ];
         } catch (Throwable $e) {
+            if ($this->job) {
+                $mail->failed($e);
+            } else {
+                $mail->markCommunicationFailed($e);
+            }
+
             return [
                 'success' => false,
                 'message' => __('Failed to send email!'),

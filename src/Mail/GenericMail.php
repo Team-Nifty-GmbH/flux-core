@@ -3,10 +3,14 @@
 namespace FluxErp\Mail;
 
 use BadMethodCallException;
+use FluxErp\Actions\Communication\UpdateCommunication;
 use FluxErp\Actions\Printing;
 use FluxErp\Livewire\Forms\CommunicationForm;
+use FluxErp\Models\Communication;
 use FluxErp\Models\Media;
 use FluxErp\Models\Tenant;
+use FluxErp\Models\User;
+use FluxErp\Notifications\Communication\SendingFailedNotification;
 use FluxErp\Traits\Makeable;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Bus\Queueable;
@@ -16,13 +20,18 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Str;
 use Laravel\SerializableClosure\SerializableClosure;
 use Spatie\MediaLibrary\HasMedia;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Mime\Email;
+use Throwable;
 
 class GenericMail extends Mailable
 {
     use Makeable, Queueable, SerializesModels;
+
+    public string $messageId;
 
     public function __construct(
         public Arrayable|array $mailMessageForm,
@@ -45,6 +54,10 @@ class GenericMail extends Mailable
         $this->mailMessageForm = $this->mailMessageForm instanceof Arrayable
             ? $this->mailMessageForm->toArray()
             : $this->mailMessageForm;
+
+        $this->messageId = Str::uuid()->toString()
+            . '@'
+            . (parse_url(config('app.url'), PHP_URL_HOST) ?: 'localhost');
     }
 
     /**
@@ -106,6 +119,12 @@ class GenericMail extends Mailable
 
     public function build(): void
     {
+        $this->withSymfonyMessage(function (Email $message): void {
+            if (! $message->getHeaders()->has('Message-ID')) {
+                $message->getHeaders()->addIdHeader('Message-ID', $this->messageId);
+            }
+        });
+
         if ($this->bladeParameters) {
             $bladeParameters = $this->bladeParameters instanceof SerializableClosure
                 ? $this->bladeParameters->getClosure()()
@@ -150,5 +169,33 @@ class GenericMail extends Mailable
         return new Envelope(
             subject: data_get($this->mailMessageForm, 'subject'),
         );
+    }
+
+    public function failed(Throwable $exception): void
+    {
+        $communication = $this->markCommunicationFailed($exception);
+        $sender = $communication?->getCreatedBy();
+
+        if ($sender instanceof User) {
+            $sender->notify(SendingFailedNotification::make($communication));
+        }
+    }
+
+    public function markCommunicationFailed(Throwable $exception): ?Communication
+    {
+        $communicationId = resolve_static(Communication::class, 'query')
+            ->where('message_id', $this->messageId)
+            ->value('id');
+
+        if (! $communicationId) {
+            return null;
+        }
+
+        return UpdateCommunication::make([
+            'id' => $communicationId,
+            'send_error' => $exception->getMessage(),
+        ])
+            ->validate()
+            ->execute();
     }
 }

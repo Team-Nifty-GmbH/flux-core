@@ -37,6 +37,7 @@ class CommunicationList extends BaseDataTable
                     __('Letter') => 'gray',
                     __('Mail') => 'indigo',
                     __('Phone Call') => 'emerald',
+                    __('Sending failed') => 'red',
                 ],
             ],
         ]);
@@ -48,8 +49,17 @@ class CommunicationList extends BaseDataTable
             $itemArray['communication_type_enum'] = __(Str::headline($itemArray['communication_type_enum']));
         }
 
+        if ($item->send_error) {
+            $itemArray['communication_type_enum'] = __('Sending failed');
+        }
+
         if (is_string($itemArray['text_body'] ?? null)) {
             $itemArray['text_body'] = Str::limit($itemArray['text_body'], 100);
         }
+    }
+
+    protected function getReturnKeys(): array
+    {
+        return array_merge(parent::getReturnKeys(), ['send_error']);
     }
 }

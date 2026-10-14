@@ -50,6 +50,7 @@ class UpdateCommunicationRuleset extends FluxRuleset
             'text_body' => 'nullable|string',
             'html_body' => 'nullable|string',
             'is_seen' => 'boolean',
+            'send_error' => 'nullable|string',
         ];
     }
 }

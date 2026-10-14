@@ -301,12 +301,22 @@ abstract class Communication extends CommunicationList
         $this->communication->communicatable_id = $this->modelId;
 
         try {
-            SendMail::make($this->communication->toArray())
+            $result = SendMail::make($this->communication->toArray())
                 ->checkPermission()
                 ->validate()
                 ->execute();
         } catch (Exception $e) {
             exception_to_notifications($e, $this, form: $this->communication);
+
+            return false;
+        }
+
+        if (! data_get($result, 'success')) {
+            $this->toast()
+                ->error(__('Failed to send email!'), e(data_get($result, 'error')))
+                ->send();
+
+            $this->loadData();
 
             return false;
         }

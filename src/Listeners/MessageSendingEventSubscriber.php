@@ -65,6 +65,10 @@ class MessageSendingEventSubscriber
         )
             ?->getKey();
 
+        $communicationForm['id'] ??= resolve_static(Communication::class, 'query')
+            ->where('message_id', data_get($communicationForm, 'message_id'))
+            ->value('id');
+
         $communicationAction = data_get($communicationForm, 'id')
             ? UpdateCommunication::make($communicationForm)
             : CreateCommunication::make($communicationForm);
@@ -92,6 +96,20 @@ class MessageSendingEventSubscriber
     {
         if (! $communicationForm = data_get($event->data, 'mailMessageForm')) {
             return;
+        }
+
+        $failedCommunicationId = resolve_static(Communication::class, 'query')
+            ->where('message_id', $event->message->getHeaders()->get('Message-ID')?->getId())
+            ->whereNotNull('send_error')
+            ->value('id');
+
+        if ($failedCommunicationId) {
+            UpdateCommunication::make([
+                'id' => $failedCommunicationId,
+                'send_error' => null,
+            ])
+                ->validate()
+                ->execute();
         }
 
         try {
