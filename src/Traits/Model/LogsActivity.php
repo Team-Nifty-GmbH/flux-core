@@ -24,21 +24,6 @@ trait LogsActivity
             ->logOnlyDirty();
     }
 
-    protected function getSecretAttributes(): array
-    {
-        return array_keys(
-            array_filter(
-                $this->getCasts(),
-                fn (mixed $cast): bool => is_string($cast)
-                    && (
-                        $cast === 'hashed'
-                        || str_starts_with($cast, 'encrypted')
-                        || str_starts_with(class_basename(Str::before($cast, ':')), 'AsEncrypted')
-                    )
-            )
-        );
-    }
-
     protected function buildChanges(string $processingEvent): array
     {
         $changes = $this->baseBuildChanges($processingEvent);
@@ -69,5 +54,20 @@ trait LogsActivity
         }
 
         return $changes;
+    }
+
+    protected function getSecretAttributes(): array
+    {
+        return array_keys(
+            array_filter(
+                $this->getCasts(),
+                fn (mixed $cast): bool => is_string($cast)
+                    && (
+                        $cast === 'hashed'
+                        || str_starts_with($cast, 'encrypted')
+                        || str_starts_with(class_basename(Str::before($cast, ':')), 'AsEncrypted')
+                    )
+            )
+        );
     }
 }
