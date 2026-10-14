@@ -2,11 +2,15 @@
 
 namespace FluxErp\Actions;
 
+use FluxErp\Models\Token;
 use FluxErp\Printing\Printable;
 use FluxErp\Rulesets\Printing\PrintingRuleset;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
+use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class Printing extends FluxAction
 {
@@ -44,5 +48,33 @@ class Printing extends FluxAction
         return $this->getData('html')
             ? $this->printable->renderView($printClass, ...$params)
             : $this->printable->printView($printClass, ...$params);
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        $model = morph_to($this->getData('model_type'), $this->getData('model_id'));
+
+        if (array_key_exists($this->getData('view'), $model->resolvePrintViews())) {
+            return;
+        }
+
+        $permission = print_view_to_permission($this->getData('view'), $model->getMorphClass());
+
+        try {
+            $denied = auth()->user()?->hasPermissionTo($permission) === false;
+        } catch (PermissionDoesNotExist) {
+            $denied = auth()->user() instanceof Token
+                && in_array($this->getData('view'), $model->getAvailableViews());
+        }
+
+        if ($denied) {
+            throw UnauthorizedException::forPermissions([$permission]);
+        }
+
+        throw ValidationException::withMessages([
+            'view' => [__('validation.in', ['attribute' => 'view'])],
+        ]);
     }
 }
