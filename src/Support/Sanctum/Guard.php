@@ -29,7 +29,7 @@ class Guard extends \Laravel\Sanctum\Guard
      */
     protected function isValidAccessToken($accessToken): bool
     {
-        if (! $accessToken || ! $this->hasValidProvider($accessToken->tokenable)) {
+        if (! $accessToken) {
             return false;
         }
 
@@ -37,6 +37,7 @@ class Guard extends \Laravel\Sanctum\Guard
 
         $isValid =
             (! $this->expiration || $accessToken->last_used_at->gt(now()->subMinutes($this->expiration)))
+            && $this->hasValidProvider($accessToken->tokenable)
             && (! $accessToken->tokenable instanceof Token || $accessToken->tokenable->isValid());
 
         if (is_callable(Sanctum::$accessTokenAuthenticationCallback)) {
@@ -44,7 +45,7 @@ class Guard extends \Laravel\Sanctum\Guard
         }
 
         if ($accessToken->tokenable instanceof Token) {
-            $isValid && $accessToken->tokenable->use();
+            $isValid = $isValid && $accessToken->tokenable->use();
 
             if (! $accessToken->tokenable->isValid()) {
                 $accessToken->delete();

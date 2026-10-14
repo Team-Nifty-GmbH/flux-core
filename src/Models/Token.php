@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\MassPrunable;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Traits\HasRoles;
 
 class Token extends FluxAuthenticatable
@@ -76,15 +77,21 @@ class Token extends FluxAuthenticatable
 
     public function use(): bool
     {
-        return static::withoutBroadcasting(function () {
-            if (is_null($this->uses)) {
-                $this->uses = 1;
-            } else {
-                $this->increment('uses');
-            }
+        $claimed = static::query()
+            ->whereKey($this->getKey())
+            ->where(fn (Builder $query) => $query
+                ->whereNull('max_uses')
+                ->orWhere('max_uses', 0)
+                ->orWhereRaw('COALESCE(uses, 0) < max_uses')
+            )
+            ->update(['uses' => DB::raw('COALESCE(uses, 0) + 1')]);
 
-            return $this->save();
-        });
+        if ($claimed) {
+            $this->uses = ($this->uses ?? 0) + 1;
+            $this->syncOriginalAttribute('uses');
+        }
+
+        return (bool) $claimed;
     }
 
     // Scopes
