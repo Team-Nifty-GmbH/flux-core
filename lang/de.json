@@ -27,6 +27,7 @@
     ":from to :to": ":from bis :to",
     ":hires / :departures this month": ":hires / :departures diesen Monat",
     ":inheriting of :total variants inherit this field": ":inheriting von :total Varianten erben dieses Feld",
+    ":job_name failed": ":job_name ist fehlgeschlagen",
     ":job_name is finished": ":job_name ist beendet",
     ":job_name is processing": ":job_name wird verarbeitet",
     ":job_name started": ":job_name gestartet",
