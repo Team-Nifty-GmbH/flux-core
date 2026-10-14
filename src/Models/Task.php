@@ -232,7 +232,9 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             $this->userBroadcastChannels([
                 $this->responsible_user_id,
                 data_get($this->getPrevious(), 'responsible_user_id'),
-                ...$this->users()->allRelatedIds(),
+                ...resolve_static(TaskUser::class, 'query')
+                    ->where('task_id', $this->getKey())
+                    ->pluck('user_id'),
             ])
         );
     }

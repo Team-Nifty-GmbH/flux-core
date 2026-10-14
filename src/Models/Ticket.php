@@ -118,7 +118,12 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
     {
         return array_merge(
             Arr::wrap(parent::broadcastOn($event)),
-            $this->userBroadcastChannels($this->users()->allRelatedIds()->all())
+            $this->userBroadcastChannels(
+                resolve_static(TicketUser::class, 'query')
+                    ->where('ticket_id', $this->getKey())
+                    ->pluck('user_id')
+                    ->all()
+            )
         );
     }
 
