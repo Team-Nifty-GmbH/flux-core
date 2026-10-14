@@ -301,7 +301,12 @@ abstract class Communication extends CommunicationList
         $this->communication->communicatable_id = $this->modelId;
 
         try {
-            SendMail::make($this->communication->toArray())
+            SendMail::make(
+                array_merge(
+                    $this->communication->toArray(),
+                    ['communication_id' => $this->communication->id]
+                )
+            )
                 ->checkPermission()
                 ->validate()
                 ->execute();

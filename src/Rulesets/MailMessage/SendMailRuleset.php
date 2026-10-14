@@ -2,6 +2,7 @@
 
 namespace FluxErp\Rulesets\MailMessage;
 
+use FluxErp\Models\Communication;
 use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\Language;
 use FluxErp\Models\MailAccount;
@@ -23,6 +24,11 @@ class SendMailRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
+            'communication_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Communication::class]),
+            ],
             'mail_account_id' => [
                 'nullable',
                 'integer',

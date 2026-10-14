@@ -32,6 +32,8 @@ class MessageSendingEventSubscriber
             return;
         }
 
+        $communicationForm['id'] ??= data_get($communicationForm, 'communication_id');
+
         // TODO: if a id is set for the attachment an existing media is being attached, create a relation between the communication and the media
         $communicationForm['attachments'] = array_filter(
             data_get($communicationForm, 'attachments', []),
