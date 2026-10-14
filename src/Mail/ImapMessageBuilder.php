@@ -11,6 +11,7 @@ use FluxErp\Models\Communication;
 use FluxErp\Models\MailFolder;
 use FluxErp\Models\Tag;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use Throwable;
 use Webklex\PHPIMAP\Exceptions\ConnectionFailedException;
@@ -431,7 +432,15 @@ class ImapMessageBuilder
             ->first();
 
         if (! $existing) {
-            $this->createMessage($imapMessage);
+            try {
+                $this->createMessage($imapMessage);
+            } catch (ValidationException $exception) {
+                report(new RuntimeException(
+                    'Skipped IMAP message ' . $imapMessage->uid . ' in mail folder '
+                        . $this->folder->getKey() . ': ' . $exception->getMessage(),
+                    previous: $exception,
+                ));
+            }
         } else {
             UpdateCommunication::make([
                 'id' => $existing->getKey(),

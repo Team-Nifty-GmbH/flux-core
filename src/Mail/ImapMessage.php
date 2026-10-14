@@ -53,11 +53,17 @@ readonly class ImapMessage
             }
         }
 
+        $messageId = $message->getMessageId()->toString();
+
+        if (mb_strlen($messageId) > 255) {
+            $messageId = mb_substr($messageId, 0, 214) . '.' . sha1($messageId);
+        }
+
         return new ImapMessage(
-            messageId: $message->getMessageId()->toString(),
+            messageId: $messageId,
             uid: $message->getUid(),
-            subject: static::toUtf8($message->getSubject()->toString()),
-            from: static::toUtf8(data_get($message->getFrom(), '0.full') ?? ''),
+            subject: Str::substr(static::toUtf8($message->getSubject()->toString()), 0, 255),
+            from: Str::substr(static::toUtf8(data_get($message->getFrom(), '0.full') ?? ''), 0, 255),
             to: static::toUtf8($message->getTo()->toArray()),
             cc: static::toUtf8($message->getCc()->toArray()),
             bcc: static::toUtf8($message->getBcc()->toArray()),
