@@ -2,10 +2,12 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Contracts\Calendarable;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Features\Calendar\Calendar as BaseCalendar;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Isolate;
 use Livewire\Attributes\Locked;
@@ -63,10 +65,14 @@ class Calendar extends BaseCalendar
 
     protected function liveUpdates(): array
     {
-        return [
-            $this->modelChannel(CalendarEvent::class) => [
-                CalendarEvent::class => ['created', 'updated', 'deleted'],
-            ],
-        ];
+        return collect(Relation::morphMap())
+            ->filter(fn (string $class): bool => in_array(Calendarable::class, class_implements($class)))
+            ->push(CalendarEvent::class)
+            ->mapWithKeys(fn (string $class): array => [
+                $this->modelChannel($class) => [
+                    $class => ['created', 'updated', 'deleted'],
+                ],
+            ])
+            ->all();
     }
 }

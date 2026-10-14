@@ -30,29 +30,7 @@ trait Widgetable
 
     public function mountWidgetable(): void
     {
-        if (! $this->isDateDependent()) {
-            return;
-        }
-
-        $this->js(
-            <<<JS
-                const reloadAtMidnight = () => {
-                    const midnight = new Date();
-                    midnight.setHours(24, 0, 5, 0);
-
-                    setTimeout(() => {
-                        if (! \$wire.\$el.isConnected) {
-                            return;
-                        }
-
-                        \$wire.call('{$this->liveUpdateMethod()}');
-                        reloadAtMidnight();
-                    }, midnight - new Date());
-                };
-
-                reloadAtMidnight();
-            JS
-        );
+        $this->subscribeLiveUpdates();
     }
 
     public function placeholder(): View
@@ -69,32 +47,16 @@ trait Widgetable
         return true;
     }
 
-    protected function contactChannel(int|string $contactId): string
+    protected function contactChannel(int|string|null $contactId): ?string
     {
-        return morph_alias(Contact::class) . '.' . $contactId;
-    }
-
-    protected function getListeners(): array
-    {
-        $listeners = parent::getListeners();
-        $method = $this->liveUpdateMethod();
-
-        foreach ($this->liveUpdates() as $channel => $models) {
-            foreach ($models as $model => $events) {
-                $eventPrefix = class_basename(resolve_static($model, 'class'));
-
-                foreach ($events as $event) {
-                    $listeners['echo-private:' . $channel . ',.' . $eventPrefix . ucfirst($event)] = $method;
-                }
-            }
-        }
-
-        return $listeners;
+        return blank($contactId)
+            ? null
+            : resolve_static(Contact::class, 'recordBroadcastChannel', ['key' => $contactId]);
     }
 
     protected function isDateDependent(): bool
     {
-        return false;
+        return in_array(IsTimeFrameAwareWidget::class, class_uses_recursive($this));
     }
 
     protected function liveUpdateMethod(): string
@@ -111,9 +73,54 @@ trait Widgetable
         return [];
     }
 
+    protected function liveUpdateListeners(): array
+    {
+        $listeners = [];
+
+        foreach ($this->liveUpdates() as $channel => $models) {
+            if (blank($channel)) {
+                continue;
+            }
+
+            foreach ($models as $model => $events) {
+                $eventPrefix = class_basename(resolve_static($model, 'class'));
+
+                if (in_array('deleted', $events)) {
+                    $events[] = 'restored';
+                }
+
+                foreach (array_unique($events) as $event) {
+                    $listeners[] = [$channel, '.' . $eventPrefix . ucfirst($event)];
+                }
+            }
+        }
+
+        return $listeners;
+    }
+
     protected function modelChannel(string $model): string
     {
         return resolve_static($model, 'getBroadcastChannel');
+    }
+
+    protected function subscribeLiveUpdates(): void
+    {
+        $listeners = $this->liveUpdateListeners();
+        $midnightIn = $this->isDateDependent()
+            ? now()->addDay()->startOfDay()->getTimestampMs() - now()->getTimestampMs() + random_int(5000, 30000)
+            : null;
+
+        if (! $listeners && is_null($midnightIn)) {
+            return;
+        }
+
+        $this->js(
+            'window.fluxWidgetLiveUpdates($wire, ' . json_encode([
+                'method' => $this->liveUpdateMethod(),
+                'listeners' => $listeners,
+                'midnightIn' => $midnightIn,
+            ]) . ')'
+        );
     }
 
     protected function userChannel(): string

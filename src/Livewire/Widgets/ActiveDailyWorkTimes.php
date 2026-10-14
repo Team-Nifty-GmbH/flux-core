@@ -59,6 +59,11 @@ class ActiveDailyWorkTimes extends ValueList
         ])->toArray();
     }
 
+    protected function isDateDependent(): bool
+    {
+        return true;
+    }
+
     protected function liveUpdates(): array
     {
         return [
