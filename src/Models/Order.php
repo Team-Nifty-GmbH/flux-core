@@ -66,7 +66,6 @@ use FluxErp\View\Printing\Order\ProformaInvoice;
 use FluxErp\View\Printing\Order\Refund;
 use FluxErp\View\Printing\Order\Retoure;
 use FluxErp\View\Printing\Order\SupplierOrder;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -708,16 +707,11 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     {
         return array_merge(
             Arr::wrap(parent::broadcastOn($event)),
-            array_map(
-                fn (int|string $contactId): PrivateChannel => new PrivateChannel(
-                    morph_alias(Contact::class) . '.' . $contactId
-                ),
-                array_values(array_unique(array_filter([
-                    $this->contact_id,
-                    data_get($this->getPrevious(), 'contact_id'),
-                ])))
-            ),
-            $this->userBroadcastChannels([
+            $this->recordBroadcastChannels(Contact::class, [
+                $this->contact_id,
+                data_get($this->getPrevious(), 'contact_id'),
+            ]),
+            $this->recordBroadcastChannels(User::class, [
                 $this->approval_user_id,
                 data_get($this->getPrevious(), 'approval_user_id'),
             ])

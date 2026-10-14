@@ -3,7 +3,6 @@
 namespace FluxErp\Traits\Model;
 
 use FluxErp\Events\BroadcastableModelEventOccurred;
-use FluxErp\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\PendingBroadcast;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -52,6 +51,11 @@ trait BroadcastsEvents
         return static::$withoutBroadcasting;
     }
 
+    public static function recordBroadcastChannel(int|string $key): string
+    {
+        return static::getBroadcastChannel() . $key;
+    }
+
     public function broadcastChannel(): string
     {
         return $this->getMorphClass() . '.' . $this->getKey();
@@ -97,6 +101,10 @@ trait BroadcastsEvents
         $event,
         $channels = null
     ): ?PendingBroadcast {
+        if (! static::$isBroadcasting) {
+            return null;
+        }
+
         if ($instance instanceof BroadcastableModelEventOccurred) {
             $instance->broadcastNow();
         }
@@ -105,7 +113,7 @@ trait BroadcastsEvents
 
         defer(
             function () use ($instance, $channels): void {
-                if (static::$isBroadcasting && $channels) {
+                if ($channels) {
                     broadcast($instance->onChannels($channels));
                 }
             },
@@ -133,13 +141,13 @@ trait BroadcastsEvents
         return $event;
     }
 
-    protected function userBroadcastChannels(array $userIds): array
+    protected function recordBroadcastChannels(string $model, array $keys): array
     {
         return array_map(
-            fn (int|string $userId): PrivateChannel => new PrivateChannel(
-                morph_alias(User::class) . '.' . $userId
+            fn (int|string $key): PrivateChannel => new PrivateChannel(
+                resolve_static($model, 'recordBroadcastChannel', ['key' => $key])
             ),
-            array_values(array_unique(array_filter($userIds)))
+            array_values(array_unique(array_filter($keys)))
         );
     }
 }

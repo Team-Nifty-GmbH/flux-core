@@ -37,7 +37,6 @@ use FluxErp\Traits\Model\Printable;
 use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\View\Printing\Address\AddressLabel;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -516,7 +515,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
     {
         return array_merge(
             Arr::wrap(parent::broadcastOn($event)),
-            [new PrivateChannel((app(Contact::class))->broadcastChannel() . $this->contact_id)]
+            $this->recordBroadcastChannels(Contact::class, [$this->contact_id])
         );
     }
 

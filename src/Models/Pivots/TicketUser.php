@@ -26,7 +26,7 @@ class TicketUser extends FluxPivot
     {
         return array_merge(
             Arr::wrap(parent::broadcastOn($event)),
-            $this->userBroadcastChannels([$this->user_id])
+            $this->recordBroadcastChannels(User::class, [$this->user_id])
         );
     }
 }

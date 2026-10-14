@@ -215,7 +215,7 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     {
         return array_merge(
             Arr::wrap(parent::broadcastOn($event)),
-            $this->userBroadcastChannels([
+            $this->recordBroadcastChannels(User::class, [
                 $this->user_id,
                 data_get($this->getPrevious(), 'user_id'),
             ])

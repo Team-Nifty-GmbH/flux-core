@@ -12,8 +12,10 @@ use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Model\RecordsMentions;
 use FluxErp\Traits\Model\SoftDeletes;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Arr;
 use Spatie\MediaLibrary\HasMedia;
 
 class Comment extends FluxModel implements HasMedia, IsSubscribable, MentionsContent
@@ -46,7 +48,7 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable, MentionsCon
 
     public static function getModelChannelEvents(): array
     {
-        return ['created'];
+        return [];
     }
 
     public static function restoring($callback): void
@@ -70,6 +72,16 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable, MentionsCon
     }
 
     // Public methods
+    public function broadcastOn(string $event): array
+    {
+        return array_merge(
+            Arr::wrap(parent::broadcastOn($event)),
+            $event === 'created' && $this->model_type === morph_alias(Ticket::class)
+                ? [new PrivateChannel(resolve_static(Ticket::class, 'getBroadcastChannel'))]
+                : []
+        );
+    }
+
     public function broadcastChannel(): string
     {
         return $this->model_type . '.' . $this->model_id;

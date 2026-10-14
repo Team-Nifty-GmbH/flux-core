@@ -229,12 +229,18 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     {
         return array_merge(
             Arr::wrap(parent::broadcastOn($event)),
-            $this->userBroadcastChannels([
+            $this->recordBroadcastChannels(User::class, [
                 $this->responsible_user_id,
                 data_get($this->getPrevious(), 'responsible_user_id'),
-                ...resolve_static(TaskUser::class, 'query')
-                    ->where('task_id', $this->getKey())
-                    ->pluck('user_id'),
+                ...match ($event) {
+                    'created', 'trashed' => [],
+                    default => $this->relationLoaded('users')
+                        ? $this->users->modelKeys()
+                        : resolve_static(TaskUser::class, 'query')
+                            ->where('task_id', $this->getKey())
+                            ->pluck('user_id')
+                            ->all(),
+                },
             ])
         );
     }
