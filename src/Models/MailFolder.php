@@ -34,7 +34,6 @@ class MailFolder extends FluxModel
     protected function casts(): array
     {
         return [
-            'uid_validity' => 'integer',
             'can_create_lead' => 'boolean',
             'can_create_purchase_invoice' => 'boolean',
             'can_create_ticket' => 'boolean',
