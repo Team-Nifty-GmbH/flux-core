@@ -26,6 +26,7 @@ use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
@@ -113,6 +114,14 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
     }
 
     // Public methods
+    public function broadcastOn(string $event): array
+    {
+        return array_merge(
+            Arr::wrap(parent::broadcastOn($event)),
+            $this->userBroadcastChannels($this->users()->allRelatedIds()->all())
+        );
+    }
+
     public function costColumn(): string
     {
         return 'total_cost';

@@ -46,7 +46,7 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable, MentionsCon
 
     public static function getModelChannelEvents(): array
     {
-        return [];
+        return ['created'];
     }
 
     public static function restoring($callback): void

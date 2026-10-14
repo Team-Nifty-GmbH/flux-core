@@ -3,6 +3,7 @@
 namespace FluxErp\Traits\Model;
 
 use FluxErp\Events\BroadcastableModelEventOccurred;
+use FluxErp\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\PendingBroadcast;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -124,5 +125,15 @@ trait BroadcastsEvents
         }
 
         return $event;
+    }
+
+    protected function userBroadcastChannels(array $userIds): array
+    {
+        return array_map(
+            fn (int|string $userId): PrivateChannel => new PrivateChannel(
+                morph_alias(User::class) . '.' . $userId
+            ),
+            array_values(array_unique(array_filter($userIds)))
+        );
     }
 }

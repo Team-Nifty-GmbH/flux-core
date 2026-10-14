@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
@@ -210,6 +211,17 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     }
 
     // Public methods
+    public function broadcastOn(string $event): array
+    {
+        return array_merge(
+            Arr::wrap(parent::broadcastOn($event)),
+            $this->userBroadcastChannels([
+                $this->user_id,
+                data_get($this->getPrevious(), 'user_id'),
+            ])
+        );
+    }
+
     public function getAvatarUrl(): ?string
     {
         return null;

@@ -66,6 +66,7 @@ use FluxErp\View\Printing\Order\ProformaInvoice;
 use FluxErp\View\Printing\Order\Refund;
 use FluxErp\View\Printing\Order\Retoure;
 use FluxErp\View\Printing\Order\SupplierOrder;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -703,6 +704,20 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     }
 
     // Public methods
+    public function broadcastOn(string $event): array
+    {
+        return array_merge(
+            Arr::wrap(parent::broadcastOn($event)),
+            $this->contact_id
+                ? [new PrivateChannel(morph_alias(Contact::class) . '.' . $this->contact_id)]
+                : [],
+            $this->userBroadcastChannels([
+                $this->approval_user_id,
+                data_get($this->getPrevious(), 'approval_user_id'),
+            ])
+        );
+    }
+
     public function calculateBalance(): static
     {
         // Subscription contracts are never invoiced themselves; their balance tracks

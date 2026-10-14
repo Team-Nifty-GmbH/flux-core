@@ -32,6 +32,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as MediaLibraryMedia;
@@ -224,6 +225,18 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     }
 
     // Public methods
+    public function broadcastOn(string $event): array
+    {
+        return array_merge(
+            Arr::wrap(parent::broadcastOn($event)),
+            $this->userBroadcastChannels([
+                $this->responsible_user_id,
+                data_get($this->getPrevious(), 'responsible_user_id'),
+                ...$this->users()->allRelatedIds(),
+            ])
+        );
+    }
+
     public function costColumn(): string
     {
         return 'total_cost';
