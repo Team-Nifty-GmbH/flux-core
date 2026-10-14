@@ -292,3 +292,43 @@ test('skips a blocked attachment given as content', function (): void {
 
     expect($message->getMedia('attachments'))->toHaveCount(0);
 });
+
+test('decodes the subject before cutting it to 255 characters', function (string $subject, string $expected): void {
+    $result = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'from' => 'sender@example.com',
+        'subject' => $subject,
+        'communication_type_enum' => 'mail',
+        'tags' => [],
+    ])
+        ->validate()
+        ->execute();
+
+    expect($result->subject)->toBe($expected);
+})->with([
+    'plain' => [str_repeat('s', 300), str_repeat('s', 255)],
+    'encoded fits once decoded' => ['=?UTF-8?B?' . base64_encode(str_repeat('ä', 150)) . '?=', str_repeat('ä', 150)],
+    'encoded too long once decoded' => ['=?UTF-8?B?' . base64_encode(str_repeat('ä', 300)) . '?=', str_repeat('ä', 255)],
+]);
+
+test('cuts an overlong sender to 255 characters and keeps its address', function (string $from, string $expected): void {
+    $result = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'from' => $from,
+        'subject' => 'Long sender',
+        'communication_type_enum' => 'mail',
+        'tags' => [],
+    ])
+        ->validate()
+        ->execute();
+
+    expect($result->from)->toBe($expected);
+})->with([
+    'display name and address' => [
+        str_repeat('N', 300) . ' <sender@example.com>',
+        str_repeat('N', 234) . ' <sender@example.com>',
+    ],
+    'without address' => [str_repeat('f', 300), str_repeat('f', 255)],
+]);

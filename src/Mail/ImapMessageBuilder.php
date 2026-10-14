@@ -5,6 +5,7 @@ namespace FluxErp\Mail;
 use Closure;
 use ErrorException;
 use FluxErp\Actions\Communication\UpdateCommunication;
+use FluxErp\Actions\MailFolder\UpdateMailFolder;
 use FluxErp\Actions\MailMessage\CreateMailMessage;
 use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Models\Communication;
@@ -442,6 +443,13 @@ class ImapMessageBuilder
                             . $this->folder->getKey() . ': ' . $exception->getMessage(),
                         previous: $exception,
                     ));
+
+                    UpdateMailFolder::make([
+                        'id' => $this->folder->getKey(),
+                        'last_skipped_uid' => $imapMessage->uid,
+                    ])
+                        ->validate()
+                        ->execute();
                 }
             } else {
                 UpdateCommunication::make([

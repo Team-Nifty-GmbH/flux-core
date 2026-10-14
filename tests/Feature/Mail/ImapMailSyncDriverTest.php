@@ -132,3 +132,19 @@ test('the first sync of a folder stores its uidvalidity and keeps the stored uid
         ->and($newest->fresh()->message_uid)->toBe('6695')
         ->and($mailFolder->fresh()->uid_validity)->toBe(2);
 });
+
+test('a changed uidvalidity ignores and clears the uid of a skipped mail', function (): void {
+    $mailFolder = MailFolder::factory()->for(MailAccount::factory())->create([
+        'uid_validity' => 1,
+        'last_skipped_uid' => 9000,
+    ]);
+    storeImapMail($mailFolder, '6695', '2026-10-08 10:00:00');
+
+    fakeImapMailbox($mailFolder->mailAccount, uidValidity: 2, firstUid: 2280);
+    $recorder = recordImapSync();
+
+    app(ImapMailSyncDriver::class)->syncMessages($mailFolder);
+
+    expect($recorder->sinceUid)->toBe(2279)
+        ->and($mailFolder->fresh()->last_skipped_uid)->toBeNull();
+});

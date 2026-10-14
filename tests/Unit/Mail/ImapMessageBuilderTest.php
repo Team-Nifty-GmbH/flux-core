@@ -1,6 +1,7 @@
 <?php
 
 use Carbon\CarbonImmutable;
+use FluxErp\Mail\ImapMailSyncDriver;
 use FluxErp\Mail\ImapMessage;
 use FluxErp\Mail\ImapMessageBuilder;
 use FluxErp\Models\Communication;
@@ -598,4 +599,46 @@ test('removes the temporary attachment files of a message that fails validation'
         ->store();
 
     expect(file_exists($tempPath))->toBeFalse();
+});
+
+test('reports a rejected message once and starts the next sync after it', function (): void {
+    Exceptions::fake();
+    $folder = MailFolder::factory()->for(MailAccount::factory())->create(['uid_validity' => 2]);
+    Communication::factory()->create([
+        'mail_account_id' => $folder->mail_account_id,
+        'mail_folder_id' => $folder->getKey(),
+        'communication_type_enum' => 'mail',
+        'message_uid' => '10',
+    ]);
+
+    $rejecting = new class() extends CreateCommunicationRuleset
+    {
+        public function rules(): array
+        {
+            return array_merge(parent::rules(), ['message_id' => 'nullable|string|max:255|not_in:<11@example.com>']);
+        }
+    };
+    app()->bind(CreateCommunicationRuleset::class, $rejecting::class);
+
+    $query = Mockery::mock(WhereQuery::class);
+    $query->shouldReceive('setFetchBody', 'leaveUnread', 'unseen', 'since')->andReturnSelf();
+    $query->shouldReceive('search')->andReturn(collect());
+    $query->shouldReceive('getByUidGreater')->andReturnUsing(
+        fn (int $uid): MessageCollection => new MessageCollection($uid < 11 ? [makeReadableImapMessage(11)] : [])
+    );
+
+    $imapFolder = Mockery::mock(Folder::class);
+    $imapFolder->shouldReceive('examine')->andReturn(['uidvalidity' => 2, 'uidnext' => 12]);
+    $imapFolder->shouldReceive('messages')->andReturn($query);
+
+    $client = Mockery::mock(Client::class);
+    $client->shouldReceive('getFolderByPath')->andReturn($imapFolder);
+    (new ReflectionProperty(MailAccount::class, 'imapClient'))->setValue($folder->mailAccount, $client);
+
+    app(ImapMailSyncDriver::class)->syncMessages($folder);
+    $reloaded = $folder->fresh();
+    $reloaded->setRelation('mailAccount', $folder->mailAccount);
+    app(ImapMailSyncDriver::class)->syncMessages($reloaded);
+
+    Exceptions::assertReportedCount(1);
 });

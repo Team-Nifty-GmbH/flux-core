@@ -38,7 +38,6 @@ class CreateMailMessage extends FluxAction
         $tags = Arr::pull($this->data, 'tags');
         $attachments = Arr::pull($this->data, 'attachments', []);
         $this->data['html_body'] = static::decodeMimeHeader(data_get($this->data, 'html_body'));
-        $this->data['subject'] = static::decodeMimeHeader(data_get($this->data, 'subject'));
         $this->data['from'] = Str::replace('"', '', data_get($this->data, 'from'));
 
         $mailMessage = app(Communication::class, ['attributes' => $this->data]);
@@ -108,5 +107,19 @@ class CreateMailMessage extends FluxAction
     protected function prepareForValidation(): void
     {
         unset($this->rules['communicatable_type'], $this->rules['communicatable_id']);
+
+        $subject = static::decodeMimeHeader(data_get($this->data, 'subject'));
+
+        if (is_string($subject)) {
+            $this->data['subject'] = Str::substr($subject, 0, 255);
+        }
+
+        $from = data_get($this->data, 'from');
+
+        if (is_string($from) && mb_strlen($from) > 255) {
+            $this->data['from'] = preg_match('/^(.*?)\s*(<[^<>]{1,252}>)$/su', trim($from), $matches)
+                ? Str::substr($matches[1], 0, 254 - mb_strlen($matches[2])) . ' ' . $matches[2]
+                : Str::substr($from, 0, 255);
+        }
     }
 }
