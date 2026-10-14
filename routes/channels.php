@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Facades\Action;
 use FluxErp\Http\Controllers\BroadcastingBatchAuthController;
 use FluxErp\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -60,7 +61,18 @@ Broadcast::channel('job-batch.{id}', function () {
     return true;
 });
 
-Broadcast::channel('action.[a-z0-9_.]+', fn () => true);
+Broadcast::channel(
+    'action.(?<action>[a-z0-9_.]+)',
+    function (Authenticatable $user, string $action): bool {
+        auth()->setUser($user);
+
+        $class = Action::all()
+            ->map(fn (array $registered): string => resolve_static(data_get($registered, 'class'), 'class'))
+            ->first(fn (string $class): bool => class_to_broadcast_channel($class, false) === $action);
+
+        return $class && $class::canPerformAction(false);
+    }
+);
 
 Broadcast::channel('presence', function (User $user) {
     return [
