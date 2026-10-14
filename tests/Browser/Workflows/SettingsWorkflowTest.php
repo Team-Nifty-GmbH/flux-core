@@ -1,5 +1,8 @@
 <?php
 
+use FluxErp\Helpers\Composer;
+use Mockery\MockInterface;
+
 // --- Absence ---
 
 test('settings.absence-policies loads without js errors', function (): void {
@@ -228,8 +231,28 @@ test('settings.permissions loads without js errors', function (): void {
 // --- Plugins ---
 
 test('settings.plugins loads without js errors', function (): void {
-    visit(route('settings.plugins'))
-        ->assertNoSmoke();
+    $this->mock(Composer::class, function (MockInterface $mock): void {
+        $mock->shouldReceive('showAvailable')->andReturn(['available' => []]);
+        $mock->shouldReceive('installed')->andReturn([
+            'installed' => [
+                'team-nifty-gmbh/flux-erp' => [
+                    'name' => 'team-nifty-gmbh/flux-erp',
+                    'version' => 'dev-main',
+                    'source' => 'https://github.com/Team-Nifty-GmbH/flux-core',
+                    'is_active' => true,
+                    'can_uninstall' => false,
+                    'is_flux_plugin' => true,
+                ],
+            ],
+        ]);
+        $mock->shouldReceive('outdated')->andReturn(['installed' => []]);
+    });
+
+    $page = visit(route('settings.plugins'));
+
+    waitForCondition($page, "() => document.body.innerText.includes('team-nifty-gmbh/flux-erp')");
+
+    $page->assertNoSmoke();
 });
 
 // --- Price Lists ---
