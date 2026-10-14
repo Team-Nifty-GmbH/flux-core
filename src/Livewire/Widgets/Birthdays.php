@@ -43,4 +43,18 @@ class Birthdays extends ValueList
         ])
             ->toArray();
     }
+
+    protected function isDateDependent(): bool
+    {
+        return true;
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Address::class) => [
+                Address::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

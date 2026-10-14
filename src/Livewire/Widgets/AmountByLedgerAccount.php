@@ -6,6 +6,7 @@ use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\Support\Widgets\Charts\CircleChart;
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
 use FluxErp\Traits\Livewire\Widget\MoneyChartFormattingTrait;
@@ -138,5 +139,14 @@ class AmountByLedgerAccount extends CircleChart implements HasWidgetOptions
     public function showTitle(): bool
     {
         return true;
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Order::class) => [
+                Order::class => ['locked'],
+            ],
+        ];
     }
 }

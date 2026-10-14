@@ -48,4 +48,13 @@ class Orders extends ValueBox
     {
         return 'shopping-cart';
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->contactChannel($this->contactId) => [
+                Order::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

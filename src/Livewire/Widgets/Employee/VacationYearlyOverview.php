@@ -178,4 +178,13 @@ class VacationYearlyOverview extends Component
 
         $this->yearlyData = array_reverse($data);
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(AbsenceRequest::class) => [
+                AbsenceRequest::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

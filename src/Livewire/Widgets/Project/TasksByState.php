@@ -72,4 +72,13 @@ class TasksByState extends CircleChart
     {
         return true;
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Task::class) => [
+                Task::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

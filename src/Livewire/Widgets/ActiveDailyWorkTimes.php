@@ -59,11 +59,12 @@ class ActiveDailyWorkTimes extends ValueList
         ])->toArray();
     }
 
-    protected function getListeners(): array
+    protected function liveUpdates(): array
     {
         return [
-            'echo-private:' . resolve_static(WorkTime::class, 'getBroadcastChannel')
-                . ',.WorkTimeDailyUpdated' => 'calculateList',
+            $this->modelChannel(WorkTime::class) => [
+                WorkTime::class => ['dailyUpdated', 'deleted'],
+            ],
         ];
     }
 }

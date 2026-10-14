@@ -6,6 +6,7 @@ use FluxErp\Contracts\HasApiResponse;
 use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Task\TaskList;
+use FluxErp\Models\Pivots\TaskUser;
 use FluxErp\Models\Task;
 use FluxErp\States\Task\TaskState;
 use FluxErp\Traits\Livewire\Widget\RespondsToApiRequests;
@@ -141,5 +142,15 @@ class MyTasks extends Component implements HasApiResponse, HasWidgetOptions
                 'model_type',
                 'model_id',
             ]);
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->userChannel() => [
+                Task::class => ['created', 'updated', 'deleted'],
+                TaskUser::class => ['created', 'deleted'],
+            ],
+        ];
     }
 }

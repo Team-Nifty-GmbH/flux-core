@@ -96,16 +96,17 @@ class Revenue extends ValueBox implements HasWidgetOptions
         $this->redirectRoute('orders.orders', navigate: true);
     }
 
-    protected function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderLocked' => 'calculateSum',
-        ];
-    }
-
     protected function icon(): string
     {
         return 'credit-card';
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Order::class) => [
+                Order::class => ['locked'],
+            ],
+        ];
     }
 }

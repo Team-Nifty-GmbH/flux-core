@@ -135,4 +135,13 @@ class VacationHeatmapWidget extends Component
             $startOfWeek->addWeek();
         }
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(AbsenceRequest::class) => [
+                AbsenceRequest::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

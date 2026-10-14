@@ -106,4 +106,16 @@ class WorkTimeModelDistributionChart extends CircleChart
             ],
         ];
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Employee::class) => [
+                Employee::class => ['created', 'updated', 'deleted'],
+            ],
+            $this->modelChannel(EmployeeWorkTimeModel::class) => [
+                EmployeeWorkTimeModel::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

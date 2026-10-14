@@ -88,6 +88,15 @@ class UnassignedPurchaseInvoices extends Component
         return CreatePurchaseInvoice::class;
     }
 
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(PurchaseInvoice::class) => [
+                PurchaseInvoice::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
+
     protected function toListItem(PurchaseInvoice $invoice): array
     {
         $supplier = data_get($invoice, 'contact.invoiceAddress')?->getLabel();

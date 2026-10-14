@@ -92,6 +92,15 @@ class MyTargetProgresses extends RadialBarChart
             : 0;
     }
 
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Target::class) => [
+                Target::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
+
     protected function resetData(): void
     {
         $this->series = [];

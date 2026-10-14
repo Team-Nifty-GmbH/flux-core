@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Features\Calendar\Calendar as BaseCalendar;
+use FluxErp\Models\CalendarEvent;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Isolate;
@@ -47,5 +48,25 @@ class Calendar extends BaseCalendar
                 )
             )
         );
+    }
+
+    #[Renderless]
+    public function refetchEvents(): void
+    {
+        $this->js('calendar?.refetchEvents()');
+    }
+
+    protected function liveUpdateMethod(): string
+    {
+        return 'refetchEvents';
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(CalendarEvent::class) => [
+                CalendarEvent::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
     }
 }

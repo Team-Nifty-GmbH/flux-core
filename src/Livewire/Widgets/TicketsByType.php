@@ -114,4 +114,13 @@ class TicketsByType extends CircleChart implements HasWidgetOptions
             ],
         ];
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Ticket::class) => [
+                Ticket::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

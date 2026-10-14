@@ -3,6 +3,8 @@
 namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Models\Pivots\TaskUser;
+use FluxErp\Models\Task;
 use FluxErp\States\Task\TaskState;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\Factory;
@@ -81,5 +83,20 @@ class MyOverdueTasks extends Component
                 'model_type',
                 'model_id',
             ]);
+    }
+
+    protected function isDateDependent(): bool
+    {
+        return true;
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->userChannel() => [
+                Task::class => ['created', 'updated', 'deleted'],
+                TaskUser::class => ['created', 'deleted'],
+            ],
+        ];
     }
 }

@@ -78,4 +78,13 @@ class PaymentBehavior extends ValueBox
     {
         return 'clock';
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->contactChannel($this->contactId) => [
+                Order::class => ['updated', 'deleted'],
+            ],
+        ];
+    }
 }

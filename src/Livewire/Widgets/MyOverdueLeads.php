@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Widgets;
 use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Lead\LeadList;
+use FluxErp\Models\Lead;
 use FluxErp\Models\LeadState;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\Factory;
@@ -102,5 +103,19 @@ class MyOverdueLeads extends Component implements HasWidgetOptions
             ->whereNot('is_lost', true)
             ->pluck('id')
             ->toArray();
+    }
+
+    protected function isDateDependent(): bool
+    {
+        return true;
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->userChannel() => [
+                Lead::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
     }
 }

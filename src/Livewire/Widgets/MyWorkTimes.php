@@ -215,4 +215,13 @@ class MyWorkTimes extends BarChart
             return new Date(val).toLocaleDateString(document.documentElement.lang) + (name ? ' (' + name + ')' : '')
         JS;
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->userChannel() => [
+                WorkTime::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }
