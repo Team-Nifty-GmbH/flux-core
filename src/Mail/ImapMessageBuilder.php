@@ -338,7 +338,7 @@ class ImapMessageBuilder
     protected function fetchNewMessages(Folder $imapFolder, ?Closure $onMessage = null): void
     {
         try {
-            $query = $imapFolder->messages()
+            $messages = $imapFolder->messages()
                 ->setFetchBody(false)
                 ->leaveUnread()
                 ->getByUidGreater($this->sinceUid);
@@ -346,26 +346,22 @@ class ImapMessageBuilder
             return;
         }
 
-        $page = 0;
-        do {
-            $page++;
-            $messages = $query->paginate(100, $page);
+        $total = $messages->count();
 
-            foreach ($messages as $message) {
-                $imapMessage = $this->makeMessage($message);
+        while ($message = $messages->shift()) {
+            $imapMessage = $this->makeMessage($message);
 
-                if (! $imapMessage) {
-                    continue;
-                }
-
-                if ($onMessage) {
-                    $onMessage($imapMessage);
-                    $this->progressCallback?->__invoke(++$this->progressProcessed, $messages->total());
-                } else {
-                    $this->messages->push($imapMessage);
-                }
+            if (! $imapMessage) {
+                continue;
             }
-        } while ($page !== $messages->lastPage());
+
+            if ($onMessage) {
+                $onMessage($imapMessage);
+                $this->progressCallback?->__invoke(++$this->progressProcessed, $total);
+            } else {
+                $this->messages->push($imapMessage);
+            }
+        }
     }
 
     protected function fetchFilteredMessages(Folder $imapFolder, ?Closure $onMessage = null): void
