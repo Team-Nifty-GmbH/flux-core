@@ -25,6 +25,11 @@ class Lot extends FluxModel
     }
 
     // Relations
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class, 'country_id');
+    }
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');

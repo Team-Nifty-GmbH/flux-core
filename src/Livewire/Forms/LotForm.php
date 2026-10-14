@@ -12,6 +12,8 @@ class LotForm extends FluxForm
 {
     public ?string $blocked_at = null;
 
+    public ?int $country_id = null;
+
     public ?string $description = null;
 
     public ?string $expires_at = null;

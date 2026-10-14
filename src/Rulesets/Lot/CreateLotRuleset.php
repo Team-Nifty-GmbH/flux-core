@@ -2,6 +2,7 @@
 
 namespace FluxErp\Rulesets\Lot;
 
+use FluxErp\Models\Country;
 use FluxErp\Models\Lot;
 use FluxErp\Models\Product;
 use FluxErp\Rules\ModelExists;
@@ -15,6 +16,11 @@ class CreateLotRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:lots,uuid',
+            'country_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Country::class]),
+            ],
             'product_id' => [
                 'required',
                 'integer',

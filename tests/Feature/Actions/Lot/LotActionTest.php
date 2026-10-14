@@ -3,6 +3,9 @@
 use FluxErp\Actions\Lot\CreateLot;
 use FluxErp\Actions\Lot\DeleteLot;
 use FluxErp\Actions\Lot\UpdateLot;
+use FluxErp\Models\Country;
+use FluxErp\Models\Currency;
+use FluxErp\Models\Language;
 use FluxErp\Models\Lot;
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
@@ -30,6 +33,50 @@ test('create lot', function (): void {
         'lot_number' => 'CH-2026-08',
         'expires_at' => '2027-06-30',
     ]);
+});
+
+test('create lot stores the country of origin', function (): void {
+    $country = Country::factory()->create([
+        'language_id' => Language::factory(),
+        'currency_id' => Currency::factory(),
+    ]);
+
+    $lot = CreateLot::make([
+        'product_id' => $this->product->getKey(),
+        'lot_number' => 'CH-2026-10',
+        'country_id' => $country->getKey(),
+    ])
+        ->validate()
+        ->execute();
+
+    expect($lot->refresh()->country->getKey())->toBe($country->getKey());
+});
+
+test('create lot rejects an unknown country of origin', function (): void {
+    CreateLot::assertValidationErrors([
+        'product_id' => $this->product->getKey(),
+        'lot_number' => 'CH-2026-10',
+        'country_id' => 999999,
+    ], 'country_id');
+});
+
+test('update lot clears the country of origin', function (): void {
+    $lot = Lot::factory()->create([
+        'product_id' => $this->product->getKey(),
+        'country_id' => Country::factory()->create([
+            'language_id' => Language::factory(),
+            'currency_id' => Currency::factory(),
+        ])->getKey(),
+    ]);
+
+    UpdateLot::make([
+        'id' => $lot->getKey(),
+        'country_id' => null,
+    ])
+        ->validate()
+        ->execute();
+
+    expect($lot->refresh()->country_id)->toBeNull();
 });
 
 test('create lot requires product and lot number', function (): void {
