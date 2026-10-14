@@ -60,7 +60,7 @@ Broadcast::channel('job-batch.{id}', function () {
     return true;
 });
 
-Broadcast::channel('action.*', fn () => true);
+Broadcast::channel('action.[a-z0-9_.]+', fn () => true);
 
 Broadcast::channel('presence', function (User $user) {
     return [
