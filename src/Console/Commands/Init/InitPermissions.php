@@ -9,6 +9,8 @@ use FluxErp\Facades\Action;
 use FluxErp\Facades\Widget;
 use FluxErp\Http\Controllers\Controller;
 use FluxErp\Models\Permission;
+use FluxErp\Models\Role;
+use FluxErp\Notifications\NewActionPermissionsNotification;
 use FluxErp\Traits\Livewire\WithTabs;
 use FluxErp\Traits\Model\HasModelPermission;
 use Illuminate\Console\Command;
@@ -17,7 +19,6 @@ use Illuminate\Support\Facades\Route;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionFunction;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 use function Livewire\invade;
 
@@ -30,6 +31,8 @@ class InitPermissions extends Command
     private array $currentPermissions = [];
 
     private array $knownPermissions = [];
+
+    private array $newActionPermissions = [];
 
     private array $preexistingPermissions = [];
 
@@ -46,6 +49,7 @@ class InitPermissions extends Command
 
         $this->currentPermissions = array_flip(array_values($this->knownPermissions));
         $this->preexistingPermissions = $this->currentPermissions;
+        $this->newActionPermissions = [];
 
         $this->registerActionPermission();
         $this->registerActionPermission('sanctum');
@@ -60,6 +64,8 @@ class InitPermissions extends Command
             ->whereKey(array_keys($this->currentPermissions))
             ->delete();
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+        $this->reportNewActionPermissions();
     }
 
     protected function keepPermission(string $name, string $guardName = 'web'): int
@@ -80,9 +86,38 @@ class InitPermissions extends Command
         $this->info('Registering action permissions for guard ' . $guardName . '…');
         foreach (Action::all() as $action) {
             if ($action['class']::hasPermission()) {
-                $this->keepPermission('action.' . $action['name'], $guardName);
+                $id = $this->keepPermission('action.' . $action['name'], $guardName);
+
+                if ($guardName !== 'token' && ! array_key_exists($id, $this->preexistingPermissions)) {
+                    $this->newActionPermissions['action.' . $action['name']] = true;
+                }
             }
         }
+    }
+
+    protected function reportNewActionPermissions(): void
+    {
+        if (! $this->newActionPermissions) {
+            return;
+        }
+
+        $permissions = array_keys($this->newActionPermissions);
+        sort($permissions);
+
+        $this->warn('New action permissions, no role holds them yet:');
+        foreach ($permissions as $permission) {
+            $this->line('  ' . $permission);
+        }
+
+        if (! $this->preexistingPermissions) {
+            return;
+        }
+
+        resolve_static(Role::class, 'query')
+            ->where('name', 'Super Admin')
+            ->where('guard_name', 'web')
+            ->first()
+            ?->notify(NewActionPermissionsNotification::make($permissions));
     }
 
     protected function registerModelGetPermission(): void
