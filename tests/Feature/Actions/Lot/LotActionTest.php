@@ -5,7 +5,6 @@ use FluxErp\Actions\Lot\DeleteLot;
 use FluxErp\Actions\Lot\UpdateLot;
 use FluxErp\Models\Country;
 use FluxErp\Models\Currency;
-use FluxErp\Models\Language;
 use FluxErp\Models\Lot;
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
@@ -37,7 +36,7 @@ test('create lot', function (): void {
 
 test('create lot stores the country of origin', function (): void {
     $country = Country::factory()->create([
-        'language_id' => Language::factory(),
+        'language_id' => $this->defaultLanguage->getKey(),
         'currency_id' => Currency::factory(),
     ]);
 
@@ -64,7 +63,7 @@ test('update lot clears the country of origin', function (): void {
     $lot = Lot::factory()->create([
         'product_id' => $this->product->getKey(),
         'country_id' => Country::factory()->create([
-            'language_id' => Language::factory(),
+            'language_id' => $this->defaultLanguage->getKey(),
             'currency_id' => Currency::factory(),
         ])->getKey(),
     ]);

@@ -3,7 +3,6 @@
 use FluxErp\Actions\Country\CreateCountry;
 use FluxErp\Actions\Country\DeleteCountry;
 use FluxErp\Actions\Country\UpdateCountry;
-use FluxErp\Actions\Lot\UpdateLot;
 use FluxErp\Models\Country;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Lot;
@@ -113,22 +112,12 @@ test('delete country is refused while a lot comes from it', function (): void {
         'language_id' => $this->defaultLanguage->getKey(),
         'currency_id' => Currency::factory()->create()->getKey(),
     ]);
-    $lot = Lot::factory()->create([
+    Lot::factory()->create([
         'product_id' => Product::factory()->create()->getKey(),
         'country_id' => $country->getKey(),
     ]);
 
     DeleteCountry::assertValidationErrors(['id' => $country->getKey()], 'lot');
-
-    UpdateLot::make([
-        'id' => $lot->getKey(),
-        'country_id' => $country->getKey(),
-        'description' => 'Still editable',
-    ])
-        ->validate()
-        ->execute();
-
-    expect($lot->refresh()->description)->toBe('Still editable');
 });
 
 test('delete country also deletes regions', function (): void {

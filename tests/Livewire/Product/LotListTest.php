@@ -4,7 +4,6 @@ use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Livewire\Product\LotList;
 use FluxErp\Models\Country;
 use FluxErp\Models\Currency;
-use FluxErp\Models\Language;
 use FluxErp\Models\Lot;
 use FluxErp\Models\Product;
 use Illuminate\Support\Str;
@@ -88,7 +87,7 @@ test('can update lot', function (): void {
 test('can set the country of origin of a lot', function (): void {
     $lot = Lot::factory()->create(['product_id' => $this->product->getKey()]);
     $country = Country::factory()->create([
-        'language_id' => Language::factory(),
+        'language_id' => $this->defaultLanguage->getKey(),
         'currency_id' => Currency::factory(),
     ]);
 
