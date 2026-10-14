@@ -1311,5 +1311,5 @@ Route::prefix('api')
             });
 
         Route::get('/media/{file_name}', DownloadMedia::class)->name('media.public');
-        Broadcast::routes(['middleware' => ['auth:sanctum']]);
+        Broadcast::routes(['middleware' => ['auth:sanctum,token']]);
     });
