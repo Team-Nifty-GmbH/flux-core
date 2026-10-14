@@ -54,9 +54,7 @@ class Printing extends FluxAction
     {
         parent::validateData();
 
-        $model = morphed_model($this->getData('model_type'))::query()
-            ->whereKey($this->getData('model_id'))
-            ->first();
+        $model = morph_to($this->getData('model_type'), $this->getData('model_id'));
 
         if (array_key_exists($this->getData('view'), $model->resolvePrintViews())) {
             return;
