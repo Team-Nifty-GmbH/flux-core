@@ -52,18 +52,21 @@ foreach (Relation::morphMap() as $class) {
 
 Broadcast::channel(
     class_to_broadcast_channel(morphed_model('user'), false) . '.{id}',
-    fn (Authenticatable $user, int|string $id): bool => (int) $user->getKey() === (int) $id,
+    fn (Authenticatable $user, int|string $id): bool => is_a($user, morphed_model('user'))
+        && (int) $user->getKey() === (int) $id,
     ['guards' => ['web', 'address', 'sanctum', 'token']]
 );
 
-Broadcast::channel('job-batch.{id}', function () {
-    return true;
-});
+Broadcast::channel(
+    'job-batch.{id}',
+    fn () => true,
+    ['guards' => ['web', 'sanctum']]
+);
 
 Broadcast::channel('action.*', fn () => true);
 
-Broadcast::channel('presence', function (User $user) {
-    return [
-        'id' => $user->getKey(),
-    ];
-});
+Broadcast::channel(
+    'presence',
+    fn (User $user): array => ['id' => $user->getKey()],
+    ['guards' => ['web', 'sanctum']]
+);
