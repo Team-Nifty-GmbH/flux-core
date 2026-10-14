@@ -23,6 +23,10 @@ Route::post('/broadcasting/auth/batch', BroadcastingBatchAuthController::class)
 |
 */
 
+$configuredGuards = fn (array $guards): array => array_values(
+    array_intersect($guards, array_keys(config('auth.guards', [])))
+);
+
 foreach (Relation::morphMap() as $class) {
     $class = resolve_static($class, 'class');
     if (! in_array(BroadcastsEvents::class, class_uses_recursive($class))) {
@@ -43,7 +47,7 @@ foreach (Relation::morphMap() as $class) {
 
             return $class::query()->where(app($class)->getRouteKeyName(), $key)->exists();
         },
-        ['guards' => ['web', 'address']]
+        ['guards' => $configuredGuards(['web', 'address'])]
     );
 
     $channel = class_to_broadcast_channel($class, false);
@@ -54,7 +58,7 @@ Broadcast::channel(
     class_to_broadcast_channel(morphed_model('user'), false) . '.{id}',
     fn (Authenticatable $user, int|string $id): bool => is_a($user, morphed_model('user'))
         && (int) $user->getKey() === (int) $id,
-    ['guards' => ['web', 'address', 'sanctum', 'token']]
+    ['guards' => $configuredGuards(['web', 'address', 'sanctum', 'token'])]
 );
 
 Broadcast::channel(
