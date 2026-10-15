@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Order;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Actions\OrderPosition\DeleteOrderPosition;
 use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
+use FluxErp\Actions\Product\CalculateProductConfigurationPrice;
 use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Livewire\DataTables\OrderPositionList;
@@ -13,9 +14,12 @@ use FluxErp\Livewire\Forms\OrderPositionForm;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\ProductConfigurationGroup;
+use FluxErp\Models\ProductConfigurationGroupItem;
 use FluxErp\Models\Scopes\FamilyTreeScope;
 use FluxErp\Models\Task;
 use FluxErp\Models\VatRate;
+use FluxErp\Support\ProductConfiguration\ConfigurationPositions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -30,6 +34,8 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableRowAttributes;
 class OrderPositions extends OrderPositionList
 {
     public ?string $cacheKey = 'order.order-positions';
+
+    public array $configurationGroups = [];
 
     public ?string $discount = null;
 
@@ -97,7 +103,7 @@ class OrderPositions extends OrderPositionList
                     'wire:click' => <<<'JS'
                             editOrderPosition(record.id);
                         JS,
-                    'x-show' => '! record.is_bundle_position',
+                    'x-show' => '! record.is_bundle_position && ! record.product_configuration_group_item_id',
                     'x-cloak' => true,
                 ]),
             DataTableButton::make()
@@ -237,6 +243,11 @@ class OrderPositions extends OrderPositionList
             ->setContact($this->order->getContact())
             ->price()
             ?->price ?? 0;
+        $this->orderPosition->is_configurable = (bool) $product->is_configurable;
+
+        if ($product->is_configurable) {
+            $this->loadConfigurator($product, $product->defaultConfiguration());
+        }
     }
 
     #[Renderless]
@@ -354,11 +365,23 @@ class OrderPositions extends OrderPositionList
     }
 
     #[Renderless]
+    public function editConfiguration(): void
+    {
+        $orderPosition = resolve_static(OrderPosition::class, 'query')
+            ->whereKey($this->orderPosition->id)
+            ->with('product')
+            ->first();
+
+        $this->loadConfigurator($orderPosition->product, $orderPosition->currentConfiguration());
+    }
+
+    #[Renderless]
     public function editOrderPosition(?OrderPosition $orderPosition = null): void
     {
         $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
         if ($orderPosition?->exists) {
             $this->orderPosition->fill($orderPosition);
+            $this->orderPosition->is_configurable = (bool) $orderPosition->product?->is_configurable;
             $this->loadPositionPackaging();
             $this->orderPosition->deriveUnitAmount();
             $this->orderPosition->is_bundle_parent = $orderPosition->is_free_text
@@ -457,6 +480,25 @@ class OrderPositions extends OrderPositionList
             $this->forceRender();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this, form: $this->orderPosition);
+        }
+    }
+
+    #[Renderless]
+    public function previewConfiguration(): array
+    {
+        try {
+            return CalculateProductConfigurationPrice::make([
+                'product_id' => $this->orderPosition->product_id,
+                'configuration' => $this->orderPosition->configuration ?? [],
+                'price_list_id' => $this->orderPosition->price_list_id ?? $this->order->price_list_id,
+                'contact_id' => $this->order->contact_id,
+                'amount' => $this->orderPosition->amount,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            return ['errors' => Arr::flatten($e instanceof ValidationException ? $e->errors() : [$e->getMessage()])];
         }
     }
 
@@ -612,6 +654,39 @@ class OrderPositions extends OrderPositionList
         $this->cacheState();
     }
 
+    protected function loadConfigurator(Product $product, array $configuration): void
+    {
+        $pricing = ConfigurationPositions::make($this->order->getPriceList(), $this->order->getContact());
+
+        $this->configurationGroups = $product->productConfigurationGroups()
+            ->with('productConfigurationGroupItems.product')
+            ->get()
+            ->map(fn (ProductConfigurationGroup $group) => [
+                'id' => $group->getKey(),
+                'name' => $group->name,
+                'selection_type_enum' => $group->selection_type_enum->value,
+                'is_required' => (bool) $group->pivot->is_required,
+                'items' => $group->productConfigurationGroupItems
+                    ->filter(fn (ProductConfigurationGroupItem $item) => $item->product)
+                    ->map(fn (ProductConfigurationGroupItem $item) => [
+                        'id' => $item->getKey(),
+                        'name' => $item->product->name,
+                        'max_amount' => $item->max_amount,
+                        'price' => $pricing->itemUnitPrice($item->setRelation('productConfigurationGroup', $group)),
+                    ])
+                    ->values()
+                    ->all(),
+            ])
+            ->all();
+
+        $this->orderPosition->configuration = $configuration;
+
+        $this->js(<<<'JS'
+            $tsui.open.modal('order-position-configurator');
+            window.dispatchEvent(new CustomEvent('order-position-configurator-load'));
+        JS);
+    }
+
     protected function loadPositionPackaging(?Product $product = null): void
     {
         $product ??= $this->orderPosition->product_id
@@ -680,6 +755,7 @@ class OrderPositions extends OrderPositionList
                 'price_id',
                 'price_list_id',
                 'product_id',
+                'product_configuration_group_item_id',
                 'vat_rate_id',
                 'warehouse_id',
                 'amount',
