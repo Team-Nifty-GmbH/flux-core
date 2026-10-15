@@ -87,10 +87,6 @@ class Notifications extends Component
     #[Renderless]
     public function sendNotify(array $notify): void
     {
-        if (request()->header('referer') === data_get($notify, 'accept.url')) {
-            return;
-        }
-
         if (data_get($notify, 'accept') || data_get($notify, 'reject')) {
             $notify['timeout'] = 0;
         }
