@@ -94,3 +94,20 @@ test('fill rejects invalid configurations, children and configuration on normal 
         ]))->toContain('Only configurable products accept a configuration.')
         ->and(OrderPosition::query()->where('order_id', $this->order->getKey())->count())->toBe(0);
 });
+
+test('fill rejects a negative configuration total and configuration on free text', function (): void {
+    $discount = configurationItem($this->storage, configurationProduct(['name' => 'Rebate']), ['surcharge' => -500]);
+
+    $errors = fn (array $position): string => json_encode(
+        rescue(fn () => ($this->fill)($position), fn (ValidationException $e) => $e->errors(), false)
+    );
+
+    expect($errors([
+        'configuration' => [['product_configuration_group_item_id' => $discount->getKey(), 'amount' => 1]],
+    ]))->toContain('The configuration total must not be negative.')
+        ->and($errors([
+            'is_free_text' => true,
+            'configuration' => [['product_configuration_group_item_id' => $this->ssd->getKey(), 'amount' => 1]],
+        ]))->toContain('A free text position cannot carry a configuration.')
+        ->and(OrderPosition::query()->where('order_id', $this->order->getKey())->count())->toBe(0);
+});
