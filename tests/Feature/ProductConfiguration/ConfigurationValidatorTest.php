@@ -179,7 +179,8 @@ test('check 7: deleted groups and deleted options are rejected', function (): vo
 test('rejects an option whose product was deleted', function (): void {
     $this->ssd->product->delete();
 
-    expect(($this->messages)([($this->entry)($this->ssd)]))->toBe(['SSD is no longer available.']);
+    expect(($this->messages)([($this->entry)($this->ssd)]))->toBe(['SSD is no longer available.'])
+        ->and(($this->messages)([($this->entry)($this->ssd)], true))->toBe(['SSD is no longer available.']);
 });
 
 test('rejects the same option twice', function (): void {
