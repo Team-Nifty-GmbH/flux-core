@@ -107,7 +107,9 @@ use FluxErp\Models\Pivots\OrderTypeTenant;
 use FluxErp\Models\Pivots\OrderUser;
 use FluxErp\Models\Pivots\PaymentTypeTenant;
 use FluxErp\Models\Pivots\PrinterUser;
+use FluxErp\Models\Pivots\ProductConfigurationRuleItem;
 use FluxErp\Models\Pivots\ProductCrossSellingProduct;
+use FluxErp\Models\Pivots\ProductProductConfigurationGroup;
 use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Pivots\ProductProductProperty;
 use FluxErp\Models\Pivots\ProductSupplier;
@@ -122,6 +124,10 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Printer;
 use FluxErp\Models\PrintJob;
 use FluxErp\Models\Product;
+use FluxErp\Models\ProductConfigurationDefault;
+use FluxErp\Models\ProductConfigurationGroup;
+use FluxErp\Models\ProductConfigurationGroupItem;
+use FluxErp\Models\ProductConfigurationRule;
 use FluxErp\Models\ProductCrossSelling;
 use FluxErp\Models\ProductOption;
 use FluxErp\Models\ProductOptionGroup;
@@ -241,6 +247,10 @@ class MorphMapServiceProvider extends ServiceProvider
             'print_job' => PrintJob::class,
             'printer' => Printer::class,
             'product' => Product::class,
+            'product_configuration_default' => ProductConfigurationDefault::class,
+            'product_configuration_group' => ProductConfigurationGroup::class,
+            'product_configuration_group_item' => ProductConfigurationGroupItem::class,
+            'product_configuration_rule' => ProductConfigurationRule::class,
             'product_cross_selling' => ProductCrossSelling::class,
             'product_option' => ProductOption::class,
             'product_option_group' => ProductOptionGroup::class,
@@ -322,7 +332,9 @@ class MorphMapServiceProvider extends ServiceProvider
             'order_user' => OrderUser::class,
             'payment_type_tenant' => PaymentTypeTenant::class,
             'printer_user' => PrinterUser::class,
+            'product_configuration_rule_item' => ProductConfigurationRuleItem::class,
             'product_cross_selling_product' => ProductCrossSellingProduct::class,
+            'product_product_configuration_group' => ProductProductConfigurationGroup::class,
             'product_product_option' => ProductProductOption::class,
             'product_product_property' => ProductProductProperty::class,
             'product_supplier' => ProductSupplier::class,

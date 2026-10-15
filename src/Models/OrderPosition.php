@@ -103,6 +103,15 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         }
     }
 
+    public static function hasConfiguredParent(?int $parentId): bool
+    {
+        return ! is_null($parentId)
+            && resolve_static(OrderPosition::class, 'query')
+                ->whereKey($parentId)
+                ->whereHas('product', fn (Builder $query) => $query->where('is_configurable', true))
+                ->exists();
+    }
+
     public static function aggregateColumns(string $type): array
     {
         return match ($type) {
@@ -250,6 +259,11 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         return $this->belongsTo(Product::class);
     }
 
+    public function productConfigurationGroupItem(): BelongsTo
+    {
+        return $this->belongsTo(ProductConfigurationGroupItem::class);
+    }
+
     public function reservedStock(): BelongsToMany
     {
         return $this->belongsToMany(StockPosting::class, 'order_position_stock_posting')
@@ -310,6 +324,19 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     }
 
     // Public methods
+    public function currentConfiguration(): array
+    {
+        return $this->children()
+            ->whereNotNull('product_configuration_group_item_id')
+            ->get(['id', 'product_configuration_group_item_id', 'amount_bundle'])
+            ->map(fn (OrderPosition $child) => [
+                'product_configuration_group_item_id' => $child->product_configuration_group_item_id,
+                'amount' => (int) $child->amount_bundle,
+            ])
+            ->values()
+            ->all();
+    }
+
     public function buildSortQuery(): Builder
     {
         return static::query()

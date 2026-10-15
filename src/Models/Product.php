@@ -10,6 +10,7 @@ use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Models\Pivots\BundleProductProduct;
+use FluxErp\Models\Pivots\ProductProductConfigurationGroup;
 use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Pivots\ProductProductProperty;
 use FluxErp\Models\Pivots\ProductSupplier;
@@ -205,6 +206,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             'is_active' => 'boolean',
             'is_active_export_to_web_shop' => 'boolean',
             'is_bundle' => 'boolean',
+            'is_configurable' => 'boolean',
             'is_highlight' => 'boolean',
             'is_lot_tracked' => 'boolean',
             'is_nos' => 'boolean',
@@ -266,6 +268,24 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     public function productCrossSellings(): HasMany
     {
         return $this->hasMany(ProductCrossSelling::class);
+    }
+
+    public function productConfigurationDefaults(): HasMany
+    {
+        return $this->hasMany(ProductConfigurationDefault::class);
+    }
+
+    public function productConfigurationGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            ProductConfigurationGroup::class,
+            'product_product_configuration_group',
+            'product_id',
+            'product_configuration_group_id'
+        )
+            ->using(ProductProductConfigurationGroup::class)
+            ->withPivot(['pivot_id', 'is_required', 'sort'])
+            ->orderByPivot('sort');
     }
 
     public function productOptions(): BelongsToMany
@@ -335,6 +355,17 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     }
 
     // Public methods
+    public function defaultConfiguration(): array
+    {
+        return $this->productConfigurationDefaults()
+            ->get(['product_configuration_group_item_id', 'amount'])
+            ->map(fn (ProductConfigurationDefault $default) => [
+                'product_configuration_group_item_id' => $default->product_configuration_group_item_id,
+                'amount' => $default->amount,
+            ])
+            ->all();
+    }
+
     /**
      * @throws Exception
      */
