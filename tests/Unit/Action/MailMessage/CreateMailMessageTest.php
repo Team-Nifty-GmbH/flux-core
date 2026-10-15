@@ -13,6 +13,7 @@ use FluxErp\Models\Ticket;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 beforeEach(function (): void {
     $contact = Contact::factory()->create();
@@ -291,4 +292,41 @@ test('skips a blocked attachment given as content', function (): void {
     ])->validate()->execute();
 
     expect($message->getMedia('attachments'))->toHaveCount(0);
+});
+
+test('stores a long subject, sender and message id in full', function (string $subject, string $expected): void {
+    $from = str_repeat('N', 400) . ' <sender@example.com>';
+    $messageId = '<' . str_repeat('a', 900) . '@example.com>';
+
+    $result = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'message_id' => $messageId,
+        'from' => $from,
+        'subject' => $subject,
+        'communication_type_enum' => 'mail',
+        'tags' => [],
+    ])
+        ->validate()
+        ->execute()
+        ->fresh();
+
+    expect($result->subject)->toBe($expected)
+        ->and($result->from)->toBe($from)
+        ->and($result->message_id)->toBe($messageId);
+})->with([
+    'plain' => [str_repeat('s', 400), str_repeat('s', 400)],
+    'mime encoded' => ['=?UTF-8?B?' . base64_encode(str_repeat('ä', 400)) . '?=', str_repeat('ä', 400)],
+]);
+
+test('rejects a message id longer than 998 characters', function (): void {
+    expect(fn () => CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'message_id' => '<' . str_repeat('a', 998) . '>',
+        'from' => 'sender@example.com',
+        'subject' => 'Too long',
+        'communication_type_enum' => 'mail',
+        'tags' => [],
+    ])->validate())->toThrow(ValidationException::class);
 });
