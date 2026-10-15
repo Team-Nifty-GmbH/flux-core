@@ -325,9 +325,8 @@ test('no toast for field errors that have matching inputs', function (): void {
 
     $page->assertScript(<<<'JS'
         (() => {
-            const container = document.querySelector('[x-data*="tallstackui_toastBase"]');
-            if (!container) return true;
-            const visible = Array.from(container.querySelectorAll('[x-show]'))
+            const containers = document.querySelectorAll('[x-data*="tallstackui_toastBase"]');
+            const visible = Array.from(containers).flatMap(container => Array.from(container.querySelectorAll('[x-show]')))
                 .filter(el => el.style.display !== 'none' && el.textContent.trim().length > 0);
             return visible.length === 0;
         })()
@@ -372,16 +371,15 @@ test('toast fallback for errors without matching visible input', function (): vo
 
     waitForCondition($page, <<<'JS'
         () => {
-            const container = document.querySelector('[x-data*="tallstackui_toastBase"]');
-            return container && container.querySelectorAll('[x-show]').length > 0;
+            return Array.from(document.querySelectorAll('[x-data*="tallstackui_toastBase"]'))
+                .some(container => container.querySelectorAll('[x-show]').length > 0);
         }
     JS);
 
     $page->assertScript(<<<'JS'
         (() => {
-            const container = document.querySelector('[x-data*="tallstackui_toastBase"]');
-            if (!container) return false;
-            return container.querySelectorAll('[x-show]').length > 0;
+            return Array.from(document.querySelectorAll('[x-data*="tallstackui_toastBase"]'))
+                .some(container => container.querySelectorAll('[x-show]').length > 0);
         })()
     JS);
 });
