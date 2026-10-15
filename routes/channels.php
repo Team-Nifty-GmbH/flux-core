@@ -45,7 +45,26 @@ foreach (Relation::morphMap() as $class) {
         function (Authenticatable $user, int|string $key) use ($class) {
             auth()->setUser($user);
 
-            return $class::query()->where(app($class)->getRouteKeyName(), $key)->exists();
+            $record = $class::query()->where(app($class)->getRouteKeyName(), $key)->first();
+
+            if (is_null($record) || ! is_a($user, morphed_model('address'))) {
+                return ! is_null($record);
+            }
+
+            $attributes = $record->getAttributes();
+            $contactId = match (true) {
+                is_a($record, morphed_model('contact')) => $record->getKey(),
+                array_key_exists('contact_id', $attributes) => data_get($attributes, 'contact_id'),
+                data_get($attributes, 'authenticatable_type') === morph_alias(morphed_model('address')) => resolve_static(
+                    morphed_model('address'),
+                    'query'
+                )
+                    ->whereKey(data_get($attributes, 'authenticatable_id'))
+                    ->value('contact_id'),
+                default => null,
+            };
+
+            return ! is_null($contactId) && (int) $contactId === (int) $user->contact_id;
         },
         ['guards' => $configuredGuards(['web', 'address'])]
     );
