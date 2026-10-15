@@ -3,6 +3,7 @@
 use FluxErp\Enums\ConfigurationRuleTypeEnum;
 use FluxErp\Livewire\Settings\ProductConfigurationGroups;
 use FluxErp\Models\ProductConfigurationGroup;
+use FluxErp\Models\ProductConfigurationGroupItem;
 use FluxErp\Models\ProductConfigurationRule;
 use Livewire\Livewire;
 
@@ -74,4 +75,56 @@ test('delete refuses a group attached to a product and keeps it', function (): v
         ->assertReturned(false);
 
     expect(ProductConfigurationGroup::query()->whereKey($group->getKey())->exists())->toBeTrue();
+});
+
+test('editRule fills an existing item targeting rule', function (): void {
+    $group = configurationGroup();
+    $other = configurationGroup();
+    $item = configurationItem($group);
+    $target = configurationItem($other);
+    $rule = ProductConfigurationRule::factory()->create([
+        'product_configuration_group_item_id' => $item->getKey(),
+        'rule_type_enum' => ConfigurationRuleTypeEnum::Excludes,
+    ]);
+    $rule->targetItems()->attach($target->getKey());
+
+    Livewire::test(ProductConfigurationGroups::class)
+        ->call('edit', $group->getKey())
+        ->call('editRule', $item->getKey(), $rule->getKey())
+        ->assertSet('productConfigurationRuleForm.rule_type_enum', 'excludes')
+        ->assertSet('productConfigurationRuleForm.target_items', [$target->getKey()])
+        ->assertSet('productConfigurationRuleForm.target_group_id', null)
+        ->assertSet('ruleModalOpens', 1)
+        ->assertOpensModal('edit-product-configuration-rule-modal');
+});
+
+test('deleteItem removes the option', function (): void {
+    $group = configurationGroup();
+    $item = configurationItem($group);
+
+    Livewire::test(ProductConfigurationGroups::class)
+        ->call('edit', $group->getKey())
+        ->assertCount('items', 1)
+        ->call('deleteItem', $item->getKey())
+        ->assertReturned(true)
+        ->assertSet('items', []);
+
+    expect(ProductConfigurationGroupItem::query()->whereKey($item->getKey())->exists())->toBeFalse();
+});
+
+test('deleteRule removes the rule', function (): void {
+    $group = configurationGroup();
+    $item = configurationItem($group);
+    $rule = ProductConfigurationRule::factory()->create([
+        'product_configuration_group_item_id' => $item->getKey(),
+        'target_group_id' => configurationGroup()->getKey(),
+    ]);
+
+    Livewire::test(ProductConfigurationGroups::class)
+        ->call('edit', $group->getKey())
+        ->call('deleteRule', $rule->getKey())
+        ->assertReturned(true)
+        ->assertSet('items.0.rules', []);
+
+    expect(ProductConfigurationRule::query()->whereKey($rule->getKey())->exists())->toBeFalse();
 });

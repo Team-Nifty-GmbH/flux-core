@@ -35,6 +35,8 @@ class ProductConfigurationGroups extends ProductConfigurationGroupList
         'items' => [],
     ];
 
+    public int $ruleModalOpens = 0;
+
     protected ?string $includeBefore = 'flux::livewire.settings.product-configuration-groups';
 
     protected function getTableActions(): array
@@ -173,7 +175,7 @@ class ProductConfigurationGroups extends ProductConfigurationGroupList
             $rule = resolve_static(ProductConfigurationRule::class, 'query')
                 ->whereKey($ruleId)
                 ->with('targetItems:id')
-                ->first();
+                ->firstOrFail();
             $this->productConfigurationRuleForm->fill($rule);
             $this->productConfigurationRuleForm->target_items = $rule->targetItems->modelKeys();
         }
@@ -200,6 +202,8 @@ class ProductConfigurationGroups extends ProductConfigurationGroupList
                 ])
                 ->all(),
         ];
+
+        $this->ruleModalOpens++;
 
         $this->modalOpen('edit-product-configuration-rule-modal');
     }

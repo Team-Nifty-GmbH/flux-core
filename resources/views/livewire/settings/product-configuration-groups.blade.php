@@ -85,7 +85,7 @@
                                 color="red"
                                 icon="trash"
                                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Option')]) }}"
-                                x-on:click="$wire.deleteItem(item.id)"
+                                wire:click="deleteItem(item.id)"
                             />
                         </div>
                     </div>
@@ -194,7 +194,7 @@
                                 color="red"
                                 icon="trash"
                                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Rule')]) }}"
-                                x-on:click="$wire.deleteRule(rule.id)"
+                                wire:click="deleteRule(rule.id)"
                             />
                         </div>
                     </div>
@@ -230,7 +230,7 @@
             class="flex flex-col gap-4"
             x-data="{ wholeGroup: true }"
             x-init="
-                $watch('$wire.productConfigurationRuleForm.id', () => {
+                $watch('$wire.ruleModalOpens', () => {
                     wholeGroup =
                         $wire.productConfigurationRuleForm.target_items.length === 0
                 })

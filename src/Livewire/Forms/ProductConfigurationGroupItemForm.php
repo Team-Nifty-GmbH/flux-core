@@ -12,13 +12,13 @@ class ProductConfigurationGroupItemForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
-    public int $max_amount = 1;
+    public ?int $max_amount = 1;
 
     public ?int $product_configuration_group_id = null;
 
     public ?int $product_id = null;
 
-    public int $sort = 0;
+    public ?int $sort = 0;
 
     public null|float|string $surcharge = null;
 
