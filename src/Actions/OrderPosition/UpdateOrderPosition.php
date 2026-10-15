@@ -311,9 +311,9 @@ class UpdateOrderPosition extends FluxAction
             if (resolve_static(OrderPosition::class, 'hasConfiguredParent', ['parentId' => $orderPosition->parent_id])
                 && (
                     (array_key_exists('product_id', $this->data)
-                        && $this->data['product_id'] !== $orderPosition->product_id)
+                        && (int) $this->data['product_id'] !== (int) $orderPosition->product_id)
                     || (array_key_exists('parent_id', $this->data)
-                        && $this->data['parent_id'] !== $orderPosition->parent_id)
+                        && (int) $this->data['parent_id'] !== (int) $orderPosition->parent_id)
                 )
             ) {
                 $errors += [
@@ -325,7 +325,7 @@ class UpdateOrderPosition extends FluxAction
 
             if ($isConfigured
                 && array_key_exists('product_id', $this->data)
-                && $this->data['product_id'] !== $orderPosition->product_id
+                && (int) $this->data['product_id'] !== (int) $orderPosition->product_id
             ) {
                 $errors += [
                     'product_id' => [__('The product of a configured position cannot be changed.')],

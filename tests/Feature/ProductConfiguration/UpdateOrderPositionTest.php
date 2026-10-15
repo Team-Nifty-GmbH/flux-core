@@ -104,6 +104,16 @@ test('the product of a configured position cannot change', function (): void {
     ], 'product_id');
 });
 
+test('a numeric string product id equal to the current one counts as unchanged', function (): void {
+    $position = UpdateOrderPosition::make([
+        'id' => $this->parent->getKey(),
+        'product_id' => (string) $this->parent->product_id,
+        'amount' => 2,
+    ])->validate()->execute();
+
+    expect($position->product_id)->toBe($this->parent->product_id);
+});
+
 test('configuration on a normal position is rejected', function (): void {
     $normal = CreateOrderPosition::make([
         'order_id' => $this->order->getKey(),
