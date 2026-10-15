@@ -484,12 +484,12 @@ class OrderPositions extends OrderPositionList
     }
 
     #[Renderless]
-    public function previewConfiguration(): array
+    public function previewConfiguration(?array $configuration = null): array
     {
         try {
             return CalculateProductConfigurationPrice::make([
                 'product_id' => $this->orderPosition->product_id,
-                'configuration' => $this->orderPosition->configuration ?? [],
+                'configuration' => $configuration ?? $this->orderPosition->configuration ?? [],
                 'price_list_id' => $this->orderPosition->price_list_id ?? $this->order->price_list_id,
                 'contact_id' => $this->order->contact_id,
                 'amount' => $this->orderPosition->amount,

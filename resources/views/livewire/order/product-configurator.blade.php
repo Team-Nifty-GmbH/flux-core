@@ -16,7 +16,17 @@
                     maximumFractionDigits: 2,
                 })
             },
+            draft() {
+                return Object.entries(this.amounts)
+                    .filter(([id, amount]) => Number(amount) > 0)
+                    .map(([id, amount]) => ({
+                        product_configuration_group_item_id: Number(id),
+                        amount: Number(amount),
+                    }))
+            },
             load() {
+                this.total = null
+                this.errors = []
                 this.amounts = Object.fromEntries(
                     ($wire.orderPosition.configuration ?? []).map((entry) => [
                         entry.product_configuration_group_item_id,
@@ -30,20 +40,24 @@
                 if (itemId) this.amounts[itemId] = 1
                 this.preview()
             },
+            save() {
+                $wire.orderPosition.configuration = this.draft()
+                $wire.addOrderPosition().then((success) => {
+                    if (success) {
+                        $tsui.close.modal('order-position-configurator')
+                        $tsui.close.modal('edit-order-position')
+                    }
+                })
+            },
             preview() {
-                $wire.orderPosition.configuration = Object.entries(this.amounts)
-                    .filter(([id, amount]) => Number(amount) > 0)
-                    .map(([id, amount]) => ({
-                        product_configuration_group_item_id: Number(id),
-                        amount: Number(amount),
-                    }))
-                $wire.previewConfiguration().then((result) => {
+                $wire.previewConfiguration(this.draft()).then((result) => {
                     this.total = result.total_price ?? null
                     this.errors = result.errors ?? []
                 })
             },
         }"
         x-on:order-position-configurator-load.window="load()"
+        x-on:order-position-configurator-save.window="save()"
     >
         <template x-for="group in $wire.configurationGroups" x-bind:key="group.id">
             <div class="flex flex-col gap-2">
@@ -119,14 +133,7 @@
             color="indigo"
             :text="__('Save')"
             loading="addOrderPosition"
-            x-on:click="
-                $wire.addOrderPosition().then((success) => {
-                    if (success) {
-                        $tsui.close.modal('order-position-configurator');
-                        $tsui.close.modal('edit-order-position');
-                    }
-                })
-            "
+            x-on:click="window.dispatchEvent(new CustomEvent('order-position-configurator-save'))"
         />
     </x-slot:footer>
 </x-modal>

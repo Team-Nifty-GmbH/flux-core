@@ -108,3 +108,31 @@ test('rows carry the option id so children hide the edit button', function (): v
         ->and(collect(invade($instance)->getRowActions())->first()->attributes['x-show'] ?? null)
         ->toContain('record.product_configuration_group_item_id');
 });
+
+test('a configuration violating a rule blocks the save', function (): void {
+    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->call('changedProductId', $this->server->getKey())
+        ->set('orderPosition.configuration', [])
+        ->call('addOrderPosition')
+        ->assertReturned(false);
+
+    expect(OrderPosition::query()->count())->toBe(0);
+});
+
+test('editing a configured position without touching the configuration keeps its children', function (): void {
+    $component = Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->call('changedProductId', $this->server->getKey())
+        ->call('addOrderPosition');
+    $parent = OrderPosition::query()->where('product_id', $this->server->getKey())->sole();
+    $childIds = $parent->children()->pluck('id')->all();
+
+    $component->call('editOrderPosition', $parent->getKey())
+        ->assertSet('orderPosition.configuration', null)
+        ->set('orderPosition.name', 'Renamed')
+        ->call('addOrderPosition')
+        ->assertReturned(true);
+
+    expect($parent->refresh()->children()->pluck('id')->all())->toBe($childIds)
+        ->and($parent->currentConfiguration())
+        ->toBe([['product_configuration_group_item_id' => $this->hdd->getKey(), 'amount' => 1]]);
+});
