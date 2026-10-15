@@ -280,6 +280,10 @@ class CreateOrderPosition extends FluxAction
             ];
         }
 
+        if ($this->getData('configuration') && $this->getData('is_free_text')) {
+            $errors['configuration'] = [__('A free text position cannot carry a configuration.')];
+        }
+
         if (! $this->getData('created_from_id')
             && resolve_static(OrderPosition::class, 'hasConfiguredParent', ['parentId' => $this->getData('parent_id')])
         ) {

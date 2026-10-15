@@ -12,6 +12,7 @@ require_once __DIR__ . '/Helpers.php';
 
 beforeEach(function (): void {
     $this->vatRate = VatRate::factory()->create(['rate_percentage' => 0.19]);
+    $this->ssdVatRate = VatRate::factory()->create(['rate_percentage' => 0.07]);
     $this->priceList = PriceList::factory()->create(['is_net' => true]);
     $this->order = configurationOrder($this->priceList);
 
@@ -21,7 +22,7 @@ beforeEach(function (): void {
     $this->storage = configurationGroup(['name' => 'Storage']);
     $this->ssd = configurationItem(
         $this->storage,
-        configurationProduct(['name' => 'SSD', 'vat_rate_id' => $this->vatRate->getKey()]),
+        configurationProduct(['name' => 'SSD', 'vat_rate_id' => $this->ssdVatRate->getKey()]),
         ['surcharge' => 10, 'max_amount' => 4]
     );
     $this->hdd = configurationItem(
@@ -50,6 +51,7 @@ test('a configuration creates priced children under the parent', function (): vo
     $child = OrderPosition::query()->where('parent_id', $parent->getKey())->sole();
 
     expect(bccomp($parent->total_net_price, '300', 2))->toBe(0)
+        ->and($child->vat_rate_id)->toBe($this->ssdVatRate->getKey())
         ->and($child->product_id)->toBe($this->ssd->product_id)
         ->and($child->product_configuration_group_item_id)->toBe($this->ssd->getKey())
         ->and(bccomp($child->amount_bundle, '2', 2))->toBe(0)
@@ -96,8 +98,25 @@ test('configuration is forbidden for a normal product', function (): void {
 test('defaults with a deleted product block the position instead of creating a child for it', function (): void {
     $this->hdd->product->delete();
 
+    CreateOrderPosition::assertValidationErrors([
+        'order_id' => $this->order->getKey(),
+        'product_id' => $this->server->getKey(),
+        'amount' => 3,
+    ], 'configuration');
+
     expect(fn () => ($this->create)())
         ->toThrow(Illuminate\Validation\ValidationException::class, 'HDD is no longer available.');
+    expect(OrderPosition::query()->where('order_id', $this->order->getKey())->count())->toBe(0);
+});
+
+test('a free text position cannot carry a configuration', function (): void {
+    CreateOrderPosition::assertValidationErrors([
+        'order_id' => $this->order->getKey(),
+        'product_id' => $this->server->getKey(),
+        'name' => 'Free',
+        'is_free_text' => true,
+        'configuration' => [['product_configuration_group_item_id' => $this->ssd->getKey(), 'amount' => 1]],
+    ], 'configuration');
 });
 
 test('creating a position whose configuration total is negative fails', function (): void {
