@@ -1,8 +1,8 @@
 class TallstackToast {
     constructor(id) {
         this.id = id;
-        const el = this.getToastComponent();
-        this.alpineComponent = el ? Alpine.$data(el) : null;
+        this.element = this.getToastComponent();
+        this.alpineComponent = this.element ? Alpine.$data(this.element) : null;
     }
 
     getToastByToastId(toastId) {
@@ -13,7 +13,10 @@ class TallstackToast {
 
     getToastComponent() {
         const base = document.getElementById(this.id);
-        return base.querySelector('[x-data^="tallstackui_toastBase"]');
+        return (
+            base.querySelector('template[x-teleport]')?._x_teleport ??
+            base.querySelector('[x-data^="tallstackui_toastBase"]')
+        );
     }
 
     upsertToast(event) {
