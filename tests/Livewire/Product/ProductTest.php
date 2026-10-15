@@ -14,6 +14,7 @@ use FluxErp\Models\Tag;
 use FluxErp\Models\VatRate;
 use Illuminate\Support\Facades\Session;
 use Livewire\Livewire;
+use function Livewire\invade;
 
 beforeEach(function (): void {
     $this->language = Language::factory()->create(['is_default' => true]);
@@ -414,4 +415,36 @@ test('saving a product without changing anything keeps its supplier values', fun
 
     expect($pivot?->supplier_product_number)->toBe('SUP-1')
         ->and($pivot?->note)->toBe('keep me');
+});
+
+test('a configurable product shows the configuration tab and hides bundle and variants', function (): void {
+    $this->product->update(['is_configurable' => true]);
+    $component = Livewire::test(Product::class, ['id' => $this->product->id]);
+
+    invade(app())->isRunningInConsole = false;
+
+    try {
+        $tabs = collect($component->instance()->getTabs())->keyBy(fn ($tab) => $tab->component);
+    } finally {
+        invade(app())->isRunningInConsole = true;
+    }
+
+    expect(invade($tabs->get('product.configuration-groups'))->shouldRender)->toBeTrue()
+        ->and(invade($tabs->get('product.bundle-list'))->shouldRender)->toBeFalse()
+        ->and(invade($tabs->get('product.variant-list'))->shouldRender)->toBeFalse();
+});
+
+test('a plain product hides the configuration tab', function (): void {
+    $component = Livewire::test(Product::class, ['id' => $this->product->id]);
+
+    invade(app())->isRunningInConsole = false;
+
+    try {
+        $tabs = collect($component->instance()->getTabs())->keyBy(fn ($tab) => $tab->component);
+    } finally {
+        invade(app())->isRunningInConsole = true;
+    }
+
+    expect(invade($tabs->get('product.configuration-groups'))->shouldRender)->toBeFalse()
+        ->and(invade($tabs->get('product.variant-list'))->shouldRender)->toBeTrue();
 });
