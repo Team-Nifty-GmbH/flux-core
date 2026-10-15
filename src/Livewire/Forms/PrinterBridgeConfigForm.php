@@ -20,6 +20,8 @@ class PrinterBridgeConfigForm extends FluxForm
 
     public bool $reverb_disabled = false;
 
+    public bool $mercure_enabled = false;
+
     public bool $force_regenerate = false;
 
     public function create(): void

@@ -10,9 +10,27 @@ use FluxErp\Models\Permission;
 use FluxErp\Models\Printer;
 use FluxErp\Models\Token;
 use FluxErp\Rulesets\Printer\GeneratePrinterBridgeConfigRuleset;
+use FluxErp\Support\Broadcasting\MercureHubConfig;
+use Illuminate\Validation\ValidationException;
 
 class GeneratePrinterBridgeConfig extends FluxAction
 {
+    public static function defaults(): array
+    {
+        $mercureEnabled = resolve_static(MercureHubConfig::class, 'usesMercure');
+
+        return [
+            'instance_name' => 'default-instance',
+            'printer_check_interval' => 5,
+            'job_check_interval' => 2,
+            'api_port' => 8080,
+            'mercure_enabled' => $mercureEnabled,
+            'reverb_disabled' => $mercureEnabled
+                || ! config('reverb.app_id', config('broadcasting.connections.reverb.app_id')),
+            'force_regenerate' => false,
+        ];
+    }
+
     public static function models(): array
     {
         return [Printer::class];
@@ -73,20 +91,35 @@ class GeneratePrinterBridgeConfig extends FluxAction
             'reverb_disabled' => $this->getData('reverb_disabled'),
             'reverb_app_id' => config('reverb.app_id', config('broadcasting.connections.reverb.app_id')) ?? '',
             'reverb_app_key' => config('reverb.app_key', config('broadcasting.connections.reverb.key')) ?? '',
-            'reverb_app_secret' => config('reverb.app_secret', config('broadcasting.connections.reverb.secret')) ?? '',
+            'reverb_app_secret' => $this->getData('reverb_disabled')
+                ? ''
+                : config('reverb.app_secret', config('broadcasting.connections.reverb.secret')) ?? '',
             'reverb_use_tls' => in_array($reverbScheme, ['https', 'wss']),
             'reverb_host' => config('reverb.host', config('broadcasting.connections.reverb.host')) ?? '',
             'reverb_auth_endpoint' => config('app.url') ? rtrim(config('app.url'), '/') . '/broadcasting/auth' : '',
+            'mercure_enabled' => $this->getData('mercure_enabled'),
+            'mercure_hub_url' => $this->getData('mercure_enabled')
+                ? config('broadcasting.connections.mercure.public_url') ?: null
+                : null,
         ];
     }
 
     protected function prepareForValidation(): void
     {
-        $this->data['instance_name'] ??= 'default-instance';
-        $this->data['printer_check_interval'] ??= 5;
-        $this->data['job_check_interval'] ??= 2;
-        $this->data['api_port'] ??= 8080;
-        $this->data['reverb_disabled'] ??= ! config('reverb.app_id', config('broadcasting.connections.reverb.app_id'));
-        $this->data['force_regenerate'] ??= false;
+        foreach (static::defaults() as $key => $value) {
+            $this->data[$key] ??= $value;
+        }
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        if ($this->getData('mercure_enabled') && ! resolve_static(MercureHubConfig::class, 'usesMercure')) {
+            throw ValidationException::withMessages([
+                'mercure_enabled' => [__('This instance does not broadcast over Mercure.')],
+            ])
+                ->errorBag('generatePrinterBridgeConfig');
+        }
     }
 }

@@ -110,6 +110,14 @@
             :hint="__('Enable this if you want to disable real-time updates via WebSocket')"
         />
 
+        @if (resolve_static(\FluxErp\Support\Broadcasting\MercureHubConfig::class, 'usesMercure'))
+            <x-toggle
+                wire:model.boolean="configForm.mercure_enabled"
+                :label="__('Enable Mercure')"
+                :hint="__('Receive print jobs in real time from the Mercure hub of this instance')"
+            />
+        @endif
+
         <div class="flex gap-2">
             <x-button
                 color="indigo"
