@@ -395,6 +395,7 @@
     "Amount per Packaging": "Menge je Gebinde",
     "Amount the supplier sells in. An order position entered in the purchase unit is multiplied by it.": "Menge, in der der Lieferant verkauft. Eine Position, die in der Einkaufseinheit erfasst wird, wird damit multipliziert.",
     "An approved absence request already exists in the given time period.": "Für den angegebenen Zeitraum liegt bereits ein genehmigter Abwesenheitsantrag vor.",
+    "An option cannot point at itself or its own group.": "Eine Option kann nicht auf sich selbst oder ihre eigene Gruppe verweisen.",
     "Ancestors": "Vorgänger",
     "and": "und",
     "Angle": "Winkel",
