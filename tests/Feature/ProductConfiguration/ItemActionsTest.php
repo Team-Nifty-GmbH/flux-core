@@ -78,6 +78,32 @@ test('update rejects a product already in the group', function (): void {
     ], 'product_id');
 });
 
+test('update rejects configurable, bundle and variant parent products', function (array $attributes): void {
+    $item = configurationItem($this->group);
+    $product = configurationProduct($attributes);
+
+    UpdateProductConfigurationGroupItem::assertValidationErrors([
+        'id' => $item->getKey(),
+        'product_id' => $product->getKey(),
+    ], 'product_id');
+})->with([
+    'configurable' => [['is_configurable' => true]],
+    'bundle' => [['is_bundle' => true]],
+    'variant parent' => [['is_variant_parent' => true]],
+]);
+
+test('update accepts a plain product', function (): void {
+    $item = configurationItem($this->group);
+    $product = configurationProduct();
+
+    $updated = UpdateProductConfigurationGroupItem::make([
+        'id' => $item->getKey(),
+        'product_id' => $product->getKey(),
+    ])->validate()->execute();
+
+    expect($updated->product_id)->toBe($product->getKey());
+});
+
 test('delete removes the option', function (): void {
     $item = configurationItem($this->group);
 
