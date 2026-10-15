@@ -2936,6 +2936,7 @@
     "The cancellation notice period has already passed. The subscription will end after the next renewal period.": "Die Kündigungsfrist ist bereits abgelaufen. Das Abonnement endet nach der nächsten Verlängerungsperiode.",
     "The category :input is invalid.": "Die Kategorie :input ist ungültig.",
     "The category :input is no id.": "Die Kategorie :input ist keine ID.",
+    "The configuration total must not be negative.": "Die Summe der Konfiguration darf nicht negativ sein.",
     "The contact has a delivery lock": "Der Kontakt hat eine Lieferungssperre",
     "The contact would be left without an address.": "Der Kontakt bliebe ohne Adresse zurück.",
     "The credit line of the contact is exceeded": "Die Kreditlinie des Kontakts wurde überschritten",
