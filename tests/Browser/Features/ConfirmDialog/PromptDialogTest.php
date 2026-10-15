@@ -37,7 +37,7 @@ test('creating a tag through the prompt dialog works', function (): void {
 
     $page->script(<<<'JS'
         () => {
-            [...document.querySelectorAll('button')]
+            [...document.getElementById('prompt-value').closest('[x-data^="tallstackui_dialog"]').querySelectorAll('button')]
                 .find((button) => button.textContent.trim() === 'Save')
                 .click();
         }

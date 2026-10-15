@@ -187,27 +187,21 @@
                 <div class="col-span-2">
                     <x-input
                         x-bind:readonly="!$wire.edit"
-                        class="pl-12"
                         wire:model="address.email_primary"
                     >
                         <x-slot:prefix>
-                            <div
-                                class="absolute inset-y-0 left-0 flex items-center p-0.5"
-                            >
-                                <x-button
-                                    class="h-full rounded-l-md"
-                                    icon="envelope"
-                                    color="indigo"
-                                    flat
-                                    squared
-                                    x-on:click.prevent="
-                                        window.open(
-                                            'mailto:' +
-                                                $wire.address.email_primary,
-                                        )
-                                    "
-                                />
-                            </div>
+                            <x-button
+                                class="h-full rounded-l-md"
+                                icon="envelope"
+                                color="indigo"
+                                flat
+                                squared
+                                x-on:click.prevent="
+                                    window.open(
+                                        'mailto:' + $wire.address.email_primary,
+                                    )
+                                "
+                            />
                         </x-slot:prefix>
                     </x-input>
                 </div>
@@ -222,26 +216,19 @@
                 <div class="col-span-2">
                     <x-input
                         x-bind:readonly="!$wire.edit"
-                        class="pl-12"
                         wire:model="address.phone"
                     >
                         <x-slot:prefix>
-                            <div
-                                class="absolute inset-y-0 left-0 flex items-center p-0.5"
-                            >
-                                <x-button
-                                    class="h-full rounded-l-md"
-                                    icon="phone"
-                                    color="indigo"
-                                    flat
-                                    squared
-                                    x-on:click.prevent="
-                                        window.open(
-                                            'tel:' + $wire.address.phone,
-                                        )
-                                    "
-                                />
-                            </div>
+                            <x-button
+                                class="h-full rounded-l-md"
+                                icon="phone"
+                                color="indigo"
+                                flat
+                                squared
+                                x-on:click.prevent="
+                                    window.open('tel:' + $wire.address.phone)
+                                "
+                            />
                         </x-slot:prefix>
                     </x-input>
                 </div>
@@ -256,26 +243,21 @@
                 <div class="col-span-2">
                     <x-input
                         x-bind:readonly="!$wire.edit"
-                        class="pl-12"
                         wire:model="address.phone_mobile"
                     >
                         <x-slot:prefix>
-                            <div
-                                class="absolute inset-y-0 left-0 flex items-center p-0.5"
-                            >
-                                <x-button
-                                    class="h-full rounded-l-md"
-                                    icon="phone"
-                                    color="indigo"
-                                    flat
-                                    squared
-                                    x-on:click.prevent="
-                                        window.open(
-                                            'tel:' + $wire.address.phone_mobile,
-                                        )
-                                    "
-                                />
-                            </div>
+                            <x-button
+                                class="h-full rounded-l-md"
+                                icon="phone"
+                                color="indigo"
+                                flat
+                                squared
+                                x-on:click.prevent="
+                                    window.open(
+                                        'tel:' + $wire.address.phone_mobile,
+                                    )
+                                "
+                            />
                         </x-slot:prefix>
                     </x-input>
                 </div>
@@ -293,31 +275,26 @@
                     <div class="col-span-2">
                         <x-input
                             x-bind:readonly="!$wire.edit"
-                            class="pl-12"
                             wire:model="address.url"
                         >
                             <x-slot:prefix>
-                                <div
-                                    class="absolute inset-y-0 left-0 flex items-center p-0.5"
-                                >
-                                    <x-button
-                                        class="h-full rounded-l-md"
-                                        icon="globe-alt"
-                                        color="indigo"
-                                        flat
-                                        squared
-                                        x-on:click.prevent="
-                                            window.open(
-                                                /^https?:\/\//.test(
-                                                    $wire.address.url,
-                                                )
-                                                    ? $wire.address.url
-                                                    : 'https://' +
-                                                          $wire.address.url,
+                                <x-button
+                                    class="h-full rounded-l-md"
+                                    icon="globe-alt"
+                                    color="indigo"
+                                    flat
+                                    squared
+                                    x-on:click.prevent="
+                                        window.open(
+                                            /^https?:\/\//.test(
+                                                $wire.address.url,
                                             )
-                                        "
-                                    />
-                                </div>
+                                                ? $wire.address.url
+                                                : 'https://' +
+                                                      $wire.address.url,
+                                        )
+                                    "
+                                />
                             </x-slot:prefix>
                         </x-input>
                     </div>

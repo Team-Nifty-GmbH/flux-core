@@ -45,7 +45,7 @@ class Guard extends \Laravel\Sanctum\Guard
         }
 
         if ($accessToken->tokenable instanceof Token) {
-            $accessToken->tokenable->use();
+            $isValid = $isValid && $accessToken->tokenable->use();
 
             if (! $accessToken->tokenable->isValid()) {
                 $accessToken->delete();
