@@ -126,6 +126,7 @@ class CreateProductRuleset extends FluxRuleset
             'is_highlight' => 'boolean',
             'is_lot_tracked' => 'boolean',
             'is_bundle' => 'boolean',
+            'is_configurable' => 'boolean',
             'is_service' => 'boolean',
             'is_shipping_free' => 'boolean',
             'is_shipping_item' => 'boolean',

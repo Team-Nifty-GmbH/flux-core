@@ -15,6 +15,7 @@ use FluxErp\Models\VatRate;
 use FluxErp\Rulesets\Product\CreateProductRuleset;
 use FluxErp\Settings\ProductSettings;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 
 class CreateProduct extends FluxAction
 {
@@ -134,6 +135,30 @@ class CreateProduct extends FluxAction
             } elseif (! data_get($this->data, 'parent_id')) {
                 $this->data['vat_rate_id'] = resolve_static(VatRate::class, 'default')?->id;
             }
+        }
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        if ($this->getData('is_configurable') && ($this->getData('is_bundle') || $this->getData('parent_id'))) {
+            throw ValidationException::withMessages([
+                'is_configurable' => [__('A configurable product cannot be a bundle or a variant.')],
+            ])
+                ->errorBag('createProduct');
+        }
+
+        if ($this->getData('parent_id')
+            && resolve_static(Product::class, 'query')
+                ->whereKey($this->getData('parent_id'))
+                ->where('is_configurable', true)
+                ->exists()
+        ) {
+            throw ValidationException::withMessages([
+                'parent_id' => [__('A configurable product cannot be a bundle or a variant.')],
+            ])
+                ->errorBag('createProduct');
         }
     }
 }

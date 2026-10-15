@@ -64,6 +64,7 @@
     "<=": "kleiner oder gleich",
     ">": "größer",
     ">=": "größer oder gleich",
+    "A configurable product cannot be a bundle or a variant.": "Ein konfigurierbares Produkt kann kein Bundle und keine Variante sein.",
     "A list of all connected mail accounts.": "Eine Liste aller verbundenen E-Mail-Konten.",
     "A list of all the countries": "Liste aller Länder",
     "A list of all the currencies": "Liste aller Währungen",
