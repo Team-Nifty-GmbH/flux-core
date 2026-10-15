@@ -57,8 +57,8 @@ class UpdateProductConfigurationRule extends FluxAction
         $item = $rule->productConfigurationGroupItem;
 
         if ((array_key_exists('target_group_id', $this->data)
-                && $this->getData('target_group_id') === $item->product_configuration_group_id)
-            || in_array($item->getKey(), $this->getData('target_items') ?? [])
+                && (int) $this->getData('target_group_id') === (int) $item->product_configuration_group_id)
+            || in_array((int) $item->getKey(), array_map('intval', $this->getData('target_items') ?? []), true)
         ) {
             throw ValidationException::withMessages([
                 'target_group_id' => [__('An option cannot point at itself or its own group.')],

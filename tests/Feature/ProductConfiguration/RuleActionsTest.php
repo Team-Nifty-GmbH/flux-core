@@ -92,3 +92,99 @@ test('delete removes the rule and its targets', function (): void {
         'product_configuration_rule_id' => $rule->getKey(),
     ]);
 });
+
+test('a numeric string group id equal to the own group is rejected', function (): void {
+    CreateProductConfigurationRule::assertValidationErrors([
+        'product_configuration_group_item_id' => $this->gpu->getKey(),
+        'rule_type_enum' => 'excludes',
+        'target_group_id' => (string) $this->graphics->getKey(),
+    ], 'target_group_id');
+});
+
+test('update rejects a numeric string group id equal to the own group', function (): void {
+    $rule = CreateProductConfigurationRule::make([
+        'product_configuration_group_item_id' => $this->gpu->getKey(),
+        'rule_type_enum' => 'requires',
+        'target_group_id' => $this->power->getKey(),
+    ])->validate()->execute();
+
+    UpdateProductConfigurationRule::assertValidationErrors([
+        'id' => $rule->getKey(),
+        'target_group_id' => (string) $this->graphics->getKey(),
+    ], 'target_group_id');
+});
+
+test('update rejects the own group and the own option', function (array $target): void {
+    $rule = CreateProductConfigurationRule::make([
+        'product_configuration_group_item_id' => $this->gpu->getKey(),
+        'rule_type_enum' => 'requires',
+        'target_group_id' => $this->power->getKey(),
+    ])->validate()->execute();
+
+    UpdateProductConfigurationRule::assertValidationErrors(array_merge(
+        ['id' => $rule->getKey()],
+        $target === ['group']
+            ? ['target_group_id' => $this->graphics->getKey()]
+            : ['target_items' => [(string) $this->gpu->getKey()]]
+    ), 'target_group_id');
+})->with([
+    'own group' => [['group']],
+    'own option' => [['option']],
+]);
+
+test('update rejects a group and items together', function (): void {
+    $rule = CreateProductConfigurationRule::make([
+        'product_configuration_group_item_id' => $this->gpu->getKey(),
+        'rule_type_enum' => 'requires',
+        'target_group_id' => $this->power->getKey(),
+    ])->validate()->execute();
+
+    UpdateProductConfigurationRule::assertValidationErrors([
+        'id' => $rule->getKey(),
+        'target_group_id' => $this->power->getKey(),
+        'target_items' => [$this->psu->getKey()],
+    ], 'target_items');
+});
+
+test('update replaces the target items', function (): void {
+    $rule = CreateProductConfigurationRule::make([
+        'product_configuration_group_item_id' => $this->gpu->getKey(),
+        'rule_type_enum' => 'requires',
+        'target_items' => [$this->psu->getKey()],
+    ])->validate()->execute();
+
+    $updated = UpdateProductConfigurationRule::make([
+        'id' => $rule->getKey(),
+        'target_items' => [$this->smallPsu->getKey()],
+    ])->validate()->execute();
+
+    expect($updated->targetItems()->pluck('product_configuration_group_items.id')->all())
+        ->toBe([$this->smallPsu->getKey()]);
+});
+
+test('update switches a rule from a group to options and back', function (): void {
+    $rule = CreateProductConfigurationRule::make([
+        'product_configuration_group_item_id' => $this->gpu->getKey(),
+        'rule_type_enum' => 'requires',
+        'target_group_id' => $this->power->getKey(),
+    ])->validate()->execute();
+
+    $toItems = UpdateProductConfigurationRule::make([
+        'id' => $rule->getKey(),
+        'target_items' => [$this->psu->getKey()],
+    ])->validate()->execute();
+
+    expect($toItems->target_group_id)->toBeNull()
+        ->and($toItems->targetItems()->pluck('product_configuration_group_items.id')->all())
+        ->toBe([$this->psu->getKey()]);
+
+    $toGroup = UpdateProductConfigurationRule::make([
+        'id' => $rule->getKey(),
+        'target_group_id' => $this->power->getKey(),
+    ])->validate()->execute();
+
+    expect($toGroup->target_group_id)->toBe($this->power->getKey());
+    $this->assertDatabaseMissing('product_configuration_rule_items', [
+        'product_configuration_rule_id' => $rule->getKey(),
+    ]);
+});
