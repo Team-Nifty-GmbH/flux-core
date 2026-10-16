@@ -5,8 +5,11 @@ namespace FluxErp\Mail;
 use BadMethodCallException;
 use FluxErp\Actions\Printing;
 use FluxErp\Livewire\Forms\CommunicationForm;
+use FluxErp\Models\Communication;
 use FluxErp\Models\Media;
 use FluxErp\Models\Tenant;
+use FluxErp\Models\User;
+use FluxErp\Notifications\Communication\SendingFailedNotification;
 use FluxErp\Traits\Makeable;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Bus\Queueable;
@@ -16,13 +19,17 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Cache;
 use Laravel\SerializableClosure\SerializableClosure;
 use Spatie\MediaLibrary\HasMedia;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Throwable;
 
 class GenericMail extends Mailable
 {
     use Makeable, Queueable, SerializesModels;
+
+    public ?int $communicationId = null;
 
     public function __construct(
         public Arrayable|array $mailMessageForm,
@@ -150,5 +157,36 @@ class GenericMail extends Mailable
         return new Envelope(
             subject: data_get($this->mailMessageForm, 'subject'),
         );
+    }
+
+    public function failed(Throwable $exception): void
+    {
+        if (! $this->communicationId) {
+            return;
+        }
+
+        $communication = resolve_static(Communication::class, 'query')
+            ->whereKey($this->communicationId)
+            ->first();
+
+        if (! $communication) {
+            return;
+        }
+
+        resolve_static(Communication::class, 'query')
+            ->whereKey($communication->getKey())
+            ->update(['send_error' => $exception->getMessage()]);
+
+        $sender = $communication->getCreatedBy();
+
+        if ($sender instanceof User
+            && Cache::add(
+                'communication-sending-failed:' . $sender->getMorphClass() . ':' . $sender->getKey(),
+                true,
+                now()->addMinutes(10)
+            )
+        ) {
+            $sender->notify(SendingFailedNotification::make());
+        }
     }
 }

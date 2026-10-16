@@ -3,7 +3,7 @@
 namespace FluxErp\Listeners;
 
 use FluxErp\Actions\Communication\CreateCommunication;
-use FluxErp\Actions\Communication\UpdateCommunication;
+use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Jobs\AppendMailToSentFolderJob;
 use FluxErp\Models\Communication;
@@ -12,7 +12,9 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\File;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Mail\Events\MessageSent;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\Mime\Email;
 use Throwable;
 
@@ -65,13 +67,21 @@ class MessageSendingEventSubscriber
         )
             ?->getKey();
 
-        $communicationAction = data_get($communicationForm, 'id')
-            ? UpdateCommunication::make($communicationForm)
-            : CreateCommunication::make($communicationForm);
+        $communication = ($communicationId = data_get($event->data, 'communicationId'))
+            ? resolve_static(Communication::class, 'query')
+                ->whereKey($communicationId)
+                ->first()
+            : null;
 
-        $communication = $communicationAction
-            ->validate()
-            ->execute();
+        if ($communication) {
+            $this->stampCommunication($communication, $communicationForm);
+        } else {
+            unset($communicationForm['id']);
+
+            $communication = CreateCommunication::make($communicationForm)
+                ->validate()
+                ->execute();
+        }
 
         foreach (data_get($communicationForm, 'communicatables', []) as $communicatable) {
             $communicatableModel = morphed_model(data_get($communicatable, 'communicatable_type'))::query()
@@ -92,6 +102,13 @@ class MessageSendingEventSubscriber
     {
         if (! $communicationForm = data_get($event->data, 'mailMessageForm')) {
             return;
+        }
+
+        if ($communicationId = data_get($event->data, 'communicationId')) {
+            resolve_static(Communication::class, 'query')
+                ->whereKey($communicationId)
+                ->whereNotNull('send_error')
+                ->update(['send_error' => null]);
         }
 
         try {
@@ -144,6 +161,33 @@ class MessageSendingEventSubscriber
             ->where(fn ($query) => $query->where('smtp_email', $address)->orWhere('email', $address))
             ->orderBy('id')
             ->first();
+    }
+
+    protected function stampCommunication(Communication $communication, array $communicationForm): void
+    {
+        $isFirstAttempt = is_null($communication->message_id);
+
+        $communication->forceFill(Arr::only(
+            $communicationForm,
+            ['subject', 'html_body', 'message_id', 'mail_account_id']
+        ))
+            ->save();
+
+        if (! $isFirstAttempt) {
+            return;
+        }
+
+        foreach (data_get($communicationForm, 'attachments') ?? [] as $attachment) {
+            try {
+                UploadMedia::make(array_merge(
+                    Arr::except($attachment, 'media_type'),
+                    ['model_id' => $communication->getKey()]
+                ))
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException) {
+            }
+        }
     }
 
     protected function injectTracker(Email $email, Communication $communication): void
