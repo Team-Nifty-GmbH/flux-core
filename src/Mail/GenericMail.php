@@ -173,8 +173,9 @@ class GenericMail extends Mailable
             return;
         }
 
-        $communication->send_error = $exception->getMessage();
-        $communication->save();
+        resolve_static(Communication::class, 'query')
+            ->whereKey($communication->getKey())
+            ->update(['send_error' => $exception->getMessage()]);
 
         $sender = $communication->getCreatedBy();
 

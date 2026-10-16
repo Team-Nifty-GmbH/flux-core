@@ -108,9 +108,7 @@ class MessageSendingEventSubscriber
             resolve_static(Communication::class, 'query')
                 ->whereKey($communicationId)
                 ->whereNotNull('send_error')
-                ->first()
-                ?->forceFill(['send_error' => null])
-                ->save();
+                ->update(['send_error' => null]);
         }
 
         try {
