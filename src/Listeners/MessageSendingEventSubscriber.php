@@ -177,7 +177,7 @@ class MessageSendingEventSubscriber
             return;
         }
 
-        foreach ((data_get($communicationForm, 'attachments') ?? []) as $attachment) {
+        foreach (data_get($communicationForm, 'attachments') ?? [] as $attachment) {
             try {
                 UploadMedia::make(array_merge(
                     Arr::except($attachment, 'media_type'),
