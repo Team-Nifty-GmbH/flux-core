@@ -153,7 +153,11 @@ class SendMail extends DispatchableFluxAction
         $communication = $this->communicationId
             ? resolve_static(Communication::class, 'query')
                 ->whereKey($this->communicationId)
-                ->where(fn (Builder $query) => $query->whereNull('message_id')->orWhereNotNull('send_error'))
+                ->where(
+                    fn (Builder $query) => $query
+                        ->whereNull('message_id')
+                        ->orWhereNotNull('send_error')
+                )
                 ->where('communication_type_enum', CommunicationTypeEnum::Mail)
                 ->first()
             : null;

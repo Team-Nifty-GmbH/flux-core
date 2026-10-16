@@ -39,7 +39,12 @@ class CommunicationList extends BaseDataTable
                     __('Phone Call') => 'emerald',
                 ],
             ],
-            'send_status' => ['state', [__('Sending failed') => 'red']],
+            'send_status' => [
+                'state',
+                [
+                    __('Sending failed') => 'red',
+                ],
+            ],
         ]);
     }
 
@@ -58,7 +63,7 @@ class CommunicationList extends BaseDataTable
 
     protected function getReturnKeys(): array
     {
-        return array_merge(parent::getReturnKeys(), ['send_error', 'send_status']);
+        return array_merge(parent::getReturnKeys(), ['send_error']);
     }
 
     protected function getRightAppends(): array
