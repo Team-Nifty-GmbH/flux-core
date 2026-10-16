@@ -67,7 +67,10 @@ Broadcast::channel(
 Broadcast::channel(
     'action.{action}',
     function (Authenticatable $user, string $action): bool {
-        $class = data_get(app(ActionManager::class)->get(str_replace('-', '.', $action)), 'class');
+        $class = data_get(
+            app(ActionManager::class)->get(str_replace('-', '.', $action)),
+            'class'
+        );
 
         if (! $class) {
             return false;
