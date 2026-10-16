@@ -36,6 +36,10 @@ class ImapMailSyncDriver implements MailSyncDriver, ReportsSyncProgress
                 ->where('mail_account_id', $folder->mailAccount->getKey())
                 ->where('mail_folder_id', $folder->getKey())
                 ->update(['message_uid' => null]);
+
+            resolve_static(MailFolder::class, 'query')
+                ->whereKey($folder->getKey())
+                ->update(['last_skipped_uid' => null]);
         }
 
         if (! is_null($startUid)) {
@@ -80,8 +84,10 @@ class ImapMailSyncDriver implements MailSyncDriver, ReportsSyncProgress
             ->selectRaw('MAX(CAST(message_uid AS UNSIGNED)) AS max_uid')
             ->value('max_uid');
 
+        $maxUid = max((int) $maxUid, (int) $folder->last_skipped_uid);
+
         if ($maxUid && ! $uidsAreStale) {
-            return (int) $maxUid;
+            return $maxUid;
         }
 
         $client = $folder->mailAccount->getImapClient();

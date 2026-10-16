@@ -1,12 +1,16 @@
 <?php
 
 use Carbon\CarbonImmutable;
+use FluxErp\Actions\Communication\UpdateCommunication;
+use FluxErp\Mail\ImapMailSyncDriver;
 use FluxErp\Mail\ImapMessage;
 use FluxErp\Mail\ImapMessageBuilder;
 use FluxErp\Models\Communication;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Exceptions;
+use Illuminate\Validation\ValidationException;
 use Webklex\PHPIMAP\Client;
 use Webklex\PHPIMAP\Folder;
 use Webklex\PHPIMAP\Message;
@@ -75,6 +79,35 @@ test('updates an existing communication from an imap message with integer uid', 
         ->store();
 
     expect($communication->refresh()->message_uid)->toBe('42');
+});
+
+test('reports an existing message that fails validation and still stores the following ones', function (): void {
+    Exceptions::fake();
+    $mailAccount = MailAccount::factory()
+        ->has(MailFolder::factory())
+        ->create();
+    $folder = $mailAccount->mailFolders->first();
+
+    $communication = Communication::factory()->create([
+        'mail_account_id' => $mailAccount->getKey(),
+        'mail_folder_id' => $folder->getKey(),
+        'message_id' => '<rejected-update@example.com>',
+        'message_uid' => '41',
+        'communication_type_enum' => 'mail',
+    ]);
+
+    UpdateCommunication::validating(fn () => throw ValidationException::withMessages(['id' => 'rejected']));
+
+    makeTestableBuilder($folder)
+        ->pushMessage(makeImapMessage(uid: 42, messageId: '<rejected-update@example.com>'))
+        ->pushMessage(makeImapMessage(uid: 43, messageId: '<after-rejected-update@example.com>'))
+        ->store();
+
+    expect($communication->refresh()->message_uid)->toBe('41')
+        ->and(Communication::query()->where('message_id', '<after-rejected-update@example.com>')->exists())->toBeTrue();
+    Exceptions::assertReported(
+        fn (RuntimeException $exception): bool => $exception->getPrevious() instanceof ValidationException
+    );
 });
 
 test('reports progress for each stored message', function (): void {
@@ -433,15 +466,19 @@ test('lets go of every new message once it is stored', function (): void {
         ->and(Communication::query()->where('mail_folder_id', $folder->getKey())->count())->toBe(3);
 });
 
-function makeReadableImapMessage(int $uid): Message
-{
+function makeReadableImapMessage(
+    int $uid,
+    ?string $messageId = null,
+    ?string $subject = null,
+    string $from = 'sender@example.com',
+): Message {
     $message = Mockery::mock(Message::class);
     $message->shouldReceive('parseBody')->andReturnSelf();
     $message->shouldReceive('getAttachments')->andReturn(new AttachmentCollection());
-    $message->shouldReceive('getMessageId->toString')->andReturn('<' . $uid . '@example.com>');
+    $message->shouldReceive('getMessageId->toString')->andReturn($messageId ?? '<' . $uid . '@example.com>');
     $message->shouldReceive('getUid')->andReturn($uid);
-    $message->shouldReceive('getSubject->toString')->andReturn('Mail ' . $uid);
-    $message->shouldReceive('getFrom')->andReturn([(object) ['full' => 'sender@example.com']]);
+    $message->shouldReceive('getSubject->toString')->andReturn($subject ?? 'Mail ' . $uid);
+    $message->shouldReceive('getFrom')->andReturn([(object) ['full' => $from]]);
     $message->shouldReceive('getTo->toArray')->andReturn([]);
     $message->shouldReceive('getCc->toArray')->andReturn([]);
     $message->shouldReceive('getBcc->toArray')->andReturn([]);
@@ -453,3 +490,128 @@ function makeReadableImapMessage(int $uid): Message
 
     return $message;
 }
+
+function makeImapFolderServingNew(array $messages): Folder
+{
+    $query = Mockery::mock(WhereQuery::class);
+    $query->shouldReceive('setFetchBody')->andReturnSelf();
+    $query->shouldReceive('leaveUnread')->andReturnSelf();
+    $query->shouldReceive('getByUidGreater')->andReturnUsing(fn (): MessageCollection => new MessageCollection($messages));
+
+    $imapFolder = Mockery::mock(Folder::class);
+    $imapFolder->shouldReceive('messages')->andReturn($query);
+
+    return $imapFolder;
+}
+
+test('stores a message id of 900 characters in full and finds it again on the next run', function (): void {
+    $folder = MailAccount::factory()->has(MailFolder::factory())->create()->mailFolders->first();
+    $longId = '<' . str_repeat('a', 900) . '@example.com>';
+    $imapFolder = makeImapFolderServingNew([makeReadableImapMessage(11, messageId: $longId)]);
+
+    makeTestableBuilder($folder)->setImapFolder($imapFolder)->newSince(10)->fetchAndStore();
+    makeTestableBuilder($folder)->setImapFolder($imapFolder)->newSince(10)->fetchAndStore();
+
+    expect(Communication::query()->where('mail_folder_id', $folder->getKey())->pluck('message_id')->all())
+        ->toBe([$longId]);
+});
+
+test('stores a long subject and sender in full', function (): void {
+    $folder = MailAccount::factory()->has(MailFolder::factory())->create()->mailFolders->first();
+    $from = str_repeat('N', 400) . ' <sender@example.com>';
+
+    makeTestableBuilder($folder)
+        ->setImapFolder(makeImapFolderServingNew([
+            makeReadableImapMessage(11, subject: str_repeat('s', 400), from: $from),
+        ]))
+        ->newSince(10)
+        ->fetchAndStore();
+
+    $stored = Communication::query()->where('mail_folder_id', $folder->getKey())->sole();
+
+    expect($stored->subject)->toBe(str_repeat('s', 400))
+        ->and($stored->from)->toBe($from);
+});
+
+test('reports a message id longer than 998 characters and still imports the following ones', function (): void {
+    Exceptions::fake();
+    $folder = MailAccount::factory()->has(MailFolder::factory())->create()->mailFolders->first();
+
+    makeTestableBuilder($folder)
+        ->setImapFolder(makeImapFolderServingNew([
+            makeReadableImapMessage(11, messageId: '<' . str_repeat('a', 998) . '>'),
+            makeReadableImapMessage(12),
+            makeReadableImapMessage(13),
+        ]))
+        ->newSince(10)
+        ->fetchAndStore();
+
+    expect(Communication::query()->where('mail_folder_id', $folder->getKey())->orderBy('message_uid')->pluck('message_uid')->all())
+        ->toBe(['12', '13']);
+    Exceptions::assertReported(
+        fn (RuntimeException $exception): bool => $exception->getPrevious() instanceof ValidationException
+    );
+});
+
+test('removes the temporary attachment files of a message that fails validation', function (): void {
+    Exceptions::fake();
+    $folder = MailAccount::factory()->has(MailFolder::factory())->create()->mailFolders->first();
+    $tempPath = tempnam(sys_get_temp_dir(), 'imap_');
+    file_put_contents($tempPath, 'attachment');
+
+    makeTestableBuilder($folder)
+        ->pushMessage(new ImapMessage(
+            messageId: '<' . str_repeat('a', 998) . '>',
+            uid: 11,
+            subject: 'Rejected',
+            from: 'sender@example.com',
+            to: [],
+            cc: [],
+            bcc: [],
+            textBody: 'Hello',
+            htmlBody: null,
+            date: CarbonImmutable::now(),
+            isSeen: true,
+            flags: [],
+            attachments: [['file_name' => 'a.txt', 'mime_type' => 'text/plain', 'name' => 'a.txt', 'media' => $tempPath]],
+        ))
+        ->store();
+
+    expect(file_exists($tempPath))->toBeFalse();
+});
+
+test('reports a rejected message once and starts the next sync after it', function (): void {
+    Exceptions::fake();
+    $folder = MailFolder::factory()->for(MailAccount::factory())->create(['uid_validity' => 2]);
+    Communication::factory()->create([
+        'mail_account_id' => $folder->mail_account_id,
+        'mail_folder_id' => $folder->getKey(),
+        'communication_type_enum' => 'mail',
+        'message_uid' => '10',
+    ]);
+
+    $query = Mockery::mock(WhereQuery::class);
+    $query->shouldReceive('setFetchBody', 'leaveUnread', 'unseen', 'since')->andReturnSelf();
+    $query->shouldReceive('search')->andReturn(collect());
+    $query->shouldReceive('getByUidGreater')->andReturnUsing(
+        fn (int $uid): MessageCollection => new MessageCollection(
+            $uid < 11 ? [makeReadableImapMessage(11, messageId: '<' . str_repeat('a', 998) . '>')] : []
+        )
+    );
+
+    $imapFolder = Mockery::mock(Folder::class);
+    $imapFolder->shouldReceive('examine')->andReturn(['uidvalidity' => 2, 'uidnext' => 12]);
+    $imapFolder->shouldReceive('messages')->andReturn($query);
+
+    $client = Mockery::mock(Client::class);
+    $client->shouldReceive('getFolderByPath')->andReturn($imapFolder);
+    (new ReflectionProperty(MailAccount::class, 'imapClient'))->setValue($folder->mailAccount, $client);
+
+    app(ImapMailSyncDriver::class)->syncMessages($folder);
+    $reloaded = $folder->fresh();
+    $reloaded->setRelation('mailAccount', $folder->mailAccount);
+    app(ImapMailSyncDriver::class)->syncMessages($reloaded);
+
+    Exceptions::assertReportedCount(1);
+    expect($reloaded->last_skipped_uid)->toBe(11);
+});
