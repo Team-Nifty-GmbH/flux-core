@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Contact;
 
 use Exception;
+use FluxErp\Actions\Contact\DeleteContact;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ContactForm;
@@ -86,7 +87,10 @@ class Contact extends Component
     public function delete(): void
     {
         try {
-            $this->contact->delete();
+            DeleteContact::make(['id' => $this->contactId])
+                ->checkPermission()
+                ->validate()
+                ->execute();
         } catch (UnauthorizedException|ValidationException $e) {
             exception_to_notifications($e, $this, form: $this->contact);
 
