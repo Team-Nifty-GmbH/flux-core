@@ -115,8 +115,11 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                 $firstAddressId = resolve_static(Address::class, 'query')
                     ->where('contact_id', $previousContactId)
                     ->value('id');
+                $storedFlags = resolve_static(Address::class, 'query')
+                    ->whereKey($address->getKey())
+                    ->first(['is_main_address', 'is_invoice_address', 'is_delivery_address']);
 
-                if (data_get($address->getPrevious(), 'is_main_address') ?? $address->is_main_address) {
+                if (data_get($address->getPrevious(), 'is_main_address') ?? $storedFlags->is_main_address) {
                     $oldContactUpdates['main_address_id'] = $firstAddressId;
                     $oldContactAddressesUpdates['is_main_address'] = true;
 
@@ -125,7 +128,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     }
                 }
 
-                if (data_get($address->getPrevious(), 'is_invoice_address') ?? $address->is_invoice_address) {
+                if (data_get($address->getPrevious(), 'is_invoice_address') ?? $storedFlags->is_invoice_address) {
                     $oldContactUpdates['invoice_address_id'] = $firstAddressId;
                     $oldContactAddressesUpdates['is_invoice_address'] = true;
 
@@ -134,7 +137,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     }
                 }
 
-                if (data_get($address->getPrevious(), 'is_delivery_address') ?? $address->is_delivery_address) {
+                if (data_get($address->getPrevious(), 'is_delivery_address') ?? $storedFlags->is_delivery_address) {
                     $oldContactUpdates['delivery_address_id'] = $firstAddressId;
                     $oldContactAddressesUpdates['is_delivery_address'] = true;
 
@@ -157,8 +160,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                         ->update($oldContactUpdates);
 
                     resolve_static(Address::class, 'query')
-                        ->whereKeyNot($address->getKey())
-                        ->where('contact_id', $previousContactId)
+                        ->whereKey($firstAddressId)
                         ->update($oldContactAddressesUpdates);
                 }
             }
