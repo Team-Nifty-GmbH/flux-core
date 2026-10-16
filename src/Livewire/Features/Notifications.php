@@ -36,8 +36,14 @@ class Notifications extends Component
     }
 
     #[Renderless]
-    public function acceptNotify(Notification $notification): void
+    public function acceptNotify(string $notification): void
     {
+        $notification = auth()->user()->notifications()->whereKey($notification)->first();
+
+        if (! $notification) {
+            return;
+        }
+
         $accept = data_get($notification->data, 'accept');
         $notification->markAsRead();
         $this->unread = max(0, $this->unread - 1);
@@ -71,8 +77,14 @@ class Notifications extends Component
     }
 
     #[Renderless]
-    public function markAsRead(Notification $notification): void
+    public function markAsRead(string $notification): void
     {
+        $notification = auth()->user()->notifications()->whereKey($notification)->first();
+
+        if (! $notification) {
+            return;
+        }
+
         $notification->markAsRead();
 
         $this->unread = max(0, $this->unread - 1);
@@ -92,9 +104,10 @@ class Notifications extends Component
         }
 
         /** @var Notification $notification */
-        $notification = resolve_static(Notification::class, 'query')
+        $notification = auth()->user()
+            ->notifications()
             ->whereKey(data_get($notify, 'id'))
-            ->firstOrNew();
+            ->first() ?? app(Notification::class);
 
         if (! $notification->exists) {
             $notification->data = $notify;
