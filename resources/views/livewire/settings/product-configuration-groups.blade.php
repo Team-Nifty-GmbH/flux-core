@@ -71,7 +71,16 @@
                             ></span>
                             <span
                                 class="text-sm text-gray-500"
-                                x-text="item.rules.map((rule) => rule.rule_type + ' ' + rule.target).join(', ')"
+                                x-text="
+                                    item.rules
+                                        .map(
+                                            (rule) =>
+                                                rule.rule_type +
+                                                ' ' +
+                                                rule.target,
+                                        )
+                                        .join(', ')
+                                "
                             ></span>
                         </div>
                         <div class="flex items-center gap-2">
@@ -94,7 +103,7 @@
             <div
                 class="text-sm text-gray-500"
                 x-cloak
-                x-show="! $wire.productConfigurationGroupForm.id"
+                x-show="!$wire.productConfigurationGroupForm.id"
             >
                 {{ __('Options can be added once the group is saved.') }}
             </div>
@@ -105,7 +114,9 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$tsui.close.modal('edit-product-configuration-group-modal')"
+                x-on:click="
+                    $tsui.close.modal('edit-product-configuration-group-modal')
+                "
             />
             <x-button
                 color="indigo"
@@ -114,7 +125,9 @@
                 x-on:click="
                     $wire.save().then((success) => {
                         if (success)
-                            $tsui.close.modal('edit-product-configuration-group-modal');
+                            $tsui.close.modal(
+                                'edit-product-configuration-group-modal',
+                            );
                     })
                 "
             />
@@ -175,20 +188,39 @@
                         color="indigo"
                         icon="plus"
                         :text="__('Add rule')"
-                        x-on:click="$wire.editRule($wire.productConfigurationGroupItemForm.id)"
+                        x-on:click="
+                            $wire.editRule(
+                                $wire.productConfigurationGroupItemForm.id,
+                            )
+                        "
                     />
                 </div>
                 <template
-                    x-for="rule in ($wire.items.find((item) => item.id === $wire.productConfigurationGroupItemForm.id)?.rules ?? [])"
+                    x-for="
+                        rule in
+                        ($wire.items.find(
+                            (item) =>
+                                item.id ===
+                                $wire.productConfigurationGroupItemForm.id,
+                        )?.rules ?? [])
+                    "
                     x-bind:key="rule.id"
                 >
                     <div class="flex items-center justify-between gap-2">
-                        <span x-text="rule.rule_type + ' ' + rule.target"></span>
+                        <span
+                            x-text="rule.rule_type + ' ' + rule.target"
+                        ></span>
                         <div class="flex gap-2">
                             <x-button
                                 color="indigo"
                                 icon="pencil"
-                                x-on:click="$wire.editRule($wire.productConfigurationGroupItemForm.id, rule.id)"
+                                x-on:click="
+                                    $wire.editRule(
+                                        $wire.productConfigurationGroupItemForm
+                                            .id,
+                                        rule.id,
+                                    )
+                                "
                             />
                             <x-button
                                 color="red"
@@ -207,7 +239,11 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$tsui.close.modal('edit-product-configuration-group-item-modal')"
+                x-on:click="
+                    $tsui.close.modal(
+                        'edit-product-configuration-group-item-modal',
+                    )
+                "
             />
             <x-button
                 color="indigo"
@@ -216,23 +252,23 @@
                 x-on:click="
                     $wire.saveItem().then((success) => {
                         if (success)
-                            $tsui.close.modal('edit-product-configuration-group-item-modal');
+                            $tsui.close.modal(
+                                'edit-product-configuration-group-item-modal',
+                            );
                     })
                 "
             />
         </x-slot:footer>
     </x-modal>
-    <x-modal
-        id="edit-product-configuration-rule-modal"
-        :title="__('Rule')"
-    >
+    <x-modal id="edit-product-configuration-rule-modal" :title="__('Rule')">
         <div
             class="flex flex-col gap-4"
             x-data="{ wholeGroup: true }"
             x-init="
                 $watch('$wire.ruleModalOpens', () => {
                     wholeGroup =
-                        $wire.productConfigurationRuleForm.target_items.length === 0
+                        $wire.productConfigurationRuleForm.target_items
+                            .length === 0;
                 })
             "
         >
@@ -245,7 +281,12 @@
             <x-toggle
                 x-model="wholeGroup"
                 :label="__('Whole group')"
-                x-on:change="wholeGroup ? ($wire.productConfigurationRuleForm.target_items = []) : ($wire.productConfigurationRuleForm.target_group_id = null)"
+                x-on:change="
+                    wholeGroup
+                        ? ($wire.productConfigurationRuleForm.target_items = [])
+                        : ($wire.productConfigurationRuleForm.target_group_id =
+                              null)
+                "
             />
             <div class="flex flex-col gap-2" x-cloak x-show="wholeGroup">
                 <x-label :label="__('Target group')" />
@@ -257,13 +298,16 @@
                         <x-radio
                             name="rule-target-group"
                             x-bind:value="group.id"
-                            x-model.number="$wire.productConfigurationRuleForm.target_group_id"
+                            x-model.number="
+                                $wire.productConfigurationRuleForm
+                                    .target_group_id
+                            "
                         />
                         <span x-text="group.name"></span>
                     </label>
                 </template>
             </div>
-            <div class="flex flex-col gap-2" x-cloak x-show="! wholeGroup">
+            <div class="flex flex-col gap-2" x-cloak x-show="!wholeGroup">
                 <x-label :label="__('Target options')" />
                 <template
                     x-for="option in $wire.ruleOptions.items"
@@ -272,7 +316,9 @@
                     <label class="flex items-center gap-2">
                         <x-checkbox
                             x-bind:value="option.id"
-                            x-model.number="$wire.productConfigurationRuleForm.target_items"
+                            x-model.number="
+                                $wire.productConfigurationRuleForm.target_items
+                            "
                         />
                         <span x-text="option.name"></span>
                     </label>
@@ -285,7 +331,9 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$tsui.close.modal('edit-product-configuration-rule-modal')"
+                x-on:click="
+                    $tsui.close.modal('edit-product-configuration-rule-modal')
+                "
             />
             <x-button
                 color="indigo"
@@ -294,7 +342,9 @@
                 x-on:click="
                     $wire.saveRule().then((success) => {
                         if (success)
-                            $tsui.close.modal('edit-product-configuration-rule-modal');
+                            $tsui.close.modal(
+                                'edit-product-configuration-rule-modal',
+                            );
                     })
                 "
             />

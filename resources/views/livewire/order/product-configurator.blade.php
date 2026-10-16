@@ -11,10 +11,13 @@
             total: null,
             errors: [],
             money(value) {
-                return Number(value ?? 0).toLocaleString(document.documentElement.lang, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                })
+                return Number(value ?? 0).toLocaleString(
+                    document.documentElement.lang,
+                    {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    },
+                );
             },
             draft() {
                 return Object.entries(this.amounts)
@@ -22,44 +25,47 @@
                     .map(([id, amount]) => ({
                         product_configuration_group_item_id: Number(id),
                         amount: Number(amount),
-                    }))
+                    }));
             },
             load() {
-                this.total = null
-                this.errors = []
+                this.total = null;
+                this.errors = [];
                 this.amounts = Object.fromEntries(
                     ($wire.orderPosition.configuration ?? []).map((entry) => [
                         entry.product_configuration_group_item_id,
                         entry.amount,
                     ]),
-                )
-                this.preview()
+                );
+                this.preview();
             },
             choose(group, itemId) {
-                group.items.forEach((item) => delete this.amounts[item.id])
-                if (itemId) this.amounts[itemId] = 1
-                this.preview()
+                group.items.forEach((item) => delete this.amounts[item.id]);
+                if (itemId) this.amounts[itemId] = 1;
+                this.preview();
             },
             save() {
-                $wire.orderPosition.configuration = this.draft()
+                $wire.orderPosition.configuration = this.draft();
                 $wire.addOrderPosition().then((success) => {
                     if (success) {
-                        $tsui.close.modal('order-position-configurator')
-                        $tsui.close.modal('edit-order-position')
+                        $tsui.close.modal('order-position-configurator');
+                        $tsui.close.modal('edit-order-position');
                     }
-                })
+                });
             },
             preview() {
                 $wire.previewConfiguration(this.draft()).then((result) => {
-                    this.total = result.total_price ?? null
-                    this.errors = result.errors ?? []
-                })
+                    this.total = result.total_price ?? null;
+                    this.errors = result.errors ?? [];
+                });
             },
         }"
         x-on:order-position-configurator-load.window="load()"
         x-on:order-position-configurator-save.window="save()"
     >
-        <template x-for="group in $wire.configurationGroups" x-bind:key="group.id">
+        <template
+            x-for="group in $wire.configurationGroups"
+            x-bind:key="group.id"
+        >
             <div class="flex flex-col gap-2">
                 <div class="font-semibold">
                     <span x-text="group.name"></span>
@@ -68,11 +74,16 @@
                 <div
                     class="flex items-center gap-2"
                     x-cloak
-                    x-show="group.selection_type_enum === 'single' && ! group.is_required"
+                    x-show="
+                        group.selection_type_enum === 'single' &&
+                        !group.is_required
+                    "
                 >
                     <x-radio
                         x-bind:name="'configurator-group-' + group.id"
-                        x-bind:checked="group.items.every((item) => ! (amounts[item.id] > 0))"
+                        x-bind:checked="
+                            group.items.every((item) => !(amounts[item.id] > 0))
+                        "
                         x-on:change="choose(group, null)"
                     />
                     <span>{{ __('No selection') }}</span>
@@ -86,7 +97,9 @@
                             >
                                 <x-radio
                                     x-bind:id="'configurator-item-' + item.id"
-                                    x-bind:name="'configurator-group-' + group.id"
+                                    x-bind:name="
+                                        'configurator-group-' + group.id
+                                    "
                                     x-bind:checked="amounts[item.id] > 0"
                                     x-on:change="choose(group, item.id)"
                                 />
@@ -94,7 +107,9 @@
                             <div
                                 class="w-24"
                                 x-cloak
-                                x-show="group.selection_type_enum === 'multiple'"
+                                x-show="
+                                    group.selection_type_enum === 'multiple'
+                                "
                             >
                                 <x-input
                                     type="number"
@@ -133,7 +148,11 @@
             color="indigo"
             :text="__('Save')"
             loading="addOrderPosition"
-            x-on:click="window.dispatchEvent(new CustomEvent('order-position-configurator-save'))"
+            x-on:click="
+                window.dispatchEvent(
+                    new CustomEvent('order-position-configurator-save'),
+                )
+            "
         />
     </x-slot:footer>
 </x-modal>

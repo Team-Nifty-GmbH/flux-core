@@ -631,8 +631,8 @@
                         x-cloak
                         x-show="
                             $wire.orderPosition.id &&
-                                $wire.orderPosition.is_configurable &&
-                                ! $wire.order.is_locked
+                            $wire.orderPosition.is_configurable &&
+                            !$wire.order.is_locked
                         "
                     >
                         <x-button
