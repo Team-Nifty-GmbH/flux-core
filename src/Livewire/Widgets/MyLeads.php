@@ -7,6 +7,7 @@ use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Models\Lead;
 use FluxErp\Models\LeadState;
+use FluxErp\Models\User;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -106,7 +107,7 @@ class MyLeads extends Component implements HasWidgetOptions
     protected function liveUpdates(): array
     {
         return [
-            $this->userChannel() => [
+            $this->modelChannel(User::class, auth()->id()) => [
                 Lead::class => ['created', 'updated', 'deleted'],
             ],
         ];

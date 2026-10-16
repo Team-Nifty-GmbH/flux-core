@@ -111,7 +111,10 @@ class WorkTimeModelDistributionChart extends CircleChart
     {
         return [
             $this->modelChannel(Employee::class) => [
-                Employee::class => ['created', 'updated', 'deleted'],
+                Employee::class => ['updated', 'deleted'],
+            ],
+            $this->modelChannel(WorkTimeModel::class) => [
+                WorkTimeModel::class => ['updated'],
             ],
             $this->modelChannel(EmployeeWorkTimeModel::class) => [
                 EmployeeWorkTimeModel::class => ['created', 'updated', 'deleted'],

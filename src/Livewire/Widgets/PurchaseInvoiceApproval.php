@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Models\Order;
+use FluxErp\Models\User;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -69,7 +70,7 @@ class PurchaseInvoiceApproval extends Component
     protected function liveUpdates(): array
     {
         return [
-            $this->userChannel() => [
+            $this->modelChannel(User::class, auth()->id()) => [
                 Order::class => ['created', 'updated', 'deleted'],
             ],
         ];

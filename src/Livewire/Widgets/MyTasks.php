@@ -8,6 +8,7 @@ use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Models\Pivots\TaskUser;
 use FluxErp\Models\Task;
+use FluxErp\Models\User;
 use FluxErp\States\Task\TaskState;
 use FluxErp\Traits\Livewire\Widget\RespondsToApiRequests;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
@@ -147,7 +148,7 @@ class MyTasks extends Component implements HasApiResponse, HasWidgetOptions
     protected function liveUpdates(): array
     {
         return [
-            $this->userChannel() => [
+            $this->modelChannel(User::class, auth()->id()) => [
                 Task::class => ['created', 'updated', 'deleted'],
                 TaskUser::class => ['created', 'deleted'],
             ],

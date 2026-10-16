@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Widgets\Contact;
 use Carbon\CarbonInterface;
 use FluxErp\Livewire\Contact\Statistics;
 use FluxErp\Livewire\Support\Widgets\ValueBox;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
@@ -82,7 +83,7 @@ class PaymentBehavior extends ValueBox
     protected function liveUpdates(): array
     {
         return [
-            $this->contactChannel($this->contactId) => [
+            $this->modelChannel(Contact::class, $this->contactId) => [
                 Order::class => ['created', 'updated', 'deleted'],
             ],
         ];

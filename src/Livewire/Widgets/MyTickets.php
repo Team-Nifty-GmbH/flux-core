@@ -6,6 +6,7 @@ use FluxErp\Contracts\HasApiResponse;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Models\Pivots\TicketUser;
 use FluxErp\Models\Ticket;
+use FluxErp\Models\User;
 use FluxErp\States\Ticket\TicketState;
 use FluxErp\Traits\Livewire\Widget\RespondsToApiRequests;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
@@ -110,7 +111,7 @@ class MyTickets extends Component implements HasApiResponse
     protected function liveUpdates(): array
     {
         return [
-            $this->userChannel() => [
+            $this->modelChannel(User::class, auth()->id()) => [
                 Ticket::class => ['updated', 'deleted'],
                 TicketUser::class => ['created', 'deleted'],
             ],

@@ -80,6 +80,9 @@ class DepartmentHeadcountChart extends BarChart
             $this->modelChannel(Employee::class) => [
                 Employee::class => ['created', 'updated', 'deleted'],
             ],
+            $this->modelChannel(EmployeeDepartment::class) => [
+                EmployeeDepartment::class => ['updated', 'deleted'],
+            ],
         ];
     }
 }

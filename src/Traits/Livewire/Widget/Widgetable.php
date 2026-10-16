@@ -2,7 +2,6 @@
 
 namespace FluxErp\Traits\Livewire\Widget;
 
-use FluxErp\Models\Contact;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
@@ -45,13 +44,6 @@ trait Widgetable
     public function showTitle(): bool
     {
         return true;
-    }
-
-    protected function contactChannel(int|string|null $contactId): ?string
-    {
-        return blank($contactId)
-            ? null
-            : resolve_static(Contact::class, 'recordBroadcastChannel', ['key' => $contactId]);
     }
 
     protected function isDateDependent(): bool
@@ -98,9 +90,11 @@ trait Widgetable
         return $listeners;
     }
 
-    protected function modelChannel(string $model): string
+    protected function modelChannel(string $model, int|string|null $key = null): string
     {
-        return resolve_static($model, 'getBroadcastChannel');
+        return is_null($key)
+            ? resolve_static($model, 'getBroadcastChannel')
+            : resolve_static($model, 'recordBroadcastChannel', ['key' => $key]);
     }
 
     protected function subscribeLiveUpdates(): void
@@ -121,10 +115,5 @@ trait Widgetable
                 'midnightIn' => $midnightIn,
             ]) . ')'
         );
-    }
-
-    protected function userChannel(): string
-    {
-        return auth()->user()->broadcastChannel();
     }
 }

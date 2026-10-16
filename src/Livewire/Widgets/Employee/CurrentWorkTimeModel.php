@@ -91,11 +91,11 @@ class CurrentWorkTimeModel extends ValueBox implements HasApiResponse
     protected function liveUpdates(): array
     {
         return [
-            $this->modelChannel(Employee::class) => [
-                Employee::class => ['created', 'updated', 'deleted'],
-            ],
             $this->modelChannel(EmployeeWorkTimeModel::class) => [
                 EmployeeWorkTimeModel::class => ['created', 'updated', 'deleted'],
+            ],
+            $this->modelChannel(WorkTimeModel::class) => [
+                WorkTimeModel::class => ['updated'],
             ],
         ];
     }

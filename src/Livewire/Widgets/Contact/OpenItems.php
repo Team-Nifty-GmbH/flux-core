@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Widgets\Contact;
 
 use FluxErp\Livewire\Contact\Statistics;
 use FluxErp\Livewire\Widgets\Outstanding;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -31,7 +32,7 @@ class OpenItems extends Outstanding
     protected function liveUpdates(): array
     {
         return [
-            $this->contactChannel($this->contactId) => [
+            $this->modelChannel(Contact::class, $this->contactId) => [
                 Order::class => ['created', 'updated', 'deleted'],
             ],
         ];

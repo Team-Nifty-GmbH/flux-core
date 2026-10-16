@@ -2,25 +2,41 @@
 
 use Carbon\Carbon;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Enums\OvertimeCompensationEnum;
 use FluxErp\Livewire\Widgets\Calendar;
 use FluxErp\Livewire\Widgets\Contact\OpenItems;
 use FluxErp\Livewire\Widgets\Contact\Orders;
 use FluxErp\Livewire\Widgets\Contact\PaymentBehavior;
 use FluxErp\Livewire\Widgets\Contact\RevenueOverTime;
+use FluxErp\Livewire\Widgets\Employee\AttendanceOverview;
+use FluxErp\Livewire\Widgets\Employee\CurrentWorkTimeModel;
+use FluxErp\Livewire\Widgets\Employee\OvertimeBalanceBox;
+use FluxErp\Livewire\Widgets\Employee\VacationBalanceBox;
 use FluxErp\Livewire\Widgets\Employee\VacationYearlyOverview;
+use FluxErp\Livewire\Widgets\Employee\WorkTimeOverview;
+use FluxErp\Livewire\Widgets\HumanResources\DepartmentHeadcountChart;
 use FluxErp\Livewire\Widgets\HumanResources\VacationHeatmapWidget;
+use FluxErp\Livewire\Widgets\HumanResources\WorkTimeModelDistributionChart;
 use FluxErp\Livewire\Widgets\MyOverdueTasks;
 use FluxErp\Livewire\Widgets\MyTargetProgresses;
 use FluxErp\Livewire\Widgets\MyTasks;
+use FluxErp\Livewire\Widgets\OrdersTimeline;
 use FluxErp\Livewire\Widgets\Outstanding;
 use FluxErp\Livewire\Widgets\RecurringRevenueForecast;
 use FluxErp\Livewire\Widgets\Revenue;
+use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\CalendarEvent;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Employee;
+use FluxErp\Models\EmployeeBalanceAdjustment;
+use FluxErp\Models\EmployeeDay;
+use FluxErp\Models\EmployeeDepartment;
 use FluxErp\Models\Order;
+use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
 use FluxErp\Models\Target;
 use FluxErp\Models\Task;
 use FluxErp\Models\Ticket;
+use FluxErp\Models\WorkTimeModel;
 use Illuminate\Support\Str;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
@@ -36,6 +52,33 @@ beforeEach(function (): void {
             true
         ))
         ->last();
+
+    $this->employee = function (): Employee {
+        $employee = app(Employee::class)->create([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'user_id' => $this->user->getKey(),
+            'firstname' => 'Test',
+            'lastname' => 'Employee',
+            'employment_date' => now()->subYear(),
+            'is_active' => true,
+        ]);
+
+        app(EmployeeWorkTimeModel::class)->create([
+            'employee_id' => $employee->getKey(),
+            'work_time_model_id' => app(WorkTimeModel::class)->create([
+                'name' => 'Standard 40h',
+                'weekly_hours' => 40,
+                'work_days_per_week' => 5,
+                'annual_vacation_days' => 24,
+                'overtime_compensation' => OvertimeCompensationEnum::TimeOff,
+                'is_active' => true,
+            ])->getKey(),
+            'valid_from' => now()->subYear(),
+            'annual_vacation_days' => 24,
+        ]);
+
+        return $employee;
+    };
 
     $this->listeners = fn (string $component, array $params = []): array => data_get(
         ($this->subscription)(Livewire::test($component, $params)),
@@ -75,8 +118,9 @@ test('a contact widget subscribes only to the channel of its contact', function 
         ->and(collect($listeners)->pluck(0)->unique()->values()->all())->toBe(['contact.42']);
 });
 
-test('a contact widget without a contact subscribes to nothing', function (string $component): void {
-    expect(($this->listeners)($component))->toBe([]);
+test('a contact widget without a contact subscribes to no contact record', function (string $component): void {
+    expect(collect(($this->listeners)($component))->pluck(0)->unique()->values()->all())
+        ->toBe([morph_alias(Contact::class) . '.']);
 })->with([OpenItems::class, Orders::class, PaymentBehavior::class, RevenueOverTime::class]);
 
 test('a widget can extend the declared live updates', function (): void {
@@ -111,6 +155,80 @@ test('a widget declares the order events its data depends on', function (string 
     'payment behavior' => [PaymentBehavior::class, ['contactId' => 42], 'contact.42', ['OrderCreated', 'OrderUpdated', 'OrderDeleted']],
     'recurring revenue forecast' => [RecurringRevenueForecast::class, [], 'order.', ['OrderUpdated', 'OrderDeleted']],
     'vacation heatmap' => [VacationHeatmapWidget::class, [], 'employee.', ['EmployeeCreated', 'EmployeeUpdated', 'EmployeeDeleted']],
+]);
+
+test('a widget declares the model events its data depends on', function (string $component, bool $forEmployee, array $expected): void {
+    $listeners = ($this->listeners)(
+        $component,
+        $forEmployee ? ['employeeId' => ($this->employee)()->getKey()] : []
+    );
+
+    foreach ($expected as $model => $events) {
+        $channel = morph_alias($model) . '.';
+        $declared = collect($listeners)->where(0, $channel)->pluck(1)->sort()->values()->all();
+
+        expect($declared)->toBe(
+            collect($events)->map(fn (string $event): string => '.' . class_basename($model) . $event)
+                ->sort()
+                ->values()
+                ->all()
+        );
+    }
+
+    expect(collect($listeners)->pluck(0)->unique()->sort()->values()->all())->toBe(
+        collect(array_keys($expected))->map(fn (string $model): string => morph_alias($model) . '.')
+            ->sort()
+            ->values()
+            ->all()
+    );
+})->with([
+    'orders timeline' => [OrdersTimeline::class, false, [
+        Order::class => ['Created', 'Updated', 'Deleted', 'Restored'],
+    ]],
+    'work time model distribution' => [WorkTimeModelDistributionChart::class, false, [
+        Employee::class => ['Updated', 'Deleted', 'Restored'],
+        EmployeeWorkTimeModel::class => ['Created', 'Updated', 'Deleted', 'Restored'],
+        WorkTimeModel::class => ['Updated'],
+    ]],
+    'department headcount' => [DepartmentHeadcountChart::class, false, [
+        Employee::class => ['Created', 'Updated', 'Deleted', 'Restored'],
+        EmployeeDepartment::class => ['Updated', 'Deleted', 'Restored'],
+    ]],
+    'vacation balance' => [VacationBalanceBox::class, true, [
+        Employee::class => ['Updated'],
+        AbsenceRequest::class => ['Created', 'Updated', 'Deleted', 'Restored'],
+        EmployeeBalanceAdjustment::class => ['Created', 'Updated', 'Deleted', 'Restored'],
+        EmployeeDay::class => ['Created', 'Updated', 'Deleted', 'Restored'],
+        EmployeeWorkTimeModel::class => ['Created', 'Updated', 'Deleted', 'Restored'],
+    ]],
+    'overtime balance' => [OvertimeBalanceBox::class, true, [
+        EmployeeBalanceAdjustment::class => ['Created', 'Updated', 'Deleted', 'Restored'],
+        EmployeeDay::class => ['Created', 'Updated', 'Deleted', 'Restored'],
+    ]],
+    'current work time model' => [CurrentWorkTimeModel::class, true, [
+        EmployeeWorkTimeModel::class => ['Created', 'Updated', 'Deleted', 'Restored'],
+        WorkTimeModel::class => ['Updated'],
+    ]],
+    'vacation yearly overview' => [VacationYearlyOverview::class, true, [
+        AbsenceRequest::class => ['Created', 'Updated', 'Deleted', 'Restored'],
+        EmployeeBalanceAdjustment::class => ['Created', 'Updated', 'Deleted', 'Restored'],
+        EmployeeWorkTimeModel::class => ['Created', 'Updated', 'Deleted', 'Restored'],
+    ]],
+]);
+
+test('a widget of a single employee ignores new and deleted employees', function (string $component): void {
+    $listeners = ($this->listeners)($component, ['employeeId' => ($this->employee)()->getKey()]);
+
+    expect(collect($listeners)->pluck(1)->all())
+        ->not->toContain('.EmployeeCreated')
+        ->not->toContain('.EmployeeDeleted');
+})->with([
+    AttendanceOverview::class,
+    CurrentWorkTimeModel::class,
+    OvertimeBalanceBox::class,
+    VacationBalanceBox::class,
+    VacationYearlyOverview::class,
+    WorkTimeOverview::class,
 ]);
 
 test('the calendar widget also refetches when a calendarable record changes', function (): void {

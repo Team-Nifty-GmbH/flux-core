@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
+use FluxErp\Models\User;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeType;
 use FluxErp\Support\Metrics\Charts\Bar;
@@ -219,7 +220,7 @@ class MyWorkTimes extends BarChart
     protected function liveUpdates(): array
     {
         return [
-            $this->userChannel() => [
+            $this->modelChannel(User::class, auth()->id()) => [
                 WorkTime::class => ['created', 'updated', 'deleted'],
             ],
         ];

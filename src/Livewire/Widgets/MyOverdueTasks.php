@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Widgets;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Models\Pivots\TaskUser;
 use FluxErp\Models\Task;
+use FluxErp\Models\User;
 use FluxErp\States\Task\TaskState;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\Factory;
@@ -93,7 +94,7 @@ class MyOverdueTasks extends Component
     protected function liveUpdates(): array
     {
         return [
-            $this->userChannel() => [
+            $this->modelChannel(User::class, auth()->id()) => [
                 Task::class => ['created', 'updated', 'deleted'],
                 TaskUser::class => ['created', 'deleted'],
             ],

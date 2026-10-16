@@ -6,6 +6,7 @@ use Carbon\CarbonInterface;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Contact\Statistics;
 use FluxErp\Livewire\Support\Widgets\ValueBox;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
@@ -52,7 +53,7 @@ class Orders extends ValueBox
     protected function liveUpdates(): array
     {
         return [
-            $this->contactChannel($this->contactId) => [
+            $this->modelChannel(Contact::class, $this->contactId) => [
                 Order::class => ['created', 'updated', 'deleted'],
             ],
         ];
