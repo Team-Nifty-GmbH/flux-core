@@ -452,15 +452,23 @@ class ImapMessageBuilder
                         ->execute();
                 }
             } else {
-                UpdateCommunication::make([
-                    'id' => $existing->getKey(),
-                    'mail_folder_id' => $this->folder->getKey(),
-                    'message_uid' => (string) $imapMessage->uid,
-                    'communication_type_enum' => 'mail',
-                    'is_seen' => $imapMessage->isSeen,
-                ])
-                    ->validate()
-                    ->execute();
+                try {
+                    UpdateCommunication::make([
+                        'id' => $existing->getKey(),
+                        'mail_folder_id' => $this->folder->getKey(),
+                        'message_uid' => (string) $imapMessage->uid,
+                        'communication_type_enum' => 'mail',
+                        'is_seen' => $imapMessage->isSeen,
+                    ])
+                        ->validate()
+                        ->execute();
+                } catch (ValidationException $exception) {
+                    report(new RuntimeException(
+                        'Skipped updating IMAP message ' . $imapMessage->uid . ' in mail folder '
+                            . $this->folder->getKey() . ': ' . $exception->getMessage(),
+                        previous: $exception,
+                    ));
+                }
             }
         } finally {
             File::delete(array_column($imapMessage->attachments, 'media'));

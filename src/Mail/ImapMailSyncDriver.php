@@ -37,12 +37,9 @@ class ImapMailSyncDriver implements MailSyncDriver, ReportsSyncProgress
                 ->where('mail_folder_id', $folder->getKey())
                 ->update(['message_uid' => null]);
 
-            UpdateMailFolder::make([
-                'id' => $folder->getKey(),
-                'last_skipped_uid' => null,
-            ])
-                ->validate()
-                ->execute();
+            resolve_static(MailFolder::class, 'query')
+                ->whereKey($folder->getKey())
+                ->update(['last_skipped_uid' => null]);
         }
 
         if (! is_null($startUid)) {

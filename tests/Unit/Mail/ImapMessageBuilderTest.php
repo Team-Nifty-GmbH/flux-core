@@ -1,6 +1,7 @@
 <?php
 
 use Carbon\CarbonImmutable;
+use FluxErp\Actions\Communication\UpdateCommunication;
 use FluxErp\Mail\ImapMailSyncDriver;
 use FluxErp\Mail\ImapMessage;
 use FluxErp\Mail\ImapMessageBuilder;
@@ -78,6 +79,35 @@ test('updates an existing communication from an imap message with integer uid', 
         ->store();
 
     expect($communication->refresh()->message_uid)->toBe('42');
+});
+
+test('reports an existing message that fails validation and still stores the following ones', function (): void {
+    Exceptions::fake();
+    $mailAccount = MailAccount::factory()
+        ->has(MailFolder::factory())
+        ->create();
+    $folder = $mailAccount->mailFolders->first();
+
+    $communication = Communication::factory()->create([
+        'mail_account_id' => $mailAccount->getKey(),
+        'mail_folder_id' => $folder->getKey(),
+        'message_id' => '<rejected-update@example.com>',
+        'message_uid' => '41',
+        'communication_type_enum' => 'mail',
+    ]);
+
+    UpdateCommunication::validating(fn () => throw ValidationException::withMessages(['id' => 'rejected']));
+
+    makeTestableBuilder($folder)
+        ->pushMessage(makeImapMessage(uid: 42, messageId: '<rejected-update@example.com>'))
+        ->pushMessage(makeImapMessage(uid: 43, messageId: '<after-rejected-update@example.com>'))
+        ->store();
+
+    expect($communication->refresh()->message_uid)->toBe('41')
+        ->and(Communication::query()->where('message_id', '<after-rejected-update@example.com>')->exists())->toBeTrue();
+    Exceptions::assertReported(
+        fn (RuntimeException $exception): bool => $exception->getPrevious() instanceof ValidationException
+    );
 });
 
 test('reports progress for each stored message', function (): void {
