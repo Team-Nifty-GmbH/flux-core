@@ -2,6 +2,8 @@
 
 use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Livewire\Product\LotList;
+use FluxErp\Models\Country;
+use FluxErp\Models\Currency;
 use FluxErp\Models\Lot;
 use FluxErp\Models\Product;
 use Illuminate\Support\Str;
@@ -80,6 +82,23 @@ test('can update lot', function (): void {
         ->assertHasNoErrors();
 
     expect($lot->refresh()->supplier_lot_number)->toEqual('SUP-4711');
+});
+
+test('can set the country of origin of a lot', function (): void {
+    $lot = Lot::factory()->create(['product_id' => $this->product->getKey()]);
+    $country = Country::factory()->create([
+        'language_id' => $this->defaultLanguage->getKey(),
+        'currency_id' => Currency::factory(),
+    ]);
+
+    Livewire::test(LotList::class, ['product' => ($this->productForm)()])
+        ->call('edit', $lot->getKey())
+        ->set('lot.country_id', $country->getKey())
+        ->call('save')
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    expect($lot->refresh()->country_id)->toBe($country->getKey());
 });
 
 test('can delete lot', function (): void {

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Rulesets\Lot;
 
+use FluxErp\Models\Country;
 use FluxErp\Models\Lot;
 use FluxErp\Models\Product;
 use FluxErp\Rules\ModelExists;
@@ -19,11 +20,16 @@ class UpdateLotRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Lot::class]),
             ],
+            'country_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Country::class, 'subject' => Lot::class]),
+            ],
             'product_id' => [
                 'sometimes',
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Product::class]),
+                app(ModelExists::class, ['model' => Product::class, 'subject' => Lot::class]),
             ],
             'lot_number' => 'sometimes|required|string|max:255',
             'supplier_lot_number' => 'nullable|string|max:255',

@@ -42,6 +42,11 @@ class Country extends FluxModel
         return $this->belongsTo(Language::class);
     }
 
+    public function lots(): HasMany
+    {
+        return $this->hasMany(Lot::class);
+    }
+
     public function regions(): HasMany
     {
         return $this->hasMany(CountryRegion::class);

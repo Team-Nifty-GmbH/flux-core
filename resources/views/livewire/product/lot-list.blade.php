@@ -9,6 +9,19 @@
             wire:model="lot.supplier_lot_number"
             :label="__('Supplier Lot Number')"
         />
+        <x-select.styled
+            wire:model="lot.country_id"
+            :label="__('Country of Origin')"
+            select="label:name|value:id"
+            unfiltered
+            :request="[
+                'url' => route('search', \FluxErp\Models\Country::class),
+                'method' => 'POST',
+                'params' => [
+                    'searchFields' => ['name', 'iso_alpha2', 'iso_alpha3'],
+                ],
+            ]"
+        />
         <x-date wire:model="lot.produced_at" :label="__('Produced At')" />
         <x-date wire:model="lot.expires_at" :label="__('Expires At')" />
         <x-input
