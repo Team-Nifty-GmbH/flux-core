@@ -25,8 +25,8 @@ class NewActionPermissionsNotification extends Notification implements ShouldQue
             ->notifiable($notifiable)
             ->title(__(':count new action permissions', ['count' => count($this->permissions)]))
             ->description(
-                __('No role holds these yet, grant them to the roles that need them:')
-                . ' ' . implode(', ', $this->permissions)
+                __('No role holds these permissions yet, grant them to the roles that need them:')
+                . '<br>' . implode('<br>', $this->permissions)
             )
             ->accept(
                 NotificationAction::make()

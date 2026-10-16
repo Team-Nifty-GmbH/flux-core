@@ -28,13 +28,13 @@ class InitPermissions extends Command
 
     protected $signature = 'init:permissions';
 
-    private array $currentPermissions = [];
+    protected array $currentPermissions = [];
 
-    private array $knownPermissions = [];
+    protected array $knownPermissions = [];
 
-    private array $newActionPermissions = [];
+    protected array $newActionPermissions = [];
 
-    private array $preexistingPermissions = [];
+    protected array $preexistingPermissions = [];
 
     public function handle(): void
     {
@@ -89,7 +89,7 @@ class InitPermissions extends Command
                 $id = $this->keepPermission('action.' . $action['name'], $guardName);
 
                 if ($guardName !== 'token' && ! array_key_exists($id, $this->preexistingPermissions)) {
-                    $this->newActionPermissions['action.' . $action['name']] = true;
+                    $this->newActionPermissions[] = 'action.' . $action['name'];
                 }
             }
         }
@@ -101,7 +101,7 @@ class InitPermissions extends Command
             return;
         }
 
-        $permissions = array_keys($this->newActionPermissions);
+        $permissions = array_unique($this->newActionPermissions);
         sort($permissions);
 
         $this->warn('New action permissions, no role holds them yet:');

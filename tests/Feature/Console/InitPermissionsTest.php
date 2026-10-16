@@ -66,10 +66,10 @@ test('lists newly created action permissions and notifies super admins once', fu
     Notification::assertSentTo(
         $this->user,
         NewActionPermissionsNotification::class,
-        fn (NewActionPermissionsNotification $notification): bool => str_contains(
+        fn (NewActionPermissionsNotification $notification): bool => substr_count(
             $notification->toArray($this->user)['description'],
             'action.order.create'
-        )
+        ) === 1
     );
 });
 
