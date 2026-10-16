@@ -83,3 +83,38 @@ test('a bound action class decides who may subscribe to the action channel', fun
     expect($channel)->toBe($this->channel)
         ->and(authorizeActionChannel($this, $channel))->toBe([['name' => $channel]]);
 });
+
+test('the channel of an action whose permission does not exist is denied', function (): void {
+    $this->permission->delete();
+
+    expect(authorizeActionChannel($this, $this->channel))
+        ->toBe([['name' => $this->channel, 'denied' => true]]);
+});
+
+test('a user bearer token may subscribe to an action channel only with the action permission', function (): void {
+    Auth::forgetGuards();
+    $plainTextToken = $this->user->createToken('mobile', ['user'])->plainTextToken;
+
+    $this->withToken($plainTextToken)
+        ->postJson('/api/broadcasting/auth', ['channel_names' => [$this->channel]])
+        ->assertOk()
+        ->assertJsonPath('channel_names.0.denied', true);
+
+    $this->user->givePermissionTo($this->permission);
+    Auth::forgetGuards();
+
+    $this->withToken($plainTextToken)
+        ->postJson('/api/broadcasting/auth', ['channel_names' => [$this->channel]])
+        ->assertOk()
+        ->assertJsonMissingPath('channel_names.0.denied');
+});
+
+test('a user bearer token may not subscribe to the channel of an action whose permission does not exist', function (): void {
+    $this->permission->delete();
+    Auth::forgetGuards();
+
+    $this->withToken($this->user->createToken('mobile', ['user'])->plainTextToken)
+        ->postJson('/api/broadcasting/auth', ['channel_names' => [$this->channel]])
+        ->assertOk()
+        ->assertJsonPath('channel_names.0.denied', true);
+});
