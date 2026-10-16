@@ -149,6 +149,7 @@ class UpdateProductRuleset extends FluxRuleset
                 'required_if:bundle_type_enum,null',
                 'boolean',
             ],
+            'is_configurable' => 'boolean',
             'is_service' => 'boolean',
             'is_shipping_free' => 'boolean',
             'is_shipping_item' => 'boolean',

@@ -58,6 +58,12 @@ class DeleteOrderPosition extends FluxAction
             ];
         }
 
+        if (resolve_static(OrderPosition::class, 'hasConfiguredParent', ['parentId' => $orderPosition->parent_id])) {
+            $errors += [
+                'parent_id' => [__('Configuration positions can only be changed through the configuration.')],
+            ];
+        }
+
         if ($orderPosition->descendants()->exists()) {
             $errors += [
                 'has_descendants' => ['You cannot delete an order position that has descendants.'],

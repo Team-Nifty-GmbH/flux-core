@@ -100,6 +100,7 @@ use FluxErp\Livewire\Settings\Plugins;
 use FluxErp\Livewire\Settings\PriceLists;
 use FluxErp\Livewire\Settings\Printers;
 use FluxErp\Livewire\Settings\PrintJobs;
+use FluxErp\Livewire\Settings\ProductConfigurationGroups;
 use FluxErp\Livewire\Settings\ProductOptionGroups;
 use FluxErp\Livewire\Settings\ProductPropertyGroups;
 use FluxErp\Livewire\Settings\Profile;
@@ -357,6 +358,8 @@ Route::middleware('web')
                         Route::get('/price-lists', PriceLists::class)->name('price-lists');
                         Route::get('/print-jobs', PrintJobs::class)->name('print-jobs');
                         Route::get('/printers', Printers::class)->name('printers');
+                        Route::get('/product-configuration-groups', ProductConfigurationGroups::class)
+                            ->name('product-configuration-groups');
                         Route::get('/product-option-groups', ProductOptionGroups::class)->name('product-option-groups');
                         Route::get('/product-properties', ProductPropertyGroups::class)->name('product-properties');
                         Route::get('/queue-monitor', QueueMonitor::class)->name('queue-monitor');

@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\OrderPosition;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\Product\CalculateProductConfigurationPrice;
 use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\ContactBankConnection;
@@ -14,6 +15,8 @@ use FluxErp\Models\Tenant;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\OrderPosition\CreateOrderPositionRuleset;
+use FluxErp\Support\ProductConfiguration\ConfigurationPositions;
+use FluxErp\Support\ProductConfiguration\ConfigurationValidator;
 use FluxErp\Traits\CalculatesPositionAvailability;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -38,6 +41,7 @@ class CreateOrderPosition extends FluxAction
     {
         $tags = Arr::pull($this->data, 'tags', []);
         $recalculateOrder = Arr::pull($this->data, 'recalculate_order', false);
+        $configuration = Arr::pull($this->data, 'configuration');
         $order = resolve_static(Order::class, 'query')
             ->with(['orderType:id,order_type_enum', 'priceList:id,is_net'])
             ->whereKey($this->getData('order_id'))
@@ -140,6 +144,12 @@ class CreateOrderPosition extends FluxAction
                         ->validate()
                         ->execute();
                 });
+        }
+
+        if (! is_null($configuration) && $product?->is_configurable) {
+            resolve_static(ConfigurationPositions::class, 'forOrderPosition', ['parent' => $orderPosition])
+                ->makeChildren($orderPosition, ConfigurationValidator::make($product)->selection($configuration))
+                ->each(fn (OrderPosition $child) => $child->save());
         }
 
         $orderPosition->attachTags($tags);
@@ -255,6 +265,47 @@ class CreateOrderPosition extends FluxAction
                         ];
                     }
                 }
+            }
+        }
+
+        $product = $this->getData('product_id')
+            ? resolve_static(Product::class, 'query')
+                ->whereKey($this->getData('product_id'))
+                ->first()
+            : null;
+
+        if ($this->getData('configuration') && ! $product?->is_configurable) {
+            $errors += [
+                'configuration' => [__('Only configurable products accept a configuration.')],
+            ];
+        }
+
+        if ($this->getData('configuration') && $this->getData('is_free_text')) {
+            $errors['configuration'] = [__('A free text position cannot carry a configuration.')];
+        }
+
+        if (! $this->getData('created_from_id')
+            && resolve_static(OrderPosition::class, 'hasConfiguredParent', ['parentId' => $this->getData('parent_id')])
+        ) {
+            $errors += [
+                'parent_id' => [__('Configuration positions can only be changed through the configuration.')],
+            ];
+        }
+
+        if (! $errors && $product?->is_configurable && ! $this->getData('is_free_text')) {
+            if (is_null($this->getData('configuration')) && ! $this->getData('created_from_id')) {
+                $this->data['configuration'] = $product->defaultConfiguration();
+            }
+
+            if (! is_null($this->getData('configuration'))) {
+                $this->data['configuration'] = CalculateProductConfigurationPrice::make([
+                    'product_id' => $product->getKey(),
+                    'configuration' => $this->getData('configuration'),
+                    'price_list_id' => $this->getData('price_list_id') ?? $order->price_list_id,
+                    'contact_id' => $order->contact_id,
+                ])
+                    ->validate()
+                    ->execute()['configuration'];
             }
         }
 

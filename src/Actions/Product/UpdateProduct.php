@@ -61,6 +61,11 @@ class UpdateProduct extends DispatchableFluxAction implements SupportsBulkExecut
             $product->bundleProducts()->detach();
         }
 
+        if ($product->isDirty('is_configurable') && ! $product->is_configurable) {
+            $product->productConfigurationGroups()->detach();
+            $product->productConfigurationDefaults()->delete();
+        }
+
         $product->save();
 
         // A variant editing its own relation entry must take ownership (is_inherited = false),
@@ -222,6 +227,38 @@ class UpdateProduct extends DispatchableFluxAction implements SupportsBulkExecut
                 ])
                     ->errorBag('updateProduct');
             }
+        }
+
+        $stored = resolve_static(Product::class, 'query')
+            ->whereKey($this->getData('id'))
+            ->withCount('children')
+            ->first(['id', 'parent_id', 'is_bundle', 'is_configurable', 'is_variant_parent']);
+        $parentId = array_key_exists('parent_id', $this->data) ? $this->data['parent_id'] : $stored->parent_id;
+
+        if (data_get($this->data, 'is_configurable', $stored->is_configurable)
+            && (
+                data_get($this->data, 'is_bundle', $stored->is_bundle)
+                || data_get($this->data, 'is_variant_parent', $stored->is_variant_parent)
+                || $stored->children_count > 0
+                || $parentId
+            )
+        ) {
+            throw ValidationException::withMessages([
+                'is_configurable' => [__('A configurable product cannot be a bundle or a variant.')],
+            ])
+                ->errorBag('updateProduct');
+        }
+
+        if ($parentId
+            && resolve_static(Product::class, 'query')
+                ->whereKey($parentId)
+                ->where('is_configurable', true)
+                ->exists()
+        ) {
+            throw ValidationException::withMessages([
+                'parent_id' => [__('A configurable product cannot be a bundle or a variant.')],
+            ])
+                ->errorBag('updateProduct');
         }
     }
 }

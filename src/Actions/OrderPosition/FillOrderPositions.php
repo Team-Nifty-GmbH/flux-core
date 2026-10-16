@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\OrderPosition;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\Product\CalculateProductConfigurationPrice;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
@@ -10,6 +11,8 @@ use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\OrderPosition\CreateOrderPositionRuleset;
 use FluxErp\Rulesets\OrderPosition\FillOrderPositionsRuleset;
 use FluxErp\Rulesets\OrderPosition\UpdateOrderPositionRuleset;
+use FluxErp\Support\ProductConfiguration\ConfigurationPositions;
+use FluxErp\Support\ProductConfiguration\ConfigurationValidator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Validator;
@@ -134,6 +137,7 @@ class FillOrderPositions extends FluxAction
     private function fillOrderPosition(array $data, bool $simulate, ?int $parentId = null): array
     {
         $originalChildren = Arr::pull($data, 'children', []);
+        $configuration = Arr::pull($data, 'configuration');
 
         if (is_int($data['id'] ?? false)) {
             $orderPosition = resolve_static(OrderPosition::class, 'query')
@@ -228,6 +232,27 @@ class FillOrderPositions extends FluxAction
                 }
 
                 $children->push($position->withoutRelations());
+            }
+        }
+
+        if (! is_null($configuration) && $orderPosition->product?->is_configurable) {
+            $configurationChildren = resolve_static(
+                ConfigurationPositions::class,
+                'forOrderPosition',
+                ['parent' => $orderPosition]
+            )
+                ->makeChildren(
+                    $orderPosition,
+                    ConfigurationValidator::make($orderPosition->product)->selection($configuration)
+                );
+
+            foreach ($configurationChildren as $child) {
+                if (! $simulate) {
+                    $child->save();
+                    $ids[] = $child->getKey();
+                }
+
+                $children->push($child->withoutRelations());
             }
         }
 
@@ -468,6 +493,53 @@ class FillOrderPositions extends FluxAction
             } else {
                 $bundleChildren = true;
                 $validated['children'] = $children;
+            }
+        }
+
+        $configurableProduct = ($validated['product_id'] ?? false)
+            ? resolve_static(Product::class, 'query')
+                ->whereKey($validated['product_id'])
+                ->where('is_configurable', true)
+                ->first()
+            : null;
+
+        if ($orderPosition['configuration'] ?? false) {
+            if ($validated['is_free_text'] ?? false) {
+                $errors['configuration'] = [__('A free text position cannot carry a configuration.')];
+            } elseif (! $configurableProduct) {
+                $errors['configuration'] = [__('Only configurable products accept a configuration.')];
+            }
+        }
+
+        if ($configurableProduct && ! ($validated['is_free_text'] ?? false)) {
+            if ($children) {
+                $errors['children'] = [__('Configurable products take a configuration instead of children.')];
+            } elseif (! array_key_exists('configuration', $errors)) {
+                try {
+                    $order = resolve_static(Order::class, 'query')
+                        ->whereKey($this->data['order_id'])
+                        ->first();
+
+                    $validated['configuration'] = CalculateProductConfigurationPrice::make([
+                        'product_id' => $configurableProduct->getKey(),
+                        'configuration' => ConfigurationValidator::make($configurableProduct)->validate(
+                            $orderPosition['configuration']
+                                ?? (is_int($orderPosition['id'] ?? false)
+                                    ? resolve_static(OrderPosition::class, 'query')
+                                        ->whereKey($orderPosition['id'])
+                                        ->first()
+                                        ?->currentConfiguration()
+                                    : null)
+                                ?: $configurableProduct->defaultConfiguration()
+                        ),
+                        'price_list_id' => $validated['price_list_id'] ?? $order->price_list_id,
+                        'contact_id' => $order->contact_id,
+                    ])
+                        ->validate()
+                        ->execute()['configuration'];
+                } catch (ValidationException $e) {
+                    $errors['configuration'] = $e->errors()['configuration'];
+                }
             }
         }
 
