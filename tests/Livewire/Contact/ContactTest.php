@@ -23,6 +23,15 @@ test('can delete contact', function (): void {
         ->assertRedirectToRoute('contacts.contacts');
 });
 
+test('handles the deleted broadcast after deleting the contact', function (): void {
+    $channel = $this->contact->broadcastChannel(false);
+
+    Livewire::test(Contact::class, ['id' => $this->contact->id])
+        ->call('delete')
+        ->dispatch('echo-private:' . $channel . ',.ContactDeleted')
+        ->assertRedirectToRoute('contacts.contacts');
+});
+
 test('renders successfully', function (): void {
     Livewire::test(Contact::class, ['id' => $this->contact->id])
         ->assertOk();
