@@ -20,6 +20,7 @@ test('can delete contact', function (): void {
     Livewire::test(Contact::class, ['id' => $this->contact->id])
         ->call('delete')
         ->assertHasNoErrors()
+        ->assertSet('contact.id', $this->contact->id)
         ->assertRedirectToRoute('contacts.contacts');
 });
 
