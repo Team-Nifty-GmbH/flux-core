@@ -73,9 +73,6 @@ Broadcast::channel(
             return false;
         }
 
-        auth()->shouldUse('web');
-        auth()->setUser($user);
-
         return ! resolve_static($class, 'hasPermission')
             || $user->can('action.' . resolve_static($class, 'name'));
     },

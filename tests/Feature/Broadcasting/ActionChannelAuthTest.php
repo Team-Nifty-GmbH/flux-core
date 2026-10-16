@@ -91,7 +91,7 @@ test('the channel of an action whose permission does not exist is denied', funct
         ->toBe([['name' => $this->channel, 'denied' => true]]);
 });
 
-test('a user bearer token may subscribe to an action channel only with the action permission', function (): void {
+test('a user bearer token may subscribe to an action channel only with the sanctum action permission', function (): void {
     Auth::forgetGuards();
     $plainTextToken = $this->user->createToken('mobile', ['user'])->plainTextToken;
 
@@ -101,6 +101,14 @@ test('a user bearer token may subscribe to an action channel only with the actio
         ->assertJsonPath('channel_names.0.denied', true);
 
     $this->user->givePermissionTo($this->permission);
+    Auth::forgetGuards();
+
+    $this->withToken($plainTextToken)
+        ->postJson('/api/broadcasting/auth', ['channel_names' => [$this->channel]])
+        ->assertOk()
+        ->assertJsonPath('channel_names.0.denied', true);
+
+    $this->user->givePermissionTo(Permission::findOrCreate('action.' . CreateBroadcastFixture::name(), 'sanctum'));
     Auth::forgetGuards();
 
     $this->withToken($plainTextToken)
