@@ -36,22 +36,29 @@
             <div
                 x-data="{
                     addToast(event) {
-                        Alpine.$data(
-                            $refs.toasts.querySelector('[x-data]'),
-                        ).add(event);
+                        const list = $tallstackuiToast($refs.toasts.id);
+                        list.alpineComponent.add(event);
+
+                        if (list.element.parentElement !== $refs.toasts) {
+                            $refs.toasts.prepend(list.element);
+                        }
                     },
                     removeAll() {
-                        Alpine.$data(
-                            $refs.toasts.querySelector('[x-data]'),
-                        ).toasts = [];
+                        $tallstackuiToast(
+                            $refs.toasts.id,
+                        ).alpineComponent.toasts = [];
                     },
                 }"
                 class="flex h-full flex-col justify-between"
                 x-on:ts-ui:toast-list.window="addToast($event)"
-                x-on:ts-ui:toast.window="event.stopPropagation()"
+                x-on:ts-ui:toast.window="event.stopImmediatePropagation()"
                 x-on:notifications:clear.window="removeAll()"
             >
-                <div class="space-y-3 p-0" x-ref="toasts">
+                <div
+                    id="notifications-toast-list"
+                    class="space-y-3 p-0"
+                    x-ref="toasts"
+                >
                     <x-toast scope="relative" />
                     <div x-intersect="show && $wire.showNotifications()"></div>
                 </div>
