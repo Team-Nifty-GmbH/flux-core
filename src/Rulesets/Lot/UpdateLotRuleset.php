@@ -23,13 +23,13 @@ class UpdateLotRuleset extends FluxRuleset
             'country_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Country::class]),
+                app(ModelExists::class, ['model' => Country::class, 'subject' => Lot::class]),
             ],
             'product_id' => [
                 'sometimes',
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Product::class]),
+                app(ModelExists::class, ['model' => Product::class, 'subject' => Lot::class]),
             ],
             'lot_number' => 'sometimes|required|string|max:255',
             'supplier_lot_number' => 'nullable|string|max:255',
