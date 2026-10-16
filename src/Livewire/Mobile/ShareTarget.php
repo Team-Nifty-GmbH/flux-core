@@ -2,8 +2,8 @@
 
 namespace FluxErp\Livewire\Mobile;
 
-use FluxErp\Actions\ActionManager;
 use FluxErp\Contracts\HandlesSharedFiles;
+use FluxErp\Facades\Action;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
@@ -35,8 +35,7 @@ class ShareTarget extends Component
             $this->files
         );
 
-        return app(ActionManager::class)
-            ->all()
+        return Action::all()
             ->pluck('class')
             ->filter(fn (string $action): bool => is_a($action, HandlesSharedFiles::class, true)
                 && $action::canPerformAction(false))
