@@ -89,7 +89,7 @@ class InitPermissions extends Command
                 $id = $this->keepPermission('action.' . $action['name'], $guardName);
 
                 if ($guardName !== 'token' && ! array_key_exists($id, $this->preexistingPermissions)) {
-                    $this->newActionPermissions[] = 'action.' . $action['name'];
+                    $this->newActionPermissions['action.' . $action['name']] = true;
                 }
             }
         }
@@ -101,7 +101,7 @@ class InitPermissions extends Command
             return;
         }
 
-        $permissions = array_unique($this->newActionPermissions);
+        $permissions = array_keys($this->newActionPermissions);
         sort($permissions);
 
         $this->warn('New action permissions, no role holds them yet:');
