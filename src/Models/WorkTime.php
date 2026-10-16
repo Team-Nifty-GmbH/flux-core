@@ -14,7 +14,6 @@ use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\SoftDeletes;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -269,15 +268,10 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
 
     public function broadcastOn(string $event): array
     {
-        $channels = Arr::wrap(parent::broadcastOn($event));
-
-        if (! is_null($this->user_id)) {
-            $channels[] = new PrivateChannel(
-                morph_alias(User::class) . '.' . $this->user_id
-            );
-        }
-
-        return $channels;
+        return array_merge(
+            Arr::wrap(parent::broadcastOn($event)),
+            $this->recordBroadcastChannels(User::class, [$this->user_id])
+        );
     }
 
     public function model(): MorphTo

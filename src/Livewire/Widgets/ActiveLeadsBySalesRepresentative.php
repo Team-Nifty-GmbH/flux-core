@@ -7,6 +7,7 @@ use FluxErp\Enums\ChartColorEnum;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
+use FluxErp\Models\Lead;
 use FluxErp\Models\User;
 use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
@@ -147,5 +148,14 @@ class ActiveLeadsBySalesRepresentative extends BarChart implements HasWidgetOpti
             ->store();
 
         $this->redirectRoute('sales.leads', navigate: true);
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Lead::class) => [
+                Lead::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
     }
 }

@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Models\Pivots\TicketUser;
 use FluxErp\Models\Ticket;
 use FluxErp\States\Ticket\TicketState;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
@@ -20,14 +21,6 @@ class UnassignedTickets extends MyTickets
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
-    }
-
-    public function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Ticket::class, 'getBroadcastChannel') . ',.TicketUpdated' => '$refresh',
-            'echo-private:' . resolve_static(Ticket::class, 'getBroadcastChannel') . ',.TicketCreated' => '$refresh',
-        ];
     }
 
     protected function getTickets(): Collection
@@ -48,5 +41,17 @@ class UnassignedTickets extends MyTickets
                 'authenticatable_type',
                 'authenticatable_id',
             ]);
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Ticket::class) => [
+                Ticket::class => ['created', 'updated', 'deleted'],
+            ],
+            $this->modelChannel(TicketUser::class) => [
+                TicketUser::class => ['created', 'deleted'],
+            ],
+        ];
     }
 }

@@ -109,6 +109,13 @@ abstract class Chart extends Component
     }
 
     #[Renderless]
+    public function calculateByTimeFrame(): void
+    {
+        $this->calculateChart();
+        $this->updateData();
+    }
+
+    #[Renderless]
     public function getWidgetOptions(): array
     {
         return $this instanceof HasWidgetOptions ? $this->options() : [];

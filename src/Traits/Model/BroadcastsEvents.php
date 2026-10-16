@@ -6,6 +6,7 @@ use FluxErp\Events\BroadcastableModelEventOccurred;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\PendingBroadcast;
 use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents as BaseBroadcastsEvents;
 use function Illuminate\Support\defer;
@@ -15,7 +16,6 @@ trait BroadcastsEvents
     use BaseBroadcastsEvents {
         BaseBroadcastsEvents::broadcastWith as protected baseBroadcastWith;
         BaseBroadcastsEvents::bootBroadcastsEvents as protected baseBootBroadcastsEvents;
-        BaseBroadcastsEvents::broadcastIfBroadcastChannelsExistForEvent as protected baseBroadcastIfBroadcastChannelsExistForEvent;
     }
 
     protected static bool $broadcastOnlyKey = true;
@@ -49,6 +49,11 @@ trait BroadcastsEvents
     public static function getWithoutBroadcasting(): bool
     {
         return static::$withoutBroadcasting;
+    }
+
+    public static function recordBroadcastChannel(int|string $key): string
+    {
+        return static::getBroadcastChannel() . $key;
     }
 
     public function broadcastChannel(): string
@@ -96,12 +101,22 @@ trait BroadcastsEvents
         $event,
         $channels = null
     ): ?PendingBroadcast {
+        if (! static::$isBroadcasting) {
+            return null;
+        }
+
         if ($instance instanceof BroadcastableModelEventOccurred) {
             $instance->broadcastNow();
         }
 
+        $channels = Arr::wrap($channels ?? $this->broadcastOn($event));
+
         defer(
-            fn () => $this->baseBroadcastIfBroadcastChannelsExistForEvent($instance, $event, $channels),
+            function () use ($instance, $channels): void {
+                if ($channels) {
+                    broadcast($instance->onChannels($channels));
+                }
+            },
             always: true
         );
 
@@ -124,5 +139,15 @@ trait BroadcastsEvents
         }
 
         return $event;
+    }
+
+    protected function recordBroadcastChannels(string $model, array $keys): array
+    {
+        return array_map(
+            fn (int|string $key): PrivateChannel => new PrivateChannel(
+                resolve_static($model, 'recordBroadcastChannel', ['key' => $key])
+            ),
+            array_values(array_unique(array_filter($keys)))
+        );
     }
 }

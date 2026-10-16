@@ -134,4 +134,13 @@ class ExpectedRevenueByLeadState extends BarChart implements HasWidgetOptions
 
         $this->redirectRoute('sales.leads', navigate: true);
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Lead::class) => [
+                Lead::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

@@ -89,16 +89,17 @@ class RecentActivities extends ValueList
         $this->calculateList();
     }
 
-    protected function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Activity::class, 'getBroadcastChannel')
-                . ',.ActivityCreated' => 'calculateList',
-        ];
-    }
-
     protected function hasLoadMore(): bool
     {
         return true;
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Activity::class) => [
+                Activity::class => ['created'],
+            ],
+        ];
     }
 }

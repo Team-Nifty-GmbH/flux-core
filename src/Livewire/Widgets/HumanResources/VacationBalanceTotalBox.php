@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Widgets\HumanResources;
 
 use FluxErp\Livewire\HumanResources\Dashboard;
 use FluxErp\Livewire\Support\Widgets\ValueBox;
+use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\Employee;
 use Illuminate\Support\Number;
 
@@ -58,5 +59,17 @@ class VacationBalanceTotalBox extends ValueBox
     protected function icon(): string
     {
         return 'sun';
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Employee::class) => [
+                Employee::class => ['created', 'updated', 'deleted'],
+            ],
+            $this->modelChannel(AbsenceRequest::class) => [
+                AbsenceRequest::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
     }
 }

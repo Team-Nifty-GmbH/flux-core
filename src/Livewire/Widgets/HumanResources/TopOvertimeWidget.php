@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Widgets\HumanResources;
 
 use FluxErp\Livewire\HumanResources\Dashboard;
 use FluxErp\Models\Employee;
+use FluxErp\Models\EmployeeDay;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Number;
@@ -78,5 +79,17 @@ class TopOvertimeWidget extends Component
             ->values()
             ->map(fn (array $item, int $index) => array_merge($item, ['rank' => $index + 1]))
             ->toArray();
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Employee::class) => [
+                Employee::class => ['created', 'updated', 'deleted'],
+            ],
+            $this->modelChannel(EmployeeDay::class) => [
+                EmployeeDay::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
     }
 }

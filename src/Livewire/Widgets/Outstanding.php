@@ -115,14 +115,6 @@ class Outstanding extends ValueBox implements HasWidgetOptions
         $this->redirectRoute('accounting.payment-reminder-run', navigate: true);
     }
 
-    protected function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderLocked' => 'calculateSum',
-        ];
-    }
-
     protected function getOutstandingQuery(Builder $builder): Builder
     {
         return $builder
@@ -150,5 +142,19 @@ class Outstanding extends ValueBox implements HasWidgetOptions
     protected function icon(): string
     {
         return 'banknotes';
+    }
+
+    protected function isDateDependent(): bool
+    {
+        return true;
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Order::class) => [
+                Order::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
     }
 }

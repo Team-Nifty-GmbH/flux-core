@@ -80,4 +80,13 @@ class TotalUnassignedBillableHours extends ValueBox implements HasWidgetOptions
     {
         return 'clock';
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(WorkTime::class) => [
+                WorkTime::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

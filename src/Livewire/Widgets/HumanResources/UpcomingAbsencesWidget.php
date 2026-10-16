@@ -86,4 +86,18 @@ class UpcomingAbsencesWidget extends Component
             ])
             ->toArray();
     }
+
+    protected function isDateDependent(): bool
+    {
+        return true;
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(AbsenceRequest::class) => [
+                AbsenceRequest::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

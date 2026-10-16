@@ -81,4 +81,13 @@ class ProjectMargin extends ValueBox implements HasWidgetOptions
     {
         return 'banknotes';
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Order::class) => [
+                Order::class => ['updated', 'deleted'],
+            ],
+        ];
+    }
 }

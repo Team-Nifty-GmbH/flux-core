@@ -4,6 +4,8 @@ namespace FluxErp\Livewire\Widgets\Contact;
 
 use FluxErp\Livewire\Contact\Statistics;
 use FluxErp\Livewire\Widgets\Outstanding;
+use FluxErp\Models\Contact;
+use FluxErp\Models\Order;
 use Illuminate\Database\Eloquent\Builder;
 
 class OpenItems extends Outstanding
@@ -25,5 +27,14 @@ class OpenItems extends Outstanding
     {
         return parent::getOverdueQuery($query)
             ->where('contact_id', $this->contactId);
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Contact::class, $this->contactId) => [
+                Order::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
     }
 }

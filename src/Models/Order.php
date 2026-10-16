@@ -703,6 +703,21 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     }
 
     // Public methods
+    public function broadcastOn(string $event): array
+    {
+        return array_merge(
+            Arr::wrap(parent::broadcastOn($event)),
+            $this->recordBroadcastChannels(Contact::class, [
+                $this->contact_id,
+                data_get($this->getPrevious(), 'contact_id'),
+            ]),
+            $this->recordBroadcastChannels(User::class, [
+                $this->approval_user_id,
+                data_get($this->getPrevious(), 'approval_user_id'),
+            ])
+        );
+    }
+
     public function calculateBalance(): static
     {
         // Subscription contracts are never invoiced themselves; their balance tracks

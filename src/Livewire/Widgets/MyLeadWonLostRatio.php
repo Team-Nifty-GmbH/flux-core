@@ -3,6 +3,8 @@
 namespace FluxErp\Livewire\Widgets;
 
 use Closure;
+use FluxErp\Models\Lead;
+use FluxErp\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
 class MyLeadWonLostRatio extends OverallLeadWonLostRatio
@@ -30,5 +32,14 @@ class MyLeadWonLostRatio extends OverallLeadWonLostRatio
                 ->where('user_id', $userId)
                 ->whereBetween('closed_at', [$start, $end]);
         };
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(User::class, auth()->id()) => [
+                Lead::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
     }
 }

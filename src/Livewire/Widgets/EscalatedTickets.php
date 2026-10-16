@@ -51,14 +51,6 @@ class EscalatedTickets extends Component
         );
     }
 
-    public function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Ticket::class, 'getBroadcastChannel') . ',.TicketUpdated' => '$refresh',
-            'echo-private:' . resolve_static(Ticket::class, 'getBroadcastChannel') . ',.TicketCreated' => '$refresh',
-        ];
-    }
-
     public function loadMore(): void
     {
         $this->limit += 25;
@@ -85,5 +77,14 @@ class EscalatedTickets extends Component
                 'authenticatable_type',
                 'authenticatable_id',
             ]);
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Ticket::class) => [
+                Ticket::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
     }
 }

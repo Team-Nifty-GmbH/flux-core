@@ -129,19 +129,20 @@ class TotalRevenue extends LineChart implements HasWidgetOptions
         $this->redirectRoute('orders.orders', navigate: true);
     }
 
-    protected function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderLocked' => 'calculateByTimeFrame',
-        ];
-    }
-
     protected function getRevenueQuery(Builder $query): Builder
     {
         return $query
             ->whereNotNull('invoice_date')
             ->whereNotNull('invoice_number')
             ->revenue();
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Order::class) => [
+                Order::class => ['locked'],
+            ],
+        ];
     }
 }

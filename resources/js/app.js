@@ -15,6 +15,7 @@ import nuxbeAppBridge, {
 import './components/alpine.js';
 import './components/apex-charts.js';
 import './components/data-table-floating-head.js';
+import './components/widget-live-updates.js';
 
 window.nuxbeAppBridge = nuxbeAppBridge;
 window.nuxbeShareTarget = { loadSharedFiles, clearSharedFiles };

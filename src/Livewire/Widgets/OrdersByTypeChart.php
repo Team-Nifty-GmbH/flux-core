@@ -166,15 +166,12 @@ class OrdersByTypeChart extends LineChart implements HasWidgetOptions
         }
     }
 
-    protected function getListeners(): array
+    protected function liveUpdates(): array
     {
         return [
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderCreated' => 'calculateByTimeFrame',
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderUpdated' => 'calculateByTimeFrame',
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderDeleted' => 'calculateByTimeFrame',
+            $this->modelChannel(Order::class) => [
+                Order::class => ['created', 'updated', 'deleted'],
+            ],
         ];
     }
 }

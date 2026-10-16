@@ -6,6 +6,7 @@ use FluxErp\Contracts\HasApiResponse;
 use FluxErp\Livewire\Employee\Dashboard;
 use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\Employee;
+use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
 use FluxErp\Models\WorkTimeModel;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Traits\Livewire\Widget\RespondsToApiRequests;
@@ -85,5 +86,17 @@ class CurrentWorkTimeModel extends ValueBox implements HasApiResponse
     protected function icon(): string
     {
         return 'wrench';
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(EmployeeWorkTimeModel::class) => [
+                EmployeeWorkTimeModel::class => ['created', 'updated', 'deleted'],
+            ],
+            $this->modelChannel(WorkTimeModel::class) => [
+                WorkTimeModel::class => ['updated'],
+            ],
+        ];
     }
 }

@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Widgets\HumanResources;
 use FluxErp\Enums\ChartColorEnum;
 use FluxErp\Livewire\HumanResources\Dashboard;
 use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
+use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDepartment;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 
@@ -69,6 +70,18 @@ class DepartmentHeadcountChart extends BarChart
                 'name' => __('Employees'),
                 'data' => $departments->pluck('employees_count')->toArray(),
                 'color' => ChartColorEnum::Blue,
+            ],
+        ];
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Employee::class) => [
+                Employee::class => ['created', 'updated', 'deleted'],
+            ],
+            $this->modelChannel(EmployeeDepartment::class) => [
+                EmployeeDepartment::class => ['updated', 'deleted'],
             ],
         ];
     }

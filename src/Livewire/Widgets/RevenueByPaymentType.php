@@ -150,4 +150,13 @@ class RevenueByPaymentType extends BarChart implements HasWidgetOptions
 
         $this->redirectRoute('orders.orders', navigate: true);
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Order::class) => [
+                Order::class => ['locked'],
+            ],
+        ];
+    }
 }
