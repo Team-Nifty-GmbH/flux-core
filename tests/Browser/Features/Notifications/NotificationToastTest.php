@@ -136,3 +136,42 @@ test('a regular toast is shown once and not copied into the notification list', 
 
     $page->assertNoJavascriptErrors();
 });
+
+test('a visible toast keeps its progress when navigating', function (): void {
+    $page = visit(route('dashboard'))->assertNoSmoke();
+
+    $page->script(<<<'JS'
+        () => new Promise((resolve) => {
+            const wait = () => document.querySelectorAll('[x-data^="tallstackui_toastBase"]').length === 2
+                ? resolve()
+                : setTimeout(wait, 200);
+            wait();
+        })
+    JS);
+
+    $page->script("() => window.\$tsui.interaction('toast').success('Kept while navigating').timeout(30).send()");
+
+    $page->wait(2);
+
+    $page->script(<<<'JS'
+        () => {
+            document.addEventListener('livewire:navigated', () => window.navigatedForTest = true, { once: true });
+            Livewire.navigate('/contacts/contacts');
+        }
+    JS);
+
+    waitForCondition($page, '() => window.navigatedForTest === true', 10000);
+
+    $progress = $page->script(<<<'JS'
+        () => [...document.querySelectorAll('[x-data^="tallstackui_toastLoop"]')]
+            .find((toast) => toast.innerText.includes('Kept while navigating'))
+            ?.querySelector('[x-ref="progress"]')
+            ?.getAnimations()[0]
+            ?.currentTime ?? null
+    JS);
+
+    expect($progress)->toBeGreaterThan(1500)
+        ->and(visibleToastsContaining($page, 'Kept while navigating'))->toBe(1);
+
+    $page->assertNoJavascriptErrors();
+});

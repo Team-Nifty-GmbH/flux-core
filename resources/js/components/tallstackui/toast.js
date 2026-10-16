@@ -56,6 +56,26 @@ class TallstackToast {
     }
 }
 
+document.addEventListener('alpine:navigating', (event) => {
+    const progress = [
+        ...document.querySelectorAll(
+            '[x-data^="tallstackui_toastLoop"] [x-ref="progress"]',
+        ),
+    ].map((element) => [element, element.getAnimations()[0]?.currentTime]);
+
+    event.detail.onSwap(() =>
+        progress.forEach(([element, currentTime]) => {
+            if (currentTime === null || currentTime === undefined) {
+                return;
+            }
+
+            element
+                .getAnimations()
+                .forEach((animation) => (animation.currentTime = currentTime));
+        }),
+    );
+});
+
 export default function (id) {
     return new TallstackToast(id);
 }
