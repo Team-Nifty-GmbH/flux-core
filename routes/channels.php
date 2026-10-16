@@ -1,6 +1,6 @@
 <?php
 
-use FluxErp\Actions\ActionManager;
+use FluxErp\Facades\Action;
 use FluxErp\Http\Controllers\BroadcastingBatchAuthController;
 use FluxErp\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -91,7 +91,7 @@ Broadcast::channel(
     'action.{action}',
     function (Authenticatable $user, string $action): bool {
         $class = data_get(
-            app(ActionManager::class)->get(str_replace('-', '.', $action)),
+            Action::get(str_replace('-', '.', $action)),
             'class'
         );
 
