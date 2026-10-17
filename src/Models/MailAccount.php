@@ -14,6 +14,7 @@ use FluxErp\Traits\Model\LogsActivity;
 use Illuminate\Contracts\Mail\Mailer;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
 use Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream;
@@ -38,6 +39,8 @@ class MailAccount extends FluxModel
         'password',
         'smtp_password',
     ];
+
+    protected ?Collection $imapFolders = null;
 
     private ?Client $imapClient = null;
 
@@ -133,6 +136,7 @@ class MailAccount extends FluxModel
     {
         $client = $this->imapClient;
         $this->imapClient = null;
+        $this->imapFolders = null;
 
         try {
             $client?->disconnect();
@@ -147,6 +151,21 @@ class MailAccount extends FluxModel
         }
 
         return $this->imapClient;
+    }
+
+    public function getImapFolder(string $path): ?Folder
+    {
+        if (is_null($this->imapFolders)) {
+            $client = $this->getImapClient();
+
+            if (! $client) {
+                return null;
+            }
+
+            $this->imapFolders = $client->getFolders(false)->keyBy('path');
+        }
+
+        return $this->imapFolders->get($path);
     }
 
     /**

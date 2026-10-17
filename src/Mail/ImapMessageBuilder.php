@@ -36,6 +36,8 @@ class ImapMessageBuilder
 
     protected int $progressProcessed = 0;
 
+    protected int $pageSize = 100;
+
     /** @var Collection<int, ImapMessage> */
     protected Collection $messages;
 
@@ -295,15 +297,7 @@ class ImapMessageBuilder
 
     protected function resolveImapFolder(): ?Folder
     {
-        $client = $this->folder
-            ->mailAccount
-            ->getImapClient();
-
-        if (! $client) {
-            return null;
-        }
-
-        return $client->getFolderByPath($this->folder->slug, utf7: true);
+        return $this->folder->mailAccount->getImapFolder($this->folder->slug);
     }
 
     /**
@@ -345,31 +339,39 @@ class ImapMessageBuilder
 
     protected function fetchNewMessages(Folder $imapFolder, ?Closure $onMessage = null): void
     {
-        try {
-            $messages = $imapFolder->messages()
-                ->setFetchBody(false)
-                ->leaveUnread()
-                ->getByUidGreater($this->sinceUid);
-        } catch (ResponseException) {
-            return;
-        }
+        $lastUid = $this->sinceUid;
+        $total = null;
 
-        $total = $messages->count();
-
-        while ($message = $messages->shift()) {
-            $imapMessage = $this->makeMessage($message);
-
-            if (! $imapMessage) {
-                continue;
+        do {
+            try {
+                $messages = $imapFolder->messages()
+                    ->setFetchBody(false)
+                    ->leaveUnread()
+                    ->limit($this->pageSize)
+                    ->getByUidGreater($lastUid);
+            } catch (ResponseException) {
+                return;
             }
 
-            if ($onMessage) {
-                $onMessage($imapMessage);
-                $this->progressCallback?->__invoke(++$this->progressProcessed, $total);
-            } else {
-                $this->messages->push($imapMessage);
+            $count = $messages->count();
+            $total ??= $messages->total() ?: $count;
+
+            while ($message = $messages->shift()) {
+                $lastUid = max($lastUid, $message->getUid());
+                $imapMessage = $this->makeMessage($message);
+
+                if (! $imapMessage) {
+                    continue;
+                }
+
+                if ($onMessage) {
+                    $onMessage($imapMessage);
+                    $this->progressCallback?->__invoke(++$this->progressProcessed, $total);
+                } else {
+                    $this->messages->push($imapMessage);
+                }
             }
-        }
+        } while ($count === $this->pageSize);
     }
 
     protected function fetchFilteredMessages(Folder $imapFolder, ?Closure $onMessage = null): void
@@ -414,6 +416,14 @@ class ImapMessageBuilder
     protected function makeMessage(Message $message): ?ImapMessage
     {
         try {
+            $maxSize = (int) config('flux.mail.max_message_size');
+
+            if ($this->fetchBody && $maxSize > 0 && $message->getSize() > $maxSize) {
+                $this->skip($message->getUid(), $message->getSize() . ' bytes exceed the limit of ' . $maxSize);
+
+                return null;
+            }
+
             return ImapMessage::fromImapMessage($message, $this->fetchBody);
         } catch (Throwable $exception) {
             if ($this->isLostConnection($exception)) {
@@ -423,7 +433,26 @@ class ImapMessageBuilder
             report($exception);
 
             return null;
+        } finally {
+            if (function_exists('imap_errors')) {
+                imap_errors();
+            }
         }
+    }
+
+    protected function skip(int $uid, string $reason, ?Throwable $previous = null): void
+    {
+        report(new RuntimeException(
+            'Skipped IMAP message ' . $uid . ' in mail folder ' . $this->folder->getKey() . ': ' . $reason,
+            previous: $previous,
+        ));
+
+        UpdateMailFolder::make([
+            'id' => $this->folder->getKey(),
+            'last_skipped_uid' => $uid,
+        ])
+            ->validate()
+            ->execute();
     }
 
     protected function storeMessage(ImapMessage $imapMessage): void
@@ -438,18 +467,7 @@ class ImapMessageBuilder
                 try {
                     $this->createMessage($imapMessage);
                 } catch (ValidationException $exception) {
-                    report(new RuntimeException(
-                        'Skipped IMAP message ' . $imapMessage->uid . ' in mail folder '
-                            . $this->folder->getKey() . ': ' . $exception->getMessage(),
-                        previous: $exception,
-                    ));
-
-                    UpdateMailFolder::make([
-                        'id' => $this->folder->getKey(),
-                        'last_skipped_uid' => $imapMessage->uid,
-                    ])
-                        ->validate()
-                        ->execute();
+                    $this->skip($imapMessage->uid, $exception->getMessage(), $exception);
                 }
             } else {
                 try {

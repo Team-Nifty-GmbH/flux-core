@@ -12,6 +12,7 @@ use FluxErp\Models\Tenant;
 use FluxErp\Models\Ticket;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -273,6 +274,34 @@ test('skips a blocked attachment and keeps the others', function (): void {
     ])->validate()->execute();
 
     expect($message->getMedia('attachments')->pluck('file_name')->all())->toBe(['invoice.txt']);
+});
+
+test('skips an attachment with a disallowed extension and keeps the others', function (): void {
+    Log::spy();
+    $files = collect(['December_Itinerary.shtml', 'imglib.php', 'invoice.txt'])
+        ->mapWithKeys(function (string $name): array {
+            $path = tempnam(sys_get_temp_dir(), 'imap_');
+            file_put_contents($path, $name . ' content');
+
+            return [$name => $path];
+        });
+
+    $message = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'from' => 'Tester McTestFace <' . $this->address->email_primary . '>',
+        'to' => [$this->mailAccount->email],
+        'subject' => Str::uuid()->toString(),
+        'communication_type_enum' => 'mail',
+        'date' => now()->format('Y-m-d H:i:s'),
+        'attachments' => $files
+            ->map(fn (string $path, string $name): array => ['file_name' => $name, 'name' => $name, 'media' => $path])
+            ->values()
+            ->all(),
+    ])->validate()->execute();
+
+    expect($message->getMedia('attachments')->pluck('file_name')->all())->toBe(['invoice.txt']);
+    Log::shouldHaveReceived('warning')->twice();
 });
 
 test('skips a blocked attachment given as content', function (): void {
