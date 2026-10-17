@@ -10,6 +10,7 @@ use Webklex\PHPIMAP\Client;
 use Webklex\PHPIMAP\Folder;
 use Webklex\PHPIMAP\Message;
 use Webklex\PHPIMAP\Query\WhereQuery;
+use Webklex\PHPIMAP\Support\FolderCollection;
 use Webklex\PHPIMAP\Support\MessageCollection;
 
 function fakeImapMailbox(MailAccount $mailAccount, int $uidValidity, int $firstUid, ?Closure $since = null): void
@@ -28,9 +29,10 @@ function fakeImapMailbox(MailAccount $mailAccount, int $uidValidity, int $firstU
     $imapFolder = Mockery::mock(Folder::class);
     $imapFolder->shouldReceive('examine')->andReturn(['uidvalidity' => $uidValidity, 'uidnext' => $firstUid + 1]);
     $imapFolder->shouldReceive('messages')->andReturn($query);
+    $imapFolder->path = $mailAccount->mailFolders()->value('slug');
 
     $client = Mockery::mock(Client::class);
-    $client->shouldReceive('getFolderByPath')->andReturn($imapFolder);
+    $client->shouldReceive('getFolders')->andReturn(new FolderCollection([$imapFolder]));
 
     (new ReflectionProperty(MailAccount::class, 'imapClient'))->setValue($mailAccount, $client);
 }

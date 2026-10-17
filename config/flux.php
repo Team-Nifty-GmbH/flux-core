@@ -29,6 +29,10 @@ return [
         'chunk_rules' => null,
     ],
 
+    'mail' => [
+        'max_message_size' => (int) env('FLUX_MAIL_MAX_MESSAGE_SIZE', 25 * 1024 * 1024),
+    ],
+
     'vite' => [
         'reverb_app_key' => env('VITE_REVERB_APP_KEY', env('REVERB_APP_KEY')),
         'reverb_host' => env(

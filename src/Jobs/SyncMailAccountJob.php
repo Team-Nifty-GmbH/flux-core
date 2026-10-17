@@ -6,6 +6,7 @@ use Cron\CronExpression;
 use FluxErp\Console\Scheduling\Repeatable;
 use FluxErp\Contracts\ReportsSyncProgress;
 use FluxErp\Contracts\ShouldBeMonitored;
+use FluxErp\Exceptions\MailSyncTimeBudgetExhausted;
 use FluxErp\Mail\MailDriverManager;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
@@ -90,21 +91,32 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
                 ->each(fn (MailFolder $folder) => $folder->setRelation('mailAccount', $this->mailAccount));
             $total = $folders->count();
             $failure = null;
+            $deadline = now()->addSeconds($this->uniqueFor() - 600);
 
             try {
-                $folders->each(function (MailFolder $folder, int $index) use ($driver, $total, &$failure): void {
+                $folders->each(function (MailFolder $folder, int $index) use ($driver, $total, $deadline, &$failure): bool {
+                    if (now()->greaterThanOrEqualTo($deadline)) {
+                        return false;
+                    }
+
                     if ($driver instanceof ReportsSyncProgress) {
                         $driver->withProgressCallback(
-                            fn (int $processed, int $totalMessages) => $this->queueUpdate([
-                                'progress' => ($index + ($totalMessages > 0 ? min($processed / $totalMessages, 1) : 1))
-                                    / $total
-                                    * 100,
-                                'message' => __(':processed of :total mails (:folder)', [
-                                    'processed' => $processed,
-                                    'total' => $totalMessages,
-                                    'folder' => $folder->name,
-                                ]),
-                            ])
+                            function (int $processed, int $totalMessages) use ($index, $total, $folder, $deadline): void {
+                                $this->queueUpdate([
+                                    'progress' => ($index + ($totalMessages > 0 ? min($processed / $totalMessages, 1) : 1))
+                                        / $total
+                                        * 100,
+                                    'message' => __(':processed of :total mails (:folder)', [
+                                        'processed' => $processed,
+                                        'total' => $totalMessages,
+                                        'folder' => $folder->name,
+                                    ]),
+                                ]);
+
+                                if (now()->greaterThanOrEqualTo($deadline)) {
+                                    throw new MailSyncTimeBudgetExhausted();
+                                }
+                            }
                         );
                     }
 
@@ -112,6 +124,8 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
                     // The first failure fails the job once all folders had their turn.
                     try {
                         $driver->syncMessages($folder);
+                    } catch (MailSyncTimeBudgetExhausted) {
+                        return false;
                     } catch (Throwable $e) {
                         if (is_null($failure)) {
                             $failure = $e;
@@ -121,6 +135,8 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
                     }
 
                     $this->queueProgressChunk($total, 1);
+
+                    return true;
                 });
 
                 if (! is_null($failure)) {
