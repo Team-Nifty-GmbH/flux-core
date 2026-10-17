@@ -9,9 +9,13 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('communications', function (Blueprint $table): void {
-            $table->dropIndex(['message_id']);
-        });
+        foreach (Schema::getIndexes('communications') as $index) {
+            if ($index['columns'] === ['message_id']) {
+                Schema::table('communications', function (Blueprint $table) use ($index): void {
+                    $table->dropIndex($index['name']);
+                });
+            }
+        }
 
         Schema::table('communications', function (Blueprint $table): void {
             $table->string('message_id', 998)->nullable()->change();
