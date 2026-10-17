@@ -33,7 +33,7 @@ class Contact extends Component
     public ContactForm $contact;
 
     #[Locked]
-    public int $contactId;
+    public ?int $contactId = null;
 
     public bool $edit = false;
 
@@ -87,7 +87,7 @@ class Contact extends Component
     public function delete(): void
     {
         try {
-            DeleteContact::make(['id' => $this->contactId])
+            DeleteContact::make(['id' => $this->contactId ?? $this->contact->id])
                 ->checkPermission()
                 ->validate()
                 ->execute();
@@ -104,7 +104,12 @@ class Contact extends Component
     public function getListeners(): array
     {
         $model = app(ContactModel::class);
-        $model->id = $this->contactId;
+        $model->id = $this->contactId ?? $this->contact->id;
+
+        if (is_null($model->id)) {
+            return [];
+        }
+
         $channel = $model->broadcastChannel(false);
 
         return [

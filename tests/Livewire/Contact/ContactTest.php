@@ -41,3 +41,18 @@ test('renders successfully', function (): void {
 test('switch tabs', function (): void {
     Livewire::test(Contact::class, ['id' => $this->contact->id])->cycleTabs();
 });
+
+test('listens on the contact channel when an override mounts without the contact id', function (): void {
+    $channel = $this->contact->broadcastChannel(false);
+
+    Livewire::test(new class() extends Contact
+    {
+        public function mount(?int $id = null): void
+        {
+            $this->contact->fill(ContactModel::query()->whereKey($id)->firstOrFail());
+        }
+    }, ['id' => $this->contact->id])
+        ->assertOk()
+        ->dispatch('echo-private:' . $channel . ',.ContactDeleted')
+        ->assertRedirectToRoute('contacts.contacts');
+});
