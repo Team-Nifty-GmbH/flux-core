@@ -491,35 +491,38 @@ test('toggling a calendar sends only the ids of the active calendars', function 
 
     $page = visitCalendar();
 
-    $sent = $page->script(<<<'JS'
-        () => new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => reject(new Error('toggleEventSource was not called')), 5000);
+    $page->script(<<<'JS'
+        () => {
+            if (window.toggleProbe) {
+                return;
+            }
+
+            const calendar = Alpine.$data(document.querySelector('[calendar-root]')).calendar;
+            window.toggleProbe = { unchecked: calendar.getEventSources()[0].id, calls: [] };
+
             const originalFetch = window.fetch;
             window.fetch = (input, init) => {
-                const calls = (JSON.parse(init?.body || '{}').components || [])
-                    .flatMap((component) => component.calls || [])
-                    .filter((call) => call.method === 'toggleEventSource');
-
-                if (calls.length) {
-                    clearTimeout(timeout);
-                    resolve({
-                        sent: calls[0].params[0],
-                        sources: Alpine.$data(document.querySelector('[calendar-root]'))
-                            .calendar.getEventSources()
-                            .map((source) => source.id),
-                    });
-                }
+                window.toggleProbe.calls.push(
+                    ...(JSON.parse(init?.body || '{}').components || [])
+                        .flatMap((component) => component.calls || [])
+                        .filter((call) => call.method === 'toggleEventSource')
+                        .map((call) => call.params[0]),
+                );
 
                 return originalFetch(input, init);
             };
 
-            const sources = Alpine.$data(document.querySelector('[calendar-root]'))
-                .calendar.getEventSources();
             document.querySelector('[x-on\\:folder-tree-uncheck]')
-                .dispatchEvent(new CustomEvent('folder-tree-uncheck', { detail: { id: sources[0].id } }));
-        })
+                .dispatchEvent(new CustomEvent('folder-tree-uncheck', { detail: { id: window.toggleProbe.unchecked } }));
+
+            window.toggleProbe.sources = calendar.getEventSources().map((source) => source.id);
+        }
     JS);
 
-    expect($sent['sources'])->not->toBeEmpty()
-        ->and($sent['sent'])->toBe(array_map(fn (string $id): array => ['publicId' => $id], $sent['sources']));
+    waitForCondition($page, '() => window.toggleProbe.calls.length > 0');
+
+    $probe = $page->script('() => window.toggleProbe');
+
+    expect($probe['sources'])->not->toBeEmpty()->not->toContain($probe['unchecked'])
+        ->and(end($probe['calls']))->toBe(array_map(fn (string $id): array => ['publicId' => $id], $probe['sources']));
 });
