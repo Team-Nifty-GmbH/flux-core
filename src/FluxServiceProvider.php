@@ -44,6 +44,7 @@ use FluxErp\Providers\ViewServiceProvider;
 use FluxErp\Providers\WidgetServiceProvider;
 use FluxErp\Support\Bus\Dispatcher as FluxDispatcher;
 use FluxErp\Support\Container\ProductTypeManager;
+use GuzzleHttp\Client;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -60,6 +61,8 @@ use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Laravel\Scout\Scout;
+use Meilisearch\Client as MeilisearchClient;
 use Spatie\LaravelPasskeys\Http\Controllers\AuthenticateUsingPasskeyController as BaseAuthenticateUsingPasskeyController;
 use Spatie\MediaLibrary\MediaCollections\Models\Observers\MediaObserver;
 use Spatie\Permission\Middleware\RoleMiddleware;
@@ -101,6 +104,7 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         $this->bootRoutes();
+        $this->bootMeilisearchClient();
 
         ProductType::register(
             name: 'product',
@@ -167,6 +171,22 @@ class FluxServiceProvider extends ServiceProvider
             : once(fn () => $this->findCommands());
 
         $this->commands($commands);
+    }
+
+    protected function bootMeilisearchClient(): void
+    {
+        if (! class_exists(MeilisearchClient::class)) {
+            return;
+        }
+
+        // Scout binds the client without an HTTP client, so a dead Meilisearch blocks every request
+        // until max_execution_time. This overrides Scout's binding (registered in register()).
+        $this->app->singleton(MeilisearchClient::class, fn () => new MeilisearchClient(
+            config('scout.meilisearch.host'),
+            config('scout.meilisearch.key'),
+            new Client(['timeout' => config('flux.meilisearch.timeout')]),
+            clientAgents: [sprintf('Meilisearch Laravel Scout (v%s)', Scout::VERSION)],
+        ));
     }
 
     protected function bootRoutes(): void
@@ -284,6 +304,7 @@ class FluxServiceProvider extends ServiceProvider
 
         if (! app()->configurationIsCached()) {
             config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);
+            config(['scout.queue' => env('SCOUT_QUEUE', true)]);
         }
 
         if ($this->app->runningInConsole()) {
