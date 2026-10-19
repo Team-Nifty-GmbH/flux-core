@@ -43,14 +43,14 @@ class MobileController extends Controller
             }
         }
 
-        if ($request->filled('redirect')) {
-            $redirectPath = $request->input('redirect');
+        $redirectUrl = $request->filled('redirect') ? url($request->input('redirect')) : null;
 
+        if ($redirectUrl && parse_url($redirectUrl, PHP_URL_HOST) === $request->getHost()) {
             if (auth()->check()) {
-                return redirect($redirectPath);
+                return redirect($redirectUrl);
             }
 
-            session(['url.intended' => url($redirectPath)]);
+            session(['url.intended' => $redirectUrl]);
 
             return redirect(route('login'));
         }
