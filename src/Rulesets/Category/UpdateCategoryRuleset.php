@@ -23,7 +23,7 @@ class UpdateCategoryRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => Category::class, 'subject' => Category::class]),
             ],
-            'name' => 'required|string|max:255',
+            'name' => 'sometimes|required|string|max:255',
             'sort_number' => 'integer|min:0',
             'is_active' => 'boolean',
         ];

@@ -50,3 +50,87 @@ test('delete price list', function (): void {
     expect(DeletePriceList::make(['id' => $list->getKey()])
         ->validate()->execute())->toBeTrue();
 });
+
+test('update price list without discount keeps the discount of a derived price list', function (): void {
+    $parent = PriceList::factory()->create();
+    $list = CreatePriceList::make([
+        'parent_id' => $parent->getKey(),
+        'name' => 'Derived',
+        'price_list_code' => 'DER',
+        'is_net' => true,
+        'rounding_method_enum' => 'none',
+        'discount' => ['discount' => 0.1, 'is_percentage' => true],
+    ])->validate()->execute();
+
+    UpdatePriceList::make([
+        'id' => $list->getKey(),
+        'rounding_method_enum' => 'none',
+        'name' => 'Renamed',
+    ])->validate()->execute();
+
+    expect($list->discount()->first())
+        ->not->toBeNull()
+        ->discount->toEqual(0.1);
+});
+
+test('update price list changes the discount without repeating parent_id', function (): void {
+    $parent = PriceList::factory()->create();
+    $list = CreatePriceList::make([
+        'parent_id' => $parent->getKey(),
+        'name' => 'Derived',
+        'price_list_code' => 'DER',
+        'is_net' => true,
+        'rounding_method_enum' => 'none',
+        'discount' => ['discount' => 0.1, 'is_percentage' => true],
+    ])->validate()->execute();
+
+    UpdatePriceList::make([
+        'id' => $list->getKey(),
+        'rounding_method_enum' => 'none',
+        'discount' => ['discount' => 0.2, 'is_percentage' => true],
+    ])->validate()->execute();
+
+    expect($list->discount()->first()->discount)->toEqual(0.2);
+});
+
+test('update price list removes the discount when the parent is removed', function (): void {
+    $parent = PriceList::factory()->create();
+    $list = CreatePriceList::make([
+        'parent_id' => $parent->getKey(),
+        'name' => 'Derived',
+        'price_list_code' => 'DER',
+        'is_net' => true,
+        'rounding_method_enum' => 'none',
+        'discount' => ['discount' => 0.1, 'is_percentage' => true],
+    ])->validate()->execute();
+
+    UpdatePriceList::make([
+        'id' => $list->getKey(),
+        'rounding_method_enum' => 'none',
+        'parent_id' => null,
+        'discount' => ['discount' => 0.1, 'is_percentage' => true],
+    ])->validate()->execute();
+
+    expect($list->discount()->exists())->toBeFalse();
+});
+
+test('update price list removes the discount when it is cleared', function (): void {
+    $parent = PriceList::factory()->create();
+    $list = CreatePriceList::make([
+        'parent_id' => $parent->getKey(),
+        'name' => 'Derived',
+        'price_list_code' => 'DER',
+        'is_net' => true,
+        'rounding_method_enum' => 'none',
+        'discount' => ['discount' => 0.1, 'is_percentage' => true],
+    ])->validate()->execute();
+
+    UpdatePriceList::make([
+        'id' => $list->getKey(),
+        'rounding_method_enum' => 'none',
+        'parent_id' => $parent->getKey(),
+        'discount' => ['discount' => null, 'is_percentage' => true],
+    ])->validate()->execute();
+
+    expect($list->discount()->exists())->toBeFalse();
+});

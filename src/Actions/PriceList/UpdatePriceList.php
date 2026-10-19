@@ -34,6 +34,10 @@ class UpdatePriceList extends FluxAction
         $priceList->fill($this->data);
         $priceList->save();
 
+        if (! array_key_exists('discount', $this->data) && $priceList->parent_id) {
+            return $priceList->withoutRelations()->fresh();
+        }
+
         $hasDiscount = ($this->data['discount'] ?? false) && $this->data['discount']['discount'] != 0;
         if ($hasDiscount && ! $priceList->discount) {
             // Create new discount
@@ -66,6 +70,15 @@ class UpdatePriceList extends FluxAction
         }
 
         return $priceList->withoutRelations()->fresh($hasDiscount ? ['discount'] : []);
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if (array_key_exists('discount', $this->data) && ! array_key_exists('parent_id', $this->data)) {
+            $this->data['parent_id'] = resolve_static(PriceList::class, 'query')
+                ->whereKey($this->getData('id'))
+                ->value('parent_id');
+        }
     }
 
     protected function validateData(): void

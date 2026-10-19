@@ -79,3 +79,24 @@ test('vat rate purchase and sales flags can be set', function (): void {
 
     expect($updated->is_sales)->toBeTrue();
 });
+
+test('update vat rate without name and rate_percentage', function (): void {
+    $vat = VatRate::factory()->create(['name' => 'Full', 'rate_percentage' => 0.19]);
+
+    UpdateVatRate::make([
+        'id' => $vat->getKey(),
+        'footer_text' => 'Footer',
+    ])->validate()->execute();
+
+    expect($vat->refresh())
+        ->name->toBe('Full')
+        ->rate_percentage->toEqual(0.19)
+        ->footer_text->toBe('Footer');
+});
+
+test('update vat rate rejects an empty name', function (): void {
+    UpdateVatRate::assertValidationErrors([
+        'id' => VatRate::factory()->create()->getKey(),
+        'name' => null,
+    ], 'name');
+});

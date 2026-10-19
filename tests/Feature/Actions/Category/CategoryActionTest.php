@@ -64,3 +64,20 @@ test('delete category', function (): void {
     expect(DeleteCategory::make(['id' => $category->getKey()])
         ->validate()->execute())->toBeTrue();
 });
+
+test('update category without name', function (): void {
+    $category = Category::factory()->create([
+        'model_type' => morph_alias(FluxErp\Models\Product::class),
+        'name' => 'Electronics',
+        'is_active' => true,
+    ]);
+
+    UpdateCategory::make([
+        'id' => $category->getKey(),
+        'is_active' => false,
+    ])->validate()->execute();
+
+    expect($category->refresh())
+        ->name->toBe('Electronics')
+        ->is_active->toBeFalse();
+});
