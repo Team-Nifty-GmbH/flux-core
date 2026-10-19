@@ -342,6 +342,42 @@ test('runs a repeatable with defaultCron without a db entry', function (): void 
     expect(ScheduleRunTestDefaultCronInvokable::$wasInvoked)->toBeTrue();
 });
 
+test('a deactivated db entry stops the defaultCron', function (): void {
+    ScheduleRunTestDefaultCronInvokable::$wasInvoked = false;
+
+    RepeatableFacade::register(
+        ScheduleRunTestDefaultCronInvokable::name(),
+        ScheduleRunTestDefaultCronInvokable::class
+    );
+
+    $this->travelTo(Carbon::create(2025, 6, 15, 10, 0, 0));
+
+    resolve_static(Schedule::class, 'query')
+        ->create([
+            'name' => 'Deactivated Default Cron',
+            'class' => ScheduleRunTestDefaultCronInvokable::class,
+            'type' => RepeatableTypeEnum::Invokable,
+            'cron' => [
+                'methods' => [
+                    'basic' => 'everyMinute',
+                    'dayConstraint' => null,
+                    'timeConstraint' => null,
+                ],
+                'parameters' => [
+                    'basic' => [],
+                    'dayConstraint' => [],
+                    'timeConstraint' => [null, null],
+                ],
+            ],
+            'is_active' => false,
+            'due_at' => now()->subMinute(),
+        ]);
+
+    $this->artisan('schedule:run');
+
+    expect(ScheduleRunTestDefaultCronInvokable::$wasInvoked)->toBeFalse();
+});
+
 test('uses db entry over defaultCron when both exist', function (): void {
     ScheduleRunTestDefaultCronInvokable::$wasInvoked = false;
 

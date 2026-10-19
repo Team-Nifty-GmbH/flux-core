@@ -10,6 +10,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\Tag;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rules\Numeric;
@@ -142,7 +143,9 @@ class CreateOrderPosition extends FluxAction
                 });
         }
 
-        $orderPosition->attachTags($tags);
+        if ($tags) {
+            $orderPosition->attachTags(resolve_static(Tag::class, 'query')->whereKey($tags)->get());
+        }
 
         if ($recalculateOrder) {
             $orderPosition->order

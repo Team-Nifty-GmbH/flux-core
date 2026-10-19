@@ -161,3 +161,22 @@ test('update order keeps the country in the invoice address snapshot', function 
 
     expect($updated->address_invoice)->toHaveKey('country_id', $country->getKey());
 });
+
+test('update order rejects a payment discount above 100 percent', function (): void {
+    $order = Order::factory()->create([
+        'order_type_id' => $this->orderType->getKey(),
+        'address_invoice_id' => $this->address->getKey(),
+        'contact_id' => $this->contact->getKey(),
+        'payment_type_id' => $this->paymentType->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'currency_id' => $this->currency->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'is_locked' => false,
+    ]);
+
+    UpdateOrder::assertValidationErrors([
+        'id' => $order->getKey(),
+        'payment_discount_percent' => 3,
+    ], 'payment_discount_percent');
+});
