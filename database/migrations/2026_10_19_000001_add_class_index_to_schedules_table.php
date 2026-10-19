@@ -9,14 +9,14 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('schedules', function (Blueprint $table): void {
-            $table->index(['class', 'deleted_at']);
+            $table->index('class');
         });
     }
 
     public function down(): void
     {
         Schema::table('schedules', function (Blueprint $table): void {
-            $table->dropIndex(['class', 'deleted_at']);
+            $table->dropIndex(['class']);
         });
     }
 };
