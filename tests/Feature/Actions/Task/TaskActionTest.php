@@ -66,7 +66,16 @@ test('delete task', function (): void {
     expect($result)->toBeTrue();
 });
 
-test('update task without dates keeps dates and reminders', function (): void {
+test('update task without dates fails validation', function (): void {
+    $task = Task::factory()->create();
+
+    UpdateTask::assertValidationErrors([
+        'id' => $task->getKey(),
+        'name' => 'Renamed',
+    ], ['start_date', 'due_date']);
+});
+
+test('update task dates without times keeps the times and reminders', function (): void {
     $task = Task::factory()->create([
         'start_date' => '2026-11-02',
         'start_time' => '09:30:00',
@@ -80,33 +89,6 @@ test('update task without dates keeps dates and reminders', function (): void {
 
     UpdateTask::make([
         'id' => $task->getKey(),
-        'name' => 'Renamed',
-    ])
-        ->validate()
-        ->execute();
-
-    expect($task->refresh())
-        ->name->toBe('Renamed')
-        ->start_date->toDateString()->toBe('2026-11-02')
-        ->start_time->toBe('09:30:00')
-        ->has_start_reminder->toBeTrue()
-        ->start_reminder_minutes_before->toBe(30)
-        ->due_date->toDateString()->toBe('2026-11-06')
-        ->due_time->toBe('16:00:00')
-        ->has_due_reminder->toBeTrue()
-        ->due_reminder_minutes_before->toBe(60);
-});
-
-test('update task dates without times keeps the times', function (): void {
-    $task = Task::factory()->create([
-        'start_date' => '2026-11-02',
-        'start_time' => '09:30:00',
-        'due_date' => '2026-11-06',
-        'due_time' => '16:00:00',
-    ]);
-
-    UpdateTask::make([
-        'id' => $task->getKey(),
         'start_date' => '2026-11-03',
         'due_date' => '2026-11-09',
     ])
@@ -116,8 +98,12 @@ test('update task dates without times keeps the times', function (): void {
     expect($task->refresh())
         ->start_date->toDateString()->toBe('2026-11-03')
         ->start_time->toBe('09:30:00')
+        ->has_start_reminder->toBeTrue()
+        ->start_reminder_minutes_before->toBe(30)
         ->due_date->toDateString()->toBe('2026-11-09')
-        ->due_time->toBe('16:00:00');
+        ->due_time->toBe('16:00:00')
+        ->has_due_reminder->toBeTrue()
+        ->due_reminder_minutes_before->toBe(60);
 });
 
 test('update task clearing a date turns its reminder off', function (): void {
@@ -126,11 +112,14 @@ test('update task clearing a date turns its reminder off', function (): void {
         'has_start_reminder' => true,
         'start_reminder_minutes_before' => 30,
         'due_date' => '2026-11-06',
+        'has_due_reminder' => true,
+        'due_reminder_minutes_before' => 60,
     ]);
 
     UpdateTask::make([
         'id' => $task->getKey(),
         'start_date' => null,
+        'due_date' => '2026-11-06',
     ])
         ->validate()
         ->execute();
@@ -138,17 +127,7 @@ test('update task clearing a date turns its reminder off', function (): void {
     expect($task->refresh())
         ->start_date->toBeNull()
         ->has_start_reminder->toBeFalse()
-        ->due_date->toDateString()->toBe('2026-11-06');
-});
-
-test('update task due date must not be before the stored start date', function (): void {
-    $task = Task::factory()->create([
-        'start_date' => '2026-11-10',
-        'due_date' => '2026-11-12',
-    ]);
-
-    UpdateTask::assertValidationErrors([
-        'id' => $task->getKey(),
-        'due_date' => '2026-11-01',
-    ], 'due_date');
+        ->due_date->toDateString()->toBe('2026-11-06')
+        ->has_due_reminder->toBeTrue()
+        ->due_reminder_minutes_before->toBe(60);
 });

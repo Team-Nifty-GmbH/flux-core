@@ -82,23 +82,12 @@ class UpdateTask extends DispatchableFluxAction implements SupportsBulkExecution
 
     protected function prepareForValidation(): void
     {
-        if (array_key_exists('start_date', $this->data) xor array_key_exists('due_date', $this->data)) {
-            $task = resolve_static(Task::class, 'query')
-                ->whereKey($this->getData('id'))
-                ->first(['id', 'start_date', 'due_date']);
-
-            $this->data += [
-                'start_date' => $task?->start_date?->toDateString(),
-                'due_date' => $task?->due_date?->toDateString(),
-            ];
-        }
-
-        if (array_key_exists('start_date', $this->data) && is_null($this->getData('start_date'))) {
+        if (! $this->getData('start_date')) {
             $this->data['start_reminder_minutes_before'] = null;
             $this->data['has_start_reminder'] = false;
         }
 
-        if (array_key_exists('due_date', $this->data) && is_null($this->getData('due_date'))) {
+        if (! $this->getData('due_date')) {
             $this->data['due_reminder_minutes_before'] = null;
             $this->data['has_due_reminder'] = false;
         }
