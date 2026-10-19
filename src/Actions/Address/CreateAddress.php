@@ -12,7 +12,6 @@ use FluxErp\Models\Tag;
 use FluxErp\Models\Tenant;
 use FluxErp\Rulesets\Address\CreateAddressRuleset;
 use FluxErp\Settings\CoreSettings;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -85,22 +84,7 @@ class CreateAddress extends FluxAction
         }
 
         if ($this->data['address_types'] ?? false) {
-            $addressTypes = resolve_static(AddressType::class, 'query')
-                ->whereKey($this->data['address_types'])
-                ->where('is_unique', true)
-                ->whereHas(
-                    'addresses',
-                    fn (Builder $query) => $query->where('contact_id', $this->data['contact_id'])
-                )
-                ->get();
-
-            foreach ($addressTypes as $addressType) {
-                $addressType->addresses()->detach($address->contact->addresses->pluck('id')->toArray());
-            }
-
-            foreach ($this->data['address_types'] as $addressType) {
-                $address->addressTypes()->attach($addressType);
-            }
+            $address->addressTypes()->attach($this->data['address_types']);
         }
 
         return $address->withoutRelations()->fresh();

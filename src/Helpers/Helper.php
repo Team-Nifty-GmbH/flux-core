@@ -322,14 +322,15 @@ class Helper
                     } catch (ValidationException) {
                     }
                 }
-            } else {
+            } elseif (in_array(data_get($item, $relatedKeyName), $existing)) {
                 if ($canUpdate) {
                     try {
                         $updateAction::make($item)->validate()->execute();
                     } catch (ValidationException) {
                     }
-                    $updated[] = $item['id'];
                 }
+
+                $updated[] = data_get($item, $relatedKeyName);
             }
         }
 
