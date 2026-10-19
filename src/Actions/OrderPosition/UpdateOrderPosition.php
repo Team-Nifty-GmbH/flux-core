@@ -11,6 +11,7 @@ use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\Tag;
 use FluxErp\Rulesets\OrderPosition\UpdateOrderPositionRuleset;
 use FluxErp\View\Printing\Order\FinalInvoice;
 use Illuminate\Database\Eloquent\Model;
@@ -32,7 +33,7 @@ class UpdateOrderPosition extends FluxAction
 
     public function performAction(): Model
     {
-        $tags = Arr::pull($this->data, 'tags', []);
+        $tags = Arr::pull($this->data, 'tags');
         $recalculateOrder = Arr::pull($this->data, 'recalculate_order', false);
 
         $orderPosition = resolve_static(OrderPosition::class, 'query')
@@ -166,7 +167,9 @@ class UpdateOrderPosition extends FluxAction
                 });
         }
 
-        $orderPosition->syncTags($tags);
+        if (! is_null($tags)) {
+            $orderPosition->syncTags(resolve_static(Tag::class, 'query')->whereKey($tags)->get());
+        }
 
         if ($recalculateOrder) {
             $orderPosition->order

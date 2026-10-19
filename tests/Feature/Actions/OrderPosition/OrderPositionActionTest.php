@@ -16,6 +16,7 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\Tag;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 
@@ -740,4 +741,63 @@ test('changing only the price list takes the price of that list', function (): v
         ->execute();
 
     expect((float) $updated->unit_price)->toBe(12.90);
+});
+
+test('create order position attaches the tags given by id', function (): void {
+    $tag = Tag::factory()->create(['type' => morph_alias(OrderPosition::class)]);
+
+    $position = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'name' => 'Tagged Position',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 1,
+        'unit_price' => 10,
+        'tags' => [$tag->getKey()],
+    ])
+        ->validate()
+        ->execute();
+
+    expect($position->tags()->pluck('tags.id')->all())->toBe([$tag->getKey()])
+        ->and(Tag::query()->count())->toBe(1);
+});
+
+test('update order position syncs the tags given by id', function (): void {
+    $kept = Tag::factory()->create(['type' => morph_alias(OrderPosition::class)]);
+    $added = Tag::factory()->create(['type' => morph_alias(OrderPosition::class)]);
+    $position = OrderPosition::factory()->create([
+        'order_id' => $this->order->getKey(),
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
+    $position->attachTag($kept);
+
+    UpdateOrderPosition::make([
+        'id' => $position->getKey(),
+        'tags' => [$kept->getKey(), $added->getKey()],
+    ])
+        ->validate()
+        ->execute();
+
+    expect($position->tags()->pluck('tags.id')->sort()->values()->all())
+        ->toBe([$kept->getKey(), $added->getKey()])
+        ->and(Tag::query()->count())->toBe(2);
+});
+
+test('update order position without tags keeps the existing tags', function (): void {
+    $tag = Tag::factory()->create(['type' => morph_alias(OrderPosition::class)]);
+    $position = OrderPosition::factory()->create([
+        'order_id' => $this->order->getKey(),
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
+    $position->attachTag($tag);
+
+    UpdateOrderPosition::make([
+        'id' => $position->getKey(),
+        'name' => 'Renamed',
+    ])
+        ->validate()
+        ->execute();
+
+    expect($position->tags()->pluck('tags.id')->all())->toBe([$tag->getKey()]);
 });
