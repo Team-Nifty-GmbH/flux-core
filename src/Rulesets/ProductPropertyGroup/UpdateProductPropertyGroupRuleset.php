@@ -35,7 +35,7 @@ class UpdateProductPropertyGroupRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => ProductPropertyGroup::class]),
             ],
-            'name' => 'required|string|max:255',
+            'name' => 'sometimes|required|string|max:255',
         ];
     }
 }

@@ -36,3 +36,20 @@ test('delete product property', function (): void {
     expect(DeleteProductProperty::make(['id' => $prop->getKey()])
         ->validate()->execute())->toBeTrue();
 });
+
+test('update product property moves it to another group', function (): void {
+    $from = FluxErp\Actions\ProductPropertyGroup\CreateProductPropertyGroup::make(['name' => 'From'])
+        ->validate()
+        ->execute();
+    $to = FluxErp\Actions\ProductPropertyGroup\CreateProductPropertyGroup::make(['name' => 'To'])
+        ->validate()
+        ->execute();
+    $prop = ProductProperty::factory()->create(['product_property_group_id' => $from->getKey()]);
+
+    UpdateProductProperty::make([
+        'id' => $prop->getKey(),
+        'product_property_group_id' => $to->getKey(),
+    ])->validate()->execute();
+
+    expect($prop->refresh()->product_property_group_id)->toBe($to->getKey());
+});
