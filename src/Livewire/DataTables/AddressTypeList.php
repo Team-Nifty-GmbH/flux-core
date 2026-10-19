@@ -11,7 +11,6 @@ class AddressTypeList extends BaseDataTable
         'tenants.name',
         'address_type_code',
         'is_locked',
-        'is_unique',
     ];
 
     protected string $model = AddressType::class;

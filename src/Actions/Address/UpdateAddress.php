@@ -12,7 +12,6 @@ use FluxErp\Models\AddressType;
 use FluxErp\Models\Tag;
 use FluxErp\Rulesets\Address\UpdateAddressRuleset;
 use FluxErp\Settings\CoreSettings;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -40,7 +39,11 @@ class UpdateAddress extends FluxAction
         $tags = Arr::pull($this->data, 'tags');
         $permissions = Arr::pull($this->data, 'permissions');
         $contactOptions = Arr::pull($this->data, 'contact_options');
-        $this->data['has_formal_salutation'] ??= app(CoreSettings::class)->formal_salutation;
+        $addressTypes = Arr::pull($this->data, 'address_types');
+
+        if (array_key_exists('has_formal_salutation', $this->data)) {
+            $this->data['has_formal_salutation'] ??= app(CoreSettings::class)->formal_salutation;
+        }
 
         $canLogin = $address->can_login;
 
@@ -98,20 +101,8 @@ class UpdateAddress extends FluxAction
             );
         }
 
-        if ($this->data['address_types'] ?? false) {
-            $addressTypes = resolve_static(AddressType::class, 'query')
-                ->whereKey($this->data['address_types'])
-                ->where('is_unique', true)
-                ->whereHas('addresses', fn (Builder $query) => $query->where('contact_id', $this->data['contact_id'])
-                    ->where('id', '!=', $this->data['id'])
-                )
-                ->get();
-
-            foreach ($addressTypes as $addressType) {
-                $addressType->addresses()->detach($address->contact->addresses()->get());
-            }
-
-            $address->addressTypes()->sync($this->data['address_types']);
+        if (! is_null($addressTypes)) {
+            $address->addressTypes()->sync($addressTypes);
         }
 
         if ($canLogin && ! $address->can_login) {
