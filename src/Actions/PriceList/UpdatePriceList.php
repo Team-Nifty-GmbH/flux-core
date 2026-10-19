@@ -10,6 +10,7 @@ use FluxErp\Helpers\Helper;
 use FluxErp\Models\PriceList;
 use FluxErp\Rulesets\PriceList\UpdatePriceListRuleset;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class UpdatePriceList extends FluxAction
@@ -33,10 +34,6 @@ class UpdatePriceList extends FluxAction
 
         $priceList->fill($this->data);
         $priceList->save();
-
-        if (! array_key_exists('discount', $this->data) && $priceList->parent_id) {
-            return $priceList->withoutRelations()->fresh();
-        }
 
         $hasDiscount = ($this->data['discount'] ?? false) && $this->data['discount']['discount'] != 0;
         if ($hasDiscount && ! $priceList->discount) {
@@ -62,7 +59,10 @@ class UpdatePriceList extends FluxAction
             )
                 ->validate()
                 ->execute();
-        } elseif ($priceList->discount && ! $hasDiscount) {
+        } elseif ($priceList->discount
+            && ! $hasDiscount
+            && (array_key_exists('discount', $this->data) || ! $priceList->parent_id)
+        ) {
             // Delete existing discount
             DeleteDiscount::make(['id' => $priceList->discount->id])
                 ->validate()
@@ -72,13 +72,20 @@ class UpdatePriceList extends FluxAction
         return $priceList->withoutRelations()->fresh($hasDiscount ? ['discount'] : []);
     }
 
-    protected function prepareForValidation(): void
+    public function setRulesFromRulesets(): static
     {
-        if (array_key_exists('discount', $this->data) && ! array_key_exists('parent_id', $this->data)) {
-            $this->data['parent_id'] = resolve_static(PriceList::class, 'query')
-                ->whereKey($this->getData('id'))
-                ->value('parent_id');
-        }
+        return parent::setRulesFromRulesets()
+            ->mergeRules([
+                'discount' => [
+                    Rule::excludeIf(fn () => ! (array_key_exists('parent_id', $this->data)
+                        ? $this->data['parent_id']
+                        : resolve_static(PriceList::class, 'query')
+                            ->whereKey($this->getData('id'))
+                            ->value('parent_id'))
+                    ),
+                    'array',
+                ],
+            ]);
     }
 
     protected function validateData(): void

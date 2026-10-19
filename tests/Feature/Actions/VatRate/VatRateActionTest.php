@@ -100,3 +100,10 @@ test('update vat rate rejects an empty name', function (): void {
         'name' => null,
     ], 'name');
 });
+
+test('update vat rate rejects a rate_percentage outside of 0 and below 1', function (mixed $rate): void {
+    UpdateVatRate::assertValidationErrors([
+        'id' => VatRate::factory()->create()->getKey(),
+        'rate_percentage' => $rate,
+    ], 'rate_percentage');
+})->with([-0.01, 1, 1.5, 'abc']);
