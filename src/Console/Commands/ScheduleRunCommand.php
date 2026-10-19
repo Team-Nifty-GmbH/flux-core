@@ -177,7 +177,10 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
         }
 
         // Register repeatables with defaultCron that aren't in the DB
-        $scheduledClasses = $repeatables->pluck('class')->all();
+        $scheduledClasses = resolve_static(ScheduleModel::class, 'query')
+            ->distinct()
+            ->pluck('class')
+            ->all();
 
         Repeatable::all()->each(function (array $repeatable) use ($schedule, $scheduledClasses): void {
             if (in_array($repeatable['class'], $scheduledClasses)) {
