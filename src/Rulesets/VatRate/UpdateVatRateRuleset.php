@@ -24,7 +24,6 @@ class UpdateVatRateRuleset extends FluxRuleset
                 'sometimes',
                 'required',
                 app(Numeric::class, ['min' => 0]),
-                'lt:1',
             ],
             'footer_text' => 'string|nullable',
             'is_default' => 'boolean',

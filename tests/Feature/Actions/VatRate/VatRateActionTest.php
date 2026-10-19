@@ -101,9 +101,21 @@ test('update vat rate rejects an empty name', function (): void {
     ], 'name');
 });
 
-test('update vat rate rejects a rate_percentage outside of 0 and below 1', function (mixed $rate): void {
+test('update vat rate rejects a negative or non numeric rate_percentage', function (mixed $rate): void {
     UpdateVatRate::assertValidationErrors([
         'id' => VatRate::factory()->create()->getKey(),
         'rate_percentage' => $rate,
     ], 'rate_percentage');
-})->with([-0.01, 1, 1.5, 'abc']);
+})->with([-0.01, 'abc']);
+
+test('vat rate accepts a rate_percentage of 100 percent and above', function (float $rate): void {
+    $vat = CreateVatRate::make(['name' => 'Full', 'rate_percentage' => $rate])
+        ->validate()
+        ->execute();
+
+    UpdateVatRate::make(['id' => $vat->getKey(), 'rate_percentage' => $rate])
+        ->validate()
+        ->execute();
+
+    expect($vat->fresh()->rate_percentage)->toEqual($rate);
+})->with([1.0, 1.5]);
