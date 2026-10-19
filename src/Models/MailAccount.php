@@ -189,6 +189,49 @@ class MailAccount extends FluxModel
         return $this->failed_logins >= static::MAX_FAILED_LOGINS;
     }
 
+    public function mailer(): Mailer
+    {
+        $fromName = $this->smtp_from_name
+            ?: auth()->user()?->name
+            ?: config('mail.from.name');
+
+        $config = [
+            'transport' => $this->smtp_mailer,
+            'username' => $this->smtp_user ?? $this->smtp_email,
+            'password' => $this->smtp_password,
+            'host' => $this->smtp_host,
+            'port' => $this->smtp_port,
+            'encryption' => $this->smtp_encryption,
+            'from_address' => $this->smtp_email,
+            'from_name' => $fromName,
+        ];
+
+        $mailer = Mail::build($config);
+
+        if ($this->smtp_has_valid_certificate === false) {
+            $transport = $mailer->getSymfonyTransport();
+            $stream = $transport instanceof EsmtpTransport ? $transport->getStream() : null;
+
+            if ($stream instanceof SocketStream) {
+                $stream->setStreamOptions([
+                    'ssl' => [
+                        'verify_peer' => false,
+                        'verify_peer_name' => false,
+                        'allow_self_signed' => true,
+                    ],
+                ]);
+            }
+        }
+
+        $mailer->alwaysFrom($this->smtp_email, $fromName);
+
+        if ($this->smtp_reply_to) {
+            $mailer->alwaysReplyTo($this->smtp_reply_to);
+        }
+
+        return $mailer;
+    }
+
     /**
      * Drop the cached client and connect again.
      *
@@ -235,49 +278,6 @@ class MailAccount extends FluxModel
             );
 
         return $folderIds;
-    }
-
-    public function mailer(): Mailer
-    {
-        $fromName = $this->smtp_from_name
-            ?: auth()->user()?->name
-            ?: config('mail.from.name');
-
-        $config = [
-            'transport' => $this->smtp_mailer,
-            'username' => $this->smtp_user ?? $this->smtp_email,
-            'password' => $this->smtp_password,
-            'host' => $this->smtp_host,
-            'port' => $this->smtp_port,
-            'encryption' => $this->smtp_encryption,
-            'from_address' => $this->smtp_email,
-            'from_name' => $fromName,
-        ];
-
-        $mailer = Mail::build($config);
-
-        if ($this->smtp_has_valid_certificate === false) {
-            $transport = $mailer->getSymfonyTransport();
-            $stream = $transport instanceof EsmtpTransport ? $transport->getStream() : null;
-
-            if ($stream instanceof SocketStream) {
-                $stream->setStreamOptions([
-                    'ssl' => [
-                        'verify_peer' => false,
-                        'verify_peer_name' => false,
-                        'allow_self_signed' => true,
-                    ],
-                ]);
-            }
-        }
-
-        $mailer->alwaysFrom($this->smtp_email, $fromName);
-
-        if ($this->smtp_reply_to) {
-            $mailer->alwaysReplyTo($this->smtp_reply_to);
-        }
-
-        return $mailer;
     }
 
     // Protected methods
