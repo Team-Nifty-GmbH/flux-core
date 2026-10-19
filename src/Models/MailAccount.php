@@ -130,17 +130,19 @@ class MailAccount extends FluxModel
             ])
                 ->connect();
         } catch (AuthFailedException $e) {
-            $this->setFailedLogins($this->failed_logins + 1);
+            $this->countFailedLogin();
             logger($e->getMessage(), ['mail_account_id' => $this->id]);
 
             return null;
         } catch (ImapServerErrorException $e) {
-            $this->setFailedLogins($this->failed_logins + 1);
+            if (! str_contains($e->getMessage(), '[UNAVAILABLE]')) {
+                $this->countFailedLogin();
+            }
 
             throw $e;
         }
 
-        $this->setFailedLogins(0);
+        $this->clearFailedLogins();
 
         return $client;
     }
@@ -262,6 +264,34 @@ class MailAccount extends FluxModel
     }
 
     // Protected methods
+    protected function clearFailedLogins(): void
+    {
+        if (! $this->exists || ! $this->failed_logins) {
+            return;
+        }
+
+        $this->forceFill(['failed_logins' => 0])
+            ->syncOriginalAttribute('failed_logins');
+
+        resolve_static(MailAccount::class, 'query')
+            ->whereKey($this->getKey())
+            ->update(['failed_logins' => 0]);
+    }
+
+    protected function countFailedLogin(): void
+    {
+        if (! $this->exists) {
+            return;
+        }
+
+        $this->forceFill(['failed_logins' => (int) $this->failed_logins + 1])
+            ->syncOriginalAttribute('failed_logins');
+
+        resolve_static(MailAccount::class, 'query')
+            ->whereKey($this->getKey())
+            ->increment('failed_logins');
+    }
+
     /**
      * Servers name their sent folder in the language of the mailbox. Only the english defaults
      * are recognized, and only when the folder first appears, so a folder unmarked by hand stays
@@ -273,20 +303,6 @@ class MailAccount extends FluxModel
             && ! $this->mailFolders()
                 ->where('is_sent', true)
                 ->exists();
-    }
-
-    protected function setFailedLogins(int $count): void
-    {
-        if (! $this->exists || $this->failed_logins === $count) {
-            return;
-        }
-
-        $this->forceFill(['failed_logins' => $count])
-            ->syncOriginalAttribute('failed_logins');
-
-        resolve_static(MailAccount::class, 'query')
-            ->whereKey($this->getKey())
-            ->update(['failed_logins' => $count]);
     }
 
     protected function syncFolder(Folder $folder, ?int $parentId = null): array

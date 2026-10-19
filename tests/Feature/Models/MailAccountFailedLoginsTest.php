@@ -73,6 +73,18 @@ test('an unreachable server does not count as a failed login', function (): void
         ->and($mailAccount->refresh()->failed_logins)->toBe(0);
 });
 
+test('a temporarily unavailable server does not count as a failed login', function (): void {
+    $mailAccount = MailAccount::factory()->create(['host' => 'imap.example.com']);
+
+    $client = Mockery::mock(Client::class);
+    $client->shouldReceive('connect')
+        ->andThrow(new ImapServerErrorException('NO [UNAVAILABLE] Temporary authentication failure.'));
+    ImapClient::shouldReceive('make')->andReturn($client);
+
+    expect(fn () => $mailAccount->connect())->toThrow(ImapServerErrorException::class)
+        ->and($mailAccount->refresh()->failed_logins)->toBe(0);
+});
+
 test('saving the account resumes a paused sync', function (): void {
     $mailAccount = MailAccount::factory()->create([
         'host' => 'imap.example.com',
