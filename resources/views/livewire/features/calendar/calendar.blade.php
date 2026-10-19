@@ -164,7 +164,7 @@
                         $wire.toggleEventSource(
                             calendar
                                 .getEventSources()
-                                .map((source) => source.internalEventSource),
+                                .map((source) => ({ publicId: source.id })),
                         );
                     },
                 }"

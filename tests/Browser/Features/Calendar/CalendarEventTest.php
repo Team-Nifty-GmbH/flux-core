@@ -485,3 +485,41 @@ test('dragging a non-recurring calendar event saves immediately without confirm 
 
     $page->assertNoJavascriptErrors();
 });
+
+test('toggling a calendar sends only the ids of the active calendars', function (): void {
+    createCalendarWithOwner();
+
+    $page = visitCalendar();
+
+    $sent = $page->script(<<<'JS'
+        () => new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => reject(new Error('toggleEventSource was not called')), 5000);
+            const originalFetch = window.fetch;
+            window.fetch = (input, init) => {
+                const calls = (JSON.parse(init?.body || '{}').components || [])
+                    .flatMap((component) => component.calls || [])
+                    .filter((call) => call.method === 'toggleEventSource');
+
+                if (calls.length) {
+                    clearTimeout(timeout);
+                    resolve({
+                        sent: calls[0].params[0],
+                        sources: Alpine.$data(document.querySelector('[calendar-root]'))
+                            .calendar.getEventSources()
+                            .map((source) => source.id),
+                    });
+                }
+
+                return originalFetch(input, init);
+            };
+
+            const sources = Alpine.$data(document.querySelector('[calendar-root]'))
+                .calendar.getEventSources();
+            document.querySelector('[x-on\\:folder-tree-uncheck]')
+                .dispatchEvent(new CustomEvent('folder-tree-uncheck', { detail: { id: sources[0].id } }));
+        })
+    JS);
+
+    expect($sent['sources'])->not->toBeEmpty()
+        ->and($sent['sent'])->toBe(array_map(fn (string $id): array => ['publicId' => $id], $sent['sources']));
+});
