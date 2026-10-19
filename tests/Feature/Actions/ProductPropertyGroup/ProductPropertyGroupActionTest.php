@@ -34,3 +34,15 @@ test('delete product property group', function (): void {
     expect(DeleteProductPropertyGroup::make(['id' => $group->getKey()])
         ->validate()->execute())->toBeTrue();
 });
+
+test('update product property group without name keeps the name', function (): void {
+    $group = CreateProductPropertyGroup::make(['name' => 'Dimensions'])
+        ->validate()
+        ->execute();
+
+    UpdateProductPropertyGroup::make([
+        'id' => $group->getKey(),
+    ])->validate()->execute();
+
+    expect($group->refresh()->name)->toBe('Dimensions');
+});
