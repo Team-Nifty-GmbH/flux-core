@@ -123,3 +123,18 @@ test('update contact rejects an inline discount without its required fields', fu
         ],
     ], ['discounts.0.is_percentage', 'discounts.0.sort_number']);
 });
+
+test('update contact keeps a new inline discount sent with a null id', function (): void {
+    $contact = Contact::factory()->create();
+
+    $action = UpdateContact::make([
+        'id' => $contact->getKey(),
+        'discounts' => [
+            ['id' => null, 'discount' => 0.1, 'is_percentage' => true, 'sort_number' => 0],
+        ],
+    ])
+        ->validate();
+
+    expect($action->getData('discounts'))
+        ->toBe([['id' => null, 'sort_number' => 0, 'is_percentage' => true, 'discount' => 0.1]]);
+});
