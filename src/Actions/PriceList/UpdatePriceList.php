@@ -10,6 +10,7 @@ use FluxErp\Helpers\Helper;
 use FluxErp\Models\PriceList;
 use FluxErp\Rulesets\PriceList\UpdatePriceListRuleset;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class UpdatePriceList extends FluxAction
@@ -58,7 +59,10 @@ class UpdatePriceList extends FluxAction
             )
                 ->validate()
                 ->execute();
-        } elseif ($priceList->discount && ! $hasDiscount) {
+        } elseif ($priceList->discount
+            && ! $hasDiscount
+            && (array_key_exists('discount', $this->data) || ! $priceList->parent_id)
+        ) {
             // Delete existing discount
             DeleteDiscount::make(['id' => $priceList->discount->id])
                 ->validate()
@@ -66,6 +70,22 @@ class UpdatePriceList extends FluxAction
         }
 
         return $priceList->withoutRelations()->fresh($hasDiscount ? ['discount'] : []);
+    }
+
+    public function setRulesFromRulesets(): static
+    {
+        return parent::setRulesFromRulesets()
+            ->mergeRules([
+                'discount' => [
+                    Rule::excludeIf(fn () => ! (array_key_exists('parent_id', $this->data)
+                        ? $this->data['parent_id']
+                        : resolve_static(PriceList::class, 'query')
+                            ->whereKey($this->getData('id'))
+                            ->value('parent_id'))
+                    ),
+                    'array',
+                ],
+            ]);
     }
 
     protected function validateData(): void

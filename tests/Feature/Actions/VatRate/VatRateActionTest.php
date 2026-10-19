@@ -79,3 +79,43 @@ test('vat rate purchase and sales flags can be set', function (): void {
 
     expect($updated->is_sales)->toBeTrue();
 });
+
+test('update vat rate without name and rate_percentage', function (): void {
+    $vat = VatRate::factory()->create(['name' => 'Full', 'rate_percentage' => 0.19]);
+
+    UpdateVatRate::make([
+        'id' => $vat->getKey(),
+        'footer_text' => 'Footer',
+    ])->validate()->execute();
+
+    expect($vat->refresh())
+        ->name->toBe('Full')
+        ->rate_percentage->toEqual(0.19)
+        ->footer_text->toBe('Footer');
+});
+
+test('update vat rate rejects an empty name', function (): void {
+    UpdateVatRate::assertValidationErrors([
+        'id' => VatRate::factory()->create()->getKey(),
+        'name' => null,
+    ], 'name');
+});
+
+test('update vat rate rejects a negative or non numeric rate_percentage', function (mixed $rate): void {
+    UpdateVatRate::assertValidationErrors([
+        'id' => VatRate::factory()->create()->getKey(),
+        'rate_percentage' => $rate,
+    ], 'rate_percentage');
+})->with([-0.01, 'abc']);
+
+test('vat rate accepts a rate_percentage of 100 percent and above', function (float $rate): void {
+    $vat = CreateVatRate::make(['name' => 'Full', 'rate_percentage' => $rate])
+        ->validate()
+        ->execute();
+
+    UpdateVatRate::make(['id' => $vat->getKey(), 'rate_percentage' => $rate])
+        ->validate()
+        ->execute();
+
+    expect($vat->fresh()->rate_percentage)->toEqual($rate);
+})->with([1.0, 1.5]);

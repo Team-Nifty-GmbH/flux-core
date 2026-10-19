@@ -51,3 +51,21 @@ test('delete discount', function (): void {
     expect(DeleteDiscount::make(['id' => $discount->getKey()])
         ->validate()->execute())->toBeTrue();
 });
+
+test('create discount at a given position moves the others down', function (): void {
+    $contact = FluxErp\Models\Contact::factory()->create();
+    $attributes = [
+        'model_type' => morph_alias(FluxErp\Models\Contact::class),
+        'model_id' => $contact->getKey(),
+        'is_percentage' => true,
+    ];
+    $first = CreateDiscount::make(array_merge($attributes, ['discount' => 0.1]))->validate()->execute();
+    $second = CreateDiscount::make(array_merge($attributes, ['discount' => 0.2]))->validate()->execute();
+
+    $inserted = CreateDiscount::make(array_merge($attributes, ['discount' => 0.3, 'order_column' => 1]))
+        ->validate()
+        ->execute();
+
+    expect(Discount::query()->where('model_id', $contact->getKey())->ordered()->pluck('id')->all())
+        ->toBe([$inserted->getKey(), $first->getKey(), $second->getKey()]);
+});
