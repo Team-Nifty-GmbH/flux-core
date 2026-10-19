@@ -43,7 +43,7 @@ class MobileController extends Controller
             }
         }
 
-        if ($request->has('redirect')) {
+        if ($request->filled('redirect')) {
             $redirectPath = $request->input('redirect');
 
             if (auth()->check()) {
