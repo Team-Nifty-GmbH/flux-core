@@ -6,6 +6,7 @@ use FluxErp\Models\DeviceToken;
 use Illuminate\Notifications\Notification;
 use Kreait\Firebase\Contract\Messaging;
 use Kreait\Firebase\Exception\FirebaseException;
+use Kreait\Firebase\Exception\Messaging\NotFound;
 use Kreait\Firebase\Exception\MessagingException;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Messaging\CloudMessage;
@@ -66,8 +67,10 @@ class FcmChannel
 
                 $message = strtolower($e->getMessage());
 
+                // send() throws the api's NotFound with its bare message "Requested entity was not found."
                 if (
-                    str_contains($message, 'not-found')
+                    $e instanceof NotFound
+                    || str_contains($message, 'not-found')
                     || str_contains($message, 'invalid-registration-token')
                     || str_contains($message, 'notregistered')
                     || str_contains($message, 'not-registered')

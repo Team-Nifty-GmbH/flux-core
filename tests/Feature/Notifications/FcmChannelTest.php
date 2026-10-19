@@ -56,6 +56,27 @@ test('deactivates a device token that firebase no longer knows', function (): vo
     expect($deviceToken->fresh()->is_active)->toBeFalse();
 });
 
+test('deactivates a device token when send reports the bare not found error', function (): void {
+    $deviceToken = DeviceToken::query()->create([
+        'authenticatable_type' => morph_alias($this->user::class),
+        'authenticatable_id' => $this->user->getKey(),
+        'device_id' => 'dead-device',
+        'token' => 'dead-token',
+        'platform' => DevicePlatformEnum::ios,
+        'is_active' => true,
+    ]);
+
+    // Messaging::send() rethrows the converted api error as is, with the api's own message.
+    $messaging = Mockery::mock(Messaging::class);
+    $messaging->shouldReceive('send')
+        ->once()
+        ->andThrow(new NotFound('Requested entity was not found.'));
+
+    fcmChannelWith($messaging)->send($this->user, fcmTestNotification());
+
+    expect($deviceToken->fresh()->is_active)->toBeFalse();
+});
+
 test('keeps a device token that firebase accepts', function (): void {
     $deviceToken = DeviceToken::query()->create([
         'authenticatable_type' => morph_alias($this->user::class),
