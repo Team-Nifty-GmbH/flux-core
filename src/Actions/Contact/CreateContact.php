@@ -50,7 +50,11 @@ class CreateContact extends FluxAction
                     continue;
                 }
 
-                $attachDiscounts[] = CreateDiscount::make($discount)
+                $attachDiscounts[] = CreateDiscount::make([
+                    ...$discount,
+                    'model_type' => morph_alias(Contact::class),
+                    'model_id' => $contact->getKey(),
+                ])
                     ->checkPermission()
                     ->validate()
                     ->execute()
