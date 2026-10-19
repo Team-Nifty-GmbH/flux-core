@@ -103,6 +103,46 @@ test('saving the account resumes a paused sync', function (): void {
     expect($mailAccount->refresh()->connect())->not->toBeNull();
 });
 
+test('an update without connection changes keeps the failed logins', function (): void {
+    $mailAccount = MailAccount::factory()->create([
+        'host' => 'imap.example.com',
+        'failed_logins' => MailAccount::MAX_FAILED_LOGINS,
+    ]);
+
+    UpdateMailAccount::make([
+        'id' => $mailAccount->getKey(),
+        'has_auto_assign' => ! $mailAccount->has_auto_assign,
+    ])
+        ->validate()
+        ->execute();
+
+    expect($mailAccount->refresh()->failed_logins)->toBe(MailAccount::MAX_FAILED_LOGINS);
+});
+
+test('an update with only the id keeps the failed logins', function (): void {
+    $mailAccount = MailAccount::factory()->create([
+        'host' => 'imap.example.com',
+        'failed_logins' => MailAccount::MAX_FAILED_LOGINS,
+    ]);
+
+    UpdateMailAccount::make(['id' => $mailAccount->getKey()])
+        ->validate()
+        ->execute();
+
+    expect($mailAccount->refresh()->failed_logins)->toBe(MailAccount::MAX_FAILED_LOGINS);
+});
+
+test('changing the server settings resets the failed logins', function (): void {
+    $mailAccount = MailAccount::factory()->create([
+        'host' => 'imap.example.com',
+        'failed_logins' => MailAccount::MAX_FAILED_LOGINS,
+    ]);
+
+    $mailAccount->update(['host' => 'imap.example.org']);
+
+    expect($mailAccount->refresh()->failed_logins)->toBe(0);
+});
+
 test('the settings form knows that the sync is paused', function (): void {
     $mailAccount = MailAccount::factory()->create([
         'failed_logins' => MailAccount::MAX_FAILED_LOGINS,

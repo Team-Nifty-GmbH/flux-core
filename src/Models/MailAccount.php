@@ -32,7 +32,7 @@ class MailAccount extends FluxModel
 {
     use HasPackageFactory, HasUserModification, HasUuid, LogsActivity;
 
-    public const MAX_FAILED_LOGINS = 5;
+    public const int MAX_FAILED_LOGINS = 5;
 
     public bool $supportsHierarchicalFolders = true;
 
@@ -43,10 +43,27 @@ class MailAccount extends FluxModel
 
     private ?Client $imapClient = null;
 
+    protected static function booted(): void
+    {
+        static::updating(function (MailAccount $mailAccount): void {
+            if ($mailAccount->isDirty([
+                'protocol',
+                'host',
+                'port',
+                'encryption',
+                'email',
+                'password',
+                'has_o_auth',
+                'has_valid_certificate',
+            ])) {
+                $mailAccount->failed_logins = 0;
+            }
+        });
+    }
+
     protected function casts(): array
     {
         return [
-            'failed_logins' => 'integer',
             'password' => 'encrypted',
             'smtp_password' => 'encrypted',
             'has_auto_assign' => 'boolean',
@@ -167,6 +184,11 @@ class MailAccount extends FluxModel
         return $this->imapClient;
     }
 
+    public function isSyncPaused(): bool
+    {
+        return $this->failed_logins >= static::MAX_FAILED_LOGINS;
+    }
+
     /**
      * Drop the cached client and connect again.
      *
@@ -213,11 +235,6 @@ class MailAccount extends FluxModel
             );
 
         return $folderIds;
-    }
-
-    public function isSyncPaused(): bool
-    {
-        return $this->failed_logins >= static::MAX_FAILED_LOGINS;
     }
 
     public function mailer(): Mailer
@@ -284,8 +301,8 @@ class MailAccount extends FluxModel
             return;
         }
 
-        $this->forceFill(['failed_logins' => (int) $this->failed_logins + 1])
-            ->syncOriginalAttribute('failed_logins');
+        $this->failed_logins++;
+        $this->syncOriginalAttribute('failed_logins');
 
         resolve_static(MailAccount::class, 'query')
             ->whereKey($this->getKey())
