@@ -264,6 +264,24 @@ test('exchange returns the magic login URL for a successful login state', functi
         ->and(Cache::get(STATE_PREFIX . $code))->toBeNull();
 });
 
+test('magic login URL from exchange leads to the intended url of the session', function (): void {
+    $verifier = pkceVerifier();
+    $code = Str::random(64);
+    Cache::put(STATE_PREFIX . $code, defaultLoginState(pkceChallenge($verifier), $this->user), now()->addMinutes(5));
+
+    $magicLoginUrl = $this->withSession(['url.intended' => url('/orders')])
+        ->postJson(route('passkey-bridge.exchange'), [
+            'code' => $code,
+            'code_verifier' => $verifier,
+        ])
+        ->json('data.magic_login_url');
+
+    auth()->logout();
+
+    $this->get($magicLoginUrl)->assertRedirect(url('/orders'));
+    $this->assertAuthenticatedAs($this->user);
+});
+
 test('exchange returns ok for a successful register state', function (): void {
     $verifier = pkceVerifier();
     $code = Str::random(64);

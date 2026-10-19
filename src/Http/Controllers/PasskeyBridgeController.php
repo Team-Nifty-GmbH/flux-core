@@ -12,6 +12,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Spatie\LaravelPasskeys\Actions\FindPasskeyToAuthenticateAction;
@@ -261,7 +262,7 @@ class PasskeyBridgeController extends Controller
                 'user_type' => $state['user_type'],
                 'user_id' => $state['user_id'],
                 'guard' => 'web',
-                'intended_url' => route('dashboard'),
+                'intended_url' => Session::pull('url.intended', route('dashboard')),
             ],
             $expires
         );
