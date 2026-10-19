@@ -30,6 +30,7 @@ class UpdateMailAccount extends FluxAction
             ->first();
 
         $mailAccount->fill($this->data);
+        $mailAccount->failed_logins = 0;
         $mailAccount->save();
 
         return $mailAccount->withoutRelations()->fresh();

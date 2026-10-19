@@ -32,6 +32,8 @@ class MailAccount extends FluxModel
 {
     use HasPackageFactory, HasUserModification, HasUuid, LogsActivity;
 
+    public const MAX_FAILED_LOGINS = 5;
+
     public bool $supportsHierarchicalFolders = true;
 
     protected $hidden = [
@@ -44,6 +46,7 @@ class MailAccount extends FluxModel
     protected function casts(): array
     {
         return [
+            'failed_logins' => 'integer',
             'password' => 'encrypted',
             'smtp_password' => 'encrypted',
             'has_auto_assign' => 'boolean',
@@ -108,10 +111,14 @@ class MailAccount extends FluxModel
      */
     public function connect(): ?Client
     {
+        if ($this->isSyncPaused()) {
+            return null;
+        }
+
         event(new Connecting($this));
 
         try {
-            return ImapClient::make([
+            $client = ImapClient::make([
                 'protocol' => $this->protocol ?: 'imap',
                 'host' => $this->host,
                 'port' => $this->port,
@@ -123,10 +130,19 @@ class MailAccount extends FluxModel
             ])
                 ->connect();
         } catch (AuthFailedException $e) {
+            $this->setFailedLogins($this->failed_logins + 1);
             logger($e->getMessage(), ['mail_account_id' => $this->id]);
+
+            return null;
+        } catch (ImapServerErrorException $e) {
+            $this->setFailedLogins($this->failed_logins + 1);
+
+            throw $e;
         }
 
-        return null;
+        $this->setFailedLogins(0);
+
+        return $client;
     }
 
     public function disconnectImapClient(): void
@@ -197,6 +213,11 @@ class MailAccount extends FluxModel
         return $folderIds;
     }
 
+    public function isSyncPaused(): bool
+    {
+        return $this->failed_logins >= static::MAX_FAILED_LOGINS;
+    }
+
     public function mailer(): Mailer
     {
         $fromName = $this->smtp_from_name
@@ -252,6 +273,20 @@ class MailAccount extends FluxModel
             && ! $this->mailFolders()
                 ->where('is_sent', true)
                 ->exists();
+    }
+
+    protected function setFailedLogins(int $count): void
+    {
+        if (! $this->exists || $this->failed_logins === $count) {
+            return;
+        }
+
+        $this->forceFill(['failed_logins' => $count])
+            ->syncOriginalAttribute('failed_logins');
+
+        resolve_static(MailAccount::class, 'query')
+            ->whereKey($this->getKey())
+            ->update(['failed_logins' => $count]);
     }
 
     protected function syncFolder(Folder $folder, ?int $parentId = null): array

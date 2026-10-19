@@ -81,6 +81,12 @@
     x-on:open="$tsui.focus('mailAccount.name')"
 >
     <div class="flex flex-col gap-1.5">
+        <div x-cloak x-show="$wire.isSyncPaused">
+            <x-alert
+                color="red"
+                :text="__('The login failed several times in a row, so the sync is paused. Check the credentials and save the account to resume it.')"
+            />
+        </div>
         <x-card>
             <div class="flex flex-col gap-1.5">
                 <x-input
