@@ -304,7 +304,7 @@ class FluxServiceProvider extends ServiceProvider
 
         if (! app()->configurationIsCached()) {
             config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);
-            config(['scout.queue' => env('SCOUT_QUEUE', true)]);
+            config(['scout.queue' => env('SCOUT_QUEUE', true), 'scout.after_commit' => true]);
         }
 
         if ($this->app->runningInConsole()) {

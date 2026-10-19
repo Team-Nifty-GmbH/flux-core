@@ -1,6 +1,11 @@
 <?php
 
 use FluxErp\FluxServiceProvider;
+use FluxErp\Models\Category;
+use FluxErp\Models\Product;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
+use Laravel\Scout\Jobs\MakeSearchable;
 use Meilisearch\Client;
 
 function meilisearchHttpClient(Client $client): object
@@ -29,4 +34,16 @@ test('scout queues index updates by default', function (): void {
         ->invoke(new FluxServiceProvider(app()));
 
     expect(config('scout.queue'))->toBeTrue();
+});
+
+test('scout index updates wait for the commit', function (): void {
+    Queue::fake();
+
+    DB::transaction(function (): void {
+        Category::factory()->create(['model_type' => morph_alias(Product::class)]);
+
+        Queue::assertNotPushed(MakeSearchable::class);
+    });
+
+    Queue::assertPushed(MakeSearchable::class);
 });
