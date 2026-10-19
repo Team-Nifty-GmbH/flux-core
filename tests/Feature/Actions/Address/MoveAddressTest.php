@@ -54,6 +54,32 @@ test('moving the main address hands the role to a remaining address', function (
         ->and($this->secondary->refresh()->is_main_address)->toBeTrue();
 });
 
+test('moving the main address flags only the new main address of the old contact', function (): void {
+    $third = Address::factory()->create([
+        'contact_id' => $this->contact->getKey(),
+        'is_main_address' => false,
+        'is_invoice_address' => false,
+        'is_delivery_address' => false,
+    ]);
+
+    MoveAddress::make([
+        'id' => $this->mainAddress->getKey(),
+        'contact_id' => $this->target->getKey(),
+    ])->validate()->execute();
+
+    $this->contact->refresh();
+    $remaining = Address::query()->where('contact_id', $this->contact->getKey())->get();
+
+    expect($remaining)->toHaveCount(2)
+        ->and($remaining->where('is_main_address', true)->pluck('id')->all())
+        ->toBe([$this->contact->main_address_id])
+        ->and($remaining->where('is_invoice_address', true)->pluck('id')->all())
+        ->toBe([$this->contact->invoice_address_id])
+        ->and($remaining->where('is_delivery_address', true)->pluck('id')->all())
+        ->toBe([$this->contact->delivery_address_id])
+        ->and($third->refresh()->is_main_address)->toBeFalse();
+});
+
 test('a main address stays the main address at a contact that had none', function (): void {
     MoveAddress::make([
         'id' => $this->mainAddress->getKey(),
