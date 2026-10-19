@@ -24,7 +24,7 @@ class UpdateProductPropertyRuleset extends FluxRuleset
             'product_property_group_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => ProductPropertyGroup::class]),
+                app(ModelExists::class, ['model' => ProductPropertyGroup::class, 'subject' => ProductProperty::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
             'property_type_enum' => [
