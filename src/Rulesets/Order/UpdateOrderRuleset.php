@@ -153,7 +153,10 @@ class UpdateOrderRuleset extends FluxRuleset
             ],
             'payment_target' => 'sometimes|required_with:payment_discount_target|integer|min:0',
             'payment_discount_target' => 'integer|min:0|nullable|lte:payment_target',
-            'payment_discount_percent' => 'numeric|min:0|nullable',
+            'payment_discount_percent' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0, 'max' => 1]),
+            ],
             'header_discount' => 'numeric|min:0|nullable',
             'margin' => 'sometimes|numeric|nullable',
             'contract_total_amount' => [
