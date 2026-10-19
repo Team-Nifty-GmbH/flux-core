@@ -10,7 +10,9 @@ use FluxErp\Models\MailAccount;
 use FluxErp\Models\Tag;
 use FluxErp\Rulesets\Communication\CreateCommunicationRuleset;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\FileNameNotAllowed;
 
 class CreateMailMessage extends FluxAction
 {
@@ -69,9 +71,16 @@ class CreateMailMessage extends FluxAction
                     continue;
                 }
 
-                UploadMedia::make($attachment)
-                    ->validate()
-                    ->execute();
+                try {
+                    UploadMedia::make($attachment)
+                        ->validate()
+                        ->execute();
+                } catch (FileNameNotAllowed $exception) {
+                    Log::warning('Skipped mail attachment: ' . $exception->getMessage(), [
+                        'communication_id' => $mailMessage->getKey(),
+                        'file_name' => data_get($attachment, 'file_name'),
+                    ]);
+                }
             }
         } finally {
             config(['media-library.max_file_size' => $maxFileSize]);

@@ -241,3 +241,57 @@ test('sync mail account job closes the imap client even when the sync blows up',
 
     expect((new ReflectionProperty(MailAccount::class, 'imapClient'))->getValue($mailAccount))->toBeNull();
 });
+
+test('sync mail account job stops before its timeout and leaves the rest to the next run', function (): void {
+    $mailAccount = MailAccount::factory()
+        ->has(MailFolder::factory()->count(3)->state(['is_active' => true]))
+        ->create();
+
+    $spy = new class() implements MailSyncDriver, ReportsSyncProgress
+    {
+        public ?Closure $callback = null;
+
+        public array $stored = [];
+
+        public function syncFolders(MailAccount $account): array
+        {
+            return [];
+        }
+
+        public function syncMessages(MailFolder $folder): void
+        {
+            foreach ([1, 2, 3] as $uid) {
+                $this->stored[] = $folder->getKey() . ':' . $uid;
+                $this->travel(20);
+                ($this->callback)($uid, 3);
+            }
+        }
+
+        public function testConnection(MailAccount $account): bool
+        {
+            return true;
+        }
+
+        public function withProgressCallback(?Closure $callback): static
+        {
+            $this->callback = $callback;
+
+            return $this;
+        }
+
+        private function travel(int $minutes): void
+        {
+            Carbon\Carbon::setTestNow(now()->addMinutes($minutes));
+        }
+    };
+
+    app(MailDriverManager::class)->extend('imap', fn () => $spy);
+
+    (new SyncMailAccountJob($mailAccount))->handle();
+
+    expect($spy->stored)->toBe([
+        $mailAccount->mailFolders->first()->getKey() . ':1',
+        $mailAccount->mailFolders->first()->getKey() . ':2',
+        $mailAccount->mailFolders->first()->getKey() . ':3',
+    ]);
+});

@@ -90,13 +90,7 @@ class ImapMailSyncDriver implements MailSyncDriver, ReportsSyncProgress
             return $maxUid;
         }
 
-        $client = $folder->mailAccount->getImapClient();
-
-        if (! $client) {
-            return null;
-        }
-
-        $imapFolder = $client->getFolderByPath($folder->slug, utf7: true);
+        $imapFolder = $folder->mailAccount->getImapFolder($folder->slug);
 
         if (! $imapFolder) {
             return null;
