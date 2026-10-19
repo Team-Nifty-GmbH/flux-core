@@ -53,7 +53,7 @@ class UpdateTaskRuleset extends FluxRuleset
             ],
             'name' => 'sometimes|required|string|max:255',
             'description' => 'string|nullable',
-            'start_date' => 'present|date|nullable',
+            'start_date' => 'sometimes|date|nullable',
             'start_time' => [
                 'nullable',
                 'exclude_if:start_date,null',
@@ -65,7 +65,7 @@ class UpdateTaskRuleset extends FluxRuleset
                 'integer',
                 'min:0',
             ],
-            'due_date' => 'present|date|nullable|after_or_equal:start_date',
+            'due_date' => 'sometimes|date|nullable|after_or_equal:start_date',
             'due_time' => [
                 'nullable',
                 'exclude_if:due_date,null',
