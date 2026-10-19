@@ -97,3 +97,29 @@ test('a default payment type the rules reject is not put on a new contact', func
     expect($contact)->toBeInstanceOf(Contact::class)
         ->and($contact->payment_type_id)->toBeNull();
 });
+
+test('update contact keeps a new inline discount', function (): void {
+    $contact = Contact::factory()->create();
+
+    $action = UpdateContact::make([
+        'id' => $contact->getKey(),
+        'discounts' => [
+            ['discount' => 0.1, 'is_percentage' => true, 'sort_number' => 0],
+        ],
+    ])
+        ->validate();
+
+    expect($action->getData('discounts'))
+        ->toBe([['sort_number' => 0, 'is_percentage' => true, 'discount' => 0.1]]);
+});
+
+test('update contact rejects an inline discount without its required fields', function (): void {
+    $contact = Contact::factory()->create();
+
+    UpdateContact::assertValidationErrors([
+        'id' => $contact->getKey(),
+        'discounts' => [
+            ['discount' => 0.1],
+        ],
+    ], ['discounts.0.is_percentage', 'discounts.0.sort_number']);
+});
