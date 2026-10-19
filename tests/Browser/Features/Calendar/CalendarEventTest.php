@@ -485,3 +485,44 @@ test('dragging a non-recurring calendar event saves immediately without confirm 
 
     $page->assertNoJavascriptErrors();
 });
+
+test('toggling a calendar sends only the ids of the active calendars', function (): void {
+    createCalendarWithOwner();
+
+    $page = visitCalendar();
+
+    $page->script(<<<'JS'
+        () => {
+            if (window.toggleProbe) {
+                return;
+            }
+
+            const calendar = Alpine.$data(document.querySelector('[calendar-root]')).calendar;
+            window.toggleProbe = { unchecked: calendar.getEventSources()[0].id, calls: [] };
+
+            const originalFetch = window.fetch;
+            window.fetch = (input, init) => {
+                window.toggleProbe.calls.push(
+                    ...(JSON.parse(init?.body || '{}').components || [])
+                        .flatMap((component) => component.calls || [])
+                        .filter((call) => call.method === 'toggleEventSource')
+                        .map((call) => call.params[0]),
+                );
+
+                return originalFetch(input, init);
+            };
+
+            document.querySelector('[x-on\\:folder-tree-uncheck]')
+                .dispatchEvent(new CustomEvent('folder-tree-uncheck', { detail: { id: window.toggleProbe.unchecked } }));
+
+            window.toggleProbe.sources = calendar.getEventSources().map((source) => source.id);
+        }
+    JS);
+
+    waitForCondition($page, '() => window.toggleProbe.calls.length > 0');
+
+    $probe = $page->script('() => window.toggleProbe');
+
+    expect($probe['sources'])->not->toBeEmpty()->not->toContain($probe['unchecked'])
+        ->and(end($probe['calls']))->toBe(array_map(fn (string $id): array => ['publicId' => $id], $probe['sources']));
+});
