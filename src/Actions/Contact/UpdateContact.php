@@ -64,7 +64,7 @@ class UpdateContact extends DispatchableFluxAction implements SupportsBulkExecut
                 if ($syncType !== 'detach') {
                     $selectedDiscounts[] = CreateDiscount::make([
                         ...$discount,
-                        'model_type' => morph_alias(Contact::class),
+                        'model_type' => $contact->getMorphClass(),
                         'model_id' => $contact->getKey(),
                     ])
                         ->checkPermission()
