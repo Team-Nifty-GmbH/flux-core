@@ -5,6 +5,7 @@ namespace FluxErp\Actions\Discount;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Discount;
 use FluxErp\Rulesets\Discount\CreateDiscountRuleset;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
 class CreateDiscount extends FluxAction
@@ -21,8 +22,15 @@ class CreateDiscount extends FluxAction
 
     public function performAction(): Discount
     {
+        $orderColumn = Arr::pull($this->data, 'order_column');
+
         $discount = app(Discount::class, ['attributes' => $this->data]);
         $discount->save();
+
+        if ($orderColumn) {
+            $discount->order_column = $orderColumn;
+            $discount->save();
+        }
 
         return $discount->fresh();
     }

@@ -4,6 +4,7 @@ namespace FluxErp\Rulesets\VatRate;
 
 use FluxErp\Models\VatRate;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
 
 class UpdateVatRateRuleset extends FluxRuleset
@@ -18,8 +19,12 @@ class UpdateVatRateRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => VatRate::class]),
             ],
-            'name' => 'required|string|max:255',
-            'rate_percentage' => 'required|numeric|lt:1|min:0',
+            'name' => 'sometimes|required|string|max:255',
+            'rate_percentage' => [
+                'sometimes',
+                'required',
+                app(Numeric::class, ['min' => 0]),
+            ],
             'footer_text' => 'string|nullable',
             'is_default' => 'boolean',
             'is_purchase' => 'boolean',

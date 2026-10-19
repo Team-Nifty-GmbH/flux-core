@@ -33,6 +33,8 @@ class MailAccount extends FluxModel
 {
     use HasPackageFactory, HasUserModification, HasUuid, LogsActivity;
 
+    public const int MAX_FAILED_LOGINS = 5;
+
     public bool $supportsHierarchicalFolders = true;
 
     protected $hidden = [
@@ -43,6 +45,24 @@ class MailAccount extends FluxModel
     protected ?Collection $imapFolders = null;
 
     private ?Client $imapClient = null;
+
+    protected static function booted(): void
+    {
+        static::updating(function (MailAccount $mailAccount): void {
+            if ($mailAccount->isDirty([
+                'protocol',
+                'host',
+                'port',
+                'encryption',
+                'email',
+                'password',
+                'has_o_auth',
+                'has_valid_certificate',
+            ])) {
+                $mailAccount->failed_logins = 0;
+            }
+        });
+    }
 
     protected function casts(): array
     {
@@ -111,10 +131,14 @@ class MailAccount extends FluxModel
      */
     public function connect(): ?Client
     {
+        if ($this->isSyncPaused()) {
+            return null;
+        }
+
         event(new Connecting($this));
 
         try {
-            return ImapClient::make([
+            $client = ImapClient::make([
                 'protocol' => $this->protocol ?: 'imap',
                 'host' => $this->host,
                 'port' => $this->port,
@@ -126,10 +150,21 @@ class MailAccount extends FluxModel
             ])
                 ->connect();
         } catch (AuthFailedException $e) {
+            $this->countFailedLogin();
             logger($e->getMessage(), ['mail_account_id' => $this->id]);
+
+            return null;
+        } catch (ImapServerErrorException $e) {
+            if (! str_contains($e->getMessage(), '[UNAVAILABLE]')) {
+                $this->countFailedLogin();
+            }
+
+            throw $e;
         }
 
-        return null;
+        $this->clearFailedLogins();
+
+        return $client;
     }
 
     public function disconnectImapClient(): void
@@ -166,6 +201,54 @@ class MailAccount extends FluxModel
         }
 
         return $this->imapFolders->get($path);
+    }
+
+    public function isSyncPaused(): bool
+    {
+        return $this->failed_logins >= static::MAX_FAILED_LOGINS;
+    }
+
+    public function mailer(): Mailer
+    {
+        $fromName = $this->smtp_from_name
+            ?: auth()->user()?->name
+            ?: config('mail.from.name');
+
+        $config = [
+            'transport' => $this->smtp_mailer,
+            'username' => $this->smtp_user ?? $this->smtp_email,
+            'password' => $this->smtp_password,
+            'host' => $this->smtp_host,
+            'port' => $this->smtp_port,
+            'encryption' => $this->smtp_encryption,
+            'from_address' => $this->smtp_email,
+            'from_name' => $fromName,
+        ];
+
+        $mailer = Mail::build($config);
+
+        if ($this->smtp_has_valid_certificate === false) {
+            $transport = $mailer->getSymfonyTransport();
+            $stream = $transport instanceof EsmtpTransport ? $transport->getStream() : null;
+
+            if ($stream instanceof SocketStream) {
+                $stream->setStreamOptions([
+                    'ssl' => [
+                        'verify_peer' => false,
+                        'verify_peer_name' => false,
+                        'allow_self_signed' => true,
+                    ],
+                ]);
+            }
+        }
+
+        $mailer->alwaysFrom($this->smtp_email, $fromName);
+
+        if ($this->smtp_reply_to) {
+            $mailer->alwaysReplyTo($this->smtp_reply_to);
+        }
+
+        return $mailer;
     }
 
     /**
@@ -216,50 +299,35 @@ class MailAccount extends FluxModel
         return $folderIds;
     }
 
-    public function mailer(): Mailer
+    // Protected methods
+    protected function clearFailedLogins(): void
     {
-        $fromName = $this->smtp_from_name
-            ?: auth()->user()?->name
-            ?: config('mail.from.name');
-
-        $config = [
-            'transport' => $this->smtp_mailer,
-            'username' => $this->smtp_user ?? $this->smtp_email,
-            'password' => $this->smtp_password,
-            'host' => $this->smtp_host,
-            'port' => $this->smtp_port,
-            'encryption' => $this->smtp_encryption,
-            'from_address' => $this->smtp_email,
-            'from_name' => $fromName,
-        ];
-
-        $mailer = Mail::build($config);
-
-        if ($this->smtp_has_valid_certificate === false) {
-            $transport = $mailer->getSymfonyTransport();
-            $stream = $transport instanceof EsmtpTransport ? $transport->getStream() : null;
-
-            if ($stream instanceof SocketStream) {
-                $stream->setStreamOptions([
-                    'ssl' => [
-                        'verify_peer' => false,
-                        'verify_peer_name' => false,
-                        'allow_self_signed' => true,
-                    ],
-                ]);
-            }
+        if (! $this->exists || ! $this->failed_logins) {
+            return;
         }
 
-        $mailer->alwaysFrom($this->smtp_email, $fromName);
+        $this->forceFill(['failed_logins' => 0])
+            ->syncOriginalAttribute('failed_logins');
 
-        if ($this->smtp_reply_to) {
-            $mailer->alwaysReplyTo($this->smtp_reply_to);
-        }
-
-        return $mailer;
+        resolve_static(MailAccount::class, 'query')
+            ->whereKey($this->getKey())
+            ->update(['failed_logins' => 0]);
     }
 
-    // Protected methods
+    protected function countFailedLogin(): void
+    {
+        if (! $this->exists) {
+            return;
+        }
+
+        $this->failed_logins++;
+        $this->syncOriginalAttribute('failed_logins');
+
+        resolve_static(MailAccount::class, 'query')
+            ->whereKey($this->getKey())
+            ->increment('failed_logins');
+    }
+
     /**
      * Servers name their sent folder in the language of the mailbox. Only the english defaults
      * are recognized, and only when the folder first appears, so a folder unmarked by hand stays
