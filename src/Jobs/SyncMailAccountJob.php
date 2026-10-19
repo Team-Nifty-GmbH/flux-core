@@ -94,18 +94,30 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
             $deadline = now()->addSeconds($this->uniqueFor() - 600);
 
             try {
-                $folders->each(function (MailFolder $folder, int $index) use ($driver, $total, $deadline, &$failure): bool {
+                $folders->each(function (MailFolder $folder, int $index) use (
+                    $driver,
+                    $total,
+                    $deadline,
+                    &$failure
+                ): bool {
                     if (now()->greaterThanOrEqualTo($deadline)) {
                         return false;
                     }
 
                     if ($driver instanceof ReportsSyncProgress) {
                         $driver->withProgressCallback(
-                            function (int $processed, int $totalMessages) use ($index, $total, $folder, $deadline): void {
+                            function (int $processed, int $totalMessages) use (
+                                $index,
+                                $total,
+                                $folder,
+                                $deadline
+                            ): void {
+                                $folderProgress = $totalMessages > 0
+                                    ? min($processed / $totalMessages, 1)
+                                    : 1;
+
                                 $this->queueUpdate([
-                                    'progress' => ($index + ($totalMessages > 0 ? min($processed / $totalMessages, 1) : 1))
-                                        / $total
-                                        * 100,
+                                    'progress' => ($index + $folderProgress) / $total * 100,
                                     'message' => __(':processed of :total mails (:folder)', [
                                         'processed' => $processed,
                                         'total' => $totalMessages,
