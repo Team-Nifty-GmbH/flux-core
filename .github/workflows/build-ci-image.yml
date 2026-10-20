@@ -10,7 +10,7 @@ jobs:
   build:
     # x86 host on purpose: it emulates arm64 through QEMU, which is reliable in
     # this direction. Building on an arm64 runner would need amd64 emulation.
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: ubuntu-latest
     timeout-minutes: 120
     permissions:
       packages: write
