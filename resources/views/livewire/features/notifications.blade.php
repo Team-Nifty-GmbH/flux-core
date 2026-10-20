@@ -58,6 +58,7 @@
                     id="notifications-toast-list"
                     class="space-y-3 p-0"
                     x-ref="toasts"
+                    wire:ignore
                 >
                     <x-toast scope="relative" />
                     <div x-intersect="show && $wire.showNotifications()"></div>

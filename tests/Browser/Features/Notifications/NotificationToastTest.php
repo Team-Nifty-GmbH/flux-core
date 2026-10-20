@@ -175,3 +175,54 @@ test('a visible toast keeps its progress when navigating', function (): void {
 
     $page->assertNoJavascriptErrors();
 });
+
+test('closing one notification in the slide keeps the other unread notifications listed', function (): void {
+    foreach (['First unread', 'Second unread', 'Third unread'] as $description) {
+        $this->user->notifications()->create([
+            'id' => (string) Str::uuid(),
+            'type' => 'test',
+            'data' => [
+                'title' => 'Unread notification',
+                'description' => $description,
+            ],
+        ]);
+    }
+
+    $page = visit(route('dashboard'))->assertNoSmoke();
+
+    waitForElement($page, '[wire\\\\:click="showNotifications()"]', 10000);
+
+    $page->script(<<<'JS'
+        () => document.querySelector('[wire\\:click="showNotifications()"]').click()
+    JS);
+
+    waitForCondition($page, <<<'JS'
+        () => [...document.querySelectorAll('[x-ref="toasts"] [x-data^="tallstackui_toastLoop"]')]
+            .filter((toast) => toast.offsetParent !== null).length === 3
+    JS, 10000);
+
+    $page->script(<<<'JS'
+        () => [...document.querySelectorAll('[x-ref="toasts"] [x-data^="tallstackui_toastLoop"]')]
+            .find((toast) => toast.innerText.includes('First unread'))
+            .querySelector('button')
+            .click()
+    JS);
+
+    waitForCondition($page, <<<'JS'
+        () => Livewire.all().find((component) => component.name === 'features.notifications').$wire.unread === 2
+    JS, 10000);
+
+    $listed = $page->script(<<<'JS'
+        () => [...document.querySelectorAll('[x-ref="toasts"] [x-data^="tallstackui_toastLoop"]')]
+            .filter((toast) => toast.offsetParent !== null)
+            .map((toast) => toast.innerText.includes('Second unread')
+                ? 'second'
+                : (toast.innerText.includes('Third unread') ? 'third' : 'other'))
+            .sort()
+    JS);
+
+    expect($listed)->toBe(['second', 'third'])
+        ->and($this->user->unreadNotifications()->count())->toBe(2);
+
+    $page->assertNoJavascriptErrors();
+});
