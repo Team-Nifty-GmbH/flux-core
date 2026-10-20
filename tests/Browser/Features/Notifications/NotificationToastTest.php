@@ -208,7 +208,9 @@ test('closing one notification in the slide keeps the other unread notifications
             .click()
     JS);
 
-    $page->wait(2);
+    waitForCondition($page, <<<'JS'
+        () => Livewire.all().find((component) => component.name === 'features.notifications').$wire.unread === 2
+    JS, 10000);
 
     $listed = $page->script(<<<'JS'
         () => [...document.querySelectorAll('[x-ref="toasts"] [x-data^="tallstackui_toastLoop"]')]
