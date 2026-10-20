@@ -19,6 +19,10 @@ return [
         'timeout' => (int) env('MEILISEARCH_TIMEOUT', 3),
     ],
 
+    'scout' => [
+        'queue' => env('SCOUT_QUEUE', true),
+    ],
+
     'media' => [
         'conversion' => env('MEDIA_CONVERSIONS_DISK', 'public'),
         'disk' => env('MEDIA_DISK', 'local'),
