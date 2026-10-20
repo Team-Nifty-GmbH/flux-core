@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Actions\Printer\DeletePrinter;
+use FluxErp\Actions\Printer\GeneratePrinterBridgeConfig;
 use FluxErp\Actions\Printer\UpdatePrinter;
 use FluxErp\Livewire\DataTables\PrinterList;
 use FluxErp\Livewire\Forms\PrinterBridgeConfigForm;
@@ -23,6 +24,13 @@ class Printers extends PrinterList
     public ?string $deleteSpoolerName = null;
 
     protected ?string $includeBefore = 'flux::livewire.settings.printers';
+
+    public function mount(): void
+    {
+        parent::mount();
+
+        $this->configForm->fill(resolve_static(GeneratePrinterBridgeConfig::class, 'defaults'));
+    }
 
     protected function getTableActions(): array
     {
