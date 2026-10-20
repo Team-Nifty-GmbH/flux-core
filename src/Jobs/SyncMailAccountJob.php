@@ -15,6 +15,7 @@ use FluxErp\Traits\Job\TracksSchedule;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
@@ -26,8 +27,11 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
 
     private readonly MailAccount $mailAccount;
 
-    public function __construct(MailAccount|string $email, public readonly bool $onlyFolders = false)
-    {
+    public function __construct(
+        MailAccount|string $email,
+        public readonly bool $onlyFolders = false,
+        public readonly ?int $mailFolderId = null
+    ) {
         if (is_string($email)) {
             $this->mailAccount = resolve_static(MailAccount::class, 'query')
                 ->where('email', $email)
@@ -79,7 +83,9 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
         try {
             $driver = app(MailDriverManager::class)->driver($this->mailAccount->protocol);
 
-            $driver->syncFolders($this->mailAccount);
+            if (is_null($this->mailFolderId)) {
+                $driver->syncFolders($this->mailAccount);
+            }
 
             if ($this->onlyFolders) {
                 return;
@@ -87,6 +93,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
 
             $folders = $this->mailAccount->mailFolders()
                 ->where('is_active', true)
+                ->when($this->mailFolderId, fn (Builder $query, int $id): Builder => $query->whereKey($id))
                 ->get()
                 ->each(fn (MailFolder $folder) => $folder->setRelation('mailAccount', $this->mailAccount));
             $total = $folders->count();
