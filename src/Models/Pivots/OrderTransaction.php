@@ -35,12 +35,14 @@ class OrderTransaction extends FluxPivot
                 $orderTransaction->order->calculatePaymentState()->save();
             }
 
-            if ($orderTransaction->transaction) {
+            $transaction = $orderTransaction->transaction()->withTrashed()->first();
+
+            if ($transaction) {
                 if ($orderTransaction->is_accepted) {
-                    $orderTransaction->transaction->is_ignored = false;
+                    $transaction->is_ignored = false;
                 }
 
-                $orderTransaction->transaction->calculateBalance()->save();
+                $transaction->calculateBalance()->save();
             }
         });
 
@@ -49,7 +51,7 @@ class OrderTransaction extends FluxPivot
                 $orderTransaction->order->calculatePaymentState()->save();
             }
 
-            $orderTransaction->transaction?->calculateBalance()->save();
+            $orderTransaction->transaction()->withTrashed()->first()?->calculateBalance()->save();
         });
     }
 

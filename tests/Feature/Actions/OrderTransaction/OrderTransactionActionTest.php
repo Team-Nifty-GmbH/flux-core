@@ -95,3 +95,18 @@ test('update order transaction of a deleted transaction', function (): void {
 
     expect($ot->refresh()->amount)->toEqual(50.00);
 });
+
+test('deleting the assignment of a deleted transaction recalculates its balance', function (): void {
+    $this->transaction->update(['amount' => 100, 'contact_bank_connection_id' => null]);
+    $ot = OrderTransaction::factory()->create([
+        'transaction_id' => $this->transaction->getKey(),
+        'order_id' => $this->order->getKey(),
+        'amount' => 100,
+        'is_accepted' => true,
+    ]);
+    $this->transaction->delete();
+
+    DeleteOrderTransaction::make(['pivot_id' => $ot->getKey()])->validate()->execute();
+
+    expect(Transaction::withTrashed()->find($this->transaction->getKey())->balance)->toEqual(100);
+});
