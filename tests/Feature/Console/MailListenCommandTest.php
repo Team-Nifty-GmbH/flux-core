@@ -4,6 +4,7 @@ use FluxErp\Jobs\SyncMailAccountJob;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use Illuminate\Bus\UniqueLock;
+use Illuminate\Console\Command;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Process\PendingProcess;
 use Illuminate\Support\Facades\Cache;
@@ -148,4 +149,41 @@ test('a new message that arrives while the account syncs is synced once that syn
         SyncMailAccountJob::class,
         fn (SyncMailAccountJob $job): bool => $job->mailFolderId === $inbox->getKey()
     );
+});
+
+test('a listener ends with invalid when the server does not support idle', function (): void {
+    [$mailAccount] = listeningMailAccount();
+
+    $capabilities = Mockery::mock(Response::class);
+    $capabilities->shouldReceive('validatedData')->andReturn(['IMAP4rev1']);
+
+    $connection = Mockery::mock(ImapProtocol::class);
+    $connection->shouldReceive('getCapabilities')->andReturn($capabilities);
+    $connection->shouldNotReceive('idle');
+
+    $client = Mockery::mock(Client::class);
+    $client->shouldReceive('connect')->andReturnSelf();
+    $client->shouldReceive('getConnection')->andReturn($connection);
+    $client->shouldReceive('disconnect');
+    ImapClient::shouldReceive('make')->andReturn($client);
+
+    $this->artisan('flux:mail-listen', ['--account' => $mailAccount->getKey()])
+        ->assertExitCode(Command::INVALID);
+});
+
+test('the listener does not restart an account whose server does not support idle', function (): void {
+    Process::fake(['*' => Process::result(exitCode: Command::INVALID)]);
+    Sleep::fake();
+    listeningMailAccount();
+
+    $sleeps = 0;
+    Sleep::whenFakingSleep(function () use (&$sleeps): void {
+        if (++$sleeps === 3) {
+            restartListener();
+        }
+    });
+
+    $this->artisan('flux:mail-listen')->assertSuccessful();
+
+    Process::assertRanTimes(fn (PendingProcess $process): bool => true, 1);
 });
