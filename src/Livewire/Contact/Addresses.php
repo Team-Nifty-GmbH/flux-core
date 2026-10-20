@@ -18,6 +18,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
@@ -41,6 +42,9 @@ class Addresses extends Component
     public ContactForm $contact;
 
     public bool $edit = false;
+
+    #[Locked]
+    public array $listenedAddressIds = [];
 
     public ?int $moveToContactId = null;
 
@@ -175,8 +179,8 @@ class Addresses extends Component
         $model = app(Address::class);
 
         $listeners = [];
-        foreach ($this->addresses as $address) {
-            $model->id = $address['id'];
+        foreach ($this->listenedAddressIds as $addressId) {
+            $model->id = $addressId;
             $channel = 'echo-private:' . $model->broadcastChannel();
             $listeners[$channel . ',.AddressUpdated'] = 'addressUpdated';
             $listeners[$channel . ',.AddressDeleted'] = 'addressDeleted';
@@ -248,14 +252,9 @@ class Addresses extends Component
             ->get()
             ->each(fn (Address $address) => $address->append('postal_address'));
 
-        foreach ($addresses as $address) {
-            $this->listeners[
-                'echo-private:' . $address->broadcastChannel(false) . ',.AddressUpdated'
-            ] = 'addressUpdated';
-            $this->listeners[
-                'echo-private:' . $address->broadcastChannel(false) . ',.AddressDeleted'
-            ] = 'addressDeleted';
-        }
+        $this->listenedAddressIds = array_values(
+            array_unique(array_merge($this->listenedAddressIds, $addresses->modelKeys()))
+        );
 
         $this->addresses = $addresses->toArray();
     }
