@@ -164,3 +164,47 @@ test('goes back to the contacts when the only address is deleted from the pane',
         ->assertHasNoErrors()
         ->assertRedirect(route('contacts.contacts'));
 });
+
+test('an update of an address that left the contact after loading does not fail', function (): void {
+    $address = Address::factory()->create(['contact_id' => $this->contactForm->id]);
+
+    $component = Livewire::actingAs($this->user)
+        ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm]);
+
+    $address->update(['contact_id' => Contact::factory()->create()->getKey()]);
+
+    $component->call('loadAddresses')
+        ->dispatch(
+            'echo-private:' . $address->broadcastChannel(false) . ',.AddressUpdated',
+            ['model' => ['id' => $address->getKey()]]
+        )
+        ->assertOk()
+        ->assertSet('addresses', fn (array $addresses): bool => ! in_array(
+            $address->getKey(),
+            array_column($addresses, 'id')
+        ));
+});
+
+test('an update of the selected address after it left the contact does not show it anymore', function (): void {
+    $address = Address::factory()->create(['contact_id' => $this->contactForm->id]);
+    $addressForm = new AddressForm(Livewire::new(Addresses::class), 'address');
+    $addressForm->fill($address);
+
+    $component = Livewire::actingAs($this->user)
+        ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $addressForm])
+        ->assertSet('address.id', $address->getKey());
+
+    $address->update(['contact_id' => Contact::factory()->create()->getKey()]);
+
+    $component
+        ->dispatch(
+            'echo-private:' . $address->broadcastChannel(false) . ',.AddressUpdated',
+            ['model' => ['id' => $address->getKey()]]
+        )
+        ->assertOk()
+        ->assertNotSet('address.id', $address->getKey())
+        ->assertSet('addresses', fn (array $addresses): bool => ! in_array(
+            $address->getKey(),
+            array_column($addresses, 'id')
+        ));
+});
