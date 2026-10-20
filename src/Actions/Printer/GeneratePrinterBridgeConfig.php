@@ -107,9 +107,7 @@ class GeneratePrinterBridgeConfig extends FluxAction
     {
         $mercureEnabled = $this->data['mercure_enabled'] ?? null;
 
-        foreach (static::defaults(is_null($mercureEnabled) ? null : (bool) $mercureEnabled) as $key => $value) {
-            $this->data[$key] ??= $value;
-        }
+        $this->data += static::defaults(is_null($mercureEnabled) ? null : (bool) $mercureEnabled);
     }
 
     protected function validateData(): void
@@ -118,7 +116,7 @@ class GeneratePrinterBridgeConfig extends FluxAction
 
         if ($this->getData('mercure_enabled') && ! resolve_static(MercureHubConfig::class, 'usesMercure')) {
             throw ValidationException::withMessages([
-                'mercure_enabled' => [__('This instance does not broadcast over Mercure.')],
+                'mercure_enabled' => ['This instance does not broadcast over Mercure.'],
             ])
                 ->errorBag('generatePrinterBridgeConfig');
         }
