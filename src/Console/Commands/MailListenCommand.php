@@ -4,7 +4,10 @@ namespace FluxErp\Console\Commands;
 
 use FluxErp\Jobs\SyncMailAccountJob;
 use FluxErp\Models\MailAccount;
+use Illuminate\Bus\UniqueLock;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Bus\Dispatcher;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Contracts\Process\InvokedProcess;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
@@ -33,20 +36,24 @@ class MailListenCommand extends Command
     {
         /** @var array<int, InvokedProcess> $processes */
         $processes = [];
+        $versions = [];
 
         while (! $this->shouldRestart($restartSignal)) {
-            $accountIds = $this->listenableAccounts()->pluck('id')->all();
+            $accounts = $this->listenableAccounts()->pluck('updated_at', 'id')->map(fn ($updatedAt) => (string) $updatedAt);
 
-            foreach (array_diff(array_keys($processes), $accountIds) as $accountId) {
-                $processes[$accountId]->signal(SIGTERM);
-                unset($processes[$accountId]);
+            foreach ($processes as $accountId => $process) {
+                if ($accounts->get($accountId) !== $versions[$accountId]) {
+                    $process->stop();
+                    unset($processes[$accountId], $versions[$accountId]);
+                }
             }
 
-            foreach ($accountIds as $accountId) {
+            foreach ($accounts as $accountId => $version) {
                 if (! ($processes[$accountId] ?? null)?->running()) {
                     $processes[$accountId] = Process::path(base_path())
                         ->forever()
                         ->start([PHP_BINARY, 'artisan', $this->getName(), '--account=' . $accountId]);
+                    $versions[$accountId] = $version;
                 }
             }
 
@@ -54,7 +61,7 @@ class MailListenCommand extends Command
         }
 
         foreach ($processes as $process) {
-            $process->signal(SIGTERM);
+            $process->stop();
         }
 
         return static::SUCCESS;
@@ -79,8 +86,20 @@ class MailListenCommand extends Command
                 return static::FAILURE;
             }
 
-            $client->openFolder($inbox->slug, true);
             $connection = $client->getConnection();
+
+            if (! in_array('IDLE', $connection->getCapabilities()->validatedData())) {
+                $mailAccount->disconnectImapClient();
+
+                while (! $this->shouldRestart($restartSignal)) {
+                    Sleep::for(60)->seconds();
+                }
+
+                return static::SUCCESS;
+            }
+
+            $client->openFolder($inbox->slug, true);
+            $syncPending = false;
 
             while (! $this->shouldRestart($restartSignal)) {
                 $connection->idle();
@@ -94,23 +113,38 @@ class MailListenCommand extends Command
                             throw $exception;
                         }
 
-                        continue;
+                        $line = '';
                     }
 
-                    if (str_contains($line, 'EXISTS')) {
-                        SyncMailAccountJob::dispatch($mailAccount, false, $inbox->getKey());
+                    if ($syncPending || stripos($line, 'EXISTS') !== false) {
+                        $syncPending = ! $this->dispatchSync(
+                            new SyncMailAccountJob($mailAccount, false, $inbox->getKey())
+                        );
                     }
                 }
 
                 $connection->done();
             }
-        } catch (ConnectionFailedException|RuntimeException) {
+        } catch (ConnectionFailedException|RuntimeException $exception) {
+            report($exception);
+
             return static::FAILURE;
         } finally {
             $mailAccount->disconnectImapClient();
         }
 
         return static::SUCCESS;
+    }
+
+    protected function dispatchSync(SyncMailAccountJob $job): bool
+    {
+        if (! (new UniqueLock(app(Repository::class)))->acquire($job)) {
+            return false;
+        }
+
+        app(Dispatcher::class)->dispatch($job);
+
+        return true;
     }
 
     protected function listenableAccounts(): Builder
