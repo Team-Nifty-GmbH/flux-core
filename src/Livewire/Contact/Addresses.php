@@ -100,13 +100,11 @@ class Addresses extends Component
     {
         $model = $params['model'];
 
+        $this->loadAddresses();
+
         if ($model['id'] === $this->address->id) {
             $this->reloadAddress();
-
-            return;
         }
-
-        $this->loadAddresses();
     }
 
     #[Renderless]
@@ -305,8 +303,16 @@ class Addresses extends Component
 
         $address = resolve_static(Address::class, 'query')
             ->whereKey($this->address->id)
+            ->where('contact_id', $this->contact->id)
             ->with('contactOptions')
             ->first();
+
+        if (is_null($address)) {
+            $this->address->reset('id');
+            $this->selectFirstAddress();
+
+            return;
+        }
 
         $this->addressId = $this->address->id;
 
