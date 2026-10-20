@@ -512,8 +512,9 @@ test('toggling a calendar sends only the ids of the active calendars', function 
                 return originalFetch(input, init);
             };
 
-            document.querySelector('[x-on\\:folder-tree-uncheck]')
-                .dispatchEvent(new CustomEvent('folder-tree-uncheck', { detail: { id: window.toggleProbe.unchecked } }));
+            const tree = document.querySelector('[x-on\\:folder-tree-uncheck]');
+            tree.dispatchEvent(new CustomEvent('folder-tree-uncheck', { detail: { id: window.toggleProbe.unchecked } }));
+            tree.dispatchEvent(new CustomEvent('folder-tree-check-updated'));
 
             window.toggleProbe.sources = calendar.getEventSources().map((source) => source.id);
         }
@@ -525,4 +526,68 @@ test('toggling a calendar sends only the ids of the active calendars', function 
 
     expect($probe['sources'])->not->toBeEmpty()->not->toContain($probe['unchecked'])
         ->and(end($probe['calls']))->toBe(array_map(fn (string $id): array => ['publicId' => $id], $probe['sources']));
+});
+
+test('unchecking a calendar group stores the active calendars in a single call', function (): void {
+    $other = createCalendarWithOwner();
+    $group = createCalendarWithOwner();
+    $groupIds = [(string) $group->getKey()];
+
+    foreach (range(1, 55) as $ignored) {
+        $groupIds[] = (string) createCalendarWithOwner(['parent_id' => $group->getKey()])->getKey();
+    }
+
+    $page = visitCalendar();
+
+    $page->script(<<<JS
+        () => {
+            if (window.groupProbe) {
+                return;
+            }
+
+            window.groupProbe = { requests: [] };
+
+            const originalFetch = window.fetch;
+            window.fetch = (input, init) => {
+                const calls = (JSON.parse(init?.body || '{}').components || [])
+                    .flatMap((component) => component.calls || [])
+                    .filter((call) => call.method === 'toggleEventSource');
+
+                if (calls.length) {
+                    return originalFetch(input, init).then((response) => {
+                        window.groupProbe.requests.push({ calls: calls.length, status: response.status });
+                        window.groupProbe.stored = calls[0].params[0].map((source) => String(source.publicId));
+
+                        return response;
+                    });
+                }
+
+                return originalFetch(input, init);
+            };
+
+            const tree = [...document.querySelectorAll('[x-data]')]
+                .map((element) => Alpine.\$data(element))
+                .find((data) => typeof data.toggleCheck === 'function');
+            const find = (nodes) => nodes.reduce(
+                (found, node) => found
+                    ?? (String(node.id) === '{$group->getKey()}' ? node : find(node.children || [])),
+                null,
+            );
+
+            tree.toggleCheck(find(tree.tree), false);
+
+            window.groupProbe.sources = Alpine.\$data(document.querySelector('[calendar-root]')).calendar
+                .getEventSources()
+                .map((source) => String(source.id));
+        }
+    JS);
+
+    waitForCondition($page, '() => window.groupProbe.requests.length > 0');
+
+    $probe = $page->script('() => window.groupProbe');
+
+    expect($probe['requests'])->toBe([['calls' => 1, 'status' => 200]])
+        ->and($probe['stored'])->toBe($probe['sources'])
+        ->toContain((string) $other->getKey())
+        ->and(array_intersect($probe['stored'], $groupIds))->toBeEmpty();
 });
