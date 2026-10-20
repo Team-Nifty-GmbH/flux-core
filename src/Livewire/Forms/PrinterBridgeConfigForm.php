@@ -10,19 +10,19 @@ class PrinterBridgeConfigForm extends FluxForm
     #[ExcludeFromActionData]
     public array $bridge_config = [];
 
-    public string $instance_name = 'default-instance';
+    public ?string $instance_name = null;
 
-    public int $printer_check_interval = 5;
+    public ?int $printer_check_interval = null;
 
-    public int $job_check_interval = 2;
+    public ?int $job_check_interval = null;
 
-    public int $api_port = 8080;
+    public ?int $api_port = null;
 
-    public bool $reverb_disabled = false;
+    public ?bool $reverb_disabled = null;
 
-    public bool $mercure_enabled = false;
+    public ?bool $mercure_enabled = null;
 
-    public bool $force_regenerate = false;
+    public ?bool $force_regenerate = null;
 
     public function create(): void
     {

@@ -93,3 +93,45 @@ test('bridge config refuses mercure when the instance does not broadcast over it
         ->validate();
 })
     ->throws(ValidationException::class, 'This instance does not broadcast over Mercure.');
+
+test('bridge config subscribes to mercure on the combined broadcaster', function (): void {
+    config([
+        'broadcasting.default' => 'combined',
+        'broadcasting.connections.combined.connections' => ['mercure', 'reverb'],
+        'broadcasting.connections.mercure.public_url' => 'https://hub.example.com/.well-known/mercure',
+        'broadcasting.connections.reverb.app_id' => 'reverb-id',
+        'broadcasting.connections.reverb.secret' => 'reverb-secret',
+    ]);
+
+    $config = GeneratePrinterBridgeConfig::make(['instance_name' => 'combined-bridge'])
+        ->validate()
+        ->execute();
+
+    expect($config)
+        ->mercure_enabled->toBeTrue()
+        ->mercure_hub_url->toBe('https://hub.example.com/.well-known/mercure')
+        ->reverb_disabled->toBeTrue()
+        ->reverb_app_secret->toBe('');
+});
+
+test('bridge config keeps reverb when mercure is turned off on a mercure instance', function (): void {
+    config([
+        'broadcasting.default' => 'mercure',
+        'broadcasting.connections.mercure.public_url' => 'https://hub.example.com/.well-known/mercure',
+        'broadcasting.connections.reverb.app_id' => 'reverb-id',
+        'broadcasting.connections.reverb.secret' => 'reverb-secret',
+    ]);
+
+    $config = GeneratePrinterBridgeConfig::make([
+        'instance_name' => 'reverb-bridge',
+        'mercure_enabled' => false,
+    ])
+        ->validate()
+        ->execute();
+
+    expect($config)
+        ->mercure_enabled->toBeFalse()
+        ->mercure_hub_url->toBeNull()
+        ->reverb_disabled->toBeFalse()
+        ->reverb_app_secret->toBe('reverb-secret');
+});

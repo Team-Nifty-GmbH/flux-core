@@ -15,18 +15,18 @@ use Illuminate\Validation\ValidationException;
 
 class GeneratePrinterBridgeConfig extends FluxAction
 {
-    public static function defaults(): array
+    public static function defaults(?bool $mercureEnabled = null): array
     {
-        $mercureEnabled = resolve_static(MercureHubConfig::class, 'usesMercure');
+        $mercureEnabled ??= resolve_static(MercureHubConfig::class, 'usesMercure');
 
         return [
             'instance_name' => 'default-instance',
             'printer_check_interval' => 5,
             'job_check_interval' => 2,
             'api_port' => 8080,
-            'mercure_enabled' => $mercureEnabled,
             'reverb_disabled' => $mercureEnabled
                 || ! config('reverb.app_id', config('broadcasting.connections.reverb.app_id')),
+            'mercure_enabled' => $mercureEnabled,
             'force_regenerate' => false,
         ];
     }
@@ -80,6 +80,7 @@ class GeneratePrinterBridgeConfig extends FluxAction
             ->execute();
 
         $reverbScheme = config('reverb.scheme', config('broadcasting.connections.reverb.scheme', 'http'));
+        $mercureHubUrl = config('broadcasting.connections.mercure.public_url') ?: null;
 
         return [
             'instance_name' => $instanceName,
@@ -98,15 +99,15 @@ class GeneratePrinterBridgeConfig extends FluxAction
             'reverb_host' => config('reverb.host', config('broadcasting.connections.reverb.host')) ?? '',
             'reverb_auth_endpoint' => config('app.url') ? rtrim(config('app.url'), '/') . '/broadcasting/auth' : '',
             'mercure_enabled' => $this->getData('mercure_enabled'),
-            'mercure_hub_url' => $this->getData('mercure_enabled')
-                ? config('broadcasting.connections.mercure.public_url') ?: null
-                : null,
+            'mercure_hub_url' => $this->getData('mercure_enabled') ? $mercureHubUrl : null,
         ];
     }
 
     protected function prepareForValidation(): void
     {
-        foreach (static::defaults() as $key => $value) {
+        $mercureEnabled = $this->data['mercure_enabled'] ?? null;
+
+        foreach (static::defaults(is_null($mercureEnabled) ? null : (bool) $mercureEnabled) as $key => $value) {
             $this->data[$key] ??= $value;
         }
     }
