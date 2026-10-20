@@ -53,7 +53,7 @@ class Editor extends Component
         }
 
         $scopes = $buttonClass::scopes();
-        if ($scopes && ! is_null($this->scope) && ! in_array($this->scope, $scopes, true)) {
+        if ($scopes && ! in_array($this->scope, $scopes, true)) {
             return null;
         }
 
