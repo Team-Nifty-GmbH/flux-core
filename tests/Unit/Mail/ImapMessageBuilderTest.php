@@ -16,6 +16,7 @@ use Webklex\PHPIMAP\Folder;
 use Webklex\PHPIMAP\Message;
 use Webklex\PHPIMAP\Query\WhereQuery;
 use Webklex\PHPIMAP\Support\AttachmentCollection;
+use Webklex\PHPIMAP\Support\FolderCollection;
 use Webklex\PHPIMAP\Support\MessageCollection;
 
 test('can be instantiated from a mail folder', function (): void {
@@ -186,11 +187,13 @@ test('keeps importing a folder when one message cannot be read', function (): vo
     $folder = $mailAccount->mailFolders->first();
 
     $broken = Mockery::mock(Message::class);
+    $broken->shouldReceive('getSize')->andReturn(1024);
     $broken->shouldReceive('parseBody')->andReturnSelf();
     $broken->shouldReceive('getAttachments')->andReturn(new AttachmentCollection());
     $broken->shouldReceive('getMessageId->toString')->andThrow(new RuntimeException('unparsable message'));
 
     $intact = Mockery::mock(Message::class);
+    $intact->shouldReceive('getSize')->andReturn(1024);
     $intact->shouldReceive('parseBody')->andReturnSelf();
     $intact->shouldReceive('getAttachments')->andReturn(new AttachmentCollection());
     $intact->shouldReceive('getMessageId->toString')->andReturn('<intact@example.com>');
@@ -447,6 +450,7 @@ test('lets go of every new message once it is stored', function (): void {
     $query = Mockery::mock(WhereQuery::class);
     $query->shouldReceive('setFetchBody')->andReturnSelf();
     $query->shouldReceive('leaveUnread')->andReturnSelf();
+    $query->shouldReceive('limit')->andReturnSelf();
     $query->shouldReceive('getByUidGreater')->with(10)->andReturn($newMessages);
 
     $imapFolder = Mockery::mock(Folder::class);
@@ -471,8 +475,10 @@ function makeReadableImapMessage(
     ?string $messageId = null,
     ?string $subject = null,
     string $from = 'sender@example.com',
+    int $size = 1024,
 ): Message {
     $message = Mockery::mock(Message::class);
+    $message->shouldReceive('getSize')->andReturn($size);
     $message->shouldReceive('parseBody')->andReturnSelf();
     $message->shouldReceive('getAttachments')->andReturn(new AttachmentCollection());
     $message->shouldReceive('getMessageId->toString')->andReturn($messageId ?? '<' . $uid . '@example.com>');
@@ -496,6 +502,7 @@ function makeImapFolderServingNew(array $messages): Folder
     $query = Mockery::mock(WhereQuery::class);
     $query->shouldReceive('setFetchBody')->andReturnSelf();
     $query->shouldReceive('leaveUnread')->andReturnSelf();
+    $query->shouldReceive('limit')->andReturnSelf();
     $query->shouldReceive('getByUidGreater')->andReturnUsing(fn (): MessageCollection => new MessageCollection($messages));
 
     $imapFolder = Mockery::mock(Folder::class);
@@ -591,7 +598,7 @@ test('reports a rejected message once and starts the next sync after it', functi
     ]);
 
     $query = Mockery::mock(WhereQuery::class);
-    $query->shouldReceive('setFetchBody', 'leaveUnread', 'unseen', 'since')->andReturnSelf();
+    $query->shouldReceive('setFetchBody', 'leaveUnread', 'unseen', 'since', 'limit')->andReturnSelf();
     $query->shouldReceive('search')->andReturn(collect());
     $query->shouldReceive('getByUidGreater')->andReturnUsing(
         fn (int $uid): MessageCollection => new MessageCollection(
@@ -602,9 +609,10 @@ test('reports a rejected message once and starts the next sync after it', functi
     $imapFolder = Mockery::mock(Folder::class);
     $imapFolder->shouldReceive('examine')->andReturn(['uidvalidity' => 2, 'uidnext' => 12]);
     $imapFolder->shouldReceive('messages')->andReturn($query);
+    $imapFolder->path = $folder->slug;
 
     $client = Mockery::mock(Client::class);
-    $client->shouldReceive('getFolderByPath')->andReturn($imapFolder);
+    $client->shouldReceive('getFolders')->andReturn(new FolderCollection([$imapFolder]));
     (new ReflectionProperty(MailAccount::class, 'imapClient'))->setValue($folder->mailAccount, $client);
 
     app(ImapMailSyncDriver::class)->syncMessages($folder);
@@ -614,4 +622,64 @@ test('reports a rejected message once and starts the next sync after it', functi
 
     Exceptions::assertReportedCount(1);
     expect($reloaded->last_skipped_uid)->toBe(11);
+});
+
+test('skips and reports a message above the size limit without loading its body', function (): void {
+    Exceptions::fake();
+    config(['flux.mail.max_message_size' => 1024 * 1024]);
+    $folder = MailAccount::factory()->has(MailFolder::factory())->create()->mailFolders->first();
+    $oversized = makeReadableImapMessage(11, size: 1024 * 1024 + 1);
+
+    makeTestableBuilder($folder)
+        ->setImapFolder(makeImapFolderServingNew([$oversized, makeReadableImapMessage(12)]))
+        ->newSince(10)
+        ->fetchAndStore();
+
+    $oversized->shouldNotHaveReceived('parseBody');
+    expect(Communication::query()->where('mail_folder_id', $folder->getKey())->pluck('message_uid')->all())
+        ->toBe(['12'])
+        ->and($folder->fresh()->last_skipped_uid)->toBe(11);
+    Exceptions::assertReported(fn (RuntimeException $exception): bool => str_contains($exception->getMessage(), '11'));
+});
+
+test('fetches new messages page by page after the last uid it saw', function (): void {
+    $folder = MailAccount::factory()->has(MailFolder::factory())->create()->mailFolders->first();
+    $onServer = [11, 12, 15];
+    $requested = [];
+
+    $query = Mockery::mock(WhereQuery::class);
+    $query->shouldReceive('setFetchBody', 'leaveUnread')->andReturnSelf();
+    $query->shouldReceive('limit')->with(2)->andReturnSelf();
+    $query->shouldReceive('getByUidGreater')->andReturnUsing(
+        function (int $uid) use (&$requested, $onServer): MessageCollection {
+            $requested[] = $uid;
+            $uids = array_slice(array_values(array_filter($onServer, fn (int $id): bool => $id > $uid)), 0, 2);
+
+            return new MessageCollection(array_map(fn (int $id): Message => makeReadableImapMessage($id), $uids));
+        }
+    );
+
+    $imapFolder = Mockery::mock(Folder::class);
+    $imapFolder->shouldReceive('messages')->andReturn($query);
+
+    $builder = makeTestableBuilder($folder)->setImapFolder($imapFolder)->newSince(10);
+    (new ReflectionProperty(ImapMessageBuilder::class, 'pageSize'))->setValue($builder, 2);
+    $builder->fetchAndStore();
+
+    expect(Communication::query()->where('mail_folder_id', $folder->getKey())->orderBy('message_uid')->pluck('message_uid')->all())
+        ->toBe(['11', '12', '15'])
+        ->and($requested)->toBe([10, 12]);
+});
+
+test('imports every message when no size limit is set', function (): void {
+    config(['flux.mail.max_message_size' => 0]);
+    $folder = MailAccount::factory()->has(MailFolder::factory())->create()->mailFolders->first();
+
+    makeTestableBuilder($folder)
+        ->setImapFolder(makeImapFolderServingNew([makeReadableImapMessage(11, size: 500 * 1024 * 1024)]))
+        ->newSince(10)
+        ->fetchAndStore();
+
+    expect(Communication::query()->where('mail_folder_id', $folder->getKey())->pluck('message_uid')->all())
+        ->toBe(['11']);
 });

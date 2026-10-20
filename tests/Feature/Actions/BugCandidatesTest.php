@@ -70,10 +70,6 @@ test('update address can_login validation skipped when can_login absent from pay
     $this->markTestSkipped('Needs fix');
 })->skip('Bug: omitting can_login from payload bypasses email/password clearing protection');
 
-test('update address contact_id direct key access in address_types block', function (): void {
-    $this->markTestSkipped('Needs fix');
-})->skip('Bug: $this->data[contact_id] without ?? in address_types unique constraint');
-
 // --- UpdateWorkTime ---
 
 test('update work time is_locked direct array access without fallback', function (): void {

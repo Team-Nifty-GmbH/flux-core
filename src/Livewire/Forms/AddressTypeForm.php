@@ -17,8 +17,6 @@ class AddressTypeForm extends FluxForm
 
     public bool $is_locked = false;
 
-    public bool $is_unique = false;
-
     public ?string $name = null;
 
     public array $tenants = [];

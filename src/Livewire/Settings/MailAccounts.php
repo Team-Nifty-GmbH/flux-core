@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -27,6 +28,9 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 class MailAccounts extends MailAccountList
 {
     public array $folders = [];
+
+    #[Locked]
+    public bool $isSyncPaused = false;
 
     public MailAccountForm $mailAccount;
 
@@ -102,6 +106,7 @@ class MailAccounts extends MailAccountList
     {
         $this->mailAccount->reset();
         $this->mailAccount->fill($mailAccount);
+        $this->isSyncPaused = $mailAccount->isSyncPaused();
 
         $this->modalOpen('edit-mail-account');
     }

@@ -34,3 +34,13 @@ test('delete product option group', function (): void {
     expect(DeleteProductOptionGroup::make(['id' => $group->getKey()])
         ->validate()->execute())->toBeTrue();
 });
+
+test('update product option group without name keeps the name', function (): void {
+    $group = ProductOptionGroup::factory()->create(['name' => 'Colors']);
+
+    UpdateProductOptionGroup::make([
+        'id' => $group->getKey(),
+    ])->validate()->execute();
+
+    expect($group->refresh()->name)->toBe('Colors');
+});
