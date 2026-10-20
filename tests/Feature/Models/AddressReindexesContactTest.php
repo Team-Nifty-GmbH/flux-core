@@ -25,6 +25,7 @@ beforeEach(function (): void {
 
     app(EngineManager::class)->extend('spy', fn () => $engine);
     config()->set('scout.driver', 'spy');
+    config()->set('scout.queue', false);
 });
 
 test('a new main address hands its contact to the search index', function (): void {

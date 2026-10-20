@@ -210,6 +210,7 @@ test('the sync recognizes the appended copy as the sent communication', function
 });
 
 test('a failing queue after delivery does not report the mail as failed', function (): void {
+    config()->set('scout.queue', false);
     Queue::shouldReceive('connection')->andThrow(new RuntimeException('redis is down'));
 
     expect(sendFluxMail())->toHaveKey('success', true);
