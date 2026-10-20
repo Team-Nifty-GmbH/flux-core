@@ -35,17 +35,24 @@ class SearchController extends Controller
         Event::dispatch('tall-datatables-searching', $request);
 
         if (! blank($request->input('selected')) && blank($request->input('search'))) {
-            $selected = $request->input('selected');
+            $selected = Arr::wrap($request->input('selected'));
             $optionValue = $request->input('option-value') ?: (app($model))->getKeyName();
 
             $query = resolve_static($model, 'query')
-                ->withoutGlobalScopes([SoftDeletingScope::class]);
+                ->withoutGlobalScopes([SoftDeletingScope::class])
+                ->whereIn($optionValue, $selected);
 
-            is_array($selected)
-                ? $query->whereIn($optionValue, Arr::wrap($selected))
-                : $query->where($optionValue, $selected);
+            $constrained = $query->clone();
+            $this->applyRequestConstraints($constrained, $request, $model);
+            $result = $constrained->get();
 
-            return $this->formatAndDispatch($query->get(), $model, $request);
+            $missing = array_diff($selected, $result->pluck($optionValue)->all());
+
+            if ($missing) {
+                $result = $result->concat($query->whereIn($optionValue, $missing)->get());
+            }
+
+            return $this->formatAndDispatch($result, $model, $request);
         } elseif ($request->has('search') && $isSearchable && ! $request->input('searchFields')) {
             /** @var Builder $perPageSearch */
             $perPageSearch = count(Arr::except(

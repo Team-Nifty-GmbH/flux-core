@@ -172,3 +172,48 @@ test('search controller leaves a link in a requested field whole', function (): 
 
     expect(data_get($response->json(), '0.url'))->toBe($url);
 });
+
+test('search controller returns the selected value from the rows matching the request constraints', function (): void {
+    $contact = Contact::factory()->create();
+    Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => false,
+    ]);
+    $mainAddress = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $response = $this->post(
+        route('search', Address::class),
+        [
+            'selected' => $contact->getKey(),
+            'option-value' => 'contact_id',
+            'where' => [['is_main_address', '=', true]],
+        ]
+    );
+
+    $response->assertOk();
+    $response->assertJsonCount(1);
+    $response->assertJsonFragment(['id' => $mainAddress->getKey()]);
+});
+
+test('search controller still returns a selected value outside the request constraints', function (): void {
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => false,
+    ]);
+
+    $response = $this->post(
+        route('search', Address::class),
+        [
+            'selected' => [$address->getKey()],
+            'where' => [['is_main_address', '=', true]],
+        ]
+    );
+
+    $response->assertOk();
+    $response->assertJsonCount(1);
+    $response->assertJsonFragment(['id' => $address->getKey()]);
+});
