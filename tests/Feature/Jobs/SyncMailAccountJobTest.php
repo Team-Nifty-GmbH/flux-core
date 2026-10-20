@@ -100,6 +100,44 @@ test('sync mail account job passes a progress callback to the driver', function 
         ->and(end($spy->callbacks))->toBeNull();
 });
 
+test('sync mail account job limited to one folder syncs only that folder without listing the folders', function (): void {
+    $mailAccount = MailAccount::factory()
+        ->has(MailFolder::factory()->count(3)->state(['is_active' => true]))
+        ->create();
+    $folder = $mailAccount->mailFolders->get(1);
+
+    $spy = new class() implements MailSyncDriver
+    {
+        public int $folderSyncs = 0;
+
+        public array $syncedFolders = [];
+
+        public function syncFolders(MailAccount $account): array
+        {
+            $this->folderSyncs++;
+
+            return [];
+        }
+
+        public function syncMessages(MailFolder $folder): void
+        {
+            $this->syncedFolders[] = $folder->getKey();
+        }
+
+        public function testConnection(MailAccount $account): bool
+        {
+            return true;
+        }
+    };
+
+    app(MailDriverManager::class)->extend('imap', fn () => $spy);
+
+    (new SyncMailAccountJob($mailAccount, mailFolderId: $folder->getKey()))->handle();
+
+    expect($spy->syncedFolders)->toBe([$folder->getKey()])
+        ->and($spy->folderSyncs)->toBe(0);
+});
+
 test('sync mail account job hands every folder the account it already holds', function (): void {
     $mailAccount = MailAccount::factory()
         ->has(MailFolder::factory()->count(3)->state(['is_active' => true]))
