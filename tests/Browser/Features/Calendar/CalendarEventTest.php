@@ -529,10 +529,12 @@ test('toggling a calendar sends only the ids of the active calendars', function 
 });
 
 test('unchecking a calendar group stores the active calendars in a single call', function (): void {
+    $other = createCalendarWithOwner();
     $group = createCalendarWithOwner();
+    $groupIds = [(string) $group->getKey()];
 
     foreach (range(1, 55) as $ignored) {
-        createCalendarWithOwner(['parent_id' => $group->getKey()]);
+        $groupIds[] = (string) createCalendarWithOwner(['parent_id' => $group->getKey()])->getKey();
     }
 
     $page = visitCalendar();
@@ -554,6 +556,7 @@ test('unchecking a calendar group stores the active calendars in a single call',
                 if (calls.length) {
                     return originalFetch(input, init).then((response) => {
                         window.groupProbe.requests.push({ calls: calls.length, status: response.status });
+                        window.groupProbe.stored = calls[0].params[0].map((source) => String(source.publicId));
 
                         return response;
                     });
@@ -572,10 +575,19 @@ test('unchecking a calendar group stores the active calendars in a single call',
             );
 
             tree.toggleCheck(find(tree.tree), false);
+
+            window.groupProbe.sources = Alpine.\$data(document.querySelector('[calendar-root]')).calendar
+                .getEventSources()
+                .map((source) => String(source.id));
         }
     JS);
 
     waitForCondition($page, '() => window.groupProbe.requests.length > 0');
 
-    expect($page->script('() => window.groupProbe.requests'))->toBe([['calls' => 1, 'status' => 200]]);
+    $probe = $page->script('() => window.groupProbe');
+
+    expect($probe['requests'])->toBe([['calls' => 1, 'status' => 200]])
+        ->and($probe['stored'])->toBe($probe['sources'])
+        ->toContain((string) $other->getKey())
+        ->and(array_intersect($probe['stored'], $groupIds))->toBeEmpty();
 });
