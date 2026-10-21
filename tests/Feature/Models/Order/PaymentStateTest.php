@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Actions\Transaction\DeleteTransaction;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -155,3 +156,13 @@ function turnIntoPurchaseInvoice(Order $order): void
             'balance' => -100,
         ]);
 }
+
+test('deleting the paying transaction removes its assignment and reopens the invoice', function (): void {
+    ($this->assignPayment)(404.12);
+    $transaction = $this->order->refresh()->transactions()->sole();
+
+    DeleteTransaction::make(['id' => $transaction->getKey()])->validate()->execute();
+
+    expect(OrderTransaction::query()->where('transaction_id', $transaction->getKey())->exists())->toBeFalse()
+        ->and($this->order->refresh()->payment_state)->toBeInstanceOf(Open::class);
+});
