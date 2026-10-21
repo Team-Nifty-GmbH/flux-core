@@ -692,7 +692,7 @@ test('imports every message when no size limit is set', function (): void {
 test('skips a message below the size limit that would not fit into the free memory', function (): void {
     Exceptions::fake();
     config(['flux.mail.max_message_size' => 0]);
-    $memoryLimit = ini_set('memory_limit', (string) (memory_get_usage() + 256 * 1024 * 1024));
+    $memoryLimit = ini_set('memory_limit', (string) (memory_get_usage() + 128 * 1024 * 1024));
     $folder = MailAccount::factory()->has(MailFolder::factory())->create()->mailFolders->first();
     $tooLarge = makeReadableImapMessage(11, size: 20 * 1024 * 1024);
 

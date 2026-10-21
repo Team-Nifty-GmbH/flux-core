@@ -24,7 +24,7 @@ use Webklex\PHPIMAP\Message;
 
 class ImapMessageBuilder
 {
-    protected const int PARSE_MEMORY_FACTOR = 20;
+    protected const int PARSE_MEMORY_FACTOR = 10;
 
     protected bool $filterUnseen = false;
 
