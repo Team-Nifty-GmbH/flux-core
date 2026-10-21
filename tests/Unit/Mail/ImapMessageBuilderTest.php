@@ -673,13 +673,41 @@ test('fetches new messages page by page after the last uid it saw', function ():
 
 test('imports every message when no size limit is set', function (): void {
     config(['flux.mail.max_message_size' => 0]);
+    $memoryLimit = ini_set('memory_limit', '-1');
     $folder = MailAccount::factory()->has(MailFolder::factory())->create()->mailFolders->first();
 
-    makeTestableBuilder($folder)
-        ->setImapFolder(makeImapFolderServingNew([makeReadableImapMessage(11, size: 500 * 1024 * 1024)]))
-        ->newSince(10)
-        ->fetchAndStore();
+    try {
+        makeTestableBuilder($folder)
+            ->setImapFolder(makeImapFolderServingNew([makeReadableImapMessage(11, size: 500 * 1024 * 1024)]))
+            ->newSince(10)
+            ->fetchAndStore();
+    } finally {
+        ini_set('memory_limit', $memoryLimit);
+    }
 
     expect(Communication::query()->where('mail_folder_id', $folder->getKey())->pluck('message_uid')->all())
         ->toBe(['11']);
+});
+
+test('skips a message below the size limit that would not fit into the free memory', function (): void {
+    Exceptions::fake();
+    config(['flux.mail.max_message_size' => 0]);
+    $memoryLimit = ini_set('memory_limit', (string) (memory_get_usage() + 256 * 1024 * 1024));
+    $folder = MailAccount::factory()->has(MailFolder::factory())->create()->mailFolders->first();
+    $tooLarge = makeReadableImapMessage(11, size: 20 * 1024 * 1024);
+
+    try {
+        makeTestableBuilder($folder)
+            ->setImapFolder(makeImapFolderServingNew([$tooLarge, makeReadableImapMessage(12)]))
+            ->newSince(10)
+            ->fetchAndStore();
+    } finally {
+        ini_set('memory_limit', $memoryLimit);
+    }
+
+    $tooLarge->shouldNotHaveReceived('parseBody');
+    expect(Communication::query()->where('mail_folder_id', $folder->getKey())->pluck('message_uid')->all())
+        ->toBe(['12'])
+        ->and($folder->fresh()->last_skipped_uid)->toBe(11);
+    Exceptions::assertReported(fn (RuntimeException $exception): bool => str_contains($exception->getMessage(), '11'));
 });

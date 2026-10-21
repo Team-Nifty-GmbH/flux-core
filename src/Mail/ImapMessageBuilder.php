@@ -24,6 +24,8 @@ use Webklex\PHPIMAP\Message;
 
 class ImapMessageBuilder
 {
+    protected const int PARSE_MEMORY_FACTOR = 20;
+
     protected bool $filterUnseen = false;
 
     protected bool $filterSeen = false;
@@ -424,6 +426,20 @@ class ImapMessageBuilder
                 return null;
             }
 
+            $freeMemory = $this->freeMemory();
+
+            if ($this->fetchBody
+                && ! is_null($freeMemory)
+                && $message->getSize() * static::PARSE_MEMORY_FACTOR > $freeMemory
+            ) {
+                $this->skip(
+                    $message->getUid(),
+                    $message->getSize() . ' bytes need more than the ' . $freeMemory . ' bytes of free memory to parse'
+                );
+
+                return null;
+            }
+
             return ImapMessage::fromImapMessage($message, $this->fetchBody);
         } catch (Throwable $exception) {
             if ($this->isLostConnection($exception)) {
@@ -438,6 +454,13 @@ class ImapMessageBuilder
                 imap_errors();
             }
         }
+    }
+
+    protected function freeMemory(): ?int
+    {
+        $limit = ini_parse_quantity(ini_get('memory_limit'));
+
+        return $limit < 0 ? null : max($limit - memory_get_usage(), 0);
     }
 
     protected function skip(int $uid, string $reason, ?Throwable $previous = null): void
