@@ -433,11 +433,14 @@ class PriceHelper
         }
 
         $price = $priceList->prices()
+            ->without(['priceList', 'product', 'product.vatRate'])
             ->where('product_id', $product->getKey())
             ->first();
 
         if ($price) {
-            return $price;
+            return $price
+                ->setRelation('priceList', $priceList)
+                ->setRelation('product', $product);
         }
 
         if ($product->isVariant() && $product->inheritanceEnabled()) {
