@@ -44,6 +44,7 @@ use FluxErp\Providers\ViewServiceProvider;
 use FluxErp\Providers\WidgetServiceProvider;
 use FluxErp\Support\Bus\Dispatcher as FluxDispatcher;
 use FluxErp\Support\Container\ProductTypeManager;
+use FluxErp\Support\Flare\CensorPersonalData;
 use GuzzleHttp\Client;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
@@ -63,6 +64,7 @@ use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Laravel\Scout\Scout;
 use Meilisearch\Client as MeilisearchClient;
+use Spatie\LaravelIgnition\FlareMiddleware\AddQueries;
 use Spatie\LaravelPasskeys\Http\Controllers\AuthenticateUsingPasskeyController as BaseAuthenticateUsingPasskeyController;
 use Spatie\MediaLibrary\MediaCollections\Models\Observers\MediaObserver;
 use Spatie\Permission\Middleware\RoleMiddleware;
@@ -131,6 +133,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
         $this->registerConfig();
         $this->registerExtensions();
+        $this->app->booting(fn () => $this->censorFlareReports());
 
         app('livewire')->componentHook(SupportFormObjects::class);
         $this->app->bind(DatabaseNotification::class, Notification::class);
@@ -258,6 +261,22 @@ class FluxServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../docker' => base_path('docker'),
         ], 'flux-docker');
+    }
+
+    protected function censorFlareReports(): void
+    {
+        // Only when laravel-ignition is installed and has merged its config.
+        if (! is_array(config('flare.flare_middleware'))) {
+            return;
+        }
+
+        // Query bindings hold searched and saved values, stack frame
+        // arguments the strings passed between functions.
+        config([
+            'flare.flare_middleware.' . AddQueries::class . '.report_query_bindings' => false,
+            'flare.flare_middleware.' . CensorPersonalData::class => [],
+            'ignition.with_stack_frame_arguments' => false,
+        ]);
     }
 
     protected function registerConfig(): void

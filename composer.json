@@ -48,6 +48,7 @@
         "pestphp/pest-plugin-livewire": "^5.0",
         "pestphp/pest-plugin-type-coverage": "^5.0",
         "phpstan/phpstan": "^2.2",
+        "spatie/flare-client-php": "^1.11",
         "squizlabs/php_codesniffer": "^4.0.1",
         "vlucas/phpdotenv": "^5.6"
     },
