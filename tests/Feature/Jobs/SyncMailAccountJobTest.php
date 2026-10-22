@@ -12,6 +12,7 @@ use FluxErp\Traits\IsMonitored;
 use Illuminate\Bus\UniqueLock;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Queue;
 use Webklex\PHPIMAP\Client;
 
 test('sync mail account job is monitored', function (): void {
@@ -281,6 +282,8 @@ test('sync mail account job closes the imap client even when the sync blows up',
 });
 
 test('sync mail account job stops before its timeout and leaves the rest to the next run', function (): void {
+    config(['flux.mail.sync_time_budget' => 3000]);
+
     $mailAccount = MailAccount::factory()
         ->has(MailFolder::factory()->count(3)->state(['is_active' => true]))
         ->create();
@@ -332,4 +335,121 @@ test('sync mail account job stops before its timeout and leaves the rest to the 
         $mailAccount->mailFolders->first()->getKey() . ':2',
         $mailAccount->mailFolders->first()->getKey() . ':3',
     ]);
+});
+
+function chunkedSyncSpy(): MailSyncDriver
+{
+    return new class() implements MailSyncDriver, ReportsSyncProgress
+    {
+        public ?Closure $callback = null;
+
+        public int $folderSyncs = 0;
+
+        public array $stored = [];
+
+        public ?Closure $afterStore = null;
+
+        public function syncFolders(MailAccount $account): array
+        {
+            $this->folderSyncs++;
+
+            return [];
+        }
+
+        public function syncMessages(MailFolder $folder): void
+        {
+            foreach ([1, 2, 3] as $uid) {
+                if (in_array($folder->getKey() . ':' . $uid, $this->stored, true)) {
+                    continue;
+                }
+
+                $this->stored[] = $folder->getKey() . ':' . $uid;
+                Carbon\Carbon::setTestNow(now()->addMinutes(2));
+
+                if ($this->afterStore) {
+                    ($this->afterStore)();
+                }
+
+                ($this->callback)($uid, 3);
+            }
+        }
+
+        public function testConnection(MailAccount $account): bool
+        {
+            return true;
+        }
+
+        public function withProgressCallback(?Closure $callback): static
+        {
+            $this->callback = $callback;
+
+            return $this;
+        }
+    };
+}
+
+test('sync mail account job hands the rest of a long sync to follow-up jobs that resume at the folder it stopped in', function (): void {
+    config(['flux.mail.sync_time_budget' => 300]);
+
+    $mailAccount = MailAccount::factory()
+        ->has(MailFolder::factory()->count(3)->state(['is_active' => true]))
+        ->create();
+    $folders = $mailAccount->mailFolders()->orderBy('id')->pluck('id');
+
+    $spy = chunkedSyncSpy();
+    app(MailDriverManager::class)->extend('imap', fn () => $spy);
+    $jobs = 0;
+    Queue::before(function () use (&$jobs): void {
+        $jobs++;
+    });
+
+    SyncMailAccountJob::dispatchSync($mailAccount);
+
+    expect($spy->stored)->toBe(
+        $folders->flatMap(fn (int $id) => [$id . ':1', $id . ':2', $id . ':3'])->all()
+    )
+        ->and($jobs)->toBe(4)
+        ->and($spy->folderSyncs)->toBe(1);
+});
+
+test('sync mail account job stops at once when the queue is paused for maintenance and queues no follow-up', function (): void {
+    $mailAccount = MailAccount::factory()
+        ->has(MailFolder::factory()->count(3)->state(['is_active' => true]))
+        ->create();
+
+    $spy = chunkedSyncSpy();
+    $spy->afterStore = fn () => Queue::pauseAll();
+    app(MailDriverManager::class)->extend('imap', fn () => $spy);
+
+    $jobs = 0;
+    Queue::before(function () use (&$jobs): void {
+        $jobs++;
+    });
+
+    try {
+        SyncMailAccountJob::dispatchSync($mailAccount);
+    } finally {
+        Queue::resumeAll();
+    }
+
+    expect($spy->stored)->toHaveCount(1)
+        ->and($jobs)->toBe(1);
+});
+
+test('sync mail account job gets through at least one folder per run so a spent budget cannot stall the account', function (): void {
+    config(['flux.mail.sync_time_budget' => 0]);
+
+    $mailAccount = MailAccount::factory()
+        ->has(MailFolder::factory()->count(2)->state(['is_active' => true]))
+        ->create();
+    $folders = $mailAccount->mailFolders()->orderBy('id')->pluck('id');
+
+    $spy = chunkedSyncSpy();
+    app(MailDriverManager::class)->extend('imap', fn () => $spy);
+
+    SyncMailAccountJob::dispatchSync($mailAccount);
+
+    expect($spy->stored)->toBe(
+        $folders->flatMap(fn (int $id) => [$id . ':1', $id . ':2', $id . ':3'])->all()
+    );
 });
