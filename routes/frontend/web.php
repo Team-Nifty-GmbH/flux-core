@@ -181,6 +181,14 @@ Route::middleware('web')
             Route::get('/mobile/share-target', ShareTarget::class)->name('mobile.share-target');
 
             Route::get('/private-storage/{path}', function (string $path) {
+                $user = auth()->user();
+                $owner = $user->getMorphClass() . '_' . $user->getKey();
+
+                abort_unless(
+                    preg_match('#^(exports|documents)/' . preg_quote($owner, '#') . '/(?!\.\.?$)[^/]+$#', $path),
+                    404
+                );
+
                 return response()
                     ->file(
                         Storage::path($path),
