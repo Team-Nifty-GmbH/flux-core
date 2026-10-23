@@ -77,7 +77,9 @@ class ProcessSubscriptionOrder implements Repeatable
                 ->execute();
 
             foreach ($newOrder->orderPositions as $orderPosition) {
-                $period = data_get($positionPeriods, $orderPosition->created_from_id);
+                $period = $orderPosition->created_from_id
+                    ? data_get($positionPeriods, $orderPosition->created_from_id)
+                    : null;
 
                 if (! $period) {
                     continue;
