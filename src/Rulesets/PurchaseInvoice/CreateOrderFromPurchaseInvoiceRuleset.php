@@ -28,8 +28,11 @@ class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
                 'purchase_invoice_positions' => 'array',
             ],
             Arr::prependKeysWith(
-                resolve_static(UpdatePurchaseInvoicePositionRuleset::class, 'getRules'),
-                'purchase_invoice_positions.*'
+                Arr::except(
+                    resolve_static(UpdatePurchaseInvoicePositionRuleset::class, 'getRules'),
+                    'id'
+                ),
+                'purchase_invoice_positions.*.'
             ),
         );
     }

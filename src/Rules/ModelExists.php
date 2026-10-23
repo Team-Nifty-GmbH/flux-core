@@ -8,6 +8,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Str;
 
 class ModelExists extends Builder implements DataAwareRule, ValidationRule
 {
@@ -52,15 +53,17 @@ class ModelExists extends Builder implements DataAwareRule, ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        $prefix = str_contains($attribute, '.') ? Str::beforeLast($attribute, '.') . '.' : '';
+
         if (! is_null($this->subject)
             && $this->subjectKeyName
-            && ($subjectKey = data_get($this->data, $this->subjectKeyName))
+            && ($subjectKey = data_get($this->data, $prefix . $this->subjectKeyName))
             && (is_string($value) || is_int($value))
             && ($currentValue = resolve_static($this->subject, 'query')
                 ->withoutGlobalScope(SoftDeletingScope::class)
                 ->where($this->subjectKeyName, $subjectKey)
                 ->toBase()
-                ->value($attribute))
+                ->value(Str::afterLast($attribute, '.')))
             && (string) $currentValue === (string) $value
         ) {
             return;
