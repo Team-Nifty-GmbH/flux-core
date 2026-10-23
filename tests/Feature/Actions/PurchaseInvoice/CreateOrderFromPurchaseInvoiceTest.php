@@ -192,6 +192,50 @@ test('an order of another contact cannot be chosen', function (): void {
     ])->validate()->execute())->toThrow(ValidationException::class);
 });
 
+test('a position with a vat rate not meant for purchases is rejected', function (): void {
+    $purchaseInvoice = ($this->createPurchaseInvoice)();
+    $salesVatRate = VatRate::factory()->create(['rate_percentage' => 0.19, 'is_purchase' => false]);
+    $countBefore = Order::query()->count();
+
+    try {
+        CreateOrderFromPurchaseInvoice::make([
+            'id' => $purchaseInvoice->getKey(),
+            'purchase_invoice_positions' => array_map(
+                fn (array $position): array => array_merge($position, ['vat_rate_id' => $salesVatRate->getKey()]),
+                $purchaseInvoice->purchaseInvoicePositions->toArray()
+            ),
+        ])
+            ->validate()
+            ->execute();
+    } catch (ValidationException $e) {
+        $errors = $e->errors();
+    }
+
+    expect($errors ?? [])->toHaveKey('purchase_invoice_positions.0.vat_rate_id')
+        ->and(Order::query()->count())->toBe($countBefore);
+});
+
+test('a position that was not saved yet can be finished', function (): void {
+    $purchaseInvoice = ($this->createPurchaseInvoice)();
+
+    $order = CreateOrderFromPurchaseInvoice::make([
+        'id' => $purchaseInvoice->getKey(),
+        'purchase_invoice_positions' => [
+            [
+                'name' => 'Added in the modal',
+                'amount' => 1,
+                'unit_price' => 119,
+                'total_price' => 119,
+                'vat_rate_id' => $this->vatRate->getKey(),
+            ],
+        ],
+    ])
+        ->validate()
+        ->execute();
+
+    expect($order->orderPositions()->pluck('name')->all())->toBe(['Added in the modal']);
+});
+
 test('an invoice without cash discount does not take one from the contact or payment type', function (): void {
     $this->contact->update(['discount_days' => 40, 'discount_percent' => 0.03]);
     $this->paymentType->update(['payment_discount_target' => 40, 'payment_discount_percentage' => 0.05]);
