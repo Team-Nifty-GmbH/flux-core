@@ -220,3 +220,29 @@ test('the cash discount of the invoice is taken over', function (): void {
     expect($order->payment_discount_target)->toBe(10)
         ->and((float) $order->payment_discount_percent)->toBe(0.02);
 });
+
+test('a net invoice position without vat rate is reported instead of crashing', function (): void {
+    $purchaseInvoice = ($this->createPurchaseInvoice)(300);
+    $purchaseInvoice->update(['is_net' => true]);
+    $purchaseInvoice->purchaseInvoicePositions()->update(['vat_rate_id' => null]);
+    $countBefore = Order::query()->count();
+
+    try {
+        CreateOrderFromPurchaseInvoice::make(['id' => $purchaseInvoice->getKey()])
+            ->validate()
+            ->execute();
+    } catch (ValidationException $e) {
+        $errors = $e->errors();
+    }
+
+    expect($errors ?? [])->toHaveKey('purchase_invoice_positions.0.vat_rate_id')
+        ->and(Order::query()->count())->toBe($countBefore);
+});
+
+test('a position without vat rate counts as net in the total gross price', function (): void {
+    $purchaseInvoice = ($this->createPurchaseInvoice)(300);
+    $purchaseInvoice->update(['is_net' => true]);
+    $purchaseInvoice->purchaseInvoicePositions()->update(['vat_rate_id' => null]);
+
+    expect(bcround($purchaseInvoice->refresh()->calculateTotalGrossPrice(), 2))->toBe('300.00');
+});
