@@ -246,3 +246,11 @@ test('a position without vat rate counts as net in the total gross price', funct
 
     expect(bcround($purchaseInvoice->refresh()->calculateTotalGrossPrice(), 2))->toBe('300.00');
 });
+
+test('a position on a deleted vat rate keeps its tax in the total gross price', function (): void {
+    $purchaseInvoice = ($this->createPurchaseInvoice)(100);
+    $purchaseInvoice->update(['is_net' => true]);
+    $this->vatRate->delete();
+
+    expect(bcround($purchaseInvoice->refresh()->calculateTotalGrossPrice(), 2))->toBe('119.00');
+});
