@@ -193,6 +193,18 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
             $errors += $this->validateChosenOrder($orderId);
         }
 
+        $missingVatRates = [];
+
+        foreach ($this->getData('purchase_invoice_positions', []) as $index => $position) {
+            if (! data_get($position, 'vat_rate_id')) {
+                $missingVatRates['purchase_invoice_positions.' . $index . '.vat_rate_id'] = [
+                    __('validation.required', ['attribute' => __('Vat Rate')]),
+                ];
+            }
+        }
+
+        $errors += $missingVatRates;
+
         /** @var PurchaseInvoice $purchaseInvoice */
         $purchaseInvoice = resolve_static(PurchaseInvoice::class, 'query')
             ->whereKey($this->getData('id'))
@@ -205,7 +217,8 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
             ]);
 
         if (
-            bccomp(
+            ! $missingVatRates
+            && bccomp(
                 $this->getData('total_gross_price'),
                 $totalPositionGross = bcround($purchaseInvoice->calculateTotalGrossPrice(), 2),
                 2
