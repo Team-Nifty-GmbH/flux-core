@@ -459,12 +459,13 @@ class PriceHelper
     protected function defaultPriceForProduct(Product $product): ?Price
     {
         $price = resolve_static(Price::class, 'query')
+            ->without(['product', 'product.vatRate'])
             ->where('product_id', $product->getKey())
             ->whereRelation('priceList', 'is_default', true)
             ->first();
 
         if ($price) {
-            return $price;
+            return $price->setRelation('product', $product);
         }
 
         if ($product->isVariant() && $product->inheritanceEnabled()) {

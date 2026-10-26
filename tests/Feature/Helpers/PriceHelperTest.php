@@ -84,11 +84,34 @@ test('price helper reuses the loaded product and price list for the found price'
     $price = $helper->price();
     $tables = collect(DB::getQueryLog())
         ->pluck('query')
-        ->filter(fn (string $query): bool => preg_match('/from `(products|vat_rates)`/', $query) === 1);
+        ->filter(fn (string $query): bool => preg_match('/from `(price_lists|products|vat_rates)` where `\\1`\\.`id` in /', $query) === 1);
     DB::disableQueryLog();
 
     expect($tables)->toBeEmpty()
         ->and($price->priceList->is($this->priceList))->toBeTrue()
+        ->and($price->product->is($this->product))->toBeTrue();
+});
+
+test('price helper reuses the loaded product for the default price', function (): void {
+    $defaultPriceList = PriceList::default();
+    Price::factory()->create([
+        'product_id' => $this->product->getKey(),
+        'price_list_id' => $defaultPriceList->getKey(),
+        'price' => 49.99,
+    ]);
+
+    $helper = PriceHelper::make($this->product)
+        ->setPriceList($this->priceList);
+
+    DB::enableQueryLog();
+    $price = $helper->price();
+    $tables = collect(DB::getQueryLog())
+        ->pluck('query')
+        ->filter(fn (string $query): bool => preg_match('/from `(products|vat_rates)`/', $query) === 1);
+    DB::disableQueryLog();
+
+    expect($tables)->toBeEmpty()
+        ->and($price->priceList->getKey())->toBe($defaultPriceList->getKey())
         ->and($price->product->is($this->product))->toBeTrue();
 });
 
