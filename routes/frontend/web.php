@@ -180,12 +180,11 @@ Route::middleware('web')
 
             Route::get('/mobile/share-target', ShareTarget::class)->name('mobile.share-target');
 
-            Route::get('/private-storage/{path}', function (string $path) {
-                $user = auth()->user();
-                $owner = $user->getMorphClass() . '_' . $user->getKey();
+            Route::get('/user/private-storage/{path}', function (string $path) {
+                $owner = private_storage_folder(auth()->user()->getMorphClass() . ':' . auth()->id());
 
                 abort_unless(
-                    preg_match('#^(exports|documents)/' . preg_quote($owner, '#') . '/(?!\.\.?$)[^/]+$#', $path),
+                    preg_match('#^(exports|documents)/' . preg_quote($owner, '#') . '/(?!\.\.?$)[^/\\\\]+$#', $path),
                     404
                 );
 

@@ -1,15 +1,16 @@
 <?php
 
 use FluxErp\Models\Permission;
+use FluxErp\Models\Role;
 use FluxErp\Models\User;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function (): void {
-    $this->user->givePermissionTo(Permission::findOrCreate('private-storage.{path}.get', 'web'));
+    $this->user->givePermissionTo(Permission::findOrCreate('user.private-storage.{path}.get', 'web'));
 
-    $this->ownFolder = $this->user->getMorphClass() . '_' . $this->user->getKey();
+    $this->ownFolder = private_storage_folder($this->user->getMorphClass() . ':' . $this->user->getKey());
     $this->otherUser = User::factory()->create(['is_active' => true]);
-    $this->otherFolder = $this->otherUser->getMorphClass() . '_' . $this->otherUser->getKey();
+    $this->otherFolder = private_storage_folder($this->otherUser->getMorphClass() . ':' . $this->otherUser->getKey());
 
     Storage::put('exports/' . $this->ownFolder . '/own.csv', 'own-export');
     Storage::put('documents/' . $this->ownFolder . '/own.pdf', 'own-document');
@@ -60,6 +61,7 @@ test('path traversal out of the own folder is not served', function (string $pat
     'into foreign export' => 'exports/%s/../%s/foreign.csv',
     'into storage root' => 'exports/%s/../../secret.txt',
     'own folder itself' => 'exports/%s/..',
+    'backslash into foreign export' => 'exports/%s/..\\%s\\foreign.csv',
 ]);
 
 test('guest is redirected to login', function (): void {
@@ -67,4 +69,19 @@ test('guest is redirected to login', function (): void {
 
     $this->get(route('private-storage', ['path' => 'exports/' . $this->ownFolder . '/own.csv']))
         ->assertRedirect(route('login'));
+});
+
+test('private storage is served below the user prefix', function (): void {
+    expect(route('private-storage', ['path' => 'exports/' . $this->ownFolder . '/own.csv'], false))
+        ->toBe('/user/private-storage/exports/' . $this->ownFolder . '/own.csv');
+});
+
+test('the migration moves the old private storage permission to the new route', function (): void {
+    $role = Role::findOrCreate('private-storage-test', 'web');
+    $role->givePermissionTo(Permission::findOrCreate('private-storage.{path}.get', 'web'));
+
+    (require __DIR__ . '/../../../database/migrations/2026_10_26_000001_rename_private_storage_permission_in_permissions_table.php')->up();
+
+    expect(Permission::query()->where('name', 'private-storage.{path}.get')->exists())->toBeFalse()
+        ->and($role->fresh()->hasPermissionTo('user.private-storage.{path}.get', 'web'))->toBeTrue();
 });
