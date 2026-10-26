@@ -4,7 +4,7 @@ namespace FluxErp\Actions\Transaction;
 
 use FluxErp\Actions\DispatchableFluxAction;
 use FluxErp\Contracts\SupportsBulkExecution;
-use FluxErp\Models\Pivots\OrderTransaction;
+use FluxErp\Models\Order;
 use FluxErp\Models\Transaction;
 use FluxErp\Rulesets\Transaction\DeleteTransactionRuleset;
 
@@ -23,13 +23,26 @@ class DeleteTransaction extends DispatchableFluxAction implements SupportsBulkEx
     public function performAction(): ?bool
     {
         $transaction = resolve_static(Transaction::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
+            ->lockForUpdate()
             ->first();
 
-        $transaction->orderTransactions()
-            ->get()
-            ->each(fn (OrderTransaction $orderTransaction) => $orderTransaction->delete());
+        $orderIds = $transaction->orderTransactions()
+            ->distinct()
+            ->pluck('order_id');
 
-        return $transaction->delete();
+        $transaction->orderTransactions()->delete();
+        $deleted = $transaction->delete();
+
+        resolve_static(Order::class, 'query')
+            ->withTrashed()
+            ->whereKey($orderIds)
+            ->lockForUpdate()
+            ->get()
+            ->each(function (Order $order): void {
+                $order->calculatePaymentState()->save();
+            });
+
+        return $deleted;
     }
 }

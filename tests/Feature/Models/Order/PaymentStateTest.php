@@ -166,3 +166,30 @@ test('deleting the paying transaction removes its assignment and reopens the inv
     expect(OrderTransaction::query()->where('transaction_id', $transaction->getKey())->exists())->toBeFalse()
         ->and($this->order->refresh()->payment_state)->toBeInstanceOf(Open::class);
 });
+
+test('deleting a transaction with a pending assignment recalculates the invoice', function (): void {
+    $transaction = Transaction::factory()->create(['amount' => 404.12, 'contact_bank_connection_id' => null]);
+    OrderTransaction::query()->create([
+        'order_id' => $this->order->getKey(),
+        'transaction_id' => $transaction->getKey(),
+        'amount' => 404.12,
+        'is_accepted' => false,
+    ]);
+    $this->order->refresh()->calculatePaymentState()->save();
+
+    DeleteTransaction::make(['id' => $transaction->getKey()])->validate()->execute();
+
+    expect($this->order->refresh()->payment_state)->toBeInstanceOf(Open::class);
+});
+
+test('deleting a transaction assigned to a deleted order removes the assignment', function (): void {
+    ($this->assignPayment)(404.12);
+    $transaction = $this->order->refresh()->transactions()->sole();
+    Order::query()->whereKey($this->order->getKey())->update(['deleted_at' => now()]);
+
+    DeleteTransaction::make(['id' => $transaction->getKey()])->validate()->execute();
+
+    expect(OrderTransaction::query()->where('transaction_id', $transaction->getKey())->exists())->toBeFalse()
+        ->and(Transaction::onlyTrashed()->whereKey($transaction->getKey())->exists())->toBeTrue()
+        ->and(Order::withTrashed()->whereKey($this->order->getKey())->first()->payment_state)->toBeInstanceOf(Open::class);
+});
