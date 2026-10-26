@@ -3,7 +3,7 @@
 namespace FluxErp\Console\Commands;
 
 use Composer\Autoload\ClassLoader;
-use FluxErp\Settings\SettingsManager;
+use FluxErp\Facades\Settings;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Database\Eloquent\Model;
@@ -160,6 +160,7 @@ class ReEncryptCommand extends Command
                             DB::connection($connection)
                                 ->table($table)
                                 ->where($keyName, $row->{$keyName})
+                                ->where($column, $row->{$column})
                                 ->update([$column => $reEncrypted]);
                         }
                     }
@@ -172,28 +173,45 @@ class ReEncryptCommand extends Command
 
     protected function reEncryptSettings(): void
     {
+        $connection = DB::connection(config('settings.repositories.database.connection'));
         $table = config('settings.repositories.database.table') ?? 'settings';
+        $count = 0;
 
-        foreach (app(SettingsManager::class)->all() as $settingsClass) {
+        foreach (Settings::all() as $settingsClass) {
+            $settingsClass = resolve_static($settingsClass, 'class');
+
             foreach ($settingsClass::encrypted() as $name) {
-                $row = DB::table($table)
-                    ->where('group', $settingsClass::group())
-                    ->where('name', $name)
-                    ->first(['id', 'payload']);
+                $connection->transaction(function () use ($connection, $table, $settingsClass, $name, &$count): void {
+                    $row = $connection->table($table)
+                        ->where('group', $settingsClass::group())
+                        ->where('name', $name)
+                        ->lockForUpdate()
+                        ->first(['id', 'payload']);
 
-                if (! $row) {
-                    continue;
-                }
+                    if (! $row) {
+                        return;
+                    }
 
-                $label = $table . '.' . $settingsClass::group() . '.' . $name;
-                $reEncrypted = $this->reEncrypt(json_decode($row->payload), $label);
+                    $reEncrypted = $this->reEncrypt(
+                        json_decode($row->payload),
+                        $table . '.' . $settingsClass::group() . '.' . $name
+                    );
 
-                $this->line($label . ': ' . (int) filled($reEncrypted) . ' with a previous key');
+                    if (is_null($reEncrypted)) {
+                        return;
+                    }
 
-                if (filled($reEncrypted) && ! $this->option('dry-run')) {
-                    DB::table($table)->where('id', $row->id)->update(['payload' => json_encode($reEncrypted)]);
-                }
+                    $count++;
+
+                    if (! $this->option('dry-run')) {
+                        $connection->table($table)
+                            ->where('id', $row->id)
+                            ->update(['payload' => json_encode($reEncrypted)]);
+                    }
+                });
             }
         }
+
+        $this->line($table . ': ' . $count . ' with a previous key');
     }
 }

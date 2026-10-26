@@ -30,7 +30,9 @@ function setRawPassword(MailAccount $mailAccount, ?string $value): void
 
 test('re encrypts a model value written with a previous key', function (): void {
     setRawPassword($this->mailAccount, $this->oldEncrypter->encryptString('secret'));
-    $updatedAt = DB::table('mail_accounts')->where('id', $this->mailAccount->getKey())->value('updated_at');
+    DB::table('mail_accounts')
+        ->where('id', $this->mailAccount->getKey())
+        ->update(['updated_at' => $updatedAt = '2020-01-01 00:00:00']);
 
     $this->artisan('flux:re-encrypt')->assertSuccessful();
 
@@ -82,4 +84,18 @@ test('re encrypts an encrypted settings property', function (): void {
     );
 
     expect($this->currentEncrypter->decrypt($payload))->toBe('smtp-secret');
+});
+
+test('dry run counts previous key settings without writing', function (): void {
+    DB::table('settings')->updateOrInsert(
+        ['group' => 'mail', 'name' => 'password'],
+        ['payload' => $payload = json_encode($this->oldEncrypter->encrypt('smtp-secret')), 'locked' => false]
+    );
+
+    $this->artisan('flux:re-encrypt', ['--dry-run' => true])
+        ->expectsOutputToContain('settings: 1 with a previous key')
+        ->assertSuccessful();
+
+    expect(DB::table('settings')->where('group', 'mail')->where('name', 'password')->value('payload'))
+        ->toBe($payload);
 });
