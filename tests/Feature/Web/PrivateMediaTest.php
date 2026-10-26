@@ -127,3 +127,13 @@ test('signed route without conversion query 404s when the original file is missi
 
     $this->get($url)->assertNotFound();
 });
+
+test('signed show route 404s when the original file is missing on disk', function (): void {
+    @unlink($this->media->getPath());
+
+    $url = URL::temporarySignedRoute('media.show', now()->addMinutes(5), [
+        'media' => $this->media->getKey(),
+    ]);
+
+    $this->get($url)->assertNotFound();
+});

@@ -435,6 +435,8 @@ Route::middleware('web')
                 $disk = Storage::disk($media->disk);
                 $path = $media->getPathRelativeToRoot();
 
+                abort_unless($disk->exists($path), 404);
+
                 if ($disk->providesTemporaryUrls()) {
                     return redirect()->away(
                         $disk->temporaryUrl(
