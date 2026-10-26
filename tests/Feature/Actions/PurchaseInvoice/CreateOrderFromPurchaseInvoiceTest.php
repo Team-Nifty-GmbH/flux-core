@@ -254,3 +254,21 @@ test('a position on a deleted vat rate keeps its tax in the total gross price', 
 
     expect(bcround($purchaseInvoice->refresh()->calculateTotalGrossPrice(), 2))->toBe('119.00');
 });
+
+test('a position on a deleted vat rate is reported instead of finishing', function (): void {
+    $purchaseInvoice = ($this->createPurchaseInvoice)(100);
+    $purchaseInvoice->update(['is_net' => true, 'total_gross_price' => 119]);
+    $this->vatRate->delete();
+    $countBefore = Order::query()->count();
+
+    try {
+        CreateOrderFromPurchaseInvoice::make(['id' => $purchaseInvoice->getKey()])
+            ->validate()
+            ->execute();
+    } catch (ValidationException $e) {
+        $errors = $e->errors();
+    }
+
+    expect($errors ?? [])->toHaveKey('purchase_invoice_positions.0.vat_rate_id')
+        ->and(Order::query()->count())->toBe($countBefore);
+});
