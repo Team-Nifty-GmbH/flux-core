@@ -1,6 +1,11 @@
 <?php
 
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\DataTables\PurchaseInvoiceList;
+use FluxErp\Models\Contact;
+use FluxErp\Models\Currency;
+use FluxErp\Models\OrderType;
+use FluxErp\Models\PaymentType;
 use FluxErp\Models\PurchaseInvoice;
 use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
@@ -66,4 +71,42 @@ test('edit with null resets form and opens modal', function (): void {
         ->assertSet('purchaseInvoiceForm.invoice_number', null)
         ->assertSet('purchaseInvoiceForm.contact_id', null)
         ->assertOpensModal('edit-purchase-invoice-modal');
+});
+
+test('finishing reports a position without vat rate on that position', function (): void {
+    $purchaseInvoice = PurchaseInvoice::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'contact_id' => Contact::factory()->create()->getKey(),
+        'currency_id' => Currency::factory()->create(['is_default' => true])->getKey(),
+        'payment_type_id' => PaymentType::factory()
+            ->hasAttached($this->dbTenant, relationship: 'tenants')
+            ->create(['requires_manual_transfer' => false])
+            ->getKey(),
+        'order_type_id' => OrderType::factory()
+            ->create(['order_type_enum' => OrderTypeEnum::Purchase, 'is_active' => true])
+            ->getKey(),
+        'invoice_number' => 'RE-4711',
+        'invoice_date' => '2026-10-01',
+        'total_gross_price' => 300,
+        'is_net' => true,
+        'order_id' => null,
+    ]);
+    $purchaseInvoice
+        ->addMedia(UploadedFile::fake()->image('invoice.jpg'))
+        ->toMediaCollection('purchase_invoice');
+    $purchaseInvoice->purchaseInvoicePositions()->create([
+        'name' => 'Anzahl',
+        'amount' => 6,
+        'unit_price' => 50,
+        'total_price' => 300,
+        'vat_rate_id' => null,
+    ]);
+
+    Livewire::test(PurchaseInvoiceList::class)
+        ->call('edit', $purchaseInvoice->getKey())
+        ->call('finish')
+        ->assertReturned(false)
+        ->assertHasErrors('purchaseInvoiceForm.purchase_invoice_positions.0.vat_rate_id');
+
+    expect($purchaseInvoice->refresh()->order_id)->toBeNull();
 });

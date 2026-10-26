@@ -103,6 +103,7 @@ class PurchaseInvoice extends FluxModel implements HasMedia, HasMediaForeignKey
     public function calculateTotalGrossPrice(): ?string
     {
         $vatRates = resolve_static(VatRate::class, 'query')
+            ->withTrashed()
             ->pluck('rate_percentage', 'id')
             ->toArray();
 
@@ -111,7 +112,7 @@ class PurchaseInvoice extends FluxModel implements HasMedia, HasMediaForeignKey
                 if ($this->is_net) {
                     $positionGross = net_to_gross(
                         $position->total_price,
-                        data_get($vatRates, $position->vat_rate_id) ?? 0
+                        $position->vat_rate_id ? data_get($vatRates, $position->vat_rate_id) : null
                     );
                 } else {
                     $positionGross = $position->total_price;
