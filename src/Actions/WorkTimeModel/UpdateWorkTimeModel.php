@@ -45,6 +45,7 @@ class UpdateWorkTimeModel extends FluxAction
                             $day,
                             [
                                 'week_number' => data_get($week, 'week_number') ?? 1,
+                                'break_minutes' => data_get($day, 'break_minutes') ?? 0,
                             ]
                         )
                     );
