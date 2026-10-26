@@ -856,3 +856,53 @@ test('a self billed purchase subscription numbers its own child', function (): v
         )
         ->and($child->invoice_date)->not->toBeNull();
 });
+
+test('a position not created from the subscription keeps its own period', function (): void {
+    $this->subscriptionOrder->update([
+        'system_delivery_date' => '2026-07-01',
+        'system_delivery_date_end' => '2026-07-31',
+    ]);
+
+    $vatRate = FluxErp\Models\VatRate::factory()->create();
+    $positionData = [
+        'tenant_id' => $this->tenant->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'amount' => 1,
+        'unit_net_price' => '100.00',
+        'total_net_price' => '100.00',
+        'total_base_net_price' => '100.00',
+    ];
+
+    FluxErp\Models\OrderPosition::factory()->create(array_merge($positionData, [
+        'order_id' => $this->subscriptionOrder->getKey(),
+        'name' => 'Wartung',
+        'system_delivery_date' => '2026-07-01',
+        'system_delivery_date_end' => '2026-07-31',
+    ]));
+
+    Order::created(function (Order $order) use ($positionData): void {
+        if ($order->created_from_id !== $this->subscriptionOrder->getKey()) {
+            return;
+        }
+
+        FluxErp\Models\OrderPosition::factory()->create(array_merge($positionData, [
+            'order_id' => $order->getKey(),
+            'created_from_id' => null,
+            'name' => 'Added on replication',
+            'system_delivery_date' => '2026-07-15',
+            'system_delivery_date_end' => '2026-07-20',
+        ]));
+    });
+
+    (new ProcessSubscriptionOrder())(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    $addedPosition = FluxErp\Models\OrderPosition::query()
+        ->where('name', 'Added on replication')
+        ->first();
+
+    expect($addedPosition->system_delivery_date?->toDateString())->toBe('2026-07-15')
+        ->and($addedPosition->system_delivery_date_end?->toDateString())->toBe('2026-07-20');
+});
