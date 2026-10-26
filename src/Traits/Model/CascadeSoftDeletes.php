@@ -12,15 +12,28 @@ trait CascadeSoftDeletes
 {
     use SoftDeletes;
 
+    protected static array $cascadingDeletes = [];
+
     protected static function bootCascadeSoftDeletes(): void
     {
         static::deleting(function (Model $model): void {
-            $model->runCascadingDeletes();
+            static::$cascadingDeletes[$model->getKey()] = true;
+
+            try {
+                $model->runCascadingDeletes();
+            } finally {
+                unset(static::$cascadingDeletes[$model->getKey()]);
+            }
         });
 
         static::restoring(function (Model $model): void {
             $model->runCascadingRestores();
         });
+    }
+
+    public function isCascadingDeletes(): bool
+    {
+        return static::$cascadingDeletes[$this->getKey()] ?? false;
     }
 
     protected function cascadeRestores(string $relationship): void
