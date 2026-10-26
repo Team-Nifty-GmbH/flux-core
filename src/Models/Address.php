@@ -243,7 +243,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     ->whereKey($address->contact_id)
                     ->first();
 
-                if ($contact && ! $contact->isCascadingDeletes()) {
+                if ($contact && ! $contact->isInCascadingDeletes()) {
                     $contact->delete();
                 }
 

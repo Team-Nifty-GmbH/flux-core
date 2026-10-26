@@ -31,7 +31,7 @@ trait CascadeSoftDeletes
         });
     }
 
-    public function isCascadingDeletes(): bool
+    public function isInCascadingDeletes(): bool
     {
         return static::$cascadingDeletes[$this->getKey()] ?? false;
     }
