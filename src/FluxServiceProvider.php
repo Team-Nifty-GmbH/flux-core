@@ -167,6 +167,44 @@ class FluxServiceProvider extends ServiceProvider
         }
     }
 
+    protected function applyMailSettings(): void
+    {
+        try {
+            $settings = app(Settings\MailSettings::class);
+            $previousConfig = [];
+
+            if (! is_null($settings->mailer)) {
+                $previousConfig['mail.default'] = config('mail.default');
+                config()->set('mail.default', $settings->mailer);
+            }
+
+            $defaultMailer = config('mail.default');
+
+            $configMap = [
+                'host' => "mail.mailers.{$defaultMailer}.host",
+                'port' => "mail.mailers.{$defaultMailer}.port",
+                'username' => "mail.mailers.{$defaultMailer}.username",
+                'password' => "mail.mailers.{$defaultMailer}.password",
+                'encryption' => "mail.mailers.{$defaultMailer}.encryption",
+                'from_address' => 'mail.from.address',
+                'from_name' => 'mail.from.name',
+            ];
+
+            foreach ($configMap as $property => $configKey) {
+                if (! is_null($settings->{$property})) {
+                    $previousConfig[$configKey] = config($configKey);
+                    config()->set($configKey, $settings->{$property});
+                }
+            }
+        } catch (Throwable $e) {
+            foreach ($previousConfig ?? [] as $configKey => $value) {
+                config()->set($configKey, $value);
+            }
+
+            report($e);
+        }
+    }
+
     protected function bootCommands(): void
     {
         $commands = file_exists($cachePath = $this->app->bootstrapPath('cache/flux-commands.php'))
@@ -190,6 +228,32 @@ class FluxServiceProvider extends ServiceProvider
             new Client(['timeout' => config('flux.meilisearch.timeout')]),
             clientAgents: [sprintf('Meilisearch Laravel Scout (v%s)', Scout::VERSION)],
         ));
+    }
+
+    protected function bootMiddleware(): void
+    {
+        /** @var Kernel $kernel */
+        $kernel = $this->app->make(Kernel::class);
+
+        if (! $kernel->hasMiddleware(InvokeDeferredCallbacks::class)) {
+            $kernel->prependMiddleware(InvokeDeferredCallbacks::class);
+        }
+
+        $kernel->prependMiddlewareToGroup('api', EnsureFrontendRequestsAreStateful::class);
+
+        $kernel->appendMiddlewareToGroup('web', Localization::class);
+        $kernel->appendMiddlewareToGroup('web', AuthContextMiddleware::class);
+        $kernel->appendMiddlewareToGroup('web', SanitizeSocketId::class);
+
+        $this->app['router']->aliasMiddleware('2fa.setup', EnsureTwoFactorSetup::class);
+        $this->app['router']->aliasMiddleware('ability', CheckForAnyAbility::class);
+        $this->app['router']->aliasMiddleware('media.signed', AuthenticatedUserMediaOrSignature::class);
+        $this->app['router']->aliasMiddleware('localization', Localization::class);
+        $this->app['router']->aliasMiddleware('permission', Permissions::class);
+        $this->app['router']->aliasMiddleware('role', RoleMiddleware::class);
+        $this->app['router']->aliasMiddleware('role_or_permission', RoleOrPermissionMiddleware::class);
+
+        Bus::pipeThrough([app(SetJobAuthenticatedUserMiddleware::class)]);
     }
 
     protected function bootRoutes(): void
@@ -216,6 +280,22 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         RouteFacade::pattern('id', '[0-9]+');
+    }
+
+    protected function censorFlareReports(): void
+    {
+        // Only when laravel-ignition is installed and has merged its config.
+        if (! is_array(config('flare.flare_middleware'))) {
+            return;
+        }
+
+        // Query bindings hold searched and saved values, stack frame
+        // arguments the strings passed between functions.
+        config([
+            'flare.flare_middleware.' . AddQueries::class . '.report_query_bindings' => false,
+            'flare.flare_middleware.' . resolve_static(CensorPersonalData::class, 'class') => [],
+            'ignition.with_stack_frame_arguments' => false,
+        ]);
     }
 
     protected function findCommands(): array
@@ -261,22 +341,6 @@ class FluxServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../docker' => base_path('docker'),
         ], 'flux-docker');
-    }
-
-    protected function censorFlareReports(): void
-    {
-        // Only when laravel-ignition is installed and has merged its config.
-        if (! is_array(config('flare.flare_middleware'))) {
-            return;
-        }
-
-        // Query bindings hold searched and saved values, stack frame
-        // arguments the strings passed between functions.
-        config([
-            'flare.flare_middleware.' . AddQueries::class . '.report_query_bindings' => false,
-            'flare.flare_middleware.' . CensorPersonalData::class => [],
-            'ignition.with_stack_frame_arguments' => false,
-        ]);
     }
 
     protected function registerConfig(): void
@@ -339,32 +403,6 @@ class FluxServiceProvider extends ServiceProvider
         }
     }
 
-    protected function bootMiddleware(): void
-    {
-        /** @var Kernel $kernel */
-        $kernel = $this->app->make(Kernel::class);
-
-        if (! $kernel->hasMiddleware(InvokeDeferredCallbacks::class)) {
-            $kernel->prependMiddleware(InvokeDeferredCallbacks::class);
-        }
-
-        $kernel->prependMiddlewareToGroup('api', EnsureFrontendRequestsAreStateful::class);
-
-        $kernel->appendMiddlewareToGroup('web', Localization::class);
-        $kernel->appendMiddlewareToGroup('web', AuthContextMiddleware::class);
-        $kernel->appendMiddlewareToGroup('web', SanitizeSocketId::class);
-
-        $this->app['router']->aliasMiddleware('2fa.setup', EnsureTwoFactorSetup::class);
-        $this->app['router']->aliasMiddleware('ability', CheckForAnyAbility::class);
-        $this->app['router']->aliasMiddleware('media.signed', AuthenticatedUserMediaOrSignature::class);
-        $this->app['router']->aliasMiddleware('localization', Localization::class);
-        $this->app['router']->aliasMiddleware('permission', Permissions::class);
-        $this->app['router']->aliasMiddleware('role', RoleMiddleware::class);
-        $this->app['router']->aliasMiddleware('role_or_permission', RoleOrPermissionMiddleware::class);
-
-        Bus::pipeThrough([app(SetJobAuthenticatedUserMiddleware::class)]);
-    }
-
     protected function registerExtensions(): void
     {
         $this->app->extend(
@@ -397,43 +435,5 @@ class FluxServiceProvider extends ServiceProvider
                 'auth.providers.users',
                 $usersProvider
             );
-    }
-
-    protected function applyMailSettings(): void
-    {
-        try {
-            $settings = app(Settings\MailSettings::class);
-            $previousConfig = [];
-
-            if (! is_null($settings->mailer)) {
-                $previousConfig['mail.default'] = config('mail.default');
-                config()->set('mail.default', $settings->mailer);
-            }
-
-            $defaultMailer = config('mail.default');
-
-            $configMap = [
-                'host' => "mail.mailers.{$defaultMailer}.host",
-                'port' => "mail.mailers.{$defaultMailer}.port",
-                'username' => "mail.mailers.{$defaultMailer}.username",
-                'password' => "mail.mailers.{$defaultMailer}.password",
-                'encryption' => "mail.mailers.{$defaultMailer}.encryption",
-                'from_address' => 'mail.from.address',
-                'from_name' => 'mail.from.name',
-            ];
-
-            foreach ($configMap as $property => $configKey) {
-                if (! is_null($settings->{$property})) {
-                    $previousConfig[$configKey] = config($configKey);
-                    config()->set($configKey, $settings->{$property});
-                }
-            }
-        } catch (Throwable $e) {
-            foreach ($previousConfig ?? [] as $configKey => $value) {
-                config()->set($configKey, $value);
-            }
-
-            report($e);
-        }
     }
 }

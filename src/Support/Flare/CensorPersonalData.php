@@ -3,6 +3,7 @@
 namespace FluxErp\Support\Flare;
 
 use Closure;
+use Illuminate\Database\QueryException;
 use Spatie\FlareClient\FlareMiddleware\FlareMiddleware;
 use Spatie\FlareClient\Report;
 
@@ -18,6 +19,11 @@ class CensorPersonalData implements FlareMiddleware
 
     public function handle(Report $report, Closure $next)
     {
+        $throwable = $report->getThrowable();
+        if ($throwable instanceof QueryException) {
+            $report->message($this->censorQueryException($throwable));
+        }
+
         $context = $report->allContext();
 
         // Console and queue reports carry no request.
@@ -42,6 +48,10 @@ class CensorPersonalData implements FlareMiddleware
             $censored['request']['url'] = strtok($url, '?');
         }
 
+        if ($referer = data_get($context, 'headers.referer')) {
+            $censored['headers']['referer'] = strtok($referer, '?');
+        }
+
         if (is_array($user = data_get($context, 'user'))) {
             $censored['user'] = array_map(
                 fn (mixed $value) => static::CENSORED,
@@ -50,7 +60,7 @@ class CensorPersonalData implements FlareMiddleware
         }
 
         foreach (data_get($context, 'route.routeParameters') ?? [] as $name => $parameter) {
-            if (is_array($parameter)) {
+            if (! is_scalar($parameter)) {
                 $censored['route']['routeParameters'][$name] = static::CENSORED;
             }
         }
@@ -58,5 +68,16 @@ class CensorPersonalData implements FlareMiddleware
         $report->userProvidedContext(array_replace_recursive($context, $censored));
 
         return $next($report);
+    }
+
+    protected function censorQueryException(QueryException $exception): string
+    {
+        $bindings = array_filter(
+            $exception->getBindings(),
+            fn (mixed $binding) => is_string($binding) && ! blank($binding)
+        );
+
+        return str_replace($bindings, static::CENSORED, $exception->getPrevious()?->getMessage() ?? '')
+            . ' (Connection: ' . $exception->getConnectionName() . ', SQL: ' . $exception->getSql() . ')';
     }
 }
