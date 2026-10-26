@@ -4,13 +4,13 @@ namespace FluxErp\Settings;
 
 class ActivityLogSettings extends FluxSettings
 {
-    public ?int $created_retention_days;
+    public ?int $created_retention_days = null;
 
-    public ?int $updated_retention_days;
+    public ?int $updated_retention_days = 365;
 
-    public ?int $deleted_retention_days;
+    public ?int $deleted_retention_days = null;
 
-    public ?int $other_retention_days;
+    public ?int $other_retention_days = 365;
 
     public static function group(): string
     {
