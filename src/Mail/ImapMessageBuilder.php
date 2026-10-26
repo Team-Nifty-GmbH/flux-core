@@ -48,60 +48,9 @@ class ImapMessageBuilder
         $this->messages = new Collection();
     }
 
-    public function unseen(): static
+    public function count(): int
     {
-        $this->filterUnseen = true;
-        $this->filterSeen = false;
-
-        return $this;
-    }
-
-    public function seen(): static
-    {
-        $this->filterSeen = true;
-        $this->filterUnseen = false;
-
-        return $this;
-    }
-
-    public function withBody(): static
-    {
-        $this->fetchBody = true;
-
-        return $this;
-    }
-
-    public function withoutBody(): static
-    {
-        $this->fetchBody = false;
-
-        return $this;
-    }
-
-    public function newSince(?int $uid): static
-    {
-        $this->sinceUid = $uid;
-
-        return $this;
-    }
-
-    public function onProgress(?Closure $callback): static
-    {
-        $this->progressCallback = $callback;
-
-        return $this;
-    }
-
-    public function reset(): static
-    {
-        $this->filterSeen = false;
-        $this->filterUnseen = false;
-        $this->fetchBody = true;
-        $this->sinceUid = null;
-        $this->progressProcessed = 0;
-        $this->messages = new Collection();
-
-        return $this;
+        return $this->messages->count();
     }
 
     public function fetch(): static
@@ -148,6 +97,51 @@ class ImapMessageBuilder
         });
 
         return $this;
+    }
+
+    /** @return Collection<int, ImapMessage> */
+    public function get(): Collection
+    {
+        return $this->messages;
+    }
+
+    public function newSince(?int $uid): static
+    {
+        $this->sinceUid = $uid;
+
+        return $this;
+    }
+
+    public function onProgress(?Closure $callback): static
+    {
+        $this->progressCallback = $callback;
+
+        return $this;
+    }
+
+    public function reset(): static
+    {
+        $this->filterSeen = false;
+        $this->filterUnseen = false;
+        $this->fetchBody = true;
+        $this->sinceUid = null;
+        $this->progressProcessed = 0;
+        $this->messages = new Collection();
+
+        return $this;
+    }
+
+    public function seen(): static
+    {
+        $this->filterSeen = true;
+        $this->filterUnseen = false;
+
+        return $this;
+    }
+
+    public function status(): array
+    {
+        return $this->overConnection(fn (): array => $this->resolveImapFolder()?->examine() ?? []);
     }
 
     public function store(): static
@@ -201,20 +195,208 @@ class ImapMessageBuilder
         return $this;
     }
 
-    public function status(): array
+    public function unseen(): static
     {
-        return $this->overConnection(fn (): array => $this->resolveImapFolder()?->examine() ?? []);
+        $this->filterUnseen = true;
+        $this->filterSeen = false;
+
+        return $this;
     }
 
-    /** @return Collection<int, ImapMessage> */
-    public function get(): Collection
+    public function withBody(): static
     {
-        return $this->messages;
+        $this->fetchBody = true;
+
+        return $this;
     }
 
-    public function count(): int
+    public function withoutBody(): static
     {
-        return $this->messages->count();
+        $this->fetchBody = false;
+
+        return $this;
+    }
+
+    protected function createMessage(ImapMessage $imapMessage): void
+    {
+        $tagIds = $this->resolveTagIds($imapMessage->flags);
+
+        CreateMailMessage::make([
+            'mail_account_id' => $this->folder->mailAccount->getKey(),
+            'mail_folder_id' => $this->folder->getKey(),
+            'message_id' => $imapMessage->messageId,
+            'message_uid' => (string) $imapMessage->uid,
+            'from' => $imapMessage->from,
+            'to' => $imapMessage->to,
+            'cc' => $imapMessage->cc,
+            'bcc' => $imapMessage->bcc,
+            'communication_type_enum' => 'mail',
+            'date' => $imapMessage->date->toDateTimeString(),
+            'subject' => $imapMessage->subject,
+            'text_body' => $imapMessage->textBody,
+            'html_body' => $imapMessage->htmlBody,
+            'is_seen' => $imapMessage->isSeen,
+            'tags' => $tagIds,
+            'attachments' => $imapMessage->attachments,
+        ])
+            ->validate()
+            ->execute();
+    }
+
+    protected function fetchFilteredMessages(Folder $imapFolder, ?Closure $onMessage = null): void
+    {
+        try {
+            $query = $imapFolder->messages()
+                ->setFetchBody(false)
+                ->leaveUnread()
+                ->since($this->folder->mailAccount->created_at);
+
+            if ($this->filterUnseen) {
+                $query->unseen();
+            } elseif ($this->filterSeen) {
+                $query->seen();
+            }
+        } catch (ResponseException) {
+            return;
+        }
+
+        $page = 0;
+        do {
+            $page++;
+            $messages = $query->paginate(100, $page);
+
+            foreach ($messages as $message) {
+                $imapMessage = $this->makeMessage($message);
+
+                if (! $imapMessage) {
+                    continue;
+                }
+
+                if ($onMessage) {
+                    $onMessage($imapMessage);
+                    $this->progressCallback?->__invoke(++$this->progressProcessed, $messages->total());
+                } else {
+                    $this->messages->push($imapMessage);
+                }
+            }
+        } while ($page !== $messages->lastPage());
+    }
+
+    protected function fetchNewMessages(Folder $imapFolder, ?Closure $onMessage = null): void
+    {
+        $lastUid = $this->sinceUid;
+        $total = null;
+
+        do {
+            try {
+                $messages = $imapFolder->messages()
+                    ->setFetchBody(false)
+                    ->leaveUnread()
+                    ->limit($this->pageSize)
+                    ->getByUidGreater($lastUid);
+            } catch (ResponseException) {
+                return;
+            }
+
+            $count = $messages->count();
+            $total ??= $messages->total() ?: $count;
+
+            while ($message = $messages->shift()) {
+                $lastUid = max($lastUid, $message->getUid());
+                $imapMessage = $this->makeMessage($message);
+
+                if (! $imapMessage) {
+                    continue;
+                }
+
+                if ($onMessage) {
+                    $onMessage($imapMessage);
+                    $this->progressCallback?->__invoke(++$this->progressProcessed, $total);
+                } else {
+                    $this->messages->push($imapMessage);
+                }
+            }
+        } while ($count === $this->pageSize);
+    }
+
+    protected function freeMemory(): ?int
+    {
+        $limit = ini_parse_quantity(ini_get('memory_limit'));
+
+        return $limit < 0 ? null : max($limit - memory_get_usage(true), 0);
+    }
+
+    /**
+     * Whether the server took the connection away, as opposed to any other
+     * failure. Everything else is left alone rather than retried blindly.
+     */
+    protected function isLostConnection(Throwable $exception): bool
+    {
+        if ($exception instanceof ConnectionFailedException
+            || $exception instanceof GetMessagesFailedException
+        ) {
+            return true;
+        }
+
+        if (! $exception instanceof ErrorException && ! $exception instanceof RuntimeException) {
+            return false;
+        }
+
+        // A stream failure only counts when it happened inside the imap client.
+        // The same words turn up in unrelated failures, and retrying one of
+        // those would repeat work that never touched the connection.
+        if (! str_contains($exception->getFile(), 'webklex/php-imap')) {
+            return false;
+        }
+
+        // php-imap reports the loss as a failed stream write, and PHP itself as
+        // a broken pipe or a reset by the peer.
+        return (bool) preg_match(
+            '/broken pipe|connection closed|connection reset|fwrite|fread/i',
+            $exception->getMessage()
+        );
+    }
+
+    protected function makeMessage(Message $message): ?ImapMessage
+    {
+        try {
+            $maxSize = (int) config('flux.mail.max_message_size');
+
+            if ($this->fetchBody && $maxSize > 0 && $message->getSize() > $maxSize) {
+                $this->skip($message->getUid(), $message->getSize() . ' bytes exceed the limit of ' . $maxSize);
+
+                return null;
+            }
+
+            $freeMemory = $this->freeMemory();
+
+            if ($this->fetchBody
+                && ! is_null($freeMemory)
+                && $message->getSize() * static::PARSE_MEMORY_FACTOR > $freeMemory
+            ) {
+                $this->skip(
+                    $message->getUid(),
+                    $message->getSize() . ' bytes need about ' . $message->getSize() * static::PARSE_MEMORY_FACTOR
+                        . ' bytes of memory to parse, only ' . $freeMemory . ' bytes are free'
+                );
+
+                return null;
+            }
+
+            return ImapMessage::fromImapMessage($message, $this->fetchBody);
+        } catch (Throwable $exception) {
+            if ($this->isLostConnection($exception)) {
+                throw $exception;
+            }
+
+            report($exception);
+
+            return null;
+        } finally {
+            if (function_exists('imap_errors')) {
+                imap_errors();
+            }
+        }
     }
 
     /**
@@ -266,40 +448,33 @@ class ImapMessageBuilder
         $this->folder->mailAccount->reconnectImapClient();
     }
 
-    /**
-     * Whether the server took the connection away, as opposed to any other
-     * failure. Everything else is left alone rather than retried blindly.
-     */
-    protected function isLostConnection(Throwable $exception): bool
-    {
-        if ($exception instanceof ConnectionFailedException
-            || $exception instanceof GetMessagesFailedException
-        ) {
-            return true;
-        }
-
-        if (! $exception instanceof ErrorException && ! $exception instanceof RuntimeException) {
-            return false;
-        }
-
-        // A stream failure only counts when it happened inside the imap client.
-        // The same words turn up in unrelated failures, and retrying one of
-        // those would repeat work that never touched the connection.
-        if (! str_contains($exception->getFile(), 'webklex/php-imap')) {
-            return false;
-        }
-
-        // php-imap reports the loss as a failed stream write, and PHP itself as
-        // a broken pipe or a reset by the peer.
-        return (bool) preg_match(
-            '/broken pipe|connection closed|connection reset|fwrite|fread/i',
-            $exception->getMessage()
-        );
-    }
-
     protected function resolveImapFolder(): ?Folder
     {
         return $this->folder->mailAccount->getImapFolder($this->folder->slug);
+    }
+
+    protected function resolveTagIds(array $flags): array
+    {
+        $tagIds = [];
+        $type = morph_alias(Communication::class);
+        $existingTags = resolve_static(Tag::class, 'query')
+            ->whereIn('name', $flags)
+            ->where('type', $type)
+            ->pluck('id', 'name')
+            ->toArray();
+
+        foreach ($flags as $flag) {
+            if ($existingTag = data_get($existingTags, $flag)) {
+                $tagIds[] = $existingTag;
+            } else {
+                $tagIds[] = CreateTag::make(['name' => $flag, 'type' => $type])
+                    ->validate()
+                    ->execute()
+                    ->getKey();
+            }
+        }
+
+        return $tagIds;
     }
 
     /**
@@ -337,130 +512,6 @@ class ImapMessageBuilder
         } catch (ResponseException) {
             return null;
         }
-    }
-
-    protected function fetchNewMessages(Folder $imapFolder, ?Closure $onMessage = null): void
-    {
-        $lastUid = $this->sinceUid;
-        $total = null;
-
-        do {
-            try {
-                $messages = $imapFolder->messages()
-                    ->setFetchBody(false)
-                    ->leaveUnread()
-                    ->limit($this->pageSize)
-                    ->getByUidGreater($lastUid);
-            } catch (ResponseException) {
-                return;
-            }
-
-            $count = $messages->count();
-            $total ??= $messages->total() ?: $count;
-
-            while ($message = $messages->shift()) {
-                $lastUid = max($lastUid, $message->getUid());
-                $imapMessage = $this->makeMessage($message);
-
-                if (! $imapMessage) {
-                    continue;
-                }
-
-                if ($onMessage) {
-                    $onMessage($imapMessage);
-                    $this->progressCallback?->__invoke(++$this->progressProcessed, $total);
-                } else {
-                    $this->messages->push($imapMessage);
-                }
-            }
-        } while ($count === $this->pageSize);
-    }
-
-    protected function fetchFilteredMessages(Folder $imapFolder, ?Closure $onMessage = null): void
-    {
-        try {
-            $query = $imapFolder->messages()
-                ->setFetchBody(false)
-                ->leaveUnread()
-                ->since($this->folder->mailAccount->created_at);
-
-            if ($this->filterUnseen) {
-                $query->unseen();
-            } elseif ($this->filterSeen) {
-                $query->seen();
-            }
-        } catch (ResponseException) {
-            return;
-        }
-
-        $page = 0;
-        do {
-            $page++;
-            $messages = $query->paginate(100, $page);
-
-            foreach ($messages as $message) {
-                $imapMessage = $this->makeMessage($message);
-
-                if (! $imapMessage) {
-                    continue;
-                }
-
-                if ($onMessage) {
-                    $onMessage($imapMessage);
-                    $this->progressCallback?->__invoke(++$this->progressProcessed, $messages->total());
-                } else {
-                    $this->messages->push($imapMessage);
-                }
-            }
-        } while ($page !== $messages->lastPage());
-    }
-
-    protected function makeMessage(Message $message): ?ImapMessage
-    {
-        try {
-            $maxSize = (int) config('flux.mail.max_message_size');
-
-            if ($this->fetchBody && $maxSize > 0 && $message->getSize() > $maxSize) {
-                $this->skip($message->getUid(), $message->getSize() . ' bytes exceed the limit of ' . $maxSize);
-
-                return null;
-            }
-
-            $freeMemory = $this->freeMemory();
-
-            if ($this->fetchBody
-                && ! is_null($freeMemory)
-                && $message->getSize() * static::PARSE_MEMORY_FACTOR > $freeMemory
-            ) {
-                $this->skip(
-                    $message->getUid(),
-                    $message->getSize() . ' bytes need more than the ' . $freeMemory . ' bytes of free memory to parse'
-                );
-
-                return null;
-            }
-
-            return ImapMessage::fromImapMessage($message, $this->fetchBody);
-        } catch (Throwable $exception) {
-            if ($this->isLostConnection($exception)) {
-                throw $exception;
-            }
-
-            report($exception);
-
-            return null;
-        } finally {
-            if (function_exists('imap_errors')) {
-                imap_errors();
-            }
-        }
-    }
-
-    protected function freeMemory(): ?int
-    {
-        $limit = ini_parse_quantity(ini_get('memory_limit'));
-
-        return $limit < 0 ? null : max($limit - memory_get_usage(), 0);
     }
 
     protected function skip(int $uid, string $reason, ?Throwable $previous = null): void
@@ -514,55 +565,5 @@ class ImapMessageBuilder
         } finally {
             File::delete(array_column($imapMessage->attachments, 'media'));
         }
-    }
-
-    protected function createMessage(ImapMessage $imapMessage): void
-    {
-        $tagIds = $this->resolveTagIds($imapMessage->flags);
-
-        CreateMailMessage::make([
-            'mail_account_id' => $this->folder->mailAccount->getKey(),
-            'mail_folder_id' => $this->folder->getKey(),
-            'message_id' => $imapMessage->messageId,
-            'message_uid' => (string) $imapMessage->uid,
-            'from' => $imapMessage->from,
-            'to' => $imapMessage->to,
-            'cc' => $imapMessage->cc,
-            'bcc' => $imapMessage->bcc,
-            'communication_type_enum' => 'mail',
-            'date' => $imapMessage->date->toDateTimeString(),
-            'subject' => $imapMessage->subject,
-            'text_body' => $imapMessage->textBody,
-            'html_body' => $imapMessage->htmlBody,
-            'is_seen' => $imapMessage->isSeen,
-            'tags' => $tagIds,
-            'attachments' => $imapMessage->attachments,
-        ])
-            ->validate()
-            ->execute();
-    }
-
-    protected function resolveTagIds(array $flags): array
-    {
-        $tagIds = [];
-        $type = morph_alias(Communication::class);
-        $existingTags = resolve_static(Tag::class, 'query')
-            ->whereIn('name', $flags)
-            ->where('type', $type)
-            ->pluck('id', 'name')
-            ->toArray();
-
-        foreach ($flags as $flag) {
-            if ($existingTag = data_get($existingTags, $flag)) {
-                $tagIds[] = $existingTag;
-            } else {
-                $tagIds[] = CreateTag::make(['name' => $flag, 'type' => $type])
-                    ->validate()
-                    ->execute()
-                    ->getKey();
-            }
-        }
-
-        return $tagIds;
     }
 }
