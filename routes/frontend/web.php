@@ -69,6 +69,7 @@ use FluxErp\Livewire\Settings\AbsencePolicies;
 use FluxErp\Livewire\Settings\AbsenceTypes;
 use FluxErp\Livewire\Settings\AccountingSettings;
 use FluxErp\Livewire\Settings\ActivityLogs;
+use FluxErp\Livewire\Settings\ActivityLogSettings;
 use FluxErp\Livewire\Settings\AddressTypes;
 use FluxErp\Livewire\Settings\BankConnections;
 use FluxErp\Livewire\Settings\BlockedFiles;
@@ -325,6 +326,7 @@ Route::middleware('web')
                         Route::get('/absence-policies', AbsencePolicies::class)->name('absence-policies');
                         Route::get('/absence-types', AbsenceTypes::class)->name('absence-types');
                         Route::get('/accounting-settings', AccountingSettings::class)->name('accounting-settings');
+                        Route::get('/activity-log-settings', ActivityLogSettings::class)->name('activity-log-settings');
                         Route::get('/activity-logs', ActivityLogs::class)->name('activity-logs');
                         Route::get('/address-types', AddressTypes::class)->name('address-types');
                         Route::get('/bank-connections', BankConnections::class)->name('bank-connections');
