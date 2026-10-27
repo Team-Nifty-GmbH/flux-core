@@ -112,7 +112,7 @@
 
         @if (resolve_static(\FluxErp\Support\Broadcasting\MercureHubConfig::class, 'usesMercure'))
             <x-toggle
-                wire:model.boolean="configForm.mercure_enabled"
+                wire:model.live.boolean="configForm.mercure_enabled"
                 :label="__('Enable Mercure')"
                 :hint="__('Receive print jobs in real time from the Mercure hub of this instance')"
             />

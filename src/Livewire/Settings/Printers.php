@@ -156,6 +156,15 @@ class Printers extends PrinterList
         $this->generateBridgeConfig();
     }
 
+    public function updatedConfigFormMercureEnabled(bool $mercureEnabled): void
+    {
+        $this->configForm->reverb_disabled = resolve_static(
+            GeneratePrinterBridgeConfig::class,
+            'defaults',
+            [$mercureEnabled]
+        )['reverb_disabled'];
+    }
+
     public function deleteSpooler(): bool
     {
         if (! $this->deleteSpoolerName) {
