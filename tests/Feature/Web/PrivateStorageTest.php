@@ -85,3 +85,17 @@ test('the migration moves the old private storage permission to the new route', 
     expect(Permission::query()->where('name', 'private-storage.{path}.get')->exists())->toBeFalse()
         ->and($role->fresh()->hasPermissionTo('user.private-storage.{path}.get', 'web'))->toBeTrue();
 });
+
+test('the migration merges the old private storage permission into an existing new one', function (): void {
+    $role = Role::findOrCreate('private-storage-merge-test', 'web');
+    $role->givePermissionTo(Permission::findOrCreate('private-storage.{path}.get', 'web'));
+    $new = Permission::findOrCreate('user.private-storage.{path}.get', 'web');
+    $this->user->givePermissionTo(Permission::findByName('private-storage.{path}.get', 'web'));
+
+    (require __DIR__ . '/../../../database/migrations/2026_10_26_000001_rename_private_storage_permission_in_permissions_table.php')->up();
+
+    expect(Permission::query()->where('name', 'private-storage.{path}.get')->exists())->toBeFalse()
+        ->and(Permission::query()->where('name', $new->name)->count())->toBe(1)
+        ->and($role->fresh()->hasPermissionTo($new->name, 'web'))->toBeTrue()
+        ->and($this->user->fresh()->hasPermissionTo($new->name, 'web'))->toBeTrue();
+});

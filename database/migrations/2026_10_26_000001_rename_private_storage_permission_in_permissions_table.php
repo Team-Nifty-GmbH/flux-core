@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -18,34 +19,32 @@ return new class() extends Migration
 
     protected function renamePermission(string $from, string $to): void
     {
-        foreach (DB::table('permissions')->where('name', $from)->get(['id', 'guard_name']) as $permission) {
-            $targetId = DB::table('permissions')
-                ->where('name', $to)
-                ->where('guard_name', $permission->guard_name)
-                ->value('id');
+        DB::table('permissions')
+            ->leftJoin('permissions as existing', function (JoinClause $join) use ($to): void {
+                $join->on('existing.guard_name', '=', 'permissions.guard_name')
+                    ->where('existing.name', $to);
+            })
+            ->where('permissions.name', $from)
+            ->whereNull('existing.id')
+            ->update(['permissions.name' => $to]);
 
-            if (is_null($targetId)) {
-                DB::table('permissions')
-                    ->where('id', $permission->id)
-                    ->update(['name' => $to]);
+        foreach ([
+            'role_has_permissions' => ['role_id'],
+            'model_has_permissions' => ['model_type', 'model_id'],
+        ] as $table => $columns) {
+            $select = DB::table($table, 'pivot')
+                ->join('permissions as old', 'old.id', '=', 'pivot.permission_id')
+                ->join('permissions as new', function (JoinClause $join): void {
+                    $join->on('new.guard_name', '=', 'old.guard_name');
+                })
+                ->where('old.name', $from)
+                ->where('new.name', $to)
+                ->select(['new.id', ...array_map(fn (string $column): string => 'pivot.' . $column, $columns)]);
 
-                continue;
-            }
-
-            foreach (['role_has_permissions', 'model_has_permissions'] as $table) {
-                DB::table($table)->insertOrIgnore(
-                    DB::table($table)
-                        ->where('permission_id', $permission->id)
-                        ->get()
-                        ->map(fn (object $row): array => array_merge((array) $row, ['permission_id' => $targetId]))
-                        ->all()
-                );
-            }
-
-            DB::table('permissions')
-                ->where('id', $permission->id)
-                ->delete();
+            DB::table($table)->insertOrIgnoreUsing(['permission_id', ...$columns], $select);
         }
+
+        DB::table('permissions')->where('name', $from)->delete();
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
