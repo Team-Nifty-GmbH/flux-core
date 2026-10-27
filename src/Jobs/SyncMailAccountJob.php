@@ -86,6 +86,10 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
 
     public function handle(): void
     {
+        if ($this->mailAccount->isSyncPaused()) {
+            return;
+        }
+
         try {
             $this->sync();
 
@@ -132,7 +136,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
 
     protected function isOutageOverdue(): bool
     {
-        Cache::add($this->connectionFailureCacheKey(), now()->getTimestamp(), now()->addDay());
+        Cache::add($this->connectionFailureCacheKey(), now()->getTimestamp());
 
         return now()->getTimestamp() - Cache::get($this->connectionFailureCacheKey())
             >= static::CONNECTION_FAILURE_GRACE_MINUTES * 60;
@@ -206,6 +210,10 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
                     return false;
                 } catch (Throwable $e) {
                     if ($this->isConnectionFailure($e)) {
+                        if (! is_null($failure)) {
+                            report($failure);
+                        }
+
                         throw $e;
                     }
 

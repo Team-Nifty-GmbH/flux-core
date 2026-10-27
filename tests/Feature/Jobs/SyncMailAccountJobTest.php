@@ -452,3 +452,74 @@ test('sync mail account job stops at the first folder when the mail server goes 
     expect($spy->attempts)->toBe(1);
     Exceptions::assertNothingReported();
 });
+
+test('sync mail account job keeps the outage running while the account is paused', function (): void {
+    $mailAccount = MailAccount::factory()->create();
+    $driver = unreachableMailDriver(new ConnectionFailedException('connection failed'));
+
+    app(MailDriverManager::class)->extend('imap', fn () => $driver);
+
+    (new SyncMailAccountJob($mailAccount))->handle();
+
+    $this->travel(10)->minutes();
+    $driver->fail = false;
+    $mailAccount->forceFill(['failed_logins' => MailAccount::MAX_FAILED_LOGINS]);
+    (new SyncMailAccountJob($mailAccount))->handle();
+
+    $this->travel(21)->minutes();
+    $driver->fail = true;
+    $mailAccount->forceFill(['failed_logins' => 0]);
+
+    expect(fn () => (new SyncMailAccountJob($mailAccount))->handle())
+        ->toThrow(ConnectionFailedException::class);
+});
+
+test('sync mail account job does not grant a new grace period to an outage older than a day', function (): void {
+    $mailAccount = MailAccount::factory()->create();
+
+    app(MailDriverManager::class)->extend(
+        'imap',
+        fn () => unreachableMailDriver(new ConnectionFailedException('connection failed'))
+    );
+
+    (new SyncMailAccountJob($mailAccount))->handle();
+
+    $this->travel(1)->days();
+    $this->travel(1)->minutes();
+
+    expect(fn () => (new SyncMailAccountJob($mailAccount))->handle())
+        ->toThrow(ConnectionFailedException::class);
+});
+
+test('sync mail account job reports an earlier folder error when the mail server goes away afterwards', function (): void {
+    Exceptions::fake();
+    $mailAccount = MailAccount::factory()
+        ->has(MailFolder::factory()->count(2)->state(['is_active' => true]))
+        ->create();
+
+    app(MailDriverManager::class)->extend('imap', fn () => new class() implements MailSyncDriver
+    {
+        public int $calls = 0;
+
+        public function syncFolders(MailAccount $account): array
+        {
+            return [];
+        }
+
+        public function syncMessages(MailFolder $folder): void
+        {
+            throw $this->calls++ === 0
+                ? new RuntimeException('Empty response')
+                : new ConnectionFailedException('connection failed');
+        }
+
+        public function testConnection(MailAccount $account): bool
+        {
+            return true;
+        }
+    });
+
+    (new SyncMailAccountJob($mailAccount))->handle();
+
+    Exceptions::assertReported(fn (RuntimeException $e): bool => $e->getMessage() === 'Empty response');
+});
