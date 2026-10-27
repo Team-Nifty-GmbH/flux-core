@@ -48,6 +48,37 @@ class ImapMessageBuilder
         $this->messages = new Collection();
     }
 
+    /**
+     * Whether the server took the connection away, as opposed to any other
+     * failure. Everything else is left alone rather than retried blindly.
+     */
+    public static function isLostConnection(Throwable $exception): bool
+    {
+        if ($exception instanceof ConnectionFailedException
+            || $exception instanceof GetMessagesFailedException
+        ) {
+            return true;
+        }
+
+        if (! $exception instanceof ErrorException && ! $exception instanceof RuntimeException) {
+            return false;
+        }
+
+        // A stream failure only counts when it happened inside the imap client.
+        // The same words turn up in unrelated failures, and retrying one of
+        // those would repeat work that never touched the connection.
+        if (! str_contains($exception->getFile(), 'webklex/php-imap')) {
+            return false;
+        }
+
+        // php-imap reports the loss as a failed stream write, and PHP itself as
+        // a broken pipe or a reset by the peer.
+        return (bool) preg_match(
+            '/broken pipe|connection closed|connection reset|fwrite|fread/i',
+            $exception->getMessage()
+        );
+    }
+
     public function count(): int
     {
         return $this->messages->count();
@@ -326,37 +357,6 @@ class ImapMessageBuilder
         return $limit < 0 ? null : max($limit - memory_get_usage(true), 0);
     }
 
-    /**
-     * Whether the server took the connection away, as opposed to any other
-     * failure. Everything else is left alone rather than retried blindly.
-     */
-    protected function isLostConnection(Throwable $exception): bool
-    {
-        if ($exception instanceof ConnectionFailedException
-            || $exception instanceof GetMessagesFailedException
-        ) {
-            return true;
-        }
-
-        if (! $exception instanceof ErrorException && ! $exception instanceof RuntimeException) {
-            return false;
-        }
-
-        // A stream failure only counts when it happened inside the imap client.
-        // The same words turn up in unrelated failures, and retrying one of
-        // those would repeat work that never touched the connection.
-        if (! str_contains($exception->getFile(), 'webklex/php-imap')) {
-            return false;
-        }
-
-        // php-imap reports the loss as a failed stream write, and PHP itself as
-        // a broken pipe or a reset by the peer.
-        return (bool) preg_match(
-            '/broken pipe|connection closed|connection reset|fwrite|fread/i',
-            $exception->getMessage()
-        );
-    }
-
     protected function makeMessage(Message $message): ?ImapMessage
     {
         try {
@@ -385,7 +385,7 @@ class ImapMessageBuilder
 
             return ImapMessage::fromImapMessage($message, $this->fetchBody);
         } catch (Throwable $exception) {
-            if ($this->isLostConnection($exception)) {
+            if (static::isLostConnection($exception)) {
                 throw $exception;
             }
 
@@ -419,7 +419,7 @@ class ImapMessageBuilder
         try {
             return $operation();
         } catch (Throwable $exception) {
-            if (! $this->isLostConnection($exception)) {
+            if (! static::isLostConnection($exception)) {
                 throw $exception;
             }
         }
