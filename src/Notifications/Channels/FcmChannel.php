@@ -4,12 +4,14 @@ namespace FluxErp\Notifications\Channels;
 
 use FluxErp\Models\DeviceToken;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Str;
 use Kreait\Firebase\Contract\Messaging;
 use Kreait\Firebase\Exception\FirebaseException;
 use Kreait\Firebase\Exception\Messaging\NotFound;
 use Kreait\Firebase\Exception\MessagingException;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification as FcmNotification;
 
 class FcmChannel
 {
@@ -26,6 +28,12 @@ class FcmChannel
         if (! $fcmNotification) {
             return;
         }
+
+        $fcmNotification = FcmNotification::create(
+            Str::limit($fcmNotification->title() ?? '', 200),
+            Str::limit($fcmNotification->body() ?? '', 1000),
+            $fcmNotification->imageUrl()
+        );
 
         $data = method_exists($notification, 'toFcmData')
             ? $notification->toFcmData($notifiable)

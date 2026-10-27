@@ -6,6 +6,7 @@ use FluxErp\Notifications\Channels\FcmChannel;
 use Illuminate\Notifications\Notification;
 use Kreait\Firebase\Contract\Messaging;
 use Kreait\Firebase\Exception\Messaging\NotFound;
+use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification as FcmNotification;
 
 beforeEach(function (): void {
@@ -113,4 +114,38 @@ test('resolves the firebase factory instead of a class in its own namespace', fu
     }
 
     expect($failure)->not->toBeInstanceOf(Error::class);
+});
+
+test('shortens title and body so the message fits into the apns payload limit', function (): void {
+    DeviceToken::query()->create([
+        'authenticatable_type' => morph_alias($this->user::class),
+        'authenticatable_id' => $this->user->getKey(),
+        'device_id' => 'live-device',
+        'token' => 'live-token',
+        'platform' => DevicePlatformEnum::ios,
+        'is_active' => true,
+    ]);
+
+    $sent = null;
+    $messaging = Mockery::mock(Messaging::class);
+    $messaging->shouldReceive('send')
+        ->once()
+        ->andReturnUsing(function (CloudMessage $message) use (&$sent): array {
+            $sent = $message->jsonSerialize();
+
+            return [];
+        });
+
+    fcmChannelWith($messaging)->send($this->user, new class() extends Notification
+    {
+        public function toFcm(object $notifiable): FcmNotification
+        {
+            return FcmNotification::create(str_repeat('t', 500), str_repeat('b', 5000), 'https://example.com/image.png');
+        }
+    });
+
+    expect(strlen(data_get($sent, 'notification.title')))->toBeLessThanOrEqual(203)
+        ->and(strlen(data_get($sent, 'notification.body')))->toBeLessThanOrEqual(1003)
+        ->and(strlen(json_encode($sent)))->toBeLessThan(4096)
+        ->and(data_get($sent, 'notification.image'))->toBe('https://example.com/image.png');
 });
