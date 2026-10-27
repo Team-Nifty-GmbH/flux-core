@@ -2,7 +2,7 @@
     <div class="flex flex-col gap-6" wire:ignore>
         @section('left-side-bar')
             <div
-                class="max-h-56 min-w-96 overflow-auto md:max-h-none"
+                class="max-h-56 overflow-auto md:max-h-none md:min-w-96"
                 x-data="{ addressSearch: '' }"
             >
                 <x-card>

@@ -517,7 +517,7 @@
                                 class="flex w-full flex-col p-4 lg:w-1/2 lg:border-r-2 lg:border-b-0"
                             >
                                 <div class="flex justify-between gap-4">
-                                    <div class="flex gap-4">
+                                    <div class="flex min-w-0 gap-4">
                                         <x-avatar
                                             borderless
                                             :image="route('icons', ['name' => 'user'])"
@@ -535,21 +535,21 @@
                                             x-bind:src="transaction?.avatar_url ?? '{{ route('icons', ['name' => 'user']) }}'"
                                         />
                                         <div
-                                            class="flex flex-col justify-between"
+                                            class="flex min-w-0 flex-col justify-between"
                                         >
                                             <div
-                                                class="w-full text-lg font-semibold"
+                                                class="w-full text-lg font-semibold wrap-anywhere"
                                                 x-text="transaction.counterpart_name ?? '{{ __('Unknown') }}'"
                                             ></div>
                                             <div
-                                                class="w-full font-semibold text-slate-400"
+                                                class="w-full font-semibold wrap-anywhere text-slate-400"
                                                 x-text="
                                                     transaction.counterpart_iban
                                                 "
                                             ></div>
                                         </div>
                                     </div>
-                                    <div class="flex flex-col gap-2">
+                                    <div class="flex shrink-0 flex-col gap-2">
                                         <div
                                             class="flex w-full justify-end text-lg font-semibold"
                                             x-html="
@@ -584,7 +584,10 @@
                                 <div
                                     class="mt-2 flex flex-row justify-between border-t border-slate-200 pt-2"
                                 >
-                                    <div x-text="transaction.purpose"></div>
+                                    <div
+                                        class="min-w-0 wrap-anywhere"
+                                        x-text="transaction.purpose"
+                                    ></div>
                                 </div>
                             </div>
                             <div
@@ -625,9 +628,9 @@
                                             />
                                         </div>
                                         <div
-                                            class="flex w-full justify-between rounded bg-slate-100 p-2 font-semibold"
+                                            class="flex w-full min-w-0 justify-between rounded bg-slate-100 p-2 font-semibold"
                                         >
-                                            <div class="flex gap-2">
+                                            <div class="flex min-w-0 gap-2">
                                                 <div class="block">
                                                     <x-button
                                                         class="h-full"
