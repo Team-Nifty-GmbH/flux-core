@@ -144,8 +144,52 @@ test('shortens title and body so the message fits into the apns payload limit', 
         }
     });
 
-    expect(strlen(data_get($sent, 'notification.title')))->toBeLessThanOrEqual(203)
-        ->and(strlen(data_get($sent, 'notification.body')))->toBeLessThanOrEqual(1003)
+    expect(data_get($sent, 'notification.title'))->toStartWith('ttt')
+        ->and(strlen(data_get($sent, 'notification.title')))->toBeLessThanOrEqual(203)
+        ->and(data_get($sent, 'notification.body'))->toStartWith('bbb')
         ->and(strlen(json_encode($sent)))->toBeLessThan(4096)
         ->and(data_get($sent, 'notification.image'))->toBe('https://example.com/image.png');
+});
+
+test('counts multibyte text and the data payload against the apns payload limit', function (): void {
+    DeviceToken::query()->create([
+        'authenticatable_type' => morph_alias($this->user::class),
+        'authenticatable_id' => $this->user->getKey(),
+        'device_id' => 'live-device',
+        'token' => 'live-token',
+        'platform' => DevicePlatformEnum::ios,
+        'is_active' => true,
+    ]);
+
+    $sent = null;
+    $messaging = Mockery::mock(Messaging::class);
+    $messaging->shouldReceive('send')
+        ->once()
+        ->andReturnUsing(function (CloudMessage $message) use (&$sent): array {
+            $sent = $message->jsonSerialize();
+
+            return [];
+        });
+
+    $path = '/orders/' . str_repeat('a', 2500);
+
+    fcmChannelWith($messaging)->send($this->user, new class($path) extends Notification
+    {
+        public function __construct(private readonly string $path) {}
+
+        public function toFcm(object $notifiable): FcmNotification
+        {
+            return FcmNotification::create(str_repeat('Ü', 500), str_repeat('Größe ', 1500));
+        }
+
+        public function toFcmData(object $notifiable): array
+        {
+            return ['url' => 'https://example.com', 'path' => $this->path];
+        }
+    });
+
+    expect(strlen(json_encode($sent, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)))->toBeLessThan(4096)
+        ->and(data_get($sent, 'data.path'))->toBe($path)
+        ->and(data_get($sent, 'notification.body'))->toStartWith('Größe')
+        ->and(data_get($sent, 'notification.body'))->toEndWith('Größe...');
 });

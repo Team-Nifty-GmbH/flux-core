@@ -15,6 +15,8 @@ use Kreait\Firebase\Messaging\Notification as FcmNotification;
 
 class FcmChannel
 {
+    protected const int PAYLOAD_BUDGET = 3500;
+
     public function send(object $notifiable, Notification $notification): void
     {
         $credentialsPath = config('flux.fcm.credentials');
@@ -29,15 +31,22 @@ class FcmChannel
             return;
         }
 
-        $fcmNotification = FcmNotification::create(
-            Str::limit($fcmNotification->title() ?? '', 200),
-            Str::limit($fcmNotification->body() ?? '', 1000),
-            $fcmNotification->imageUrl()
-        );
-
         $data = method_exists($notification, 'toFcmData')
             ? $notification->toFcmData($notifiable)
             : [];
+
+        $title = Str::limit($fcmNotification->title() ?? '', 200, preserveWords: true);
+        $imageUrl = $fcmNotification->imageUrl();
+        $bodyBytes = static::PAYLOAD_BUDGET
+            - strlen($title)
+            - strlen($imageUrl ?? '')
+            - strlen(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+
+        $fcmNotification = FcmNotification::create(
+            $title,
+            $this->limitBytes($fcmNotification->body() ?? '', $bodyBytes),
+            $imageUrl
+        );
 
         $deviceTokens = resolve_static(DeviceToken::class, 'query')
             ->whereMorphedTo('authenticatable', $notifiable)
@@ -88,6 +97,17 @@ class FcmChannel
                 }
             }
         }
+    }
+
+    protected function limitBytes(string $value, int $bytes): string
+    {
+        if (strlen($value) <= $bytes) {
+            return $value;
+        }
+
+        $cut = mb_strcut($value, 0, max(0, $bytes - 3), 'UTF-8');
+
+        return Str::limit($value, mb_strlen($cut), preserveWords: true);
     }
 
     protected function messaging(string $credentialsPath): Messaging
