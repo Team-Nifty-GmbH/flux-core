@@ -14,6 +14,7 @@ use FluxErp\Models\User;
 use FluxErp\Notifications\Order\DocumentSignedNotification;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Notifications\Channels\BroadcastChannel;
+use Illuminate\Notifications\Channels\DatabaseChannel;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -110,35 +111,69 @@ test('upload signature', function (): void {
     ]);
 });
 
-test('signing notifies the creator and the agent of the order', function (): void {
-    config(['queue.default' => 'sync']);
-    Notification::fake();
-    Storage::fake('local');
-
-    $agent = User::factory()->create(['is_active' => true]);
-    $this->order->update(['agent_id' => $agent->getKey()]);
-
-    auth()->logout();
-
+function signOrder(Order $order): void
+{
     Livewire::test(
         SignaturePublicLink::class,
         [
-            'uuid' => $this->order->uuid,
-            'model' => $this->order->getMorphClass(),
-            'printView' => array_keys($this->order->resolvePrintViews())[0],
+            'uuid' => $order->uuid,
+            'model' => $order->getMorphClass(),
+            'printView' => array_keys($order->resolvePrintViews())[0],
         ]
     )
         ->set('signature.file', UploadedFile::fake()->image('signature.png'))
         ->set('signature.custom_properties.name', 'John Doe')
         ->call('save')
         ->assertReturned(true);
+}
+
+test('signing notifies the creator and the agent of the order', function (): void {
+    config(['queue.default' => 'sync']);
+    Notification::fake();
+    Storage::fake('local');
+
+    $agent = User::factory()->create(['is_active' => true]);
+    $order = Order::factory()->create(
+        array_merge(
+            $this->order->only([
+                'tenant_id',
+                'currency_id',
+                'address_invoice_id',
+                'price_list_id',
+                'payment_type_id',
+                'order_type_id',
+            ]),
+            ['agent_id' => $agent->getKey()]
+        )
+    );
+
+    auth()->logout();
+    signOrder($order);
 
     foreach ([$this->user, $agent] as $user) {
         Notification::assertSentTo(
             $user,
             DocumentSignedNotification::class,
             fn (DocumentSignedNotification $notification, array $channels) => in_array(BroadcastChannel::class, $channels)
+                && in_array(DatabaseChannel::class, $channels)
         );
         expect($user->receivesBroadcastNotificationsOn())->toBe('user.' . $user->getKey());
     }
+});
+
+test('changing the agent moves the signature subscription to the new agent', function (): void {
+    config(['queue.default' => 'sync']);
+    Notification::fake();
+    Storage::fake('local');
+
+    $formerAgent = User::factory()->create(['is_active' => true]);
+    $agent = User::factory()->create(['is_active' => true]);
+    $this->order->update(['agent_id' => $formerAgent->getKey()]);
+    $this->order->update(['agent_id' => $agent->getKey()]);
+
+    auth()->logout();
+    signOrder($this->order);
+
+    Notification::assertSentTo($agent, DocumentSignedNotification::class);
+    Notification::assertNotSentTo($formerAgent, DocumentSignedNotification::class);
 });
