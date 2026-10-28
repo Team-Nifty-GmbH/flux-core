@@ -56,7 +56,7 @@
         "beyondcode/laravel-query-detector": "^2.3",
         "barryvdh/laravel-debugbar": "^4.4"
     },
-    "license": "MIT",
+    "license": "AGPL-3.0-or-later",
     "autoload": {
         "files": [
             "helpers.php",
