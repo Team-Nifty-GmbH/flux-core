@@ -1,0 +1,38 @@
+name: semgrep
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  semgrep:
+    name: Semgrep
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: semgrep/semgrep:1.181.0
+    steps:
+      - uses: actions/checkout@v5
+
+      # Static security analysis with the PHP security rules and the secret
+      # detectors. Any finding fails the build; a false positive gets an inline
+      # `nosemgrep: <rule id>` comment with the reason, never a weaker ruleset.
+      # Results stay in the log, no artifact upload.
+      - name: Scan
+        run: >-
+          semgrep scan
+          --config p/php
+          --config p/secrets
+          --error
+          --metrics off
+          --exclude vendor
+          --exclude node_modules
