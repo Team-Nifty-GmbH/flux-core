@@ -52,6 +52,15 @@ class CurrentWorkTimeModel extends ValueBox implements HasApiResponse
             ->first()
             ->getWorkTimeModel();
 
+        if (! $workTimeModel) {
+            $this->sum = '-';
+            $this->subValue = __('No work time model');
+            $this->dailyTarget = null;
+            $this->weeklyTarget = null;
+
+            return;
+        }
+
         $dailyWorkHours = $workTimeModel->getDailyWorkHours();
 
         $this->sum = Number::format($dailyWorkHours, 2) . 'h';
