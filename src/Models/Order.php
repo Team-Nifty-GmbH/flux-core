@@ -17,6 +17,7 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Enums\PaymentRunTypeEnum;
+use FluxErp\Events\Order\DocumentSignedEvent;
 use FluxErp\Events\Order\OrderApprovalRequestEvent;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\OrderPaymentRun;
@@ -276,6 +277,21 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ) {
                 $order->responsibleUser?->subscribeNotificationChannel($order->broadcastChannel());
             }
+
+            // The responsible user holds a wildcard subscription already, creator and agent only
+            // need to hear about signatures, which arrive on the public link without anyone logged in.
+            collect([
+                $order->wasRecentlyCreated ? $order->getCreatedBy() : null,
+                ($order->wasRecentlyCreated || $order->wasChanged('agent_id')) && $order->agent_id
+                    ? $order->agent()->first()
+                    : null,
+            ])
+                ->filter(fn ($user) => $user instanceof User)
+                ->unique(fn (User $user) => $user->getKey())
+                ->each(fn (User $user) => $user->subscribeNotificationChannel(
+                    $order->broadcastChannel(),
+                    resolve_static(DocumentSignedEvent::class, 'class')
+                ));
 
             // Every write to a generated order routes through here, so the parent
             // contract's remaining balance stays current no matter which action
