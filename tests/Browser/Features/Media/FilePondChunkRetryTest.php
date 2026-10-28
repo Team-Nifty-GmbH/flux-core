@@ -14,7 +14,7 @@ beforeEach(function (): void {
     ]);
 });
 
-test('a chunk whose response got lost is resumed at the server offset', function (): void {
+test('a chunk whose response got lost is resumed at the server offset', function (int $lostPatch, array $expectedPatches): void {
     $page = visit('/contacts/contacts/' . $this->contact->getKey())
         ->assertNoSmoke();
 
@@ -32,7 +32,7 @@ test('a chunk whose response got lost is resumed at the server offset', function
         }
     JS, 15000);
 
-    $page->script(<<<'JS'
+    $page->script(str_replace('LOST_PATCH', (string) $lostPatch, <<<'JS'
         async () => {
             window.chunkPatches = [];
             const originalFetch = window.fetch;
@@ -44,7 +44,7 @@ test('a chunk whose response got lost is resumed at the server offset', function
                 const response = await originalFetch(url, options);
                 window.chunkPatches.push(response.status);
 
-                if (window.chunkPatches.length === 1) {
+                if (window.chunkPatches.length === LOST_PATCH) {
                     throw new TypeError('Failed to fetch');
                 }
 
@@ -55,7 +55,7 @@ test('a chunk whose response got lost is resumed at the server offset', function
 
             await pond.addFile(new File([new Uint8Array(2.5 * 1024 * 1024)], 'foto.txt', { type: 'text/plain' }));
         }
-    JS);
+    JS));
 
     waitForCondition($page, <<<'JS'
         () => {
@@ -78,6 +78,9 @@ test('a chunk whose response got lost is resumed at the server offset', function
     JS);
 
     expect($state['status'])->toBe(5)
-        ->and($state['patches'])->toBe([200, 409, 200, 200])
+        ->and($state['patches'])->toBe($expectedPatches)
         ->and($state['temp'])->toBe(1);
-});
+})->with([
+    'first chunk' => [1, [200, 409, 200, 200]],
+    'last chunk' => [3, [200, 200, 200, 404]],
+]);

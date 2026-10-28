@@ -34,6 +34,7 @@ new PerformanceObserver((list) => {
 const CHUNK_THRESHOLD = 1024 * 1024;
 const CHUNK_SIZE = 1024 * 1024;
 const CHUNK_ATTEMPTS = 3;
+const CHUNK_TIMEOUT = 120 * 1000;
 
 function csrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -101,6 +102,7 @@ async function chunkedUpload(file, progress) {
                 ),
             },
             body: chunk,
+            signal: AbortSignal.timeout(CHUNK_TIMEOUT),
         }).catch(() => null);
 
         const status = patchResponse?.status ?? 0;
@@ -113,6 +115,10 @@ async function chunkedUpload(file, progress) {
             attempt = 1;
             progress?.(true, offset, file.size);
             continue;
+        }
+
+        if (status === 404 && attempt > 1) {
+            break;
         }
 
         const retryable = status === 0 || status === 409 || status >= 500;

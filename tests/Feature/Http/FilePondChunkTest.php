@@ -161,6 +161,37 @@ test('chunk patch rejects mismatching offsets', function (): void {
         ->assertJsonPath('errors.offset', 0);
 });
 
+test('chunk patch finalizes a complete file whose final response got lost', function (): void {
+    config(['livewire.temporary_file_upload.rules' => ['file']]);
+
+    $initResponse = chunkInit([
+        'Upload-Length' => '2048',
+        'Upload-Name' => base64_encode('payload.bin'),
+    ]);
+
+    $signedPath = transferIdFrom($initResponse);
+    $filename = TemporaryUploadedFile::extractPathFromSignedPath($signedPath);
+    $disk = FileUploadConfiguration::storage();
+    $disk->put(FileUploadConfiguration::path($filename), str_repeat('a', 2048));
+
+    $response = $this->call(
+        method: 'PATCH',
+        uri: route('file-pond.chunk') . '?patch=' . urlencode($signedPath),
+        server: $this->transformHeadersToServerVars([
+            'Upload-Offset' => '1024',
+            'Content-Type' => 'application/offset+octet-stream',
+        ]),
+        content: str_repeat('a', 1024),
+    );
+
+    $response->assertStatus(409)
+        ->assertJsonPath('errors.offset', 2048);
+
+    expect($disk->exists(FileUploadConfiguration::path($filename . '.chunk')))->toBeFalse()
+        ->and($disk->exists(FileUploadConfiguration::path($filename . '.json')))->toBeTrue()
+        ->and($disk->size(FileUploadConfiguration::path($filename)))->toBe(2048);
+});
+
 test('chunk patch rejects requests from other users', function (): void {
     $initResponse = chunkInit([
         'Upload-Length' => '2048',
