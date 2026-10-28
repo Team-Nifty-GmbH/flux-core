@@ -111,6 +111,7 @@ test('upload signature', function (): void {
 });
 
 test('signing notifies the creator and the agent of the order', function (): void {
+    config(['queue.default' => 'sync']);
     Notification::fake();
     Storage::fake('local');
 
