@@ -241,7 +241,7 @@ Route::middleware('web')
                 Route::get('/tasks/{id}', Task::class)->name('tasks.id')
                     ->metadata(['model' => 'task']);
                 Route::get('/tickets', TicketList::class)->name('tickets');
-                Route::get('/tickets/{id}', Ticket::class)->name('tickets.id')
+                Route::get('/tickets/{id}', Ticket::class)->where('id', '[0-9]+')->name('tickets.id')
                     ->metadata(['model' => 'ticket']);
                 Route::get('/projects', ProjectList::class)->name('projects');
                 Route::get('/projects/{id}', Project::class)->name('projects.id')
