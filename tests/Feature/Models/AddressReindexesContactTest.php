@@ -55,6 +55,20 @@ test('a renamed main address hands its contact to the search index', function ()
     expect($this->engine->updated)->toContain(Contact::class . ':' . $contact->getKey());
 });
 
+test('a moved main address hands its contact to the search index', function (): void {
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+        'street' => 'Am Ried 16 b',
+    ]);
+    $this->engine->updated = [];
+
+    $address->fresh()->update(['street' => 'Lerchenweg 2', 'zip' => '87448', 'city' => 'Waltenhofen']);
+
+    expect($this->engine->updated)->toContain(Contact::class . ':' . $contact->getKey());
+});
+
 test('a secondary address leaves its contact alone', function (): void {
     $contact = Contact::factory()->create();
     Address::factory()->create([
