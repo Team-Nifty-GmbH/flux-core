@@ -39,7 +39,10 @@ return new class() extends Migration
                 })
                 ->where('old.name', $from)
                 ->where('new.name', $to)
-                ->select(['new.id', ...array_map(fn (string $column): string => 'pivot.' . $column, $columns)]);
+                ->select([
+                    'new.id',
+                    ...array_map(fn (string $column): string => 'pivot.' . $column, $columns),
+                ]);
 
             DB::table($table)->insertOrIgnoreUsing(['permission_id', ...$columns], $select);
         }
