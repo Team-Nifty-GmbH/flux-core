@@ -14,7 +14,7 @@ beforeEach(function (): void {
     ]);
 });
 
-test('a chunk whose response got lost is resumed at the server offset', function (int $lostPatch, array $expectedPatches): void {
+test('a chunk whose response got lost is resumed at the server offset', function (array $plan, array $expectedPatches): void {
     $page = visit('/contacts/contacts/' . $this->contact->getKey())
         ->assertNoSmoke();
 
@@ -32,8 +32,9 @@ test('a chunk whose response got lost is resumed at the server offset', function
         }
     JS, 15000);
 
-    $page->script(str_replace('LOST_PATCH', (string) $lostPatch, <<<'JS'
+    $page->script(str_replace('PLAN', json_encode($plan), <<<'JS'
         async () => {
+            const plan = PLAN;
             window.chunkPatches = [];
             const originalFetch = window.fetch;
             window.fetch = async (url, options) => {
@@ -41,10 +42,18 @@ test('a chunk whose response got lost is resumed at the server offset', function
                     return originalFetch(url, options);
                 }
 
+                const call = plan[window.chunkPatches.length + 1];
+
+                if (call === 'offline') {
+                    window.chunkPatches.push(0);
+
+                    throw new TypeError('Failed to fetch');
+                }
+
                 const response = await originalFetch(url, options);
                 window.chunkPatches.push(response.status);
 
-                if (window.chunkPatches.length === LOST_PATCH) {
+                if (call === 'lost') {
                     throw new TypeError('Failed to fetch');
                 }
 
@@ -81,6 +90,7 @@ test('a chunk whose response got lost is resumed at the server offset', function
         ->and($state['patches'])->toBe($expectedPatches)
         ->and($state['temp'])->toBe(1);
 })->with([
-    'first chunk' => [1, [200, 409, 200, 200]],
-    'last chunk' => [3, [200, 200, 200, 404]],
+    'first chunk' => [[1 => 'lost'], [200, 409, 200, 200]],
+    'last chunk' => [[3 => 'lost'], [200, 200, 200, 404]],
+    'offline after resync' => [[1 => 'lost', 3 => 'offline', 4 => 'offline'], [200, 409, 0, 0, 200, 200]],
 ]);

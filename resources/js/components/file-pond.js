@@ -121,18 +121,16 @@ async function chunkedUpload(file, progress) {
             break;
         }
 
-        const retryable = status === 0 || status === 409 || status >= 500;
+        if (status === 409 && patchBody?.errors?.offset > offset) {
+            offset = patchBody.errors.offset;
+            attempt = 1;
+            progress?.(true, offset, file.size);
+            continue;
+        }
 
-        if (retryable && attempt < CHUNK_ATTEMPTS) {
+        if ((status === 0 || status >= 500) && attempt < CHUNK_ATTEMPTS) {
             attempt++;
-
-            if (status === 409 && Number.isInteger(patchBody?.errors?.offset)) {
-                offset = patchBody.errors.offset;
-            } else {
-                await new Promise((resolve) =>
-                    setTimeout(resolve, 1000 * attempt),
-                );
-            }
+            await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
             continue;
         }
 
