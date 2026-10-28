@@ -41,45 +41,29 @@ test('the same widget can be added twice in a row', function (): void {
     JS);
     waitForElement($page, '#widget-list [x-on\\\\:click="toggleSelect(node)"]');
 
-    $counts = $page->script(<<<'JS'
-        () => new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => reject(new Error('widget was not added')), 15000);
-            const count = () => document.querySelectorAll('.grid-stack > .grid-stack-item').length;
-            const leaf = () => {
-                const nodes = Array.from(
-                    document.querySelectorAll('#widget-list [x-on\\:click="toggleSelect(node)"]')
-                );
-                const found = nodes.find((el) => !Alpine.$data(el).node.children);
-                if (!found) {
-                    nodes[0].querySelector('i').click();
-                }
+    $leaf = <<<'JS'
+        Array.from(document.querySelectorAll('#widget-list [x-on\\:click="toggleSelect(node)"]'))
+            .find((el) => ! Alpine.$data(el).node.children)
+    JS;
+    $count = "document.querySelectorAll('.grid-stack > .grid-stack-item').length";
 
-                return found;
-            };
-            const clickLeafAndWait = (expected) => new Promise((done) => {
-                const tryClick = () => {
-                    const el = leaf();
-                    if (!el) {
-                        setTimeout(tryClick, 200);
-                        return;
-                    }
-                    el.click();
-                    const check = () => count() >= expected ? done() : setTimeout(check, 200);
-                    check();
-                };
-                tryClick();
-            });
-            const before = count();
-
-            clickLeafAndWait(before + 1)
-                .then(() => new Promise((wait) => setTimeout(wait, 1000)))
-                .then(() => clickLeafAndWait(before + 2))
-                .then(() => {
-                    clearTimeout(timeout);
-                    resolve([before, count()]);
-                });
-        })
+    $page->script(<<<'JS'
+        () => {
+            const nodes = document.querySelectorAll('#widget-list [x-on\\:click="toggleSelect(node)"]');
+            if (! Array.from(nodes).some((el) => ! Alpine.$data(el).node.children)) {
+                nodes[0].querySelector('i').click();
+            }
+        }
     JS);
+    waitForCondition($page, "() => !! {$leaf}");
 
-    expect($counts[1])->toBe($counts[0] + 2);
+    $before = $page->script("() => {$count}");
+
+    $page->script("() => {$leaf}.click()");
+    waitForCondition($page, "() => {$count} === {$before} + 1 && ! Alpine.\$data({$leaf}).isLoading", 12000);
+
+    $page->script("() => {$leaf}.click()");
+    waitForCondition($page, "() => {$count} === {$before} + 2", 12000);
+
+    expect($page->script("() => {$count}"))->toBe($before + 2);
 });
