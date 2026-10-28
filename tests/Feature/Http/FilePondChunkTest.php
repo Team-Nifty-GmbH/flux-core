@@ -157,7 +157,8 @@ test('chunk patch rejects mismatching offsets', function (): void {
         content: str_repeat('a', 100),
     );
 
-    $response->assertStatus(409);
+    $response->assertStatus(409)
+        ->assertJsonPath('errors.offset', 0);
 });
 
 test('chunk patch rejects requests from other users', function (): void {
