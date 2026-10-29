@@ -18,3 +18,16 @@ test('login page', function (): void {
     $this->get('/login')
         ->assertOk();
 });
+
+test('posting to login is locked after too many failed attempts', function (): void {
+    $this->actingAsGuest();
+
+    foreach (range(1, 5) as $attempt) {
+        $this->post('/login', ['email' => $this->user->email, 'password' => 'wrongpassword']);
+    }
+
+    $this->post('/login', ['email' => $this->user->email, 'password' => 'password'])
+        ->assertSessionHasErrors('email');
+
+    $this->assertGuest('web');
+});

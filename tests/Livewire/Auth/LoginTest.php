@@ -105,7 +105,7 @@ test('totp challenge is locked after too many failed attempts', function (): voi
     $component = Livewire::test(Login::class);
 
     foreach (range(1, 5) as $attempt) {
-        $component->set('totpCode', '000000')->call('verifyTotpCode');
+        $component->set('totpCode', 'invalid')->call('verifyTotpCode');
     }
 
     $component->set('totpCode', $this->user->makeTwoFactorCode())

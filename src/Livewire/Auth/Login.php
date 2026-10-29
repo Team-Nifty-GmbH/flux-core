@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Auth;
 
 use FluxErp\Models\User;
 use FluxErp\Settings\SecuritySettings;
+use FluxErp\Support\Auth\LoginThrottle;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Auth\PasswordBroker;
 use Illuminate\Contracts\Auth\StatefulGuard;
@@ -12,9 +13,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
@@ -84,13 +83,13 @@ class Login extends Component
                     'remember' => $this->remember,
                     'target' => $target,
                 ]);
-                RateLimiter::clear($this->throttleKey());
+                LoginThrottle::clear($this->throttleKey());
                 $this->showTotpChallenge = true;
 
                 return true;
             }
 
-            RateLimiter::clear($this->throttleKey());
+            LoginThrottle::clear($this->throttleKey());
             $guard->login($user, $this->remember);
             $this->redirect($target);
 
@@ -141,14 +140,13 @@ class Login extends Component
             ->first();
 
         if (! $user || blank($this->totpCode) || ! $user->validateTwoFactorCode($this->totpCode)) {
-            RateLimiter::hit($throttleKey);
             $this->addError('totpCode', __('Invalid code'));
             $this->reset('totpCode');
 
             return;
         }
 
-        RateLimiter::clear($throttleKey);
+        LoginThrottle::clear($throttleKey);
         Session::forget('two_factor_login');
         $this->guard()->login($user, $loginData['remember']);
         $this->redirect($loginData['target']);
@@ -192,7 +190,6 @@ class Login extends Component
 
     protected function failLogin(): bool
     {
-        RateLimiter::hit($this->throttleKey());
         $this->reset('password');
         $this->toast()
             ->error(__('Login failed'))
@@ -204,12 +201,12 @@ class Login extends Component
 
     protected function isRateLimited(string $key): bool
     {
-        if (! RateLimiter::tooManyAttempts($key, 5)) {
+        if (LoginThrottle::reserve($key)) {
             return false;
         }
 
         $this->toast()
-            ->error(__('auth.throttle', ['seconds' => RateLimiter::availableIn($key)]))
+            ->error(LoginThrottle::message($key))
             ->send();
 
         return true;
@@ -217,7 +214,7 @@ class Login extends Component
 
     protected function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->email) . '|' . request()->ip());
+        return LoginThrottle::key($this->email);
     }
 
     protected function getPasswordBroker(): PasswordBroker
