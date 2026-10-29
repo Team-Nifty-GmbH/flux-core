@@ -63,7 +63,7 @@ test('the same widget can be added twice in a row', function (): void {
     waitForCondition($page, "() => {$count} === {$before} + 1 && ! Alpine.\$data({$leaf}).isLoading", 12000);
 
     $page->script("() => {$leaf}.click()");
-    waitForCondition($page, "() => {$count} === {$before} + 2", 12000);
+    waitForCondition($page, "() => {$count} === {$before} + 2 && ! Alpine.\$data({$leaf}).isLoading", 12000);
 
     expect($page->script("() => {$count}"))->toBe($before + 2);
 });
