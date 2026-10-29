@@ -58,7 +58,8 @@ class SendMail extends DispatchableFluxAction
                 $mail->from(
                     $mailAccount->smtp_email ?? config('mail.from.address'),
                     $this->getData('from_name')
-                        ?? auth()->user()?->name
+                        ?: $mailAccount->smtp_from_name
+                        ?: auth()->user()?->name
                         ?? $mailAccount->smtp_email
                         ?? config('mail.from.address')
                 );
