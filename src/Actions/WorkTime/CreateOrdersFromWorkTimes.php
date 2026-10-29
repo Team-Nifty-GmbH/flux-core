@@ -63,6 +63,7 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
             ->where('is_locked', true)
             ->where('is_daily_work_time', false)
             ->where('total_time_ms', '>', 0)
+            ->where('ended_at', '<=', now())
             ->whereNull('order_position_id')
             ->when(
                 ! $this->getData('add_non_billable_work_times'),
@@ -93,6 +94,7 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
                     ->where('is_locked', true)
                     ->where('is_daily_work_time', false)
                     ->where('total_time_ms', '>', 0)
+                    ->where('ended_at', '<=', now())
                     ->whereNull('order_position_id')
                     ->orderBy('is_billable', 'desc')
                     ->orderBy('started_at', 'desc')
@@ -231,6 +233,22 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
         ) {
             throw ValidationException::withMessages([
                 'order_type_id' => ['Order Type not found on given tenant.'],
+            ])
+                ->errorBag('createOrdersFromWorkTimes');
+        }
+
+        if (resolve_static(WorkTime::class, 'query')
+            ->whereKey(array_column($this->getData('work_times'), 'id'))
+            ->where('is_daily_work_time', false)
+            ->whereNull('order_position_id')
+            ->where(
+                fn (Builder $query) => $query->whereNull('ended_at')
+                    ->orWhere('ended_at', '>', now())
+            )
+            ->exists()
+        ) {
+            throw ValidationException::withMessages([
+                'work_times' => ['Work times that have not ended yet can not be billed.'],
             ])
                 ->errorBag('createOrdersFromWorkTimes');
         }

@@ -3460,6 +3460,7 @@
     "Work Times": "Arbeitszeiten",
     "Work times for :user in :month": "Arbeitszeiten für :user im :month",
     "Work times for :user on :date": "Arbeitszeiten für :user am :date",
+    "Work times that have not ended yet can not be billed.": "Arbeitszeiten, die noch nicht beendet sind, können nicht abgerechnet werden.",
     "Write something…": "Schreib etwas…",
     "Year": "Jahr",
     "Year(s)": "Jahr(e)",

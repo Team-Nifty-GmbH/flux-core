@@ -14,6 +14,7 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\Warehouse;
 use FluxErp\Models\WorkTime;
+use Illuminate\Validation\ValidationException;
 
 beforeEach(function (): void {
     $this->contact = Contact::factory()->create();
@@ -129,3 +130,44 @@ test('order_type_id and tenant_id not required when order_id provided', function
 
     expect($result)->toHaveCount(1);
 });
+
+test('rejects work times that have not ended yet', function (array $attributes): void {
+    $unfinishedWorkTime = WorkTime::factory()->create(array_merge([
+        'user_id' => $this->user->getKey(),
+        'contact_id' => $this->contact->getKey(),
+        'is_daily_work_time' => false,
+        'is_billable' => true,
+        'is_pause' => false,
+    ], $attributes));
+
+    expect(fn () => CreateOrdersFromWorkTimes::make([
+        'product_id' => $this->product->getKey(),
+        'order_type_id' => $this->orderType->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'round' => 'round',
+        'work_times' => [
+            ['id' => $this->workTime->getKey()],
+            ['id' => $unfinishedWorkTime->getKey()],
+        ],
+    ])
+        ->validate()
+        ->execute()
+    )->toThrow(ValidationException::class, 'Work times that have not ended yet can not be billed.');
+
+    expect(Order::query()->count())->toBe(0)
+        ->and($this->workTime->refresh()->order_position_id)->toBeNull()
+        ->and($unfinishedWorkTime->refresh()->order_position_id)->toBeNull();
+})->with([
+    'ends in the future' => [[
+        'is_locked' => true,
+        'started_at' => now()->addHour(),
+        'ended_at' => now()->addHours(3),
+        'total_time_ms' => 7200000,
+    ]],
+    'running timer' => [[
+        'is_locked' => false,
+        'started_at' => now()->subHour(),
+        'ended_at' => null,
+        'total_time_ms' => 0,
+    ]],
+]);
