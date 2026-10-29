@@ -47,6 +47,8 @@ class Login extends Component
         if (! config('flux.install_done')) {
             throw HttpException::fromStatusCode(423);
         }
+
+        $this->showTotpChallenge = Session::has('two_factor_login');
     }
 
     public function render(): Factory|View|Application
