@@ -245,6 +245,10 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
                 fn (Builder $query) => $query->whereNull('ended_at')
                     ->orWhere('ended_at', '>', now())
             )
+            ->when(
+                ! $this->getData('add_non_billable_work_times'),
+                fn (Builder $query) => $query->where('is_billable', true)
+            )
             ->exists()
         ) {
             throw ValidationException::withMessages([

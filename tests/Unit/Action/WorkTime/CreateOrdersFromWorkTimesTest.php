@@ -171,3 +171,35 @@ test('rejects work times that have not ended yet', function (array $attributes):
         'total_time_ms' => 0,
     ]],
 ]);
+
+test('ignores unfinished non billable work times when non billable ones are not billed', function (): void {
+    $futureWorkTime = WorkTime::factory()->create([
+        'user_id' => $this->user->getKey(),
+        'contact_id' => $this->contact->getKey(),
+        'is_locked' => true,
+        'is_daily_work_time' => false,
+        'is_billable' => false,
+        'is_pause' => false,
+        'started_at' => now()->addHour(),
+        'ended_at' => now()->addHours(3),
+        'total_time_ms' => 7200000,
+    ]);
+
+    $result = CreateOrdersFromWorkTimes::make([
+        'product_id' => $this->product->getKey(),
+        'order_type_id' => $this->orderType->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'round' => 'round',
+        'add_non_billable_work_times' => false,
+        'work_times' => [
+            ['id' => $this->workTime->getKey()],
+            ['id' => $futureWorkTime->getKey()],
+        ],
+    ])
+        ->validate()
+        ->execute();
+
+    expect($result)->toHaveCount(1)
+        ->and($this->workTime->refresh()->order_position_id)->not->toBeNull()
+        ->and($futureWorkTime->refresh()->order_position_id)->toBeNull();
+});
