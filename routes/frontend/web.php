@@ -228,7 +228,7 @@ Route::middleware('web')
                     ->prefix('sales')
                     ->group(function (): void {
                         Route::get('/leads', LeadList::class)->name('leads');
-                        Route::get('/leads/{id}', Lead::class)->name('lead.id')
+                        Route::get('/leads/{id}', Lead::class)->where('id', '[0-9]+')->name('lead.id')
                             ->metadata(['model' => 'lead']);
                     });
 
@@ -245,13 +245,13 @@ Route::middleware('web')
                     });
 
                 Route::get('/tasks', TaskList::class)->name('tasks');
-                Route::get('/tasks/{id}', Task::class)->name('tasks.id')
+                Route::get('/tasks/{id}', Task::class)->where('id', '[0-9]+')->name('tasks.id')
                     ->metadata(['model' => 'task']);
                 Route::get('/tickets', TicketList::class)->name('tickets');
-                Route::get('/tickets/{id}', Ticket::class)->name('tickets.id')
+                Route::get('/tickets/{id}', Ticket::class)->where('id', '[0-9]+')->name('tickets.id')
                     ->metadata(['model' => 'ticket']);
                 Route::get('/projects', ProjectList::class)->name('projects');
-                Route::get('/projects/{id}', Project::class)->name('projects.id')
+                Route::get('/projects/{id}', Project::class)->where('id', '[0-9]+')->name('projects.id')
                     ->metadata(['model' => 'project']);
 
                 Route::name('products.')->prefix('products')
@@ -259,7 +259,7 @@ Route::middleware('web')
                         Route::get('/expiring-stock', ExpiringStockList::class)->name('expiring-stock');
                         Route::get('/list', ProductList::class)->name('products');
                         Route::get('/serial-numbers', SerialNumberList::class)->name('serial-numbers');
-                        Route::get('/serial-numbers/{id?}', SerialNumber::class)->name('serial-numbers.id?')
+                        Route::get('/serial-numbers/{id?}', SerialNumber::class)->where('id', '[0-9]+')->name('serial-numbers.id?')
                             ->metadata(['model' => 'serial_number']);
                         Route::get('/{id}', Product::class)->where('id', '[0-9]+')->name('id')
                             ->metadata(['model' => 'product']);
@@ -275,7 +275,7 @@ Route::middleware('web')
                     ->group(function (): void {
                         Route::get('/absence-requests', AbsenceRequests::class)
                             ->name('absence-requests');
-                        Route::get('/absence-requests/{id}', AbsenceRequest::class)
+                        Route::get('/absence-requests/{id}', AbsenceRequest::class)->where('id', '[0-9]+')
                             ->name('absence-requests.show')
                             ->metadata(['model' => 'absence_request']);
 
@@ -286,7 +286,7 @@ Route::middleware('web')
 
                         Route::get('/employee-days', EmployeeDays::class)
                             ->name('employee-days');
-                        Route::get('/employee-days/{id}', EmployeeDay::class)
+                        Route::get('/employee-days/{id}', EmployeeDay::class)->where('id', '[0-9]+')
                             ->name('employee-days.show')
                             ->metadata(['model' => 'employee_day']);
 
@@ -296,10 +296,10 @@ Route::middleware('web')
 
                         Route::get('/my-employee-profile', MyEmployeeProfile::class)
                             ->name('my-employee-profile');
-                        Route::get('/my-employee-profile/employee-day/{id}', MyEmployeeDay::class)
+                        Route::get('/my-employee-profile/employee-day/{id}', MyEmployeeDay::class)->where('id', '[0-9]+')
                             ->name('my-employee-profile.my-employee-day')
                             ->metadata(['model' => 'employee_day']);
-                        Route::get('/my-employee-profile/absence-request/{id}', MyAbsenceRequest::class)
+                        Route::get('/my-employee-profile/absence-request/{id}', MyAbsenceRequest::class)->where('id', '[0-9]+')
                             ->name('my-employee-profile.my-absence-request')
                             ->metadata(['model' => 'absence_request']);
 
@@ -389,7 +389,7 @@ Route::middleware('web')
                         Route::get('/vacation-carryover-rules', VacationCarryoverRules::class)->name('vacation-carryover-rules');
                         Route::get('/vat-rates', VatRates::class)->name('vat-rates');
                         Route::get('/warehouses', Warehouses::class)->name('warehouses');
-                        Route::get('/work-time-model/{id}', WorkTimeModel::class)->name('work-time-model')
+                        Route::get('/work-time-model/{id}', WorkTimeModel::class)->where('id', '[0-9]+')->name('work-time-model')
                             ->metadata(['model' => 'work_time_model']);
                         Route::get('/work-time-models', WorkTimeModels::class)->name('work-time-models');
                         Route::get('/work-time-types', WorkTimeTypes::class)->name('work-time-types');

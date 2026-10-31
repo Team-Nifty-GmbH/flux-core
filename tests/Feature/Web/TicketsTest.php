@@ -44,6 +44,13 @@ test('tickets id ticket not found', function (): void {
         ->assertNotFound();
 });
 
+test('tickets id not numeric', function (): void {
+    $this->user->givePermissionTo(Permission::findOrCreate('tickets.{id}.get', 'web'));
+
+    $this->actingAs($this->user, 'web')->get('/tickets/abc')
+        ->assertNotFound();
+});
+
 test('tickets id without permission', function (): void {
     Permission::findOrCreate('tickets.{id}.get', 'web');
 
