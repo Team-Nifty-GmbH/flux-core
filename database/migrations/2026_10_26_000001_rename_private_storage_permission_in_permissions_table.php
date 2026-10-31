@@ -44,10 +44,13 @@ return new class() extends Migration
                     ...array_map(fn (string $column): string => 'pivot.' . $column, $columns),
                 ]);
 
-            DB::table($table)->insertOrIgnoreUsing(['permission_id', ...$columns], $select);
+            DB::table($table)
+                ->insertOrIgnoreUsing(['permission_id', ...$columns], $select);
         }
 
-        DB::table('permissions')->where('name', $from)->delete();
+        DB::table('permissions')
+            ->where('name', $from)
+            ->delete();
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
