@@ -63,7 +63,7 @@ class ExportDataTableJob implements ShouldBeMonitored, ShouldQueue
         };
 
         $fileName = morph_alias($this->modelClass) . '_' . now()->toDateTimeLocalString('minute') . $extension;
-        $folder = 'exports/' . str_replace(':', '_', $this->userMorph) . '/';
+        $folder = 'exports/' . private_storage_folder($this->userMorph) . '/';
         $filePath = $folder . str_replace(['<', '>', ':', '"', '/', '\\', '|', '?', '*'], '_', $fileName);
 
         $formatters = $this->formatted

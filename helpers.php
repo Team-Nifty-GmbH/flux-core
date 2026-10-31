@@ -665,6 +665,13 @@ if (! function_exists('morph_to')) {
     }
 }
 
+if (! function_exists('private_storage_folder')) {
+    function private_storage_folder(string $userMorph): string
+    {
+        return str_replace(':', '_', $userMorph);
+    }
+}
+
 if (! function_exists('render_editor_blade')) {
     function render_editor_blade(?string $html, array $data = []): Illuminate\Support\HtmlString
     {
