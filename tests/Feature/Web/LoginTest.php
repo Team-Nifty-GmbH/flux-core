@@ -52,3 +52,22 @@ test('post login requires the totp code when two factor is enabled', function ()
 
     $this->assertAuthenticatedAs($this->user);
 });
+
+test('totp code does not log in a user deactivated after the password step', function (): void {
+    $this->actingAsGuest();
+    $this->user->createTwoFactorAuth();
+    $this->user->confirmTwoFactorAuth($this->user->makeTwoFactorCode());
+
+    $this->post('/login', ['email' => $this->user->email, 'password' => 'password'])
+        ->assertRedirect(route('login'));
+
+    $this->user->update(['is_active' => false]);
+    $this->travel(30)->seconds();
+
+    Livewire::test(Login::class)
+        ->set('totpCode', $this->user->makeTwoFactorCode())
+        ->call('verifyTotpCode')
+        ->assertNoRedirect();
+
+    $this->assertGuest();
+});

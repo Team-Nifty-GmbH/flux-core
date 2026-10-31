@@ -124,6 +124,7 @@ class Login extends Component
 
         $user = resolve_static(User::class, 'query')
             ->whereKey($loginData['user_id'])
+            ->where('is_active', true)
             ->first();
 
         if (! $user || blank($this->totpCode) || ! $user->validateTwoFactorCode($this->totpCode)) {
