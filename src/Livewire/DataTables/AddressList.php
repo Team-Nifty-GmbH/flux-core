@@ -296,7 +296,7 @@ class AddressList extends BaseDataTable
         );
     }
 
-    protected function getPreferredLanguageId(OffersPrinting $item): int
+    protected function getPreferredLanguageId(OffersPrinting $item): ?int
     {
         return $item->language_id;
     }

@@ -284,7 +284,7 @@ Route::middleware('web')
                             ->metadata(['model' => 'employee_day']);
 
                         Route::get('/employees', Employees::class)->name('employees');
-                        Route::get('/employees/{id}', Employee::class)->name('employees.id')
+                        Route::get('/employees/{id}', Employee::class)->where('id', '[0-9]+')->name('employees.id')
                             ->metadata(['model' => 'employee']);
 
                         Route::get('/my-employee-profile', MyEmployeeProfile::class)
