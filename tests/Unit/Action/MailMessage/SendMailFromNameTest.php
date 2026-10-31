@@ -6,14 +6,14 @@ use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 
-function sendThroughMailAccount(array $data = []): ?string
+function sendThroughMailAccount(array $data = [], ?string $accountFromName = null): ?string
 {
     Event::fake([MessageSent::class]);
 
     $mailAccount = MailAccount::factory()->create([
         'smtp_mailer' => 'array',
         'smtp_email' => 'noreply@example.com',
-        'smtp_from_name' => null,
+        'smtp_from_name' => $accountFromName,
     ]);
 
     SendMail::make(
@@ -42,6 +42,10 @@ function sendThroughMailAccount(array $data = []): ?string
 
 test('a given from name becomes the sender name', function (): void {
     expect(sendThroughMailAccount(['from_name' => 'Manne Pahl']))->toBe('Manne Pahl');
+});
+
+test('the from name of the mail account beats the logged in user', function (): void {
+    expect(sendThroughMailAccount(accountFromName: 'Reservierung Manne Pahl'))->toBe('Reservierung Manne Pahl');
 });
 
 test('without a from name the logged in user still wins', function (): void {
