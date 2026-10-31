@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Auth;
 
 use FluxErp\Models\User;
 use FluxErp\Settings\SecuritySettings;
+use FluxErp\Support\Auth\LoginThrottle;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Auth\PasswordBroker;
 use Illuminate\Contracts\Auth\StatefulGuard;
@@ -60,6 +61,10 @@ class Login extends Component
         $this->validate();
 
         if ($this->password) {
+            if ($this->isRateLimited($this->throttleKey())) {
+                return false;
+            }
+
             $guard = $this->guard();
 
             if (! $guard->validate(['email' => $this->email, 'password' => $this->password])) {
@@ -78,11 +83,13 @@ class Login extends Component
                     'remember' => $this->remember,
                     'target' => $target,
                 ]);
+                LoginThrottle::clear($this->throttleKey());
                 $this->showTotpChallenge = true;
 
                 return true;
             }
 
+            LoginThrottle::clear($this->throttleKey());
             $guard->login($user, $this->remember);
             $this->redirect($target);
 
@@ -120,6 +127,14 @@ class Login extends Component
             return;
         }
 
+        $throttleKey = 'totp|' . $loginData['user_id'];
+
+        if ($this->isRateLimited($throttleKey)) {
+            $this->reset('totpCode');
+
+            return;
+        }
+
         $user = resolve_static(User::class, 'query')
             ->whereKey($loginData['user_id'])
             ->first();
@@ -131,6 +146,7 @@ class Login extends Component
             return;
         }
 
+        LoginThrottle::clear($throttleKey);
         Session::forget('two_factor_login');
         $this->guard()->login($user, $loginData['remember']);
         $this->redirect($loginData['target']);
@@ -181,6 +197,24 @@ class Login extends Component
         $this->js('$focus.focus(document.getElementById(\'password\'));');
 
         return false;
+    }
+
+    protected function isRateLimited(string $key): bool
+    {
+        if (LoginThrottle::reserve($key)) {
+            return false;
+        }
+
+        $this->toast()
+            ->error(LoginThrottle::message($key))
+            ->send();
+
+        return true;
+    }
+
+    protected function throttleKey(): string
+    {
+        return LoginThrottle::key($this->email);
     }
 
     protected function getPasswordBroker(): PasswordBroker
