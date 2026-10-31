@@ -32,7 +32,9 @@ new PerformanceObserver((list) => {
 // 1 MB stays well under the 2 MB upload_max_filesize default once Livewire's
 // base64 encoding inflates the payload by ~33%.
 const CHUNK_THRESHOLD = 1024 * 1024;
-const CHUNK_SIZE = 4 * 1024 * 1024;
+const CHUNK_SIZE = 1024 * 1024;
+const CHUNK_ATTEMPTS = 3;
+const CHUNK_TIMEOUT = 120 * 1000;
 
 function csrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -82,6 +84,7 @@ async function chunkedUpload(file, progress) {
     const patchUrl = '/file-pond/chunk?patch=' + encodeURIComponent(transferId);
 
     let offset = 0;
+    let attempt = 1;
     while (offset < file.size) {
         const end = Math.min(offset + CHUNK_SIZE, file.size);
         const chunk = file.slice(offset, end);
@@ -99,19 +102,45 @@ async function chunkedUpload(file, progress) {
                 ),
             },
             body: chunk,
-        });
+            signal: AbortSignal.timeout(CHUNK_TIMEOUT),
+        }).catch(() => null);
 
-        const patchBody = await readJsonSafe(patchResponse);
+        const status = patchResponse?.status ?? 0;
+        const patchBody = patchResponse
+            ? await readJsonSafe(patchResponse)
+            : null;
 
-        if (!patchResponse.ok) {
-            throw Object.assign(
-                new Error(patchBody?.statusMessage || 'Chunk upload failed'),
-                { status: patchResponse.status },
-            );
+        if (patchResponse?.ok) {
+            offset = patchBody?.data?.offset ?? end;
+            attempt = 1;
+            progress?.(true, offset, file.size);
+            continue;
         }
 
-        offset = patchBody?.data?.offset ?? end;
-        progress?.(true, offset, file.size);
+        if (status === 404 && attempt > 1) {
+            break;
+        }
+
+        if (status === 409 && patchBody?.errors?.offset > offset) {
+            offset = patchBody.errors.offset;
+            attempt = 1;
+            progress?.(true, offset, file.size);
+            continue;
+        }
+
+        if ((status === 0 || status >= 500) && attempt < CHUNK_ATTEMPTS) {
+            attempt++;
+            await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+            continue;
+        }
+
+        throw Object.assign(
+            new Error(
+                patchBody?.statusMessage ||
+                    `Chunk upload failed (${status || 'network'})`,
+            ),
+            { status },
+        );
     }
 
     return transferId;
