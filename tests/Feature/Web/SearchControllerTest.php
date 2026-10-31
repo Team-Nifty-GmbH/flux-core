@@ -2,6 +2,7 @@
 
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
+use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Product;
 
 test('search controller returns soft deleted record when selected', function (): void {
@@ -216,4 +217,20 @@ test('search controller still returns a selected value outside the request const
     $response->assertOk();
     $response->assertJsonCount(1);
     $response->assertJsonFragment(['id' => $address->getKey()]);
+});
+
+test('search controller returns a contact bank connection without balance', function (): void {
+    $bankConnection = ContactBankConnection::factory()->create([
+        'contact_id' => Contact::factory()->create()->getKey(),
+        'balance' => null,
+    ]);
+
+    $response = $this->post(
+        route('search', ContactBankConnection::class),
+        ['selected' => [$bankConnection->getKey()]]
+    );
+
+    $response->assertOk();
+    $response->assertJsonCount(1);
+    $response->assertJsonFragment(['id' => $bankConnection->getKey(), 'description' => null]);
 });
