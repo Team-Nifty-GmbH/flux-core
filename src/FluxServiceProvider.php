@@ -17,6 +17,7 @@ use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Http\Middleware\SanitizeSocketId;
 use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
 use FluxErp\Livewire\Product\Product;
+use FluxErp\Mail\ImapHeaderDecoder;
 use FluxErp\Mail\MailDriverManager;
 use FluxErp\Models\Activity;
 use FluxErp\Models\Currency;
@@ -364,6 +365,7 @@ class FluxServiceProvider extends ServiceProvider
             config(['two-factor.recovery.enabled' => false]);
             config(['passkeys.models.authenticatable' => resolve_static(User::class, 'class')]);
             config(['passkeys.actions.store_passkey' => resolve_static(StorePasskeyAction::class, 'class')]);
+            config(['imap.decoding.decoder.header' => resolve_static(ImapHeaderDecoder::class, 'class')]);
 
             resolve_static(Media::class, 'class')::observe(MediaObserver::class);
         });
