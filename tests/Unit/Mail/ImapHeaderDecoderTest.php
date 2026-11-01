@@ -57,5 +57,5 @@ test('decodes encoded words in addresses and subject', function (string $raw, st
 test('keeps a broken encoded word instead of failing', function (): void {
     $header = parseImapHeader("From: Hans <a@example.com>\r\nSubject: =?nonsense?Q?abc?=\r\n");
 
-    expect((string) $header->get('subject'))->toContain('abc');
+    expect((string) $header->get('subject'))->toBe('=?nonsense?Q?abc?=');
 });
