@@ -25,11 +25,19 @@ class ImapHeaderDecoder extends HeaderDecoder
     public function mimeHeaderDecode(string $text): array
     {
         if (! str_contains($text, '=?')) {
-            return [(object) ['charset' => $this->getEncoding($text), 'text' => $text]];
+            $charset = $this->getEncoding($text);
+
+            return [(object) [
+                'charset' => $charset,
+                'text' => $this->convertEncoding($text, $charset),
+            ]];
         }
 
         $decoded = iconv_mime_decode($text, ICONV_MIME_DECODE_CONTINUE_ON_ERROR, 'UTF-8');
 
-        return [(object) ['charset' => 'UTF-8', 'text' => $decoded === false ? $text : $decoded]];
+        return [(object) [
+            'charset' => 'UTF-8',
+            'text' => $decoded === false ? $text : $decoded,
+        ]];
     }
 }

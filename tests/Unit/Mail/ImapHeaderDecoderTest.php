@@ -4,7 +4,6 @@ use FluxErp\Mail\ImapHeaderDecoder;
 use Webklex\PHPIMAP\ClientManager;
 use Webklex\PHPIMAP\Header;
 
-// Built like the singleton of webklex/laravel-imap, whose provider the test app does not load.
 function imapClientManager(): ClientManager
 {
     return new ClientManager(config('imap'));
