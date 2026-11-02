@@ -93,6 +93,17 @@
                     class="shrink-0"
                 />
             </div>
+            @if ($this->canEditRoleDashboards())
+                <div class="mt-4" x-cloak x-show="!editGrid">
+                    <x-button
+                        color="secondary"
+                        light
+                        x-on:click="$tsui.open.modal('save-role-dashboard-modal')"
+                        :text="__('Save as role default')"
+                        class="shrink-0"
+                    />
+                </div>
+            @endif
             <div x-cloak x-show="editGrid" class="flex gap-2">
                 <x-button
                     color="secondary"
@@ -121,15 +132,6 @@
                     :text="__('Reset to default')"
                     class="shrink-0"
                 />
-                @if ($this->canEditRoleDashboards())
-                    <x-button
-                        color="secondary"
-                        light
-                        x-on:click="$tsui.open.modal('save-role-dashboard-modal')"
-                        :text="__('Save as role default')"
-                        class="shrink-0"
-                    />
-                @endif
 
                 <x-button
                     color="indigo"

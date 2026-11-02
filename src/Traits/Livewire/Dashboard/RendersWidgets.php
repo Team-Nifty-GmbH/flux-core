@@ -56,21 +56,23 @@ trait RendersWidgets
 
     public function applyPreset(string $name): void
     {
-        $widgets = data_get(static::getPresets(), $name);
+        $widgets = static::getPresets()[$name] ?? null;
 
         abort_if(is_null($widgets), 404);
 
-        foreach (collect($widgets)->groupBy('group') as $group => $groupWidgets) {
-            $this->group = $group === '' ? null : $group;
-            $this->saveWidgets(static::mapDefaultWidgets(
-                $groupWidgets
-                    ->map(fn (array $widget): array => array_merge(
-                        ['width' => 1, 'height' => 1, 'order_column' => 0, 'order_row' => 0],
-                        $widget
-                    ))
-                    ->all()
-            ));
-        }
+        DB::transaction(function () use ($widgets): void {
+            foreach (collect($widgets)->groupBy('group') as $group => $groupWidgets) {
+                $this->group = $group === '' ? null : $group;
+                $this->saveWidgets(static::mapDefaultWidgets(
+                    $groupWidgets
+                        ->map(fn (array $widget): array => array_merge(
+                            ['width' => 1, 'height' => 1, 'order_column' => 0, 'order_row' => 0],
+                            $widget
+                        ))
+                        ->all()
+                ));
+            }
+        });
 
         $this->widgets();
         $this->dispatch('gridstack-reinit');
