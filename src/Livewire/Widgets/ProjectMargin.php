@@ -94,7 +94,7 @@ class ProjectMargin extends ValueBox implements HasWidgetOptions
     {
         return [
             $this->modelChannel(Order::class) => [
-                Order::class => ['updated', 'deleted'],
+                Order::class => ['created', 'updated', 'deleted'],
             ],
         ];
     }

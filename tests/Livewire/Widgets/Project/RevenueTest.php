@@ -79,6 +79,11 @@ test('sums the net revenue of invoiced sales orders of the project', function ()
 });
 
 test('returns zero when project has no order', function (): void {
+    ($this->makeOrder)(
+        OrderTypeEnum::Order,
+        ['invoice_date' => now(), 'invoice_number' => 'RE-OTHER', 'total_net_price' => 100]
+    );
+
     $project = Project::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
         'order_id' => null,
