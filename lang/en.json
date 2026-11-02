@@ -313,5 +313,6 @@
     "wire:confirm.install-uploaded-plugin": "Install uploaded Plugins|The code of uploaded Plugins cant be verified.\nBe sure that the source is trusted.|Cancel|Install",
     "wire:confirm.product-prices-update": "Update product prices|Are you sure you want to update the prices of the selected products?|Cancel|Yes",
     "wire:confirm.recalculate-product-names": "Recalculate product names|Are you sure you want to recalculate the names of the selected products?|Cancel|Yes",
+    "wire:confirm.reset.dashboard-group": "Reset to default|Do you really want to reset this group to the default? Your own changes to it will be lost.|Cancel|Reset",
     "wire:confirm.uninstall-plugin": "Uninstall Plugin|Do you really want to uninstall this plugin?|Cancel|Uninstall"
 }

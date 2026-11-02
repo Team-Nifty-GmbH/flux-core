@@ -101,6 +101,36 @@
                     class="shrink-0"
                     :text="__('Add')"
                 />
+                @if ($this->presets)
+                    <x-dropdown :text="__('Presets')" static>
+                        @foreach ($this->presets as $preset)
+                            <x-dropdown.items
+                                :text="__($preset)"
+                                x-on:click="$wire.applyPreset({{ \Illuminate\Support\Js::from($preset) }}).then(onPostReset.bind($data))"
+                            />
+                        @endforeach
+                    </x-dropdown>
+                @endif
+
+                <x-button
+                    color="secondary"
+                    light
+                    loading
+                    wire:flux-confirm.type.warning="{{ __('wire:confirm.reset.dashboard-group') }}"
+                    x-on:click="$wire.resetToRoleDashboard().then(onPostReset.bind($data))"
+                    :text="__('Reset to default')"
+                    class="shrink-0"
+                />
+                @if ($this->canEditRoleDashboards())
+                    <x-button
+                        color="secondary"
+                        light
+                        x-on:click="$tsui.open.modal('save-role-dashboard-modal')"
+                        :text="__('Save as role default')"
+                        class="shrink-0"
+                    />
+                @endif
+
                 <x-button
                     color="indigo"
                     loading
@@ -151,3 +181,35 @@
         />
     </x-slot>
 </x-modal>
+
+@if ($canEdit && $this->canEditRoleDashboards())
+    <x-modal
+        id="save-role-dashboard-modal"
+        :title="__('Save as role default')"
+    >
+        <x-select.styled
+            wire:model="dashboardRoleId"
+            :label="__('Role')"
+            select="value:id"
+            unfiltered
+            :request="[
+                'url' => route('search', \FluxErp\Models\Role::class),
+                'method' => 'POST',
+            ]"
+        />
+
+        <x-slot:footer>
+            <x-button
+                color="secondary"
+                x-on:click="$tsui.close.modal('save-role-dashboard-modal')"
+                :text="__('Cancel')"
+            />
+            <x-button
+                loading
+                x-bind:disabled="! $wire.dashboardRoleId"
+                x-on:click="$wire.saveAsRoleDashboard($wire.dashboardRoleId).then(() => $tsui.close.modal('save-role-dashboard-modal'))"
+                :text="__('Save')"
+            />
+        </x-slot>
+    </x-modal>
+@endif

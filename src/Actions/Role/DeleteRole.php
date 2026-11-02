@@ -21,10 +21,12 @@ class DeleteRole extends FluxAction
 
     public function performAction(): ?bool
     {
-        return resolve_static(Role::class, 'query')
+        $role = resolve_static(Role::class, 'query')
             ->whereKey($this->data['id'])
-            ->first()
-            ->delete();
+            ->first();
+        $role->widgets()->delete();
+
+        return $role->delete();
     }
 
     protected function validateData(): void
