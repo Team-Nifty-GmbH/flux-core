@@ -244,6 +244,9 @@ use FluxErp\Actions\Role\UpdateRole;
 use FluxErp\Actions\Role\UpdateRolePermissions;
 use FluxErp\Actions\Role\UpdateRoleUsers;
 use FluxErp\Actions\Role\UpdateUserRoles;
+use FluxErp\Actions\SalaryComponent\CreateSalaryComponent;
+use FluxErp\Actions\SalaryComponent\DeleteSalaryComponent;
+use FluxErp\Actions\SalaryComponent\UpdateSalaryComponent;
 use FluxErp\Actions\Schedule\CreateSchedule;
 use FluxErp\Actions\Schedule\DeleteSchedule;
 use FluxErp\Actions\Schedule\UpdateSchedule;
@@ -404,6 +407,7 @@ use FluxErp\Models\RecordOrigin;
 use FluxErp\Models\Resource;
 use FluxErp\Models\ResourceBooking;
 use FluxErp\Models\Role;
+use FluxErp\Models\SalaryComponent;
 use FluxErp\Models\Schedule;
 use FluxErp\Models\SepaMandate;
 use FluxErp\Models\SerialNumber;
@@ -1096,6 +1100,15 @@ Route::prefix('api')
                 Route::put('/roles/users/revoke', UpdateRoleUsers::class)->defaults('assign', false);
                 Route::put('/roles/users/sync', UpdateUserRoles::class)->defaults('sync', true);
                 Route::delete('/roles/{id}', DeleteRole::class);
+
+                // SalaryComponents
+                Route::get('/salary-components/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', SalaryComponent::class);
+                Route::get('/salary-components', [BaseController::class, 'index'])
+                    ->defaults('model', SalaryComponent::class);
+                Route::post('/salary-components', CreateSalaryComponent::class);
+                Route::put('/salary-components', UpdateSalaryComponent::class);
+                Route::delete('/salary-components/{id}', DeleteSalaryComponent::class);
 
                 // Schedules
                 Route::get('/schedules/{id}', [BaseController::class, 'show'])
