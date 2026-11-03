@@ -231,6 +231,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
                             ->first(
                                 fn (EmployeeWorkTimeModel $assignment): bool => $assignment->valid_from
                                     ->lte($date)
+                                    && ! $assignment->valid_until?->lt($date)
                             )
                             ?->workTimeModel
                             ?->weekly_hours ?? 0

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Employee;
 
+use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\DataTables\SalaryComponentList;
 use FluxErp\Livewire\Forms\EmployeeSalaryForm;
 use FluxErp\Livewire\Forms\SalaryComponentForm;
@@ -38,6 +39,9 @@ class Salary extends SalaryComponentList
 
     public function mount(): void
     {
+        resolve_static(TabButton::class, 'make', ['component' => 'employee.salary'])
+            ->userHasTabPermission();
+
         parent::mount();
 
         $employee = resolve_static(Employee::class, 'query')

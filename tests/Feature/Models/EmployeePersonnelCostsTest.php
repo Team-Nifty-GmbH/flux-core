@@ -140,3 +140,27 @@ test('salary data is hidden from serialization', function (): void {
     expect($array)
         ->not->toHaveKeys(['base_salary', 'hourly_rate', 'employer_contribution_rate', 'salary_components']);
 });
+
+test('hourly salary ignores an expired work time model', function (): void {
+    $workTimeModel = app(WorkTimeModel::class)->create([
+        'name' => 'Expired 40h',
+        'weekly_hours' => 40,
+        'work_days_per_week' => 5,
+        'annual_vacation_days' => 30,
+        'overtime_compensation' => OvertimeCompensationEnum::TimeOff,
+        'is_active' => true,
+    ]);
+    app(EmployeeWorkTimeModel::class)->create([
+        'employee_id' => $this->employee->getKey(),
+        'work_time_model_id' => $workTimeModel->getKey(),
+        'valid_from' => now()->subYear(),
+        'valid_until' => now()->subMonth(),
+    ]);
+
+    $this->employee->update([
+        'salary_type' => SalaryTypeEnum::Hourly,
+        'hourly_rate' => 15,
+    ]);
+
+    expect(bccomp($this->employee->refresh()->getMonthlyPersonnelCosts()['gross'], '0', 2))->toBe(0);
+});

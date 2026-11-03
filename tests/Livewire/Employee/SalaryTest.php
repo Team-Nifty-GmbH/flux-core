@@ -7,6 +7,7 @@ use FluxErp\Livewire\Employee\Employee as EmployeeView;
 use FluxErp\Livewire\Employee\Salary;
 use FluxErp\Models\Activity;
 use FluxErp\Models\Employee;
+use FluxErp\Models\Permission;
 use Illuminate\Support\Number;
 use Livewire\Livewire;
 
@@ -104,4 +105,11 @@ test('salary changes are not written to the activity log', function (): void {
     expect($properties)->toContain('Developer')
         ->not->toContain('base_salary')
         ->not->toContain('employer_contribution_rate');
+});
+
+test('salary tab requires its tab permission', function (): void {
+    Permission::findOrCreate('tab.employee.salary', 'web');
+
+    Livewire::test(Salary::class, ['employeeId' => $this->employee->getKey()])
+        ->assertForbidden();
 });

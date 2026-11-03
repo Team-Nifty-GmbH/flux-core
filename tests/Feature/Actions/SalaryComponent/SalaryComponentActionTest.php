@@ -58,3 +58,22 @@ test('create rejects unknown interval and inverted validity', function (array $d
         'validity' => [['valid_from' => '2026-02-01', 'valid_until' => '2026-01-01']],
     ])
     ->throws(ValidationException::class);
+
+test('update rejects a validity that ends before the stored start', function (): void {
+    $salaryComponent = CreateSalaryComponent::make([
+        'employee_id' => $this->employee->getKey(),
+        'name' => 'Allowance',
+        'amount' => 50,
+        'payment_interval' => PaymentIntervalEnum::Monthly->value,
+        'valid_from' => '2026-02-01',
+    ])
+        ->validate()
+        ->execute();
+
+    UpdateSalaryComponent::make([
+        'id' => $salaryComponent->getKey(),
+        'valid_until' => '2026-01-01',
+    ])
+        ->validate();
+})
+    ->throws(ValidationException::class);
