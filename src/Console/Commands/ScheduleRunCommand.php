@@ -61,8 +61,6 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 continue;
             }
 
-            $event->description($repeatable->class . ':' . $repeatable->getKey());
-
             if (
                 is_a($repeatable->class, RepeatableInterface::class, true)
                 && $repeatable->class::withoutOverlapping()
@@ -235,7 +233,7 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
         ?array $parameters,
         ?int $scheduleId = null
     ): mixed {
-        return match ($type) {
+        $event = match ($type) {
             RepeatableTypeEnum::Command => $schedule->command($class, $parameters ?? []),
             RepeatableTypeEnum::Job => $schedule->job(tap(
                 $parameters ? new $class(...$parameters) : new $class(),
@@ -249,5 +247,16 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
             RepeatableTypeEnum::Shell => $schedule->exec($class, $parameters ?? []),
             default => null,
         };
+
+        if (is_null($event)) {
+            return null;
+        }
+
+        $name = $scheduleId ? $class . ':' . $scheduleId : $class;
+
+        // Callback events carry no command, so Laravel would report a failure as "Scheduled command []"
+        $event->command ??= $name;
+
+        return $event->name($name);
     }
 }
