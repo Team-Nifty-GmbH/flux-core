@@ -5,6 +5,7 @@ use FluxErp\Models\Address;
 use FluxErp\Support\Flare\CensoringSender;
 use FluxErp\Support\Flare\CensorPersonalData;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Route;
 use Spatie\FlareClient\Context\ContextProvider;
 use Spatie\FlareClient\Report;
 use Spatie\FlareClient\Senders\Sender;
@@ -148,6 +149,8 @@ function sendThroughFlareSender(array $payload): array
 }
 
 test('laravel-flare reports leave without request data, user attributes or query bindings', function (): void {
+    Route::get('contacts', fn () => null);
+
     $payload = sendThroughFlareSender([
         'exceptionClass' => RuntimeException::class,
         'message' => 'Something broke',
@@ -219,6 +222,54 @@ test('laravel-flare reports leave without request data, user attributes or query
         ->and(json_encode($payload))->not->toContain('max@example.com', 'Mustermann', 'secret', '203.0.113.7', 'DE00');
 });
 
+test('laravel-flare urls carry the route pattern instead of the dynamic path segments', function (): void {
+    Route::get('flare-contacts/{contact}/orders/{order?}', fn () => null);
+    Route::post('flare-media/{medium}', fn () => null);
+
+    $payload = sendThroughFlareSender([
+        'attributes' => [
+            'url.full' => 'https://flux.test:8443/flare-contacts/max@example.com/orders/7?search=Mustermann',
+            'url.path' => '/flare-contacts/max@example.com/orders/7',
+            'flare.entry_point.value' => 'https://flux.test/flare-media/max@example.com',
+            'http.request.headers' => ['referer' => 'https://flux.test/flare-contacts/max@example.com/orders'],
+        ],
+        'events' => [
+            ['attributes' => ['url.full' => 'https://flux.test/unknown/max@example.com', 'url.path' => '/unknown/max@example.com']],
+            ['attributes' => ['http.request.headers' => ['referer' => 'http://[max@example.com']]],
+            ['attributes' => ['flare.entry_point.value' => 'App\\Jobs\\SyncContacts']],
+            ['attributes' => ['flare.entry_point.value' => 'artisan flux:sync']],
+        ],
+        'resourceSpans' => [[
+            'scopeSpans' => [[
+                'spans' => [[
+                    'name' => 'Request - https://flux.test/flare-contacts/max@example.com/orders',
+                    'attributes' => [
+                        ['key' => 'url.path', 'value' => ['stringValue' => '/flare-contacts/max@example.com/orders']],
+                    ],
+                ], [
+                    'name' => 'Http Request - api.example.com',
+                ]],
+            ]],
+        ]],
+    ]);
+
+    $spans = data_get($payload, 'resourceSpans.0.scopeSpans.0.spans');
+
+    expect($payload['attributes']['url.full'])->toBe('https://flux.test:8443/flare-contacts/{contact}/orders/{order?}')
+        ->and($payload['attributes']['url.path'])->toBe('/flare-contacts/{contact}/orders/{order?}')
+        ->and($payload['attributes']['flare.entry_point.value'])->toBe('https://flux.test/flare-media/{medium}')
+        ->and($payload['attributes']['http.request.headers']['referer'])->toBe('https://flux.test/flare-contacts/{contact}/orders/{order?}')
+        ->and($payload['events'][0]['attributes']['url.full'])->toBe('https://flux.test/' . CensoringSender::CENSORED)
+        ->and($payload['events'][0]['attributes']['url.path'])->toBe('/' . CensoringSender::CENSORED)
+        ->and($payload['events'][1]['attributes']['http.request.headers']['referer'])->toBe(CensoringSender::CENSORED)
+        ->and($payload['events'][2]['attributes']['flare.entry_point.value'])->toBe('App\\Jobs\\SyncContacts')
+        ->and($payload['events'][3]['attributes']['flare.entry_point.value'])->toBe('artisan flux:sync')
+        ->and($spans[0]['name'])->toBe('Request - https://flux.test/flare-contacts/{contact}/orders/{order?}')
+        ->and(data_get($spans[0], 'attributes.0.value.stringValue'))->toBe('/flare-contacts/{contact}/orders/{order?}')
+        ->and($spans[1]['name'])->toBe('Http Request - api.example.com')
+        ->and(json_encode($payload))->not->toContain('max@example.com', 'Mustermann');
+});
+
 test('laravel-flare reports keep only the error class of a failed query', function (): void {
     $payload = sendThroughFlareSender([
         'exceptionClass' => QueryException::class,
@@ -234,6 +285,8 @@ test('laravel-flare reports keep only the error class of a failed query', functi
 });
 
 test('laravel-flare traces and logs leave without personal data in the OpenTelemetry format', function (): void {
+    Route::get('contacts', fn () => null);
+
     $payload = sendThroughFlareSender([
         'resourceSpans' => [[
             'resource' => ['attributes' => [['key' => 'service.name', 'value' => ['stringValue' => 'Flux']]]],
