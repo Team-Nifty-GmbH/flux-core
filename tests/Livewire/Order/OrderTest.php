@@ -1749,6 +1749,8 @@ test('contract total prefill does not count a run that falls exactly on the end 
     string $endsAt,
     int $cycles
 ): void {
+    $this->travelTo('2026-12-01 01:00:00');
+
     $schedule = Schedule::create([
         'uuid' => Str::uuid(),
         'name' => 'ProcessSubscriptionOrder',
