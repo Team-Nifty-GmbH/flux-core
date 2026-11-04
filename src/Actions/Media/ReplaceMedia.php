@@ -54,6 +54,8 @@ class ReplaceMedia extends FluxAction
                 ?->diskName ?: config('media-library.disk_name')
         );
 
+        $this->moveOldMediaOutOfCollection($mediaItem);
+
         $file = $this->getData('media');
         $mediaItem->name = $this->getData('name');
 
@@ -116,6 +118,13 @@ class ReplaceMedia extends FluxAction
     {
         DeleteMedia::make(['id' => $this->getData('id')])
             ->execute();
+    }
+
+    protected function moveOldMediaOutOfCollection(Media $mediaItem): void
+    {
+        resolve_static(Media::class, 'query')
+            ->whereKey($mediaItem->getKey())
+            ->update(['collection_name' => $mediaItem->collection_name . '.replaced']);
     }
 
     protected function prepareForValidation(): void

@@ -34,7 +34,7 @@ class DeleteMedia extends FluxAction
             ->whereKey($this->data['id'])
             ->first();
 
-        return $mediaItem->delete();
+        return $mediaItem?->delete();
     }
 
     protected function validateData(): void
