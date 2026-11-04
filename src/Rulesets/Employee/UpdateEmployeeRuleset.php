@@ -8,6 +8,7 @@ use FluxErp\Models\Country;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDepartment;
 use FluxErp\Models\Location;
+use FluxErp\Models\User;
 use FluxErp\Models\VacationCarryoverRule;
 use FluxErp\Rules\EnumRule;
 use FluxErp\Rules\Iban;
@@ -44,6 +45,12 @@ class UpdateEmployeeRuleset extends FluxRuleset
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => Employee::class, 'subject' => Employee::class]),
+            ],
+            'user_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => User::class, 'subject' => Employee::class])
+                    ->whereDoesntHave('employee'),
             ],
             'vacation_carryover_rule_id' => [
                 'nullable',

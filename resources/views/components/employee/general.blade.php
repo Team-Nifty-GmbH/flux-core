@@ -43,6 +43,23 @@
 <div class="space-y-6 pt-4 pb-16">
     <x-card :header="__('Basic Information')">
         <div class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
+                <x-select.styled
+                    wire:model="employee.user_id"
+                    :label="__('User')"
+                    select="value:id"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\User::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'whereDoesntHave' => 'employee',
+                            'fields' => ['id', 'firstname', 'lastname', 'email'],
+                            'with' => 'media',
+                        ],
+                    ]"
+                />
+            </div>
             <x-input
                 :label="__('Firstname')"
                 wire:model="employee.firstname"
