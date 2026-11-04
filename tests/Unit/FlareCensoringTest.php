@@ -223,7 +223,7 @@ test('flare reports carry no credentials, client ips, dynamic urls or recorded v
 
 test('flare console reports carry no command arguments or recorded values', function (): void {
     $context = censoredFlareContext([
-        'arguments' => ['artisan', '--env=max@example.com', 'flux:sync', 'max@example.com', '--name=Mustermann'],
+        'arguments' => ['artisan', 'flux:sync', 'max@example.com', '--name=Mustermann'],
         'env' => ['php_version' => PHP_VERSION],
         'git' => ['hash' => 'abc123'],
         'queries' => [['sql' => 'select * from addresses', 'bindings' => null]],
@@ -251,6 +251,11 @@ test('flare console reports carry no command arguments or recorded values', func
         ->and(json_encode($context))->not->toContain('max@example.com')
         ->and(json_encode($context))->not->toContain('Mustermann')
         ->and(json_encode($context))->not->toContain('Musterweg');
+});
+
+test('flare console reports with an option before the command keep only the script', function (): void {
+    expect(data_get(censoredFlareContext(['arguments' => ['artisan', '--env', 'max@example.com', 'flux:sync']]), 'arguments'))
+        ->toBe(['artisan']);
 });
 
 test('flare console reports of other scripts keep only the script', function (): void {
@@ -617,11 +622,12 @@ test('the real laravel-flare client hands reports, traces and logs to the sender
 test('laravel-flare command lines leave without arguments', function (): void {
     $payload = sendThroughFlareSender([
         'attributes' => [
-            'flare.entry_point.value' => 'artisan --env=max@example.com flux:sync max@example.com --name=Mustermann',
+            'flare.entry_point.value' => 'artisan flux:sync max@example.com --name=Mustermann',
             'process.command_args' => ['artisan', 'flux:sync', 'max@example.com', '--name=Mustermann'],
         ],
         'events' => [
             ['attributes' => ['flare.entry_point.value' => 'bin/import max@example.com']],
+            ['attributes' => ['flare.entry_point.value' => 'artisan --env max@example.com flux:sync']],
             ['attributes' => ['laravel.job.tags' => ['contact:max@example.com']]],
             ['attributes' => ['laravel.job.chain.jobs' => [['laravel.job.properties' => ['email' => 'max@example.com']]]]],
         ],
@@ -644,7 +650,8 @@ test('laravel-flare command lines leave without arguments', function (): void {
     expect($payload['attributes']['flare.entry_point.value'])->toBe('artisan flux:sync')
         ->and($payload['attributes']['process.command_args'])->toBe(CensoringSender::CENSORED)
         ->and($payload['events'][0]['attributes']['flare.entry_point.value'])->toBe('bin/import')
-        ->and($payload['events'][1]['attributes']['laravel.job.tags'])->toBe(CensoringSender::CENSORED)
+        ->and($payload['events'][1]['attributes']['flare.entry_point.value'])->toBe('artisan')
+        ->and($payload['events'][2]['attributes']['laravel.job.tags'])->toBe(CensoringSender::CENSORED)
         ->and($spanAttribute)->toBe(['stringValue' => 'artisan flux:sync'])
         ->and(json_encode($payload))->not->toContain('max@example.com')
         ->and(json_encode($payload))->not->toContain('Mustermann');
