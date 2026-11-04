@@ -79,3 +79,44 @@ test('leaves a schedule out that has run all its recurrences', function (): void
 
     expect($component->get('series'))->toBeEmpty();
 });
+
+test('leaves a run out that falls exactly on the end of the schedule', function (): void {
+    makeForecastOrder(OrderTypeEnum::Subscription, '100.00', scheduleAttributes: [
+        'ends_at' => now()->startOfMonth()->addDays(14),
+    ]);
+
+    $component = Livewire::test(RecurringRevenueForecast::class)
+        ->call('calculateChart');
+
+    expect($component->get('series'))->toBeEmpty()
+        ->and($component->get('orderIds'))->toBeEmpty();
+});
+
+test('keeps a run that falls before the end of the schedule', function (): void {
+    $order = makeForecastOrder(OrderTypeEnum::Subscription, '100.00', scheduleAttributes: [
+        'ends_at' => now()->startOfMonth()->addDays(14)->addMinute(),
+    ]);
+
+    $component = Livewire::test(RecurringRevenueForecast::class)
+        ->call('calculateChart');
+
+    expect(array_values(array_unique($component->get('orderIds'))))->toBe([$order->getKey()])
+        ->and($component->get('series.0.data'))->toBe(['100.00']);
+});
+
+test('forecasts only the recurrences that are left', function (): void {
+    makeForecastOrder(
+        OrderTypeEnum::Subscription,
+        '100.00',
+        cronExpression: '0 0 15,20,25 * *',
+        scheduleAttributes: [
+            'recurrences' => 3,
+            'current_recurrence' => 2,
+        ]
+    );
+
+    $component = Livewire::test(RecurringRevenueForecast::class)
+        ->call('calculateChart');
+
+    expect($component->get('series.0.data'))->toBe(['100.00']);
+});

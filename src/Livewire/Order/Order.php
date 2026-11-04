@@ -823,13 +823,13 @@ class Order extends Component
 
         $cron = new CronExpression($schedule->cron_expression);
         $current = Carbon::parse($schedule->due_at ?? now());
-        $cycles = $current->lessThanOrEqualTo($schedule->ends_at) ? 1 : 0;
+        $cycles = $current->lessThan($schedule->ends_at) ? 1 : 0;
         $limit = 10000;
 
         while ($cycles < $limit) {
             $current = Carbon::instance($cron->getNextRunDate($current));
 
-            if ($current->greaterThan($schedule->ends_at)) {
+            if ($current->greaterThanOrEqualTo($schedule->ends_at)) {
                 break;
             }
 

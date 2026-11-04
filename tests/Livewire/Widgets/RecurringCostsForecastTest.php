@@ -65,3 +65,14 @@ test('spreads the forecast over every date the schedule runs on', function (): v
     expect($component->get('series.0.data'))->toBe(['40.00', '40.00'])
         ->and($component->get('xaxis.categories'))->toHaveCount(2);
 });
+
+test('leaves a run out that falls exactly on the end of the schedule', function (): void {
+    makeForecastOrder(OrderTypeEnum::PurchaseSubscription, '40.00', scheduleAttributes: [
+        'ends_at' => now()->startOfMonth()->addDays(14),
+    ]);
+
+    $component = Livewire::test(RecurringCostsForecast::class)
+        ->call('calculateChart');
+
+    expect($component->get('series'))->toBeEmpty();
+});
