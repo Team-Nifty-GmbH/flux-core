@@ -960,6 +960,38 @@ test('deleting an order keeps a schedule that is shared with another order', fun
     expect($schedule->refresh()->trashed())->toBeFalse();
 });
 
+test('schedule preview follows the due date like the scheduler', function (
+    array $parameters,
+    string $dueAt,
+    array $expected
+): void {
+    $this->travelTo('2026-11-01 01:00:00');
+
+    $dates = Livewire::test(Scheduling::class)
+        ->set('schedule.cron.methods.basic', 'monthlyOn')
+        ->set('schedule.cron.parameters.basic', $parameters)
+        ->set('schedule.due_at', $dueAt)
+        ->instance()->schedule->getNextExecutionDates(2);
+
+    expect(array_column($dates, 'date'))->toBe($expected);
+})->with([
+    'due date in the future' => [
+        [15, '00:00'],
+        '2027-02-15 00:00:00',
+        ['2027-02-15 00:00:00', '2027-03-15 00:00:00', '2027-04-15 00:00:00'],
+    ],
+    'due date has passed' => [
+        [15, '00:00'],
+        '2026-10-15 00:00:00',
+        ['2026-11-15 00:00:00', '2026-12-15 00:00:00'],
+    ],
+    'cron matches later on the due date' => [
+        [15, '06:00'],
+        '2026-11-15 00:00:00',
+        ['2026-11-15 00:00:00', '2026-12-15 06:00:00', '2027-01-15 06:00:00'],
+    ],
+]);
+
 test('process subscription order deactivates the schedule of a deleted order instead of failing', function (): void {
     // Orders deleted before the fix lost their pivot but kept an active schedule
     $schedule = createSubscriptionSchedule($this->subscriptionOrder, $this->targetOrderType->getKey(), false);

@@ -3,6 +3,7 @@
 use FluxErp\Actions\ContactBankConnection\CalculateContactBankConnectionBalance;
 use FluxErp\Enums\CreditAccountPostingEnum;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Enums\RepeatableTypeEnum;
 use FluxErp\Invokable\ProcessSubscriptionOrder;
 use FluxErp\Livewire\Order\Order as OrderView;
 use FluxErp\Models\Address;
@@ -1723,6 +1724,42 @@ test('switching the subscription repeat method applies the parameters of the new
         ->assertOk()
         ->assertSet('schedule.cron.parameters.basic', [null, null, null]);
 });
+
+test('contract total prefill starts at the first run the scheduler will do', function (
+    string $cronExpression,
+    ?string $dueAt,
+    int $cycles
+): void {
+    $this->travelTo('2026-12-01 01:00:00');
+
+    $schedule = Schedule::create([
+        'uuid' => Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => ['basic' => 'monthlyOn', 'dayConstraint' => null, 'timeConstraint' => null],
+            'parameters' => ['basic' => [1, '00:00'], 'dayConstraint' => [], 'timeConstraint' => []],
+        ],
+        'cron_expression' => $cronExpression,
+        'due_at' => $dueAt,
+        'ends_at' => '2027-03-01 00:01:00',
+        'is_active' => true,
+        'parameters' => ['orderId' => $this->order->getKey()],
+    ]);
+    $this->order->schedules()->attach($schedule->getKey());
+
+    $gross = $this->order->refresh()->total_gross_price;
+
+    Livewire::test(OrderView::class, ['id' => $this->order->getKey()])
+        ->call('prefillContractTotal')
+        ->assertSet('order.contract_total_amount', bcmul($cycles, $gross, 2));
+})->with([
+    'no due date' => ['0 0 1 * *', null, 3],
+    'due date has passed' => ['0 0 1 * *', '2026-10-01 00:00:00', 3],
+    'due date in the future' => ['0 0 1 * *', '2027-02-01 00:00:00', 2],
+    'cron matches later on the due date' => ['0 6 1 * *', '2027-01-01 00:00:00', 2],
+]);
 
 test('the subscription time picker previews the schedule when it changes', function (): void {
     $subscriptionOrderType = OrderType::factory()->create([
