@@ -246,6 +246,19 @@ class CalendarEventForm extends FluxForm
         $model = morphed_model($this->calendar_type ?? '')
             ?? resolve_static(CalendarEvent::class, 'class');
 
+        if ($model === resolve_static(CalendarEvent::class, 'class')) {
+            resolve_static(Calendar::class, 'ensureWritable', [
+                'calendarIds' => array_filter([
+                    $this->calendar_id,
+                    $this->id
+                        ? resolve_static(CalendarEvent::class, 'query')
+                            ->whereKey($this->id)
+                            ->value('calendar_id')
+                        : null,
+                ]),
+            ]);
+        }
+
         $data = $this->toArray();
         if (! data_get($data, 'is_repeatable') || ! data_get($data, 'has_repeats')) {
             unset($data['repeat']);

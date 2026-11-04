@@ -338,7 +338,7 @@ class Calendar extends Component
     #[Renderless]
     public function getEvents(array $info, array $calendarAttributes): array
     {
-        if (data_get($calendarAttributes, 'hasNoEvents')) {
+        if (data_get($calendarAttributes, 'hasNoEvents') || ! $this->isListedCalendar($calendarAttributes)) {
             return [];
         }
 
@@ -552,6 +552,16 @@ class Calendar extends Component
     ): Builder {
         return resolve_static(morphed_model($modelType), 'query')
             ->inTimeframe($start, $end, $calendarAttributes);
+    }
+
+    protected function isListedCalendar(array $calendarAttributes): bool
+    {
+        $calendars = collect(to_flat_tree($this->getCalendars()));
+
+        return data_get($calendarAttributes, 'isVirtual', false)
+            ? $calendars->where('isVirtual', true)->contains('modelType', data_get($calendarAttributes, 'modelType'))
+            : $calendars->reject(fn (array $calendar): bool => (bool) data_get($calendar, 'hasNoEvents'))
+                ->contains('id', data_get($calendarAttributes, 'id'));
     }
 
     protected function getViews(): array
