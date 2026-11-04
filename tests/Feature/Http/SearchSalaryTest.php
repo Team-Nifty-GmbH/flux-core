@@ -2,6 +2,7 @@
 
 use FluxErp\Models\Employee;
 use FluxErp\Models\SalaryComponent;
+use Illuminate\Support\Facades\DB;
 
 beforeEach(function (): void {
     $this->employee = app(Employee::class)->create([
@@ -32,9 +33,14 @@ test('employees cannot be searched by hidden columns', function (array $payload)
         'where single' => [['where' => ['base_salary', '>', 1999]]],
         'where assoc' => [['where' => ['base_salary' => 2000]]],
         'where table prefix' => [['where' => [['employees.base_salary', '>', 1999]]]],
+        'where database prefix' => fn (): array => [
+            'where' => [[DB::connection()->getDatabaseName() . '.employees.base_salary', '>', 1999]],
+        ],
+        'where string keys' => [['where' => [['a' => 'base_salary', 'b' => '>', 'c' => 1999]]]],
         'where upper case' => [['where' => [['BASE_SALARY', '>', 1999]]]],
         'where in' => [['whereIn' => [['hourly_rate', [20]]]]],
         'where between' => [['whereBetween' => ['employer_contribution_rate', [1, 100]]]],
+        'where between named' => [['whereBetween' => ['column' => 'base_salary', 'values' => [1999, 2001]]]],
         'where relation' => [['whereRelation' => ['supervisor', 'base_salary', '>', 1999]]],
         'nested relation field' => [['searchFields' => ['supervisor.base_salary'], 'search' => '2000']],
         'where has hidden relation' => [['whereHas' => 'salaryComponents']],

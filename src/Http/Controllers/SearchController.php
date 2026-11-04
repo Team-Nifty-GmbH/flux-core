@@ -249,24 +249,19 @@ class SearchController extends Controller
     protected function isHiddenColumn(string $model, string $column): bool
     {
         $instance = app($model);
-        $segments = explode('.', trim(Str::before($column, '->'), ' `'));
-
-        if (count($segments) > 1 && strcasecmp($segments[0], $instance->getTable()) === 0) {
-            array_shift($segments);
-        }
+        $segments = explode('.', Str::before($column, '->'));
+        $last = count($segments) - 1;
 
         foreach ($segments as $index => $segment) {
-            $segment = trim($segment, ' `');
+            $segment = trim($segment, ' `"');
 
             if (in_array(strtolower($segment), array_map('strtolower', $instance->getHidden()), true)) {
                 return true;
             }
 
-            if ($index === count($segments) - 1 || ! $this->isRelationMethod($instance, $segment)) {
-                return false;
+            if ($index < $last && $this->isRelationMethod($instance, $segment)) {
+                $instance = $instance->{$segment}()->getRelated();
             }
-
-            $instance = $instance->{$segment}()->getRelated();
         }
 
         return false;
@@ -286,23 +281,13 @@ class SearchController extends Controller
 
     protected function requestedColumns(Request $request): array
     {
-        $columns = array_merge(
-            Arr::wrap($request->input('searchFields')),
-            Arr::wrap($request->input('orderBy')),
-            Arr::wrap($request->input('option-value')),
-            Arr::wrap($request->input('whereHas')),
-            Arr::wrap($request->input('whereDoesntHave')),
-            Arr::wrap($request->input('doesntHave')),
-            $this->whereColumns($request->input('where')),
-        );
-
-        foreach (['whereIn', 'whereNotIn'] as $parameter) {
-            foreach (Arr::wrap($request->input($parameter)) as $constraint) {
-                $columns[] = data_get($constraint, 0);
-            }
-        }
-
-        $parameters = [
+        $columns = $this->stringsIn(array_values($request->only([
+            'searchFields',
+            'orderBy',
+            'option-value',
+            'where',
+            'whereIn',
+            'whereNotIn',
             'whereNull',
             'whereNotNull',
             'whereBetween',
@@ -312,38 +297,36 @@ class SearchController extends Controller
             'whereDay',
             'whereYear',
             'whereTime',
-        ];
-
-        foreach ($parameters as $parameter) {
-            $columns = array_merge($columns, Arr::wrap(data_get(Arr::wrap($request->input($parameter)), 0)));
-        }
+            'whereHas',
+            'whereDoesntHave',
+            'whereRelation',
+            'whereDoesntHaveRelation',
+            'doesntHave',
+        ])));
 
         foreach (['whereRelation', 'whereDoesntHaveRelation'] as $parameter) {
-            $constraint = Arr::wrap($request->input($parameter));
+            $arguments = Arr::wrap($request->input($parameter));
+            $positional = array_values(array_filter($arguments, 'is_int', ARRAY_FILTER_USE_KEY));
+            $relation = $arguments['relation'] ?? data_get($positional, 0);
+            $column = $arguments['column'] ?? data_get($positional, 1);
 
-            if (is_string(data_get($constraint, 0)) && is_string(data_get($constraint, 1))) {
-                $columns[] = $constraint[0] . '.' . $constraint[1];
+            if (is_string($relation) && is_string($column)) {
+                $columns[] = $relation . '.' . $column;
             }
         }
 
         return $columns;
     }
 
-    protected function whereColumns(mixed $where): array
+    protected function stringsIn(mixed $value): array
     {
-        if (! is_array($where)) {
-            return [];
-        }
-
-        if (array_is_list($where)) {
-            return is_string(data_get($where, 0))
-                ? [$where[0]]
-                : array_merge([], ...array_map(fn (mixed $nested): array => $this->whereColumns($nested), $where));
+        if (! is_array($value)) {
+            return is_string($value) ? [$value] : [];
         }
 
         return array_merge(
-            array_keys($where),
-            ...array_map(fn (mixed $nested): array => $this->whereColumns($nested), array_values($where))
+            array_filter(array_keys($value), 'is_string'),
+            ...array_map(fn (mixed $nested): array => $this->stringsIn($nested), array_values($value))
         );
     }
 
