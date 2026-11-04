@@ -86,6 +86,8 @@ function censoredFlareContext(array $context): array
 }
 
 test('flare reports carry no request data, cookies, session or user attributes', function (): void {
+    Route::get('contacts', fn () => null);
+
     $context = censoredFlareContext([
         'request' => ['url' => 'https://flux.test/contacts?search=Mustermann', 'method' => 'POST'],
         'request_data' => [
@@ -167,6 +169,53 @@ test('flare reports keep the request data as arrays and drop every collected val
         ->and(json_encode($context))->not->toContain('Musterweg')
         ->and(json_encode($context))->not->toContain('cookiesecret')
         ->and(json_encode($context))->not->toContain('sessionsecret');
+});
+
+test('flare reports carry no credentials, client ips, dynamic urls or recorded values', function (): void {
+    Route::get('flare-contacts/{contact}', fn () => null);
+
+    $context = censoredFlareContext([
+        'request' => [
+            'url' => 'https://flux.test/flare-contacts/Mustermann?search=Mustermann',
+            'ip' => '203.0.113.7',
+            'method' => 'GET',
+        ],
+        'request_data' => ['queryString' => [], 'body' => [], 'files' => []],
+        'headers' => [
+            'user-agent' => 'test',
+            'referer' => 'https://flux.test/flare-contacts/Mustermann',
+            'authorization' => 'Bearer tokensecret',
+            'cookie' => 'flux_session=cookiesecret',
+            'x-csrf-token' => 'csrfsecret',
+            'x-forwarded-for' => '203.0.113.8',
+            'x-real-ip' => '203.0.113.9',
+        ],
+        'route' => ['routeParameters' => ['id' => 5, 'contact' => 'Mustermann']],
+        'logs' => [['message' => 'Saved max@example.com', 'context' => ['street' => 'Musterweg 1']]],
+        'dumps' => [['html_dump' => 'Mustermann']],
+        'laravel_context' => ['email' => 'max@example.com'],
+        'exception' => ['raw_sql' => 'select * from addresses', 'email' => 'max@example.com'],
+    ]);
+
+    expect(data_get($context, 'request.url'))->toBe('https://flux.test/flare-contacts/{contact}')
+        ->and(data_get($context, 'request.ip'))->toBeNull()
+        ->and(data_get($context, 'headers.referer'))->toBe('https://flux.test/flare-contacts/{contact}')
+        ->and(data_get($context, 'headers.user-agent'))->toBe('test')
+        ->and(data_get($context, 'headers.authorization'))->toBe(CensorPersonalData::CENSORED)
+        ->and(data_get($context, 'route.routeParameters'))->toBe(['id' => 5, 'contact' => CensorPersonalData::CENSORED])
+        ->and(data_get($context, 'logs'))->toBe([])
+        ->and(data_get($context, 'dumps'))->toBe([])
+        ->and(data_get($context, 'laravel_context'))->toBe([])
+        ->and(data_get($context, 'exception'))->toBe(['raw_sql' => 'select * from addresses'])
+        ->and(json_encode($context))->not->toContain('Mustermann')
+        ->and(json_encode($context))->not->toContain('max@example.com')
+        ->and(json_encode($context))->not->toContain('Musterweg')
+        ->and(json_encode($context))->not->toContain('tokensecret')
+        ->and(json_encode($context))->not->toContain('cookiesecret')
+        ->and(json_encode($context))->not->toContain('csrfsecret')
+        ->and(json_encode($context))->not->toContain('203.0.113.7')
+        ->and(json_encode($context))->not->toContain('203.0.113.8')
+        ->and(json_encode($context))->not->toContain('203.0.113.9');
 });
 
 test('flare reports without a request stay untouched', function (): void {
