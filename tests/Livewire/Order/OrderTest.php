@@ -299,6 +299,57 @@ test('a purchase order is delivered to the tenant, not to the supplier', functio
         ->assertSet('order.address_delivery_id', null);
 });
 
+test('changing the contact in the replicate dialog fills the replicate form', function (): void {
+    $newContact = Contact::factory()->create();
+
+    $newAddress = Address::factory()->create([
+        'contact_id' => $newContact->getKey(),
+    ]);
+
+    $newContact->update([
+        'delivery_address_id' => $newAddress->getKey(),
+        'invoice_address_id' => $newAddress->getKey(),
+        'main_address_id' => $newAddress->getKey(),
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->getKey()])
+        ->call('replicate')
+        ->set('replicateOrder.contact_id', $newContact->getKey())
+        ->call('fetchContactData', true)
+        ->assertOk()
+        ->assertSet('replicateOrder.address_invoice_id', $newContact->invoice_address_id)
+        ->assertSet('replicateOrder.address_delivery_id', $newContact->delivery_address_id)
+        ->assertSet('order.contact_id', $this->order->contact_id);
+});
+
+test('replicating into a purchase order type clears the delivery address on contact change', function (): void {
+    $supplier = Contact::factory()->create();
+
+    $supplierAddress = Address::factory()->create([
+        'contact_id' => $supplier->getKey(),
+    ]);
+
+    $supplier->update([
+        'delivery_address_id' => $supplierAddress->getKey(),
+        'invoice_address_id' => $supplierAddress->getKey(),
+        'main_address_id' => $supplierAddress->getKey(),
+    ]);
+
+    $purchaseOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Purchase,
+        'is_active' => true,
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->getKey()])
+        ->call('replicate')
+        ->set('replicateOrder.order_type_id', $purchaseOrderType->getKey())
+        ->set('replicateOrder.contact_id', $supplier->getKey())
+        ->call('fetchContactData', true)
+        ->assertOk()
+        ->assertSet('replicateOrder.address_invoice_id', $supplier->invoice_address_id)
+        ->assertSet('replicateOrder.address_delivery_id', null);
+});
+
 test('get additional model actions', function (): void {
     $this->order->update([
         'invoice_date' => now(),
