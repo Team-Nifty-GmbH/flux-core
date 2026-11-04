@@ -55,6 +55,11 @@ trait RendersWidgets
         $this->widgets();
     }
 
+    public function renderingRendersWidgets(): void
+    {
+        $this->widgets = $this->permittedWidgets($this->widgets);
+    }
+
     #[Renderless]
     public function resetWidgets(): void
     {
@@ -64,7 +69,7 @@ trait RendersWidgets
     #[Renderless]
     public function saveWidgets(?array $widgets = null): void
     {
-        $widgetsToSave = array_values($widgets ?? $this->widgets);
+        $widgetsToSave = $this->permittedWidgets($widgets ?? $this->widgets);
 
         $existingItemIds = array_filter(Arr::pluck($widgetsToSave, 'id'), 'is_numeric');
 
@@ -85,11 +90,18 @@ trait RendersWidgets
                 ->updateOrCreate(
                     ['id' => is_numeric(data_get($widget, 'id')) ? data_get($widget, 'id') : null],
                     array_merge(
-                        [
-                            'dashboard_component' => static::class,
-                            'group' => $this->group ?? null,
-                        ],
-                        Arr::except($widget, 'id')
+                        ['group' => $this->group ?? null],
+                        Arr::only($widget, [
+                            'component_name',
+                            'config',
+                            'group',
+                            'height',
+                            'name',
+                            'order_column',
+                            'order_row',
+                            'width',
+                        ]),
+                        ['dashboard_component' => static::class]
                     )
                 );
             $mergedWidget = array_merge($widget, $savedWidget->toArray());
@@ -112,7 +124,7 @@ trait RendersWidgets
     {
         $this->widgets = array_merge(
             array_filter($this->widgets, fn (array $widget) => data_get($widget, 'group') !== $this->group),
-            $widgets
+            $this->permittedWidgets($widgets)
         );
     }
 
@@ -218,5 +230,19 @@ trait RendersWidgets
         ksort($widgets);
 
         return $widgets;
+    }
+
+    protected function permittedWidgets(array $widgets): array
+    {
+        $permittedComponentNames = array_column($this->availableWidgets(), 'component_name');
+
+        return collect($widgets)
+            ->filter(fn (mixed $widget): bool => in_array(
+                data_get($widget, 'component_name'),
+                $permittedComponentNames,
+                true
+            ))
+            ->values()
+            ->all();
     }
 }

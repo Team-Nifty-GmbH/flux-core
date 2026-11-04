@@ -44,7 +44,7 @@
                             x-cloak
                             x-show="editGrid"
                             wire:loading.attr="disabled"
-                            x-on:click="removeWidget('{{$widget['id']}}')"
+                            x-on:click="removeWidget(@js($widget['id']))"
                             class="h-4 w-4 cursor-pointer text-gray-400 shadow-md"
                             icon="trash"
                             color="red"

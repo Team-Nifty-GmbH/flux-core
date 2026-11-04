@@ -79,7 +79,7 @@ test('can add widget', function (): void {
                 'width' => 2,
                 'order_column' => 0,
                 'order_row' => 0,
-                'component_name' => $componentName = Str::uuid()->toString(),
+                'component_name' => $componentName = 'sample-component-2',
             ],
         ])
         ->assertHasNoErrors();
@@ -215,4 +215,114 @@ test('filtering many permissioned widgets does not scan the permissions per widg
     });
 
     expect($scans)->toBeLessThan(10);
+});
+
+test('sync widgets drops a widget the user may not see', function (): void {
+    Permission::findOrCreate('widget.sample-component-2', 'web');
+
+    $component = Livewire::withoutLazyLoading()
+        ->test(Dashboard::class)
+        ->call('syncWidgets', [
+            [
+                'id' => Str::uuid()->toString(),
+                'height' => 1,
+                'width' => 1,
+                'order_column' => 0,
+                'order_row' => 0,
+                'component_name' => 'sample-component-2',
+            ],
+        ])
+        ->set('sync', true)
+        ->assertDontSeeLivewire('sample-component-2');
+
+    expect(array_column($component->get('widgets'), 'component_name'))
+        ->not->toContain('sample-component-2');
+});
+
+test('sync widgets drops a component that is no widget', function (): void {
+    $component = Livewire::withoutLazyLoading()
+        ->test(Dashboard::class)
+        ->call('syncWidgets', [
+            [
+                'id' => Str::uuid()->toString(),
+                'height' => 1,
+                'width' => 1,
+                'order_column' => 0,
+                'order_row' => 0,
+                'component_name' => 'settings.users',
+            ],
+        ])
+        ->set('sync', true)
+        ->assertDontSeeLivewire('settings.users');
+
+    expect(array_column($component->get('widgets'), 'component_name'))
+        ->not->toContain('settings.users');
+});
+
+test('setting the widgets property drops a component that is no widget', function (): void {
+    Livewire::withoutLazyLoading()
+        ->test(Dashboard::class)
+        ->set('widgets', [
+            [
+                'id' => Str::uuid()->toString(),
+                'height' => 1,
+                'width' => 1,
+                'order_column' => 0,
+                'order_row' => 0,
+                'component_name' => 'settings.users',
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'height' => 1,
+                'width' => 1,
+                'order_column' => 1,
+                'order_row' => 0,
+                'component_name' => 'sample-component-2',
+            ],
+        ])
+        ->assertDontSeeLivewire('settings.users')
+        ->assertSeeLivewire('sample-component-2');
+});
+
+test('save widgets does not store a component that is no widget', function (): void {
+    Livewire::withoutLazyLoading()
+        ->test(Dashboard::class)
+        ->call('saveWidgets', [
+            [
+                'id' => Str::uuid()->toString(),
+                'height' => 1,
+                'width' => 1,
+                'order_column' => 0,
+                'order_row' => 0,
+                'component_name' => 'settings.users',
+            ],
+        ]);
+
+    $this->assertDatabaseMissing('widgets', ['component_name' => 'settings.users']);
+});
+
+test('save widgets keeps the widget on the own dashboard', function (): void {
+    $otherUser = User::factory()->create();
+
+    Livewire::withoutLazyLoading()
+        ->test(Dashboard::class)
+        ->call('saveWidgets', [
+            [
+                'id' => Str::uuid()->toString(),
+                'height' => 1,
+                'width' => 1,
+                'order_column' => 0,
+                'order_row' => 0,
+                'component_name' => 'sample-component-2',
+                'widgetable_id' => $otherUser->getKey(),
+                'dashboard_component' => 'App\\Livewire\\SomeOtherDashboard',
+            ],
+        ]);
+
+    $this->assertDatabaseHas('widgets', [
+        'component_name' => 'sample-component-2',
+        'widgetable_id' => $this->user->getKey(),
+        'dashboard_component' => Dashboard::class,
+    ]);
+    $this->assertDatabaseMissing('widgets', ['widgetable_id' => $otherUser->getKey()]);
 });
