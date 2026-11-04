@@ -13,9 +13,11 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\PurchaseInvoice;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 beforeEach(function (): void {
     Queue::fake();
@@ -136,6 +138,91 @@ test('replacing media of a collection without single file only touches the repla
         ->and($this->order->fresh()->getMedia('documents')->pluck('id')->sort()->values()->all())
         ->toBe([$sibling->getKey(), $new->getKey()])
         ->and($new->collection_name)->toBe('documents');
+});
+
+test('a rolled back replace keeps the old file', function (): void {
+    $old = replaceMediaSeed($this->order, 'invoice');
+
+    expect(
+        fn () => DB::transaction(function () use ($old): void {
+            ReplaceMedia::make([
+                'id' => $old->getKey(),
+                'media' => replaceMediaPdf('new.pdf'),
+            ])
+                ->force()
+                ->validate()
+                ->execute();
+
+            throw new RuntimeException('failed');
+        })
+    )
+        ->toThrow(RuntimeException::class, 'failed');
+
+    expect(replaceMediaExists($old))->toBeTrue()
+        ->and(Media::query()->whereKey($old->getKey())->value('collection_name'))->toBe('invoice');
+});
+
+test('a replace waiting on a finished replace of the same media is rejected', function (): void {
+    $first = replaceMediaSeed($this->order, 'invoice');
+    $action = ReplaceMedia::make([
+        'id' => $first->getKey(),
+        'media' => replaceMediaPdf('late.pdf'),
+    ])
+        ->force()
+        ->validate();
+
+    Media::query()->whereKey($first->getKey())->update(['collection_name' => '.replaced']);
+
+    expect(fn () => $action->execute())->toThrow(ValidationException::class);
+});
+
+test('a replace of media deleted after validation is rejected', function (): void {
+    $old = replaceMediaSeed($this->order, 'invoice');
+    $action = ReplaceMedia::make([
+        'id' => $old->getKey(),
+        'media' => replaceMediaPdf('late.pdf'),
+    ])
+        ->force()
+        ->validate();
+
+    Media::query()->whereKey($old->getKey())->delete();
+
+    expect(fn () => $action->execute())->toThrow(ValidationException::class);
+});
+
+test('replacing media keeps a collection name at the column limit', function (): void {
+    $collection = str_repeat('a', 255);
+    $old = replaceMediaSeed($this->order, $collection);
+
+    $new = ReplaceMedia::make([
+        'id' => $old->getKey(),
+        'media' => replaceMediaPdf('new.pdf'),
+    ])
+        ->validate()
+        ->execute();
+
+    expect($new->collection_name)->toBe($collection)
+        ->and(Media::query()->whereKey($old->getKey())->exists())->toBeFalse();
+});
+
+test('the activity log of a replace names the original collection', function (): void {
+    $old = replaceMediaSeed($this->order, 'invoice');
+
+    ReplaceMedia::make([
+        'id' => $old->getKey(),
+        'media' => replaceMediaPdf('new.pdf'),
+    ])
+        ->force()
+        ->validate()
+        ->execute();
+
+    $activity = DB::table('activity_log')
+        ->where('subject_type', $old->getMorphClass())
+        ->where('subject_id', $old->getKey())
+        ->where('event', 'deleted')
+        ->sole();
+
+    expect(data_get(json_decode($activity->attribute_changes, true), 'old.collection_name'))->toBe('invoice');
 });
 
 test('deleting media that is already gone does not fail', function (): void {
