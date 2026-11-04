@@ -109,7 +109,7 @@ test('create dialog clears the delivery address as soon as a purchase type is pi
             const select = document.querySelector('#delivery-address-id').innerText;
             if ({$condition}) {
                 clearTimeout(timeout);
-                resolve(select);
+                resolve();
             } else {
                 setTimeout(check, 200);
             }
@@ -142,15 +142,13 @@ test('create dialog clears the delivery address as soon as a purchase type is pi
         ->assertSee($address->name)
         ->click($this->tsSelectOption($address->name));
 
-    $deliverySelect = $page->script($waitForDeliveryAddress('value === ' . $address->getKey()));
-
-    expect($deliverySelect)->toContain($address->company);
+    $page->script($waitForDeliveryAddress(
+        "value === {$address->getKey()} && select.includes('{$address->company}')"
+    ));
 
     $page->click($this->tsSelect('order.order_type_id'))
         ->assertSee($purchaseType->name)
         ->click($this->tsSelectOption($purchaseType->name));
 
-    $deliverySelect = $page->script($waitForDeliveryAddress('value === null'));
-
-    expect($deliverySelect)->not->toContain($address->company);
+    $page->script($waitForDeliveryAddress("value === null && ! select.includes('{$address->company}')"));
 });
