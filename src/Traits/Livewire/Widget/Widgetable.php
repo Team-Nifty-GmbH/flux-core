@@ -31,19 +31,12 @@ trait Widgetable
 
     public function hydrateWidgetable(): void
     {
-        if (is_null($this->dashboardComponent)) {
-            return;
-        }
-
-        $permission = 'widget.' . $this->getName();
-
-        if (! PermissionSet::make()->allows($permission)) {
-            throw UnauthorizedException::forPermissions([$permission]);
-        }
+        $this->ensureWidgetPermission();
     }
 
     public function mountWidgetable(): void
     {
+        $this->ensureWidgetPermission();
         $this->subscribeLiveUpdates();
     }
 
@@ -59,6 +52,19 @@ trait Widgetable
     public function showTitle(): bool
     {
         return true;
+    }
+
+    protected function ensureWidgetPermission(): void
+    {
+        if (is_null($this->dashboardComponent)) {
+            return;
+        }
+
+        $permission = 'widget.' . $this->getName();
+
+        if (! PermissionSet::make()->allows($permission)) {
+            throw UnauthorizedException::forPermissions([$permission]);
+        }
     }
 
     protected function isDateDependent(): bool
