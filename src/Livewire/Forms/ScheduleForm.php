@@ -242,17 +242,17 @@ class ScheduleForm extends FluxForm
                 }
             } else {
                 $cron = new CronExpression($expression);
-                $current = $from;
+                $next = $dueAt && $dueAt->isFuture()
+                    ? resolve_static(ScheduleModel::class, 'nextRunAfter', [$cron, $dueAt])
+                    : Carbon::instance($cron->getNextRunDate(now()));
 
                 for ($i = 0; $i < $maxDates; $i++) {
-                    $next = Carbon::instance($cron->getNextRunDate($current));
-
                     if ($endsAt && $next->greaterThanOrEqualTo($endsAt)) {
                         break;
                     }
 
                     $dates[] = $this->buildExecutionEntry($next, $periodStart, $expression);
-                    $current = $next;
+                    $next = Carbon::instance($cron->getNextRunDate($next));
                 }
             }
         } catch (Throwable) {
