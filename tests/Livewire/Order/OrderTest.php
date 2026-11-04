@@ -302,14 +302,18 @@ test('a purchase order is delivered to the tenant, not to the supplier', functio
 test('changing the contact in the replicate dialog fills the replicate form', function (): void {
     $newContact = Contact::factory()->create();
 
-    $newAddress = Address::factory()->create([
+    $invoiceAddress = Address::factory()->create([
+        'contact_id' => $newContact->getKey(),
+    ]);
+
+    $deliveryAddress = Address::factory()->create([
         'contact_id' => $newContact->getKey(),
     ]);
 
     $newContact->update([
-        'delivery_address_id' => $newAddress->getKey(),
-        'invoice_address_id' => $newAddress->getKey(),
-        'main_address_id' => $newAddress->getKey(),
+        'delivery_address_id' => $deliveryAddress->getKey(),
+        'invoice_address_id' => $invoiceAddress->getKey(),
+        'main_address_id' => $invoiceAddress->getKey(),
     ]);
 
     Livewire::test(OrderView::class, ['id' => $this->order->getKey()])
@@ -317,8 +321,8 @@ test('changing the contact in the replicate dialog fills the replicate form', fu
         ->set('replicateOrder.contact_id', $newContact->getKey())
         ->call('fetchContactData', true)
         ->assertOk()
-        ->assertSet('replicateOrder.address_invoice_id', $newContact->invoice_address_id)
-        ->assertSet('replicateOrder.address_delivery_id', $newContact->delivery_address_id)
+        ->assertSet('replicateOrder.address_invoice_id', $invoiceAddress->getKey())
+        ->assertSet('replicateOrder.address_delivery_id', $deliveryAddress->getKey())
         ->assertSet('order.contact_id', $this->order->contact_id);
 });
 
