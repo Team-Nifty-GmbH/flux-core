@@ -231,12 +231,21 @@ test('sync widgets drops a widget the user may not see', function (): void {
                 'order_row' => 0,
                 'component_name' => 'sample-component-2',
             ],
+            [
+                'id' => $permittedId = Str::uuid()->toString(),
+                'height' => 1,
+                'width' => 1,
+                'order_column' => 1,
+                'order_row' => 0,
+                'component_name' => 'sample-component',
+            ],
         ])
         ->set('sync', true)
         ->assertDontSeeLivewire('sample-component-2');
 
     expect(array_column($component->get('widgets'), 'component_name'))
         ->not->toContain('sample-component-2');
+    expect(array_column($component->get('widgets'), 'id'))->toContain($permittedId);
 });
 
 test('sync widgets drops a component that is no widget', function (): void {
@@ -251,12 +260,21 @@ test('sync widgets drops a component that is no widget', function (): void {
                 'order_row' => 0,
                 'component_name' => 'settings.users',
             ],
+            [
+                'id' => $permittedId = Str::uuid()->toString(),
+                'height' => 1,
+                'width' => 1,
+                'order_column' => 1,
+                'order_row' => 0,
+                'component_name' => 'sample-component',
+            ],
         ])
         ->set('sync', true)
         ->assertDontSeeLivewire('settings.users');
 
     expect(array_column($component->get('widgets'), 'component_name'))
         ->not->toContain('settings.users');
+    expect(array_column($component->get('widgets'), 'id'))->toContain($permittedId);
 });
 
 test('setting the widgets property drops a component that is no widget', function (): void {
@@ -296,9 +314,18 @@ test('save widgets does not store a component that is no widget', function (): v
                 'order_row' => 0,
                 'component_name' => 'settings.users',
             ],
+            [
+                'id' => Str::uuid()->toString(),
+                'height' => 1,
+                'width' => 1,
+                'order_column' => 1,
+                'order_row' => 0,
+                'component_name' => 'sample-component-2',
+            ],
         ]);
 
     $this->assertDatabaseMissing('widgets', ['component_name' => 'settings.users']);
+    $this->assertDatabaseHas('widgets', ['component_name' => 'sample-component-2']);
 });
 
 test('save widgets keeps the widget on the own dashboard', function (): void {
