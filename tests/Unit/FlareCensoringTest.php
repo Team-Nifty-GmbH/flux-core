@@ -9,12 +9,17 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Spatie\FlareClient\Api;
+use Spatie\FlareClient\Context\ContextProvider;
 use Spatie\FlareClient\Flare;
 use Spatie\FlareClient\Senders\Sender;
 use Spatie\FlareClient\Spans\Span;
 use Spatie\LaravelFlare\FlareServiceProvider;
 use Spatie\LaravelIgnition\FlareMiddleware\AddQueries;
 use function Livewire\invade;
+
+if (! interface_exists(ContextProvider::class)) {
+    require_once __DIR__ . '/../Fixtures/FlareContextProvider.php';
+}
 
 function flareReport(array $context): object
 {
@@ -26,7 +31,7 @@ function flareReport(array $context): object
 
         public array $userProvidedContext = [];
 
-        public function __construct(private readonly array $context) {}
+        public function __construct(private array $context) {}
 
         public function allContext(): array
         {
@@ -53,6 +58,13 @@ function flareReport(array $context): object
         public function throwable(Throwable $throwable): static
         {
             $this->throwable = $throwable;
+
+            return $this;
+        }
+
+        public function useContext(ContextProvider $provider): static
+        {
+            $this->context = $provider->toArray();
 
             return $this;
         }
@@ -97,9 +109,7 @@ test('flare reports carry no request data, cookies, session or user attributes',
 
     expect(data_get($context, 'request.url'))->toBe('https://flux.test/contacts')
         ->and(data_get($context, 'request.method'))->toBe('POST')
-        ->and(data_get($context, 'request_data.queryString'))->toBe(CensorPersonalData::CENSORED)
-        ->and(data_get($context, 'request_data.body'))->toBe(CensorPersonalData::CENSORED)
-        ->and(data_get($context, 'request_data.files'))->toBe(CensorPersonalData::CENSORED)
+        ->and(data_get($context, 'request_data'))->toBe(['queryString' => [], 'body' => [], 'files' => []])
         ->and(data_get($context, 'headers.referer'))->toBe('https://flux.test/contacts')
         ->and(data_get($context, 'headers.user-agent'))->toBe('test')
         ->and(data_get($context, 'cookies'))->toBe(CensorPersonalData::CENSORED)
@@ -116,6 +126,47 @@ test('flare reports carry no request data, cookies, session or user attributes',
         ])
         ->and(json_encode($context))->not->toContain('Mustermann')
         ->and(json_encode($context))->not->toContain('Musterweg');
+});
+
+test('flare reports keep the request data as arrays and drop every collected value', function (): void {
+    $context = censoredFlareContext([
+        'request' => ['url' => 'https://flux.test/livewire/update?max@example.com', 'method' => 'POST'],
+        'request_data' => [
+            'queryString' => ['max@example.com' => ''],
+            'body' => ['components' => [['snapshot' => '{"street":"Musterweg 1"}']], 'lastname' => 'Mustermann'],
+            'files' => ['avatar' => ['pathname' => '/tmp/max-mustermann.jpg']],
+        ],
+        'cookies' => ['flux_session' => 'cookiesecret'],
+        'session' => ['_token' => 'sessionsecret'],
+        'livewire' => [
+            [
+                'component_class' => 'App\\Livewire\\Contact',
+                'data' => ['street' => 'Musterweg 1'],
+                'memo' => ['path' => 'contacts/Mustermann'],
+                'updates' => ['form.email' => 'max@example.com'],
+                'calls' => [['method' => 'save', 'params' => ['Mustermann']]],
+            ],
+        ],
+    ]);
+
+    expect(data_get($context, 'request_data.queryString'))->toBeArray()
+        ->and(data_get($context, 'request_data.body'))->toBeArray()
+        ->and(data_get($context, 'request_data.files'))->toBeArray()
+        ->and(data_get($context, 'livewire'))->toBe([
+            [
+                'component_class' => 'App\\Livewire\\Contact',
+                'data' => [],
+                'memo' => [],
+                'updates' => [],
+                'calls' => [],
+            ],
+        ])
+        ->and(json_encode($context))->not->toContain('max@example.com')
+        ->and(json_encode($context))->not->toContain('Mustermann')
+        ->and(json_encode($context))->not->toContain('mustermann')
+        ->and(json_encode($context))->not->toContain('Musterweg')
+        ->and(json_encode($context))->not->toContain('cookiesecret')
+        ->and(json_encode($context))->not->toContain('sessionsecret');
 });
 
 test('flare reports without a request stay untouched', function (): void {
