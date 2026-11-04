@@ -1054,6 +1054,20 @@ class Order extends Component
             ->send();
     }
 
+    public function updatedReplicateOrderOrderTypeId(): void
+    {
+        $this->skipRender();
+
+        $this->replicateOrder->address_delivery_id = resolve_static(OrderType::class, 'query')
+            ->whereKey($this->replicateOrder->order_type_id)
+            ->value('order_type_enum')
+            ?->isPurchase()
+                ? null
+                : $this->replicateOrder->address_delivery_id ?? resolve_static(Contact::class, 'query')
+                    ->whereKey($this->replicateOrder->contact_id)
+                    ->value('delivery_address_id');
+    }
+
     public function updatedScheduleParametersOrderTypeId(): void
     {
         $this->skipRender();

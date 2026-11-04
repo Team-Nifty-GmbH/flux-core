@@ -708,6 +708,55 @@ test('replicate order', function (): void {
     $this->assertNotEquals($replicatedOrder->order_number, $this->order->order_number);
 });
 
+test('replicate dialog clears the delivery address when switching to a purchase', function (): void {
+    $purchaseType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Purchase,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('replicate')
+        ->assertSet('replicateOrder.address_delivery_id', $this->order->address_delivery_id)
+        ->set('replicateOrder.order_type_id', $purchaseType->getKey())
+        ->assertSet('replicateOrder.address_delivery_id', null)
+        ->call('saveReplicate')
+        ->assertHasNoErrors();
+
+    expect(Order::query()->whereKey($component->get('replicateOrder.id'))->value('address_delivery_id'))->toBeNull();
+});
+
+test('replicate dialog fills the delivery address when switching away from a purchase', function (): void {
+    $deliveryAddress = Address::factory()->create(['contact_id' => $this->contact->getKey()]);
+    $this->contact->update(['delivery_address_id' => $deliveryAddress->getKey()]);
+    $this->order->update([
+        'address_delivery_id' => null,
+        'order_type_id' => OrderType::factory()
+            ->create(['order_type_enum' => OrderTypeEnum::Purchase, 'is_active' => true])
+            ->getKey(),
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('replicate')
+        ->assertSet('replicateOrder.address_delivery_id', null)
+        ->set('replicateOrder.order_type_id', OrderType::factory()
+            ->create(['order_type_enum' => OrderTypeEnum::Order, 'is_active' => true])
+            ->getKey())
+        ->assertSet('replicateOrder.address_delivery_id', $deliveryAddress->getKey());
+});
+
+test('replicate dialog keeps a chosen delivery address between sales types', function (): void {
+    $chosenAddress = Address::factory()->create(['contact_id' => $this->contact->getKey()]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('replicate')
+        ->set('replicateOrder.address_delivery_id', $chosenAddress->getKey())
+        ->set('replicateOrder.order_type_id', OrderType::factory()
+            ->create(['order_type_enum' => OrderTypeEnum::Offer, 'is_active' => true])
+            ->getKey())
+        ->assertSet('replicateOrder.address_delivery_id', $chosenAddress->getKey());
+});
+
 test('save locked order uses update locked action', function (): void {
     $newCommission = 'Updated commission for locked order';
     $originalInvoiceNumber = 'INVOICE-123';
