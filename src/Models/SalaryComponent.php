@@ -2,13 +2,14 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Contracts\ExcludedFromSearch;
 use FluxErp\Enums\PaymentIntervalEnum;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class SalaryComponent extends FluxModel
+class SalaryComponent extends FluxModel implements ExcludedFromSearch
 {
     use HasUserModification, HasUuid, SoftDeletes;
 

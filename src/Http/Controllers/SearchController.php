@@ -2,9 +2,11 @@
 
 namespace FluxErp\Http\Controllers;
 
+use FluxErp\Contracts\ExcludedFromSearch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -12,6 +14,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Laravel\Scout\SearchableScope;
+use ReflectionMethod;
 use Spatie\EloquentSortable\Sortable;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
@@ -24,6 +27,12 @@ class SearchController extends Controller
         $model = qualify_model(str_replace('/', '\\', $model));
 
         abort_unless(class_exists($model), 404);
+        abort_if(is_a($model, ExcludedFromSearch::class, true), 403);
+        abort_if(
+            collect($this->requestedColumns($request))
+                ->contains(fn (mixed $column): bool => is_string($column) && $this->isHiddenColumn($model, $column)),
+            403
+        );
 
         $isSearchable = in_array(
             Searchable::class,
@@ -235,6 +244,107 @@ class SearchController extends Controller
                 }
             }
         }
+    }
+
+    protected function isHiddenColumn(string $model, string $column): bool
+    {
+        $instance = app($model);
+        $segments = explode('.', trim(Str::before($column, '->'), ' `'));
+
+        if (count($segments) > 1 && strcasecmp($segments[0], $instance->getTable()) === 0) {
+            array_shift($segments);
+        }
+
+        foreach ($segments as $index => $segment) {
+            $segment = trim($segment, ' `');
+
+            if (in_array(strtolower($segment), array_map('strtolower', $instance->getHidden()), true)) {
+                return true;
+            }
+
+            if ($index === count($segments) - 1 || ! $this->isRelationMethod($instance, $segment)) {
+                return false;
+            }
+
+            $instance = $instance->{$segment}()->getRelated();
+        }
+
+        return false;
+    }
+
+    protected function isRelationMethod(Model $instance, string $method): bool
+    {
+        if (! method_exists($instance, $method)) {
+            return false;
+        }
+
+        $reflection = new ReflectionMethod($instance, $method);
+        $returnType = (string) $reflection->getReturnType();
+
+        return $reflection->isPublic() && is_subclass_of($returnType, Relation::class);
+    }
+
+    protected function requestedColumns(Request $request): array
+    {
+        $columns = array_merge(
+            Arr::wrap($request->input('searchFields')),
+            Arr::wrap($request->input('orderBy')),
+            Arr::wrap($request->input('option-value')),
+            Arr::wrap($request->input('whereHas')),
+            Arr::wrap($request->input('whereDoesntHave')),
+            Arr::wrap($request->input('doesntHave')),
+            $this->whereColumns($request->input('where')),
+        );
+
+        foreach (['whereIn', 'whereNotIn'] as $parameter) {
+            foreach (Arr::wrap($request->input($parameter)) as $constraint) {
+                $columns[] = data_get($constraint, 0);
+            }
+        }
+
+        $parameters = [
+            'whereNull',
+            'whereNotNull',
+            'whereBetween',
+            'whereNotBetween',
+            'whereDate',
+            'whereMonth',
+            'whereDay',
+            'whereYear',
+            'whereTime',
+        ];
+
+        foreach ($parameters as $parameter) {
+            $columns = array_merge($columns, Arr::wrap(data_get(Arr::wrap($request->input($parameter)), 0)));
+        }
+
+        foreach (['whereRelation', 'whereDoesntHaveRelation'] as $parameter) {
+            $constraint = Arr::wrap($request->input($parameter));
+
+            if (is_string(data_get($constraint, 0)) && is_string(data_get($constraint, 1))) {
+                $columns[] = $constraint[0] . '.' . $constraint[1];
+            }
+        }
+
+        return $columns;
+    }
+
+    protected function whereColumns(mixed $where): array
+    {
+        if (! is_array($where)) {
+            return [];
+        }
+
+        if (array_is_list($where)) {
+            return is_string(data_get($where, 0))
+                ? [$where[0]]
+                : array_merge([], ...array_map(fn (mixed $nested): array => $this->whereColumns($nested), $where));
+        }
+
+        return array_merge(
+            array_keys($where),
+            ...array_map(fn (mixed $nested): array => $this->whereColumns($nested), array_values($where))
+        );
     }
 
     protected function formatAndDispatch(Collection $result, string $model, Request $request)

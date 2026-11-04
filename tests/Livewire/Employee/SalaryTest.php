@@ -89,7 +89,8 @@ test('employee list does not aggregate, sort or filter by salary', function (): 
 
     expect($component->get('enabledCols'))->not->toContain('base_salary')
         ->and($component->get('userOrderBy'))->toBe('')
-        ->and(data_get($component->get('data'), 'aggregates.max.base_salary'))->toBeNull()
+        ->and($component->instance()->getDataForTesting())->not->toHaveKey('aggregates.max.base_salary')
+        ->and(json_encode($component->instance()->getDataForTesting()))->not->toContain('2000')
         ->and(json_encode($component->get('userFilters')))->not->toContain('base_salary');
 });
 

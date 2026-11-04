@@ -8,12 +8,13 @@ use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDepartment;
 use FluxErp\Models\SalaryComponent;
+use FluxErp\Traits\Livewire\Widget\MoneyChartFormattingTrait;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Support\Collection;
 
 class PersonnelCostsByDepartmentChart extends BarChart
 {
-    use Widgetable;
+    use MoneyChartFormattingTrait, Widgetable;
 
     public ?array $plotOptions = [
         'bar' => [

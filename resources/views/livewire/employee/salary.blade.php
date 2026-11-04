@@ -58,7 +58,10 @@
             </dl>
         </x-card>
     </div>
-    <x-modal :id="$salaryComponentForm->modalName()">
+    <x-modal
+        :id="$salaryComponentForm->modalName()"
+        :title="__('Salary Component')"
+    >
         <div class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
             <div class="sm:col-span-2">
                 <x-input
