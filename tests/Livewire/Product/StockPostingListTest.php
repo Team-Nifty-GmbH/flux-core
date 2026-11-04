@@ -10,6 +10,7 @@ use FluxErp\Models\Warehouse;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
+    grantModelPermissions($this->user);
     $this->warehouse = Warehouse::factory()->create(['is_default' => true]);
 
     $this->product = Product::factory()

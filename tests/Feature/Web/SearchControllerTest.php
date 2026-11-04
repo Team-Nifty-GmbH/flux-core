@@ -5,6 +5,10 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Product;
 
+beforeEach(function (): void {
+    grantModelPermissions($this->user);
+});
+
 test('search controller returns soft deleted record when selected', function (): void {
     $contact = Contact::factory()->create();
     $address = Address::factory()->create([

@@ -5,6 +5,7 @@ use FluxErp\Models\Permission;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
+    grantModelPermissions($this->user);
     $this->searchPermission = Permission::findOrCreate('api.search.{model}.get', 'sanctum');
 });
 

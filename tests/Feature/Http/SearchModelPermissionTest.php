@@ -4,6 +4,10 @@ use FluxErp\Actions\Role\CreateRole;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
+use FluxErp\Models\Tag;
+use FluxErp\Models\Token;
+use FluxErp\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
@@ -79,6 +83,49 @@ test('search does not call model methods that are no relation', function (): voi
     expect(Contact::query()->count())->toBe($count);
 });
 
+test('search denies a model without model permissions', function (string $model): void {
+    $this->post(route('search', $model), ['searchFields' => ['id'], 'search' => '1'])
+        ->assertForbidden();
+})->with(['activity', 'permission', 'role', 'media', 'notification']);
+
+test('search allows tags without a model permission', function (): void {
+    Tag::factory()->create(['type' => 'contact']);
+
+    $this->post(route('search', 'tag'), ['searchFields' => ['name'], 'search' => ''])
+        ->assertOk();
+});
+
+test('search allows media as a relation', function (): void {
+    $this->user->givePermissionTo($this->contactPermission);
+
+    $this->post(route('search', 'contact'), ['with' => 'media'])
+        ->assertOk();
+});
+
+test('search denies activities as a relation', function (): void {
+    $this->user->givePermissionTo($this->contactPermission);
+
+    $this->post(route('search', 'contact'), ['with' => 'activitiesAsSubject'])
+        ->assertForbidden();
+});
+
+test('search denies a model whose permission was never registered', function (): void {
+    Permission::query()
+        ->where('name', 'model.contact.get')
+        ->delete();
+
+    $this->post(route('search', 'contact'), ['selected' => [$this->contact->getKey()]])
+        ->assertForbidden();
+});
+
+test('search denies an untyped relation fixed with a return type', function (): void {
+    Permission::findOrCreate('model.job_batch.get', 'web');
+    $this->user->givePermissionTo($this->addressPermission);
+
+    $this->post(route('search', 'address'), ['with' => ['jobBatches']])
+        ->assertForbidden();
+});
+
 test('search allows a relation the user may read', function (): void {
     $this->user->givePermissionTo([$this->contactPermission, $this->addressPermission]);
 
@@ -105,6 +152,32 @@ test('api search allows a user with the model permission', function (): void {
         ->assertOk();
 });
 
+test('api search denies a token without the model permission', function (): void {
+    $token = Token::query()->create(['name' => 'integration']);
+    $token->givePermissionTo(Permission::findOrCreate('api.search.{model}.get', 'token'));
+    Permission::findOrCreate('model.contact.get', 'token');
+    $plainTextToken = $token->createToken('integration', ['interface'])->plainTextToken;
+    Auth::forgetGuards();
+
+    $this->withToken($plainTextToken)
+        ->getJson('/api/search/contact?selected[]=' . $this->contact->getKey())
+        ->assertForbidden();
+});
+
+test('api search allows a token with the model permission', function (): void {
+    $token = Token::query()->create(['name' => 'integration']);
+    $token->givePermissionTo([
+        Permission::findOrCreate('api.search.{model}.get', 'token'),
+        Permission::findOrCreate('model.contact.get', 'token'),
+    ]);
+    $plainTextToken = $token->createToken('integration', ['interface'])->plainTextToken;
+    Auth::forgetGuards();
+
+    $this->withToken($plainTextToken)
+        ->getJson('/api/search/contact?selected[]=' . $this->contact->getKey())
+        ->assertOk();
+});
+
 test('a new role gets every model permission of its guard', function (): void {
     $role = CreateRole::make(['name' => 'Fresh role', 'guard_name' => 'web'])
         ->validate()
@@ -118,7 +191,7 @@ test('the migration grants every existing role the model permissions it lacks', 
     $role = Role::findOrCreate('Without model permissions', 'web');
     $role->givePermissionTo($this->contactPermission);
 
-    (require __DIR__ . '/../../../database/migrations/2026_11_04_000001_grant_model_get_permissions_to_all_roles.php')->up();
+    (require __DIR__ . '/../../../database/migrations/2026_11_04_000001_grant_model_get_permissions.php')->up();
 
     expect(
         $role->fresh()
@@ -129,4 +202,16 @@ test('the migration grants every existing role the model permissions it lacks', 
             ->all()
     )
         ->toBe(['model.address.get', 'model.contact.get']);
+});
+
+test('the migration grants users without a role the model permissions', function (): void {
+    $withoutRole = User::factory()->create(['is_active' => true]);
+    $withRole = User::factory()->create(['is_active' => true]);
+    $withRole->assignRole(Role::findOrCreate('Some role', 'web'));
+
+    (require __DIR__ . '/../../../database/migrations/2026_11_04_000001_grant_model_get_permissions.php')->up();
+
+    expect($withoutRole->fresh()->hasDirectPermission('model.contact.get'))->toBeTrue()
+        ->and($withRole->fresh()->hasDirectPermission('model.contact.get'))->toBeFalse()
+        ->and($withRole->fresh()->hasPermissionTo('model.contact.get'))->toBeTrue();
 });

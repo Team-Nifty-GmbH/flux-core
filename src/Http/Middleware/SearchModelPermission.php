@@ -42,7 +42,7 @@ class SearchModelPermission
         }
 
         $instance = app($model);
-        $this->authorize($user, $instance);
+        $this->authorize($user, $instance, ['tag']);
 
         foreach ($this->relationPaths($request) as $path) {
             $related = $instance;
@@ -57,19 +57,22 @@ class SearchModelPermission
                 abort_if($relation instanceof MorphTo, 403);
 
                 $related = $relation->getRelated();
-                $this->authorize($user, $related);
+                $this->authorize($user, $related, ['media', 'tag']);
             }
         }
 
         return $next($request);
     }
 
-    protected function authorize(Authenticatable $user, Model $model): void
+    protected function authorize(Authenticatable $user, Model $model, array $openModels): void
     {
-        if (
-            ! in_array(HasModelPermission::class, class_uses_recursive($model))
-            || ! resolve_static($model::class, 'hasPermission')
-        ) {
+        if (! in_array(HasModelPermission::class, class_uses_recursive($model))) {
+            abort_unless(in_array(morph_alias($model::class), $openModels), 403);
+
+            return;
+        }
+
+        if (! resolve_static($model::class, 'hasPermission')) {
             return;
         }
 
@@ -78,10 +81,9 @@ class SearchModelPermission
             ->whereIn('guard_name', Guard::getNames($user))
             ->get(['id', 'name', 'guard_name']);
 
-        if ($permissions->isNotEmpty() && ! $user->hasAnyPermission($permissions)) {
+        if ($permissions->isEmpty() || ! $user->hasAnyPermission($permissions)) {
             throw UnauthorizedException::forPermissions(
-                $permissions->pluck('name')
-                    ->all()
+                ['model.' . morph_alias($model::class) . '.get']
             );
         }
     }
