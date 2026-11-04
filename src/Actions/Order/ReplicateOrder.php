@@ -104,7 +104,7 @@ class ReplicateOrder extends FluxAction
             ->execute();
 
         if (
-            $originalOrder['contact_id'] === $orderData['contact_id']
+            $originalOrder->contact_id === $order->contact_id
             && in_array($orderTypeEnum, [OrderTypeEnum::Retoure, OrderTypeEnum::Refund])
             && $order->vat_rate_id !== $originalOrder->vat_rate_id
         ) {
