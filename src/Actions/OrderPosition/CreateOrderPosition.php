@@ -81,6 +81,7 @@ class CreateOrderPosition extends FluxAction
                 ->whereKey($this->getData('product_id'))
                 ->with([
                     'bundleProducts:id,name',
+                    'vatRate:id,rate_percentage',
                 ])
                 ->first();
 
@@ -88,7 +89,6 @@ class CreateOrderPosition extends FluxAction
                 $product->localize($order->language_id);
             }
 
-            data_set($this->data, 'vat_rate_id', $product->vat_rate_id, false);
             data_set($this->data, 'name', $product->name, false);
             data_set($this->data, 'description', $product->description, false);
             data_set($this->data, 'product_number', $product->product_number, false);
@@ -97,6 +97,19 @@ class CreateOrderPosition extends FluxAction
 
             if (! $this->getData('origin_position_id') && $product->bundle_type_enum === BundleTypeEnum::Group) {
                 $this->data['is_free_text'] = true;
+            }
+
+            $vatRatePercentage = $this->getData('vat_rate_percentage');
+
+            if (
+                is_null($this->getData('vat_rate_id'))
+                && ! $this->getData('is_free_text')
+                && (
+                    is_null($vatRatePercentage)
+                    || bccomp($vatRatePercentage, $product->vatRate?->rate_percentage ?? 0) === 0
+                )
+            ) {
+                $this->data['vat_rate_id'] = $product->vat_rate_id;
             }
         }
 

@@ -1691,7 +1691,7 @@ test('applies the vat rate fitting the replicated document after the contact bec
         'vat_rate_id' => null,
     ]);
 
-    $sourcePosition = OrderPosition::factory()->create([
+    OrderPosition::factory()->create([
         'order_id' => $order->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
         'product_id' => $positionHasOwnRate
@@ -1725,7 +1725,7 @@ test('applies the vat rate fitting the replicated document after the contact bec
     $multiplier = $targetEnum->multiplier();
 
     expect($copy->vat_rate_id)->toBe($keepsInvoiceRate ? null : $exemptRate->getKey())
-        ->and($position->vat_rate_id)->toBe($keepsInvoiceRate ? $sourcePosition->vat_rate_id : $exemptRate->getKey())
+        ->and($position->vat_rate_id)->toBe($keepsInvoiceRate ? $reducedRate->getKey() : $exemptRate->getKey())
         ->and((float) $position->vat_rate_percentage)->toEqual($keepsInvoiceRate ? 0.07 : 0.0)
         ->and((float) $position->total_net_price)->toEqual(180.0 * $multiplier)
         ->and((float) $position->total_gross_price)->toEqual(($keepsInvoiceRate ? 192.6 : 180.0) * $multiplier)
