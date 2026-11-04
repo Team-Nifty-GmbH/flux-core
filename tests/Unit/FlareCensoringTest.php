@@ -4,13 +4,16 @@ use FluxErp\FluxServiceProvider;
 use FluxErp\Models\Address;
 use FluxErp\Support\Flare\CensoringSender;
 use FluxErp\Support\Flare\CensorPersonalData;
+use FluxErp\Tests\Fixtures\FlareFailingJob;
 use FluxErp\Tests\Fixtures\RecordingFlareSender;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Spatie\FlareClient\Api;
 use Spatie\FlareClient\Context\ContextProvider;
 use Spatie\FlareClient\Flare;
+use Spatie\FlareClient\Sampling\AlwaysSampler;
 use Spatie\FlareClient\Senders\Sender;
 use Spatie\FlareClient\Spans\Span;
 use Spatie\LaravelFlare\FlareServiceProvider;
@@ -218,10 +221,82 @@ test('flare reports carry no credentials, client ips, dynamic urls or recorded v
         ->and(json_encode($context))->not->toContain('203.0.113.9');
 });
 
-test('flare reports without a request stay untouched', function (): void {
-    $context = ['env' => ['php_version' => PHP_VERSION], 'user' => ['id' => 7, 'name' => 'Max Mustermann']];
+test('flare console reports carry no command arguments or recorded values', function (): void {
+    $context = censoredFlareContext([
+        'arguments' => ['artisan', 'flux:sync', 'max@example.com', '--name=Mustermann'],
+        'env' => ['php_version' => PHP_VERSION],
+        'git' => ['hash' => 'abc123'],
+        'queries' => [['sql' => 'select * from addresses', 'bindings' => null]],
+        'logs' => [['message' => 'Saved max@example.com', 'context' => ['street' => 'Musterweg 1']]],
+        'dumps' => [['html_dump' => 'Mustermann']],
+        'laravel_context' => ['email' => 'max@example.com'],
+        'context' => ['street' => 'Musterweg 1'],
+        'exception' => ['raw_sql' => 'select * from addresses', 'email' => 'max@example.com'],
+        'view' => ['view' => 'mails.order', 'data' => ['street' => 'Musterweg 1']],
+    ]);
 
-    expect(censoredFlareContext($context))->toBe($context);
+    expect(data_get($context, 'arguments'))->toBe(['artisan', 'flux:sync'])
+        ->and(data_get($context, 'env.php_version'))->toBe(PHP_VERSION)
+        ->and(data_get($context, 'git.hash'))->toBe('abc123')
+        ->and(data_get($context, 'queries.0.sql'))->toBe('select * from addresses')
+        ->and(data_get($context, 'logs'))->toBe([])
+        ->and(data_get($context, 'dumps'))->toBe([])
+        ->and(data_get($context, 'laravel_context'))->toBe([])
+        ->and(data_get($context, 'context'))->toBe([])
+        ->and(data_get($context, 'exception'))->toBe(['raw_sql' => 'select * from addresses'])
+        ->and(data_get($context, 'view'))->toBe(['view' => 'mails.order', 'data' => []])
+        ->and($context)->not->toHaveKey('request_data')
+        ->and($context)->not->toHaveKey('cookies')
+        ->and($context)->not->toHaveKey('session')
+        ->and(json_encode($context))->not->toContain('max@example.com')
+        ->and(json_encode($context))->not->toContain('Mustermann')
+        ->and(json_encode($context))->not->toContain('Musterweg');
+});
+
+test('flare console reports with an option before the command keep only the script', function (): void {
+    expect(data_get(censoredFlareContext(['arguments' => ['artisan', '--env', 'max@example.com', 'flux:sync']]), 'arguments'))
+        ->toBe(['artisan']);
+});
+
+test('flare console reports of other scripts keep only the script', function (): void {
+    $context = censoredFlareContext(['arguments' => ['bin/import', 'max@example.com', '--name=Mustermann']]);
+
+    expect(data_get($context, 'arguments'))->toBe(['bin/import']);
+});
+
+test('flare queue reports keep the job metadata and drop its payload', function (): void {
+    $context = censoredFlareContext([
+        'arguments' => ['artisan', 'queue:work'],
+        'job' => [
+            'uuid' => 'c1f0c9b4',
+            'maxTries' => 3,
+            'timeout' => 60,
+            'tags' => ['contact:max@example.com'],
+            'illuminate:log:context' => ['data' => ['email' => 'max@example.com']],
+            'data' => [
+                'email' => 'max@example.com',
+                'address' => ['street' => 'Musterweg 1'],
+                'chained' => [['name' => 'App\\Jobs\\Notify', 'data' => ['lastname' => 'Mustermann']]],
+            ],
+            'pushedAt' => '2026-11-04T10:00:00+00:00',
+            'name' => 'App\\Jobs\\SyncContacts',
+            'connection' => 'redis',
+            'queue' => 'default',
+        ],
+    ]);
+
+    expect(data_get($context, 'job'))->toBe([
+        'uuid' => 'c1f0c9b4',
+        'maxTries' => 3,
+        'timeout' => 60,
+        'pushedAt' => '2026-11-04T10:00:00+00:00',
+        'name' => 'App\\Jobs\\SyncContacts',
+        'connection' => 'redis',
+        'queue' => 'default',
+    ])
+        ->and(json_encode($context))->not->toContain('max@example.com')
+        ->and(json_encode($context))->not->toContain('Mustermann')
+        ->and(json_encode($context))->not->toContain('Musterweg');
 });
 
 test('flare reports carry no query bindings in the message of a query exception', function (): void {
@@ -542,4 +617,118 @@ test('the real laravel-flare client hands reports, traces and logs to the sender
         ->and($sent)->not->toContain($this->user->email)
         ->and($sent)->not->toContain('Mustermann')
         ->and($sent)->not->toContain('Musterweg');
+});
+
+test('laravel-flare command lines leave without arguments', function (): void {
+    $payload = sendThroughFlareSender([
+        'attributes' => [
+            'flare.entry_point.value' => 'artisan flux:sync max@example.com --name=Mustermann',
+            'process.command_args' => ['artisan', 'flux:sync', 'max@example.com', '--name=Mustermann'],
+        ],
+        'events' => [
+            ['attributes' => ['flare.entry_point.value' => 'bin/import max@example.com']],
+            ['attributes' => ['flare.entry_point.value' => 'artisan --env max@example.com flux:sync']],
+            ['attributes' => ['laravel.job.tags' => ['contact:max@example.com']]],
+            ['attributes' => ['laravel.job.chain.jobs' => [['laravel.job.properties' => ['email' => 'max@example.com']]]]],
+        ],
+        'resourceSpans' => [[
+            'resource' => ['attributes' => [
+                ['key' => 'process.command_args', 'value' => ['arrayValue' => ['values' => [['stringValue' => 'max@example.com']]]]],
+            ]],
+            'scopeSpans' => [[
+                'spans' => [[
+                    'attributes' => [
+                        ['key' => 'flare.entry_point.value', 'value' => ['stringValue' => 'artisan flux:sync max@example.com']],
+                    ],
+                ]],
+            ]],
+        ]],
+    ]);
+
+    $spanAttribute = data_get($payload, 'resourceSpans.0.scopeSpans.0.spans.0.attributes.0.value');
+
+    expect($payload['attributes']['flare.entry_point.value'])->toBe('artisan flux:sync')
+        ->and($payload['attributes']['process.command_args'])->toBe(CensoringSender::CENSORED)
+        ->and($payload['events'][0]['attributes']['flare.entry_point.value'])->toBe('bin/import')
+        ->and($payload['events'][1]['attributes']['flare.entry_point.value'])->toBe('artisan')
+        ->and($payload['events'][2]['attributes']['laravel.job.tags'])->toBe(CensoringSender::CENSORED)
+        ->and($spanAttribute)->toBe(['stringValue' => 'artisan flux:sync'])
+        ->and(json_encode($payload))->not->toContain('max@example.com')
+        ->and(json_encode($payload))->not->toContain('Mustermann');
+});
+
+function realFlareClientInConsole(array $argv): void
+{
+    config([
+        'flare.key' => 'test-key',
+        'flare.sender' => ['class' => RecordingFlareSender::class, 'config' => []],
+        'flare.sampler' => ['class' => AlwaysSampler::class, 'config' => []],
+        'queue.default' => 'sync',
+    ]);
+    RecordingFlareSender::$payloads = [];
+
+    $_SERVER['argv'] = $argv;
+
+    app()->instance('config_loaded_from_cache', false);
+    app()->register(new FlareServiceProvider(app()));
+}
+
+test('the real laravel-flare client hands console reports to the sender censored', function (): void {
+    $argv = $_SERVER['argv'];
+    realFlareClientInConsole(['artisan', 'flare-test:sync', 'max@example.com', '--name=Mustermann']);
+
+    Artisan::command('flare-test:sync {email} {--name=}', function (): void {
+        app(Flare::class)->report(new RuntimeException('Command broke'));
+        app(Flare::class)->log()->record('Saved', context: ['email' => $this->argument('email')]);
+        app(Flare::class)->log()->flush();
+        app(Api::class)->sendQueue();
+    });
+
+    Artisan::call('flare-test:sync', ['email' => 'max@example.com', '--name' => 'Mustermann']);
+
+    $_SERVER['argv'] = $argv;
+
+    $payloads = RecordingFlareSender::$payloads;
+
+    expect($payloads)->toHaveCount(2)
+        ->and($payloads[0]['message'])->toBe('Command broke')
+        ->and($payloads[0]['attributes']['process.command_args'])->toBe(CensoringSender::CENSORED)
+        ->and($payloads[0]['attributes']['flare.entry_point.value'])->toBe('artisan flare-test:sync');
+
+    data_forget($payloads, '0.stacktrace');
+    $sent = json_encode($payloads);
+
+    expect($sent)->not->toContain('max@example.com')
+        ->and($sent)->not->toContain('Mustermann');
+});
+
+test('the real laravel-flare client hands queue reports to the sender censored', function (): void {
+    $argv = $_SERVER['argv'];
+    realFlareClientInConsole(['artisan', 'queue:work', 'redis', '--name=Mustermann']);
+
+    try {
+        dispatch(new FlareFailingJob('max@example.com'));
+    } catch (RuntimeException $exception) {
+        app(Flare::class)->report($exception);
+    }
+
+    app(Api::class)->sendQueue();
+
+    $_SERVER['argv'] = $argv;
+
+    $payloads = RecordingFlareSender::$payloads;
+    $reportIndex = collect($payloads)->search(fn (array $payload): bool => data_get($payload, 'message') === 'Job broke');
+    $report = $payloads[$reportIndex];
+    $jobSpan = $report['events'][0];
+
+    expect($report['attributes']['process.command_args'])->toBe(CensoringSender::CENSORED)
+        ->and($report['attributes']['flare.entry_point.value'])->toBe(FlareFailingJob::class)
+        ->and($jobSpan['attributes']['laravel.job.class'])->toBe(FlareFailingJob::class)
+        ->and($jobSpan['attributes']['laravel.job.properties'])->toBe(CensoringSender::CENSORED);
+
+    data_forget($payloads, $reportIndex . '.stacktrace');
+    $sent = json_encode($payloads);
+
+    expect($sent)->not->toContain('max@example.com')
+        ->and($sent)->not->toContain('Mustermann');
 });

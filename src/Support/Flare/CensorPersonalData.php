@@ -15,11 +15,12 @@ use Spatie\FlareClient\Context\ContextProvider;
  */
 class CensorPersonalData
 {
-    use CensorsUrls;
+    use CensorsCommandLines, CensorsUrls;
 
     public const string CENSORED = '<CENSORED>';
 
     protected const array CENSORED_BRANCHES = [
+        'context',
         'dumps',
         'laravel_context',
         'logs',
@@ -36,6 +37,21 @@ class CensorPersonalData
         'x-xsrf-token',
     ];
 
+    protected const array JOB_METADATA = [
+        'attempts',
+        'backoff',
+        'connection',
+        'failOnTimeout',
+        'maxExceptions',
+        'maxTries',
+        'name',
+        'pushedAt',
+        'queue',
+        'retryUntil',
+        'timeout',
+        'uuid',
+    ];
+
     public function handle(object $report, Closure $next): mixed
     {
         $throwable = $report->getThrowable();
@@ -46,10 +62,64 @@ class CensorPersonalData
         $context = $report->allContext();
 
         // Console and queue reports carry no request.
-        if (! array_key_exists('request_data', $context)) {
-            return $next($report);
+        if (array_key_exists('request_data', $context)) {
+            $context = $this->censorRequest($context);
         }
 
+        foreach (static::CENSORED_BRANCHES as $branch) {
+            if (array_key_exists($branch, $context)) {
+                $context[$branch] = [];
+            }
+        }
+
+        if (array_key_exists('exception', $context)) {
+            $context['exception'] = Arr::only($context['exception'], 'raw_sql');
+        }
+
+        if (array_key_exists('arguments', $context)) {
+            $context['arguments'] = $this->censorCommandLine($context['arguments']);
+        }
+
+        if (array_key_exists('job', $context)) {
+            $context['job'] = Arr::only($context['job'], static::JOB_METADATA);
+        }
+
+        if (is_array(data_get($context, 'view.data'))) {
+            $context['view']['data'] = [];
+        }
+
+        // The Flare API rejects request_data with a scalar, and an array provided
+        // on top of the collected context only adds keys. So the collected context
+        // itself has to go, otherwise the real values stay in the report.
+        $report->useContext(
+            new readonly class($context) implements ContextProvider
+            {
+                public function __construct(private array $context) {}
+
+                public function toArray(): array
+                {
+                    return $this->context;
+                }
+            }
+        );
+        $report->userProvidedContext($context);
+
+        return $next($report);
+    }
+
+    protected function censorQueryException(QueryException $exception): string
+    {
+        $bindings = array_filter(
+            $exception->getBindings(),
+            fn (mixed $binding) => is_string($binding) && ! blank($binding)
+        );
+
+        return str_replace($bindings, static::CENSORED, $exception->getPrevious()?->getMessage() ?? '')
+            . ' (Connection: ' . $exception->getConnectionName() . ', SQL: ' . $exception->getSql() . ')';
+    }
+
+    protected function censorRequest(array $context): array
+    {
         $censored = [
             'cookies' => static::CENSORED,
             'session' => static::CENSORED,
@@ -93,16 +163,6 @@ class CensorPersonalData
             'files' => [],
         ];
 
-        foreach (static::CENSORED_BRANCHES as $branch) {
-            if (array_key_exists($branch, $context)) {
-                $context[$branch] = [];
-            }
-        }
-
-        if (array_key_exists('exception', $context)) {
-            $context['exception'] = Arr::only($context['exception'], 'raw_sql');
-        }
-
         if (is_array($components = data_get($context, 'livewire'))) {
             $context['livewire'] = array_map(
                 fn (array $component): array => array_map(
@@ -113,33 +173,6 @@ class CensorPersonalData
             );
         }
 
-        // The Flare API rejects request_data with a scalar, and an array provided
-        // on top of the collected context only adds keys. So the collected context
-        // itself has to go, otherwise the real values stay in the report.
-        $report->useContext(
-            new readonly class($context) implements ContextProvider
-            {
-                public function __construct(private array $context) {}
-
-                public function toArray(): array
-                {
-                    return $this->context;
-                }
-            }
-        );
-        $report->userProvidedContext($context);
-
-        return $next($report);
-    }
-
-    protected function censorQueryException(QueryException $exception): string
-    {
-        $bindings = array_filter(
-            $exception->getBindings(),
-            fn (mixed $binding) => is_string($binding) && ! blank($binding)
-        );
-
-        return str_replace($bindings, static::CENSORED, $exception->getPrevious()?->getMessage() ?? '')
-            . ' (Connection: ' . $exception->getConnectionName() . ', SQL: ' . $exception->getSql() . ')';
+        return $context;
     }
 }
