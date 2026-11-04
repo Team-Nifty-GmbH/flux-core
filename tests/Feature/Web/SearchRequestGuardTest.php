@@ -119,6 +119,15 @@ test('malformed query arguments are rejected', function (string $parameter, mixe
     'whereDate boolean' => ['whereDate', ['created_at', '>', '2000-01-01', 'nope']],
     'doesntHave boolean' => ['doesntHave', ['typedRelation', 'nope']],
     'named argument' => ['whereNotNull', ['boolean' => 'nope', 'columns' => 'id']],
+    'whereIn as string' => ['whereIn', 'id'],
+    'whereIn as flat list' => ['whereIn', ['id', 1]],
+    'whereIn without values' => ['whereIn', [['id']]],
+    'whereNotIn as string' => ['whereNotIn', 'id'],
+    'whereNull as string' => ['whereNull', 'id'],
+    'whereDate as string' => ['whereDate', 'created_at'],
+    'whereRelation as string' => ['whereRelation', 'typedRelation'],
+    'doesntHave as string' => ['doesntHave', 'typedRelation'],
+    'orderDirection' => ['orderDirection', 'sideways'],
     'too many where arguments' => ['where', [['id', '=', 1, 'nope']]],
     'too many nested where arguments' => ['whereRelation', ['typedRelation', [['id', '=', 1, 'nope']]]],
 ]);
@@ -172,6 +181,7 @@ test('real relations, attributes and accessors keep working', function (): void 
         'whereDoesntHave' => 'addressTypes',
         'where' => [['is_main_address', '=', true]],
         'whereIn' => [['id', [$address->getKey()], 'and']],
+        'whereNotIn' => [['id', -1]],
         'whereNull' => ['deleted_at', 'or'],
         'orderBy' => 'name',
         'fields' => ['name', 'contact', 'does_not_exist'],
@@ -181,4 +191,5 @@ test('real relations, attributes and accessors keep working', function (): void 
         ->assertJsonFragment(['id' => $address->getKey()]);
 
     expect(data_get($response->json(), '0.contact.id'))->toBe($contact->getKey());
+    expect($response->json('0'))->not->toHaveKey('does_not_exist');
 });

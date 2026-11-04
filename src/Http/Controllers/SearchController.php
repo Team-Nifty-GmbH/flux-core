@@ -113,7 +113,7 @@ class SearchController extends Controller
         }
 
         if ($request->has('orderBy')) {
-            $query->orderBy($request->input('orderBy'), $request->input('orderDirection', 'asc'));
+            $query->orderBy($request->input('orderBy'), $request->input('orderDirection') ?: 'asc');
         }
 
         $this->applyRequestConstraints($query, $request, $model);
@@ -150,6 +150,7 @@ class SearchController extends Controller
 
         if ($request->has('whereNotIn')) {
             foreach ($request->input('whereNotIn') as $whereNotIn) {
+                $whereNotIn[1] = Arr::wrap($whereNotIn[1]);
                 $query->whereNotIn(...$whereNotIn);
             }
         }
@@ -338,48 +339,49 @@ class SearchController extends Controller
             }
         }
 
-        $spreads = [];
         foreach ([
-            'whereNull' => 1,
-            'whereNotNull' => 1,
-            'whereBetween' => 2,
-            'whereNotBetween' => 2,
-            'whereDate' => 3,
-            'whereMonth' => 3,
-            'whereDay' => 3,
-            'whereYear' => 3,
-            'whereTime' => 3,
-        ] as $parameter => $boolean) {
+            'whereNull' => [1, 1],
+            'whereNotNull' => [1, 1],
+            'whereBetween' => [2, 2],
+            'whereNotBetween' => [2, 2],
+            'whereDate' => [2, 3],
+            'whereMonth' => [2, 3],
+            'whereDay' => [2, 3],
+            'whereYear' => [2, 3],
+            'whereTime' => [2, 3],
+        ] as $parameter => [$min, $boolean]) {
             if ($request->has($parameter)) {
-                $spreads[] = [$request->input($parameter), $boolean];
+                $this->guardColumns(
+                    $model,
+                    data_get($this->spreadArguments($request->input($parameter), $min, $boolean + 1, $boolean), 0)
+                );
             }
         }
 
         foreach (['whereIn', 'whereNotIn'] as $parameter) {
             foreach (Arr::wrap($request->input($parameter)) as $arguments) {
-                $spreads[] = [$arguments, 2];
+                $this->guardColumns($model, data_get($this->spreadArguments($arguments, 2, 3, 2), 0));
             }
-        }
-
-        foreach ($spreads as [$arguments, $boolean]) {
-            $this->guardColumns($model, data_get($this->listArguments($arguments, $boolean + 1, $boolean), 0));
         }
 
         foreach (['whereRelation', 'whereDoesntHaveRelation'] as $parameter) {
             if ($request->has($parameter)) {
-                $arguments = $this->listArguments($request->input($parameter), 4);
+                $arguments = $this->spreadArguments($request->input($parameter), 2, 4);
                 $this->guardColumns($this->relatedModel($model, data_get($arguments, 0)), data_get($arguments, 1));
             }
         }
 
         if ($request->has('doesntHave')) {
-            $this->relatedModel($model, data_get($this->listArguments($request->input('doesntHave'), 2, 1), 0));
+            $this->relatedModel($model, data_get($this->spreadArguments($request->input('doesntHave'), 1, 2, 1), 0));
         }
 
         foreach (['orderBy', 'option-value'] as $parameter) {
             abort_unless(is_null($request->input($parameter)) || is_string($request->input($parameter)), 422);
             $this->guardColumns($model, $request->input($parameter));
         }
+
+        $orderDirection = $request->input('orderDirection') ?: 'asc';
+        abort_unless(is_string($orderDirection) && in_array(strtolower($orderDirection), ['asc', 'desc'], true), 422);
 
         $this->guardColumns($model, $request->input('where'));
     }
@@ -432,12 +434,15 @@ class SearchController extends Controller
     {
         $keys = array_diff(array_filter($keys, 'is_string'), $item->getHidden());
 
-        foreach ($keys as $key) {
-            abort_if(
-                method_exists($item, $key) && ! $item->hasAttribute($key) && ! $this->isRelation($item, $key),
-                422
-            );
-        }
+        $keys = array_filter($keys, function (string $key) use ($item): bool {
+            if ($item->hasAttribute($key) || $this->isRelation($item, $key)) {
+                return true;
+            }
+
+            abort_if(method_exists($item, $key), 422);
+
+            return false;
+        });
 
         return $item->only($item->getVisible() ? array_intersect($keys, $item->getVisible()) : $keys);
     }
@@ -454,6 +459,13 @@ class SearchController extends Controller
         }
 
         return $model;
+    }
+
+    protected function spreadArguments(mixed $arguments, int $min, int $max, ?int $boolean = null): array
+    {
+        abort_unless(is_array($arguments) && count($arguments) >= $min, 422);
+
+        return $this->listArguments($arguments, $max, $boolean);
     }
 
     // a link is not display text, shortening it would break it
