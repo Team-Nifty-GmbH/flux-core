@@ -39,6 +39,8 @@ test('new email button opens a blank compose modal', function (): void {
 });
 
 test('compose to field suggests matching addresses', function (): void {
+    grantModelPermissions($this->user);
+
     $contact = FluxErp\Models\Contact::factory()->create();
     FluxErp\Models\Address::factory()->create([
         'contact_id' => $contact->getKey(),
@@ -71,6 +73,8 @@ test('compose to field suggests matching addresses', function (): void {
 });
 
 test('selecting a suggestion adds a recipient pill', function (): void {
+    grantModelPermissions($this->user);
+
     $contact = FluxErp\Models\Contact::factory()->create();
     FluxErp\Models\Address::factory()->create([
         'contact_id' => $contact->getKey(),
