@@ -36,7 +36,8 @@ beforeEach(function (): void {
 });
 
 test('rejecting notifies the requesting employees user', function (): void {
-    $employeeUser = User::factory()->create();
+    $employeeUser = User::factory()->create(['is_active' => true]);
+    $employeeUser->tenants()->attach($this->dbTenant->getKey());
 
     $employee = CreateEmployee::make([
         'firstname' => 'John',

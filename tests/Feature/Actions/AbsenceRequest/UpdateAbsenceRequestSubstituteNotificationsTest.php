@@ -43,7 +43,9 @@ beforeEach(function (): void {
         'work_time_model_id' => $this->wtm->getKey(),
     ])->validate()->execute();
 
-    $keptUser = User::factory()->create();
+    $keptUser = User::factory()->create(['is_active' => true]);
+
+    $keptUser->tenants()->attach($this->dbTenant->getKey());
     $this->keptEmployee = CreateEmployee::make([
         'firstname' => 'Kept',
         'lastname' => 'Sub',
@@ -54,7 +56,9 @@ beforeEach(function (): void {
     ])->validate()->execute();
     $this->keptUser = $keptUser;
 
-    $addedUser = User::factory()->create();
+    $addedUser = User::factory()->create(['is_active' => true]);
+
+    $addedUser->tenants()->attach($this->dbTenant->getKey());
     $this->addedEmployee = CreateEmployee::make([
         'firstname' => 'Added',
         'lastname' => 'Sub',
