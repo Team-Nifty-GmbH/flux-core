@@ -56,11 +56,12 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
         });
 
         static::created(function (Employee $employee): void {
-            if ($employee->user_id) {
-                resolve_static(WorkTime::class, 'query')
-                    ->withTrashed()
-                    ->where('user_id', $employee->user_id)
-                    ->update(['employee_id' => $employee->getKey()]);
+            $employee->syncWorkTimes();
+        });
+
+        static::updated(function (Employee $employee): void {
+            if ($employee->wasChanged('user_id')) {
+                $employee->syncWorkTimes();
             }
         });
     }
@@ -79,6 +80,29 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
             'salary_type' => SalaryTypeEnum::class,
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * Assigns the work times of the linked user to this employee and releases
+     * the ones that still point here but belong to a previous or no user.
+     */
+    public function syncWorkTimes(): void
+    {
+        resolve_static(WorkTime::class, 'query')
+            ->withTrashed()
+            ->where('employee_id', $this->getKey())
+            ->where(fn (Builder $query) => $query
+                ->whereNull('user_id')
+                ->orWhere('user_id', '!=', $this->user_id ?? 0)
+            )
+            ->update(['employee_id' => null]);
+
+        if ($this->user_id) {
+            resolve_static(WorkTime::class, 'query')
+                ->withTrashed()
+                ->where('user_id', $this->user_id)
+                ->update(['employee_id' => $this->getKey()]);
+        }
     }
 
     // Relations

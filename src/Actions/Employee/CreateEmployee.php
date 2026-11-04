@@ -5,9 +5,12 @@ namespace FluxErp\Actions\Employee;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDepartment;
+use FluxErp\Models\Scopes\UserTenantScope;
 use FluxErp\Models\Tenant;
+use FluxErp\Models\User;
 use FluxErp\Models\VacationCarryoverRule;
 use FluxErp\Rulesets\Employee\CreateEmployeeRuleset;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
@@ -59,6 +62,8 @@ class CreateEmployee extends FluxAction
     {
         parent::validateData();
 
+        $this->validateUserLink((int) $this->getData('tenant_id'));
+
         if (
             $this->getData('employee_department_id')
             && $this->getData('location_id')
@@ -72,5 +77,27 @@ class CreateEmployee extends FluxAction
             ])
                 ->errorBag('createEmployee');
         }
+    }
+
+    protected function validateUserLink(int $tenantId): void
+    {
+        if (
+            ! $this->getData('user_id')
+            || resolve_static(User::class, 'query')
+                ->withoutGlobalScope(UserTenantScope::class)
+                ->whereKey($this->getData('user_id'))
+                ->whereHas('tenants', fn (Builder $query) => $query
+                    ->withoutGlobalScope(UserTenantScope::class)
+                    ->whereKey($tenantId)
+                )
+                ->exists()
+        ) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            'user_id' => ['The selected user does not belong to the tenant of this employee.'],
+        ])
+            ->errorBag('createEmployee');
     }
 }

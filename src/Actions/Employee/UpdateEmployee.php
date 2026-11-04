@@ -5,7 +5,10 @@ namespace FluxErp\Actions\Employee;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDepartment;
+use FluxErp\Models\Scopes\UserTenantScope;
+use FluxErp\Models\User;
 use FluxErp\Rulesets\Employee\UpdateEmployeeRuleset;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 
 class UpdateEmployee extends FluxAction
@@ -38,7 +41,11 @@ class UpdateEmployee extends FluxAction
 
         $employee = resolve_static(Employee::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first(['id', 'employee_department_id', 'location_id']);
+            ->first(['id', 'employee_department_id', 'location_id', 'tenant_id', 'user_id']);
+
+        if ($this->getData('user_id') !== $employee->user_id) {
+            $this->validateUserLink((int) ($this->getData('tenant_id') ?? $employee->tenant_id));
+        }
 
         if (
             $this->getData('employee_department_id')
@@ -65,5 +72,27 @@ class UpdateEmployee extends FluxAction
             ])
                 ->errorBag('createEmployee');
         }
+    }
+
+    protected function validateUserLink(int $tenantId): void
+    {
+        if (
+            ! $this->getData('user_id')
+            || resolve_static(User::class, 'query')
+                ->withoutGlobalScope(UserTenantScope::class)
+                ->whereKey($this->getData('user_id'))
+                ->whereHas('tenants', fn (Builder $query) => $query
+                    ->withoutGlobalScope(UserTenantScope::class)
+                    ->whereKey($tenantId)
+                )
+                ->exists()
+        ) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            'user_id' => ['The selected user does not belong to the tenant of this employee.'],
+        ])
+            ->errorBag('createEmployee');
     }
 }
