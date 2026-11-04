@@ -2,10 +2,12 @@
 
 namespace FluxErp\View\Printing\PaymentReminder;
 
+use FluxErp\Models\Media;
 use FluxErp\Models\PaymentReminder;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 
 class PaymentReminderView extends PrintableView
@@ -32,6 +34,17 @@ class PaymentReminderView extends PrintableView
                 ['paymentReminder' => $this->model]
             ),
         ]);
+    }
+
+    public function attachToModel(?Model $model = null): ?Media
+    {
+        $media = parent::attachToModel($model);
+
+        if ($media) {
+            $this->model->media()->associate($media)->saveQuietly();
+        }
+
+        return $media;
     }
 
     public function getFileName(): string
