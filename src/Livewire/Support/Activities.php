@@ -18,7 +18,7 @@ abstract class Activities extends Component
     #[Locked]
     public array $activities = [];
 
-    #[Modelable]
+    #[Locked, Modelable]
     public ?int $modelId = null;
 
     public int $page = 1;
