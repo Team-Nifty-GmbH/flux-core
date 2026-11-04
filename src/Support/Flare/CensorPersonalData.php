@@ -4,6 +4,7 @@ namespace FluxErp\Support\Flare;
 
 use Closure;
 use Illuminate\Database\QueryException;
+use Spatie\FlareClient\Context\ContextProvider;
 use Spatie\FlareClient\Report;
 use Spatie\FlareClient\ReportFactory;
 
@@ -31,15 +32,7 @@ class CensorPersonalData
             return $next($report);
         }
 
-        // allContext() merges the provided context recursively over the
-        // collected one, so an array would only add keys. A scalar replaces
-        // the whole branch.
         $censored = [
-            'request_data' => [
-                'queryString' => static::CENSORED,
-                'body' => static::CENSORED,
-                'files' => static::CENSORED,
-            ],
             'cookies' => static::CENSORED,
             'session' => static::CENSORED,
         ];
@@ -65,7 +58,38 @@ class CensorPersonalData
             }
         }
 
-        $report->userProvidedContext(array_replace_recursive($context, $censored));
+        $context = array_replace_recursive($context, $censored);
+        $context['request_data'] = [
+            'queryString' => [],
+            'body' => [],
+            'files' => [],
+        ];
+
+        if (is_array($components = data_get($context, 'livewire'))) {
+            $context['livewire'] = array_map(
+                fn (array $component): array => array_map(
+                    fn (mixed $value): mixed => is_array($value) ? [] : $value,
+                    $component
+                ),
+                $components
+            );
+        }
+
+        // The Flare API rejects request_data with a scalar, and an array provided
+        // on top of the collected context only adds keys. So the collected context
+        // itself has to go, otherwise the real values stay in the report.
+        $report->useContext(
+            new readonly class($context) implements ContextProvider
+            {
+                public function __construct(private array $context) {}
+
+                public function toArray(): array
+                {
+                    return $this->context;
+                }
+            }
+        );
+        $report->userProvidedContext($context);
 
         return $next($report);
     }

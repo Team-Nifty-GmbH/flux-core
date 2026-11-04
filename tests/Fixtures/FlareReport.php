@@ -2,6 +2,7 @@
 
 namespace Spatie\FlareClient;
 
+use Spatie\FlareClient\Context\ContextProvider;
 use Throwable;
 
 // Client v3 ships an empty Report.php. This stands in for the v1 Report that
@@ -15,7 +16,7 @@ if (! class_exists(Report::class)) {
 
         public array $userProvidedContext = [];
 
-        public function __construct(private readonly array $context) {}
+        public function __construct(private array $context) {}
 
         public function allContext(): array
         {
@@ -42,6 +43,13 @@ if (! class_exists(Report::class)) {
         public function throwable(Throwable $throwable): static
         {
             $this->throwable = $throwable;
+
+            return $this;
+        }
+
+        public function useContext(ContextProvider $provider): static
+        {
+            $this->context = $provider->toArray();
 
             return $this;
         }
