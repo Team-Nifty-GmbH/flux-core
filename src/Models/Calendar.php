@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Models\Pivots\Calendarable;
+use FluxErp\Support\Auth\PermissionSet;
 use FluxErp\Support\Collection\CalendarCollection;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
@@ -12,6 +13,7 @@ use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
@@ -38,12 +40,20 @@ class Calendar extends FluxModel
         $user = auth()->user();
         $calendarIds = array_unique($calendarIds);
 
+        if (is_null($user) || $user instanceof Token || Gate::forUser($user)->allows(PermissionSet::blanketProbeAbility())) {
+            return;
+        }
+
+        $existingCalendars = resolve_static(static::class, 'query')
+            ->whereKey($calendarIds)
+            ->count();
+
         if (
             ! method_exists($user, 'calendars')
             || $user->calendars()
                 ->whereKey($calendarIds)
                 ->wherePivot('permission', '!=', 'reader')
-                ->count() !== count($calendarIds)
+                ->count() !== $existingCalendars
         ) {
             throw UnauthorizedException::forPermissions(['calendar.write']);
         }
