@@ -992,6 +992,34 @@ test('schedule preview follows the due date like the scheduler', function (
     ],
 ]);
 
+test('schedule preview follows the due date of a lastDayOfMonth schedule like the scheduler', function (
+    string $dueAt,
+    array $expected
+): void {
+    $this->travelTo('2026-11-01 01:00:00');
+
+    $dates = Livewire::test(Scheduling::class)
+        ->set('schedule.cron.methods.basic', 'lastDayOfMonth')
+        ->set('schedule.cron.parameters.basic', ['06:00'])
+        ->set('schedule.due_at', $dueAt)
+        ->instance()->schedule->getNextExecutionDates(2);
+
+    expect(array_column($dates, 'date'))->toBe($expected);
+})->with([
+    'due date on the month end' => [
+        '2026-11-30 06:00:00',
+        ['2026-11-30 06:00:00', '2026-12-31 06:00:00', '2027-01-31 06:00:00'],
+    ],
+    'due date earlier on the month end' => [
+        '2026-11-30 00:00:00',
+        ['2026-11-30 00:00:00', '2026-12-31 06:00:00', '2027-01-31 06:00:00'],
+    ],
+    'due date within the month' => [
+        '2026-11-15 00:00:00',
+        ['2026-11-15 00:00:00', '2026-12-31 06:00:00', '2027-01-31 06:00:00'],
+    ],
+]);
+
 test('process subscription order deactivates the schedule of a deleted order instead of failing', function (): void {
     // Orders deleted before the fix lost their pivot but kept an active schedule
     $schedule = createSubscriptionSchedule($this->subscriptionOrder, $this->targetOrderType->getKey(), false);

@@ -2,7 +2,6 @@
 
 namespace FluxErp\Livewire\Order;
 
-use Cron\CronExpression;
 use Exception;
 use FluxErp\Actions\Discount\DeleteDiscount;
 use FluxErp\Actions\Discount\UpdateDiscount;
@@ -827,7 +826,7 @@ class Order extends Component
             return;
         }
 
-        $cron = new CronExpression($schedule->cron_expression);
+        $cron = resolve_static(Schedule::class, 'runCron', [$schedule->cron, $schedule->cron_expression]);
         $current = $schedule->due_at?->isFuture()
             ? $schedule->due_at
             : Carbon::instance($cron->getNextRunDate(now()));
