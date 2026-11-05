@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Str;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class Calendar extends FluxModel
 {
@@ -30,6 +31,22 @@ class Calendar extends FluxModel
         static::deleting(function ($calendar): void {
             $calendar->calendarEvents()->delete();
         });
+    }
+
+    public static function ensureWritable(array $calendarIds): void
+    {
+        $user = auth()->user();
+        $calendarIds = array_unique($calendarIds);
+
+        if (
+            ! method_exists($user, 'calendars')
+            || $user->calendars()
+                ->whereKey($calendarIds)
+                ->wherePivot('permission', '!=', 'reader')
+                ->count() !== count($calendarIds)
+        ) {
+            throw UnauthorizedException::forPermissions(['calendar.write']);
+        }
     }
 
     protected function casts(): array
