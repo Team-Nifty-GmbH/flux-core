@@ -349,11 +349,14 @@ class SearchController extends Controller
             'whereDay' => [2, 3],
             'whereYear' => [2, 3],
             'whereTime' => [2, 3],
-        ] as $parameter => [$min, $boolean]) {
+        ] as $parameter => [$min, $booleanIndex]) {
             if ($request->has($parameter)) {
                 $this->guardColumns(
                     $model,
-                    data_get($this->spreadArguments($request->input($parameter), $min, $boolean + 1, $boolean), 0)
+                    data_get(
+                        $this->spreadArguments($request->input($parameter), $min, $booleanIndex + 1, $booleanIndex),
+                        0
+                    )
                 );
             }
         }
@@ -408,15 +411,16 @@ class SearchController extends Controller
                 );
     }
 
-    protected function listArguments(mixed $arguments, int $max, ?int $boolean = null): array
+    protected function listArguments(mixed $arguments, int $max, ?int $booleanIndex = null): array
     {
         $arguments = Arr::wrap($arguments);
 
         abort_unless(array_is_list($arguments) && count($arguments) <= $max, 422);
 
-        if (! is_null($boolean) && array_key_exists($boolean, $arguments)) {
+        if (! is_null($booleanIndex) && array_key_exists($booleanIndex, $arguments)) {
             abort_unless(
-                is_string($arguments[$boolean]) && in_array(strtolower($arguments[$boolean]), ['and', 'or'], true),
+                is_string($arguments[$booleanIndex])
+                    && in_array(strtolower($arguments[$booleanIndex]), ['and', 'or'], true),
                 422
             );
         }
@@ -428,23 +432,6 @@ class SearchController extends Controller
     protected function plainColumns(array $columns): array
     {
         return array_values(preg_grep('/^([a-z0-9_]+\.)?([a-z0-9_]+|\*)$/', array_filter($columns, 'is_string')));
-    }
-
-    protected function visibleOnly(Model $item, array $keys): array
-    {
-        $keys = array_diff(array_filter($keys, 'is_string'), $item->getHidden());
-
-        $keys = array_filter($keys, function (string $key) use ($item): bool {
-            if ($item->hasAttribute($key) || $this->isRelation($item, $key)) {
-                return true;
-            }
-
-            abort_if(method_exists($item, $key), 422);
-
-            return false;
-        });
-
-        return $item->only($item->getVisible() ? array_intersect($keys, $item->getVisible()) : $keys);
     }
 
     protected function relatedModel(Model $model, mixed $path): ?Model
@@ -461,11 +448,11 @@ class SearchController extends Controller
         return $model;
     }
 
-    protected function spreadArguments(mixed $arguments, int $min, int $max, ?int $boolean = null): array
+    protected function spreadArguments(mixed $arguments, int $min, int $max, ?int $booleanIndex = null): array
     {
         abort_unless(is_array($arguments) && count($arguments) >= $min, 422);
 
-        return $this->listArguments($arguments, $max, $boolean);
+        return $this->listArguments($arguments, $max, $booleanIndex);
     }
 
     // a link is not display text, shortening it would break it
@@ -484,5 +471,22 @@ class SearchController extends Controller
         }
 
         return $values;
+    }
+
+    protected function visibleOnly(Model $item, array $keys): array
+    {
+        $keys = array_diff(array_filter($keys, 'is_string'), $item->getHidden());
+
+        $keys = array_filter($keys, function (string $key) use ($item): bool {
+            if ($item->hasAttribute($key) || $this->isRelation($item, $key)) {
+                return true;
+            }
+
+            abort_if(method_exists($item, $key), 422);
+
+            return false;
+        });
+
+        return $item->only($item->getVisible() ? array_intersect($keys, $item->getVisible()) : $keys);
     }
 }
