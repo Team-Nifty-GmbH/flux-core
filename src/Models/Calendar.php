@@ -42,11 +42,23 @@ class Calendar extends FluxModel
         $calendarIds = array_unique($calendarIds);
 
         if (
+            is_null($user)
+            || $user instanceof Token
+            || Gate::forUser($user)->allows(PermissionSet::blanketProbeAbility())
+        ) {
+            return;
+        }
+
+        $existingCalendars = resolve_static(static::class, 'query')
+            ->whereKey($calendarIds)
+            ->count();
+
+        if (
             ! method_exists($user, 'calendars')
             || $user->calendars()
                 ->whereKey($calendarIds)
                 ->wherePivot('permission', '!=', 'reader')
-                ->count() !== count($calendarIds)
+                ->count() !== $existingCalendars
         ) {
             throw UnauthorizedException::forPermissions(['calendar.write']);
         }

@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\Calendar\CreateCalendar;
 use FluxErp\Actions\Calendar\DeleteCalendar;
 use FluxErp\Actions\Calendar\UpdateCalendar;
-use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Calendar;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
@@ -90,15 +89,6 @@ class CalendarForm extends FluxForm
         }
 
         return parent::toActionData();
-    }
-
-    protected function makeAction(string $name, ?array $data = null): FluxAction
-    {
-        if ($this->id) {
-            resolve_static(Calendar::class, 'ensureWritable', ['calendarIds' => [$this->id]]);
-        }
-
-        return parent::makeAction($name, $data);
     }
 
     protected function getActions(): array
