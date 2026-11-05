@@ -1,6 +1,7 @@
 <?php
 
 use FluxErp\Jobs\CreateDocumentsJob;
+use FluxErp\Models\Contact;
 use Illuminate\Support\Facades\Storage;
 
 test('deduplicates preview filenames in zip', function (): void {
@@ -40,6 +41,27 @@ test('deduplicates preview filenames in zip', function (): void {
 
     $zip->close();
     unlink($tmpZip);
+});
+
+test('keeps the extension of a single stored file', function (): void {
+    Storage::fake();
+
+    $contact = Contact::factory()->create();
+    $media = $contact
+        ->addMediaFromString('<xml />')
+        ->usingFileName('invoice.xml')
+        ->toMediaCollection('test');
+
+    $job = app(CreateDocumentsJob::class, [
+        'items' => [],
+        'selectedPrintLayouts' => ['download' => ['test']],
+        'userMorph' => 'user:' . $this->user->getKey(),
+    ]);
+
+    $filePath = (new ReflectionMethod($job, 'storeFiles'))->invoke($job, [], [$media]);
+
+    expect($filePath)->toEndWith('/invoice.xml')
+        ->and(Storage::get($filePath))->toBe('<xml />');
 });
 
 test('keeps unique filenames unchanged in zip', function (): void {
