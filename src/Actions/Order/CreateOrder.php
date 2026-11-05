@@ -93,10 +93,13 @@ class CreateOrder extends FluxAction
         if (data_get($this->data, 'address_delivery')) {
             // Custom address_delivery provided - use its id if present, otherwise null (custom address)
             $this->data['address_delivery_id'] = data_get($this->data, 'address_delivery.id');
-        } else {
-            $this->data['address_delivery_id'] = data_get($this->data, 'address_delivery_id')
-                ?? $contact->delivery_address_id
-                ?? $addressInvoice?->getKey();
+        } elseif (is_null(data_get($this->data, 'address_delivery_id'))
+            && ! resolve_static(OrderType::class, 'query')
+                ->whereKey($this->getData('order_type_id'))
+                ->value('order_type_enum')
+                ?->isPurchase()
+        ) {
+            $this->data['address_delivery_id'] = $contact->delivery_address_id ?? $addressInvoice?->getKey();
         }
 
         if (is_null($contact)) {

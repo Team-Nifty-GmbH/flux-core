@@ -198,11 +198,11 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         $this->order->agent_id = $contact->agent_id ?? $this->order->agent_id;
         $this->order->language_id = $contact->invoiceAddress?->language_id;
         $this->order->address_invoice_id = $contact->address_invoice_id;
-        $this->order->address_delivery_id = $contact->address_delivery_id;
         $this->order->price_list_id = $contact->price_list_id ?? $this->order->price_list_id;
         $this->order->payment_type_id = $contact->payment_type_id ?? $this->order->payment_type_id;
         $this->order->address_invoice_id = $contact->invoice_address_id ?? $this->order->address_invoice_id;
-        $this->order->address_delivery_id = $contact->delivery_address_id ?? $this->order->address_delivery_id;
+        $this->order->address_delivery_id = null;
+        $this->updatedOrderOrderTypeId();
     }
 
     /**
@@ -369,6 +369,20 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     }
 
     #[Renderless]
+    public function updatedOrderOrderTypeId(): void
+    {
+        $this->skipRender();
+
+        $this->order->address_delivery_id = resolve_static(OrderType::class, 'query')
+            ->whereKey($this->orderType ?? $this->order->order_type_id)
+            ->value('order_type_enum')
+            ?->isPurchase()
+                ? null
+                : $this->order->address_delivery_id ?? resolve_static(Contact::class, 'query')
+                    ->whereKey($this->order->contact_id)
+                    ->value('delivery_address_id');
+    }
+
     public function updatedShowMap(): void
     {
         $this->dispatch('load-map');
