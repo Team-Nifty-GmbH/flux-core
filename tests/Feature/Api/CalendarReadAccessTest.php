@@ -118,6 +118,29 @@ test('calendar events of a lead are limited to readable calendars', function ():
     expect($lead->calendarEvents()->pluck('id')->all())->toEqual([$this->publicEvent->getKey()]);
 });
 
+test('relations of an included calendar cannot be included', function (string $relation): void {
+    $this->user->givePermissionTo([
+        Permission::findOrCreate('api.users.get'),
+        Permission::findOrCreate('api.users.{id}.get'),
+    ]);
+
+    $this->getJson('/api/users/' . $this->user->getKey() . '?include=calendars.' . $relation)
+        ->assertUnprocessable();
+    $this->getJson('/api/users?include=calendars.' . $relation)
+        ->assertBadRequest();
+})
+    ->with(['children', 'parent', 'users']);
+
+test('the calendar index does not resolve includes', function (string $relation): void {
+    $calendars = $this->getJson('/api/calendars?include=' . $relation)
+        ->assertOk()
+        ->json('data.data');
+
+    expect($calendars)->not->toBeEmpty();
+    expect($calendars)->each->not->toHaveKey($relation);
+})
+    ->with(['children', 'parent', 'users']);
+
 test('calendars of the user stay complete through the relation', function (): void {
     $this->user->calendars()->attach($this->otherCalendar, ['permission' => 'owner']);
 
