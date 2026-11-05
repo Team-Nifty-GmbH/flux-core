@@ -78,7 +78,7 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
             ->with([
                 'order:id,tenant_id,total_net_price',
                 'order.tenant:id,name',
-                'schedule:id,cron_expression,ends_at,recurrences,current_recurrence',
+                'schedule:id,cron_expression,due_at,ends_at,recurrences,current_recurrence',
             ])
             ->get();
 
@@ -91,7 +91,9 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
 
             $cron = new CronExpression($orderSchedule->schedule->cron_expression);
             try {
-                $nextRun = $cron->getNextRunDate(now());
+                $nextRun = $orderSchedule->schedule->due_at?->isFuture()
+                    ? $orderSchedule->schedule->due_at
+                    : $cron->getNextRunDate(now());
             } catch (Throwable) {
                 continue;
             }
@@ -128,7 +130,7 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
                     )
                 );
 
-                $nextRun = $cron->getNextRunDate($nextRun);
+                $nextRun = resolve_static(Schedule::class, 'nextRunAfter', [$cron, $nextRun]);
                 if (! is_null($orderSchedule->schedule->recurrences)) {
                     $currentRecurrence++;
                 }

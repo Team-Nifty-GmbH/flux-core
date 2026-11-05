@@ -56,6 +56,22 @@ test('leaves an inactive schedule out', function (): void {
     expect($component->get('series'))->toBeEmpty();
 });
 
+test('starts the forecast at a due date in the future', function (): void {
+    makeForecastOrder(
+        OrderTypeEnum::PurchaseSubscription,
+        '40.00',
+        cronExpression: '0 0 15,20 * *',
+        scheduleAttributes: [
+            'due_at' => now()->startOfMonth()->addDays(19),
+        ]
+    );
+
+    $component = Livewire::test(RecurringCostsForecast::class)
+        ->call('calculateChart');
+
+    expect($component->get('xaxis.categories'))->toBe([now()->startOfMonth()->addDays(19)->format('Y-m-d')]);
+});
+
 test('spreads the forecast over every date the schedule runs on', function (): void {
     makeForecastOrder(OrderTypeEnum::PurchaseSubscription, '40.00', cronExpression: '0 0 15,28 * *');
 
