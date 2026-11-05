@@ -239,9 +239,7 @@ test('sync widgets drops a widget the user may not see', function (): void {
                 'order_row' => 0,
                 'component_name' => 'sample-component',
             ],
-        ])
-        ->set('sync', true)
-        ->assertDontSeeLivewire('sample-component-2');
+        ]);
 
     expect(array_column($component->get('widgets'), 'component_name'))
         ->not->toContain('sample-component-2');
@@ -268,9 +266,7 @@ test('sync widgets drops a component that is no widget', function (): void {
                 'order_row' => 0,
                 'component_name' => 'sample-component',
             ],
-        ])
-        ->set('sync', true)
-        ->assertDontSeeLivewire('settings.users');
+        ]);
 
     expect(array_column($component->get('widgets'), 'component_name'))
         ->not->toContain('settings.users');
@@ -352,4 +348,37 @@ test('save widgets keeps the widget on the own dashboard', function (): void {
         'dashboard_component' => Dashboard::class,
     ]);
     $this->assertDatabaseMissing('widgets', ['widgetable_id' => $otherUser->getKey()]);
+});
+
+test('a saved widget registered for another dashboard is not rendered', function (): void {
+    Livewire::component('project-only-widget', new class() extends Component
+    {
+        use FluxErp\Traits\Livewire\Widget\Widgetable;
+
+        public static function dashboardComponent(): string
+        {
+            return FluxErp\Livewire\Project\Dashboard::class;
+        }
+
+        public function render(): string
+        {
+            return '<div>Hello from project widget</div>';
+        }
+    });
+    FluxErp\Facades\Widget::register('project-only-widget', 'project-only-widget');
+
+    Widget::query()->create([
+        'widgetable_type' => morph_alias(User::class),
+        'widgetable_id' => $this->user->getKey(),
+        'component_name' => 'project-only-widget',
+        'dashboard_component' => Dashboard::class,
+        'name' => 'Project widget',
+        'width' => 1,
+        'height' => 1,
+    ]);
+
+    Livewire::withoutLazyLoading()
+        ->test(Dashboard::class)
+        ->assertSeeLivewire('sample-component')
+        ->assertDontSeeLivewire('project-only-widget');
 });

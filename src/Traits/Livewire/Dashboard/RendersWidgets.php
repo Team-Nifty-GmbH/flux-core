@@ -57,7 +57,7 @@ trait RendersWidgets
 
     public function renderingRendersWidgets(): void
     {
-        $this->widgets = $this->permittedWidgets($this->widgets);
+        $this->widgets = array_values($this->filterWidgets($this->widgets));
     }
 
     #[Renderless]
@@ -69,7 +69,7 @@ trait RendersWidgets
     #[Renderless]
     public function saveWidgets(?array $widgets = null): void
     {
-        $widgetsToSave = $this->permittedWidgets($widgets ?? $this->widgets);
+        $widgetsToSave = array_values($this->filterWidgets($widgets ?? $this->widgets));
 
         $existingItemIds = array_filter(Arr::pluck($widgetsToSave, 'id'), 'is_numeric');
 
@@ -93,13 +93,13 @@ trait RendersWidgets
                         ['group' => $this->group ?? null],
                         Arr::only($widget, [
                             'component_name',
-                            'config',
                             'group',
-                            'height',
                             'name',
+                            'config',
+                            'height',
+                            'width',
                             'order_column',
                             'order_row',
-                            'width',
                         ]),
                         ['dashboard_component' => static::class]
                     )
@@ -124,7 +124,7 @@ trait RendersWidgets
     {
         $this->widgets = array_merge(
             array_filter($this->widgets, fn (array $widget) => data_get($widget, 'group') !== $this->group),
-            $this->permittedWidgets($widgets)
+            array_values($this->filterWidgets($widgets))
         );
     }
 
@@ -220,29 +220,20 @@ trait RendersWidgets
 
         $widgets = array_filter(
             $widgets,
-            fn (array $widget): bool => collect(Arr::wrap(data_get($widget, 'dashboard_component')))
-                ->map(fn (string $dashboardClass): string => resolve_static($dashboardClass, 'class'))
-                ->contains(static::class)
-                && $permissions->allows('widget.' . $widget['component_name'])
-                && ! is_null(Widget::get($widget['component_name']))
+            function (mixed $widget) use ($permissions): bool {
+                $componentName = data_get($widget, 'component_name');
+                $registeredWidget = is_string($componentName) ? Widget::get($componentName) : null;
+
+                return ! is_null($registeredWidget)
+                    && collect(Arr::wrap(data_get($registeredWidget, 'dashboard_component')))
+                        ->map(fn (string $dashboardClass): string => resolve_static($dashboardClass, 'class'))
+                        ->contains(static::class)
+                    && $permissions->allows('widget.' . $componentName);
+            }
         );
 
         ksort($widgets);
 
         return $widgets;
-    }
-
-    protected function permittedWidgets(array $widgets): array
-    {
-        $permittedComponentNames = array_column($this->availableWidgets(), 'component_name');
-
-        return collect($widgets)
-            ->filter(fn (mixed $widget): bool => in_array(
-                data_get($widget, 'component_name'),
-                $permittedComponentNames,
-                true
-            ))
-            ->values()
-            ->all();
     }
 }
