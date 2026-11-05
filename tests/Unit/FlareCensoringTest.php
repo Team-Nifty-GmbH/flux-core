@@ -4,31 +4,72 @@ use FluxErp\FluxServiceProvider;
 use FluxErp\Models\Address;
 use FluxErp\Support\Flare\CensoringSender;
 use FluxErp\Support\Flare\CensorPersonalData;
+use FluxErp\Tests\Fixtures\RecordingFlareSender;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Spatie\FlareClient\Context\ContextProvider;
-use Spatie\FlareClient\Report;
+use Spatie\FlareClient\Api;
+use Spatie\FlareClient\Flare;
 use Spatie\FlareClient\Senders\Sender;
+use Spatie\FlareClient\Spans\Span;
+use Spatie\LaravelFlare\FlareServiceProvider;
 use Spatie\LaravelIgnition\FlareMiddleware\AddQueries;
 use function Livewire\invade;
 
-function flareReport(array $context): Report
+function flareReport(array $context): object
 {
-    return (new Report())->useContext(new readonly class($context) implements ContextProvider
+    return new class($context)
     {
-        public function __construct(private array $context) {}
+        public ?string $message = null;
 
-        public function toArray(): array
+        public ?Throwable $throwable = null;
+
+        public array $userProvidedContext = [];
+
+        public function __construct(private readonly array $context) {}
+
+        public function allContext(): array
         {
-            return $this->context;
+            return array_replace_recursive($this->context, $this->userProvidedContext);
         }
-    });
+
+        public function getMessage(): ?string
+        {
+            return $this->message;
+        }
+
+        public function getThrowable(): ?Throwable
+        {
+            return $this->throwable;
+        }
+
+        public function message(string $message): static
+        {
+            $this->message = $message;
+
+            return $this;
+        }
+
+        public function throwable(Throwable $throwable): static
+        {
+            $this->throwable = $throwable;
+
+            return $this;
+        }
+
+        public function userProvidedContext(array $userProvidedContext): static
+        {
+            $this->userProvidedContext = $userProvidedContext;
+
+            return $this;
+        }
+    };
 }
 
 function censoredFlareContext(array $context): array
 {
     return (new CensorPersonalData())
-        ->handle(flareReport($context), fn (Report $report) => $report)
+        ->handle(flareReport($context), fn (object $report) => $report)
         ->allContext();
 }
 
@@ -95,7 +136,7 @@ test('flare reports carry no query bindings in the message of a query exception'
         ->throwable($exception)
         ->message($exception->getMessage());
 
-    $message = (new CensorPersonalData())->handle($report, fn (Report $report) => $report)->getMessage();
+    $message = (new CensorPersonalData())->handle($report, fn (object $report) => $report)->getMessage();
 
     expect($message)->not->toContain('max@example.com')
         ->and($message)->toContain('insert into addresses (email) values (?)')
@@ -127,10 +168,6 @@ test('flare config stays untouched without laravel-ignition', function (): void 
 
 function sendThroughFlareSender(array $payload): array
 {
-    if (! interface_exists(Sender::class)) {
-        require_once __DIR__ . '/../Fixtures/FlareSender.php';
-    }
-
     $recorder = new class() implements Sender
     {
         public array $payload = [];
@@ -219,7 +256,11 @@ test('laravel-flare reports leave without request data, user attributes or query
         ->and($payload['events'][1]['attributes']['cache.key'])->toBe(CensoringSender::CENSORED)
         ->and($payload['events'][2]['attributes']['log.context'])->toBe(CensoringSender::CENSORED)
         ->and($payload['events'][3]['attributes']['laravel.job.properties'])->toBe(CensoringSender::CENSORED)
-        ->and(json_encode($payload))->not->toContain('max@example.com', 'Mustermann', 'secret', '203.0.113.7', 'DE00');
+        ->and(json_encode($payload))->not->toContain('max@example.com')
+        ->and(json_encode($payload))->not->toContain('Mustermann')
+        ->and(json_encode($payload))->not->toContain('secret')
+        ->and(json_encode($payload))->not->toContain('203.0.113.7')
+        ->and(json_encode($payload))->not->toContain('DE00');
 });
 
 test('laravel-flare urls carry the route pattern instead of the dynamic path segments', function (): void {
@@ -267,7 +308,8 @@ test('laravel-flare urls carry the route pattern instead of the dynamic path seg
         ->and($spans[0]['name'])->toBe('Request - https://flux.test/flare-contacts/{contact}/orders/{order?}')
         ->and(data_get($spans[0], 'attributes.0.value.stringValue'))->toBe('/flare-contacts/{contact}/orders/{order?}')
         ->and($spans[1]['name'])->toBe('Http Request - api.example.com')
-        ->and(json_encode($payload))->not->toContain('max@example.com', 'Mustermann');
+        ->and(json_encode($payload))->not->toContain('max@example.com')
+        ->and(json_encode($payload))->not->toContain('Mustermann');
 });
 
 test('laravel-flare reports keep only the error class of a failed query', function (): void {
@@ -330,5 +372,74 @@ test('laravel-flare traces and logs leave without personal data in the OpenTelem
         ->and($headers['referer'])->toBe(['stringValue' => 'https://flux.test/contacts'])
         ->and($headers['x-forwarded-for'])->toBe(['stringValue' => CensoringSender::CENSORED])
         ->and(data_get($span, 'events.0.attributes.0.value.stringValue'))->toBe('SQLSTATE[23000]: Integrity constraint violation: 1062')
-        ->and(json_encode($payload))->not->toContain('max@example.com', 'Mustermann', '203.0.113.7');
+        ->and(json_encode($payload))->not->toContain('max@example.com')
+        ->and(json_encode($payload))->not->toContain('Mustermann')
+        ->and(json_encode($payload))->not->toContain('203.0.113.7');
+});
+
+test('the real laravel-flare client hands reports, traces and logs to the sender censored', function (): void {
+    config([
+        'flare.key' => 'test-key',
+        'flare.sender' => ['class' => RecordingFlareSender::class, 'config' => []],
+    ]);
+    RecordingFlareSender::$payloads = [];
+
+    $_ENV['FLARE_FAKE_WEB_REQUEST'] = 'true';
+    $this->app->instance('config_loaded_from_cache', false);
+    $this->app->register(new FlareServiceProvider($this->app));
+
+    Route::post('flare-contacts/{contact}', function (): void {
+        invade(app())->isRunningInConsole = false;
+        session(['street' => 'Musterweg 1']);
+        DB::select('select ? as email', ['max@example.com']);
+
+        app(Flare::class)->report(new RuntimeException('Something broke'));
+        app(Api::class)->trace([
+            new Span('trace', 'span', null, 'Request - ' . request()->fullUrl(), 1, 2, [
+                'url.full' => request()->fullUrl(),
+                'user.email' => 'max@example.com',
+                'db.sql.bindings' => ['max@example.com'],
+                'dump.html' => '<pre>max@example.com</pre>',
+                'filesystem.path' => 'media/Mustermann.pdf',
+                'filesystem.url' => 'https://flux.test/media/Mustermann.pdf',
+                'glow.context' => ['email' => 'max@example.com'],
+                'laravel.url' => 'https://flux.test/media/Mustermann.pdf',
+                'notification.to' => 'max@example.com',
+                'url.fragment' => 'Mustermann',
+            ]),
+        ]);
+        app(Flare::class)->log()->record('Saved', context: ['email' => 'max@example.com']);
+        app(Flare::class)->log()->flush();
+        app(Api::class)->sendQueue();
+    })->middleware('web');
+
+    $this->actingAs($this->user)
+        ->withUnencryptedCookie('private', 'Mustermann')
+        ->post('flare-contacts/max@example.com?search=Mustermann', ['street' => 'Musterweg 1'])
+        ->assertOk();
+
+    unset($_ENV['FLARE_FAKE_WEB_REQUEST']);
+
+    $payloads = RecordingFlareSender::$payloads;
+
+    expect($payloads)->toHaveCount(3);
+
+    $attributes = $payloads[0]['attributes'];
+
+    expect($attributes['http.request.body.contents'])->toBe(CensoringSender::CENSORED)
+        ->and($attributes['http.request.cookies'])->toBe(CensoringSender::CENSORED)
+        ->and($attributes['http.request.session'])->toBe(CensoringSender::CENSORED)
+        ->and($attributes['url.query'])->toBe(CensoringSender::CENSORED)
+        ->and($attributes['url.full'])->toEndWith('/flare-contacts/{contact}')
+        ->and($attributes['user.id'])->toBe($this->user->getKey())
+        ->and($attributes['user.email'])->toBe(CensoringSender::CENSORED)
+        ->and(collect($payloads[0]['stacktrace'])->pluck('arguments')->filter())->toBeEmpty();
+
+    data_forget($payloads, '0.stacktrace');
+    $sent = json_encode($payloads);
+
+    expect($sent)->not->toContain('max@example.com')
+        ->and($sent)->not->toContain($this->user->email)
+        ->and($sent)->not->toContain('Mustermann')
+        ->and($sent)->not->toContain('Musterweg');
 });
