@@ -14,6 +14,7 @@ use FluxErp\Models\Media;
 use FluxErp\Models\Media as MediaModel;
 use FluxErp\Models\MediaFolder;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\BindsModelRecord;
 use FluxErp\Traits\Livewire\LoadsMediaTree;
 use FluxErp\Traits\Livewire\WithFilePond;
 use Illuminate\Contracts\Foundation\Application;
@@ -32,7 +33,7 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 abstract class FolderTree extends Component
 {
-    use Actions, LoadsMediaTree, WithFilePond;
+    use Actions, BindsModelRecord, LoadsMediaTree, WithFilePond;
 
     public $files = [];
 
@@ -132,13 +133,6 @@ abstract class FolderTree extends Component
         return true;
     }
 
-    public function getListeners(): array
-    {
-        return [
-            'folder-tree:loadModel' => 'loadModel',
-        ];
-    }
-
     public function getRules(): array
     {
         return [
@@ -183,18 +177,6 @@ abstract class FolderTree extends Component
                 )
                 ?? false
             );
-    }
-
-    public function loadModel(array $arguments): void
-    {
-        $this->fill($arguments);
-
-        $this->js(
-            <<<'JS'
-                selected = false;
-                loadLevels();
-            JS
-        );
     }
 
     #[Renderless]

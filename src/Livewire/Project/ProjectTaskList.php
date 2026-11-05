@@ -14,6 +14,7 @@ use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
@@ -27,6 +28,7 @@ class ProjectTaskList extends BaseTaskList
 
     public bool $hasNoRedirect = true;
 
+    #[Locked]
     public ?int $projectId;
 
     #[DataTableForm]
