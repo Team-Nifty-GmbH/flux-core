@@ -90,7 +90,10 @@
                         @if ($printers ?? false)
                             <div
                                 class="flex items-center gap-1.5 overflow-hidden text-ellipsis whitespace-nowrap"
-                                x-bind:class="printLayout.is_printable === false && 'invisible'"
+                                x-bind:class="
+                                    printLayout.is_printable === false &&
+                                    'invisible'
+                                "
                             >
                                 <x-checkbox
                                     wire:model="selectedPrintLayouts.print"
