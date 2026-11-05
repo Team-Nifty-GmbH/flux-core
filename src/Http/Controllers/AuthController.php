@@ -80,9 +80,11 @@ class AuthController extends Controller
         $throttleKey = LoginThrottle::key($credentials['email']);
 
         if (! LoginThrottle::reserve($throttleKey)) {
-            return back()->withErrors([
-                'email' => LoginThrottle::message($throttleKey),
-            ])->onlyInput('email');
+            return back()
+                ->withErrors([
+                    'email' => LoginThrottle::message($throttleKey),
+                ])
+                ->onlyInput('email');
         }
 
         $guard = Auth::guard('web');

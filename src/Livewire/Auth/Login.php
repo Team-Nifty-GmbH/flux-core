@@ -57,6 +57,13 @@ class Login extends Component
         return view('flux::livewire.auth.login');
     }
 
+    public function cancelTotpChallenge(): void
+    {
+        Session::forget('two_factor_login');
+        $this->showTotpChallenge = false;
+        $this->reset('password', 'totpCode');
+    }
+
     public function login(): bool
     {
         $target = Session::get('url.intended', route($this->dashboardRoute));
@@ -114,6 +121,30 @@ class Login extends Component
         return true;
     }
 
+    public function resetPassword(): void
+    {
+        $this->validateOnly('email');
+        $this->getPasswordBroker()->sendResetLink(['email' => $this->email]);
+        $this->toast()
+            ->success(__('Password reset link sent'))
+            ->send();
+    }
+
+    public function sendMagicLink(): void
+    {
+        if (! app(SecuritySettings::class)->magic_login_links_enabled) {
+            return;
+        }
+
+        $user = $this->guard()
+            ->getProvider()
+            ->retrieveByCredentials(['email' => $this->email]);
+
+        if ($user && method_exists($user, 'sendLoginLink')) {
+            $user->sendLoginLink();
+        }
+    }
+
     public function verifyTotpCode(): void
     {
         $loginData = Session::get('two_factor_login');
@@ -155,42 +186,6 @@ class Login extends Component
         $this->redirect($loginData['target']);
     }
 
-    public function cancelTotpChallenge(): void
-    {
-        Session::forget('two_factor_login');
-        $this->showTotpChallenge = false;
-        $this->reset('password', 'totpCode');
-    }
-
-    public function resetPassword(): void
-    {
-        $this->validateOnly('email');
-        $this->getPasswordBroker()->sendResetLink(['email' => $this->email]);
-        $this->toast()
-            ->success(__('Password reset link sent'))
-            ->send();
-    }
-
-    public function sendMagicLink(): void
-    {
-        if (! app(SecuritySettings::class)->magic_login_links_enabled) {
-            return;
-        }
-
-        $user = $this->guard()
-            ->getProvider()
-            ->retrieveByCredentials(['email' => $this->email]);
-
-        if ($user && method_exists($user, 'sendLoginLink')) {
-            $user->sendLoginLink();
-        }
-    }
-
-    protected function guard(): StatefulGuard
-    {
-        return Auth::guard($this->guard);
-    }
-
     protected function failLogin(): bool
     {
         $this->reset('password');
@@ -200,6 +195,24 @@ class Login extends Component
         $this->js('$focus.focus(document.getElementById(\'password\'));');
 
         return false;
+    }
+
+    protected function getPasswordBroker(): PasswordBroker
+    {
+        $provider = config('auth.guards.' . $this->guard()->name . '.provider');
+        $broker = collect(config('auth.passwords'))
+            ->filter(function ($item) use ($provider) {
+                return $item['provider'] === $provider;
+            })
+            ->keys()
+            ->first();
+
+        return Password::broker($broker);
+    }
+
+    protected function guard(): StatefulGuard
+    {
+        return Auth::guard($this->guard);
     }
 
     protected function isRateLimited(string $key): bool
@@ -218,18 +231,5 @@ class Login extends Component
     protected function throttleKey(): string
     {
         return LoginThrottle::key($this->email);
-    }
-
-    protected function getPasswordBroker(): PasswordBroker
-    {
-        $provider = config('auth.guards.' . $this->guard()->name . '.provider');
-        $broker = collect(config('auth.passwords'))
-            ->filter(function ($item) use ($provider) {
-                return $item['provider'] === $provider;
-            })
-            ->keys()
-            ->first();
-
-        return Password::broker($broker);
     }
 }
