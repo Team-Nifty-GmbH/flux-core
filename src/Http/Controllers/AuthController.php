@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
@@ -65,7 +66,22 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::guard('web')->attempt(array_merge($credentials, ['is_active' => true]))) {
+        $guard = Auth::guard('web');
+
+        if ($guard->validate(array_merge($credentials, ['is_active' => true]))) {
+            $user = $guard->getLastAttempted();
+
+            if ($user->hasTwoFactorEnabled()) {
+                Session::put('two_factor_login', [
+                    'user_id' => $user->getKey(),
+                    'remember' => false,
+                    'target' => Session::get('url.intended', route('dashboard')),
+                ]);
+
+                return redirect()->route('login');
+            }
+
+            $guard->login($user);
             $request->session()->regenerate();
 
             return redirect()->intended(route('dashboard'));

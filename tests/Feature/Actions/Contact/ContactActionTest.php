@@ -1,10 +1,16 @@
 <?php
 
+use FluxErp\Actions\Address\DeleteAddress;
 use FluxErp\Actions\Contact\CreateContact;
 use FluxErp\Actions\Contact\DeleteContact;
 use FluxErp\Actions\Contact\UpdateContact;
+use FluxErp\Models\Activity;
+use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PaymentType;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 
 test('create contact with defaults', function (): void {
     $contact = CreateContact::make([])
@@ -80,6 +86,61 @@ test('delete contact', function (): void {
 
     expect($result)->toBeTrue();
     expect(Contact::query()->whereKey($contact->getKey())->exists())->toBeFalse();
+});
+
+test('delete contact deletes it exactly once', function (): void {
+    $contact = Contact::factory()->create();
+    Address::factory()->create(['contact_id' => $contact->getKey()]);
+
+    $deletedEvents = 0;
+    Event::listen('eloquent.deleted: ' . $contact::class, function () use (&$deletedEvents): void {
+        $deletedEvents++;
+    });
+
+    $softDeleteQueries = 0;
+    DB::listen(function (QueryExecuted $query) use (&$softDeleteQueries): void {
+        if (str_starts_with($query->sql, 'update `contacts` set `deleted_at`')) {
+            $softDeleteQueries++;
+        }
+    });
+
+    DeleteContact::make(['id' => $contact->getKey()])
+        ->validate()->execute();
+
+    expect($deletedEvents)->toBe(1)
+        ->and($softDeleteQueries)->toBe(1)
+        ->and(
+            Activity::query()
+                ->where('subject_type', $contact->getMorphClass())
+                ->where('subject_id', $contact->getKey())
+                ->where('event', 'deleted')
+                ->count()
+        )->toBe(1)
+        ->and(Contact::onlyTrashed()->whereKey($contact->getKey())->exists())->toBeTrue()
+        ->and(Address::query()->where('contact_id', $contact->getKey())->exists())->toBeFalse();
+});
+
+test('deleting the last address deletes its contact once', function (): void {
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
+
+    $deletedEvents = 0;
+    Event::listen('eloquent.deleted: ' . $contact::class, function () use (&$deletedEvents): void {
+        $deletedEvents++;
+    });
+
+    DeleteAddress::make(['id' => $address->getKey()])
+        ->validate()->execute();
+
+    expect($deletedEvents)->toBe(1)
+        ->and(
+            Activity::query()
+                ->where('subject_type', $contact->getMorphClass())
+                ->where('subject_id', $contact->getKey())
+                ->where('event', 'deleted')
+                ->count()
+        )->toBe(1)
+        ->and(Contact::onlyTrashed()->whereKey($contact->getKey())->exists())->toBeTrue();
 });
 
 test('a default payment type the rules reject is not put on a new contact', function (): void {

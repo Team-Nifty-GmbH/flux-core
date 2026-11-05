@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Spatie\Image\Enums\Fit;
 use Spatie\Image\Exceptions\InvalidManipulation;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -143,36 +144,31 @@ trait InteractsWithMedia
     public function registerMediaConversions(?Media $media = null): void
     {
         $this->addMediaConversion('preview')
-            ->width(150)
-            ->height(150)
+            ->fit(Fit::Max, 150, 150)
             ->keepOriginalImageFormat()
             ->quality(80)
             ->optimize();
 
         $this->addMediaConversion('thumb')
-            ->width(100)
-            ->height(100)
+            ->fit(Fit::Max, 100, 100)
             ->keepOriginalImageFormat()
             ->quality(80)
             ->optimize();
 
         $this->addMediaConversion('thumb_280x280')
-            ->width(280)
-            ->height(280)
+            ->fit(Fit::Max, 280, 280)
             ->keepOriginalImageFormat()
             ->quality(80)
             ->optimize();
 
         $this->addMediaConversion('thumb_400x400')
-            ->width(400)
-            ->height(400)
+            ->fit(Fit::Max, 400, 400)
             ->keepOriginalImageFormat()
             ->quality(80)
             ->optimize();
 
         $this->addMediaConversion('thumb_800x800')
-            ->width(800)
-            ->height(800)
+            ->fit(Fit::Max, 800, 800)
             ->keepOriginalImageFormat()
             ->quality(80)
             ->optimize();

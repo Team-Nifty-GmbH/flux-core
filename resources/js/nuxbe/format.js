@@ -73,8 +73,8 @@ export function money(value, options = {}) {
 
     const color =
         value < 0
-            ? 'text-red-500 dark:text-red-700'
-            : 'text-emerald-500 dark:text-emerald-700';
+            ? 'text-red-500 dark:text-red-400'
+            : 'text-emerald-500 dark:text-emerald-400';
 
     return `<span class="${color} font-semibold">${formatted}</span>`;
 }

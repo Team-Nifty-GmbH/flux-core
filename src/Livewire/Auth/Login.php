@@ -47,6 +47,8 @@ class Login extends Component
         if (! config('flux.install_done')) {
             throw HttpException::fromStatusCode(423);
         }
+
+        $this->showTotpChallenge = Session::has('two_factor_login');
     }
 
     public function render(): Factory|View|Application
@@ -122,6 +124,7 @@ class Login extends Component
 
         $user = resolve_static(User::class, 'query')
             ->whereKey($loginData['user_id'])
+            ->where('is_active', true)
             ->first();
 
         if (! $user || blank($this->totpCode) || ! $user->validateTwoFactorCode($this->totpCode)) {

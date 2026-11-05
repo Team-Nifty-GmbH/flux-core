@@ -30,20 +30,20 @@
         <table
             class="dark:divide-dark-500/50 min-w-full divide-y divide-gray-200"
         >
-            <thead class="sticky top-0 z-10 bg-gray-50 dark:bg-gray-800">
+            <thead class="dark:bg-dark-800 sticky top-0 z-10 bg-gray-50">
                 <tr>
                     <th
-                        class="sticky left-0 z-20 min-w-[120px] border-r border-b bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                        class="dark:border-dark-600 dark:bg-dark-800 sticky left-0 z-20 min-w-[120px] border-r border-b bg-gray-50 px-2 py-1 text-left text-xs font-medium text-gray-700 dark:text-gray-300"
                     >
                         {{ __('Employee') }}
                     </th>
                     @foreach ($calendarDays as $calDay)
                         <th
                             @class([
-                                'border-r border-b px-0.5 py-1 text-center text-xs font-medium dark:border-gray-700',
+                                'border-r border-b px-0.5 py-1 text-center text-xs font-medium dark:border-dark-600',
                                 'bg-yellow-100 dark:bg-yellow-900 border-l-2 border-r-2 border-t-2 border-yellow-400 dark:border-yellow-600' => $calDay['isToday'],
-                                'bg-gray-100 dark:bg-gray-700' => $calDay['isWeekend'] && ! $calDay['isToday'],
-                                'bg-gray-50 dark:bg-gray-800' => ! $calDay['isWeekend'] && ! $calDay['isToday'],
+                                'bg-gray-100 dark:bg-dark-900' => $calDay['isWeekend'] && ! $calDay['isToday'],
+                                'bg-gray-50 dark:bg-dark-800' => ! $calDay['isWeekend'] && ! $calDay['isToday'],
                             ])
                         >
                             <div class="text-gray-700 dark:text-gray-300">
@@ -60,12 +60,12 @@
             <tbody>
                 @foreach ($departments as $deptIndex => $department)
                     <tr
-                        class="cursor-pointer bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+                        class="dark:bg-dark-800 dark:hover:bg-dark-600 cursor-pointer bg-gray-100 hover:bg-gray-200"
                         x-on:click="expandedDepts[{{ $deptIndex }}] = !(expandedDepts[{{ $deptIndex }}] ?? true)"
                     >
                         <td
                             colspan="{{ count($calendarDays) + 1 }}"
-                            class="border-b px-2 py-1.5 font-semibold dark:border-gray-700"
+                            class="dark:border-dark-600 border-b px-2 py-1.5 font-semibold"
                         >
                             <div class="flex items-center gap-2">
                                 <x-icon
@@ -89,10 +89,10 @@
                             x-cloak
                             x-show="expandedDepts[{{ $deptIndex }}] ?? true"
                             x-transition
-                            class="hover:bg-gray-50 dark:hover:bg-gray-800"
+                            class="dark:hover:bg-dark-600 hover:bg-gray-50"
                         >
                             <td
-                                class="sticky left-0 z-[5] border-r border-b bg-white px-2 py-1 pl-8 dark:border-gray-700 dark:bg-gray-900"
+                                class="dark:border-dark-600 dark:bg-dark-700 sticky left-0 z-[5] border-r border-b bg-white px-2 py-1 pl-8"
                             >
                                 <span
                                     class="truncate text-xs text-gray-800 dark:text-gray-200"
@@ -107,10 +107,10 @@
                                 @endphp
                                 <td
                                     @class([
-                                        'border-r border-b px-0.5 py-0.5 text-center dark:border-gray-700',
+                                        'border-r border-b px-0.5 py-0.5 text-center dark:border-dark-600',
                                         'border-l-2 border-r-2 border-yellow-400 bg-yellow-50 dark:border-yellow-600 dark:bg-yellow-900/30' => $calDay['isToday'],
-                                        'bg-gray-100 dark:bg-gray-700' => $calDay['isWeekend'] && ! $calDay['isToday'],
-                                        'bg-white dark:bg-gray-900' => ! $calDay['isWeekend'] && ! $calDay['isToday'],
+                                        'bg-gray-100 dark:bg-dark-800' => $calDay['isWeekend'] && ! $calDay['isToday'],
+                                        'bg-white dark:bg-dark-700' => ! $calDay['isWeekend'] && ! $calDay['isToday'],
                                     ])
                                     @if ($dayData)
                                         title="{{ $dayData['name'] }}{{ ($dayData['is_holiday'] ?? false) && $dayData['type'] !== 'holiday' ? ' — ' . $dayData['holiday_name'] : '' }}"
@@ -155,7 +155,7 @@
     </div>
 
     <div
-        class="mt-2 flex flex-wrap items-center gap-3 border-t pt-2 dark:border-gray-700"
+        class="dark:border-dark-600 mt-2 flex flex-wrap items-center gap-3 border-t pt-2"
     >
         @foreach ($absenceTypes as $type)
             <div class="flex items-center gap-1.5">

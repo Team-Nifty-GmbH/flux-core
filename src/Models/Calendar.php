@@ -3,16 +3,20 @@
 namespace FluxErp\Models;
 
 use FluxErp\Models\Pivots\Calendarable;
+use FluxErp\Support\Auth\PermissionSet;
 use FluxErp\Support\Collection\CalendarCollection;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class Calendar extends FluxModel
 {
@@ -30,6 +34,34 @@ class Calendar extends FluxModel
         static::deleting(function ($calendar): void {
             $calendar->calendarEvents()->delete();
         });
+    }
+
+    public static function ensureWritable(array $calendarIds): void
+    {
+        $user = auth()->user();
+        $calendarIds = array_unique($calendarIds);
+
+        if (
+            is_null($user)
+            || $user instanceof Token
+            || Gate::forUser($user)->allows(PermissionSet::blanketProbeAbility())
+        ) {
+            return;
+        }
+
+        $existingCalendars = resolve_static(static::class, 'query')
+            ->whereKey($calendarIds)
+            ->count();
+
+        if (
+            ! method_exists($user, 'calendars')
+            || $user->calendars()
+                ->whereKey($calendarIds)
+                ->wherePivot('permission', '!=', 'reader')
+                ->count() !== $existingCalendars
+        ) {
+            throw UnauthorizedException::forPermissions(['calendar.write']);
+        }
     }
 
     protected function casts(): array
@@ -105,5 +137,26 @@ class Calendar extends FluxModel
     public function newCollection(array $models = []): Collection
     {
         return app(CalendarCollection::class, ['items' => $models]);
+    }
+
+    protected function scopeReadable(Builder $query): void
+    {
+        $user = auth()->user();
+
+        if (
+            is_null($user)
+            || $user instanceof Token
+            || Gate::forUser($user)->allows(resolve_static(PermissionSet::class, 'blanketProbeAbility'))
+        ) {
+            return;
+        }
+
+        $query->where(fn (Builder $query) => $query
+            ->where('is_public', true)
+            ->orWhereHas('calendarables', fn (Builder $query) => $query
+                ->where('calendarable_id', $user->getKey())
+                ->where('calendarable_type', $user->getMorphClass())
+            )
+        );
     }
 }

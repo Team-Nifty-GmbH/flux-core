@@ -34,6 +34,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as MediaLibraryMedia;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
@@ -276,8 +277,7 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     public function registerMediaConversions(?MediaLibraryMedia $media = null): void
     {
         $this->addMediaConversion('thumb')
-            ->width(368)
-            ->height(232)
+            ->fit(Fit::Max, 368, 232)
             ->optimize()
             ->nonQueued()
             ->performOnCollections('files');

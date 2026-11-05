@@ -856,3 +856,120 @@ test('a self billed purchase subscription numbers its own child', function (): v
         )
         ->and($child->invoice_date)->not->toBeNull();
 });
+
+test('a position not created from the subscription keeps its own period', function (): void {
+    $this->subscriptionOrder->update([
+        'system_delivery_date' => '2026-07-01',
+        'system_delivery_date_end' => '2026-07-31',
+    ]);
+
+    $vatRate = FluxErp\Models\VatRate::factory()->create();
+    $positionData = [
+        'tenant_id' => $this->tenant->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'amount' => 1,
+        'unit_net_price' => '100.00',
+        'total_net_price' => '100.00',
+        'total_base_net_price' => '100.00',
+    ];
+
+    FluxErp\Models\OrderPosition::factory()->create(array_merge($positionData, [
+        'order_id' => $this->subscriptionOrder->getKey(),
+        'name' => 'Wartung',
+        'system_delivery_date' => '2026-07-01',
+        'system_delivery_date_end' => '2026-07-31',
+    ]));
+
+    Order::created(function (Order $order) use ($positionData): void {
+        if ($order->created_from_id !== $this->subscriptionOrder->getKey()) {
+            return;
+        }
+
+        FluxErp\Models\OrderPosition::factory()->create(array_merge($positionData, [
+            'order_id' => $order->getKey(),
+            'created_from_id' => null,
+            'name' => 'Added on replication',
+            'system_delivery_date' => '2026-07-15',
+            'system_delivery_date_end' => '2026-07-20',
+        ]));
+    });
+
+    (new ProcessSubscriptionOrder())(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    $addedPosition = FluxErp\Models\OrderPosition::query()
+        ->where('name', 'Added on replication')
+        ->first();
+
+    expect($addedPosition->system_delivery_date?->toDateString())->toBe('2026-07-15')
+        ->and($addedPosition->system_delivery_date_end?->toDateString())->toBe('2026-07-20');
+});
+
+function createSubscriptionSchedule(Order $order, int|string $orderTypeId, bool $attach = true): Schedule
+{
+    $schedule = Schedule::create([
+        'uuid' => Illuminate\Support\Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'monthly',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => [],
+                'dayConstraint' => [],
+                'timeConstraint' => [],
+            ],
+        ],
+        'is_active' => true,
+        'parameters' => [
+            'orderId' => $order->getKey(),
+            'orderTypeId' => $orderTypeId,
+        ],
+    ]);
+
+    if ($attach) {
+        $order->schedules()->attach($schedule->getKey());
+    }
+
+    return $schedule;
+}
+
+test('deleting a subscription order deletes its schedule', function (): void {
+    $schedule = createSubscriptionSchedule($this->subscriptionOrder, $this->targetOrderType->getKey());
+
+    $this->subscriptionOrder->delete();
+
+    expect($schedule->refresh()->trashed())->toBeTrue();
+});
+
+test('deleting an order keeps a schedule that is shared with another order', function (): void {
+    $schedule = createSubscriptionSchedule($this->subscriptionOrder, $this->targetOrderType->getKey());
+
+    $otherOrder = $this->subscriptionOrder->replicate(['uuid', 'order_number']);
+    $otherOrder->save();
+    $otherOrder->schedules()->attach($schedule->getKey());
+
+    $this->subscriptionOrder->delete();
+
+    expect($schedule->refresh()->trashed())->toBeFalse();
+});
+
+test('process subscription order deactivates the schedule of a deleted order instead of failing', function (): void {
+    // Orders deleted before the fix lost their pivot but kept an active schedule
+    $schedule = createSubscriptionSchedule($this->subscriptionOrder, $this->targetOrderType->getKey(), false);
+    $this->subscriptionOrder->delete();
+
+    $result = (new ProcessSubscriptionOrder())(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    expect($result)->toBeTrue()
+        ->and($schedule->refresh()->is_active)->toBeFalse();
+});

@@ -149,3 +149,39 @@ test('edit resets form between different printers', function (): void {
         ->assertSet('printerForm.id', $printer2->getKey())
         ->assertSet('printerForm.alias', 'Second Alias');
 });
+
+test('bridge config form enables mercure when the instance broadcasts over it', function (): void {
+    config(['broadcasting.default' => 'mercure']);
+
+    Livewire::test(Printers::class)
+        ->assertSet('configForm.mercure_enabled', true)
+        ->assertSet('configForm.reverb_disabled', true);
+});
+
+test('bridge config form keeps reverb when the instance does not broadcast over mercure', function (): void {
+    config([
+        'broadcasting.default' => 'reverb',
+        'broadcasting.connections.reverb.app_id' => 'reverb-id',
+    ]);
+
+    Livewire::test(Printers::class)
+        ->assertSet('configForm.mercure_enabled', false)
+        ->assertSet('configForm.reverb_disabled', false);
+});
+
+test('bridge config keeps reverb when mercure is turned off on a mercure instance', function (): void {
+    config([
+        'broadcasting.default' => 'mercure',
+        'broadcasting.connections.reverb.app_id' => 'reverb-id',
+    ]);
+
+    Livewire::test(Printers::class)
+        ->assertSet('configForm.reverb_disabled', true)
+        ->set('configForm.mercure_enabled', false)
+        ->assertSet('configForm.reverb_disabled', false)
+        ->call('generateBridgeConfig')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertSet('configForm.bridge_config.mercure_enabled', false)
+        ->assertSet('configForm.bridge_config.reverb_disabled', false);
+});
