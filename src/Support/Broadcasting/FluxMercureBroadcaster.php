@@ -75,10 +75,10 @@ class FluxMercureBroadcaster extends MercureBroadcaster
     protected function compactGrant(Grant $grant): Grant
     {
         $isList = array_is_list($grant->topics);
-        [$exact, $patterns] = $this->compactTopics($isList ? $grant->topics : data_get($grant->topics, 'exact', []));
+        [$exact, $patterns] = $this->compactTopics($isList ? $grant->topics : data_get($grant->topics, 'exact') ?? []);
         $patterns = array_merge(
             $patterns,
-            $isList ? [] : $this->compactSubscriptionPatterns(data_get($grant->topics, 'urlpattern', []))
+            $isList ? [] : $this->compactSubscriptionPatterns(data_get($grant->topics, 'urlpattern') ?? [])
         );
 
         if ($isList && $patterns === []) {
@@ -135,8 +135,8 @@ class FluxMercureBroadcaster extends MercureBroadcaster
         $patterns = [];
 
         foreach ($groups as $prefix => $group) {
-            $ids = data_get($group, 'ids', []);
-            $names = data_get($group, 'names', []);
+            $ids = data_get($group, 'ids') ?? [];
+            $names = data_get($group, 'names') ?? [];
 
             if (count($ids) === 1) {
                 $exact[] = $prefix . $ids[0];
