@@ -115,10 +115,6 @@ class UpdateSetting extends FluxAction
             $rules[$propertyName] = $this->extractRulesFromType($reflectionProperty->getType());
         }
 
-        if (method_exists($settingsClass, 'rules')) {
-            $rules = array_merge($rules, resolve_static($settingsClass, 'rules'));
-        }
-
-        return $rules;
+        return array_merge($rules, resolve_static($settingsClass, 'rules'));
     }
 }

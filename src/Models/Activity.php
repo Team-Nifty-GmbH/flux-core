@@ -21,7 +21,6 @@ class Activity extends BaseActivity
         ];
     }
 
-    // Public methods
     public function prunable(): Builder
     {
         $settings = app(ActivityLogSettings::class);
@@ -48,7 +47,7 @@ class Activity extends BaseActivity
         }
 
         if (! $conditions) {
-            return static::query()->whereKey([]);
+            return static::query()->whereRaw('1 = 0');
         }
 
         return static::query()
