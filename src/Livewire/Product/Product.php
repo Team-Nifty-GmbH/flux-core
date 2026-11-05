@@ -124,7 +124,6 @@ class Product extends Component
         $product->append('avatar_url');
 
         $this->product->fill($product);
-        $this->product->product_properties = Arr::keyBy($this->product->product_properties, 'id');
 
         $this->languageId = Session::get('selectedLanguageId')
             ?? resolve_static(Language::class, 'default')?->getKey();
@@ -153,6 +152,8 @@ class Product extends Component
 
             return true;
         }
+
+        $this->product->product_properties = Arr::keyBy($this->product->product_properties, 'id');
 
         $added = [];
         $keep = [];
@@ -402,7 +403,6 @@ class Product extends Component
 
         $this->product->reset();
         $this->product->fill($product);
-        $this->product->product_properties = Arr::keyBy($this->product->product_properties, 'id');
 
         $this->recalculateDisplayedProductProperties();
     }
@@ -499,6 +499,8 @@ class Product extends Component
                 array_filter(data_get($this->displayedProductProperties, '*.' . PropertyTypeEnum::Text->value)),
                 1
             );
+
+            $this->product->product_properties = Arr::keyBy($this->product->product_properties, 'id');
 
             foreach ($productProperties as $productProperty) {
                 data_set(
