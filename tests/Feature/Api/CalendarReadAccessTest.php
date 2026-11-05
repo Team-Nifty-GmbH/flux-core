@@ -3,9 +3,11 @@
 use FluxErp\Models\Address;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
+use FluxErp\Models\Lead;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
 use FluxErp\Models\Token;
+use FluxErp\Models\User;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
@@ -81,4 +83,49 @@ test('token reads every calendar', function (): void {
     $this->withToken($token->createToken('integration', ['interface'])->plainTextToken)
         ->getJson('/api/calendars/' . $this->otherCalendar->getKey())
         ->assertOk();
+});
+
+test('included calendars of another user are limited to readable ones', function (): void {
+    $user = User::factory()->create(['language_id' => $this->user->language_id]);
+    $user->calendars()->attach([$this->publicCalendar->getKey(), $this->otherCalendar->getKey()]);
+
+    $this->user->givePermissionTo([
+        Permission::findOrCreate('api.users.get'),
+        Permission::findOrCreate('api.users.{id}.get'),
+    ]);
+
+    $showIds = collect(
+        $this->getJson('/api/users/' . $user->getKey() . '?include=calendars')
+            ->assertOk()
+            ->json('data.calendars')
+    )
+        ->pluck('id');
+    $indexIds = collect(
+        collect($this->getJson('/api/users?include=calendars')->assertOk()->json('data.data'))
+            ->firstWhere('id', $user->getKey())['calendars']
+    )
+        ->pluck('id');
+
+    expect($showIds->all())->toEqual([$this->publicCalendar->getKey()]);
+    expect($indexIds->all())->toEqual([$this->publicCalendar->getKey()]);
+});
+
+test('calendar events of a lead are limited to readable calendars', function (): void {
+    $lead = Lead::factory()->create();
+    $this->publicEvent->update(['model_type' => morph_alias(Lead::class), 'model_id' => $lead->getKey()]);
+    $this->otherEvent->update(['model_type' => morph_alias(Lead::class), 'model_id' => $lead->getKey()]);
+
+    expect($lead->calendarEvents()->pluck('id')->all())->toEqual([$this->publicEvent->getKey()]);
+});
+
+test('calendars of the user stay complete through the relation', function (): void {
+    $this->user->calendars()->attach($this->otherCalendar, ['permission' => 'owner']);
+
+    expect($this->user->calendars()->pluck('calendars.id')->sort()->values()->all())
+        ->toEqual(
+            collect([$this->sharedCalendar->getKey(), $this->otherCalendar->getKey()])
+                ->sort()
+                ->values()
+                ->all()
+        );
 });
