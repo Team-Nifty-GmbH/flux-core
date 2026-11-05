@@ -33,6 +33,7 @@ use Illuminate\Support\Collection;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
+use Throwable;
 
 class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
@@ -83,26 +84,51 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
     }
 
     /**
-     * Assigns the work times of the linked user to this employee and releases
-     * the ones that still point here but belong to a previous or no user.
+     * Moves the work times of the linked user to this employee and releases
+     * the ones of a previous user. Saving each row runs WorkTime::saved, which
+     * closes the day for the new employee; released days are closed here.
      */
     public function syncWorkTimes(): void
     {
         resolve_static(WorkTime::class, 'query')
             ->withTrashed()
             ->where('employee_id', $this->getKey())
-            ->where(fn (Builder $query) => $query
-                ->whereNull('user_id')
-                ->orWhere('user_id', '!=', $this->user_id ?? 0)
-            )
-            ->update(['employee_id' => null]);
+            ->whereNotNull('user_id')
+            ->where('user_id', '!=', $this->user_id ?? 0)
+            ->get()
+            ->each(function (WorkTime $workTime): void {
+                $workTime->employee_id = null;
+                $workTime->save();
 
-        if ($this->user_id) {
-            resolve_static(WorkTime::class, 'query')
-                ->withTrashed()
-                ->where('user_id', $this->user_id)
-                ->update(['employee_id' => $this->getKey()]);
+                if ($workTime->is_daily_work_time && $workTime->is_locked) {
+                    try {
+                        CloseEmployeeDay::make([
+                            'employee_id' => $this->getKey(),
+                            'date' => $workTime->started_at,
+                        ])
+                            ->validate()
+                            ->execute();
+                    } catch (Throwable) {
+                    }
+                }
+            });
+
+        if (! $this->user_id) {
+            return;
         }
+
+        resolve_static(WorkTime::class, 'query')
+            ->withTrashed()
+            ->where('user_id', $this->user_id)
+            ->where(fn (Builder $query) => $query
+                ->whereNull('employee_id')
+                ->orWhere('employee_id', '!=', $this->getKey())
+            )
+            ->get()
+            ->each(function (WorkTime $workTime): void {
+                $workTime->employee_id = $this->getKey();
+                $workTime->save();
+            });
     }
 
     // Relations

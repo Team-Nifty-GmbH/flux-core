@@ -56,7 +56,6 @@ class UpdateEmployeeRuleset extends FluxRuleset
                     ->where('is_active', true)
                     ->whereDoesntHave('employee', fn (Builder $query) => $query
                         ->withoutGlobalScope(UserTenantScope::class)
-                        ->withTrashed()
                     ),
             ],
             'vacation_carryover_rule_id' => [

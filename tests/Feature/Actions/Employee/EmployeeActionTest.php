@@ -160,6 +160,42 @@ test('update employee refuses users that are linked, inactive or in another tena
     ], ['user_id']);
 });
 
+test('deleting an employee frees its user and keeps the work times with it', function (): void {
+    $user = User::factory()->create(['is_active' => true]);
+    $user->tenants()->attach($this->dbTenant->getKey());
+
+    $employee = CreateEmployee::make([
+        'firstname' => 'Gone',
+        'lastname' => 'Soon',
+        'employment_date' => '2026-01-01',
+        'tenant_id' => $this->dbTenant->getKey(),
+        'work_time_model_id' => $this->workTimeModel->getKey(),
+        'user_id' => $user->getKey(),
+    ])->validate()->execute();
+
+    $workTime = WorkTime::factory()->create([
+        'user_id' => $user->getKey(),
+        'employee_id' => $employee->getKey(),
+        'started_at' => now()->subDay()->setTime(8, 0),
+        'ended_at' => now()->subDay()->setTime(16, 0),
+    ]);
+
+    DeleteEmployee::make(['id' => $employee->getKey()])->validate()->execute();
+
+    expect($workTime->refresh()->employee_id)->toBe($employee->getKey());
+
+    $other = CreateEmployee::make([
+        'firstname' => 'Next',
+        'lastname' => 'Holder',
+        'employment_date' => '2026-01-01',
+        'tenant_id' => $this->dbTenant->getKey(),
+        'work_time_model_id' => $this->workTimeModel->getKey(),
+        'user_id' => $user->getKey(),
+    ])->validate()->execute();
+
+    expect($other->user_id)->toBe($user->getKey());
+});
+
 test('delete employee', function (): void {
     $employee = CreateEmployee::make([
         'firstname' => 'Temp',

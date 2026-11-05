@@ -20,9 +20,14 @@ class DeleteEmployee extends FluxAction
 
     public function performAction(): ?bool
     {
-        return resolve_static(Employee::class, 'query')
+        $employee = resolve_static(Employee::class, 'query')
             ->whereKey($this->getData('id'))
-            ->firstOrFail()
-            ->delete();
+            ->firstOrFail();
+
+        // Free the user for a later link, the work times keep their employee.
+        $employee->user_id = null;
+        $employee->saveQuietly();
+
+        return $employee->delete();
     }
 }
