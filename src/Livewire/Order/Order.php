@@ -1197,7 +1197,7 @@ class Order extends Component
 
     protected function getTo(OffersPrinting $item, array $documents): array
     {
-        $printViews = $item->getPrintViews();
+        $printViews = $item->resolvePrintViews();
 
         $invoiceDocs = array_filter(
             $documents,

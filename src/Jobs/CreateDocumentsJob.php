@@ -204,7 +204,7 @@ class CreateDocumentsJob implements ShouldQueue
             }
 
             $media = $downloadFiles[0];
-            $filePath = $folder . Str::finish($media->file_name, '.pdf');
+            $filePath = $folder . $media->file_name;
             $disk->put($filePath, file_get_contents($media->getPath()));
 
             return $filePath;
