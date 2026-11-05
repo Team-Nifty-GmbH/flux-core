@@ -1098,10 +1098,7 @@ class Order extends Component
 
         $this->order->users = $order->users->pluck('id')->toArray();
 
-        $this->printLayouts = array_map(
-            fn (string $layout) => ['layout' => $layout, 'label' => __($layout)],
-            array_keys($this->getPrintLayouts())
-        );
+        $this->printLayouts = $this->mapPrintLayouts();
 
         $invoice = $order->invoice();
         if ($invoice) {

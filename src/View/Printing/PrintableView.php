@@ -49,6 +49,11 @@ abstract class PrintableView extends Component implements Responsable
         return static::$layout;
     }
 
+    public static function isPrintable(): bool
+    {
+        return true;
+    }
+
     public static function setLayout(?string $layout): void
     {
         static::$layout = $layout;
