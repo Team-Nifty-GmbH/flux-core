@@ -9,7 +9,7 @@
     "
 >
     <div>
-        <div wire:click="showNotifications()">
+        <div x-on:click="$tsui.open.slide('notifications-slide')">
             <x-button.circle color="indigo" icon="bell" />
             <div
                 class="z-10 -mt-11 pl-5"
@@ -35,6 +35,7 @@
         >
             <div
                 x-data="{
+                    refill: null,
                     addToast(event) {
                         const list = $tallstackuiToast($refs.toasts.id);
                         list.alpineComponent.add(event);
@@ -42,6 +43,18 @@
                         if (list.element.parentElement !== $refs.toasts) {
                             $refs.toasts.prepend(list.element);
                         }
+
+                        clearTimeout(this.refill);
+                        this.refill = setTimeout(() => {
+                            if (
+                                show &&
+                                $wire.hasMore &&
+                                $refs.more.getBoundingClientRect().top <
+                                    window.innerHeight
+                            ) {
+                                $wire.showNotifications();
+                            }
+                        }, 100);
                     },
                     removeAll() {
                         $tallstackuiToast(
@@ -61,7 +74,10 @@
                     wire:ignore
                 >
                     <x-toast scope="relative" />
-                    <div x-intersect="show && $wire.showNotifications()"></div>
+                    <div
+                        x-ref="more"
+                        x-intersect="show && $wire.showNotifications()"
+                    ></div>
                 </div>
             </div>
             <x-slot:footer>

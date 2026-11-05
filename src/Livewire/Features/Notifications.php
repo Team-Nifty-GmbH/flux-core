@@ -7,6 +7,7 @@ use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
@@ -15,7 +16,11 @@ class Notifications extends Component
 {
     use Actions;
 
-    public int $loaded = 0;
+    #[Locked]
+    public ?string $cursor = null;
+
+    #[Locked]
+    public bool $hasMore = true;
 
     public int $unread = 0;
 
@@ -61,7 +66,8 @@ class Notifications extends Component
     #[Renderless]
     public function closeNotifications(): void
     {
-        $this->loaded = 0;
+        $this->cursor = null;
+        $this->hasMore = true;
     }
 
     #[Renderless]
@@ -126,28 +132,30 @@ class Notifications extends Component
     #[Renderless]
     public function showNotifications(): void
     {
-        auth()->user()
-            ->unreadNotifications()
-            ->offset($this->loaded)
-            ->limit(20)
-            ?->get()
-            ->each(function (Notification $notification): void {
-                $notification
-                    ->toast($this)
-                    ->setEventName('toast-list')
-                    ->persistent()
-                    ->hook([
-                        'close' => [
-                            'method' => 'markAsRead',
-                            'params' => $notification->getKey(),
-                        ],
-                    ])
-                    ->send();
-            });
+        if (! $this->hasMore) {
+            return;
+        }
 
-        $this->loaded = $this->loaded + 20;
-        $this->js(<<<'JS'
-            $tsui.open.slide('notifications-slide');
-        JS);
+        $notifications = auth()->user()
+            ->unreadNotifications()
+            ->orderByDesc('id')
+            ->cursorPaginate(perPage: 20, cursor: $this->cursor);
+
+        $notifications->each(function (Notification $notification): void {
+            $notification
+                ->toast($this)
+                ->setEventName('toast-list')
+                ->persistent()
+                ->hook([
+                    'close' => [
+                        'method' => 'markAsRead',
+                        'params' => $notification->getKey(),
+                    ],
+                ])
+                ->send();
+        });
+
+        $this->cursor = $notifications->nextCursor()?->encode();
+        $this->hasMore = $notifications->hasMorePages();
     }
 }
