@@ -103,7 +103,7 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
                 && $nextRun >= $this->getStart()
                 && (
                     is_null($orderSchedule->schedule->ends_at)
-                    || $nextRun <= $orderSchedule->schedule->ends_at
+                    || $nextRun < $orderSchedule->schedule->ends_at
                 )
                 && (
                     is_null($orderSchedule->schedule->recurrences)

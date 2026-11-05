@@ -3,6 +3,7 @@
 use FluxErp\Actions\ContactBankConnection\CalculateContactBankConnectionBalance;
 use FluxErp\Enums\CreditAccountPostingEnum;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Enums\RepeatableTypeEnum;
 use FluxErp\Invokable\ProcessSubscriptionOrder;
 use FluxErp\Livewire\Order\Order as OrderView;
 use FluxErp\Models\Address;
@@ -1742,3 +1743,38 @@ test('the subscription time picker previews the schedule when it changes', funct
         ->and(Str::of($html)->after('tallstackui_formTime(')->before('<')->toString())
         ->toContain('previewSchedule');
 });
+
+test('contract total prefill does not count a run that falls exactly on the end of the schedule', function (
+    string $dueAt,
+    string $endsAt,
+    int $cycles
+): void {
+    $this->travelTo('2026-12-01 01:00:00');
+
+    $schedule = Schedule::create([
+        'uuid' => Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => ['basic' => 'monthlyOn', 'dayConstraint' => null, 'timeConstraint' => null],
+            'parameters' => ['basic' => [1, '00:00'], 'dayConstraint' => [], 'timeConstraint' => []],
+        ],
+        'cron_expression' => '0 0 1 * *',
+        'due_at' => $dueAt,
+        'ends_at' => $endsAt,
+        'is_active' => true,
+        'parameters' => ['orderId' => $this->order->getKey()],
+    ]);
+    $this->order->schedules()->attach($schedule->getKey());
+
+    $gross = $this->order->refresh()->total_gross_price;
+
+    Livewire::test(OrderView::class, ['id' => $this->order->getKey()])
+        ->call('prefillContractTotal')
+        ->assertSet('order.contract_total_amount', bcmul($cycles, $gross, 2));
+})->with([
+    'due at equals end' => ['2027-01-01 00:00:00', '2027-01-01 00:00:00', 0],
+    'later run equals end' => ['2027-01-01 00:00:00', '2027-04-01 00:00:00', 3],
+    'end after the last run' => ['2027-01-01 00:00:00', '2027-04-01 00:01:00', 4],
+]);
