@@ -10,6 +10,7 @@ use FluxErp\Livewire\Forms\ContactBankConnectionForm;
 use FluxErp\Models\ContactBankConnection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -19,7 +20,7 @@ class BankConnections extends BaseContactBankConnectionList
 {
     public ContactBankConnectionForm $contactBankConnection;
 
-    #[Modelable]
+    #[Locked, Modelable]
     public int $contactId;
 
     protected ?string $includeBefore = 'flux::livewire.contact.accounting.bank-connections';

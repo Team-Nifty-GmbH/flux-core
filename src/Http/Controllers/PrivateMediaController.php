@@ -20,6 +20,8 @@ class PrivateMediaController extends Controller
         $conversion = (string) $request->query('conversion', '');
 
         if (blank($conversion)) {
+            abort_unless(Storage::disk($media->disk)->exists($media->getPathRelativeToRoot()), 404);
+
             return $media;
         }
 

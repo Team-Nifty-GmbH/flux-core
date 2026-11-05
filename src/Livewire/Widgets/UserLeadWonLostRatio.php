@@ -11,6 +11,8 @@ class UserLeadWonLostRatio extends MyLeadWonLostRatio
 {
     public bool $showDonutOptions = false;
 
+    public ?int $userId = null;
+
     public static function getCategory(): ?string
     {
         return 'Leads';

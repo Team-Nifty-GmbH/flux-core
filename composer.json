@@ -48,6 +48,7 @@
         "pestphp/pest-plugin-livewire": "^5.0",
         "pestphp/pest-plugin-type-coverage": "^5.0",
         "phpstan/phpstan": "^2.2",
+        "spatie/flare-client-php": "^1.11",
         "squizlabs/php_codesniffer": "^4.0.1",
         "vlucas/phpdotenv": "^5.6"
     },
@@ -55,7 +56,7 @@
         "beyondcode/laravel-query-detector": "^2.3",
         "barryvdh/laravel-debugbar": "^4.4"
     },
-    "license": "MIT",
+    "license": "AGPL-3.0-or-later",
     "autoload": {
         "files": [
             "helpers.php",

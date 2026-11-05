@@ -94,6 +94,13 @@ class FilePondChunkController extends Controller
         $currentSize = file_exists($absolutePath) ? filesize($absolutePath) : 0;
 
         if ($offset !== $currentSize) {
+            if ($currentSize === $expected) {
+                $finalizeError = $this->finalize($disk, $filename, $session);
+                if ($finalizeError) {
+                    return $finalizeError;
+                }
+            }
+
             return ResponseHelper::conflict(
                 'Upload-Offset does not match',
                 ['offset' => $currentSize],
@@ -125,6 +132,16 @@ class FilePondChunkController extends Controller
         try {
             if (! flock($handle, LOCK_EX)) {
                 throw new FileException('Unable to lock upload target');
+            }
+
+            $lockedSize = fstat($handle)['size'];
+            if ($lockedSize !== $offset) {
+                flock($handle, LOCK_UN);
+
+                return ResponseHelper::conflict(
+                    'Upload-Offset does not match',
+                    ['offset' => $lockedSize],
+                );
             }
 
             $written = fwrite($handle, $body);

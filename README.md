@@ -147,4 +147,4 @@ Guides for extending Flux live in [`docs`](./docs):
 
 ## License
 
-Flux ERP is open-sourced software licensed under the [MIT license](LICENSE.md).
+Nuxbe is open source software licensed under the GNU Affero General Public License v3.0 or later. Commercial plugins provided as separate works may be subject to their own license terms.

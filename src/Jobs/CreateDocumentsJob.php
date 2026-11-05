@@ -191,7 +191,7 @@ class CreateDocumentsJob implements ShouldQueue
      */
     protected function storeFiles(array $previewFiles, array $downloadFiles): string
     {
-        $folder = 'documents/' . str_replace(':', '_', $this->userMorph) . '/';
+        $folder = 'documents/' . private_storage_folder($this->userMorph) . '/';
         $disk = Storage::disk();
         $totalFiles = count($previewFiles) + count($downloadFiles);
 

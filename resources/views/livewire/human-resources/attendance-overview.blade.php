@@ -38,9 +38,9 @@
                 return 'bg-yellow-100 dark:bg-yellow-900 border-l-2 border-r-2 border-t-2 border-yellow-400 dark:border-yellow-600'
             }
             if (calDay.isWeekend) {
-                return 'bg-gray-100 dark:bg-gray-700'
+                return 'bg-gray-100 dark:bg-dark-800'
             }
-            return 'bg-gray-50 dark:bg-gray-800'
+            return 'bg-gray-50 dark:bg-dark-700'
         },
     }"
 >
@@ -84,15 +84,15 @@
             <table
                 class="dark:divide-dark-500/50 min-w-full divide-y divide-gray-200"
             >
-                <thead class="bg-gray-50 dark:bg-gray-800">
+                <thead class="dark:bg-dark-800 bg-gray-50">
                     <tr>
                         <th
-                            class="min-w-[200px] border-r border-b bg-gray-50 px-4 py-2 text-left font-medium text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                            class="dark:border-dark-600 dark:bg-dark-800 min-w-[200px] border-r border-b bg-gray-50 px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-300"
                         >
                             {{ __('Employee') }}
                         </th>
                         <th
-                            class="min-w-[80px] border-r border-b bg-blue-50 px-2 py-2 text-center text-xs font-medium text-gray-700 dark:border-gray-700 dark:bg-blue-900 dark:text-gray-300"
+                            class="dark:border-dark-600 min-w-[80px] border-r border-b bg-blue-50 px-2 py-2 text-center text-xs font-medium text-gray-700 dark:bg-blue-900 dark:text-gray-300"
                         >
                             <div>{{ __('Days') }}</div>
                             <div class="text-gray-500 dark:text-gray-400">
@@ -100,7 +100,7 @@
                             </div>
                         </th>
                         <th
-                            class="min-w-[90px] border-r border-b bg-purple-50 px-2 py-2 text-center text-xs font-medium text-gray-700 dark:border-gray-700 dark:bg-purple-900 dark:text-gray-300"
+                            class="dark:border-dark-600 min-w-[90px] border-r border-b bg-purple-50 px-2 py-2 text-center text-xs font-medium text-gray-700 dark:bg-purple-900 dark:text-gray-300"
                         >
                             <div>{{ __('Hours') }}</div>
                             <div class="text-gray-500 dark:text-gray-400">
@@ -109,7 +109,7 @@
                         </th>
                         @foreach ($this->calendarDays as $calDay)
                             <th
-                                class="{{ $calDay['isToday'] ? 'border-t-2 border-r-2 border-l-2 border-yellow-400 bg-yellow-100 dark:border-yellow-600 dark:bg-yellow-900' : ($calDay['isWeekend'] ? 'bg-gray-100 dark:bg-gray-700' : 'bg-gray-50 dark:bg-gray-800') }} border-r border-b px-1 py-2 text-center text-xs font-medium dark:border-gray-700"
+                                class="{{ $calDay['isToday'] ? 'border-t-2 border-r-2 border-l-2 border-yellow-400 bg-yellow-100 dark:border-yellow-600 dark:bg-yellow-900' : ($calDay['isWeekend'] ? 'bg-gray-100 dark:bg-dark-900' : 'bg-gray-50 dark:bg-dark-800') }} border-r border-b px-1 py-2 text-center text-xs font-medium dark:border-dark-600"
                             >
                                 <div
                                     class="{{ $calDay['isToday'] ? 'font-bold' : '' }} text-gray-700 dark:text-gray-300"
@@ -136,12 +136,12 @@
                 @foreach ($this->employeesByDepartment as $departmentId => $employees)
                     <tbody wire:key="dept-{{ $departmentId }}">
                         <tr
-                            class="cursor-pointer bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+                            class="dark:bg-dark-800 dark:hover:bg-dark-600 cursor-pointer bg-gray-100 hover:bg-gray-200"
                             x-on:click="toggleDepartment('{{ $departmentId }}')"
                         >
                             <td
                                 colspan="{{ count($this->calendarDays) + 3 }}"
-                                class="border-b px-4 py-2 font-semibold dark:border-gray-700"
+                                class="dark:border-dark-600 border-b px-4 py-2 font-semibold"
                             >
                                 <div class="flex items-center gap-2">
                                     <x-icon

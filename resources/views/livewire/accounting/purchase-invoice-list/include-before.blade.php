@@ -642,6 +642,24 @@
                                                 select="label:name|value:id"
                                                 :options="$vatRates"
                                             />
+                                            <span
+                                                class="mt-1 block text-sm font-medium text-red-500"
+                                                x-cloak
+                                                x-show="
+                                                    $wire.$errors.has(
+                                                        'purchaseInvoiceForm.purchase_invoice_positions.' +
+                                                            index +
+                                                            '.vat_rate_id',
+                                                    )
+                                                "
+                                                x-text="
+                                                    $wire.$errors.first(
+                                                        'purchaseInvoiceForm.purchase_invoice_positions.' +
+                                                            index +
+                                                            '.vat_rate_id',
+                                                    )
+                                                "
+                                            ></span>
                                         </div>
                                     </div>
 

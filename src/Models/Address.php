@@ -162,6 +162,13 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     resolve_static(Address::class, 'query')
                         ->whereKey($firstAddressId)
                         ->update($oldContactAddressesUpdates);
+
+                    if (array_key_exists('main_address_id', $oldContactUpdates)) {
+                        resolve_static(Contact::class, 'query')
+                            ->whereKey($previousContactId)
+                            ->first()
+                            ?->searchable();
+                    }
                 }
             }
 
@@ -223,9 +230,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             }
 
             if ($address->is_main_address
-                && ($address->wasRecentlyCreated
-                    || $address->wasChanged(['name', 'company', 'firstname', 'lastname', 'is_main_address'])
-                )
+                && ($address->wasRecentlyCreated || $address->wasChanged())
             ) {
                 resolve_static(Contact::class, 'query')
                     ->whereKey($address->contact_id)
@@ -239,10 +244,13 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                 ->where('contact_id', $address->contact_id)
                 ->exists()
             ) {
-                resolve_static(Contact::class, 'query')
+                $contact = resolve_static(Contact::class, 'query')
                     ->whereKey($address->contact_id)
-                    ->first()
-                    ?->delete();
+                    ->first();
+
+                if ($contact && ! $contact->isInCascadingDeletes()) {
+                    $contact->delete();
+                }
 
                 return;
             }

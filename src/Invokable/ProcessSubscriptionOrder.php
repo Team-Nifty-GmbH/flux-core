@@ -34,7 +34,18 @@ class ProcessSubscriptionOrder implements Repeatable
             ->whereKey($orderTypeId)
             ->first();
 
-        if (! $order || ! $orderType) {
+        if (! $order) {
+            // The order is gone, so this schedule can never succeed again
+            resolve_static(Schedule::class, 'query')
+                ->where('class', static::class)
+                ->where('parameters->orderId', $orderId)
+                ->where('is_active', true)
+                ->update(['is_active' => false]);
+
+            return true;
+        }
+
+        if (! $orderType) {
             return false;
         }
 
@@ -77,7 +88,9 @@ class ProcessSubscriptionOrder implements Repeatable
                 ->execute();
 
             foreach ($newOrder->orderPositions as $orderPosition) {
-                $period = data_get($positionPeriods, $orderPosition->created_from_id);
+                $period = $orderPosition->created_from_id
+                    ? data_get($positionPeriods, $orderPosition->created_from_id)
+                    : null;
 
                 if (! $period) {
                     continue;

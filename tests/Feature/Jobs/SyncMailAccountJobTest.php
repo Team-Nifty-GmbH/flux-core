@@ -12,7 +12,11 @@ use FluxErp\Traits\IsMonitored;
 use Illuminate\Bus\UniqueLock;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Exceptions;
+use Illuminate\Support\Facades\Log;
 use Webklex\PHPIMAP\Client;
+use Webklex\PHPIMAP\Exceptions\ConnectionFailedException;
+use Webklex\PHPIMAP\Exceptions\ImapServerErrorException;
 
 test('sync mail account job is monitored', function (): void {
     expect(is_a(SyncMailAccountJob::class, ShouldBeMonitored::class, true))->toBeTrue()
@@ -332,4 +336,190 @@ test('sync mail account job stops before its timeout and leaves the rest to the 
         $mailAccount->mailFolders->first()->getKey() . ':2',
         $mailAccount->mailFolders->first()->getKey() . ':3',
     ]);
+});
+
+function unreachableMailDriver(Throwable $exception): MailSyncDriver
+{
+    return new class($exception) implements MailSyncDriver
+    {
+        public bool $fail = true;
+
+        public function __construct(public Throwable $exception) {}
+
+        public function syncFolders(MailAccount $account): array
+        {
+            if ($this->fail) {
+                throw $this->exception;
+            }
+
+            return [];
+        }
+
+        public function syncMessages(MailFolder $folder): void {}
+
+        public function testConnection(MailAccount $account): bool
+        {
+            return true;
+        }
+    };
+}
+
+test('sync mail account job logs an unreachable mail server as a warning instead of failing', function (Throwable $exception): void {
+    Exceptions::fake();
+    Log::spy();
+    $mailAccount = MailAccount::factory()->create();
+
+    app(MailDriverManager::class)->extend('imap', fn () => unreachableMailDriver($exception));
+
+    (new SyncMailAccountJob($mailAccount))->handle();
+
+    Exceptions::assertNothingReported();
+    Log::shouldHaveReceived('warning')->once();
+})->with([
+    'connection failed' => fn () => new ConnectionFailedException('connection failed'),
+    'login before the server is ready' => fn () => new ImapServerErrorException('NO [AUTHENTICATIONFAILED] Authentication failed.'),
+    'broken pipe' => fn () => new ErrorException('fwrite(): SSL: Broken pipe', 0, E_WARNING, (new ReflectionClass(Client::class))->getFileName()),
+]);
+
+test('sync mail account job fails once the mail server stays unreachable for half an hour', function (): void {
+    $mailAccount = MailAccount::factory()->create();
+
+    app(MailDriverManager::class)->extend(
+        'imap',
+        fn () => unreachableMailDriver(new ConnectionFailedException('connection failed'))
+    );
+
+    (new SyncMailAccountJob($mailAccount))->handle();
+
+    $this->travel(29)->minutes();
+    (new SyncMailAccountJob($mailAccount))->handle();
+
+    $this->travel(2)->minutes();
+    expect(fn () => (new SyncMailAccountJob($mailAccount))->handle())
+        ->toThrow(ConnectionFailedException::class);
+});
+
+test('sync mail account job starts counting the outage again after a successful run', function (): void {
+    $mailAccount = MailAccount::factory()->create();
+    $driver = unreachableMailDriver(new ConnectionFailedException('connection failed'));
+
+    app(MailDriverManager::class)->extend('imap', fn () => $driver);
+
+    (new SyncMailAccountJob($mailAccount))->handle();
+
+    $this->travel(20)->minutes();
+    $driver->fail = false;
+    (new SyncMailAccountJob($mailAccount))->handle();
+
+    $this->travel(20)->minutes();
+    $driver->fail = true;
+
+    expect(fn () => (new SyncMailAccountJob($mailAccount))->handle())->not->toThrow(Throwable::class);
+});
+
+test('sync mail account job stops at the first folder when the mail server goes away', function (): void {
+    Exceptions::fake();
+    $mailAccount = MailAccount::factory()
+        ->has(MailFolder::factory()->count(3)->state(['is_active' => true]))
+        ->create();
+
+    $spy = new class() implements MailSyncDriver
+    {
+        public int $attempts = 0;
+
+        public function syncFolders(MailAccount $account): array
+        {
+            return [];
+        }
+
+        public function syncMessages(MailFolder $folder): void
+        {
+            $this->attempts++;
+
+            throw new ConnectionFailedException('connection failed');
+        }
+
+        public function testConnection(MailAccount $account): bool
+        {
+            return true;
+        }
+    };
+
+    app(MailDriverManager::class)->extend('imap', fn () => $spy);
+
+    (new SyncMailAccountJob($mailAccount))->handle();
+
+    expect($spy->attempts)->toBe(1);
+    Exceptions::assertNothingReported();
+});
+
+test('sync mail account job keeps the outage running while the account is paused', function (): void {
+    $mailAccount = MailAccount::factory()->create();
+    $driver = unreachableMailDriver(new ConnectionFailedException('connection failed'));
+
+    app(MailDriverManager::class)->extend('imap', fn () => $driver);
+
+    (new SyncMailAccountJob($mailAccount))->handle();
+
+    $this->travel(10)->minutes();
+    $driver->fail = false;
+    $mailAccount->forceFill(['failed_logins' => MailAccount::MAX_FAILED_LOGINS]);
+    (new SyncMailAccountJob($mailAccount))->handle();
+
+    $this->travel(21)->minutes();
+    $driver->fail = true;
+    $mailAccount->forceFill(['failed_logins' => 0]);
+
+    expect(fn () => (new SyncMailAccountJob($mailAccount))->handle())
+        ->toThrow(ConnectionFailedException::class);
+});
+
+test('sync mail account job does not grant a new grace period to an outage older than a day', function (): void {
+    $mailAccount = MailAccount::factory()->create();
+
+    app(MailDriverManager::class)->extend(
+        'imap',
+        fn () => unreachableMailDriver(new ConnectionFailedException('connection failed'))
+    );
+
+    (new SyncMailAccountJob($mailAccount))->handle();
+
+    $this->travel(1)->days();
+    $this->travel(1)->minutes();
+
+    expect(fn () => (new SyncMailAccountJob($mailAccount))->handle())
+        ->toThrow(ConnectionFailedException::class);
+});
+
+test('sync mail account job reports an earlier folder error when the mail server goes away afterwards', function (): void {
+    Exceptions::fake();
+    $mailAccount = MailAccount::factory()
+        ->has(MailFolder::factory()->count(2)->state(['is_active' => true]))
+        ->create();
+
+    app(MailDriverManager::class)->extend('imap', fn () => new class() implements MailSyncDriver
+    {
+        public int $calls = 0;
+
+        public function syncFolders(MailAccount $account): array
+        {
+            return [];
+        }
+
+        public function syncMessages(MailFolder $folder): void
+        {
+            throw $this->calls++ === 0
+                ? new RuntimeException('Empty response')
+                : new ConnectionFailedException('connection failed');
+        }
+
+        public function testConnection(MailAccount $account): bool
+        {
+            return true;
+        }
+    });
+
+    (new SyncMailAccountJob($mailAccount))->handle();
+
+    Exceptions::assertReported(fn (RuntimeException $e): bool => $e->getMessage() === 'Empty response');
 });

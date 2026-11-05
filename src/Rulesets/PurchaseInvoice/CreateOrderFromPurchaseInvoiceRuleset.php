@@ -10,12 +10,11 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
+use FluxErp\Models\VatRate;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\ContactBankConnection\BankConnectionRuleset;
 use FluxErp\Rulesets\FluxRuleset;
-use FluxErp\Rulesets\PurchaseInvoicePosition\UpdatePurchaseInvoicePositionRuleset;
-use Illuminate\Support\Arr;
 
 class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
 {
@@ -24,13 +23,15 @@ class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
         return array_merge(
             parent::getRules(),
             resolve_static(BankConnectionRuleset::class, 'getRules'),
+            resolve_static(PurchaseInvoicePositionRuleset::class, 'getRules'),
             [
-                'purchase_invoice_positions' => 'array',
+                'purchase_invoice_positions.*.vat_rate_id' => [
+                    'required',
+                    'integer',
+                    app(ModelExists::class, ['model' => VatRate::class])
+                        ->where('is_purchase', true),
+                ],
             ],
-            Arr::prependKeysWith(
-                resolve_static(UpdatePurchaseInvoicePositionRuleset::class, 'getRules'),
-                'purchase_invoice_positions.*'
-            ),
         );
     }
 
