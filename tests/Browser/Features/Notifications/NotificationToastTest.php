@@ -226,3 +226,70 @@ test('closing one notification in the slide keeps the other unread notifications
 
     $page->assertNoJavascriptErrors();
 });
+
+test('mark all as read shows a spinner and blocks a second click while the request runs', function (): void {
+    foreach (range(1, 3) as $index) {
+        $this->user->notifications()->create([
+            'id' => (string) Str::uuid(),
+            'type' => 'test',
+            'data' => ['title' => 'Notification ' . $index, 'description' => 'Unread'],
+        ]);
+    }
+
+    $page = visit(route('dashboard'))->assertNoSmoke();
+
+    $page->script(<<<'JS'
+        () => {
+            if (window.markAllAsReadRequests !== undefined) {
+                return;
+            }
+
+            const fetch = window.fetch;
+
+            window.markAllAsReadRequests = 0;
+            window.fetch = async (url, options) => {
+                if (String(options?.body ?? '').includes('markAllAsRead')) {
+                    window.markAllAsReadRequests++;
+                    await new Promise((resolve) => setTimeout(resolve, 2000));
+                }
+
+                return fetch(url, options);
+            };
+
+            document.querySelector('[wire\\:click="showNotifications()"]').click();
+        }
+    JS);
+
+    $page->wait(1);
+
+    $state = <<<'JS'
+        () => {
+            const spinner = document.querySelector('[wire\\:target="markAllAsRead"]');
+            const button = spinner.closest('button');
+
+            return {
+                disabled: button.disabled,
+                spinner: getComputedStyle(spinner).display !== 'none',
+            };
+        }
+    JS;
+
+    expect($page->script($state))->toBe(['disabled' => false, 'spinner' => false]);
+
+    $click = <<<'JS'
+        () => document.querySelector('[wire\\:target="markAllAsRead"]').closest('button').click()
+    JS;
+
+    $page->script($click);
+    $page->wait(1);
+
+    expect($page->script($state))->toBe(['disabled' => true, 'spinner' => true]);
+
+    $page->script($click);
+    $page->wait(3);
+
+    expect($page->script('() => window.markAllAsReadRequests'))->toBe(1)
+        ->and($this->user->unreadNotifications()->count())->toBe(0);
+
+    $page->assertNoJavascriptErrors();
+});

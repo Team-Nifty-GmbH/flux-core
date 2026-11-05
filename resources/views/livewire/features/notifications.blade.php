@@ -70,6 +70,7 @@
                         color="indigo"
                         class="w-full"
                         :text="__('Mark all as read')"
+                        loading="markAllAsRead"
                         x-on:click.prevent="
                             $wire
                                 .markAllAsRead()

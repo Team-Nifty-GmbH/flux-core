@@ -2,6 +2,7 @@
 
 use FluxErp\Livewire\Features\Notifications;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
@@ -79,6 +80,44 @@ test('mark as read marks an own notification as read', function (): void {
         ->call('markAsRead', $notification->getKey());
 
     expect($notification->refresh()->read_at)->not->toBeNull();
+});
+
+test('mark all as read updates only own unread notifications in a single query', function (): void {
+    $unread = collect(range(1, 3))->map(fn (): FluxErp\Models\Notification => createNotification($this->user));
+
+    $alreadyRead = createNotification($this->user);
+    $alreadyRead->forceFill(['read_at' => now()->subWeek()])->save();
+    $readAt = $alreadyRead->refresh()->read_at;
+
+    $foreign = createNotification(FluxErp\Models\User::factory()->create());
+
+    $component = Livewire::actingAs($this->user)->test(Notifications::class);
+
+    DB::enableQueryLog();
+    DB::flushQueryLog();
+
+    $component->call('markAllAsRead')
+        ->assertSet('unread', 0)
+        ->assertDispatched('notifications-changed');
+
+    $updates = collect(DB::getQueryLog())
+        ->filter(
+            fn (array $query): bool => str_starts_with(strtolower(data_get($query, 'query')), 'update `notifications`')
+        );
+
+    expect($updates)->toHaveCount(1)
+        ->and($this->user->unreadNotifications()->count())->toBe(0)
+        ->and($unread->every(
+            fn (FluxErp\Models\Notification $notification): bool => ! is_null($notification->refresh()->read_at)
+        ))->toBeTrue()
+        ->and($alreadyRead->refresh()->read_at->equalTo($readAt))->toBeTrue()
+        ->and($foreign->refresh()->read_at)->toBeNull();
+});
+
+test('mark all as read button shows a spinner while the request runs', function (): void {
+    Livewire::actingAs($this->user)
+        ->test(Notifications::class)
+        ->assertSeeHtml('wire:target="markAllAsRead"');
 });
 
 test('send notify ignores a notification of another user', function (): void {
