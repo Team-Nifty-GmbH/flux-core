@@ -17,6 +17,7 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Enums\PaymentRunTypeEnum;
+use FluxErp\Events\Order\DocumentSignedEvent;
 use FluxErp\Events\Order\OrderApprovalRequestEvent;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\OrderPaymentRun;
@@ -80,9 +81,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Number;
 use Illuminate\Support\Traits\Conditionable;
+use Illuminate\Validation\ValidationException;
 use RoundingMode;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
@@ -276,6 +279,35 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ) {
                 $order->responsibleUser?->subscribeNotificationChannel($order->broadcastChannel());
             }
+
+            // The responsible user holds a wildcard subscription already, creator and agent only
+            // need to hear about signatures, which arrive on the public link without anyone logged in.
+            // On insert the original attributes are not synced yet, created_by is the authenticated user.
+            $signedEvent = resolve_static(DocumentSignedEvent::class, 'class');
+            if ($order->wasChanged('agent_id') && $order->getOriginal('agent_id')) {
+                $formerAgent = resolve_static(User::class, 'query')
+                    ->whereKey($order->getOriginal('agent_id'))
+                    ->first();
+
+                if ($formerAgent && ! $order->getCreatedBy()?->is($formerAgent)) {
+                    $formerAgent->unsubscribeNotificationChannel($order->broadcastChannel(), $signedEvent);
+                }
+            }
+
+            collect([
+                $order->wasRecentlyCreated ? auth()->user() : null,
+                ($order->wasRecentlyCreated || $order->wasChanged('agent_id')) && $order->agent_id
+                    ? $order->agent()->first()
+                    : null,
+            ])
+                ->filter(fn ($user) => $user instanceof User)
+                ->unique(fn (User $user) => $user->getKey())
+                ->each(function (User $user) use ($order, $signedEvent): void {
+                    try {
+                        $user->subscribeNotificationChannel($order->broadcastChannel(), $signedEvent);
+                    } catch (UnauthorizedException|ValidationException) {
+                    }
+                });
 
             // Every write to a generated order routes through here, so the parent
             // contract's remaining balance stays current no matter which action

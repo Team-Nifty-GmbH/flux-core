@@ -68,3 +68,21 @@ test('a work time model without fixed hours has no weekly target', function (): 
         ->assertSet('weeklyTarget', 0.0)
         ->assertSet('subValue', __('No fixed hours'));
 });
+
+test('an employee without a work time model shows an empty state', function (): void {
+    $employee = app(Employee::class)->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'user_id' => $this->user->getKey(),
+        'firstname' => 'Test',
+        'lastname' => 'Employee',
+        'is_active' => true,
+    ]);
+
+    Livewire::test(CurrentWorkTimeModel::class, ['employeeId' => $employee->getKey()])
+        ->call('calculateSum')
+        ->assertOk()
+        ->assertSet('sum', '-')
+        ->assertSet('subValue', __('No work time model'))
+        ->assertSet('dailyTarget', null)
+        ->assertSet('weeklyTarget', null);
+});

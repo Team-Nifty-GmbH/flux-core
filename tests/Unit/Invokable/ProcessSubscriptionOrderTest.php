@@ -906,3 +906,70 @@ test('a position not created from the subscription keeps its own period', functi
     expect($addedPosition->system_delivery_date?->toDateString())->toBe('2026-07-15')
         ->and($addedPosition->system_delivery_date_end?->toDateString())->toBe('2026-07-20');
 });
+
+function createSubscriptionSchedule(Order $order, int|string $orderTypeId, bool $attach = true): Schedule
+{
+    $schedule = Schedule::create([
+        'uuid' => Illuminate\Support\Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'monthly',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => [],
+                'dayConstraint' => [],
+                'timeConstraint' => [],
+            ],
+        ],
+        'is_active' => true,
+        'parameters' => [
+            'orderId' => $order->getKey(),
+            'orderTypeId' => $orderTypeId,
+        ],
+    ]);
+
+    if ($attach) {
+        $order->schedules()->attach($schedule->getKey());
+    }
+
+    return $schedule;
+}
+
+test('deleting a subscription order deletes its schedule', function (): void {
+    $schedule = createSubscriptionSchedule($this->subscriptionOrder, $this->targetOrderType->getKey());
+
+    $this->subscriptionOrder->delete();
+
+    expect($schedule->refresh()->trashed())->toBeTrue();
+});
+
+test('deleting an order keeps a schedule that is shared with another order', function (): void {
+    $schedule = createSubscriptionSchedule($this->subscriptionOrder, $this->targetOrderType->getKey());
+
+    $otherOrder = $this->subscriptionOrder->replicate(['uuid', 'order_number']);
+    $otherOrder->save();
+    $otherOrder->schedules()->attach($schedule->getKey());
+
+    $this->subscriptionOrder->delete();
+
+    expect($schedule->refresh()->trashed())->toBeFalse();
+});
+
+test('process subscription order deactivates the schedule of a deleted order instead of failing', function (): void {
+    // Orders deleted before the fix lost their pivot but kept an active schedule
+    $schedule = createSubscriptionSchedule($this->subscriptionOrder, $this->targetOrderType->getKey(), false);
+    $this->subscriptionOrder->delete();
+
+    $result = (new ProcessSubscriptionOrder())(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    expect($result)->toBeTrue()
+        ->and($schedule->refresh()->is_active)->toBeFalse();
+});

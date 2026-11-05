@@ -106,6 +106,30 @@ beforeEach(function (): void {
             'ended_at' => Carbon::now()->toDateTimeString(),
             'total_time_ms' => 7200000,
         ]);
+
+    $this->futureWorkTime = WorkTime::factory()
+        ->for($this->user)
+        ->create([
+            'order_position_id' => null,
+            'is_daily_work_time' => false,
+            'is_billable' => true,
+            'is_pause' => false,
+            'started_at' => Carbon::now()->addHour()->toDateTimeString(),
+            'ended_at' => Carbon::now()->addHours(3)->toDateTimeString(),
+            'total_time_ms' => 7200000,
+        ]);
+
+    $this->runningWorkTime = WorkTime::factory()
+        ->for($this->user)
+        ->create([
+            'order_position_id' => null,
+            'is_daily_work_time' => false,
+            'is_billable' => true,
+            'is_pause' => false,
+            'started_at' => Carbon::now()->subHours(2)->toDateTimeString(),
+            'ended_at' => null,
+            'total_time_ms' => 7200000,
+        ]);
 });
 
 test('calculates correct sum of unassigned billable hours', function (): void {
@@ -155,7 +179,9 @@ test('show method filters correct work times', function (): void {
     $filteredWorkTimes = $query->get();
 
     // Verify the filter finds at least our test work time
-    expect($filteredWorkTimes->contains($this->workTime->getKey()))->toBeTrue();
+    expect($filteredWorkTimes->contains($this->workTime->getKey()))->toBeTrue()
+        ->and($filteredWorkTimes->contains($this->futureWorkTime->getKey()))->toBeFalse()
+        ->and($filteredWorkTimes->contains($this->runningWorkTime->getKey()))->toBeFalse();
 
     // Verify all filtered work times match the expected criteria
     $filteredWorkTimes->each(function (WorkTime $workTime): void {

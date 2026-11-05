@@ -2,10 +2,13 @@
 
 use FluxErp\FluxServiceProvider;
 use FluxErp\Models\Address;
+use FluxErp\Support\Flare\CensoringSender;
 use FluxErp\Support\Flare\CensorPersonalData;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Route;
 use Spatie\FlareClient\Context\ContextProvider;
 use Spatie\FlareClient\Report;
+use Spatie\FlareClient\Senders\Sender;
 use Spatie\LaravelIgnition\FlareMiddleware\AddQueries;
 use function Livewire\invade;
 
@@ -120,4 +123,212 @@ test('flare config stays untouched without laravel-ignition', function (): void 
     invade(new FluxServiceProvider($this->app))->censorFlareReports();
 
     expect(config('flare'))->toBeNull()->and(config('ignition'))->toBeNull();
+});
+
+function sendThroughFlareSender(array $payload): array
+{
+    if (! interface_exists(Sender::class)) {
+        require_once __DIR__ . '/../Fixtures/FlareSender.php';
+    }
+
+    $recorder = new class() implements Sender
+    {
+        public array $payload = [];
+
+        public function post(string $endpoint, string $apiToken, array $payload, mixed $type, bool $test, Closure $callback): void
+        {
+            $this->payload = $payload;
+        }
+    };
+
+    app()->singleton(Sender::class, fn () => $recorder);
+
+    app(Sender::class)->post('https://flare.test', 'token', $payload, 'errors', false, fn () => null);
+
+    return $recorder->payload;
+}
+
+test('laravel-flare reports leave without request data, user attributes or query bindings', function (): void {
+    Route::get('contacts', fn () => null);
+
+    $payload = sendThroughFlareSender([
+        'exceptionClass' => RuntimeException::class,
+        'message' => 'Something broke',
+        'stacktrace' => [['file' => 'a.php', 'arguments' => [['value' => 'max@example.com']]]],
+        'attributes' => [
+            'url.full' => 'https://flux.test/contacts?search=Mustermann',
+            'url.query' => 'search=Mustermann',
+            'flare.entry_point.value' => 'https://flux.test/contacts?search=Mustermann',
+            'client.address' => '203.0.113.7',
+            'http.request.body.contents' => ['components' => [['snapshot' => '{"email":"max@example.com"}']]],
+            'http.request.files' => ['avatar' => 'max-mustermann.jpg'],
+            'http.request.cookies' => ['flux_session' => 'secret'],
+            'http.request.session' => ['password_hash_web' => 'secret'],
+            'http.request.headers' => [
+                'user-agent' => 'test',
+                'referer' => 'https://flux.test/contacts?search=Mustermann',
+                'x-forwarded-for' => '203.0.113.7',
+                'x-real-ip' => '203.0.113.7',
+            ],
+            'user.id' => 7,
+            'user.email' => 'max@example.com',
+            'user.full_name' => 'Max Mustermann',
+            'user.attributes' => ['iban' => 'DE00'],
+            'livewire.components' => [['data' => ['street' => 'Musterweg 1']]],
+            'view.data' => ['name' => 'Max'],
+            'laravel.route.parameters' => ['contact' => ['name' => 'Max']],
+            'context.laravel' => ['user' => 'user:7'],
+            'context.custom' => ['email' => 'max@example.com'],
+            'context.exception' => ['email' => 'max@example.com'],
+        ],
+        'events' => [
+            ['type' => 'php_query', 'attributes' => ['db.statement' => 'select ?', 'db.sql.bindings' => ['max@example.com']]],
+            ['type' => 'php_cache', 'attributes' => ['cache.key' => 'session-id', 'cache.store' => 'redis']],
+            ['type' => 'php_log', 'attributes' => ['log.message' => 'Sync failed', 'log.context' => ['email' => 'max@example.com']]],
+            ['type' => 'php_job', 'attributes' => ['laravel.job.properties' => ['email' => 'max@example.com']]],
+        ],
+    ]);
+
+    expect($payload['message'])->toBe('Something broke')
+        ->and(data_get($payload, 'stacktrace.0.file'))->toBe('a.php')
+        ->and(data_get($payload, 'stacktrace.0.arguments'))->toBeNull()
+        ->and(data_get($payload, 'attributes.url\.full'))->toBeNull();
+
+    $attributes = $payload['attributes'];
+
+    expect($attributes['url.full'])->toBe('https://flux.test/contacts')
+        ->and($attributes['flare.entry_point.value'])->toBe('https://flux.test/contacts')
+        ->and($attributes['user.id'])->toBe(7)
+        ->and($attributes['http.request.headers']['user-agent'])->toBe('test')
+        ->and($attributes['http.request.headers']['referer'])->toBe('https://flux.test/contacts')
+        ->and($payload['events'][0]['attributes']['db.statement'])->toBe('select ?')
+        ->and($payload['events'][1]['attributes']['cache.store'])->toBe('redis')
+        ->and($payload['events'][2]['attributes']['log.message'])->toBe('Sync failed');
+
+    foreach ([
+        'url.query', 'client.address', 'http.request.body.contents', 'http.request.files', 'http.request.cookies',
+        'http.request.session', 'user.email', 'user.full_name', 'user.attributes', 'livewire.components', 'view.data',
+        'laravel.route.parameters', 'context.laravel', 'context.custom', 'context.exception',
+    ] as $name) {
+        expect($attributes[$name])->toBe(CensoringSender::CENSORED);
+    }
+
+    expect($attributes['http.request.headers']['x-forwarded-for'])->toBe(CensoringSender::CENSORED)
+        ->and($attributes['http.request.headers']['x-real-ip'])->toBe(CensoringSender::CENSORED)
+        ->and($payload['events'][0]['attributes']['db.sql.bindings'])->toBe(CensoringSender::CENSORED)
+        ->and($payload['events'][1]['attributes']['cache.key'])->toBe(CensoringSender::CENSORED)
+        ->and($payload['events'][2]['attributes']['log.context'])->toBe(CensoringSender::CENSORED)
+        ->and($payload['events'][3]['attributes']['laravel.job.properties'])->toBe(CensoringSender::CENSORED)
+        ->and(json_encode($payload))->not->toContain('max@example.com', 'Mustermann', 'secret', '203.0.113.7', 'DE00');
+});
+
+test('laravel-flare urls carry the route pattern instead of the dynamic path segments', function (): void {
+    Route::get('flare-contacts/{contact}/orders/{order?}', fn () => null);
+    Route::post('flare-media/{medium}', fn () => null);
+
+    $payload = sendThroughFlareSender([
+        'attributes' => [
+            'url.full' => 'https://flux.test:8443/flare-contacts/max@example.com/orders/7?search=Mustermann',
+            'url.path' => '/flare-contacts/max@example.com/orders/7',
+            'flare.entry_point.value' => 'https://flux.test/flare-media/max@example.com',
+            'http.request.headers' => ['referer' => 'https://flux.test/flare-contacts/max@example.com/orders'],
+        ],
+        'events' => [
+            ['attributes' => ['url.full' => 'https://flux.test/unknown/max@example.com', 'url.path' => '/unknown/max@example.com']],
+            ['attributes' => ['http.request.headers' => ['referer' => 'http://[max@example.com']]],
+            ['attributes' => ['flare.entry_point.value' => 'App\\Jobs\\SyncContacts']],
+            ['attributes' => ['flare.entry_point.value' => 'artisan flux:sync']],
+        ],
+        'resourceSpans' => [[
+            'scopeSpans' => [[
+                'spans' => [[
+                    'name' => 'Request - https://flux.test/flare-contacts/max@example.com/orders',
+                    'attributes' => [
+                        ['key' => 'url.path', 'value' => ['stringValue' => '/flare-contacts/max@example.com/orders']],
+                    ],
+                ], [
+                    'name' => 'Http Request - api.example.com',
+                ]],
+            ]],
+        ]],
+    ]);
+
+    $spans = data_get($payload, 'resourceSpans.0.scopeSpans.0.spans');
+
+    expect($payload['attributes']['url.full'])->toBe('https://flux.test:8443/flare-contacts/{contact}/orders/{order?}')
+        ->and($payload['attributes']['url.path'])->toBe('/flare-contacts/{contact}/orders/{order?}')
+        ->and($payload['attributes']['flare.entry_point.value'])->toBe('https://flux.test/flare-media/{medium}')
+        ->and($payload['attributes']['http.request.headers']['referer'])->toBe('https://flux.test/flare-contacts/{contact}/orders/{order?}')
+        ->and($payload['events'][0]['attributes']['url.full'])->toBe('https://flux.test/' . CensoringSender::CENSORED)
+        ->and($payload['events'][0]['attributes']['url.path'])->toBe('/' . CensoringSender::CENSORED)
+        ->and($payload['events'][1]['attributes']['http.request.headers']['referer'])->toBe(CensoringSender::CENSORED)
+        ->and($payload['events'][2]['attributes']['flare.entry_point.value'])->toBe('App\\Jobs\\SyncContacts')
+        ->and($payload['events'][3]['attributes']['flare.entry_point.value'])->toBe('artisan flux:sync')
+        ->and($spans[0]['name'])->toBe('Request - https://flux.test/flare-contacts/{contact}/orders/{order?}')
+        ->and(data_get($spans[0], 'attributes.0.value.stringValue'))->toBe('/flare-contacts/{contact}/orders/{order?}')
+        ->and($spans[1]['name'])->toBe('Http Request - api.example.com')
+        ->and(json_encode($payload))->not->toContain('max@example.com', 'Mustermann');
+});
+
+test('laravel-flare reports keep only the error class of a failed query', function (): void {
+    $payload = sendThroughFlareSender([
+        'exceptionClass' => QueryException::class,
+        'message' => "SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'max@example.com' for key (Connection: mysql, SQL: insert into addresses (email) values (max@example.com))",
+        'previous' => [
+            ['exceptionClass' => PDOException::class, 'message' => "SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'max@example.com' for key"],
+        ],
+        'attributes' => [],
+    ]);
+
+    expect($payload['message'])->toBe('SQLSTATE[23000]: Integrity constraint violation: 1062')
+        ->and($payload['previous'][0]['message'])->toBe('SQLSTATE[23000]: Integrity constraint violation: 1062');
+});
+
+test('laravel-flare traces and logs leave without personal data in the OpenTelemetry format', function (): void {
+    Route::get('contacts', fn () => null);
+
+    $payload = sendThroughFlareSender([
+        'resourceSpans' => [[
+            'resource' => ['attributes' => [['key' => 'service.name', 'value' => ['stringValue' => 'Flux']]]],
+            'scopeSpans' => [[
+                'spans' => [[
+                    'attributes' => [
+                        ['key' => 'url.full', 'value' => ['stringValue' => 'https://flux.test/contacts?search=Mustermann']],
+                        ['key' => 'user.id', 'value' => ['intValue' => 7]],
+                        ['key' => 'user.email', 'value' => ['stringValue' => 'max@example.com']],
+                        ['key' => 'db.sql.bindings', 'value' => ['arrayValue' => ['values' => [['stringValue' => 'max@example.com']]]]],
+                        ['key' => 'http.request.body.contents', 'value' => ['kvlistValue' => ['values' => [
+                            ['key' => 'email', 'value' => ['stringValue' => 'max@example.com']],
+                        ]]]],
+                        ['key' => 'http.request.headers', 'value' => ['kvlistValue' => ['values' => [
+                            ['key' => 'user-agent', 'value' => ['stringValue' => 'test']],
+                            ['key' => 'referer', 'value' => ['stringValue' => 'https://flux.test/contacts?search=Mustermann']],
+                            ['key' => 'x-forwarded-for', 'value' => ['stringValue' => '203.0.113.7']],
+                        ]]]],
+                    ],
+                    'events' => [[
+                        'attributes' => [
+                            ['key' => 'exception.message', 'value' => ['stringValue' => "SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'max@example.com'"]],
+                        ],
+                    ]],
+                ]],
+            ]],
+        ]],
+    ]);
+
+    $span = data_get($payload, 'resourceSpans.0.scopeSpans.0.spans.0');
+    $attributes = collect($span['attributes'])->pluck('value', 'key');
+    $headers = collect(data_get($attributes['http.request.headers'], 'kvlistValue.values'))->pluck('value', 'key');
+
+    expect(data_get($payload, 'resourceSpans.0.resource.attributes.0.value.stringValue'))->toBe('Flux')
+        ->and($attributes['url.full'])->toBe(['stringValue' => 'https://flux.test/contacts'])
+        ->and($attributes['user.id'])->toBe(['intValue' => 7])
+        ->and($attributes['user.email'])->toBe(['stringValue' => CensoringSender::CENSORED])
+        ->and($attributes['db.sql.bindings'])->toBe(['stringValue' => CensoringSender::CENSORED])
+        ->and($attributes['http.request.body.contents'])->toBe(['stringValue' => CensoringSender::CENSORED])
+        ->and($headers['user-agent'])->toBe(['stringValue' => 'test'])
+        ->and($headers['referer'])->toBe(['stringValue' => 'https://flux.test/contacts'])
+        ->and($headers['x-forwarded-for'])->toBe(['stringValue' => CensoringSender::CENSORED])
+        ->and(data_get($span, 'events.0.attributes.0.value.stringValue'))->toBe('SQLSTATE[23000]: Integrity constraint violation: 1062')
+        ->and(json_encode($payload))->not->toContain('max@example.com', 'Mustermann', '203.0.113.7');
 });

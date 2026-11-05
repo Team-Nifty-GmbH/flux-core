@@ -6,11 +6,14 @@ use Carbon\Carbon;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Rulesets\CalendarEvent\ReactivateCalendarEventRuleset;
+use FluxErp\Traits\Action\ChecksCalendarEventAccess;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
 class ReactivateCalendarEvent extends FluxAction
 {
+    use ChecksCalendarEventAccess;
+
     public static function models(): array
     {
         return [CalendarEvent::class];

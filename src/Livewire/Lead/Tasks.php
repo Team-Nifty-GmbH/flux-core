@@ -5,11 +5,12 @@ namespace FluxErp\Livewire\Lead;
 use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Models\Lead;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
 
 class Tasks extends TaskList
 {
-    #[Modelable]
+    #[Locked, Modelable]
     public int $modelId;
 
     protected ?string $modelType = Lead::class;

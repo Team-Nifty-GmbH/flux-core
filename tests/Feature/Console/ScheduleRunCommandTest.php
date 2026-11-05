@@ -5,10 +5,13 @@ use FluxErp\Facades\Repeatable as RepeatableFacade;
 use FluxErp\Models\Schedule;
 use FluxErp\Tests\Feature\Console\ScheduleRunTestDefaultCronInvokable;
 use FluxErp\Tests\Feature\Console\ScheduleRunTestFailingInvokable;
+use FluxErp\Tests\Feature\Console\ScheduleRunTestFalseInvokable;
 use FluxErp\Tests\Feature\Console\ScheduleRunTestInvokable;
 use FluxErp\Tests\Feature\Console\ScheduleRunTestJob;
 use FluxErp\Tests\Feature\Console\ScheduleRunTestSuccessJob;
+use Illuminate\Console\Events\ScheduledTaskFailed;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 
 test('does not set last_success when a scheduled job fails', function (): void {
@@ -450,4 +453,40 @@ test('advances due_at when an invokable schedule fails', function (): void {
         ->and($schedule->last_run)->not->toBeNull()
         ->and($schedule->last_success)->toBeNull()
         ->and($schedule->due_at->greaterThan(now()))->toBeTrue();
+});
+
+test('reports a failed invokable schedule with its name', function (): void {
+    $this->travelTo(Carbon::create(2025, 6, 15, 10, 0, 0));
+
+    $schedule = resolve_static(Schedule::class, 'query')->create([
+        'name' => 'False Invokable Schedule',
+        'class' => ScheduleRunTestFalseInvokable::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'everyMinute',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => [],
+                'dayConstraint' => [],
+                'timeConstraint' => [null, null],
+            ],
+        ],
+        'is_active' => true,
+        'due_at' => now()->subMinute(),
+    ]);
+
+    $messages = [];
+    Event::listen(ScheduledTaskFailed::class, function (ScheduledTaskFailed $event) use (&$messages): void {
+        $messages[] = $event->exception->getMessage();
+    });
+
+    $this->artisan('schedule:run');
+
+    expect($messages)->toBe([
+        'Scheduled command [' . ScheduleRunTestFalseInvokable::class . ':' . $schedule->getKey()
+            . '] failed with exit code [1].',
+    ]);
 });

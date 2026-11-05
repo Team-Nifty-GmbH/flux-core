@@ -5,11 +5,12 @@ namespace FluxErp\Livewire\AbsenceRequest;
 use FluxErp\Livewire\HumanResources\EmployeeDays as BaseEmployeeDays;
 use FluxErp\Models\AbsenceRequest;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
 
 class EmployeeDays extends BaseEmployeeDays
 {
-    #[Modelable]
+    #[Locked, Modelable]
     public ?int $absenceRequestId = null;
 
     protected function getBuilder(Builder $builder): Builder
