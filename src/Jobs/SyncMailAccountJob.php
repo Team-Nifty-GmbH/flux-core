@@ -154,6 +154,14 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
 
     protected function sync(): void
     {
+        $deadline = now()->addSeconds(
+            min(config('flux.mail.sync_time_budget'), $this->uniqueFor() - 600)
+        );
+
+        if ($this->queueIsPaused()) {
+            return;
+        }
+
         $driver = app(MailDriverManager::class)->driver($this->mailAccount->protocol);
 
         if (is_null($this->mailFolderId) && is_null($this->resumeAtFolderId)) {
@@ -177,9 +185,6 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
         $total = $folders->count();
         $failure = null;
         $stoppedAt = null;
-        $deadline = now()->addSeconds(
-            min(config('flux.mail.sync_time_budget'), $this->uniqueFor() - 600)
-        );
 
         try {
             $folders->each(function (MailFolder $folder, int $index) use (
@@ -258,11 +263,11 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
                 return true;
             });
 
-            if (! is_null($failure)) {
-                throw $failure;
-            }
-
             if (! is_null($stoppedAt) && ! $this->queueIsPaused()) {
+                if (! is_null($failure)) {
+                    report($failure);
+                }
+
                 $this->appendToChain(
                     app(static::class, [
                         'email' => $this->mailAccount,
@@ -270,6 +275,12 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
                         'resumeAtFolderId' => $stoppedAt->getKey(),
                     ])
                 );
+
+                return;
+            }
+
+            if (! is_null($failure)) {
+                throw $failure;
             }
         } finally {
             if ($driver instanceof ReportsSyncProgress) {

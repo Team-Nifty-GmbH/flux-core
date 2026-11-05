@@ -537,7 +537,11 @@ function chunkedSyncSpy(): MailSyncDriver
 
         public array $stored = [];
 
+        public array $syncedFolders = [];
+
         public ?Closure $afterStore = null;
+
+        public ?Closure $beforeFolder = null;
 
         public function syncFolders(MailAccount $account): array
         {
@@ -548,6 +552,12 @@ function chunkedSyncSpy(): MailSyncDriver
 
         public function syncMessages(MailFolder $folder): void
         {
+            $this->syncedFolders[] = $folder->getKey();
+
+            if ($this->beforeFolder) {
+                ($this->beforeFolder)($folder);
+            }
+
             foreach ([1, 2, 3] as $uid) {
                 if (in_array($folder->getKey() . ':' . $uid, $this->stored, true)) {
                     continue;
@@ -579,7 +589,7 @@ function chunkedSyncSpy(): MailSyncDriver
 }
 
 test('sync mail account job hands the rest of a long sync to follow-up jobs that resume at the folder it stopped in', function (): void {
-    config(['flux.mail.sync_time_budget' => 300]);
+    config(['flux.mail.sync_time_budget' => 300, 'queue.default' => 'sync']);
 
     $mailAccount = MailAccount::factory()
         ->has(MailFolder::factory()->count(3)->state(['is_active' => true]))
@@ -599,7 +609,15 @@ test('sync mail account job hands the rest of a long sync to follow-up jobs that
         $folders->flatMap(fn (int $id) => [$id . ':1', $id . ':2', $id . ':3'])->all()
     )
         ->and($jobs)->toBe(4)
-        ->and($spy->folderSyncs)->toBe(1);
+        ->and($spy->folderSyncs)->toBe(1)
+        ->and($spy->syncedFolders)->toBe([
+            $folders[0],
+            $folders[0],
+            $folders[1],
+            $folders[1],
+            $folders[2],
+            $folders[2],
+        ]);
 });
 
 test('sync mail account job stops at once when the queue is paused for maintenance and queues no follow-up', function (): void {
@@ -627,7 +645,7 @@ test('sync mail account job stops at once when the queue is paused for maintenan
 });
 
 test('sync mail account job gets through at least one folder per run so a spent budget cannot stall the account', function (): void {
-    config(['flux.mail.sync_time_budget' => 0]);
+    config(['flux.mail.sync_time_budget' => 0, 'queue.default' => 'sync']);
 
     $mailAccount = MailAccount::factory()
         ->has(MailFolder::factory()->count(2)->state(['is_active' => true]))
@@ -642,4 +660,47 @@ test('sync mail account job gets through at least one folder per run so a spent 
     expect($spy->stored)->toBe(
         $folders->flatMap(fn (int $id) => [$id . ':1', $id . ':2', $id . ':3'])->all()
     );
+});
+
+test('sync mail account job does not list the folders when the queue is already paused', function (): void {
+    $mailAccount = MailAccount::factory()
+        ->has(MailFolder::factory()->state(['is_active' => true]))
+        ->create();
+
+    $spy = chunkedSyncSpy();
+    app(MailDriverManager::class)->extend('imap', fn () => $spy);
+
+    Queue::pauseAll();
+
+    try {
+        SyncMailAccountJob::dispatchSync($mailAccount);
+    } finally {
+        Queue::resumeAll();
+    }
+
+    expect($spy->folderSyncs)->toBe(0)
+        ->and($spy->stored)->toBe([]);
+});
+
+test('sync mail account job still hands over the remaining folders after a folder failed', function (): void {
+    config(['flux.mail.sync_time_budget' => 0, 'queue.default' => 'sync']);
+    Exceptions::fake();
+
+    $mailAccount = MailAccount::factory()
+        ->has(MailFolder::factory()->count(2)->state(['is_active' => true]))
+        ->create();
+    $folders = $mailAccount->mailFolders()->orderBy('id')->pluck('id');
+
+    $spy = chunkedSyncSpy();
+    $spy->beforeFolder = function (MailFolder $folder) use ($folders): void {
+        if ($folder->getKey() === $folders[0]) {
+            throw new RuntimeException('Empty response');
+        }
+    };
+    app(MailDriverManager::class)->extend('imap', fn () => $spy);
+
+    SyncMailAccountJob::dispatchSync($mailAccount);
+
+    expect($spy->stored)->toBe([$folders[1] . ':1', $folders[1] . ':2', $folders[1] . ':3']);
+    Exceptions::assertReported(fn (RuntimeException $e): bool => $e->getMessage() === 'Empty response');
 });
