@@ -558,9 +558,12 @@ class Calendar extends Component
     {
         $calendars = collect(to_flat_tree($this->getCalendars()));
 
-        return data_get($calendarAttributes, 'isVirtual', false)
-            ? $calendars->where('isVirtual', true)->contains('modelType', data_get($calendarAttributes, 'modelType'))
-            : $calendars->reject(fn (array $calendar): bool => (bool) data_get($calendar, 'hasNoEvents'))
+        return data_get($calendarAttributes, 'isVirtual') ?? false
+            ? $calendars
+                ->where('isVirtual', true)
+                ->contains('modelType', data_get($calendarAttributes, 'modelType'))
+            : $calendars
+                ->reject(fn (array $calendar): bool => (bool) data_get($calendar, 'hasNoEvents'))
                 ->contains('id', data_get($calendarAttributes, 'id'));
     }
 
