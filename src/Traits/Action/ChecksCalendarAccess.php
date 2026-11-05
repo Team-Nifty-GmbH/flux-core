@@ -10,7 +10,11 @@ trait ChecksCalendarAccess
     {
         parent::checkPermission();
 
-        resolve_static(Calendar::class, 'ensureWritable', ['calendarIds' => $this->calendarIds()]);
+        resolve_static(
+            Calendar::class,
+            'ensureWritable',
+            ['calendarIds' => array_filter($this->calendarIds(), 'is_scalar')]
+        );
 
         return $this;
     }

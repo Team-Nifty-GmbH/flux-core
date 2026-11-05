@@ -12,7 +12,7 @@ trait ChecksCalendarEventAccess
     {
         return array_filter([
             $this->getData('calendar_id'),
-            $this->getData('id')
+            is_scalar($this->getData('id'))
                 ? resolve_static(CalendarEvent::class, 'query')
                     ->whereKey($this->getData('id'))
                     ->value('calendar_id')

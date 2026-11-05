@@ -102,6 +102,18 @@ test('an unknown calendar is left to the validation', function (): void {
         ->toBeInstanceOf(UpdateCalendarEvent::class);
 });
 
+test('a malformed id is left to the validation', function (string $action, array $data): void {
+    expect($action::make($data)->checkPermission())
+        ->toBeInstanceOf($action);
+})
+    ->with([
+        'calendar id' => [DeleteCalendar::class, ['id' => [1, [2]]]],
+        'calendar id and parent id' => [UpdateCalendar::class, ['id' => [1], 'parent_id' => [2]]],
+        'parent id' => [UpdateCalendar::class, ['id' => 0, 'parent_id' => [1]]],
+        'event id' => [UpdateCalendarEvent::class, ['id' => [[1]]]],
+        'event calendar id' => [UpdateCalendarEvent::class, ['id' => 0, 'calendar_id' => [1]]],
+    ]);
+
 test('the api answers with forbidden without write access', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 

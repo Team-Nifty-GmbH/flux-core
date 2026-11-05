@@ -40,7 +40,11 @@ class Calendar extends FluxModel
         $user = auth()->user();
         $calendarIds = array_unique($calendarIds);
 
-        if (is_null($user) || $user instanceof Token || Gate::forUser($user)->allows(PermissionSet::blanketProbeAbility())) {
+        if (
+            is_null($user)
+            || $user instanceof Token
+            || Gate::forUser($user)->allows(PermissionSet::blanketProbeAbility())
+        ) {
             return;
         }
 
