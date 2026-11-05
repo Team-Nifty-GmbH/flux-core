@@ -2,7 +2,6 @@
 
 namespace FluxErp\Livewire\Order;
 
-use Cron\CronExpression;
 use Exception;
 use FluxErp\Actions\Discount\DeleteDiscount;
 use FluxErp\Actions\Discount\UpdateDiscount;
@@ -821,13 +820,15 @@ class Order extends Component
             return;
         }
 
-        $cron = new CronExpression($schedule->cron_expression);
-        $current = Carbon::parse($schedule->due_at ?? now());
+        $cron = resolve_static(Schedule::class, 'runCron', [$schedule->cron, $schedule->cron_expression]);
+        $current = $schedule->due_at?->isFuture()
+            ? $schedule->due_at
+            : Carbon::instance($cron->getNextRunDate(now()));
         $cycles = $current->lessThanOrEqualTo($schedule->ends_at) ? 1 : 0;
         $limit = 10000;
 
         while ($cycles < $limit) {
-            $current = Carbon::instance($cron->getNextRunDate($current));
+            $current = resolve_static(Schedule::class, 'nextRunAfter', [$cron, $current]);
 
             if ($current->greaterThan($schedule->ends_at)) {
                 break;

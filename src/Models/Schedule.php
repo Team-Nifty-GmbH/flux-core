@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use Carbon\CarbonInterface;
 use Cron\CronExpression;
+use DateTimeInterface;
 use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\RepeatableTypeEnum;
 use FluxErp\Models\Pivots\OrderSchedule;
@@ -17,6 +18,19 @@ use Illuminate\Support\Carbon;
 class Schedule extends FluxModel
 {
     use HasUserModification, HasUuid, LogsActivity, SoftDeletes;
+
+    public static function nextRunAfter(CronExpression $cron, DateTimeInterface $runDate): Carbon
+    {
+        $nextRun = Carbon::instance($cron->getNextRunDate($runDate));
+
+        $isSamePeriod = $cron->getExpression(CronExpression::DAY) === 'L'
+            ? $nextRun->isSameMonth($runDate)
+            : $nextRun->isSameDay($runDate);
+
+        return ! $cron->isDue($runDate) && $isSamePeriod
+            ? Carbon::instance($cron->getNextRunDate($nextRun))
+            : $nextRun;
+    }
 
     /**
      * The end of the period that starts on $start, based on the schedule frequency.
@@ -51,6 +65,18 @@ class Schedule extends FluxModel
         }
 
         return $start;
+    }
+
+    public static function runCron(?array $cron, string $cronExpression): CronExpression
+    {
+        if (data_get($cron, 'methods.basic') !== FrequenciesEnum::LastDayOfMonth->value) {
+            return new CronExpression($cronExpression);
+        }
+
+        $parts = explode(' ', $cronExpression);
+        $parts[2] = 'L';
+
+        return new CronExpression(implode(' ', $parts));
     }
 
     protected function casts(): array
