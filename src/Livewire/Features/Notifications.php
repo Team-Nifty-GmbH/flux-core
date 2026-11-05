@@ -129,7 +129,7 @@ class Notifications extends Component
         auth()->user()
             ->unreadNotifications()
             ->offset($this->loaded)
-            ->limit($this->loaded + 20)
+            ->limit(20)
             ?->get()
             ->each(function (Notification $notification): void {
                 $notification

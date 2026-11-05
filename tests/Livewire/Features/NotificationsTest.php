@@ -120,6 +120,32 @@ test('mark all as read button shows a spinner while the request runs', function 
         ->assertSeeHtml('wire:target="markAllAsRead"');
 });
 
+test('show notifications loads every unread notification once in pages of twenty', function (): void {
+    $expected = collect(range(1, 65))
+        ->map(function (int $minutes): string {
+            $notification = createNotification($this->user);
+            $notification->forceFill(['created_at' => now()->subMinutes($minutes)])->save();
+
+            return $notification->getKey();
+        });
+
+    $component = Livewire::actingAs($this->user)->test(Notifications::class);
+
+    $pages = collect(range(1, 4))
+        ->map(function () use ($component): array {
+            $component->call('showNotifications');
+
+            return collect(data_get($component->effects, 'dispatches'))
+                ->where('name', 'ts-ui:toast-list')
+                ->map(fn (array $dispatch): ?string => data_get($dispatch, 'params.hooks.close.params'))
+                ->values()
+                ->all();
+        });
+
+    expect($pages->map(fn (array $page): int => count($page))->all())->toBe([20, 20, 20, 5])
+        ->and($pages->flatten()->all())->toBe($expected->all());
+});
+
 test('send notify ignores a notification of another user', function (): void {
     $notification = createNotification(
         FluxErp\Models\User::factory()->create(),
