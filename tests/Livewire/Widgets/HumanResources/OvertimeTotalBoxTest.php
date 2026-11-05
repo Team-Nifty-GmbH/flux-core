@@ -31,7 +31,6 @@ test('calculates total overtime from employee days', function (): void {
     for ($i = 0; $i < 2; $i++) {
         $employee = app(Employee::class)->create([
             'tenant_id' => $this->dbTenant->getKey(),
-            'user_id' => $this->user->getKey(),
             'firstname' => 'Worker',
             'lastname' => 'Nr' . $i,
             'is_active' => true,

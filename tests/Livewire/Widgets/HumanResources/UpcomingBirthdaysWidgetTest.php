@@ -29,7 +29,6 @@ test('shows employees with birthdays within next 30 days', function (): void {
 
     $employee = app(Employee::class)->create([
         'tenant_id' => $this->dbTenant->getKey(),
-        'user_id' => $this->user->getKey(),
         'firstname' => 'Birthday',
         'lastname' => 'Person',
         'is_active' => true,
@@ -60,7 +59,6 @@ test('excludes employees with birthdays beyond 30 days', function (): void {
 
     $employee = app(Employee::class)->create([
         'tenant_id' => $this->dbTenant->getKey(),
-        'user_id' => $this->user->getKey(),
         'firstname' => 'Far',
         'lastname' => 'Birthday',
         'is_active' => true,

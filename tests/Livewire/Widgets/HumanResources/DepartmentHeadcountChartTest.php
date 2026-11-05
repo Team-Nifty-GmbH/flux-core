@@ -39,7 +39,6 @@ test('shows department headcount data', function (): void {
     for ($i = 0; $i < 2; $i++) {
         $employee = app(Employee::class)->create([
             'tenant_id' => $this->dbTenant->getKey(),
-            'user_id' => $this->user->getKey(),
             'firstname' => 'Eng',
             'lastname' => 'Employee' . $i,
             'is_active' => true,
@@ -58,7 +57,6 @@ test('shows department headcount data', function (): void {
     // 1 employee in Sales
     $salesEmployee = app(Employee::class)->create([
         'tenant_id' => $this->dbTenant->getKey(),
-        'user_id' => $this->user->getKey(),
         'firstname' => 'Sales',
         'lastname' => 'Person',
         'is_active' => true,
