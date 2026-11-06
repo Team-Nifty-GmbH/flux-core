@@ -24,6 +24,7 @@ use FluxErp\Notifications\Order\OrderApprovalRequestNotification;
 use FluxErp\Notifications\Order\SubscriptionOrderFailedNotification;
 use FluxErp\Notifications\Task\TaskAssignedNotification;
 use FluxErp\Notifications\Task\TaskCreatedNotification;
+use FluxErp\Notifications\Task\TaskReminderNotification;
 use FluxErp\Notifications\Task\TaskUpdatedNotification;
 use FluxErp\Notifications\Ticket\TicketAssignedNotification;
 use FluxErp\Notifications\Ticket\TicketCreatedNotification;
@@ -79,6 +80,7 @@ class EventServiceProvider extends ServiceProvider
         SubscriptionOrderFailedNotification::class,
         TaskAssignedNotification::class,
         TaskCreatedNotification::class,
+        TaskReminderNotification::class,
         TaskUpdatedNotification::class,
         TicketAssignedNotification::class,
         TicketCreatedNotification::class,
