@@ -16,8 +16,6 @@ class EmployeeForm extends FluxForm
 
     public ?string $bank_name = null;
 
-    public ?float $base_salary = null;
-
     public ?string $bic = null;
 
     public ?string $city = null;
@@ -45,8 +43,6 @@ class EmployeeForm extends FluxForm
     public ?string $health_insurance = null;
 
     public ?string $health_insurance_member_number = null;
-
-    public ?float $hourly_rate = null;
 
     public ?string $iban = null;
 

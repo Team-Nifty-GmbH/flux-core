@@ -28,8 +28,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
+use Spatie\Activitylog\Support\LogOptions;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
@@ -37,11 +39,20 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
     use Commentable, Communicatable, HasFrontendAttributes, HasTenantAssignment, HasUserModification, HasUuid,
-        InteractsWithMedia, LogsActivity, Notifiable, Printable, Searchable, SoftDeletes;
+        InteractsWithMedia, LogsActivity, Notifiable, Printable, Searchable, SoftDeletes {
+            LogsActivity::getActivitylogOptions as baseGetActivitylogOptions;
+        }
 
     public static string $iconName = 'user';
 
     protected string $detailRouteName = 'human-resources.employees.id';
+
+    protected $hidden = [
+        'base_salary',
+        'employer_contribution_rate',
+        'hourly_rate',
+        'salaryComponents',
+    ];
 
     protected static function booted(): void
     {
@@ -81,10 +92,22 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
         ];
     }
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        $options = $this->baseGetActivitylogOptions();
+
+        return $options->logExcept(array_merge($options->logExceptAttributes, $this->getHidden()));
+    }
+
     // Relations
     public function absenceRequests(): HasMany
     {
         return $this->hasMany(AbsenceRequest::class);
+    }
+
+    public function activitiesAsSubject(): MorphMany
+    {
+        return $this->morphMany(resolve_static(Activity::class, 'class'), 'subject');
     }
 
     public function employeeBalanceAdjustments(): HasMany
@@ -105,6 +128,11 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
+    }
+
+    public function salaryComponents(): HasMany
+    {
+        return $this->hasMany(SalaryComponent::class);
     }
 
     public function subordinates(): HasMany
@@ -194,6 +222,54 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
     public function getLabel(): ?string
     {
         return $this->name ?: $this->user?->name;
+    }
+
+    public function getMonthlyPersonnelCosts(?Carbon $date = null): array
+    {
+        $date = ($date ?? now())->copy()->startOfDay();
+
+        $baseSalary = match ($this->salary_type) {
+            SalaryTypeEnum::Hourly => bcdiv(
+                bcmul(
+                    bcmul(
+                        $this->hourly_rate ?? 0,
+                        $this->workTimeModelHistory
+                            ->first(
+                                fn (EmployeeWorkTimeModel $assignment): bool => $assignment->valid_from
+                                    ->lte($date)
+                                    && ! $assignment->valid_until?->lt($date)
+                            )
+                            ?->workTimeModel
+                            ?->weekly_hours ?? 0
+                    ),
+                    52
+                ),
+                12
+            ),
+            SalaryTypeEnum::Annual => bcdiv($this->base_salary ?? 0, 12),
+            default => bcadd($this->base_salary ?? 0, 0),
+        };
+
+        $gross = $this->salaryComponents
+            ->filter(
+                fn (SalaryComponent $salaryComponent): bool => ! $salaryComponent->valid_from?->isAfter($date)
+                    && ! $salaryComponent->valid_until?->isBefore($date)
+            )
+            ->reduce(
+                fn (string $carry, SalaryComponent $salaryComponent): string => bcadd(
+                    $carry,
+                    $salaryComponent->getMonthlyAmount()
+                ),
+                $baseSalary
+            );
+
+        $employerContributions = bcdiv(bcmul($gross, $this->employer_contribution_rate ?? 0), 100);
+
+        return [
+            'gross' => $gross,
+            'employer_contributions' => $employerContributions,
+            'total' => bcadd($gross, $employerContributions),
+        ];
     }
 
     public function getTotalVacationDays(
