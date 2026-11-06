@@ -8,6 +8,7 @@ use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDepartment;
 use FluxErp\Models\SalaryComponent;
+use FluxErp\Support\Auth\PermissionSet;
 use FluxErp\Traits\Livewire\Widget\MoneyChartFormattingTrait;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Support\Collection;
@@ -36,6 +37,8 @@ class PersonnelCostsByDepartmentChart extends BarChart
 
     public function calculateChart(): void
     {
+        abort_unless(PermissionSet::make()->allows('widget.' . $this->getName()), 403);
+
         $departments = resolve_static(Employee::class, 'query')
             ->employed(now())
             ->with([

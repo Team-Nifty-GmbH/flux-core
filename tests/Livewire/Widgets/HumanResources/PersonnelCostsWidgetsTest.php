@@ -7,6 +7,7 @@ use FluxErp\Livewire\Widgets\HumanResources\PersonnelCostsByDepartmentChart;
 use FluxErp\Livewire\Widgets\HumanResources\PersonnelCostsPerEmployeeWidget;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDepartment;
+use FluxErp\Models\Permission;
 use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
 use FluxErp\Models\WorkTimeModel;
 use Illuminate\Support\Number;
@@ -74,3 +75,14 @@ test('list shows the costs per employee', function (): void {
         ->assertSet('employees.0.name', 'Test Developer')
         ->assertSet('employees.0.total', Number::currency(3600));
 });
+
+test('widgets require their widget permission', function (string $widget, string $name): void {
+    Permission::findOrCreate('widget.' . $name, 'web');
+
+    Livewire::test($widget)->assertForbidden();
+})
+    ->with([
+        [PersonnelCostsBox::class, 'widgets.human-resources.personnel-costs-box'],
+        [PersonnelCostsByDepartmentChart::class, 'widgets.human-resources.personnel-costs-by-department-chart'],
+        [PersonnelCostsPerEmployeeWidget::class, 'widgets.human-resources.personnel-costs-per-employee-widget'],
+    ]);

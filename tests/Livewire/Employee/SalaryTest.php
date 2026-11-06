@@ -73,10 +73,11 @@ test('saving the general tab keeps the salary', function (): void {
         ->and(bccomp($this->employee->employer_contribution_rate, '10', 2))->toBe(0);
 });
 
-test('employee list does not offer salary columns', function (): void {
+test('employee list does not offer salary columns', function (string $column): void {
     expect(Livewire::test(EmployeeList::class)->instance()->getAvailableCols())
-        ->not->toContain('base_salary', 'hourly_rate', 'employer_contribution_rate');
-});
+        ->not->toContain($column);
+})
+    ->with(['base_salary', 'hourly_rate', 'employer_contribution_rate']);
 
 test('employee list does not aggregate, sort or filter by salary', function (): void {
     $component = Livewire::test(EmployeeList::class)

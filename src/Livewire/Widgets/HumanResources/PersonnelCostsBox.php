@@ -6,6 +6,7 @@ use FluxErp\Livewire\HumanResources\Dashboard;
 use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\Employee;
 use FluxErp\Models\SalaryComponent;
+use FluxErp\Support\Auth\PermissionSet;
 use Illuminate\Support\Number;
 
 class PersonnelCostsBox extends ValueBox
@@ -22,6 +23,8 @@ class PersonnelCostsBox extends ValueBox
 
     public function calculateSum(): void
     {
+        abort_unless(PermissionSet::make()->allows('widget.' . $this->getName()), 403);
+
         $costs = resolve_static(Employee::class, 'query')
             ->employed(now())
             ->with([

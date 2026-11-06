@@ -3,6 +3,7 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Contracts\ExcludedFromSearch;
+use FluxErp\Models\Activity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -255,7 +256,7 @@ class SearchController extends Controller
         foreach ($segments as $index => $segment) {
             $segment = trim($segment, ' `"');
 
-            if (in_array(strtolower($segment), array_map('strtolower', $instance->getHidden()), true)) {
+            if (in_array(strtolower($segment), array_map('strtolower', $this->hiddenColumns($instance)), true)) {
                 return true;
             }
 
@@ -265,6 +266,13 @@ class SearchController extends Controller
         }
 
         return false;
+    }
+
+    protected function hiddenColumns(Model $instance): array
+    {
+        return $instance instanceof Activity
+            ? array_merge($instance->getHidden(), ['attribute_changes', 'properties'])
+            : $instance->getHidden();
     }
 
     protected function isRelationMethod(Model $instance, string $method): bool
@@ -310,9 +318,17 @@ class SearchController extends Controller
             $relation = $arguments['relation'] ?? data_get($positional, 0);
             $column = $arguments['column'] ?? data_get($positional, 1);
 
-            if (is_string($relation) && is_string($column)) {
-                $columns[] = $relation . '.' . $column;
+            if (! is_string($relation)) {
+                continue;
             }
+
+            foreach ($this->stringsIn($column) as $nestedColumn) {
+                $columns[] = $relation . '.' . $nestedColumn;
+            }
+        }
+
+        foreach ($this->stringsIn(Arr::wrap($request->input('with'))) as $with) {
+            $columns[] = Str::before($with, ':');
         }
 
         return $columns;
@@ -377,7 +393,11 @@ class SearchController extends Controller
 
     protected function visibleOnly(Model $item, array $keys): array
     {
-        $keys = array_diff(array_filter($keys, 'is_string'), $item->getHidden());
+        $hidden = array_map('strtolower', $item->getHidden());
+        $keys = array_filter(
+            $keys,
+            fn (mixed $key): bool => is_string($key) && ! in_array(strtolower($key), $hidden, true)
+        );
 
         return $item->only($item->getVisible() ? array_intersect($keys, $item->getVisible()) : $keys);
     }

@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Spatie\Activitylog\Support\LogOptions;
@@ -102,6 +103,11 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
     public function absenceRequests(): HasMany
     {
         return $this->hasMany(AbsenceRequest::class);
+    }
+
+    public function activitiesAsSubject(): MorphMany
+    {
+        return $this->morphMany(resolve_static(Activity::class, 'class'), 'subject');
     }
 
     public function employeeBalanceAdjustments(): HasMany

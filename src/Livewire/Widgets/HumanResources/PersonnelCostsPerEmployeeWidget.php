@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Widgets\HumanResources;
 use FluxErp\Livewire\HumanResources\Dashboard;
 use FluxErp\Models\Employee;
 use FluxErp\Models\SalaryComponent;
+use FluxErp\Support\Auth\PermissionSet;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Number;
@@ -50,6 +51,8 @@ class PersonnelCostsPerEmployeeWidget extends Component
 
     public function loadData(): void
     {
+        abort_unless(PermissionSet::make()->allows('widget.' . $this->getName()), 403);
+
         $this->employees = resolve_static(Employee::class, 'query')
             ->employed(now())
             ->with([
