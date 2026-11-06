@@ -8,8 +8,9 @@ use Illuminate\Support\Facades\Notification;
 
 test('due reminder notifies the subscribed responsible user', function (): void {
     Notification::fake();
+    config(['queue.default' => 'sync']);
 
-    $responsibleUser = User::factory()->create();
+    $responsibleUser = User::factory()->create(['is_active' => true]);
 
     $task = Task::factory()->create([
         'responsible_user_id' => $responsibleUser->getKey(),
