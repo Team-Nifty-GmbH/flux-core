@@ -1,6 +1,10 @@
 <?php
 
 use FluxErp\Livewire\EditMail;
+use FluxErp\Models\Contact;
+use FluxErp\Models\EmailTemplate;
+use FluxErp\Models\Order;
+use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
@@ -77,3 +81,36 @@ test('create from session with already consumed key fails gracefully', function 
         ->call('createFromSession', 'mail_' . str()->uuid()->toString())
         ->assertOk();
 });
+
+test('applies only templates offered for the model type', function (): void {
+    $otherTemplate = EmailTemplate::factory()->create([
+        'subject' => 'Other subject',
+        'model_type' => morph_alias(Order::class),
+    ]);
+    $template = EmailTemplate::factory()->create([
+        'subject' => 'Offered subject',
+        'model_type' => morph_alias(Contact::class),
+    ]);
+
+    $component = Livewire::test(EditMail::class)
+        ->call('create', [], morph_alias(Contact::class));
+
+    $component->set('selectedTemplateId', $otherTemplate->getKey())
+        ->call('applyTemplate')
+        ->assertSet('mailMessage.subject', null);
+
+    $component->set('selectedTemplateId', $template->getKey())
+        ->call('applyTemplate')
+        ->assertSet('mailMessage.subject', 'Offered subject');
+});
+
+test('does not accept template settings from the client', function (string $property, array|string $value): void {
+    Livewire::test(EditMail::class)
+        ->set($property, $value);
+})
+    ->with([
+        ['emailTemplates', []],
+        ['templateData', []],
+        ['templateModelType', 'contact'],
+    ])
+    ->throws(CannotUpdateLockedPropertyException::class);

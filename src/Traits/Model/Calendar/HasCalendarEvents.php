@@ -9,6 +9,7 @@ trait HasCalendarEvents
 {
     public function calendarEvents(): MorphMany
     {
-        return $this->morphMany(CalendarEvent::class, 'model');
+        return $this->morphMany(CalendarEvent::class, 'model')
+            ->readable();
     }
 }

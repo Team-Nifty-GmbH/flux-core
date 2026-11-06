@@ -518,17 +518,23 @@ Route::prefix('api')
                 Route::delete('/bank-connections/{id}', DeleteBankConnection::class);
 
                 // Calendars
-                Route::get('/calendars/{id}', [BaseController::class, 'show'])->defaults('model', Calendar::class);
-                Route::get('/calendars', [BaseController::class, 'index'])->defaults('model', Calendar::class);
+                Route::get('/calendars/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', Calendar::class)
+                    ->defaults('scope', 'readable');
+                Route::get('/calendars', [BaseController::class, 'index'])
+                    ->defaults('model', Calendar::class)
+                    ->defaults('scope', 'readable');
                 Route::post('/calendars', CreateCalendar::class);
                 Route::put('/calendars', UpdateCalendar::class);
                 Route::delete('/calendars/{id}', DeleteCalendar::class);
 
                 // CalendarEvents
                 Route::get('/calendar-events/{id}', [BaseController::class, 'show'])
-                    ->defaults('model', CalendarEvent::class);
+                    ->defaults('model', CalendarEvent::class)
+                    ->defaults('scope', 'readable');
                 Route::get('/calendar-events', [BaseController::class, 'index'])
-                    ->defaults('model', CalendarEvent::class);
+                    ->defaults('model', CalendarEvent::class)
+                    ->defaults('scope', 'readable');
                 Route::post('/calendar-events', CreateCalendarEvent::class);
                 Route::put('/calendar-events', UpdateCalendarEvent::class);
                 Route::delete('/calendar-events/{id}', DeleteCalendarEvent::class);
