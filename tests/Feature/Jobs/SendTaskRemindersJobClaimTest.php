@@ -42,6 +42,24 @@ test('due reminder is sent once and marked', function (): void {
     expect($this->dueTask->refresh()->due_reminder_sent_at)->not->toBeNull();
 });
 
+test('claiming a reminder leaves the modification of the task untouched', function (): void {
+    $before = DB::table('tasks')
+        ->where('id', $this->dueTask->getKey())
+        ->first(['updated_at', 'updated_by']);
+
+    $this->travel(1)->minutes();
+
+    (new SendTaskRemindersJob())->handle();
+
+    $after = DB::table('tasks')
+        ->where('id', $this->dueTask->getKey())
+        ->first(['due_reminder_sent_at', 'updated_at', 'updated_by']);
+
+    expect($after->due_reminder_sent_at)->not->toBeNull()
+        ->and($after->updated_at)->toBe($before->updated_at)
+        ->and($after->updated_by)->toBe($before->updated_by);
+});
+
 test('due reminder claimed by another run is not sent again', function (): void {
     changeTaskRowOnFirstRetrieve(['due_reminder_sent_at' => now()]);
 

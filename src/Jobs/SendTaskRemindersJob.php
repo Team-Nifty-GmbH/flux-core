@@ -63,6 +63,7 @@ class SendTaskRemindersJob implements Repeatable, ShouldQueue
             ->whereKey($task->getKey())
             ->whereNull($type . '_reminder_sent_at')
             ->where($type . '_datetime', $task->{$type . '_datetime'})
+            ->toBase()
             ->update([$type . '_reminder_sent_at' => now()]) === 1;
     }
 
