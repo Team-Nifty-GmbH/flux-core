@@ -34,8 +34,11 @@ class UpdateRole extends FluxAction
         }
 
         if (! is_null($users = $this->getData('users'))) {
+            $affected = array_merge($users, $role->users()->pluck('users.id')->all());
+            $withoutRoleBefore = resolve_static(User::class, 'idsWithoutRole', [$affected]);
+
             $role->users()->sync($users);
-            resolve_static(User::class, 'revokeDirectModelGetPermissions', [$users]);
+            resolve_static(User::class, 'syncDirectModelGetPermissions', [$affected, $withoutRoleBefore]);
         }
 
         return $role->withoutRelations()->fresh();

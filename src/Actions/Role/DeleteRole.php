@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Role;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Role;
+use FluxErp\Models\User;
 use FluxErp\Rulesets\Role\DeleteRoleRuleset;
 use Illuminate\Validation\ValidationException;
 
@@ -21,10 +22,15 @@ class DeleteRole extends FluxAction
 
     public function performAction(): ?bool
     {
-        return resolve_static(Role::class, 'query')
+        $role = resolve_static(Role::class, 'query')
             ->whereKey($this->data['id'])
-            ->first()
-            ->delete();
+            ->first();
+        $users = $role->users()->pluck('users.id')->all();
+
+        $deleted = $role->delete();
+        resolve_static(User::class, 'syncDirectModelGetPermissions', [$users, []]);
+
+        return $deleted;
     }
 
     protected function validateData(): void

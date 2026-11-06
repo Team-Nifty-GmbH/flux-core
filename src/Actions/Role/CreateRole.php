@@ -35,8 +35,10 @@ class CreateRole extends FluxAction
         ));
 
         if ($users = $this->getData('users')) {
+            $withoutRoleBefore = resolve_static(User::class, 'idsWithoutRole', [$users]);
+
             $role->users()->attach($users);
-            resolve_static(User::class, 'revokeDirectModelGetPermissions', [$users]);
+            resolve_static(User::class, 'syncDirectModelGetPermissions', [$users, $withoutRoleBefore]);
         }
 
         return $role->fresh()->load('permissions');

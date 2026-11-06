@@ -50,6 +50,7 @@ use Laragear\TwoFactor\Contracts\TwoFactorAuthenticatable;
 use Spatie\LaravelPasskeys\Models\Concerns\HasPasskeys;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
+use Spatie\Permission\Guard;
 use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\Traits\HasRoles;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
@@ -93,19 +94,41 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         });
     }
 
-    public static function revokeDirectModelGetPermissions(array $userIds): void
+    public static function idsWithoutRole(array $userIds): array
     {
-        $permissionIds = resolve_static(Permission::class, 'query')
-            ->where('name', 'like', 'model.%.get')
+        return resolve_static(static::class, 'query')
+            ->withoutGlobalScope(UserTenantScope::class)
+            ->whereKey($userIds)
+            ->whereDoesntHave('roles')
             ->pluck('id')
             ->all();
+    }
+
+    public static function syncDirectModelGetPermissions(array $userIds, array $withoutRoleBefore): void
+    {
+        $withoutRoleNow = static::idsWithoutRole($userIds);
+        $changed = array_merge(
+            array_diff($withoutRoleBefore, $withoutRoleNow),
+            array_diff($withoutRoleNow, $withoutRoleBefore)
+        );
+
+        if (! $changed) {
+            return;
+        }
 
         resolve_static(static::class, 'query')
             ->withoutGlobalScope(UserTenantScope::class)
-            ->whereKey($userIds)
-            ->whereHas('roles')
+            ->whereKey($changed)
             ->get()
-            ->each(fn (User $user) => $user->permissions()->detach($permissionIds));
+            ->each(fn (User $user) => in_array($user->getKey(), $withoutRoleNow)
+                ? $user->grantModelGetPermissions()
+                : $user->permissions()->detach(
+                    resolve_static(Permission::class, 'query')
+                        ->where('name', 'like', 'model.%.get')
+                        ->pluck('id')
+                        ->all()
+                )
+            );
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
@@ -318,6 +341,17 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     public function getUrl(): ?string
     {
         return null;
+    }
+
+    public function grantModelGetPermissions(): void
+    {
+        $this->givePermissionTo(
+            resolve_static(Permission::class, 'query')
+                ->where('guard_name', Guard::getDefaultName($this))
+                ->where('name', 'like', 'model.%.get')
+                ->pluck('id')
+                ->all()
+        );
     }
 
     public function guardName(): array

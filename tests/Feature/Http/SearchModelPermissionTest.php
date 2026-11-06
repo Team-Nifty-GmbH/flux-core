@@ -1,10 +1,13 @@
 <?php
 
 use FluxErp\Actions\Role\CreateRole;
+use FluxErp\Actions\Role\DeleteRole;
 use FluxErp\Actions\Role\UpdateRoleUsers;
 use FluxErp\Actions\Role\UpdateUserRoles;
 use FluxErp\Actions\User\CreateUser;
+use FluxErp\Livewire\Settings\UserEdit;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
 use FluxErp\Models\Tag;
@@ -12,6 +15,7 @@ use FluxErp\Models\Token;
 use FluxErp\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\Sanctum;
+use Livewire\Livewire;
 
 beforeEach(function (): void {
     $this->contactPermission = Permission::findOrCreate('model.contact.get', 'web');
@@ -310,4 +314,69 @@ test('users added to a role lose their direct model permissions', function (): v
 
     expect($user->fresh()->hasDirectPermission($this->contactPermission))->toBeFalse()
         ->and($untouched->fresh()->hasDirectPermission($this->contactPermission))->toBeTrue();
+});
+
+test('a direct model permission survives saving a user whose roles stay the same', function (): void {
+    $user = User::factory()
+        ->for(Language::factory())
+        ->create(['is_active' => true]);
+    $role = Role::findOrCreate('Without model permissions', 'web');
+    $user->assignRole($role);
+
+    Livewire::actingAs($this->user)
+        ->test(UserEdit::class, ['user' => $user])
+        ->set('userForm.permissions', [$this->contactPermission->getKey()])
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect($user->fresh()->hasDirectPermission($this->contactPermission))->toBeTrue()
+        ->and($user->fresh()->hasRole($role))->toBeTrue();
+});
+
+test('a user created without a role keeps its model permissions in the user edit', function (): void {
+    Livewire::actingAs($this->user)
+        ->test(UserEdit::class, ['user' => app(User::class)])
+        ->set('userForm.email', 'edited@example.com')
+        ->set('userForm.firstname', 'Edited')
+        ->set('userForm.lastname', 'User')
+        ->set('userForm.user_code', 'EDITED')
+        ->set('userForm.password', 'Secret123!')
+        ->set('userForm.password_confirmation', 'Secret123!')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(User::query()->where('email', 'edited@example.com')->first()->hasDirectPermission($this->contactPermission))
+        ->toBeTrue();
+});
+
+test('a user gets the model permissions back when its last role goes', function (): void {
+    $user = User::factory()->create(['is_active' => true]);
+    $role = Role::findOrCreate('Last role', 'web');
+    $user->assignRole($role);
+
+    UpdateUserRoles::make([
+        'user_id' => $user->getKey(),
+        'roles' => [$role->getKey()],
+        'assign' => false,
+    ])
+        ->validate()
+        ->execute();
+
+    expect($user->fresh()->hasDirectPermission($this->contactPermission))->toBeTrue()
+        ->and($user->fresh()->hasDirectPermission($this->addressPermission))->toBeTrue();
+});
+
+test('users of a deleted role get the model permissions back when it was their last', function (): void {
+    $onlyRole = User::factory()->create(['is_active' => true]);
+    $otherRole = User::factory()->create(['is_active' => true]);
+    $role = Role::findOrCreate('Deleted role', 'web');
+    $onlyRole->assignRole($role);
+    $otherRole->assignRole($role, Role::findOrCreate('Remaining role', 'web'));
+
+    DeleteRole::make(['id' => $role->getKey()])
+        ->validate()
+        ->execute();
+
+    expect($onlyRole->fresh()->hasDirectPermission($this->contactPermission))->toBeTrue()
+        ->and($otherRole->fresh()->hasDirectPermission($this->contactPermission))->toBeFalse();
 });
