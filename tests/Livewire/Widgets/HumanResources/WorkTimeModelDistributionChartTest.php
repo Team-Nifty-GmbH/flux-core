@@ -37,7 +37,6 @@ test('shows distribution of work time models', function (): void {
     for ($i = 0; $i < 2; $i++) {
         $employee = app(Employee::class)->create([
             'tenant_id' => $this->dbTenant->getKey(),
-            'user_id' => $this->user->getKey(),
             'firstname' => 'FullTime',
             'lastname' => 'Employee' . $i,
             'is_active' => true,
@@ -55,7 +54,6 @@ test('shows distribution of work time models', function (): void {
     // 1 employee on part time
     $partTimeEmployee = app(Employee::class)->create([
         'tenant_id' => $this->dbTenant->getKey(),
-        'user_id' => $this->user->getKey(),
         'firstname' => 'PartTime',
         'lastname' => 'Employee',
         'is_active' => true,

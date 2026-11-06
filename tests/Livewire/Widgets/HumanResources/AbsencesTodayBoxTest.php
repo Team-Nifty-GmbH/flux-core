@@ -46,7 +46,6 @@ test('counts employees absent today', function (): void {
     for ($i = 0; $i < 2; $i++) {
         $employee = app(Employee::class)->create([
             'tenant_id' => $this->dbTenant->getKey(),
-            'user_id' => $this->user->getKey(),
             'firstname' => 'Employee',
             'lastname' => 'Nr' . $i,
             'is_active' => true,
@@ -83,7 +82,6 @@ test('counts employees absent today', function (): void {
 test('sub value shows present rate', function (): void {
     $employee = app(Employee::class)->create([
         'tenant_id' => $this->dbTenant->getKey(),
-        'user_id' => $this->user->getKey(),
         'firstname' => 'Present',
         'lastname' => 'Worker',
         'is_active' => true,
