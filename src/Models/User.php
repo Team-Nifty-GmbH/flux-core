@@ -10,6 +10,7 @@ use FluxErp\Models\Pivots\TargetUser;
 use FluxErp\Models\Pivots\TaskUser;
 use FluxErp\Models\Pivots\TenantUser;
 use FluxErp\Models\Pivots\TicketUser;
+use FluxErp\Models\Scopes\UserTenantScope;
 use FluxErp\Support\Collection\UserCollection;
 use FluxErp\Traits\Model\Calendar\HasCalendars;
 use FluxErp\Traits\Model\Calendar\HasCalendarUserSettings;
@@ -49,6 +50,7 @@ use Laragear\TwoFactor\Contracts\TwoFactorAuthenticatable;
 use Spatie\LaravelPasskeys\Models\Concerns\HasPasskeys;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
+use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\Traits\HasRoles;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
@@ -89,6 +91,23 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         static::saved(function (User $user): void {
             Cache::forget('morph_to:' . $user->getMorphClass() . ':' . $user->id);
         });
+    }
+
+    public static function revokeDirectModelGetPermissions(array $userIds): void
+    {
+        $permissionIds = resolve_static(Permission::class, 'query')
+            ->where('name', 'like', 'model.%.get')
+            ->pluck('id')
+            ->all();
+
+        resolve_static(static::class, 'query')
+            ->withoutGlobalScope(UserTenantScope::class)
+            ->whereKey($userIds)
+            ->whereHas('roles')
+            ->get()
+            ->each(fn (User $user) => $user->permissions()->detach($permissionIds));
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 
     // Public static methods

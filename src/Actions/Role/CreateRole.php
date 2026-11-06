@@ -5,6 +5,7 @@ namespace FluxErp\Actions\Role;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
+use FluxErp\Models\User;
 use FluxErp\Rulesets\Role\CreateRoleRuleset;
 use Illuminate\Database\Eloquent\Model;
 
@@ -35,6 +36,7 @@ class CreateRole extends FluxAction
 
         if ($users = $this->getData('users')) {
             $role->users()->attach($users);
+            resolve_static(User::class, 'revokeDirectModelGetPermissions', [$users]);
         }
 
         return $role->fresh()->load('permissions');

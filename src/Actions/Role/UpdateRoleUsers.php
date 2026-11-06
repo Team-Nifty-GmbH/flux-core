@@ -38,6 +38,7 @@ class UpdateRoleUsers extends FluxAction
 
         if ($this->data['assign']) {
             $role->users()->syncWithoutDetaching($this->data['users']);
+            resolve_static(User::class, 'revokeDirectModelGetPermissions', [$this->data['users']]);
         } else {
             $role->users()->detach($this->data['users']);
         }

@@ -1,6 +1,8 @@
 <?php
 
 use FluxErp\Actions\Role\CreateRole;
+use FluxErp\Actions\Role\UpdateRoleUsers;
+use FluxErp\Actions\Role\UpdateUserRoles;
 use FluxErp\Actions\User\CreateUser;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
@@ -255,4 +257,57 @@ test('a new user gets every model permission of its guard', function (): void {
 
     expect($user->hasDirectPermission($this->contactPermission))->toBeTrue()
         ->and($user->hasDirectPermission($this->addressPermission))->toBeTrue();
+});
+
+test('a new user loses its direct model permissions once it gets a role', function (): void {
+    $user = CreateUser::make([
+        'email' => 'roled@example.com',
+        'firstname' => 'Roled',
+        'lastname' => 'User',
+        'user_code' => 'ROLED',
+        'password' => 'Secret123!',
+    ])
+        ->validate()
+        ->execute();
+
+    UpdateUserRoles::make([
+        'user_id' => $user->getKey(),
+        'roles' => [Role::findOrCreate('Without model permissions', 'web')->getKey()],
+    ])
+        ->validate()
+        ->execute();
+
+    expect($user->fresh()->hasDirectPermission($this->contactPermission))->toBeFalse()
+        ->and($user->fresh()->hasPermissionTo($this->contactPermission))->toBeFalse();
+});
+
+test('users added to a role lose their direct model permissions', function (): void {
+    $user = CreateUser::make([
+        'email' => 'member@example.com',
+        'firstname' => 'Member',
+        'lastname' => 'User',
+        'user_code' => 'MEMBER',
+        'password' => 'Secret123!',
+    ])
+        ->validate()
+        ->execute();
+    $untouched = CreateUser::make([
+        'email' => 'untouched@example.com',
+        'firstname' => 'Untouched',
+        'lastname' => 'User',
+        'user_code' => 'UNTOUCHED',
+        'password' => 'Secret123!',
+    ])
+        ->validate()
+        ->execute();
+
+    UpdateRoleUsers::make([
+        'id' => Role::findOrCreate('Members', 'web')->getKey(),
+        'users' => [$user->getKey()],
+    ])
+        ->validate()
+        ->execute();
+
+    expect($user->fresh()->hasDirectPermission($this->contactPermission))->toBeFalse()
+        ->and($untouched->fresh()->hasDirectPermission($this->contactPermission))->toBeTrue();
 });

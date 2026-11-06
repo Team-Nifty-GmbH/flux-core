@@ -41,12 +41,14 @@ class UpdateUserRoles extends FluxAction
 
         if ($this->data['sync'] ?? false) {
             $user->syncRoles($roles);
+            resolve_static(User::class, 'revokeDirectModelGetPermissions', [[$user->getKey()]]);
 
             return $user->roles->toArray();
         }
 
         if ($this->data['assign']) {
             $user->assignRole($roles);
+            resolve_static(User::class, 'revokeDirectModelGetPermissions', [[$user->getKey()]]);
         } else {
             foreach ($roles as $role) {
                 $user->removeRole($role);

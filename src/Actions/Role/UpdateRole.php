@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Role;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Role;
+use FluxErp\Models\User;
 use FluxErp\Rulesets\Role\UpdateRoleRuleset;
 use Illuminate\Database\Eloquent\Model;
 
@@ -34,6 +35,7 @@ class UpdateRole extends FluxAction
 
         if (! is_null($users = $this->getData('users'))) {
             $role->users()->sync($users);
+            resolve_static(User::class, 'revokeDirectModelGetPermissions', [$users]);
         }
 
         return $role->withoutRelations()->fresh();
