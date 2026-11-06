@@ -55,6 +55,11 @@ trait RendersWidgets
         $this->widgets();
     }
 
+    public function renderingRendersWidgets(): void
+    {
+        $this->widgets = array_values($this->filterWidgets($this->widgets));
+    }
+
     #[Renderless]
     public function resetWidgets(): void
     {
@@ -64,7 +69,7 @@ trait RendersWidgets
     #[Renderless]
     public function saveWidgets(?array $widgets = null): void
     {
-        $widgetsToSave = array_values($widgets ?? $this->widgets);
+        $widgetsToSave = array_values($this->filterWidgets($widgets ?? $this->widgets));
 
         $existingItemIds = array_filter(Arr::pluck($widgetsToSave, 'id'), 'is_numeric');
 
@@ -85,11 +90,18 @@ trait RendersWidgets
                 ->updateOrCreate(
                     ['id' => is_numeric(data_get($widget, 'id')) ? data_get($widget, 'id') : null],
                     array_merge(
-                        [
-                            'dashboard_component' => static::class,
-                            'group' => $this->group ?? null,
-                        ],
-                        Arr::except($widget, 'id')
+                        ['group' => $this->group ?? null],
+                        Arr::only($widget, [
+                            'component_name',
+                            'group',
+                            'name',
+                            'config',
+                            'height',
+                            'width',
+                            'order_column',
+                            'order_row',
+                        ]),
+                        ['dashboard_component' => static::class]
                     )
                 );
             $mergedWidget = array_merge($widget, $savedWidget->toArray());
@@ -112,7 +124,7 @@ trait RendersWidgets
     {
         $this->widgets = array_merge(
             array_filter($this->widgets, fn (array $widget) => data_get($widget, 'group') !== $this->group),
-            $widgets
+            array_values($this->filterWidgets($widgets))
         );
     }
 
@@ -208,11 +220,16 @@ trait RendersWidgets
 
         $widgets = array_filter(
             $widgets,
-            fn (array $widget): bool => collect(Arr::wrap(data_get($widget, 'dashboard_component')))
-                ->map(fn (string $dashboardClass): string => resolve_static($dashboardClass, 'class'))
-                ->contains(static::class)
-                && $permissions->allows('widget.' . $widget['component_name'])
-                && ! is_null(Widget::get($widget['component_name']))
+            function (mixed $widget) use ($permissions): bool {
+                $componentName = data_get($widget, 'component_name');
+                $registeredWidget = is_string($componentName) ? Widget::get($componentName) : null;
+
+                return data_get($registeredWidget, 'component_name') === $componentName
+                    && collect(Arr::wrap(data_get($registeredWidget, 'dashboard_component')))
+                        ->map(fn (string $dashboardClass): string => resolve_static($dashboardClass, 'class'))
+                        ->contains(static::class)
+                    && $permissions->allows('widget.' . $componentName);
+            }
         );
 
         ksort($widgets);
