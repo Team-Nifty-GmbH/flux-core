@@ -2,6 +2,7 @@
 
 use FluxErp\Models\User;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\PermissionRegistrar;
@@ -31,7 +32,7 @@ return new class() extends Migration
                         $join->where('permissions.guard_name', 'web')
                             ->where('permissions.name', 'like', 'model.%.get');
                     })
-                    ->whereNotExists(function ($query) use ($userType): void {
+                    ->whereNotExists(function (Builder $query) use ($userType): void {
                         $query->from('model_has_roles')
                             ->whereColumn('model_has_roles.model_id', 'users.id')
                             ->where('model_has_roles.model_type', $userType);

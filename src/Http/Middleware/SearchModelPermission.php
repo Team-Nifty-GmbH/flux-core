@@ -13,7 +13,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use ReflectionMethod;
-use ReflectionNamedType;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Spatie\Permission\Guard;
 use Spatie\Permission\Traits\HasRoles;
@@ -97,7 +96,15 @@ class SearchModelPermission
 
             $type = (new ReflectionMethod($model, $name))->getReturnType();
 
-            if (! $type instanceof ReflectionNamedType || ! is_a($type->getName(), Relation::class, true)) {
+            if (! $type) {
+                abort_unless(method_exists(Model::class, $name), 403);
+
+                return null;
+            }
+
+            $classes = preg_split('/[|&()?]/', (string) $type, flags: PREG_SPLIT_NO_EMPTY);
+
+            if (! array_filter($classes, fn (string $class): bool => is_a($class, Relation::class, true))) {
                 return null;
             }
         }

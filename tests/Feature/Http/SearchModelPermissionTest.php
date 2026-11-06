@@ -1,6 +1,7 @@
 <?php
 
 use FluxErp\Actions\Role\CreateRole;
+use FluxErp\Actions\User\CreateUser;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
@@ -126,6 +127,31 @@ test('search denies an untyped relation fixed with a return type', function (): 
         ->assertForbidden();
 });
 
+test('search denies a relation method without a return type', function (string $model, string $relation): void {
+    $this->user->givePermissionTo($this->addressPermission);
+
+    $this->post(route('search', $model), ['with' => [$relation]])
+        ->assertForbidden();
+})->with([
+    'notifications on address' => ['address', 'notifications'],
+    'tokens on address' => ['address', 'tokens'],
+    'notifications on user' => ['user', 'notifications'],
+    'tokens on user' => ['user', 'tokens'],
+]);
+
+test('search checks a relation with a union return type', function (): void {
+    $categoryPermission = Permission::findOrCreate('model.category.get', 'web');
+    $this->user->givePermissionTo($this->contactPermission);
+
+    $this->post(route('search', 'contact'), ['with' => ['category']])
+        ->assertForbidden();
+
+    $this->user->givePermissionTo($categoryPermission);
+
+    $this->post(route('search', 'contact'), ['with' => ['category']])
+        ->assertOk();
+});
+
 test('search allows a relation the user may read', function (): void {
     $this->user->givePermissionTo([$this->contactPermission, $this->addressPermission]);
 
@@ -214,4 +240,19 @@ test('the migration grants users without a role the model permissions', function
     expect($withoutRole->fresh()->hasDirectPermission('model.contact.get'))->toBeTrue()
         ->and($withRole->fresh()->hasDirectPermission('model.contact.get'))->toBeFalse()
         ->and($withRole->fresh()->hasPermissionTo('model.contact.get'))->toBeTrue();
+});
+
+test('a new user gets every model permission of its guard', function (): void {
+    $user = CreateUser::make([
+        'email' => 'fresh@example.com',
+        'firstname' => 'Fresh',
+        'lastname' => 'User',
+        'user_code' => 'FRESH',
+        'password' => 'Secret123!',
+    ])
+        ->validate()
+        ->execute();
+
+    expect($user->hasDirectPermission($this->contactPermission))->toBeTrue()
+        ->and($user->hasDirectPermission($this->addressPermission))->toBeTrue();
 });

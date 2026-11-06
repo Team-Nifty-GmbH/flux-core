@@ -4,10 +4,12 @@ namespace FluxErp\Actions\User;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Language;
+use FluxErp\Models\Permission;
 use FluxErp\Models\User;
 use FluxErp\Rulesets\User\CreateUserRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Guard;
 
 class CreateUser extends FluxAction
 {
@@ -29,6 +31,14 @@ class CreateUser extends FluxAction
 
         $user = app(User::class, ['attributes' => $this->data]);
         $user->save();
+
+        $user->givePermissionTo(
+            resolve_static(Permission::class, 'query')
+                ->where('guard_name', Guard::getDefaultName($user))
+                ->where('name', 'like', 'model.%.get')
+                ->pluck('id')
+                ->all()
+        );
 
         if ($mailAccounts) {
             $mailAccounts = array_map(
