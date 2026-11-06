@@ -81,7 +81,7 @@ test('search does not call model methods that are no relation', function (): voi
     $count = Contact::query()->count();
 
     $this->post(route('search', 'contact'), ['searchFields' => ['touch.name']])
-        ->assertOk();
+        ->assertUnprocessable();
 
     expect(Contact::query()->count())->toBe($count);
 });
