@@ -273,6 +273,35 @@ test('sync widgets drops a component that is no widget', function (): void {
     expect(array_column($component->get('widgets'), 'id'))->toContain($permittedId);
 });
 
+test('sync widgets drops a widget given by its class name', function (): void {
+    Permission::findOrCreate('widget.sample-component-2', 'web');
+
+    $component = Livewire::withoutLazyLoading()
+        ->test(Dashboard::class)
+        ->call('syncWidgets', [
+            [
+                'id' => $deniedId = Str::uuid()->toString(),
+                'height' => 1,
+                'width' => 1,
+                'order_column' => 0,
+                'order_row' => 0,
+                'component_name' => get_class($this->components[1]),
+            ],
+            [
+                'id' => $permittedId = Str::uuid()->toString(),
+                'height' => 1,
+                'width' => 1,
+                'order_column' => 1,
+                'order_row' => 0,
+                'component_name' => 'sample-component',
+            ],
+        ]);
+
+    expect(array_column($component->get('widgets'), 'id'))
+        ->not->toContain($deniedId)
+        ->toContain($permittedId);
+});
+
 test('setting the widgets property drops a component that is no widget', function (): void {
     Livewire::withoutLazyLoading()
         ->test(Dashboard::class)

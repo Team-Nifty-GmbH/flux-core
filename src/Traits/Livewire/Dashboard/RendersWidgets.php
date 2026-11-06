@@ -224,7 +224,7 @@ trait RendersWidgets
                 $componentName = data_get($widget, 'component_name');
                 $registeredWidget = is_string($componentName) ? Widget::get($componentName) : null;
 
-                return ! is_null($registeredWidget)
+                return data_get($registeredWidget, 'component_name') === $componentName
                     && collect(Arr::wrap(data_get($registeredWidget, 'dashboard_component')))
                         ->map(fn (string $dashboardClass): string => resolve_static($dashboardClass, 'class'))
                         ->contains(static::class)
