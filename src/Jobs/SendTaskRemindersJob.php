@@ -57,6 +57,15 @@ class SendTaskRemindersJob implements Repeatable, ShouldQueue
         $this->sendDueReminders($endStates);
     }
 
+    protected function claimReminder(Task $task, string $type): bool
+    {
+        return resolve_static(Task::class, 'query')
+            ->whereKey($task->getKey())
+            ->whereNull($type . '_reminder_sent_at')
+            ->where($type . '_datetime', $task->{$type . '_datetime'})
+            ->update([$type . '_reminder_sent_at' => now()]) === 1;
+    }
+
     protected function sendStartReminders(array $endStates): void
     {
         resolve_static(Task::class, 'query')
@@ -68,10 +77,11 @@ class SendTaskRemindersJob implements Repeatable, ShouldQueue
             ->whereRaw('TIMESTAMPDIFF(MINUTE, NOW(), start_datetime) <= COALESCE(start_reminder_minutes_before, 0)')
             ->with(['responsibleUser', 'users'])
             ->each(function (Task $task): void {
-                event(app(TaskReminderEvent::class, ['task' => $task, 'type' => 'start']));
+                if (! $this->claimReminder($task, 'start')) {
+                    return;
+                }
 
-                $task->start_reminder_sent_at = now();
-                $task->saveQuietly();
+                event(app(TaskReminderEvent::class, ['task' => $task, 'type' => 'start']));
             });
     }
 
@@ -86,10 +96,11 @@ class SendTaskRemindersJob implements Repeatable, ShouldQueue
             ->whereRaw('TIMESTAMPDIFF(MINUTE, NOW(), due_datetime) <= COALESCE(due_reminder_minutes_before, 0)')
             ->with(['responsibleUser', 'users'])
             ->each(function (Task $task): void {
-                event(app(TaskReminderEvent::class, ['task' => $task, 'type' => 'due']));
+                if (! $this->claimReminder($task, 'due')) {
+                    return;
+                }
 
-                $task->due_reminder_sent_at = now();
-                $task->saveQuietly();
+                event(app(TaskReminderEvent::class, ['task' => $task, 'type' => 'due']));
             });
     }
 }
