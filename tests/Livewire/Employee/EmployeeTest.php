@@ -113,23 +113,26 @@ test('can link a user to the employee via the general form', function (): void {
     expect($employee->refresh()->user_id)->toBe($user->getKey());
 });
 
-test('saving the general form without touching the user keeps the link', function (): void {
-    $user = User::factory()->create(['is_active' => true]);
-    $user->tenants()->attach($this->dbTenant->getKey());
-
+test('saving a stale general form keeps a user linked meanwhile', function (): void {
     $employee = app(EmployeeModel::class)->create([
         'tenant_id' => $this->dbTenant->getKey(),
-        'user_id' => $user->getKey(),
         'firstname' => 'Keep',
         'lastname' => 'Link',
         'employment_date' => now()->subYear()->format('Y-m-d'),
         'is_active' => true,
     ]);
 
-    Livewire::test(Employee::class, ['id' => $employee->getKey()])
+    $component = Livewire::test(Employee::class, ['id' => $employee->getKey()]);
+
+    $user = User::factory()->create(['is_active' => true]);
+    $employee->update(['user_id' => $user->getKey()]);
+
+    $component
         ->set('employee.firstname', 'Renamed')
         ->call('save')
         ->assertHasNoErrors();
 
-    expect($employee->refresh()->user_id)->toBe($user->getKey());
+    expect($employee->refresh())
+        ->user_id->toBe($user->getKey())
+        ->firstname->toBe('Renamed');
 });

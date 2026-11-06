@@ -114,7 +114,6 @@ class EmployeeForm extends FluxForm
     {
         $data = parent::toActionData();
 
-        // Only send the link when it was changed here, a stale form must not clear a newer one.
         if (array_key_exists('user_id', $data) && $data['user_id'] === $this->loadedUserId) {
             unset($data['user_id']);
         }

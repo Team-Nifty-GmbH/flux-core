@@ -83,51 +83,46 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
         ];
     }
 
-    /**
-     * Moves the work times of the linked user to this employee and releases
-     * the ones of a previous user. Saving each row runs WorkTime::saved, which
-     * closes the day for the new employee; released days are closed here.
-     */
     public function syncWorkTimes(): void
     {
         resolve_static(WorkTime::class, 'query')
             ->withTrashed()
-            ->where('employee_id', $this->getKey())
-            ->whereNotNull('user_id')
-            ->where('user_id', '!=', $this->user_id ?? 0)
-            ->get()
-            ->each(function (WorkTime $workTime): void {
-                $workTime->employee_id = null;
-                $workTime->save();
-
-                if ($workTime->is_daily_work_time && $workTime->is_locked) {
-                    try {
-                        CloseEmployeeDay::make([
-                            'employee_id' => $this->getKey(),
-                            'date' => $workTime->started_at,
-                        ])
-                            ->validate()
-                            ->execute();
-                    } catch (Throwable) {
-                    }
-                }
-            });
-
-        if (! $this->user_id) {
-            return;
-        }
-
-        resolve_static(WorkTime::class, 'query')
-            ->withTrashed()
-            ->where('user_id', $this->user_id)
             ->where(fn (Builder $query) => $query
-                ->whereNull('employee_id')
-                ->orWhere('employee_id', '!=', $this->getKey())
+                ->where('employee_id', $this->getKey())
+                ->whereNotNull('user_id')
+                ->where('user_id', '!=', $this->user_id ?? 0)
+            )
+            ->when($this->user_id, fn (Builder $query) => $query
+                ->orWhere(fn (Builder $query) => $query
+                    ->where('user_id', $this->user_id)
+                    ->where(fn (Builder $query) => $query
+                        ->whereNull('employee_id')
+                        ->orWhere('employee_id', '!=', $this->getKey())
+                    )
+                )
             )
             ->get()
             ->each(function (WorkTime $workTime): void {
-                $workTime->employee_id = $this->getKey();
+                $previousEmployeeId = $workTime->employee_id;
+
+                $workTime->employee_id = $this->user_id && (int) $workTime->user_id === (int) $this->user_id
+                    ? $this->getKey()
+                    : null;
                 $workTime->save();
+
+                if (! $previousEmployeeId || ! $workTime->is_daily_work_time || ! $workTime->is_locked) {
+                    return;
+                }
+
+                try {
+                    CloseEmployeeDay::make([
+                        'employee_id' => $previousEmployeeId,
+                        'date' => $workTime->started_at,
+                    ])
+                        ->validate()
+                        ->execute();
+                } catch (Throwable) {
+                }
             });
     }
 

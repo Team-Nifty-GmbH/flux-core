@@ -18,9 +18,14 @@ trait ValidatesEmployeeUserLink
         $belongsToTenant = resolve_static(User::class, 'query')
             ->withoutGlobalScope(UserTenantScope::class)
             ->whereKey($this->getData('user_id'))
-            ->whereHas('tenants', fn (Builder $query) => $query
-                ->withoutGlobalScope(UserTenantScope::class)
-                ->whereKey($tenantId)
+            ->where(fn (Builder $query) => $query
+                ->whereDoesntHave('tenants', fn (Builder $query) => $query
+                    ->withoutGlobalScope(UserTenantScope::class)
+                )
+                ->orWhereHas('tenants', fn (Builder $query) => $query
+                    ->withoutGlobalScope(UserTenantScope::class)
+                    ->whereKey($tenantId)
+                )
             )
             ->exists();
 
