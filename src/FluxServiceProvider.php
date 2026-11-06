@@ -44,6 +44,7 @@ use FluxErp\Providers\ViewServiceProvider;
 use FluxErp\Providers\WidgetServiceProvider;
 use FluxErp\Support\Bus\Dispatcher as FluxDispatcher;
 use FluxErp\Support\Container\ProductTypeManager;
+use FluxErp\Support\Flare\CensoringSender;
 use FluxErp\Support\Flare\CensorPersonalData;
 use GuzzleHttp\Client;
 use Illuminate\Auth\Middleware\Authenticate;
@@ -64,6 +65,7 @@ use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Laravel\Scout\Scout;
 use Meilisearch\Client as MeilisearchClient;
+use Spatie\FlareClient\Senders\Sender;
 use Spatie\LaravelIgnition\FlareMiddleware\AddQueries;
 use Spatie\LaravelPasskeys\Http\Controllers\AuthenticateUsingPasskeyController as BaseAuthenticateUsingPasskeyController;
 use Spatie\MediaLibrary\MediaCollections\Models\Observers\MediaObserver;
@@ -134,6 +136,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerExtensions();
         $this->app->booting(fn () => $this->censorFlareReports());
+        $this->app->extend(Sender::class, fn (Sender $sender) => app(CensoringSender::class, ['sender' => $sender]));
 
         app('livewire')->componentHook(SupportFormObjects::class);
         $this->app->bind(DatabaseNotification::class, Notification::class);

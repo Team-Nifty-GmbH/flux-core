@@ -25,6 +25,7 @@ class EditMail extends Component
 {
     use Actions, WithFileUploads;
 
+    #[Locked]
     public array $emailTemplates = [];
 
     public array $files = [];
@@ -39,8 +40,10 @@ class EditMail extends Component
 
     public ?string $sessionKey = null;
 
+    #[Locked]
     public ?array $templateData = null;
 
+    #[Locked]
     public ?string $templateModelType = null;
 
     #[Locked]
@@ -119,13 +122,7 @@ class EditMail extends Component
             ->defaultMailAccount()
             ?->getKey() ?? 'default';
 
-        $this->emailTemplates = resolve_static(EmailTemplate::class, 'query')
-            ->when(
-                $this->templateModelType,
-                fn (Builder $query) => $query
-                    ->where('model_type', $this->templateModelType)
-                    ->orWhereNull('model_type')
-            )
+        $this->emailTemplates = $this->offeredTemplates()
             ->get(['id', 'name'])
             ->toArray();
 
@@ -296,7 +293,7 @@ class EditMail extends Component
     {
         if (
             ! $this->selectedTemplateId
-            || ! $template = resolve_static(EmailTemplate::class, 'query')
+            || ! $template = $this->offeredTemplates()
                 ->whereKey($this->selectedTemplateId)
                 ->first()
         ) {
@@ -362,6 +359,19 @@ class EditMail extends Component
         }
 
         return $this->sendSingleGroup();
+    }
+
+    protected function offeredTemplates(): Builder
+    {
+        return resolve_static(EmailTemplate::class, 'query')
+            ->when(
+                $this->templateModelType,
+                fn (Builder $query) => $query->where(
+                    fn (Builder $query) => $query
+                        ->where('model_type', $this->templateModelType)
+                        ->orWhereNull('model_type')
+                )
+            );
     }
 
     protected function initializeSingleGroup(Collection|array $mailMessages, ?string $sessionKey): void

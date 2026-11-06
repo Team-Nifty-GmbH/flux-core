@@ -7,6 +7,7 @@ use FluxErp\Models\Activity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
@@ -16,6 +17,9 @@ use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Laravel\Scout\SearchableScope;
 use ReflectionMethod;
+use ReflectionNamedType;
+use ReflectionType;
+use ReflectionUnionType;
 use Spatie\EloquentSortable\Sortable;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
@@ -27,13 +31,11 @@ class SearchController extends Controller
         $model = morphed_model($model) ?? $model;
         $model = qualify_model(str_replace('/', '\\', $model));
 
-        abort_unless(class_exists($model), 404);
+        abort_unless(class_exists($model) && is_a($model, Model::class, true), 404);
+
         abort_if(is_a($model, ExcludedFromSearch::class, true), 403);
-        abort_if(
-            collect($this->requestedColumns($request))
-                ->contains(fn (mixed $column): bool => is_string($column) && $this->isHiddenColumn($model, $column)),
-            403
-        );
+
+        $this->guardRequest(app($model), $request);
 
         $isSearchable = in_array(
             Searchable::class,
@@ -115,7 +117,7 @@ class SearchController extends Controller
         }
 
         if ($request->has('orderBy')) {
-            $query->orderBy($request->input('orderBy'), $request->input('orderDirection', 'asc'));
+            $query->orderBy($request->input('orderBy'), $request->input('orderDirection') ?: 'asc');
         }
 
         $this->applyRequestConstraints($query, $request, $model);
@@ -130,7 +132,7 @@ class SearchController extends Controller
 
         if ($request->has('appends')) {
             $result->each(function ($item) use ($request): void {
-                $item->append(array_intersect($item->getAppends(), $request->input('appends')));
+                $item->append(array_intersect($item->getAppends(), Arr::wrap($request->input('appends'))));
             });
         }
 
@@ -152,6 +154,7 @@ class SearchController extends Controller
 
         if ($request->has('whereNotIn')) {
             foreach ($request->input('whereNotIn') as $whereNotIn) {
+                $whereNotIn[1] = Arr::wrap($whereNotIn[1]);
                 $query->whereNotIn(...$whereNotIn);
             }
         }
@@ -247,103 +250,23 @@ class SearchController extends Controller
         }
     }
 
-    protected function isHiddenColumn(string $model, string $column): bool
+    protected function columnsOf(mixed $where): array
     {
-        $instance = app($model);
-        $segments = explode('.', Str::before($column, '->'));
-        $last = count($segments) - 1;
-
-        foreach ($segments as $index => $segment) {
-            $segment = trim($segment, ' `"');
-
-            if (in_array(strtolower($segment), array_map('strtolower', $this->hiddenColumns($instance)), true)) {
-                return true;
-            }
-
-            if ($index < $last && $this->isRelationMethod($instance, $segment)) {
-                $instance = $instance->{$segment}()->getRelated();
-            }
+        if (! is_array($where)) {
+            return [$where];
         }
 
-        return false;
-    }
+        $columns = [];
+        foreach ($where as $key => $value) {
+            abort_if(is_numeric($key) && is_array($value) && count($value) > 3, 422);
 
-    protected function hiddenColumns(Model $instance): array
-    {
-        return $instance instanceof Activity
-            ? array_merge($instance->getHidden(), ['attribute_changes', 'properties'])
-            : $instance->getHidden();
-    }
-
-    protected function isRelationMethod(Model $instance, string $method): bool
-    {
-        if (! method_exists($instance, $method)) {
-            return false;
-        }
-
-        $reflection = new ReflectionMethod($instance, $method);
-        $returnType = (string) $reflection->getReturnType();
-
-        return $reflection->isPublic() && is_subclass_of($returnType, Relation::class);
-    }
-
-    protected function requestedColumns(Request $request): array
-    {
-        $columns = $this->stringsIn(array_values($request->only([
-            'searchFields',
-            'orderBy',
-            'option-value',
-            'where',
-            'whereIn',
-            'whereNotIn',
-            'whereNull',
-            'whereNotNull',
-            'whereBetween',
-            'whereNotBetween',
-            'whereDate',
-            'whereMonth',
-            'whereDay',
-            'whereYear',
-            'whereTime',
-            'whereHas',
-            'whereDoesntHave',
-            'whereRelation',
-            'whereDoesntHaveRelation',
-            'doesntHave',
-        ])));
-
-        foreach (['whereRelation', 'whereDoesntHaveRelation'] as $parameter) {
-            $arguments = Arr::wrap($request->input($parameter));
-            $positional = array_values(array_filter($arguments, 'is_int', ARRAY_FILTER_USE_KEY));
-            $relation = $arguments['relation'] ?? data_get($positional, 0);
-            $column = $arguments['column'] ?? data_get($positional, 1);
-
-            if (! is_string($relation)) {
-                continue;
-            }
-
-            foreach ($this->stringsIn($column) as $nestedColumn) {
-                $columns[] = $relation . '.' . $nestedColumn;
-            }
-        }
-
-        foreach ($this->stringsIn(Arr::wrap($request->input('with'))) as $with) {
-            $columns[] = Str::before($with, ':');
+            $columns = array_merge(
+                $columns,
+                is_numeric($key) && is_array($value) ? $this->columnsOf(Arr::first($value)) : [$key]
+            );
         }
 
         return $columns;
-    }
-
-    protected function stringsIn(mixed $value): array
-    {
-        if (! is_array($value)) {
-            return is_string($value) ? [$value] : [];
-        }
-
-        return array_merge(
-            array_filter(array_keys($value), 'is_string'),
-            ...array_map(fn (mixed $nested): array => $this->stringsIn($nested), array_values($value))
-        );
     }
 
     protected function formatAndDispatch(Collection $result, string $model, Request $request)
@@ -385,21 +308,164 @@ class SearchController extends Controller
         return $result;
     }
 
+    protected function guardColumns(?Model $model, mixed $columns): void
+    {
+        abort_unless($model, 422);
+
+        $hidden = array_map(strtolower(...), $this->hiddenColumns($model));
+
+        foreach ($this->columnsOf($columns) as $column) {
+            if (is_string($column)) {
+                $column = Str::afterLast(Str::before(Str::before(strtolower($column), ' as '), '->'), '.');
+
+                abort_if(in_array(trim($column), $hidden, true), 403);
+            }
+        }
+    }
+
+    protected function guardRequest(Model $model, Request $request): void
+    {
+        foreach (Arr::wrap($request->input('searchFields')) as $field) {
+            abort_unless(is_string($field), 422);
+
+            $this->guardColumns(
+                str_contains($field, '.') ? $this->relatedModel($model, Str::beforeLast($field, '.')) : $model,
+                Str::afterLast($field, '.')
+            );
+        }
+
+        foreach (['with', 'whereHas', 'whereDoesntHave'] as $parameter) {
+            foreach ($this->listArguments($request->input($parameter), PHP_INT_MAX) as $relation) {
+                $this->relatedModel(
+                    $model,
+                    $parameter === 'with' && is_string($relation) ? Str::before($relation, ':') : $relation
+                );
+            }
+        }
+
+        foreach ([
+            'whereNull' => [1, 1],
+            'whereNotNull' => [1, 1],
+            'whereBetween' => [2, 2],
+            'whereNotBetween' => [2, 2],
+            'whereDate' => [2, 3],
+            'whereMonth' => [2, 3],
+            'whereDay' => [2, 3],
+            'whereYear' => [2, 3],
+            'whereTime' => [2, 3],
+        ] as $parameter => [$min, $booleanIndex]) {
+            if ($request->has($parameter)) {
+                $this->guardColumns(
+                    $model,
+                    data_get(
+                        $this->spreadArguments($request->input($parameter), $min, $booleanIndex + 1, $booleanIndex),
+                        0
+                    )
+                );
+            }
+        }
+
+        foreach (['whereIn', 'whereNotIn'] as $parameter) {
+            foreach (Arr::wrap($request->input($parameter)) as $arguments) {
+                $this->guardColumns($model, data_get($this->spreadArguments($arguments, 2, 3, 2), 0));
+            }
+        }
+
+        foreach (['whereRelation', 'whereDoesntHaveRelation'] as $parameter) {
+            if ($request->has($parameter)) {
+                $arguments = $this->spreadArguments($request->input($parameter), 2, 4);
+                $this->guardColumns($this->relatedModel($model, data_get($arguments, 0)), data_get($arguments, 1));
+            }
+        }
+
+        if ($request->has('doesntHave')) {
+            $this->relatedModel($model, data_get($this->spreadArguments($request->input('doesntHave'), 1, 2, 1), 0));
+        }
+
+        foreach (['orderBy', 'option-value'] as $parameter) {
+            abort_unless(is_null($request->input($parameter)) || is_string($request->input($parameter)), 422);
+            $this->guardColumns($model, $request->input($parameter));
+        }
+
+        $orderDirection = $request->input('orderDirection') ?: 'asc';
+        abort_unless(is_string($orderDirection) && in_array(strtolower($orderDirection), ['asc', 'desc'], true), 422);
+
+        $this->guardColumns($model, $request->input('where'));
+    }
+
+    // activity rows carry the logged attributes of their subject, hidden ones included
+    protected function hiddenColumns(Model $model): array
+    {
+        return $model instanceof Activity
+            ? array_merge($model->getHidden(), ['attribute_changes', 'properties'])
+            : $model->getHidden();
+    }
+
+    protected function isRelation(Model $model, string $name): bool
+    {
+        if ($model->relationResolver($model::class, $name)) {
+            return true;
+        }
+
+        if (! method_exists($model, $name)) {
+            return false;
+        }
+
+        $method = new ReflectionMethod($model, $name);
+        $returnType = $method->getReturnType();
+
+        return $method->isPublic()
+            && ! $method->isStatic()
+            && $returnType
+            && collect($returnType instanceof ReflectionUnionType ? $returnType->getTypes() : [$returnType])
+                ->every(fn (ReflectionType $type): bool => $type instanceof ReflectionNamedType
+                    && is_a($type->getName(), Relation::class, true)
+                );
+    }
+
+    protected function listArguments(mixed $arguments, int $max, ?int $booleanIndex = null): array
+    {
+        $arguments = Arr::wrap($arguments);
+
+        abort_unless(array_is_list($arguments) && count($arguments) <= $max, 422);
+
+        if (! is_null($booleanIndex) && array_key_exists($booleanIndex, $arguments)) {
+            abort_unless(
+                is_string($arguments[$booleanIndex])
+                    && in_array(strtolower($arguments[$booleanIndex]), ['and', 'or'], true),
+                422
+            );
+        }
+
+        return $arguments;
+    }
+
     // an alias or another spelling would rename a hidden column past the model's hidden list
     protected function plainColumns(array $columns): array
     {
         return array_values(preg_grep('/^([a-z0-9_]+\.)?([a-z0-9_]+|\*)$/', array_filter($columns, 'is_string')));
     }
 
-    protected function visibleOnly(Model $item, array $keys): array
+    protected function relatedModel(Model $model, mixed $path): ?Model
     {
-        $hidden = array_map('strtolower', $item->getHidden());
-        $keys = array_filter(
-            $keys,
-            fn (mixed $key): bool => is_string($key) && ! in_array(strtolower($key), $hidden, true)
-        );
+        abort_unless(is_string($path), 422);
 
-        return $item->only($item->getVisible() ? array_intersect($keys, $item->getVisible()) : $keys);
+        foreach (explode('.', $path) as $name) {
+            abort_unless($model && $this->isRelation($model, $name), 422);
+            abort_if(in_array(strtolower($name), array_map(strtolower(...), $model->getHidden()), true), 403);
+
+            $relation = $model->{$name}();
+            $model = $relation instanceof MorphTo ? null : $relation->getRelated();
+        }
+
+        return $model;
+    }
+
+    protected function spreadArguments(mixed $arguments, int $min, int $max, ?int $booleanIndex = null): array
+    {
+        abort_unless(is_array($arguments) && count($arguments) >= $min, 422);
+
+        return $this->listArguments($arguments, $max, $booleanIndex);
     }
 
     // a link is not display text, shortening it would break it
@@ -418,5 +484,26 @@ class SearchController extends Controller
         }
 
         return $values;
+    }
+
+    protected function visibleOnly(Model $item, array $keys): array
+    {
+        $hidden = array_map(strtolower(...), $item->getHidden());
+        $keys = array_filter(
+            $keys,
+            fn (mixed $key): bool => is_string($key) && ! in_array(strtolower($key), $hidden, true)
+        );
+
+        $keys = array_filter($keys, function (string $key) use ($item): bool {
+            if ($item->hasAttribute($key) || $this->isRelation($item, $key)) {
+                return true;
+            }
+
+            abort_if(method_exists($item, $key), 422);
+
+            return false;
+        });
+
+        return $item->only($item->getVisible() ? array_intersect($keys, $item->getVisible()) : $keys);
     }
 }

@@ -2,6 +2,7 @@
 
 use FluxErp\Livewire\Features\CreateTaskModal;
 use Illuminate\Support\Str;
+use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
@@ -50,9 +51,10 @@ test('save sets model type and model id when modelType is set', function (): voi
 
     $name = Str::uuid()->toString();
 
-    Livewire::test(CreateTaskModal::class)
-        ->set('modelType', morph_alias(FluxErp\Models\Project::class))
-        ->set('modelId', $project->getKey())
+    Livewire::test(CreateTaskModal::class, [
+        'modelType' => morph_alias(FluxErp\Models\Project::class),
+        'modelId' => $project->getKey(),
+    ])
         ->call('resetTask')
         ->set('task.name', $name)
         ->call('save')
@@ -70,7 +72,6 @@ test('save clears model type and model id when modelType is null', function (): 
     $name = Str::uuid()->toString();
 
     Livewire::test(CreateTaskModal::class)
-        ->set('modelType', null)
         ->set('task.name', $name)
         ->call('save')
         ->assertHasNoErrors()
@@ -90,3 +91,13 @@ test('form resets after successful save', function (): void {
         ->assertReturned(true)
         ->assertSet('task.name', null);
 });
+
+test('does not accept a linked record from the client', function (string $property, int|string $value): void {
+    Livewire::test(CreateTaskModal::class)
+        ->set($property, $value);
+})
+    ->with([
+        ['modelId', 1],
+        ['modelType', 'contact'],
+    ])
+    ->throws(CannotUpdateLockedPropertyException::class);

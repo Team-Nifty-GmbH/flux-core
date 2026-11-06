@@ -5,10 +5,13 @@ namespace FluxErp\Actions\Calendar;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Calendar;
 use FluxErp\Rulesets\Calendar\DeleteCalendarRuleset;
+use FluxErp\Traits\Action\ChecksCalendarAccess;
 use Illuminate\Validation\ValidationException;
 
 class DeleteCalendar extends FluxAction
 {
+    use ChecksCalendarAccess;
+
     public static function models(): array
     {
         return [Calendar::class];

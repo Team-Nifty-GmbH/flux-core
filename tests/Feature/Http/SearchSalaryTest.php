@@ -33,7 +33,6 @@ test('employees cannot be searched by hidden columns', function (array $payload)
         'search field' => [['searchFields' => ['base_salary'], 'search' => '2000']],
         'order by' => [['orderBy' => 'base_salary']],
         'where list' => [['where' => [['base_salary', '>', 1999]]]],
-        'where single' => [['where' => ['base_salary', '>', 1999]]],
         'where assoc' => [['where' => ['base_salary' => 2000]]],
         'where table prefix' => [['where' => [['employees.base_salary', '>', 1999]]]],
         'where database prefix' => fn (): array => [
@@ -43,7 +42,6 @@ test('employees cannot be searched by hidden columns', function (array $payload)
         'where upper case' => [['where' => [['BASE_SALARY', '>', 1999]]]],
         'where in' => [['whereIn' => [['hourly_rate', [20]]]]],
         'where between' => [['whereBetween' => ['employer_contribution_rate', [1, 100]]]],
-        'where between named' => [['whereBetween' => ['column' => 'base_salary', 'values' => [1999, 2001]]]],
         'where relation' => [['whereRelation' => ['supervisor', 'base_salary', '>', 1999]]],
         'nested relation field' => [['searchFields' => ['supervisor.base_salary'], 'search' => '2000']],
         'where has hidden relation' => [['whereHas' => 'salaryComponents']],
@@ -104,7 +102,18 @@ test('departments cannot reach salary data through employees', function (array $
         'with nested relation' => [['with' => ['employees.salarycomponents']]],
         'where relation array' => [['whereRelation' => ['employees', ['base_salary' => 2000]]]],
         'where doesnt have relation array' => [['whereDoesntHaveRelation' => ['employees', ['base_salary' => 2000]]]],
-        'where relation named array' => [['whereRelation' => ['relation' => 'employees', 'column' => ['base_salary' => 2000]]]],
+    ]);
+
+test('named arguments that point at salary data are rejected', function (string $model, array $payload): void {
+    $this->post(route('search', $model), array_merge(['search' => '', 'searchFields' => ['name']], $payload))
+        ->assertUnprocessable();
+})
+    ->with([
+        'where between named' => [Employee::class, ['whereBetween' => ['column' => 'base_salary', 'values' => [1999, 2001]]]],
+        'where relation named array' => [
+            EmployeeDepartment::class,
+            ['whereRelation' => ['relation' => 'employees', 'column' => ['base_salary' => 2000]]],
+        ],
     ]);
 
 test('activities cannot be filtered by logged changes', function (array $payload): void {
