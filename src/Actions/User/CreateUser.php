@@ -30,6 +30,8 @@ class CreateUser extends FluxAction
         $user = app(User::class, ['attributes' => $this->data]);
         $user->save();
 
+        $user->grantModelGetPermissions();
+
         if ($mailAccounts) {
             $mailAccounts = array_map(
                 fn (int|string $mailAccountId) => [

@@ -3,7 +3,9 @@
 namespace FluxErp\Actions\Role;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
+use FluxErp\Models\User;
 use FluxErp\Rulesets\Role\CreateRoleRuleset;
 use Illuminate\Database\Eloquent\Model;
 
@@ -23,12 +25,20 @@ class CreateRole extends FluxAction
     {
         $role = resolve_static(Role::class, 'create', [$this->data]);
 
-        if ($permissions = $this->getData('permissions')) {
-            $role->givePermissionTo($permissions);
-        }
+        $role->givePermissionTo(array_merge(
+            $this->getData('permissions') ?? [],
+            resolve_static(Permission::class, 'query')
+                ->where('guard_name', $role->guard_name)
+                ->where('name', 'like', 'model.%.get')
+                ->pluck('id')
+                ->all()
+        ));
 
         if ($users = $this->getData('users')) {
+            $withoutRoleBefore = resolve_static(User::class, 'idsWithoutRole', [$users]);
+
             $role->users()->attach($users);
+            resolve_static(User::class, 'syncDirectModelGetPermissions', [$users, $withoutRoleBefore]);
         }
 
         return $role->fresh()->load('permissions');

@@ -165,6 +165,13 @@ class UserEdit extends Component
             return;
         }
 
+        if ($action === CreateUser::class) {
+            $this->userForm->permissions = array_values(array_unique(array_merge(
+                $this->userForm->permissions ?? [],
+                $user->getDirectPermissions()->modelKeys()
+            )));
+        }
+
         $this->toast()
             ->success(__(':model saved', ['model' => __('User')]))
             ->send();

@@ -133,6 +133,7 @@ class InitPermissions extends Command
                 && resolve_static($class, 'hasPermission')
             ) {
                 $id = $this->keepPermission('model.' . $alias . '.get');
+                $this->keepPermission('model.' . $alias . '.get', 'token');
 
                 if (! array_key_exists($id, $this->preexistingPermissions)) {
                     $newPermissions[] = $id;

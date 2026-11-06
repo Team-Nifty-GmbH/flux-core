@@ -325,3 +325,19 @@ function countRegistrarScans(callable $callback): int
 
     return CountingPermissionRegistrar::$scans;
 }
+
+function grantModelPermissions(FluxErp\Models\FluxAuthenticatable $user, string $guard = 'web'): void
+{
+    $user->givePermissionTo(
+        collect(Illuminate\Database\Eloquent\Relations\Relation::morphMap())
+            ->filter(fn (string $class): bool => in_array(
+                FluxErp\Traits\Model\HasModelPermission::class,
+                class_uses_recursive($class)
+            ))
+            ->keys()
+            ->map(fn (string $alias): FluxErp\Models\Permission => FluxErp\Models\Permission::findOrCreate(
+                'model.' . $alias . '.get',
+                $guard
+            ))
+    );
+}

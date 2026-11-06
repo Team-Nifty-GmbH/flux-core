@@ -3,6 +3,10 @@
 use FluxErp\Models\Category;
 use FluxErp\Models\Product;
 
+beforeEach(function (): void {
+    grantModelPermissions($this->user);
+});
+
 test('a sortable model is offered in its own order', function (): void {
     $model = morph_alias(Product::class);
 

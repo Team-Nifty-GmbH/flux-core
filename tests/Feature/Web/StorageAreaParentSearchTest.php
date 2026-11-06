@@ -5,6 +5,7 @@ use FluxErp\Models\StorageArea;
 use FluxErp\Models\Warehouse;
 
 beforeEach(function (): void {
+    grantModelPermissions($this->user);
     $this->warehouse = Warehouse::factory()->create();
 });
 

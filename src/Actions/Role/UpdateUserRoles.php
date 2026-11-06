@@ -38,20 +38,23 @@ class UpdateUserRoles extends FluxAction
         $roles = Role::query()
             ->whereKey($this->data['roles'])
             ->get();
+        $withoutRoleBefore = resolve_static(User::class, 'idsWithoutRole', [[$user->getKey()]]);
 
         if ($this->data['sync'] ?? false) {
             $user->syncRoles($roles);
-
-            return $user->roles->toArray();
-        }
-
-        if ($this->data['assign']) {
+        } elseif ($this->data['assign']) {
             $user->assignRole($roles);
         } else {
             foreach ($roles as $role) {
                 $user->removeRole($role);
             }
         }
+
+        resolve_static(
+            User::class,
+            'syncDirectModelGetPermissions',
+            [[$user->getKey()], $withoutRoleBefore]
+        );
 
         return $user->roles->toArray();
     }
