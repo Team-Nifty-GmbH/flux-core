@@ -28,7 +28,7 @@
         "@tiptap/starter-kit": "^3.32.2",
         "@wireui/alpinejs-hold-directive": "^1.0.3",
         "alpinejs": "^3.17.5",
-        "apexcharts": "^8.4.1",
+        "apexcharts": "^8.7.0",
         "axios": "^1.21.0",
         "dayjs": "^1.11.23",
         "filepond": "^4.32.12",
