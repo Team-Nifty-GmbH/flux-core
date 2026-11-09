@@ -54,5 +54,10 @@
         "@techstark/opencv-js": "^5.0.0-release.1",
         "fullcalendar": "^7.1.4",
         "temporal-polyfill": "^1.0.8"
+    },
+    "overrides": {
+        "@tailwindcss/typography": {
+            "postcss-selector-parser": "^6.1.5"
+        }
     }
 }
