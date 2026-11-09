@@ -7,6 +7,7 @@ use FluxErp\Models\Order;
 use FluxErp\States\Order\Draft;
 use FluxErp\States\Order\InReview;
 use FluxErp\States\Order\Open;
+use Illuminate\Support\Facades\DB;
 
 class OfferSignedSubscriber
 {
@@ -18,13 +19,20 @@ class OfferSignedSubscriber
             return;
         }
 
-        if ($order->state instanceof Draft && $order->state->canTransitionTo(Open::class)) {
-            $order->state->transitionTo(Open::class);
-        }
+        DB::transaction(function () use ($order): void {
+            $order = resolve_static(Order::class, 'query')
+                ->whereKey($order->getKey())
+                ->lockForUpdate()
+                ->first();
 
-        if ($order->state->canTransitionTo(InReview::class)) {
-            $order->state->transitionTo(InReview::class);
-        }
+            if ($order->state instanceof Draft && $order->state->canTransitionTo(Open::class)) {
+                $order->state->transitionTo(Open::class);
+            }
+
+            if ($order->state->canTransitionTo(InReview::class)) {
+                $order->state->transitionTo(InReview::class);
+            }
+        });
     }
 
     public function subscribe(): array
