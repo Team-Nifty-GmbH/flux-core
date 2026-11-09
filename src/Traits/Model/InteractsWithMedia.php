@@ -4,12 +4,15 @@ namespace FluxErp\Traits\Model;
 
 use FluxErp\Models\Media as FluxMedia;
 use FluxErp\Models\MediaFolder;
+use FluxErp\Models\Scopes\ExcludeDocumentsScope;
 use FluxErp\Models\Scopes\FamilyTreeScope;
 use FluxErp\Support\MediaLibrary\MediaCollection;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Spatie\Image\Enums\Fit;
 use Spatie\Image\Exceptions\InvalidManipulation;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -25,6 +28,21 @@ trait InteractsWithMedia
         $this->mediaCollections[$name] = $mediaCollection;
 
         return $mediaCollection;
+    }
+
+    public function deleteAllMedia(): self
+    {
+        $query = $this->media()->withoutGlobalScope(ExcludeDocumentsScope::class);
+
+        if ((clone $query)->where('retain_until', '>=', today()->toDateString())->exists()) {
+            throw ValidationException::withMessages([
+                'media' => [__('Documents are kept until their retention period ends.')],
+            ]);
+        }
+
+        $query->cursor()->each(fn (Media $media) => $media->delete());
+
+        return $this;
     }
 
     public function getMediaAsTree(array $exclude = []): array
@@ -131,6 +149,11 @@ trait InteractsWithMedia
     public function getMediaModel(): string
     {
         return resolve_static(FluxMedia::class, 'class');
+    }
+
+    public function isDocumentOwnedBy(?Authenticatable $user): bool
+    {
+        return false;
     }
 
     public function mediaFolders(): MorphToMany

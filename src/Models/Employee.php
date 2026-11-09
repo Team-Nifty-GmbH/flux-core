@@ -24,6 +24,7 @@ use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Model\Printable;
 use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Scout\Searchable;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -390,6 +391,11 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
                 ->with('workTimeModel')
                 ->first()
                 ?->workTimeModel;
+    }
+
+    public function isDocumentOwnedBy(?Authenticatable $user): bool
+    {
+        return $user instanceof User && $this->user_id === $user->getKey();
     }
 
     public function isWorkDay(Carbon $date): bool

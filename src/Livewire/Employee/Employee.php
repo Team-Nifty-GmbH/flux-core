@@ -88,6 +88,10 @@ class Employee extends Component
                 ->text(__('Attachments'))
                 ->isLivewireComponent()
                 ->wireModel('employee.id'),
+            TabButton::make('employee.documents')
+                ->text(__('Personnel file'))
+                ->isLivewireComponent()
+                ->wireModel('employee.id'),
             TabButton::make('employee.comments')
                 ->text(__('Comments'))
                 ->isLivewireComponent()
