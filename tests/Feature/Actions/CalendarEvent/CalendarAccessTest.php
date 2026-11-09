@@ -60,6 +60,14 @@ test('the permission check needs write access to the calendar', function (?strin
     'owner' => ['owner', true],
 ]);
 
+test('a model-backed calendar is left to the action permission', function (): void {
+    $this->calendar->update(['model_type' => morph_alias(CalendarEvent::class)]);
+
+    foreach (($this->actions)() as $action) {
+        expect($action->checkPermission())->toBe($action);
+    }
+});
+
 test('an event needs write access to the calendar it moves to', function (): void {
     $this->user->calendars()->attach($this->calendar->getKey(), ['permission' => 'owner']);
 
