@@ -284,3 +284,80 @@ test('the contact picker of the new order modal can be replaced on its own', fun
     expect($section)->toContain('wire:model="order.contact_id"')
         ->and($section)->not->toContain('order.address_invoice_id');
 });
+
+function createSupplierWithDeliveryAddress(): array
+{
+    $supplier = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
+    $invoiceAddress = Address::factory()->create([
+        'contact_id' => $supplier->getKey(),
+        'is_main_address' => true,
+        'is_invoice_address' => true,
+    ]);
+    $deliveryAddress = Address::factory()->create(['contact_id' => $supplier->getKey()]);
+    $supplier->update([
+        'delivery_address_id' => $deliveryAddress->getKey(),
+        'invoice_address_id' => $invoiceAddress->getKey(),
+        'main_address_id' => $invoiceAddress->getKey(),
+    ]);
+
+    return [$supplier, $deliveryAddress];
+}
+
+test('create dialog saves a purchase without delivery address', function (): void {
+    [$supplier] = createSupplierWithDeliveryAddress();
+    $orderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Purchase,
+        'is_active' => true,
+    ]);
+
+    Livewire::test(OrderList::class)
+        ->set('order.order_type_id', $orderType->getKey())
+        ->set('order.contact_id', $supplier->getKey())
+        ->call('fetchContactData')
+        ->assertSet('order.address_delivery_id', null)
+        ->set('order.payment_type_id', PaymentType::factory()
+            ->hasAttached($this->dbTenant, relationship: 'tenants')
+            ->create()
+            ->getKey())
+        ->set('order.price_list_id', PriceList::factory()->create()->getKey())
+        ->set('order.language_id', $this->defaultLanguage->getKey())
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $order = Order::query()->where('order_type_id', $orderType->getKey())->first();
+
+    expect($order)->not->toBeNull()
+        ->and($order->address_delivery_id)->toBeNull();
+});
+
+test('create dialog prefills the delivery address of a sales order', function (): void {
+    [$customer, $deliveryAddress] = createSupplierWithDeliveryAddress();
+
+    Livewire::test(OrderList::class)
+        ->set('order.order_type_id', OrderType::factory()
+            ->create(['order_type_enum' => OrderTypeEnum::Order, 'is_active' => true])
+            ->getKey())
+        ->set('order.contact_id', $customer->getKey())
+        ->call('fetchContactData')
+        ->assertSet('order.address_delivery_id', $deliveryAddress->getKey());
+});
+
+test('create dialog follows an order type chosen after the contact', function (): void {
+    [$supplier, $deliveryAddress] = createSupplierWithDeliveryAddress();
+    $otherAddress = Address::factory()->create(['contact_id' => $supplier->getKey()]);
+    $createOrderType = fn (OrderTypeEnum $orderTypeEnum): int => OrderType::factory()
+        ->create(['order_type_enum' => $orderTypeEnum, 'is_active' => true])
+        ->getKey();
+
+    Livewire::test(OrderList::class)
+        ->set('order.contact_id', $supplier->getKey())
+        ->call('fetchContactData')
+        ->assertSet('order.address_delivery_id', $deliveryAddress->getKey())
+        ->set('order.order_type_id', $createOrderType(OrderTypeEnum::Purchase))
+        ->assertSet('order.address_delivery_id', null)
+        ->set('order.order_type_id', $createOrderType(OrderTypeEnum::Order))
+        ->assertSet('order.address_delivery_id', $deliveryAddress->getKey())
+        ->set('order.address_delivery_id', $otherAddress->getKey())
+        ->set('order.order_type_id', $createOrderType(OrderTypeEnum::Offer))
+        ->assertSet('order.address_delivery_id', $otherAddress->getKey());
+});

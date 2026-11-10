@@ -43,7 +43,7 @@
                 >
                     <x-select.styled
                         :label="__('Order type')"
-                        wire:model="replicateOrder.order_type_id"
+                        wire:model.live="replicateOrder.order_type_id"
                         required
                         select="label:name|value:id"
                         unfiltered

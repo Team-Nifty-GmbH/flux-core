@@ -1407,6 +1407,44 @@ test('replicates an order whose address snapshot points at a deleted address', f
         ->and($replicated->getKey())->not->toBe($order->getKey());
 });
 
+test('replicating into a purchase order with a cleared delivery address keeps it empty', function (): void {
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
+
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+    $deliveryAddress = Address::factory()->create(['contact_id' => $contact->getKey()]);
+    $contact->update(['delivery_address_id' => $deliveryAddress->getKey()]);
+
+    $order = Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'address_delivery_id' => $deliveryAddress->getKey(),
+        'contact_id' => $contact->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => OrderType::factory()
+            ->create(['order_type_enum' => OrderTypeEnum::Order, 'is_active' => true])
+            ->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
+
+    $replicated = ReplicateOrder::make([
+        'id' => $order->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'address_delivery_id' => null,
+        'order_type_id' => OrderType::factory()
+            ->create(['order_type_enum' => OrderTypeEnum::Purchase, 'is_active' => true])
+            ->getKey(),
+    ])
+        ->validate()
+        ->execute();
+
+    expect($replicated->address_delivery_id)->toBeNull();
+});
+
 test('creates a refund from an order which itself has a parent', function (): void {
     $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
 
