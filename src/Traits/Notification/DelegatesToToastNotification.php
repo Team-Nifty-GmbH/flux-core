@@ -2,6 +2,7 @@
 
 namespace FluxErp\Traits\Notification;
 
+use Illuminate\Support\Str;
 use Kreait\Firebase\Messaging\Notification as FcmNotification;
 use NotificationChannels\WebPush\WebPushMessage;
 
@@ -21,6 +22,18 @@ trait DelegatesToToastNotification
     public function toArray(object $notifiable): array
     {
         return $this->toToastNotification($notifiable)->toArray();
+    }
+
+    public function toBroadcast(object $notifiable): array
+    {
+        $data = $this->toArray($notifiable);
+        $description = data_get($data, 'description');
+
+        if (mb_strlen($description ?? '') > 500) {
+            $data['description'] = Str::limit(strip_tags($description), 500);
+        }
+
+        return $data;
     }
 
     public function toWebPush(object $notifiable): ?WebPushMessage
