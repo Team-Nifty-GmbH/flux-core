@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use Carbon\CarbonInterface;
 use Cron\CronExpression;
+use DateTimeInterface;
 use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\RepeatableTypeEnum;
 use FluxErp\Models\Pivots\OrderSchedule;
@@ -17,6 +18,27 @@ use Illuminate\Support\Carbon;
 class Schedule extends FluxModel
 {
     use HasUserModification, HasUuid, LogsActivity, SoftDeletes;
+
+    public static function nextRunAfter(CronExpression $cron, DateTimeInterface $runDate): Carbon
+    {
+        $nextRun = Carbon::instance($cron->getNextRunDate($runDate));
+
+        return ! $cron->isDue($runDate)
+            && $nextRun->isSameDay($runDate)
+            && ! static::runsSeveralTimesADay($cron, $nextRun)
+            ? Carbon::instance($cron->getNextRunDate($nextRun))
+            : $nextRun;
+    }
+
+    /**
+     * A run outside the cron rhythm stands in for the next tick on the same day only when
+     * the cron runs at most once a day. Otherwise that tick is a new occurrence.
+     */
+    public static function runsSeveralTimesADay(CronExpression $cron, DateTimeInterface $tick): bool
+    {
+        return Carbon::instance($cron->getNextRunDate($tick))
+            ->lessThan(Carbon::instance($tick)->addDay());
+    }
 
     /**
      * The end of the period that starts on $start, based on the schedule frequency.

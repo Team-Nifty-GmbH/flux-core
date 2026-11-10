@@ -68,6 +68,66 @@ test('leaves a schedule out that has already ended', function (): void {
     expect($component->get('series'))->toBeEmpty();
 });
 
+test('starts the forecast at a due date in the future', function (): void {
+    makeForecastOrder(OrderTypeEnum::Subscription, '100.00', cronExpression: '0 0 15,20 * *', scheduleAttributes: [
+        'due_at' => now()->startOfMonth()->addDays(19),
+    ]);
+
+    $component = Livewire::test(RecurringRevenueForecast::class)
+        ->call('calculateChart');
+
+    expect($component->get('xaxis.categories'))->toBe([now()->startOfMonth()->addDays(19)->format('Y-m-d')])
+        ->and($component->get('series.0.data'))->toBe(['100.00']);
+});
+
+test('leaves a schedule out that is not due within the time frame', function (): void {
+    makeForecastOrder(OrderTypeEnum::Subscription, '100.00', scheduleAttributes: [
+        'due_at' => now()->addMonthNoOverflow()->startOfMonth()->addDays(14),
+    ]);
+
+    $component = Livewire::test(RecurringRevenueForecast::class)
+        ->call('calculateChart');
+
+    expect($component->get('series'))->toBeEmpty()
+        ->and($component->get('orderIds'))->toBeEmpty();
+});
+
+test('forecasts the following runs after a due date outside the cron rhythm', function (): void {
+    makeForecastOrder(OrderTypeEnum::Subscription, '100.00', cronExpression: '0 0 20 * *', scheduleAttributes: [
+        'due_at' => now()->startOfMonth()->addDays(14)->addHours(12),
+    ]);
+
+    $component = Livewire::test(RecurringRevenueForecast::class)
+        ->call('calculateChart');
+
+    expect($component->get('xaxis.categories'))->toBe([
+        now()->startOfMonth()->addDays(14)->format('Y-m-d'),
+        now()->startOfMonth()->addDays(19)->format('Y-m-d'),
+    ]);
+});
+
+test('does not count a due date twice when the cron matches later the same day', function (): void {
+    makeForecastOrder(OrderTypeEnum::Subscription, '100.00', cronExpression: '0 6 15 * *', scheduleAttributes: [
+        'due_at' => now()->startOfMonth()->addDays(14),
+    ]);
+
+    $component = Livewire::test(RecurringRevenueForecast::class)
+        ->call('calculateChart');
+
+    expect($component->get('series.0.data'))->toBe(['100.00']);
+});
+
+test('forecasts from the cron rhythm when the due date has passed', function (): void {
+    makeForecastOrder(OrderTypeEnum::Subscription, '100.00', scheduleAttributes: [
+        'due_at' => now()->subMinute(),
+    ]);
+
+    $component = Livewire::test(RecurringRevenueForecast::class)
+        ->call('calculateChart');
+
+    expect($component->get('xaxis.categories'))->toBe([now()->startOfMonth()->addDays(14)->format('Y-m-d')]);
+});
+
 test('leaves a schedule out that has run all its recurrences', function (): void {
     makeForecastOrder(OrderTypeEnum::Subscription, '100.00', scheduleAttributes: [
         'recurrences' => 3,
