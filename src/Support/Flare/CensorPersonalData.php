@@ -4,6 +4,8 @@ namespace FluxErp\Support\Flare;
 
 use Closure;
 use Illuminate\Database\QueryException;
+use Spatie\FlareClient\Report;
+use Spatie\FlareClient\ReportFactory;
 
 /**
  * Error reports leave the server, so they must not carry personal data.
@@ -15,7 +17,7 @@ class CensorPersonalData
 {
     public const string CENSORED = '<CENSORED>';
 
-    public function handle(object $report, Closure $next): mixed
+    public function handle(Report|ReportFactory $report, Closure $next): mixed
     {
         $throwable = $report->getThrowable();
         if ($throwable instanceof QueryException) {

@@ -10,60 +10,18 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Spatie\FlareClient\Api;
 use Spatie\FlareClient\Flare;
+use Spatie\FlareClient\Report;
 use Spatie\FlareClient\Senders\Sender;
 use Spatie\FlareClient\Spans\Span;
 use Spatie\LaravelFlare\FlareServiceProvider;
 use Spatie\LaravelIgnition\FlareMiddleware\AddQueries;
 use function Livewire\invade;
 
-function flareReport(array $context): object
+require_once __DIR__ . '/../Fixtures/FlareReport.php';
+
+function flareReport(array $context): Report
 {
-    return new class($context)
-    {
-        public ?string $message = null;
-
-        public ?Throwable $throwable = null;
-
-        public array $userProvidedContext = [];
-
-        public function __construct(private readonly array $context) {}
-
-        public function allContext(): array
-        {
-            return array_replace_recursive($this->context, $this->userProvidedContext);
-        }
-
-        public function getMessage(): ?string
-        {
-            return $this->message;
-        }
-
-        public function getThrowable(): ?Throwable
-        {
-            return $this->throwable;
-        }
-
-        public function message(string $message): static
-        {
-            $this->message = $message;
-
-            return $this;
-        }
-
-        public function throwable(Throwable $throwable): static
-        {
-            $this->throwable = $throwable;
-
-            return $this;
-        }
-
-        public function userProvidedContext(array $userProvidedContext): static
-        {
-            $this->userProvidedContext = $userProvidedContext;
-
-            return $this;
-        }
-    };
+    return new Report($context);
 }
 
 function censoredFlareContext(array $context): array
