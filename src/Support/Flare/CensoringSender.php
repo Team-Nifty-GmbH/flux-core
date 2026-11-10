@@ -7,7 +7,7 @@ use Spatie\FlareClient\Senders\Sender;
 
 class CensoringSender implements Sender
 {
-    use CensorsUrls;
+    use CensorsCommandLines, CensorsUrls;
 
     public const string CENSORED = '<CENSORED>';
 
@@ -34,12 +34,14 @@ class CensoringSender implements Sender
         'http.request.files',
         'http.request.session',
         'laravel.job.properties',
+        'laravel.job.tags',
         'laravel.route.parameters',
         'laravel.url',
         'livewire.component.call.params',
         'livewire.components',
         'log.context',
         'notification.to',
+        'process.command_args',
         'url.fragment',
         'url.query',
         'user.attributes',
@@ -59,7 +61,6 @@ class CensoringSender implements Sender
     protected const string REQUEST_SPAN_PREFIX = 'Request - ';
 
     protected const array URLS = [
-        'flare.entry_point.value',
         'referer',
         'url.full',
         'url.path',
@@ -98,6 +99,10 @@ class CensoringSender implements Sender
         return match (true) {
             $name === 'arguments' => null,
             in_array($name, static::CENSORED_NAMES, true) => static::CENSORED,
+            is_string($value) && $name === 'flare.entry_point.value' => implode(
+                ' ',
+                $this->censorCommandLine(explode(' ', $this->censorUrl($value)))
+            ),
             is_string($value) && in_array($name, static::URLS, true) => $this->censorUrl($value),
             is_string($value)
                 && $name === 'name'
