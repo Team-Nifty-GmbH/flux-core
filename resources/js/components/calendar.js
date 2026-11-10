@@ -376,6 +376,7 @@ const calendar = () => {
                     interactionPlugin,
                     classicThemePlugin,
                 ],
+                locales: allLocales,
                 // v7 hashes its own class names, so expose stable hooks for the
                 // application stylesheet and the calendar-week title suffix below.
                 viewClass: 'fc-view',
