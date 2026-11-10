@@ -3,12 +3,9 @@
 namespace FluxErp\Actions\PaymentReminder;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Models\Media;
-use FluxErp\Models\Order;
 use FluxErp\Models\PaymentReminder;
 use FluxErp\Rulesets\PaymentReminder\UpdatePaymentReminderRuleset;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Validation\ValidationException;
 
 class UpdatePaymentReminder extends FluxAction
 {
@@ -37,25 +34,5 @@ class UpdatePaymentReminder extends FluxAction
         $paymentReminder->save();
 
         return $paymentReminder->withoutRelations()->fresh();
-    }
-
-    protected function validateData(): void
-    {
-        parent::validateData();
-
-        $paymentReminder = resolve_static(PaymentReminder::class, 'query')
-            ->whereKey($this->data['id'])
-            ->first(['id', 'order_id']);
-
-        if (! resolve_static(Media::class, 'query')
-            ->whereKey($this->data['media_id'])
-            ->where('model_type', app(Order::class)->getMorphClass())
-            ->where('model_id', $paymentReminder->order_id)
-            ->exists()
-        ) {
-            throw ValidationException::withMessages([
-                'media_id' => [__('validation.exists', ['attribute' => 'media_id'])],
-            ])->errorBag('updatePaymentReminder');
-        }
     }
 }

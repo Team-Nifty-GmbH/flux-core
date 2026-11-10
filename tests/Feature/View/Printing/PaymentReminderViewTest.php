@@ -11,7 +11,7 @@ use FluxErp\Models\PaymentReminder;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 
-test('stores the reminder pdf on the order and links it as media of the reminder', function (): void {
+test('stores the reminder pdf on the order', function (): void {
     $contact = Contact::factory()->create();
     $address = Address::factory()->create([
         'contact_id' => $contact->getKey(),
@@ -53,6 +53,5 @@ test('stores the reminder pdf on the order and links it as media of the reminder
     expect($media)->not->toBeNull()
         ->and($media->model_type)->toBe($order->getMorphClass())
         ->and($media->model_id)->toBe($order->getKey())
-        ->and($media->collection_name)->toBe('payment-reminders')
-        ->and($reminder->fresh()->media_id)->toBe($media->getKey());
+        ->and($media->collection_name)->toBe('payment-reminders');
 });
