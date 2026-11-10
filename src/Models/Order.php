@@ -1277,7 +1277,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     public function getSerialNumber(string|array $types, ?int $tenantId = null): static
     {
         if (in_array('invoice_number', Arr::wrap($types))) {
-            if (! $this->contact) {
+            if (! $this->contact()->exists()) {
                 throw ValidationException::withMessages([
                     'contact_id' => [__('The contact of this order no longer exists')],
                 ]);
