@@ -1657,3 +1657,218 @@ test('rebuilds the slug positions once instead of once per position', function (
         ->and($copy->orderPositions()->count())->toBe(6)
         ->and($copy->orderPositions()->pluck('slug_position')->filter()->count())->toBe(6);
 });
+
+test('applies the vat rate fitting the replicated document after the contact became tax exempt', function (
+    OrderTypeEnum $sourceEnum,
+    OrderTypeEnum $targetEnum,
+    bool $positionHasOwnRate,
+    bool $keepsInvoiceRate
+): void {
+    $reducedRate = VatRate::factory()->create(['rate_percentage' => 0.07]);
+    $exemptRate = VatRate::factory()->create(['rate_percentage' => 0, 'is_tax_exemption' => true]);
+
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $sourceOrderType = OrderType::factory()->create(['order_type_enum' => $sourceEnum, 'is_active' => true]);
+    $targetOrderType = OrderType::factory()->create(['order_type_enum' => $targetEnum, 'is_active' => true]);
+    $isInvoiced = in_array($targetEnum, [OrderTypeEnum::Refund, OrderTypeEnum::Retoure]);
+
+    $order = Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => $sourceOrderType->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => $isInvoiced ? Str::random() : null,
+        'is_locked' => $isInvoiced,
+        'vat_rate_id' => null,
+    ]);
+
+    OrderPosition::factory()->create([
+        'order_id' => $order->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'product_id' => $positionHasOwnRate
+            ? null
+            : Product::factory()->create(['vat_rate_id' => $reducedRate->getKey()])->getKey(),
+        'warehouse_id' => Warehouse::factory()->create()->getKey(),
+        'vat_rate_id' => $positionHasOwnRate ? $reducedRate->getKey() : null,
+        'vat_rate_percentage' => 0.07,
+        'discount_percentage' => null,
+        'amount' => 1,
+        'signed_amount' => 1,
+        'unit_net_price' => 180,
+        'unit_gross_price' => 192.6,
+        'total_net_price' => 180,
+        'total_gross_price' => 192.6,
+        'is_net' => true,
+        'is_free_text' => false,
+    ]);
+
+    $contact->update(['vat_rate_id' => $exemptRate->getKey()]);
+
+    $copy = ReplicateOrder::make([
+        'id' => $order->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $targetOrderType->getKey(),
+    ])
+        ->validate()
+        ->execute();
+
+    $position = $copy->orderPositions()->first();
+    $multiplier = $targetEnum->multiplier();
+
+    expect($copy->vat_rate_id)->toBe($keepsInvoiceRate ? null : $exemptRate->getKey())
+        ->and($position->vat_rate_id)->toBe($keepsInvoiceRate ? $reducedRate->getKey() : $exemptRate->getKey())
+        ->and((float) $position->vat_rate_percentage)->toEqual($keepsInvoiceRate ? 0.07 : 0.0)
+        ->and((float) $position->total_net_price)->toEqual(180.0 * $multiplier)
+        ->and((float) $position->total_gross_price)->toEqual(($keepsInvoiceRate ? 192.6 : 180.0) * $multiplier)
+        ->and((float) $position->vat_price)->toEqual(($keepsInvoiceRate ? 12.6 : 0.0) * $multiplier);
+})->with([
+    'refund, own rate' => [OrderTypeEnum::Order, OrderTypeEnum::Refund, true, true],
+    'refund, product rate' => [OrderTypeEnum::Order, OrderTypeEnum::Refund, false, true],
+    'retoure, own rate' => [OrderTypeEnum::Order, OrderTypeEnum::Retoure, true, true],
+    'retoure, product rate' => [OrderTypeEnum::Order, OrderTypeEnum::Retoure, false, true],
+    'split order, own rate' => [OrderTypeEnum::Order, OrderTypeEnum::SplitOrder, true, false],
+    'split order, product rate' => [OrderTypeEnum::Order, OrderTypeEnum::SplitOrder, false, false],
+    'subscription invoice, own rate' => [OrderTypeEnum::Subscription, OrderTypeEnum::Order, true, false],
+    'subscription invoice, product rate' => [OrderTypeEnum::Subscription, OrderTypeEnum::Order, false, false],
+    'copy, own rate' => [OrderTypeEnum::Order, OrderTypeEnum::Order, true, false],
+    'copy, product rate' => [OrderTypeEnum::Order, OrderTypeEnum::Order, false, false],
+]);
+
+test('a refund for another contact takes the vat rate of that contact', function (): void {
+    $reducedRate = VatRate::factory()->create(['rate_percentage' => 0.07]);
+    $exemptRate = VatRate::factory()->create(['rate_percentage' => 0, 'is_tax_exemption' => true]);
+
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $otherContact = Contact::factory()->create([
+        'has_delivery_lock' => false,
+        'credit_line' => null,
+        'vat_rate_id' => $exemptRate->getKey(),
+    ]);
+    $otherAddress = Address::factory()->create([
+        'contact_id' => $otherContact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $order = Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => OrderType::factory()
+            ->create(['order_type_enum' => OrderTypeEnum::Order, 'is_active' => true])
+            ->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => Str::random(),
+        'is_locked' => true,
+        'vat_rate_id' => null,
+    ]);
+
+    OrderPosition::factory()->create([
+        'order_id' => $order->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'vat_rate_id' => $reducedRate->getKey(),
+        'vat_rate_percentage' => 0.07,
+        'discount_percentage' => null,
+        'amount' => 1,
+        'signed_amount' => 1,
+        'unit_net_price' => 180,
+        'unit_gross_price' => 192.6,
+        'total_net_price' => 180,
+        'total_gross_price' => 192.6,
+        'is_net' => true,
+        'is_free_text' => false,
+    ]);
+
+    $refund = ReplicateOrder::make([
+        'id' => $order->getKey(),
+        'contact_id' => $otherContact->getKey(),
+        'address_invoice_id' => $otherAddress->getKey(),
+        'order_type_id' => OrderType::factory()
+            ->create(['order_type_enum' => OrderTypeEnum::Refund, 'is_active' => true])
+            ->getKey(),
+    ])
+        ->validate()
+        ->execute();
+
+    $position = $refund->orderPositions()->first();
+
+    expect($refund->vat_rate_id)->toBe($exemptRate->getKey())
+        ->and($position->vat_rate_id)->toBe($exemptRate->getKey())
+        ->and((float) $position->vat_rate_percentage)->toEqual(0.0)
+        ->and((float) $position->total_gross_price)->toEqual(-180.0);
+});
+
+test('a refund keeps the invoice vat rate when the contact id is passed as string', function (): void {
+    $reducedRate = VatRate::factory()->create(['rate_percentage' => 0.07]);
+    $exemptRate = VatRate::factory()->create(['rate_percentage' => 0, 'is_tax_exemption' => true]);
+
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $order = Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => OrderType::factory()
+            ->create(['order_type_enum' => OrderTypeEnum::Order, 'is_active' => true])
+            ->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => Str::random(),
+        'is_locked' => true,
+        'vat_rate_id' => null,
+    ]);
+
+    OrderPosition::factory()->create([
+        'order_id' => $order->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'vat_rate_id' => $reducedRate->getKey(),
+        'vat_rate_percentage' => 0.07,
+        'discount_percentage' => null,
+        'amount' => 1,
+        'signed_amount' => 1,
+        'unit_net_price' => 180,
+        'unit_gross_price' => 192.6,
+        'total_net_price' => 180,
+        'total_gross_price' => 192.6,
+        'is_net' => true,
+        'is_free_text' => false,
+    ]);
+
+    $contact->update(['vat_rate_id' => $exemptRate->getKey()]);
+
+    $refund = ReplicateOrder::make([
+        'id' => $order->getKey(),
+        'contact_id' => (string) $contact->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'order_type_id' => OrderType::factory()
+            ->create(['order_type_enum' => OrderTypeEnum::Refund, 'is_active' => true])
+            ->getKey(),
+    ])
+        ->validate()
+        ->execute();
+
+    expect($refund->vat_rate_id)->toBeNull()
+        ->and((float) $refund->orderPositions()->first()->total_gross_price)->toEqual(-192.6);
+});
