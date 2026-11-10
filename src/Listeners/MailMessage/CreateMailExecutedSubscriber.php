@@ -118,9 +118,10 @@ class CreateMailExecutedSubscriber
                 'authenticatable_type' => morph_alias(Address::class),
                 'authenticatable_id' => $this->address->getKey(),
                 'title' => $communication->subject,
-                'description' => collect([$communication->text_body, $communication->html_body])
-                    ->first(fn (?string $body): bool => mb_strlen(trim($body ?? '')) >= 12)
-                    ?? $communication->subject,
+                'description' => array_find(
+                    [$communication->text_body, $communication->html_body],
+                    fn (?string $body): bool => mb_strlen(trim($body ?? '')) >= 12
+                ) ?? $communication->subject,
             ])
                 ->actingAs($this->address)
                 ->validate()
