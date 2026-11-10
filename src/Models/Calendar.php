@@ -51,12 +51,14 @@ class Calendar extends FluxModel
 
         $existingCalendars = resolve_static(static::class, 'query')
             ->whereKey($calendarIds)
+            ->whereNull('model_type')
             ->count();
 
         if (
             ! method_exists($user, 'calendars')
             || $user->calendars()
                 ->whereKey($calendarIds)
+                ->whereNull('model_type')
                 ->wherePivot('permission', '!=', 'reader')
                 ->count() !== $existingCalendars
         ) {
