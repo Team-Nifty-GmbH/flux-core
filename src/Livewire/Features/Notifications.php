@@ -22,6 +22,7 @@ class Notifications extends Component
     #[Locked]
     public bool $hasMore = true;
 
+    #[Locked]
     public int $unread = 0;
 
     public function mount(): void
