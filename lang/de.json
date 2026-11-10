@@ -38,6 +38,8 @@
     ":model Export Ready": ":model Export bereit",
     ":model restored": ":model wiederhergestellt",
     ":model saved": ":model gespeichert",
+    ":name logged in": ":name hat sich angemeldet",
+    ":name logged out": ":name hat sich abgemeldet",
     ":order_type :order_number dated :order_date": ":order_type :order_number vom :order_date",
     ":overridden of :total fields overridden on at least one variant": ":overridden von :total Feldern werden auf mindestens einer Variante überschrieben",
     ":percent % of open invoices overdue": ":percent % der offenen Rechnungen überfällig",
