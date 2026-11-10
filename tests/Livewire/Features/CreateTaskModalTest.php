@@ -101,3 +101,30 @@ test('does not accept a linked record from the client', function (string $proper
         ['modelType', 'contact'],
     ])
     ->throws(CannotUpdateLockedPropertyException::class);
+
+test('renders the due reminder fields', function (): void {
+    Livewire::test(CreateTaskModal::class)
+        ->assertSeeHtml('x-show="$wire.task.due_date"')
+        ->assertSeeHtml('wire:model="task.has_due_reminder"')
+        ->assertSeeHtml('wire:model="task.due_reminder_minutes_before"');
+});
+
+test('can create a task with a due reminder', function (): void {
+    $name = Str::uuid()->toString();
+
+    Livewire::test(CreateTaskModal::class)
+        ->call('resetTask')
+        ->set('task.name', $name)
+        ->set('task.due_date', now()->addDay()->toDateString())
+        ->set('task.has_due_reminder', true)
+        ->set('task.due_reminder_minutes_before', 30)
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    $this->assertDatabaseHas('tasks', [
+        'name' => $name,
+        'has_due_reminder' => true,
+        'due_reminder_minutes_before' => 30,
+    ]);
+});
