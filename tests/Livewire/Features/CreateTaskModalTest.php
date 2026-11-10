@@ -104,6 +104,7 @@ test('does not accept a linked record from the client', function (string $proper
 
 test('renders the due reminder fields', function (): void {
     Livewire::test(CreateTaskModal::class)
+        ->assertSeeHtml('x-show="$wire.task.due_date"')
         ->assertSeeHtml('wire:model="task.has_due_reminder"')
         ->assertSeeHtml('wire:model="task.due_reminder_minutes_before"');
 });
