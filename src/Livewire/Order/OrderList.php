@@ -368,7 +368,6 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
             ->toArray();
     }
 
-    #[Renderless]
     public function updatedOrderOrderTypeId(): void
     {
         $this->skipRender();
@@ -383,6 +382,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
                     ->value('delivery_address_id');
     }
 
+    #[Renderless]
     public function updatedShowMap(): void
     {
         $this->dispatch('load-map');
