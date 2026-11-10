@@ -39,6 +39,7 @@ return [
 
     'mail' => [
         'max_message_size' => (int) env('FLUX_MAIL_MAX_MESSAGE_SIZE', 25 * 1024 * 1024),
+        'sync_time_budget' => (int) env('FLUX_MAIL_SYNC_TIME_BUDGET', 300),
     ],
 
     'vite' => [
