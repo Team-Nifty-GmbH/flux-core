@@ -10,6 +10,7 @@ use FluxErp\Listeners\CacheKeyWrittenListener;
 use FluxErp\Listeners\MailMessage\CreateMailExecutedSubscriber;
 use FluxErp\Listeners\MessageSendingEventSubscriber;
 use FluxErp\Listeners\Notifications\EloquentEventSubscriber;
+use FluxErp\Listeners\Order\OfferSignedSubscriber;
 use FluxErp\Listeners\Order\OrderInvoiceAddedSubscriber;
 use FluxErp\Listeners\Order\OrderStockSubscriber;
 use FluxErp\Listeners\Product\DispatchVariantInheritanceMigration;
@@ -72,6 +73,7 @@ class EventServiceProvider extends ServiceProvider
         SnapshotEventSubscriber::class,
         OrderStockSubscriber::class,
         OrderInvoiceAddedSubscriber::class,
+        OfferSignedSubscriber::class,
         MessageSendingEventSubscriber::class,
         CreateMailExecutedSubscriber::class,
         CommentCreatedNotification::class,
