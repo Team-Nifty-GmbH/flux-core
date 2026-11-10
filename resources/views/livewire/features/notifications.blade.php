@@ -35,7 +35,13 @@
         >
             <div
                 x-data="{
-                    refill: null,
+                    loading: false,
+                    settle: null,
+                    init() {
+                        new ResizeObserver(() => this.queueFill()).observe(
+                            $refs.toasts,
+                        );
+                    },
                     addToast(event) {
                         const list = $tallstackuiToast($refs.toasts.id);
                         list.alpineComponent.add(event);
@@ -44,17 +50,42 @@
                             $refs.toasts.prepend(list.element);
                         }
 
-                        clearTimeout(this.refill);
-                        this.refill = setTimeout(() => {
-                            if (
-                                show &&
-                                $wire.hasMore &&
-                                $refs.more.getBoundingClientRect().top <
-                                    window.innerHeight
-                            ) {
-                                $wire.showNotifications();
-                            }
-                        }, 100);
+                        this.queueFill();
+                    },
+                    queueFill() {
+                        clearTimeout(this.settle);
+                        this.settle = setTimeout(() => this.fill(), 50);
+                    },
+                    fill() {
+                        // A toast is hidden until its own init shows it, so the list only
+                        // has its real height once every toast is visible.
+                        const pending = [
+                            ...$refs.toasts.querySelectorAll(
+                                '[x-data^=tallstackui_toastLoop]',
+                            ),
+                        ].some((toast) => !toast.checkVisibility());
+
+                        if (pending) {
+                            this.queueFill();
+
+                            return;
+                        }
+
+                        if (
+                            this.loading ||
+                            !show ||
+                            !$wire.hasMore ||
+                            $refs.more.getBoundingClientRect().top >=
+                                window.innerHeight
+                        ) {
+                            return;
+                        }
+
+                        this.loading = true;
+                        $wire.showNotifications().finally(() => {
+                            this.loading = false;
+                            this.queueFill();
+                        });
                     },
                     removeAll() {
                         $tallstackuiToast(
@@ -74,10 +105,7 @@
                     wire:ignore
                 >
                     <x-toast scope="relative" />
-                    <div
-                        x-ref="more"
-                        x-intersect="show && $wire.showNotifications()"
-                    ></div>
+                    <div x-ref="more" x-intersect="fill()"></div>
                 </div>
             </div>
             <x-slot:footer>
