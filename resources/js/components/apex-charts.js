@@ -207,6 +207,23 @@ function apexCharts($wire) {
                 };
             });
 
+            // Rounded stacked bars get their bottom radius by mirroring the path with
+            // a CSS transform (transform-box: fill-box). WebKit keeps the fill-box of
+            // the first animation frame, so the mirrored segments end up below the
+            // axis. ApexCharts only works around this for user agents containing
+            // "Safari", which an in-app WKWebView does not send. Reapplying the class
+            // once the animation is done makes WebKit measure the final path.
+            events.animationEnd = (chartContext) => {
+                chartContext.el
+                    .querySelectorAll('.apexcharts-flip-y, .apexcharts-flip-x')
+                    .forEach((path) => {
+                        const classes = path.getAttribute('class');
+                        path.setAttribute('class', '');
+                        path.getBBox();
+                        path.setAttribute('class', classes);
+                    });
+            };
+
             return events;
         },
         mapLivewireData(options) {
