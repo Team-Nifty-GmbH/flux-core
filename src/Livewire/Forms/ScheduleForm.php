@@ -202,7 +202,7 @@ class ScheduleForm extends FluxForm
         $dates = [];
 
         if ($dueAt && $dueAt->isFuture()) {
-            if (! $endsAt || $dueAt->lessThanOrEqualTo($endsAt)) {
+            if (! $endsAt || $dueAt->lessThan($endsAt)) {
                 $dates[] = $this->buildExecutionEntry($dueAt, $periodStart, $expression);
             }
         }
@@ -233,7 +233,7 @@ class ScheduleForm extends FluxForm
                             ->setTime((int) $parts[1], (int) $parts[0]);
                     }
 
-                    if ($endsAt && $next->greaterThan($endsAt)) {
+                    if ($endsAt && $next->greaterThanOrEqualTo($endsAt)) {
                         break;
                     }
 
@@ -247,7 +247,7 @@ class ScheduleForm extends FluxForm
                 for ($i = 0; $i < $maxDates; $i++) {
                     $next = Carbon::instance($cron->getNextRunDate($current));
 
-                    if ($endsAt && $next->greaterThan($endsAt)) {
+                    if ($endsAt && $next->greaterThanOrEqualTo($endsAt)) {
                         break;
                     }
 

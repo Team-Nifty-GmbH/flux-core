@@ -973,3 +973,46 @@ test('process subscription order deactivates the schedule of a deleted order ins
     expect($result)->toBeTrue()
         ->and($schedule->refresh()->is_active)->toBeFalse();
 });
+
+test('schedule preview leaves out a run that falls exactly on the end of the schedule', function (
+    string $method,
+    array $parameters,
+    ?string $dueAt,
+    string $endsAt,
+    array $expected
+): void {
+    $this->travelTo('2026-11-01 01:00:00');
+
+    $dates = Livewire::test(Scheduling::class)
+        ->set('schedule.cron.methods.basic', $method)
+        ->set('schedule.cron.parameters.basic', $parameters)
+        ->set('schedule.due_at', $dueAt)
+        ->set('schedule.end_radio', 'ends_at')
+        ->set('schedule.ends_at', $endsAt)
+        ->instance()->schedule->getNextExecutionDates(5);
+
+    expect(array_column($dates, 'date'))->toBe($expected);
+})->with([
+    'due at equals end' => ['monthlyOn', [15, '00:00'], '2026-11-15 00:00:00', '2026-11-15 00:00:00', []],
+    'later run equals end' => [
+        'monthlyOn',
+        [15, '00:00'],
+        '2026-11-15 00:00:00',
+        '2027-01-15 00:00:00',
+        ['2026-11-15 00:00:00', '2026-12-15 00:00:00'],
+    ],
+    'last day of month equals end' => [
+        'lastDayOfMonth',
+        ['00:00'],
+        null,
+        '2026-12-31 00:00:00',
+        ['2026-11-30 00:00:00'],
+    ],
+    'run before end stays' => [
+        'monthlyOn',
+        [15, '00:00'],
+        '2026-11-15 00:00:00',
+        '2026-11-15 00:01:00',
+        ['2026-11-15 00:00:00'],
+    ],
+]);
