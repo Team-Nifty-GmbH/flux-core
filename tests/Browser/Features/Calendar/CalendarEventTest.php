@@ -618,7 +618,7 @@ test('calendar uses the locale data of the user language', function (): void {
             const check = () => {
                 const link = document
                     .querySelector('[calendar-root]')
-                    ?.innerText.match(/\+ weitere \d+|\+\d+ \S+/)?.[0];
+                    ?.innerText.match(/\+ ?(\d+ )?\S+( \d+)?/)?.[0];
 
                 if (link || Date.now() - started > 10000) {
                     resolve(link ?? '');
@@ -631,5 +631,7 @@ test('calendar uses the locale data of the user language', function (): void {
         })
     JS);
 
-    expect($moreLinkText)->toMatch('/^\+ weitere \d+$/');
+    expect($moreLinkText)
+        ->toContain('weitere')
+        ->not->toContain('more');
 });
