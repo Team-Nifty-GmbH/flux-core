@@ -9,8 +9,15 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Printer;
+use FluxErp\Models\PrintJob;
+use FluxErp\View\Printing\PrintableView;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 test('deduplicates preview filenames in zip', function (): void {
     Storage::fake();
@@ -155,4 +162,81 @@ test('invoice of an order whose contact was deleted fails validation and assigns
     }
 
     expect($order->refresh()->invoice_number)->toBeNull();
+});
+
+class NotPrintableTestView extends PrintableView
+{
+    public function __construct(public Contact $contact) {}
+
+    public static function isPrintable(): bool
+    {
+        return false;
+    }
+
+    public function render(): View
+    {
+        return view('flux::printing.order.invoice');
+    }
+
+    public function getFileName(): string
+    {
+        return 'not-printable';
+    }
+
+    public function getModel(): ?Model
+    {
+        return $this->contact;
+    }
+
+    public function getSubject(): string
+    {
+        return 'Not printable';
+    }
+
+    public function print(): static
+    {
+        return $this;
+    }
+
+    public function attachToModel(?Model $model = null): ?Media
+    {
+        return $this->contact
+            ->addMediaFromString('<xml />')
+            ->usingFileName('not-printable.xml')
+            ->toMediaCollection('not-printable');
+    }
+}
+
+test('sends no print job for a view that is not printable', function (): void {
+    Contact::registerPrintView('not-printable', NotPrintableTestView::class);
+    Notification::fake();
+
+    $contact = Contact::factory()->create();
+    $printer = Printer::query()->create([
+        'name' => 'Printer',
+        'spooler_name' => 'spooler',
+        'media_sizes' => ['A4'],
+    ]);
+
+    try {
+        app(CreateDocumentsJob::class, [
+            'items' => [
+                [
+                    'model_type' => $contact->getMorphClass(),
+                    'model_id' => $contact->getKey(),
+                    'layouts' => ['not-printable'],
+                ],
+            ],
+            'selectedPrintLayouts' => ['print' => ['not-printable']],
+            'userMorph' => 'user:' . $this->user->getKey(),
+            'printerId' => $printer->getKey(),
+            'printerSize' => 'A4',
+        ])
+            ->throwException()
+            ->handle();
+    } finally {
+        Contact::$registeredPrintViews = [];
+    }
+
+    expect(PrintJob::query()->count())->toBe(0);
 });

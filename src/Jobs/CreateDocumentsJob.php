@@ -70,7 +70,8 @@ class CreateDocumentsJob implements ShouldQueue
 
                 $isForce = in_array($layout, data_get($this->selectedPrintLayouts, 'force') ?? []);
                 $isDownload = in_array($layout, data_get($this->selectedPrintLayouts, 'download') ?? []);
-                $isPrint = in_array($layout, data_get($this->selectedPrintLayouts, 'print') ?? []);
+                $isPrint = in_array($layout, data_get($this->selectedPrintLayouts, 'print') ?? [])
+                    && resolve_static($printViews[$layout], 'isPrintable');
                 $isPreview = in_array($layout, data_get($this->selectedPrintLayouts, 'preview') ?? []);
 
                 if ($isPreview) {
