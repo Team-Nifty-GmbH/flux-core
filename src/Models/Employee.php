@@ -135,7 +135,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
 
     public function vacationCarryOverRule(): BelongsTo
     {
-        return $this->belongsto(VacationCarryoverRule::class);
+        return $this->belongsTo(VacationCarryoverRule::class, 'vacation_carryover_rule_id');
     }
 
     public function workTimeModelHistory(): HasMany
