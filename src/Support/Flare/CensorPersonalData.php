@@ -4,8 +4,8 @@ namespace FluxErp\Support\Flare;
 
 use Closure;
 use Illuminate\Database\QueryException;
-use Spatie\FlareClient\FlareMiddleware\FlareMiddleware;
 use Spatie\FlareClient\Report;
+use Spatie\FlareClient\ReportFactory;
 
 /**
  * Error reports leave the server, so they must not carry personal data.
@@ -13,11 +13,11 @@ use Spatie\FlareClient\Report;
  * request body, query strings carry search terms, and the user and bound route
  * models are serialized with all their attributes.
  */
-class CensorPersonalData implements FlareMiddleware
+class CensorPersonalData
 {
     public const string CENSORED = '<CENSORED>';
 
-    public function handle(Report $report, Closure $next)
+    public function handle(Report|ReportFactory $report, Closure $next): mixed
     {
         $throwable = $report->getThrowable();
         if ($throwable instanceof QueryException) {
