@@ -129,14 +129,22 @@ class ReplaceMedia extends FluxAction
 
     protected function deleteOldMedia(string $collectionName): void
     {
-        DB::transaction(function () use ($collectionName): void {
+        $delete = function () use ($collectionName): void {
             resolve_static(Media::class, 'query')
                 ->whereKey($this->getData('id'))
                 ->update(['collection_name' => $collectionName]);
 
             DeleteMedia::make(['id' => $this->getData('id')])
                 ->execute();
-        });
+        };
+
+        // Same guard as FluxAction::execute(): no nested savepoint when this already
+        // runs inside a transaction.
+        if (DB::transactionLevel() === 0) {
+            DB::transaction($delete);
+        } else {
+            $delete();
+        }
     }
 
     protected function moveOldMediaOutOfCollection(Media $mediaItem): void
