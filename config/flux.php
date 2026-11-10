@@ -26,6 +26,7 @@ return [
     'media' => [
         'conversion' => env('MEDIA_CONVERSIONS_DISK', 'public'),
         'disk' => env('MEDIA_DISK', 'local'),
+        'max_image_pixels' => (int) env('FLUX_MEDIA_MAX_IMAGE_PIXELS', 50_000_000),
     ],
 
     'file_uploads' => [
