@@ -494,7 +494,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
             );
         }
 
-        $printViews = $item->getPrintViews();
+        $printViews = $item->resolvePrintViews();
 
         $invoiceDocs = array_filter(
             $documents,
