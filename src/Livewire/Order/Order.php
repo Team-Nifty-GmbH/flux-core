@@ -417,11 +417,14 @@ class Order extends Component
         $this->{$orderFormName}->tenant_id = $contact?->getTenantId()
             ?? resolve_static(Tenant::class, 'default')->getKey();
         $this->{$orderFormName}->agent_id = $contact?->agent_id ?? $this->{$orderFormName}->agent_id;
-        $this->{$orderFormName}->contact_bank_connection_id = $contact?->contactBankConnections()
-            ->latest()
-            ->value('id');
         $this->{$orderFormName}->address_invoice_id = $contact?->invoice_address_id ?? $contact?->mainAddress?->id;
-        $this->{$orderFormName}->address_delivery_id = $this->{$orderFormName}->isPurchase
+        $isPurchase = $replicate
+            ? resolve_static(OrderType::class, 'query')
+                ->whereKey($this->replicateOrder->order_type_id)
+                ->value('order_type_enum')
+                ?->isPurchase()
+            : $this->order->isPurchase;
+        $this->{$orderFormName}->address_delivery_id = $isPurchase
             ? null
             : $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
         $this->{$orderFormName}->language_id = $contact?->mainAddress?->language_id
@@ -431,6 +434,9 @@ class Order extends Component
         $this->{$orderFormName}->payment_type_id = $contact?->payment_type_id;
 
         if (! $replicate) {
+            $this->order->contact_bank_connection_id = $contact?->contactBankConnections()
+                ->latest()
+                ->value('id');
             $this->order->address_invoice = resolve_static(Address::class, 'query')
                 ->whereKey($this->order->address_invoice_id)
                 ->select(['id', 'company', 'firstname', 'lastname', 'zip', 'city', 'street'])
