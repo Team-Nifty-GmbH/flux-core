@@ -35,16 +35,6 @@ class Schedule extends FluxModel
     }
 
     /**
-     * A run outside the cron rhythm stands in for the next tick on the same day only when
-     * the cron runs at most once a day. Otherwise that tick is a new occurrence.
-     */
-    public static function runsSeveralTimesADay(CronExpression $cron, DateTimeInterface $tick): bool
-    {
-        return Carbon::instance($cron->getNextRunDate($tick))
-            ->lessThan(Carbon::instance($tick)->addDay());
-    }
-
-    /**
      * The end of the period that starts on $start, based on the schedule frequency.
      *
      * Single source of truth for consumers that derive a period from a schedule
@@ -89,6 +79,16 @@ class Schedule extends FluxModel
         $parts[2] = 'L';
 
         return new CronExpression(implode(' ', $parts));
+    }
+
+    /**
+     * A run outside the cron rhythm stands in for the next tick on the same day only when
+     * the cron runs at most once a day. Otherwise that tick is a new occurrence.
+     */
+    public static function runsSeveralTimesADay(CronExpression $cron, DateTimeInterface $tick): bool
+    {
+        return Carbon::instance($cron->getNextRunDate($tick))
+            ->lessThan(Carbon::instance($tick)->addDay());
     }
 
     protected function casts(): array
