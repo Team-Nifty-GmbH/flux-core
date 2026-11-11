@@ -2,7 +2,9 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Enums\DocumentReviewStateEnum;
 use FluxErp\Models\Pivots\Categorizable;
+use FluxErp\Models\Scopes\ExcludeDocumentsScope;
 use FluxErp\Support\MediaLibrary\MediaCollection;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\LogsActivity;
@@ -10,6 +12,7 @@ use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Validation\ValidationException;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as BaseMedia;
 
 class Media extends BaseMedia
@@ -42,6 +45,29 @@ class Media extends BaseMedia
         'thumb_url',
     ];
 
+    protected static function booted(): void
+    {
+        static::addGlobalScope(app(ExcludeDocumentsScope::class));
+
+        static::deleting(function (Media $media): void {
+            if ($media->isLocked()) {
+                throw ValidationException::withMessages([
+                    'id' => [__('Documents are kept until their retention period ends.')],
+                ]);
+            }
+        });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'document_date' => 'date',
+            'retain_until' => 'date',
+            'review_state' => DocumentReviewStateEnum::class,
+            'reviewed_at' => 'datetime',
+        ];
+    }
+
     public function getThumbUrlAttribute(): string
     {
         return $this->hasGeneratedConversion('thumb_400x400')
@@ -54,6 +80,11 @@ class Media extends BaseMedia
     {
         return $this->morphToMany(Category::class, 'categorizable', 'categorizable')
             ->using(Categorizable::class);
+    }
+
+    public function documentType(): BelongsTo
+    {
+        return $this->belongsTo(DocumentType::class);
     }
 
     public function printJobs(): HasMany
@@ -72,6 +103,16 @@ class Media extends BaseMedia
     public function getCollection(): ?MediaCollection
     {
         return $this->model->getMediaCollection($this->collection_name);
+    }
+
+    public function isDocument(): bool
+    {
+        return ! is_null($this->document_type_id);
+    }
+
+    public function isLocked(): bool
+    {
+        return $this->retain_until?->gte(today()) ?? false;
     }
 
     public function getPath(string $conversionName = ''): string

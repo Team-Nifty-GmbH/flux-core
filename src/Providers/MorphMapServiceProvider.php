@@ -30,6 +30,7 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\DeviceToken;
 use FluxErp\Models\Discount;
 use FluxErp\Models\DiscountGroup;
+use FluxErp\Models\DocumentType;
 use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeBalanceAdjustment;
@@ -198,6 +199,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'device_token' => DeviceToken::class,
             'discount' => Discount::class,
             'discount_group' => DiscountGroup::class,
+            'document_type' => DocumentType::class,
             'email_template' => EmailTemplate::class,
             'employee' => Employee::class,
             'employee_balance_adjustment' => EmployeeBalanceAdjustment::class,

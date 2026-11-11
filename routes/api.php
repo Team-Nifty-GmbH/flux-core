@@ -77,6 +77,9 @@ use FluxErp\Actions\Discount\UpdateDiscount;
 use FluxErp\Actions\DiscountGroup\CreateDiscountGroup;
 use FluxErp\Actions\DiscountGroup\DeleteDiscountGroup;
 use FluxErp\Actions\DiscountGroup\UpdateDiscountGroup;
+use FluxErp\Actions\DocumentType\CreateDocumentType;
+use FluxErp\Actions\DocumentType\DeleteDocumentType;
+use FluxErp\Actions\DocumentType\UpdateDocumentType;
 use FluxErp\Actions\EmailTemplate\CreateEmailTemplate;
 use FluxErp\Actions\EmailTemplate\DeleteEmailTemplate;
 use FluxErp\Actions\EmailTemplate\UpdateEmailTemplate;
@@ -356,6 +359,7 @@ use FluxErp\Models\CountryRegion;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Discount;
 use FluxErp\Models\DiscountGroup;
+use FluxErp\Models\DocumentType;
 use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeBalanceAdjustment;
@@ -634,6 +638,15 @@ Route::prefix('api')
                 Route::post('/record-origins', CreateRecordOrigin::class);
                 Route::put('/record-origins', UpdateRecordOrigin::class);
                 Route::delete('/record-origins/{id}', DeleteRecordOrigin::class);
+
+                // DocumentTypes
+                Route::get('/document-types/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', DocumentType::class);
+                Route::get('/document-types', [BaseController::class, 'index'])
+                    ->defaults('model', DocumentType::class);
+                Route::post('/document-types', CreateDocumentType::class);
+                Route::put('/document-types', UpdateDocumentType::class);
+                Route::delete('/document-types/{id}', DeleteDocumentType::class);
 
                 // Contacts
                 Route::get('/contacts/{id}', [BaseController::class, 'show'])->defaults('model', Contact::class);

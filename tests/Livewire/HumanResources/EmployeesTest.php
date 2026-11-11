@@ -78,3 +78,17 @@ test('save validates required fields', function (): void {
         ->call('save')
         ->assertReturned(false);
 });
+
+test('downloads the documents of the selected employees as zip', function (): void {
+    $employee = app(Employee::class)->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'firstname' => 'Test',
+        'lastname' => 'Employee',
+        'is_active' => true,
+    ]);
+
+    Livewire::test(Employees::class)
+        ->set('selected', [$employee->getKey()])
+        ->call('downloadDocuments')
+        ->assertFileDownloaded('documents.zip');
+});
