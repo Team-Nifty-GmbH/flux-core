@@ -3,7 +3,9 @@
 namespace FluxErp\Actions\Record;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Models\Activity;
 use FluxErp\Rulesets\Record\MergeRecordsRuleset;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,15 +14,20 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use ReflectionException;
 use ReflectionMethod;
+use Spatie\Activitylog\Enums\ActivityEvent;
+use Spatie\Activitylog\Support\ActivityLogStatus;
+use Spatie\Activitylog\Support\CauserResolver;
 use TeamNiftyGmbH\DataTable\Helpers\RelationFinder;
 
 class MergeRecords extends FluxAction
@@ -121,29 +128,14 @@ class MergeRecords extends FluxAction
                 // On MorphOne and HasOne relations if it is not from the main record,
                 // it must be updated accordingly, and the related record from the main record must be deleted.
                 // For now, related records from these relations are not replaced to avoid data loss.
-                // Update each related model separately to trigger the model events.
                 switch (true) {
                     case $relation instanceof HasOne:
                     case $relation instanceof HasMany:
                     case $relation instanceof MorphOne:
                     case $relation instanceof MorphMany:
-                        $relation->getRelated()
-                            ->newQuery()
-                            ->when(
-                                $relation instanceof MorphOne || $relation instanceof MorphMany,
-                                fn ($query) => $query->where(
-                                    $relation->getQualifiedMorphType(),
-                                    $mainRecord->getMorphClass()
-                                )
-                            )
-                            ->whereIn($relation->getQualifiedForeignKeyName(), $this->getData('merge_records.*.id'))
-                            ->get()
-                            ->each(fn (Model $model) => $model
-                                ->fill([
-                                    $relation->getForeignKeyName() => $mainRecord->getKey(),
-                                ])
-                                ->save()
-                            );
+                        in_array($relation->getQualifiedForeignKeyName(), $this->foreignKeysMovableByQuery())
+                            ? $this->moveByQuery($relation, $mainRecord)
+                            : $this->moveModelByModel($relation, $mainRecord);
                         break;
                     case $relation instanceof BelongsToMany:
                         if ($relation->getParentKeyName() !== $mainRecord->getKeyName()) {
@@ -277,6 +269,114 @@ class MergeRecords extends FluxAction
                     break;
             }
         }
+    }
+
+    protected function foreignKeysMovableByQuery(): array
+    {
+        return [
+            'contacts.record_origin_id',
+            'leads.record_origin_id',
+            'orders.order_type_id',
+        ];
+    }
+
+    protected function logMovedRecords(Model $related, Collection $rows, string $foreignKey, int $mainRecordId): void
+    {
+        if (! method_exists($related, 'getActivitylogOptions') || app(ActivityLogStatus::class)->disabled()) {
+            return;
+        }
+
+        $causer = app(CauserResolver::class)->resolve();
+        $logName = $related->getActivitylogOptions()->logName;
+        $now = now();
+
+        resolve_static(Activity::class, 'query')
+            ->insert(
+                $rows
+                    ->map(fn (object $row) => [
+                        'log_name' => $logName,
+                        'description' => ActivityEvent::Updated->value,
+                        'subject_type' => $related->getMorphClass(),
+                        'subject_id' => data_get($row, $related->getKeyName()),
+                        'event' => ActivityEvent::Updated->value,
+                        'causer_type' => $causer?->getMorphClass(),
+                        'causer_id' => $causer?->getKey(),
+                        'attribute_changes' => json_encode([
+                            'attributes' => [$foreignKey => $mainRecordId],
+                            'old' => [$foreignKey => data_get($row, $foreignKey)],
+                        ]),
+                        'properties' => '[]',
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ])
+                    ->all()
+            );
+    }
+
+    protected function moveByQuery(Relation $relation, Model $mainRecord): void
+    {
+        $related = $relation->getRelated();
+        $keyName = $related->getKeyName();
+        $foreignKey = $relation->getForeignKeyName();
+
+        $this->relatedRecords($relation)
+            ->toBase()
+            ->select([$keyName, $foreignKey])
+            ->chunkById(
+                100,
+                function (Collection $rows) use ($related, $keyName, $foreignKey, $mainRecord): void {
+                    $keys = $rows->pluck($keyName)->all();
+
+                    $related->newQuery()
+                        ->whereKey($keys)
+                        ->update(array_merge(
+                            $related->newInstance()
+                                ->setUpdatedAt($related->freshTimestamp())
+                                ->getAttributes(),
+                            [$foreignKey => $mainRecord->getKey()]
+                        ));
+
+                    $this->logMovedRecords($related, $rows, $foreignKey, $mainRecord->getKey());
+
+                    if (method_exists($related, 'searchable')) {
+                        $related->newQuery()
+                            ->whereKey($keys)
+                            ->get()
+                            ->filter(fn (Model $model) => $model->shouldBeSearchable())
+                            ->searchable();
+                    }
+                },
+                $keyName
+            );
+    }
+
+    protected function moveModelByModel(Relation $relation, Model $mainRecord): void
+    {
+        Model::withoutBroadcasting(
+            fn () => $this->relatedRecords($relation)
+                ->chunkById(
+                    100,
+                    fn (Collection $models) => $models->each(
+                        fn (Model $model) => $model
+                            ->fill([$relation->getForeignKeyName() => $mainRecord->getKey()])
+                            ->save()
+                    )
+                )
+        );
+    }
+
+    protected function relatedRecords(Relation $relation): EloquentBuilder
+    {
+        return $relation->getRelated()
+            ->newQuery()
+            ->when(
+                $relation instanceof MorphOne || $relation instanceof MorphMany,
+                fn (EloquentBuilder $query) => $query->where(
+                    $relation->getQualifiedMorphType(),
+                    $relation->getParent()->getMorphClass()
+                )
+            )
+            ->whereIn($relation->getQualifiedForeignKeyName(), $this->getData('merge_records.*.id'));
     }
 
     protected function validateData(): void
