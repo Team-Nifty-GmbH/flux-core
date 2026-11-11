@@ -237,6 +237,22 @@ test('merging order types keeps the audit trail of every moved order', function 
         ->toBe($this->user->getMorphClass() . ':' . $this->user->getKey());
 });
 
+test('merging order types touches updated_at of every moved order', function (): void {
+    $main = OrderType::factory()->create();
+    $merge = OrderType::factory()->create();
+    $order = createMergeOrder($this, ['order_type_id' => $merge->getKey()]);
+
+    DB::table('orders')
+        ->where('id', $order->getKey())
+        ->update(['updated_at' => '2020-01-01 00:00:00']);
+    $this->travelTo(now()->startOfSecond());
+
+    runMerge(OrderType::class, $main->getKey(), $merge->getKey());
+
+    expect($order->refresh()->updated_at->toDateTimeString())
+        ->toBe(now()->toDateTimeString());
+});
+
 test('merging order types reindexes the moved orders', function (): void {
     $main = OrderType::factory()->create();
     $merge = OrderType::factory()->create();

@@ -290,26 +290,27 @@ class MergeRecords extends FluxAction
         $logName = $related->getActivitylogOptions()->logName;
         $now = now();
 
-        resolve_static(Activity::class, 'query')->insert(
-            $rows
-                ->map(fn (object $row) => [
-                    'log_name' => $logName,
-                    'description' => ActivityEvent::Updated->value,
-                    'subject_type' => $related->getMorphClass(),
-                    'subject_id' => data_get($row, $related->getKeyName()),
-                    'event' => ActivityEvent::Updated->value,
-                    'causer_type' => $causer?->getMorphClass(),
-                    'causer_id' => $causer?->getKey(),
-                    'attribute_changes' => json_encode([
-                        'attributes' => [$foreignKey => $mainRecordId],
-                        'old' => [$foreignKey => data_get($row, $foreignKey)],
-                    ]),
-                    'properties' => '[]',
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ])
-                ->all()
-        );
+        resolve_static(Activity::class, 'query')
+            ->insert(
+                $rows
+                    ->map(fn (object $row) => [
+                        'log_name' => $logName,
+                        'description' => ActivityEvent::Updated->value,
+                        'subject_type' => $related->getMorphClass(),
+                        'subject_id' => data_get($row, $related->getKeyName()),
+                        'event' => ActivityEvent::Updated->value,
+                        'causer_type' => $causer?->getMorphClass(),
+                        'causer_id' => $causer?->getKey(),
+                        'attribute_changes' => json_encode([
+                            'attributes' => [$foreignKey => $mainRecordId],
+                            'old' => [$foreignKey => data_get($row, $foreignKey)],
+                        ]),
+                        'properties' => '[]',
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ])
+                    ->all()
+            );
     }
 
     protected function moveByQuery(Relation $relation, Model $mainRecord): void
@@ -329,7 +330,9 @@ class MergeRecords extends FluxAction
                     $related->newQuery()
                         ->whereKey($keys)
                         ->update(array_merge(
-                            $related->newInstance()->setUpdatedAt($related->freshTimestamp())->getAttributes(),
+                            $related->newInstance()
+                                ->setUpdatedAt($related->freshTimestamp())
+                                ->getAttributes(),
                             [$foreignKey => $mainRecord->getKey()]
                         ));
 
@@ -339,8 +342,7 @@ class MergeRecords extends FluxAction
                         $related->newQuery()
                             ->whereKey($keys)
                             ->get()
-                            ->filter
-                            ->shouldBeSearchable()
+                            ->filter(fn (Model $model) => $model->shouldBeSearchable())
                             ->searchable();
                     }
                 },
