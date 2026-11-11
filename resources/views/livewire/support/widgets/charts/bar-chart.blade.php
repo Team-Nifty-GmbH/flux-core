@@ -70,7 +70,11 @@
                                 color="emerald"
                             >
                                 <span
-                                    x-text="seriesData.growthRate + '%'"
+                                    x-text="
+                                        $nuxbe.format.percentage(
+                                            seriesData.growthRate / 100,
+                                        )
+                                    "
                                 ></span>
                             </x-badge>
                             <x-badge
@@ -83,7 +87,11 @@
                                 color="red"
                             >
                                 <span
-                                    x-text="seriesData.growthRate + '%'"
+                                    x-text="
+                                        $nuxbe.format.percentage(
+                                            seriesData.growthRate / 100,
+                                        )
+                                    "
                                 ></span>
                             </x-badge>
                             <x-badge
@@ -96,7 +104,11 @@
                                 color="gray"
                             >
                                 <span
-                                    x-text="seriesData.growthRate + '%'"
+                                    x-text="
+                                        $nuxbe.format.percentage(
+                                            seriesData.growthRate / 100,
+                                        )
+                                    "
                                 ></span>
                             </x-badge>
                         </div>
