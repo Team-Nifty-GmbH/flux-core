@@ -5,9 +5,14 @@ namespace FluxErp\Traits\Livewire\Dashboard;
 use FluxErp\Enums\ComparisonTypeEnum;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Facades\Widget;
+use FluxErp\Models\Role;
+use FluxErp\Models\Widget as WidgetModel;
 use FluxErp\Support\Auth\PermissionSet;
 use FluxErp\Traits\Livewire\EnsureUsedInLivewire;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Js;
 use Livewire\Attributes\Renderless;
@@ -18,9 +23,15 @@ trait RendersWidgets
 
     protected static ?array $defaultWidgets = null;
 
+    protected static array $registeredPresets = [];
+
     public array $availableWidgets = [];
 
     public array $availableWidgetsTree = [];
+
+    public ?int $dashboardRoleId = null;
+
+    public array $presets = [];
 
     public array $params = [
         'timeFrame' => TimeFrameEnum::ThisMonth,
@@ -32,6 +43,40 @@ trait RendersWidgets
     public bool $sync = false;
 
     public array $widgets = [];
+
+    public static function getPresets(): array
+    {
+        return static::$registeredPresets[static::class] ?? [];
+    }
+
+    public static function registerPreset(string $name, array $widgets): void
+    {
+        static::$registeredPresets[static::class][$name] = $widgets;
+    }
+
+    public function applyPreset(string $name): void
+    {
+        $widgets = static::getPresets()[$name] ?? null;
+
+        abort_if(is_null($widgets), 404);
+
+        DB::transaction(function () use ($widgets): void {
+            foreach (collect($widgets)->groupBy('group') as $group => $groupWidgets) {
+                $this->group = $group === '' ? null : $group;
+                $this->saveWidgets(static::mapDefaultWidgets(
+                    $groupWidgets
+                        ->map(fn (array $widget): array => array_merge(
+                            ['width' => 1, 'height' => 1, 'order_column' => 0, 'order_row' => 0],
+                            $widget
+                        ))
+                        ->all()
+                ));
+            }
+        });
+
+        $this->widgets();
+        $this->dispatch('gridstack-reinit');
+    }
 
     #[Computed]
     public function availableWidgets(): array
@@ -52,7 +97,21 @@ trait RendersWidgets
     {
         $this->availableWidgets = $this->filterWidgets(Widget::all());
         $this->availableWidgetsTree = $this->availableWidgetsTree();
+        $this->presets = array_keys(static::getPresets());
         $this->widgets();
+    }
+
+    public function resetToRoleDashboard(): void
+    {
+        auth()
+            ->user()
+            ->widgets()
+            ->where('dashboard_component', static::class)
+            ->where('group', $this->group)
+            ->delete();
+
+        $this->widgets();
+        $this->dispatch('gridstack-reinit');
     }
 
     #[Renderless]
@@ -108,6 +167,36 @@ trait RendersWidgets
     }
 
     #[Renderless]
+    public function saveAsRoleDashboard(?int $roleId): void
+    {
+        abort_unless($this->canEditRoleDashboards(), 403);
+
+        $role = resolve_static(Role::class, 'query')
+            ->whereKey($roleId)
+            ->firstOrFail();
+
+        DB::transaction(function () use ($role): void {
+            $role->widgets()
+                ->where('dashboard_component', static::class)
+                ->delete();
+            $role->widgets()
+                ->createMany(
+                    array_map(
+                        fn (array $widget): array => array_merge(
+                            $this->copyableWidgetAttributes($widget),
+                            ['dashboard_component' => static::class]
+                        ),
+                        $this->widgets
+                    )
+                );
+        });
+
+        $this->toast()
+            ->success(__('The dashboard was saved as default for the role :role.', ['role' => $role->name]))
+            ->send();
+    }
+
+    #[Renderless]
     public function syncWidgets(array $widgets): void
     {
         $this->widgets = array_merge(
@@ -132,31 +221,21 @@ trait RendersWidgets
             ->get()
             ->groupBy('group');
 
+        $roleWidgets = $this->roleWidgets();
+        $defaultWidgets = collect(static::getDefaultWidgets() ?? [])
+            ->groupBy(fn (array $widget): ?string => data_get($widget, 'group'));
+        $groups = $defaultWidgets->keys()
+            ->merge($roleWidgets->keys())
+            ->merge($userWidgets?->keys() ?? [])
+            ->unique();
+
         $allWidgets = [];
+        foreach ($groups as $group) {
+            $groupWidgets = $userWidgets?->get($group)
+                ?? $roleWidgets->get($group)
+                ?? $defaultWidgets->get($group);
 
-        $defaultWidgets = static::getDefaultWidgets() ?? [];
-        $defaultGroups = collect($defaultWidgets)->pluck('group')->unique()->filter();
-        $userGroups = $userWidgets ? $userWidgets->keys()->filter() : collect();
-        $allGroups = $defaultGroups->merge($userGroups)->unique();
-
-        foreach ($allGroups as $group) {
-            if ($userWidgets && $userWidgets->has($group)) {
-                $allWidgets = array_merge($allWidgets, $userWidgets->get($group)->toArray());
-            } else {
-                $groupDefaults = collect($defaultWidgets)
-                    ->filter(fn (array $widget) => data_get($widget, 'group') === $group)
-                    ->toArray();
-                $allWidgets = array_merge($allWidgets, $groupDefaults);
-            }
-        }
-
-        if ($userWidgets && $userWidgets->has(null)) {
-            $allWidgets = array_merge($allWidgets, $userWidgets->get(null)->toArray());
-        } else {
-            $nullGroupDefaults = collect($defaultWidgets)
-                ->filter(fn (array $widget) => is_null(data_get($widget, 'group')))
-                ->toArray();
-            $allWidgets = array_merge($allWidgets, $nullGroupDefaults);
+            $allWidgets = array_merge($allWidgets, $groupWidgets->toArray());
         }
 
         $this->widgets = array_values($this->filterWidgets($allWidgets));
@@ -200,6 +279,57 @@ trait RendersWidgets
             ->values();
 
         return $categorized->merge($uncategorized)->all();
+    }
+
+    protected function canEditRoleDashboards(): bool
+    {
+        return PermissionSet::make()->allows(route_to_permission('settings.permissions', false));
+    }
+
+    protected function copyableWidgetAttributes(array $widget): array
+    {
+        return Arr::only(
+            $widget,
+            [
+                'component_name',
+                'dashboard_component',
+                'name',
+                'config',
+                'group',
+                'width',
+                'height',
+                'order_column',
+                'order_row',
+            ]
+        );
+    }
+
+    protected function roleWidgets(): Collection
+    {
+        $roleIds = auth()
+            ->user()
+            ?->roles
+            ->modelKeys() ?? [];
+
+        if (! $roleIds) {
+            return collect();
+        }
+
+        return resolve_static(WidgetModel::class, 'query')
+            ->where('widgetable_type', morph_alias(Role::class))
+            ->whereIntegerInRaw('widgetable_id', $roleIds)
+            ->where('dashboard_component', static::class)
+            ->orderBy('widgetable_id')
+            ->get()
+            ->groupBy('group')
+            ->map(fn (Collection $widgets): Collection => $widgets
+                ->where('widgetable_id', $widgets->first()->widgetable_id)
+                ->map(fn (WidgetModel $widget): array => array_merge(
+                    $this->copyableWidgetAttributes($widget->toArray()),
+                    ['id' => Str::uuid()->toString()]
+                ))
+                ->values()
+            );
     }
 
     protected function filterWidgets(array $widgets): array

@@ -216,3 +216,184 @@ test('filtering many permissioned widgets does not scan the permissions per widg
 
     expect($scans)->toBeLessThan(10);
 });
+
+function createRoleWidget(FluxErp\Models\Role $role, string $componentName, ?string $group = null, int $width = 1): Widget
+{
+    return Widget::query()->create([
+        'widgetable_type' => morph_alias(FluxErp\Models\Role::class),
+        'widgetable_id' => $role->getKey(),
+        'component_name' => $componentName,
+        'dashboard_component' => Dashboard::class,
+        'group' => $group,
+        'width' => $width,
+        'height' => 1,
+    ]);
+}
+
+test('user without own widgets in a group sees the widgets of his role', function (): void {
+    $role = FluxErp\Models\Role::findOrCreate('Sales', 'web');
+    $this->user->assignRole($role);
+    createRoleWidget($role, 'sample-component-2', 'Sales');
+
+    $component = Livewire::withoutLazyLoading()
+        ->test(Dashboard::class)
+        ->set('group', 'Sales')
+        ->assertOk();
+
+    $salesWidgets = collect($component->get('widgets'))->where('group', 'Sales');
+
+    expect($salesWidgets)->toHaveCount(1)
+        ->and($salesWidgets->first()['component_name'])->toBe('sample-component-2')
+        ->and(is_numeric($salesWidgets->first()['id']))->toBeFalse();
+});
+
+test('saving a group bound to a role creates an own copy and leaves the role untouched', function (): void {
+    $role = FluxErp\Models\Role::findOrCreate('Sales', 'web');
+    $this->user->assignRole($role);
+    $roleWidget = createRoleWidget($role, 'sample-component-2', 'Sales');
+
+    $component = Livewire::withoutLazyLoading()
+        ->test(Dashboard::class)
+        ->set('group', 'Sales');
+
+    $widgets = collect($component->get('widgets'))->where('group', 'Sales')->values()->all();
+    $widgets[0]['width'] = 4;
+
+    $component->call('saveWidgets', $widgets)->assertOk();
+
+    $this->assertDatabaseHas('widgets', [
+        'widgetable_type' => morph_alias(User::class),
+        'widgetable_id' => $this->user->getKey(),
+        'component_name' => 'sample-component-2',
+        'group' => 'Sales',
+        'width' => 4,
+    ]);
+    expect($roleWidget->refresh()->width)->toBe(1);
+
+    $roleWidget->update(['width' => 6]);
+
+    $ownWidgets = collect(
+        Livewire::withoutLazyLoading()
+            ->test(Dashboard::class)
+            ->get('widgets')
+    )->where('group', 'Sales');
+
+    expect($ownWidgets)->toHaveCount(1)
+        ->and($ownWidgets->first()['width'])->toBe(4);
+});
+
+test('groups of several roles are merged and the role with the lowest id wins a shared group', function (): void {
+    $first = FluxErp\Models\Role::findOrCreate('Sales', 'web');
+    $second = FluxErp\Models\Role::findOrCreate('Accounting', 'web');
+    $this->user->assignRole([$first, $second]);
+
+    createRoleWidget($first, 'sample-component', 'Shared', 2);
+    createRoleWidget($second, 'sample-component-2', 'Shared', 3);
+    createRoleWidget($second, 'sample-component-2', 'Finance');
+
+    $widgets = collect(Livewire::withoutLazyLoading()->test(Dashboard::class)->get('widgets'));
+
+    expect($widgets->where('group', 'Shared'))->toHaveCount(1)
+        ->and($widgets->where('group', 'Shared')->first()['width'])->toBe(2)
+        ->and($widgets->where('group', 'Finance'))->toHaveCount(1);
+});
+
+test('saving the dashboard as role default replaces the widgets of the role', function (): void {
+    $role = FluxErp\Models\Role::findOrCreate('Sales', 'web');
+    $oldWidget = createRoleWidget($role, 'sample-component-2', 'Old');
+    Permission::findOrCreate(route_to_permission('settings.permissions', false), 'web');
+    $this->user->givePermissionTo(route_to_permission('settings.permissions', false));
+
+    Livewire::withoutLazyLoading()
+        ->test(Dashboard::class)
+        ->assertSee('Save as role default')
+        ->call('saveAsRoleDashboard', $role->getKey())
+        ->assertOk();
+
+    $this->assertModelMissing($oldWidget);
+    $this->assertDatabaseHas('widgets', [
+        'widgetable_type' => morph_alias(FluxErp\Models\Role::class),
+        'widgetable_id' => $role->getKey(),
+        'component_name' => 'sample-component',
+        'dashboard_component' => Dashboard::class,
+        'width' => 2,
+    ]);
+});
+
+test('saving the dashboard as role default needs the permission to manage roles', function (): void {
+    $role = FluxErp\Models\Role::findOrCreate('Sales', 'web');
+    Permission::findOrCreate(route_to_permission('settings.permissions', false), 'web');
+
+    Livewire::withoutLazyLoading()
+        ->test(Dashboard::class)
+        ->assertDontSee('Save as role default')
+        ->call('saveAsRoleDashboard', $role->getKey())
+        ->assertForbidden();
+
+    $this->assertDatabaseMissing('widgets', [
+        'widgetable_type' => morph_alias(FluxErp\Models\Role::class),
+    ]);
+});
+
+test('resetting a group brings back the widgets of the role', function (): void {
+    $role = FluxErp\Models\Role::findOrCreate('Sales', 'web');
+    $this->user->assignRole($role);
+    createRoleWidget($role, 'sample-component-2');
+
+    $component = Livewire::withoutLazyLoading()
+        ->test(Dashboard::class)
+        ->assertSeeLivewire('sample-component')
+        ->call('resetToRoleDashboard')
+        ->assertOk();
+
+    expect(collect($component->get('widgets'))->pluck('component_name')->all())->toBe(['sample-component-2']);
+    $this->assertDatabaseMissing('widgets', [
+        'widgetable_type' => morph_alias(User::class),
+        'widgetable_id' => $this->user->getKey(),
+        'component_name' => 'sample-component',
+    ]);
+});
+
+test('applying a preset fills its group in the own dashboard', function (): void {
+    Dashboard::registerPreset('finance', [
+        ['component_name' => 'sample-component-2', 'group' => 'Finance', 'width' => 3, 'height' => 1],
+    ]);
+
+    $component = Livewire::withoutLazyLoading()
+        ->test(Dashboard::class)
+        ->assertSet('presets', ['finance'])
+        ->call('applyPreset', 'finance')
+        ->assertOk()
+        ->assertSet('group', 'Finance');
+
+    $this->assertDatabaseHas('widgets', [
+        'widgetable_type' => morph_alias(User::class),
+        'widgetable_id' => $this->user->getKey(),
+        'component_name' => 'sample-component-2',
+        'group' => 'Finance',
+        'width' => 3,
+    ]);
+    expect(collect($component->get('widgets'))->where('group', 'Finance'))->toHaveCount(1);
+});
+
+test('a group that only exists for the role stays selected from the url', function (): void {
+    $role = FluxErp\Models\Role::findOrCreate('Sales', 'web');
+    $this->user->assignRole($role);
+    createRoleWidget($role, 'sample-component-2', 'Sales');
+
+    Livewire::withoutLazyLoading()
+        ->withQueryParams(['group' => 'Sales'])
+        ->test(Dashboard::class)
+        ->assertSet('group', 'Sales');
+});
+
+test('deleting a role removes its dashboard widgets', function (): void {
+    $role = FluxErp\Models\Role::findOrCreate('Sales', 'web');
+    $widget = createRoleWidget($role, 'sample-component-2');
+
+    FluxErp\Actions\Role\DeleteRole::make(['id' => $role->getKey()])
+        ->validate()
+        ->execute();
+
+    $this->assertModelMissing($widget);
+});
