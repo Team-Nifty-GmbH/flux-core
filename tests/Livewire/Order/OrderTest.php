@@ -1865,6 +1865,33 @@ test('contract total prefill starts at the first run the scheduler will do', fun
     'cron matches later on the due date' => ['0 6 1 * *', '2027-01-01 00:00:00', 2],
 ]);
 
+test('contract total prefill counts every month end of a lastDayOfMonth schedule', function (): void {
+    $this->travelTo('2026-11-04 01:00:00');
+
+    $schedule = Schedule::create([
+        'uuid' => Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => ['basic' => 'lastDayOfMonth', 'dayConstraint' => null, 'timeConstraint' => null],
+            'parameters' => ['basic' => ['06:00'], 'dayConstraint' => [], 'timeConstraint' => []],
+        ],
+        'cron_expression' => '0 6 30 * *',
+        'due_at' => '2026-11-30 06:00:00',
+        'ends_at' => '2027-03-01 00:00:00',
+        'is_active' => true,
+        'parameters' => ['orderId' => $this->order->getKey()],
+    ]);
+    $this->order->schedules()->attach($schedule->getKey());
+
+    $gross = $this->order->refresh()->total_gross_price;
+
+    Livewire::test(OrderView::class, ['id' => $this->order->getKey()])
+        ->call('prefillContractTotal')
+        ->assertSet('order.contract_total_amount', bcmul(4, $gross, 2));
+});
+
 test('the subscription time picker previews the schedule when it changes', function (): void {
     $subscriptionOrderType = OrderType::factory()->create([
         'order_type_enum' => OrderTypeEnum::Subscription,

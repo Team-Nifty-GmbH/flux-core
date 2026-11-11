@@ -23,21 +23,15 @@ class Schedule extends FluxModel
     {
         $nextRun = Carbon::instance($cron->getNextRunDate($runDate));
 
+        $isSamePeriod = $cron->getExpression(CronExpression::DAY) === 'L'
+            ? $nextRun->isSameMonth($runDate)
+            : $nextRun->isSameDay($runDate);
+
         return ! $cron->isDue($runDate)
-            && $nextRun->isSameDay($runDate)
+            && $isSamePeriod
             && ! static::runsSeveralTimesADay($cron, $nextRun)
             ? Carbon::instance($cron->getNextRunDate($nextRun))
             : $nextRun;
-    }
-
-    /**
-     * A run outside the cron rhythm stands in for the next tick on the same day only when
-     * the cron runs at most once a day. Otherwise that tick is a new occurrence.
-     */
-    public static function runsSeveralTimesADay(CronExpression $cron, DateTimeInterface $tick): bool
-    {
-        return Carbon::instance($cron->getNextRunDate($tick))
-            ->lessThan(Carbon::instance($tick)->addDay());
     }
 
     /**
@@ -73,6 +67,28 @@ class Schedule extends FluxModel
         }
 
         return $start;
+    }
+
+    public static function runCron(?array $cron, string $cronExpression): CronExpression
+    {
+        if (data_get($cron, 'methods.basic') !== FrequenciesEnum::LastDayOfMonth->value) {
+            return new CronExpression($cronExpression);
+        }
+
+        $parts = explode(' ', $cronExpression);
+        $parts[2] = 'L';
+
+        return new CronExpression(implode(' ', $parts));
+    }
+
+    /**
+     * A run outside the cron rhythm stands in for the next tick on the same day only when
+     * the cron runs at most once a day. Otherwise that tick is a new occurrence.
+     */
+    public static function runsSeveralTimesADay(CronExpression $cron, DateTimeInterface $tick): bool
+    {
+        return Carbon::instance($cron->getNextRunDate($tick))
+            ->lessThan(Carbon::instance($tick)->addDay());
     }
 
     protected function casts(): array

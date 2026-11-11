@@ -1,6 +1,7 @@
 <?php
 
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Widgets\RecurringRevenueForecast;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
@@ -127,6 +128,29 @@ test('forecasts from the cron rhythm when the due date has passed', function ():
 
     expect($component->get('xaxis.categories'))->toBe([now()->startOfMonth()->addDays(14)->format('Y-m-d')]);
 });
+
+test('forecasts every month end of a lastDayOfMonth schedule', function (string $cronExpression): void {
+    $this->travelTo('2026-01-01 01:00:00');
+
+    makeForecastOrder(OrderTypeEnum::Subscription, '100.00', cronExpression: $cronExpression, scheduleAttributes: [
+        'cron' => [
+            'methods' => ['basic' => 'lastDayOfMonth', 'dayConstraint' => null, 'timeConstraint' => null],
+            'parameters' => ['basic' => ['06:00'], 'dayConstraint' => [], 'timeConstraint' => []],
+        ],
+    ]);
+
+    $component = Livewire::test(RecurringRevenueForecast::class)
+        ->set('timeFrame', TimeFrameEnum::ThisYear)
+        ->call('calculateChart');
+
+    expect($component->get('xaxis.categories'))->toBe([
+        '2026-01-31', '2026-02-28', '2026-03-31', '2026-04-30', '2026-05-31', '2026-06-30',
+        '2026-07-31', '2026-08-31', '2026-09-30', '2026-10-31', '2026-11-30', '2026-12-31',
+    ]);
+})->with([
+    'expression baked in a long month' => ['0 6 31 * *'],
+    'expression baked in a short month' => ['0 6 28 * *'],
+]);
 
 test('leaves a schedule out that has run all its recurrences', function (): void {
     makeForecastOrder(OrderTypeEnum::Subscription, '100.00', scheduleAttributes: [
