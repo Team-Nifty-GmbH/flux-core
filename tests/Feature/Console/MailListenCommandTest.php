@@ -8,6 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Process\PendingProcess;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Sleep;
@@ -15,6 +16,7 @@ use Webklex\IMAP\Facades\Client as ImapClient;
 use Webklex\PHPIMAP\Client;
 use Webklex\PHPIMAP\Connection\Protocols\ImapProtocol;
 use Webklex\PHPIMAP\Connection\Protocols\Response;
+use Webklex\PHPIMAP\Exceptions\ConnectionFailedException;
 use Webklex\PHPIMAP\Exceptions\RuntimeException;
 
 function listeningMailAccount(): array
@@ -29,23 +31,35 @@ function listeningMailAccount(): array
     return [$mailAccount, $inbox];
 }
 
-function fakeIdleServer(Closure ...$lines): void
+function fakeIdleConnection(Closure ...$lines): ImapProtocol
 {
     $capabilities = Mockery::mock(Response::class);
     $capabilities->shouldReceive('validatedData')->andReturn(['IMAP4rev1', 'IDLE']);
 
     $connection = Mockery::mock(ImapProtocol::class);
     $connection->shouldReceive('getCapabilities')->andReturn($capabilities);
-    $connection->shouldReceive('idle');
-    $connection->shouldReceive('done');
+    $connection->shouldReceive('meta')->andReturn(['eof' => false])->byDefault();
+    $connection->shouldReceive('idle')->byDefault();
+    $connection->shouldReceive('done')->byDefault();
     $connection->shouldReceive('nextLine')->andReturnUsing(...$lines);
 
+    return $connection;
+}
+
+function fakeImapClient(ImapProtocol $connection): Client
+{
     $client = Mockery::mock(Client::class);
     $client->shouldReceive('connect')->andReturnSelf();
     $client->shouldReceive('openFolder')->with('INBOX', true);
     $client->shouldReceive('getConnection')->andReturn($connection);
     $client->shouldReceive('disconnect');
-    ImapClient::shouldReceive('make')->andReturn($client);
+
+    return $client;
+}
+
+function fakeIdleServer(Closure ...$lines): void
+{
+    ImapClient::shouldReceive('make')->andReturn(fakeImapClient(fakeIdleConnection(...$lines)));
 }
 
 function restartListener(): void
@@ -186,4 +200,92 @@ test('the listener does not restart an account whose server does not support idl
     $this->artisan('flux:mail-listen')->assertSuccessful();
 
     Process::assertRanTimes(fn (PendingProcess $process): bool => true, 1);
+});
+
+test('the listener renews idle every few minutes so a dead connection shows up early', function (): void {
+    [$mailAccount] = listeningMailAccount();
+
+    $connection = fakeIdleConnection(
+        function (): string {
+            $this->travel(6)->minutes();
+
+            throw new RuntimeException('empty response');
+        },
+        function (): string {
+            restartListener();
+
+            throw new RuntimeException('empty response');
+        },
+    );
+    $connection->shouldReceive('idle')->twice();
+    ImapClient::shouldReceive('make')->andReturn(fakeImapClient($connection));
+
+    $this->artisan('flux:mail-listen', ['--account' => $mailAccount->getKey()])->assertSuccessful();
+});
+
+test('a dead connection is reconnected silently and the inbox synced', function (string $failure): void {
+    Exceptions::fake();
+    Queue::fake();
+    Sleep::fake();
+    [$mailAccount, $inbox] = listeningMailAccount();
+
+    $deadConnection = fakeIdleConnection(function (): string {
+        $this->travel(6)->minutes();
+
+        throw new RuntimeException('empty response');
+    });
+    match ($failure) {
+        'eof' => $deadConnection->shouldReceive('meta')->andReturn(['eof' => true]),
+        'timeout' => $deadConnection->shouldReceive('done')->andThrow(new RuntimeException('empty response')),
+        'broken pipe' => $deadConnection->shouldReceive('done')->andThrow(
+            new ErrorException('fwrite(): SSL operation failed with code 5. OpenSSL Error messages: Broken pipe')
+        ),
+    };
+
+    $newConnection = fakeIdleConnection(function (): string {
+        restartListener();
+
+        throw new RuntimeException('empty response');
+    });
+
+    ImapClient::shouldReceive('make')
+        ->twice()
+        ->andReturn(fakeImapClient($deadConnection), fakeImapClient($newConnection));
+
+    $this->artisan('flux:mail-listen', ['--account' => $mailAccount->getKey()])->assertSuccessful();
+
+    Exceptions::assertNothingReported();
+    Queue::assertPushed(
+        SyncMailAccountJob::class,
+        fn (SyncMailAccountJob $job): bool => $job->mailFolderId === $inbox->getKey()
+    );
+})->with([
+    'the server closed the connection' => 'eof',
+    'the server stopped answering' => 'timeout',
+    'writing to the connection fails' => 'broken pipe',
+]);
+
+test('a listener reports once when reconnecting keeps failing for half an hour', function (): void {
+    Exceptions::fake();
+    Sleep::fake();
+    [$mailAccount] = listeningMailAccount();
+
+    $client = Mockery::mock(Client::class);
+    $client->shouldReceive('connect')->andThrow(new ConnectionFailedException('connection setup failed'));
+    $client->shouldReceive('disconnect');
+    ImapClient::shouldReceive('make')->andReturn($client);
+
+    $sleeps = 0;
+    Sleep::whenFakingSleep(function () use (&$sleeps): void {
+        $this->travel(10)->minutes();
+
+        if (++$sleeps === 6) {
+            restartListener();
+        }
+    });
+
+    $this->artisan('flux:mail-listen', ['--account' => $mailAccount->getKey()])->assertSuccessful();
+
+    Exceptions::assertReportedCount(1);
+    Exceptions::assertReported(ConnectionFailedException::class);
 });

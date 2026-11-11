@@ -95,10 +95,7 @@ trait CreatesDocuments
     #[Renderless]
     public function openCreateDocumentsModal(): void
     {
-        $this->printLayouts = array_map(
-            fn (string $layout) => ['layout' => $layout, 'label' => __($layout)],
-            array_keys($this->getPrintLayouts())
-        );
+        $this->printLayouts = $this->mapPrintLayouts();
 
         foreach ($this->getPrintLayouts() as $alias => $className) {
             if (resolve_static($className, 'shouldForceRecreate')) {
@@ -365,6 +362,21 @@ trait CreatesDocuments
         $sessionKey = 'mail_' . Str::uuid()->toString();
         session()->put($sessionKey, $mailMessages);
         $this->dispatch('createFromSession', key: $sessionKey)->to('edit-mail');
+    }
+
+    protected function mapPrintLayouts(): array
+    {
+        $printLayouts = $this->getPrintLayouts();
+
+        return array_map(
+            fn (string $layout, string $className): array => [
+                'layout' => $layout,
+                'label' => __($layout),
+                'is_printable' => resolve_static($className, 'isPrintable'),
+            ],
+            array_keys($printLayouts),
+            $printLayouts
+        );
     }
 
     protected function resolveItem(mixed $item, ?string $model = null): ?OffersPrinting

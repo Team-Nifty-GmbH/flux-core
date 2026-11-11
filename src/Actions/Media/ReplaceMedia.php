@@ -11,12 +11,15 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileUnacceptableForCollection;
 
 class ReplaceMedia extends FluxAction
 {
+    protected const string REPLACED_COLLECTION_NAME = '.replaced';
+
     protected bool $force = false;
 
     public static function models(): array
@@ -45,7 +48,17 @@ class ReplaceMedia extends FluxAction
     {
         $mediaItem = resolve_static(Media::class, 'query')
             ->whereKey($this->getData('id'))
+            ->lockForUpdate()
             ->first();
+
+        if (
+            is_null($mediaItem)
+            || $mediaItem->collection_name === static::REPLACED_COLLECTION_NAME
+        ) {
+            throw ValidationException::withMessages([
+                'id' => ['The media has already been replaced or deleted.'],
+            ]);
+        }
 
         $diskName = $this->getData('disk') ?? (
             $mediaItem->model->getRegisteredMediaCollections()
@@ -53,6 +66,8 @@ class ReplaceMedia extends FluxAction
                 ->first()
                 ?->diskName ?: config('media-library.disk_name')
         );
+
+        $this->moveOldMediaOutOfCollection($mediaItem);
 
         $file = $this->getData('media');
         $mediaItem->name = $this->getData('name');
@@ -107,15 +122,36 @@ class ReplaceMedia extends FluxAction
         }
 
         $this->replaceOldMediaOnModels($this->getData('id'), $media);
-        $this->deleteOldMedia();
+        DB::afterCommit(fn () => $this->deleteOldMedia($mediaItem->collection_name));
 
         return $media->withoutRelations();
     }
 
-    protected function deleteOldMedia(): void
+    protected function deleteOldMedia(string $collectionName): void
     {
-        DeleteMedia::make(['id' => $this->getData('id')])
-            ->execute();
+        $delete = function () use ($collectionName): void {
+            resolve_static(Media::class, 'query')
+                ->whereKey($this->getData('id'))
+                ->update(['collection_name' => $collectionName]);
+
+            DeleteMedia::make(['id' => $this->getData('id')])
+                ->execute();
+        };
+
+        // Same guard as FluxAction::execute(): no nested savepoint when this already
+        // runs inside a transaction.
+        if (DB::transactionLevel() === 0) {
+            DB::transaction($delete);
+        } else {
+            $delete();
+        }
+    }
+
+    protected function moveOldMediaOutOfCollection(Media $mediaItem): void
+    {
+        resolve_static(Media::class, 'query')
+            ->whereKey($mediaItem->getKey())
+            ->update(['collection_name' => static::REPLACED_COLLECTION_NAME]);
     }
 
     protected function prepareForValidation(): void
@@ -161,7 +197,7 @@ class ReplaceMedia extends FluxAction
         $this->data['collection_name'] ??= 'default';
 
         // check if the media collection is read-only
-        if (data_get($mediaItem->getCollection(), 'readOnly') === true && ! $this->force) {
+        if (data_get($mediaItem?->getCollection(), 'readOnly') === true && ! $this->force) {
             throw ValidationException::withMessages([
                 'collection_name' => ['The media collection is read-only and cannot be modified.'],
             ]);

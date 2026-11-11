@@ -5,6 +5,7 @@ namespace FluxErp\Http\Controllers;
 use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Http\Requests\LoginUrlRequest;
 use FluxErp\Models\User;
+use FluxErp\Support\Auth\LoginThrottle;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -35,6 +36,15 @@ class AuthController extends Controller
             return ResponseHelper::createResponseFromBase(statusCode: 422, data: $validator->errors()->toArray());
         }
 
+        $throttleKey = LoginThrottle::key($request->email ?? $request->username);
+
+        if (! LoginThrottle::reserve($throttleKey)) {
+            return ResponseHelper::createResponseFromBase(
+                statusCode: 429,
+                data: ['credentials' => LoginThrottle::message($throttleKey)]
+            );
+        }
+
         $user = resolve_static(User::class, 'query')
             ->where('email', $request->email ?? $request->username)
             ->where('is_active', true)
@@ -47,6 +57,7 @@ class AuthController extends Controller
             );
         }
 
+        LoginThrottle::clear($throttleKey);
         $token = $user->createToken('API Token', ['user']);
 
         return ResponseHelper::createResponseFromBase(
@@ -66,9 +77,20 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
+        $throttleKey = LoginThrottle::key($credentials['email']);
+
+        if (! LoginThrottle::reserve($throttleKey)) {
+            return back()
+                ->withErrors([
+                    'email' => LoginThrottle::message($throttleKey),
+                ])
+                ->onlyInput('email');
+        }
+
         $guard = Auth::guard('web');
 
         if ($guard->validate(array_merge($credentials, ['is_active' => true]))) {
+            LoginThrottle::clear($throttleKey);
             $user = $guard->getLastAttempted();
 
             if ($user->hasTwoFactorEnabled()) {

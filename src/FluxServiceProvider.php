@@ -17,6 +17,7 @@ use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Http\Middleware\SanitizeSocketId;
 use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
 use FluxErp\Livewire\Product\Product;
+use FluxErp\Mail\ImapHeaderDecoder;
 use FluxErp\Mail\MailDriverManager;
 use FluxErp\Models\Activity;
 use FluxErp\Models\Currency;
@@ -46,6 +47,8 @@ use FluxErp\Support\Bus\Dispatcher as FluxDispatcher;
 use FluxErp\Support\Container\ProductTypeManager;
 use FluxErp\Support\Flare\CensoringSender;
 use FluxErp\Support\Flare\CensorPersonalData;
+use FluxErp\Support\MediaLibrary\ImageGenerators\Image as ImageGenerator;
+use FluxErp\Support\MediaLibrary\ImageGenerators\Pdf as PdfGenerator;
 use GuzzleHttp\Client;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
@@ -68,6 +71,8 @@ use Meilisearch\Client as MeilisearchClient;
 use Spatie\FlareClient\Senders\Sender;
 use Spatie\LaravelIgnition\FlareMiddleware\AddQueries;
 use Spatie\LaravelPasskeys\Http\Controllers\AuthenticateUsingPasskeyController as BaseAuthenticateUsingPasskeyController;
+use Spatie\MediaLibrary\Conversions\ImageGenerators\Image as BaseImageGenerator;
+use Spatie\MediaLibrary\Conversions\ImageGenerators\Pdf as BasePdfGenerator;
 use Spatie\MediaLibrary\MediaCollections\Models\Observers\MediaObserver;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
@@ -364,9 +369,20 @@ class FluxServiceProvider extends ServiceProvider
             config(['permission.display_permission_in_exception' => true]);
             config(['activitylog.activitymodel' => resolve_static(Activity::class, 'class')]);
             config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
+            config([
+                'media-library.image_generators' => array_map(
+                    fn (mixed $generator): mixed => match ($generator) {
+                        BaseImageGenerator::class => ImageGenerator::class,
+                        BasePdfGenerator::class => PdfGenerator::class,
+                        default => $generator,
+                    },
+                    config('media-library.image_generators', [])
+                ),
+            ]);
             config(['two-factor.recovery.enabled' => false]);
             config(['passkeys.models.authenticatable' => resolve_static(User::class, 'class')]);
             config(['passkeys.actions.store_passkey' => resolve_static(StorePasskeyAction::class, 'class')]);
+            config(['imap.decoding.decoder.header' => resolve_static(ImapHeaderDecoder::class, 'class')]);
 
             resolve_static(Media::class, 'class')::observe(MediaObserver::class);
         });

@@ -10,6 +10,7 @@ use FluxErp\Listeners\CacheKeyWrittenListener;
 use FluxErp\Listeners\MailMessage\CreateMailExecutedSubscriber;
 use FluxErp\Listeners\MessageSendingEventSubscriber;
 use FluxErp\Listeners\Notifications\EloquentEventSubscriber;
+use FluxErp\Listeners\Order\OfferSignedSubscriber;
 use FluxErp\Listeners\Order\OrderInvoiceAddedSubscriber;
 use FluxErp\Listeners\Order\OrderStockSubscriber;
 use FluxErp\Listeners\Product\DispatchVariantInheritanceMigration;
@@ -24,6 +25,7 @@ use FluxErp\Notifications\Order\OrderApprovalRequestNotification;
 use FluxErp\Notifications\Order\SubscriptionOrderFailedNotification;
 use FluxErp\Notifications\Task\TaskAssignedNotification;
 use FluxErp\Notifications\Task\TaskCreatedNotification;
+use FluxErp\Notifications\Task\TaskReminderNotification;
 use FluxErp\Notifications\Task\TaskUpdatedNotification;
 use FluxErp\Notifications\Ticket\TicketAssignedNotification;
 use FluxErp\Notifications\Ticket\TicketCreatedNotification;
@@ -71,6 +73,7 @@ class EventServiceProvider extends ServiceProvider
         SnapshotEventSubscriber::class,
         OrderStockSubscriber::class,
         OrderInvoiceAddedSubscriber::class,
+        OfferSignedSubscriber::class,
         MessageSendingEventSubscriber::class,
         CreateMailExecutedSubscriber::class,
         CommentCreatedNotification::class,
@@ -79,6 +82,7 @@ class EventServiceProvider extends ServiceProvider
         SubscriptionOrderFailedNotification::class,
         TaskAssignedNotification::class,
         TaskCreatedNotification::class,
+        TaskReminderNotification::class,
         TaskUpdatedNotification::class,
         TicketAssignedNotification::class,
         TicketCreatedNotification::class,

@@ -131,3 +131,32 @@ test('update task clearing a date turns its reminder off', function (): void {
         ->has_due_reminder->toBeTrue()
         ->due_reminder_minutes_before->toBe(60);
 });
+
+test('create task rejects reminder minutes above the column limit', function (): void {
+    CreateTask::assertValidationErrors([
+        'name' => 'Far reminder',
+        'start_date' => '2026-04-01',
+        'has_start_reminder' => true,
+        'start_reminder_minutes_before' => 4294967296,
+        'due_date' => '2026-04-30',
+        'has_due_reminder' => true,
+        'due_reminder_minutes_before' => 4294967296,
+    ], ['start_reminder_minutes_before', 'due_reminder_minutes_before']);
+});
+
+test('update task rejects reminder minutes above the column limit', function (): void {
+    $task = Task::factory()->create([
+        'start_date' => '2026-04-01',
+        'due_date' => '2026-04-30',
+    ]);
+
+    UpdateTask::assertValidationErrors([
+        'id' => $task->getKey(),
+        'start_date' => '2026-04-01',
+        'has_start_reminder' => true,
+        'start_reminder_minutes_before' => 4294967296,
+        'due_date' => '2026-04-30',
+        'has_due_reminder' => true,
+        'due_reminder_minutes_before' => 4294967296,
+    ], ['start_reminder_minutes_before', 'due_reminder_minutes_before']);
+});

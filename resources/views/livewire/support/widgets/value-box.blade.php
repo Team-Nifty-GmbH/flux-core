@@ -41,7 +41,13 @@
                                 <x-slot:left>
                                     <i class="ph ph-caret-up"></i>
                                 </x-slot:left>
-                                <span x-text="$wire.growthRate + '%'"></span>
+                                <span
+                                    x-text="
+                                        $nuxbe.format.percentage(
+                                            $wire.growthRate / 100,
+                                        )
+                                    "
+                                ></span>
                             </x-badge>
                             <x-badge
                                 x-cloak
@@ -51,7 +57,13 @@
                                 <x-slot:left>
                                     <i class="ph ph-caret-down"></i>
                                 </x-slot:left>
-                                <span x-text="$wire.growthRate + '%'"></span>
+                                <span
+                                    x-text="
+                                        $nuxbe.format.percentage(
+                                            $wire.growthRate / 100,
+                                        )
+                                    "
+                                ></span>
                             </x-badge>
                         </div>
                     </template>
@@ -66,7 +78,13 @@
                                 <x-slot:left>
                                     <i class="ph ph-caret-up"></i>
                                 </x-slot:left>
-                                <span x-text="$wire.growthRate + '%'"></span>
+                                <span
+                                    x-text="
+                                        $nuxbe.format.percentage(
+                                            $wire.growthRate / 100,
+                                        )
+                                    "
+                                ></span>
                             </x-badge>
                             <x-badge
                                 x-cloak
@@ -76,7 +94,13 @@
                                 <x-slot:left>
                                     <i class="ph ph-caret-down"></i>
                                 </x-slot:left>
-                                <span x-text="$wire.growthRate + '%'"></span>
+                                <span
+                                    x-text="
+                                        $nuxbe.format.percentage(
+                                            $wire.growthRate / 100,
+                                        )
+                                    "
+                                ></span>
                             </x-badge>
                         </div>
                     </template>

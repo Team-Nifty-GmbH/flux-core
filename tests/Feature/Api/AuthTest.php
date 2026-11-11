@@ -41,3 +41,14 @@ test('validate token', function (): void {
     $response = $this->actingAs($this->user)->get('/api/auth/token/validate');
     $response->assertOk();
 });
+
+test('authenticate is locked after too many failed attempts', function (): void {
+    foreach (range(1, 5) as $attempt) {
+        $this->post('/api/auth/token', ['email' => $this->user->email, 'password' => Str::random()])
+            ->assertUnauthorized();
+    }
+
+    $this->post('/api/auth/token', ['email' => $this->user->email, 'password' => 'password'])
+        ->assertTooManyRequests()
+        ->assertJsonMissingPath('access_token');
+});

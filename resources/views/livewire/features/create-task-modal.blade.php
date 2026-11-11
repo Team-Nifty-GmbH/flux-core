@@ -54,6 +54,23 @@
                             :label="__('Due Time')"
                             wire:model="task.due_time"
                         />
+                        <div
+                            class="space-y-2"
+                            x-cloak
+                            x-show="$wire.task.due_date"
+                        >
+                            <x-toggle
+                                :label="__('Due Reminder')"
+                                wire:model="task.has_due_reminder"
+                            />
+                            <div x-cloak x-show="$wire.task.has_due_reminder">
+                                <x-number
+                                    :label="__('Remind Minutes Before')"
+                                    wire:model="task.due_reminder_minutes_before"
+                                    min="0"
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <x-flux::state
