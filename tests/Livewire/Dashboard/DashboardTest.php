@@ -6,6 +6,7 @@ use FluxErp\Models\User;
 use FluxErp\Models\Widget;
 use Illuminate\Support\Str;
 use Livewire\Component;
+use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -181,10 +182,10 @@ test('dashboard widget removal', function (): void {
     $widgets = $livewire->get('widgets');
     unset($widgets[0]);
 
-    $livewire->set('widgets', $widgets)
-        ->call('saveWidgets', $widgets)
+    $livewire->call('saveWidgets', $widgets)
         ->assertOk()
         ->call('widgets')
+        ->call('$refresh')
         ->assertOk()
         ->assertDontSee('Hello from sample component')
         ->assertDontSeeLivewire('sample-component');
@@ -239,9 +240,7 @@ test('sync widgets drops a widget the user may not see', function (): void {
                 'order_row' => 0,
                 'component_name' => 'sample-component',
             ],
-        ])
-        ->set('sync', true)
-        ->assertDontSeeLivewire('sample-component-2');
+        ]);
 
     expect(array_column($component->get('widgets'), 'component_name'))
         ->not->toContain('sample-component-2');
@@ -268,16 +267,43 @@ test('sync widgets drops a component that is no widget', function (): void {
                 'order_row' => 0,
                 'component_name' => 'sample-component',
             ],
-        ])
-        ->set('sync', true)
-        ->assertDontSeeLivewire('settings.users');
+        ]);
 
     expect(array_column($component->get('widgets'), 'component_name'))
         ->not->toContain('settings.users');
     expect(array_column($component->get('widgets'), 'id'))->toContain($permittedId);
 });
 
-test('setting the widgets property drops a component that is no widget', function (): void {
+test('sync widgets drops a widget given by its class name', function (): void {
+    Permission::findOrCreate('widget.sample-component-2', 'web');
+
+    $component = Livewire::withoutLazyLoading()
+        ->test(Dashboard::class)
+        ->call('syncWidgets', [
+            [
+                'id' => $deniedId = Str::uuid()->toString(),
+                'height' => 1,
+                'width' => 1,
+                'order_column' => 0,
+                'order_row' => 0,
+                'component_name' => get_class($this->components[1]),
+            ],
+            [
+                'id' => $permittedId = Str::uuid()->toString(),
+                'height' => 1,
+                'width' => 1,
+                'order_column' => 1,
+                'order_row' => 0,
+                'component_name' => 'sample-component',
+            ],
+        ]);
+
+    expect(array_column($component->get('widgets'), 'id'))
+        ->not->toContain($deniedId)
+        ->toContain($permittedId);
+});
+
+test('the widgets property cannot be set from the client', function (): void {
     Livewire::withoutLazyLoading()
         ->test(Dashboard::class)
         ->set('widgets', [
@@ -289,18 +315,8 @@ test('setting the widgets property drops a component that is no widget', functio
                 'order_row' => 0,
                 'component_name' => 'settings.users',
             ],
-            [
-                'id' => Str::uuid()->toString(),
-                'height' => 1,
-                'width' => 1,
-                'order_column' => 1,
-                'order_row' => 0,
-                'component_name' => 'sample-component-2',
-            ],
-        ])
-        ->assertDontSeeLivewire('settings.users')
-        ->assertSeeLivewire('sample-component-2');
-});
+        ]);
+})->throws(CannotUpdateLockedPropertyException::class);
 
 test('save widgets does not store a component that is no widget', function (): void {
     Livewire::withoutLazyLoading()
@@ -352,4 +368,37 @@ test('save widgets keeps the widget on the own dashboard', function (): void {
         'dashboard_component' => Dashboard::class,
     ]);
     $this->assertDatabaseMissing('widgets', ['widgetable_id' => $otherUser->getKey()]);
+});
+
+test('a saved widget registered for another dashboard is not rendered', function (): void {
+    Livewire::component('project-only-widget', new class() extends Component
+    {
+        use FluxErp\Traits\Livewire\Widget\Widgetable;
+
+        public static function dashboardComponent(): string
+        {
+            return FluxErp\Livewire\Project\Dashboard::class;
+        }
+
+        public function render(): string
+        {
+            return '<div>Hello from project widget</div>';
+        }
+    });
+    FluxErp\Facades\Widget::register('project-only-widget', 'project-only-widget');
+
+    Widget::query()->create([
+        'widgetable_type' => morph_alias(User::class),
+        'widgetable_id' => $this->user->getKey(),
+        'component_name' => 'project-only-widget',
+        'dashboard_component' => Dashboard::class,
+        'name' => 'Project widget',
+        'width' => 1,
+        'height' => 1,
+    ]);
+
+    Livewire::withoutLazyLoading()
+        ->test(Dashboard::class)
+        ->assertSeeLivewire('sample-component')
+        ->assertDontSeeLivewire('project-only-widget');
 });
