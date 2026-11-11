@@ -2,14 +2,13 @@
 
 namespace FluxErp\Support\Flare;
 
-use Illuminate\Http\Request;
-use Illuminate\Routing\Route;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Spatie\FlareClient\Senders\Sender;
 
 class CensoringSender implements Sender
 {
+    use CensorsCommandLines, CensorsUrls;
+
     public const string CENSORED = '<CENSORED>';
 
     protected const array CENSORED_NAMES = [
@@ -20,15 +19,30 @@ class CensoringSender implements Sender
         'context.laravel',
         'db.query.parameters',
         'db.sql.bindings',
+        'dump.html',
+        'filesystem.as_path',
+        'filesystem.found_paths',
+        'filesystem.from_path',
+        'filesystem.full_path',
+        'filesystem.path',
+        'filesystem.paths',
+        'filesystem.to_path',
+        'filesystem.url',
+        'glow.context',
         'http.request.body.contents',
         'http.request.cookies',
         'http.request.files',
         'http.request.session',
         'laravel.job.properties',
+        'laravel.job.tags',
         'laravel.route.parameters',
+        'laravel.url',
         'livewire.component.call.params',
         'livewire.components',
         'log.context',
+        'notification.to',
+        'process.command_args',
+        'url.fragment',
         'url.query',
         'user.attributes',
         'user.email',
@@ -47,7 +61,6 @@ class CensoringSender implements Sender
     protected const string REQUEST_SPAN_PREFIX = 'Request - ';
 
     protected const array URLS = [
-        'flare.entry_point.value',
         'referer',
         'url.full',
         'url.path',
@@ -81,33 +94,15 @@ class CensoringSender implements Sender
         return $attribute;
     }
 
-    protected function censorUrl(string $url): string
-    {
-        if (! Str::startsWith($url, ['http://', 'https://', '/'])) {
-            return $url;
-        }
-
-        return rescue(
-            function () use ($url): string {
-                $request = Request::create($url);
-                $route = Arr::first(
-                    app('router')->getRoutes()->getRoutes(),
-                    fn (Route $route): bool => $route->matches($request, false)
-                );
-
-                return (str_starts_with($url, '/') ? '' : $request->getSchemeAndHttpHost())
-                    . '/' . ltrim($route?->uri() ?? static::CENSORED, '/');
-            },
-            static::CENSORED,
-            false
-        );
-    }
-
     protected function censorValue(string $name, mixed $value): mixed
     {
         return match (true) {
             $name === 'arguments' => null,
             in_array($name, static::CENSORED_NAMES, true) => static::CENSORED,
+            is_string($value) && $name === 'flare.entry_point.value' => implode(
+                ' ',
+                $this->censorCommandLine(explode(' ', $this->censorUrl($value)))
+            ),
             is_string($value) && in_array($name, static::URLS, true) => $this->censorUrl($value),
             is_string($value)
                 && $name === 'name'

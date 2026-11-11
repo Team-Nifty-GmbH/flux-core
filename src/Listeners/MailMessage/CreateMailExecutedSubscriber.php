@@ -18,6 +18,7 @@ use FluxErp\Models\Tenant;
 use FluxErp\Models\Ticket;
 use FluxErp\Settings\TicketSettings;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Spatie\Activitylog\Support\CauserResolver;
@@ -117,12 +118,20 @@ class CreateMailExecutedSubscriber
                 'authenticatable_type' => morph_alias(Address::class),
                 'authenticatable_id' => $this->address->getKey(),
                 'title' => $communication->subject,
-                'description' => $communication->text_body ?? $communication->html_body,
+                'description' => array_find(
+                    [$communication->text_body, $communication->html_body],
+                    fn (?string $body): bool => mb_strlen(trim($body ?? '')) >= 12
+                ) ?? $communication->subject,
             ])
                 ->actingAs($this->address)
                 ->validate()
                 ->execute();
-        } catch (ValidationException) {
+        } catch (ValidationException $e) {
+            Log::warning('Ticket could not be created from mail', [
+                'communication_id' => $communication->getKey(),
+                'errors' => $e->errors(),
+            ]);
+
             return null;
         }
 

@@ -30,6 +30,8 @@ abstract class SubscribableNotification extends Notification implements Routable
 
     public ?string $fallbackRoute = null;
 
+    public bool $deleteWhenMissingModels = true;
+
     abstract protected function getTitle(): string;
 
     abstract public function subscribe(): array;

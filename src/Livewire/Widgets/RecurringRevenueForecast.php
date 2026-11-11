@@ -2,7 +2,6 @@
 
 namespace FluxErp\Livewire\Widgets;
 
-use Cron\CronExpression;
 use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Order\OrderList;
@@ -78,7 +77,7 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
             ->with([
                 'order:id,tenant_id,total_net_price',
                 'order.tenant:id,name',
-                'schedule:id,cron_expression,ends_at,recurrences,current_recurrence',
+                'schedule:id,cron,cron_expression,due_at,ends_at,recurrences,current_recurrence',
             ])
             ->get();
 
@@ -89,9 +88,15 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
                 continue;
             }
 
-            $cron = new CronExpression($orderSchedule->schedule->cron_expression);
+            $cron = resolve_static(
+                Schedule::class,
+                'runCron',
+                [$orderSchedule->schedule->cron, $orderSchedule->schedule->cron_expression]
+            );
             try {
-                $nextRun = $cron->getNextRunDate(now());
+                $nextRun = $orderSchedule->schedule->due_at?->isFuture()
+                    ? $orderSchedule->schedule->due_at
+                    : $cron->getNextRunDate(now());
             } catch (Throwable) {
                 continue;
             }
@@ -103,7 +108,7 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
                 && $nextRun >= $this->getStart()
                 && (
                     is_null($orderSchedule->schedule->ends_at)
-                    || $nextRun <= $orderSchedule->schedule->ends_at
+                    || $nextRun < $orderSchedule->schedule->ends_at
                 )
                 && (
                     is_null($orderSchedule->schedule->recurrences)
@@ -128,7 +133,7 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
                     )
                 );
 
-                $nextRun = $cron->getNextRunDate($nextRun);
+                $nextRun = resolve_static(Schedule::class, 'nextRunAfter', [$cron, $nextRun]);
                 if (! is_null($orderSchedule->schedule->recurrences)) {
                     $currentRecurrence++;
                 }

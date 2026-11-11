@@ -58,6 +58,17 @@ class CommunicationList extends BaseDataTable
             $itemArray['text_body'] = Str::limit($itemArray['text_body'], 100);
         }
 
+        foreach (['to', 'cc', 'bcc'] as $recipientColumn) {
+            if (array_key_exists($recipientColumn, $itemArray)) {
+                $itemArray[$recipientColumn] = array_map(
+                    fn (mixed $recipient): mixed => is_array($recipient)
+                        ? data_get($recipient, 'full') ?? data_get($recipient, 'mail')
+                        : $recipient,
+                    $item->getAttribute($recipientColumn) ?? []
+                );
+            }
+        }
+
         $itemArray['send_status'] = $item->send_error ? __('Sending failed') : '';
     }
 

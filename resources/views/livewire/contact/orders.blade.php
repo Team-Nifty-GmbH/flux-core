@@ -4,7 +4,7 @@
             <div class="divide-secondary-200 space-y-2.5 divide-y">
                 <x-select.styled
                     :label="__('Order type')"
-                    wire:model="order.order_type_id"
+                    wire:model.live="order.order_type_id"
                     select="label:name|value:id"
                     :options="$orderTypes"
                 />

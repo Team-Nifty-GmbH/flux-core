@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Product;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class ProductList extends BaseDataTable
 {
@@ -33,5 +34,9 @@ class ProductList extends BaseDataTable
     protected function augmentItemArray(array &$itemArray, Model $item): void
     {
         $itemArray['product_image'] = $item->getAvatarUrl();
+
+        if (is_string($itemArray['product_type'] ?? null)) {
+            $itemArray['product_type'] = __(Str::headline($itemArray['product_type']));
+        }
     }
 }

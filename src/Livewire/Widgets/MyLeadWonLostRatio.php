@@ -6,9 +6,11 @@ use Closure;
 use FluxErp\Models\Lead;
 use FluxErp\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 
 class MyLeadWonLostRatio extends OverallLeadWonLostRatio
 {
+    #[Locked]
     public ?int $userId = null;
 
     public static function getCategory(): ?string

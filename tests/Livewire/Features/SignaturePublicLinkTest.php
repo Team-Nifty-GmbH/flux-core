@@ -12,6 +12,8 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
 use FluxErp\Notifications\Order\DocumentSignedNotification;
+use FluxErp\States\Order\Draft;
+use FluxErp\States\Order\InReview;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Notifications\Channels\BroadcastChannel;
 use Illuminate\Notifications\Channels\DatabaseChannel;
@@ -111,14 +113,14 @@ test('upload signature', function (): void {
     ]);
 });
 
-function signOrder(Order $order): void
+function signOrder(Order $order, ?string $printView = null): void
 {
     Livewire::test(
         SignaturePublicLink::class,
         [
             'uuid' => $order->uuid,
             'model' => $order->getMorphClass(),
-            'printView' => array_keys($order->resolvePrintViews())[0],
+            'printView' => $printView ?? array_keys($order->resolvePrintViews())[0],
         ]
     )
         ->set('signature.file', UploadedFile::fake()->image('signature.png'))
@@ -176,4 +178,24 @@ test('changing the agent moves the signature subscription to the new agent', fun
 
     Notification::assertSentTo($agent, DocumentSignedNotification::class);
     Notification::assertNotSentTo($formerAgent, DocumentSignedNotification::class);
+});
+
+test('signing an offer puts the order in review', function (): void {
+    Storage::fake('local');
+    $this->order->orderType->update(['print_layouts' => ['offer']]);
+
+    auth()->logout();
+    signOrder($this->order->refresh(), 'offer');
+
+    expect($this->order->refresh()->state)->toBeInstanceOf(InReview::class);
+});
+
+test('signing a delivery note keeps the order state', function (): void {
+    Storage::fake('local');
+    $this->order->orderType->update(['print_layouts' => ['delivery-note']]);
+
+    auth()->logout();
+    signOrder($this->order->refresh(), 'delivery-note');
+
+    expect($this->order->refresh()->state)->toBeInstanceOf(Draft::class);
 });

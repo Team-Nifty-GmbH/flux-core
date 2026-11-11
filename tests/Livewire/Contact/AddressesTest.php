@@ -78,6 +78,24 @@ test('invalid salutation blocks saving', function (): void {
     $this->assertDatabaseMissing('addresses', ['id' => $this->addressForm->id, 'street' => $street]);
 });
 
+test('saving successfully clears validation errors of the previous attempt', function (): void {
+    $component = Livewire::actingAs($this->user)
+        ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm])
+        ->set('edit', true)
+        ->set('address.email_primary', 'not-an-email')
+        ->call('save')
+        ->assertHasErrors('address.email_primary');
+
+    $message = $component->errors()->first('address.email_primary');
+
+    $component->set('address.email_primary', 'john@example.com')
+        ->call('save')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertDontSee($message)
+        ->assertSet('edit', false);
+});
+
 test('selecting another address resets validation errors', function (): void {
     $otherAddress = Address::factory()->create([
         'contact_id' => $this->contactForm->id,

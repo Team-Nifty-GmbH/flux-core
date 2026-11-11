@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Auth;
 
 use FluxErp\Models\User;
 use FluxErp\Settings\SecuritySettings;
+use FluxErp\Support\Auth\LoginThrottle;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Auth\PasswordBroker;
 use Illuminate\Contracts\Auth\StatefulGuard;
@@ -56,12 +57,23 @@ class Login extends Component
         return view('flux::livewire.auth.login');
     }
 
+    public function cancelTotpChallenge(): void
+    {
+        Session::forget('two_factor_login');
+        $this->showTotpChallenge = false;
+        $this->reset('password', 'totpCode');
+    }
+
     public function login(): bool
     {
         $target = Session::get('url.intended', route($this->dashboardRoute));
         $this->validate();
 
         if ($this->password) {
+            if ($this->isRateLimited($this->throttleKey())) {
+                return false;
+            }
+
             $guard = $this->guard();
 
             if (! $guard->validate(['email' => $this->email, 'password' => $this->password])) {
@@ -80,11 +92,13 @@ class Login extends Component
                     'remember' => $this->remember,
                     'target' => $target,
                 ]);
+                LoginThrottle::clear($this->throttleKey());
                 $this->showTotpChallenge = true;
 
                 return true;
             }
 
+            LoginThrottle::clear($this->throttleKey());
             $guard->login($user, $this->remember);
             $this->redirect($target);
 
@@ -105,45 +119,6 @@ class Login extends Component
             ->send();
 
         return true;
-    }
-
-    public function verifyTotpCode(): void
-    {
-        $loginData = Session::get('two_factor_login');
-
-        if (
-            ! is_array($loginData)
-            || ! isset($loginData['user_id'], $loginData['remember'], $loginData['target'])
-        ) {
-            Session::forget('two_factor_login');
-            $this->reset('password', 'totpCode');
-            $this->showTotpChallenge = false;
-
-            return;
-        }
-
-        $user = resolve_static(User::class, 'query')
-            ->whereKey($loginData['user_id'])
-            ->where('is_active', true)
-            ->first();
-
-        if (! $user || blank($this->totpCode) || ! $user->validateTwoFactorCode($this->totpCode)) {
-            $this->addError('totpCode', __('Invalid code'));
-            $this->reset('totpCode');
-
-            return;
-        }
-
-        Session::forget('two_factor_login');
-        $this->guard()->login($user, $loginData['remember']);
-        $this->redirect($loginData['target']);
-    }
-
-    public function cancelTotpChallenge(): void
-    {
-        Session::forget('two_factor_login');
-        $this->showTotpChallenge = false;
-        $this->reset('password', 'totpCode');
     }
 
     public function resetPassword(): void
@@ -170,9 +145,45 @@ class Login extends Component
         }
     }
 
-    protected function guard(): StatefulGuard
+    public function verifyTotpCode(): void
     {
-        return Auth::guard($this->guard);
+        $loginData = Session::get('two_factor_login');
+
+        if (
+            ! is_array($loginData)
+            || ! isset($loginData['user_id'], $loginData['remember'], $loginData['target'])
+        ) {
+            Session::forget('two_factor_login');
+            $this->reset('password', 'totpCode');
+            $this->showTotpChallenge = false;
+
+            return;
+        }
+
+        $throttleKey = 'totp|' . $loginData['user_id'];
+
+        if ($this->isRateLimited($throttleKey)) {
+            $this->reset('totpCode');
+
+            return;
+        }
+
+        $user = resolve_static(User::class, 'query')
+            ->whereKey($loginData['user_id'])
+            ->where('is_active', true)
+            ->first();
+
+        if (! $user || blank($this->totpCode) || ! $user->validateTwoFactorCode($this->totpCode)) {
+            $this->addError('totpCode', __('Invalid code'));
+            $this->reset('totpCode');
+
+            return;
+        }
+
+        LoginThrottle::clear($throttleKey);
+        Session::forget('two_factor_login');
+        $this->guard()->login($user, $loginData['remember']);
+        $this->redirect($loginData['target']);
     }
 
     protected function failLogin(): bool
@@ -197,5 +208,28 @@ class Login extends Component
             ->first();
 
         return Password::broker($broker);
+    }
+
+    protected function guard(): StatefulGuard
+    {
+        return Auth::guard($this->guard);
+    }
+
+    protected function isRateLimited(string $key): bool
+    {
+        if (LoginThrottle::reserve($key)) {
+            return false;
+        }
+
+        $this->toast()
+            ->error(LoginThrottle::message($key))
+            ->send();
+
+        return true;
+    }
+
+    protected function throttleKey(): string
+    {
+        return LoginThrottle::key($this->email);
     }
 }

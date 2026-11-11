@@ -2,7 +2,6 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Contracts\HasMediaForeignKey;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasUserModification;
@@ -14,7 +13,7 @@ use FluxErp\View\Printing\PaymentReminder\PaymentReminderView;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class PaymentReminder extends FluxModel implements HasMediaForeignKey, OffersPrinting
+class PaymentReminder extends FluxModel implements OffersPrinting
 {
     use HasPackageFactory, HasUserModification, HasUuid, LogsActivity, Printable, SoftDeletes;
 
@@ -27,20 +26,7 @@ class PaymentReminder extends FluxModel implements HasMediaForeignKey, OffersPri
         });
     }
 
-    // Public static methods
-    public static function mediaReplaced(int|string|null $oldMediaId, int|string|null $newMediaId): void
-    {
-        static::query()
-            ->where('media_id', $oldMediaId)
-            ->update(['media_id' => $newMediaId]);
-    }
-
     // Relations
-    public function media(): BelongsTo
-    {
-        return $this->belongsTo(Media::class);
-    }
-
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);

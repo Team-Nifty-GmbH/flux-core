@@ -11,12 +11,14 @@ use FluxErp\Models\Order;
 use FluxErp\Models\Project;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Livewire;
 use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
 class ProjectMargin extends ValueBox implements HasWidgetOptions
 {
+    #[Locked]
     public ?int $projectId = null;
 
     public static function getCategory(): ?string

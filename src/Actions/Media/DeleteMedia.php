@@ -34,7 +34,7 @@ class DeleteMedia extends FluxAction
             ->whereKey($this->data['id'])
             ->first();
 
-        return $mediaItem->delete();
+        return $mediaItem?->delete();
     }
 
     protected function validateData(): void
@@ -47,7 +47,7 @@ class DeleteMedia extends FluxAction
             ->first(['id', 'model_type', 'model_id', 'collection_name']);
 
         // check if the media collection is read-only
-        if (data_get($mediaItem->getCollection(), 'readOnly') === true && ! $this->force) {
+        if (data_get($mediaItem?->getCollection(), 'readOnly') === true && ! $this->force) {
             throw ValidationException::withMessages([
                 'collection_name' => ['The media collection is read-only and cannot be modified.'],
             ]);

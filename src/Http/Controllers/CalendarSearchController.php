@@ -25,10 +25,6 @@ class CalendarSearchController extends Controller
             });
         }
 
-        if ($request->has('with')) {
-            $query->with($request->input('with'));
-        }
-
         if ($request->has('limit')) {
             $query->limit($request->input('limit'));
         } else {
@@ -47,19 +43,6 @@ class CalendarSearchController extends Controller
             $query->where($request->input('where'));
         }
 
-        if ($request->has('whereIn')) {
-            foreach ($request->input('whereIn') as $whereIn) {
-                $whereIn[1] = Arr::wrap($whereIn[1]);
-                $query->whereIn(...$whereIn);
-            }
-        }
-
-        if ($request->has('whereNotIn')) {
-            foreach ($request->input('whereNotIn') as $whereNotIn) {
-                $query->whereNotIn(...$whereNotIn);
-            }
-        }
-
         if ($request->has('whereNull')) {
             $query->whereNull($request->input('whereNull'));
         }
@@ -70,14 +53,6 @@ class CalendarSearchController extends Controller
 
         if ($request->has('select')) {
             $query->select($request->input('select'));
-        }
-
-        if ($request->has('whereDoesntHave')) {
-            $query->whereDoesntHave($request->input('whereDoesntHave'));
-        }
-
-        if ($request->has('whereHas')) {
-            $query->whereHas($request->input('whereHas'));
         }
 
         if ($onlyGroupCalendars) {
