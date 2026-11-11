@@ -55,7 +55,7 @@
                         x-bind:class="{ 'pointer-events-none': editGrid }"
                     >
                         @livewire(
-                            $widget['component_name'] ?? $widget['class'],
+                            $widget['component_name'],
                             array_merge($this->getWidgetAttributes(), [
                                 'config' => data_get($widget, 'config'),
                                 'dashboardComponent' => $this->getName(),
