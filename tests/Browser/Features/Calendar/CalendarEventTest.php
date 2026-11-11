@@ -539,15 +539,6 @@ test('unchecking a calendar group stores the active calendars in a single call',
 
     $page = visitCalendar();
 
-    // The event sources are added after the view renders, so wait until the calendar
-    // outside the group is one of them before reading the sources.
-    waitForCondition(
-        $page,
-        "() => Alpine.\$data(document.querySelector('[calendar-root]')).calendar"
-            . ".getEventSources().some((source) => String(source.id) === '{$other->getKey()}')",
-        10000
-    );
-
     $page->script(<<<JS
         () => {
             if (window.groupProbe) {
