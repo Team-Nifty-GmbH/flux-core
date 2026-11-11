@@ -6,6 +6,7 @@ use FluxErp\Models\User;
 use FluxErp\Models\Widget;
 use Illuminate\Support\Str;
 use Livewire\Component;
+use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -181,10 +182,10 @@ test('dashboard widget removal', function (): void {
     $widgets = $livewire->get('widgets');
     unset($widgets[0]);
 
-    $livewire->set('widgets', $widgets)
-        ->call('saveWidgets', $widgets)
+    $livewire->call('saveWidgets', $widgets)
         ->assertOk()
         ->call('widgets')
+        ->call('$refresh')
         ->assertOk()
         ->assertDontSee('Hello from sample component')
         ->assertDontSeeLivewire('sample-component');
@@ -302,7 +303,7 @@ test('sync widgets drops a widget given by its class name', function (): void {
         ->toContain($permittedId);
 });
 
-test('setting the widgets property drops a component that is no widget', function (): void {
+test('the widgets property cannot be set from the client', function (): void {
     Livewire::withoutLazyLoading()
         ->test(Dashboard::class)
         ->set('widgets', [
@@ -314,18 +315,8 @@ test('setting the widgets property drops a component that is no widget', functio
                 'order_row' => 0,
                 'component_name' => 'settings.users',
             ],
-            [
-                'id' => Str::uuid()->toString(),
-                'height' => 1,
-                'width' => 1,
-                'order_column' => 1,
-                'order_row' => 0,
-                'component_name' => 'sample-component-2',
-            ],
-        ])
-        ->assertDontSeeLivewire('settings.users')
-        ->assertSeeLivewire('sample-component-2');
-});
+        ]);
+})->throws(CannotUpdateLockedPropertyException::class);
 
 test('save widgets does not store a component that is no widget', function (): void {
     Livewire::withoutLazyLoading()

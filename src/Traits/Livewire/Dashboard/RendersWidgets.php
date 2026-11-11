@@ -10,6 +10,7 @@ use FluxErp\Traits\Livewire\EnsureUsedInLivewire;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Js;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 
 trait RendersWidgets
@@ -31,6 +32,7 @@ trait RendersWidgets
 
     public bool $sync = false;
 
+    #[Locked]
     public array $widgets = [];
 
     #[Computed]
@@ -53,11 +55,6 @@ trait RendersWidgets
         $this->availableWidgets = $this->filterWidgets(Widget::all());
         $this->availableWidgetsTree = $this->availableWidgetsTree();
         $this->widgets();
-    }
-
-    public function renderingRendersWidgets(): void
-    {
-        $this->widgets = array_values($this->filterWidgets($this->widgets));
     }
 
     #[Renderless]
