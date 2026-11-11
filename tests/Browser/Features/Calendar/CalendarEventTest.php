@@ -502,12 +502,18 @@ test('toggling a calendar sends only the ids of the active calendars', function 
 
             const originalFetch = window.fetch;
             window.fetch = (input, init) => {
-                window.toggleProbe.calls.push(
-                    ...(JSON.parse(init?.body || '{}').components || [])
-                        .flatMap((component) => component.calls || [])
-                        .filter((call) => call.method === 'toggleEventSource')
-                        .map((call) => call.params[0]),
-                );
+                const calls = (JSON.parse(init?.body || '{}').components || [])
+                    .flatMap((component) => component.calls || [])
+                    .filter((call) => call.method === 'toggleEventSource')
+                    .map((call) => call.params[0]);
+
+                if (calls.length) {
+                    return originalFetch(input, init).then((response) => {
+                        window.toggleProbe.calls.push(...calls);
+
+                        return response;
+                    });
+                }
 
                 return originalFetch(input, init);
             };
