@@ -509,6 +509,7 @@ test('toggling a calendar sends only the ids of the active calendars', function 
 
                 if (calls.length) {
                     return originalFetch(input, init).then((response) => {
+                        window.toggleProbe.status = response.status;
                         window.toggleProbe.calls.push(...calls);
 
                         return response;
@@ -530,7 +531,8 @@ test('toggling a calendar sends only the ids of the active calendars', function 
 
     $probe = $page->script('() => window.toggleProbe');
 
-    expect($probe['sources'])->not->toBeEmpty()->not->toContain($probe['unchecked'])
+    expect($probe['status'])->toBe(200)
+        ->and($probe['sources'])->not->toBeEmpty()->not->toContain($probe['unchecked'])
         ->and(end($probe['calls']))->toBe(array_map(fn (string $id): array => ['publicId' => $id], $probe['sources']));
 });
 
