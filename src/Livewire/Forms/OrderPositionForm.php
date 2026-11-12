@@ -8,6 +8,7 @@ use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
 use FluxErp\Models\Product;
 use FluxErp\Models\Warehouse;
 use FluxErp\Support\Calculation\Rounding;
+use FluxErp\Support\Livewire\Attributes\ExcludeFromActionData;
 use Livewire\Attributes\Locked;
 
 class OrderPositionForm extends FluxForm
@@ -21,6 +22,8 @@ class OrderPositionForm extends FluxForm
     public ?string $amount_packed_products = null;
 
     public ?int $tenant_id = null;
+
+    public ?array $configuration = null;
 
     public ?int $contact_id = null;
 
@@ -50,6 +53,9 @@ class OrderPositionForm extends FluxForm
     public bool $is_bundle_parent = false;
 
     public bool $is_bundle_position = false;
+
+    #[ExcludeFromActionData]
+    public bool $is_configurable = false;
 
     public bool $is_free_text = false;
 
