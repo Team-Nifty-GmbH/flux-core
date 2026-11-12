@@ -50,6 +50,7 @@ test('can create employee via save', function (): void {
         'is_active' => true,
         'language_id' => $this->defaultLanguage->getKey(),
     ]);
+    $newUser->tenants()->attach($this->dbTenant->getKey());
 
     Livewire::test(Employees::class)
         ->call('edit')

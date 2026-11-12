@@ -40,7 +40,9 @@ beforeEach(function (): void {
         'work_time_model_id' => $this->wtm->getKey(),
     ])->validate()->execute();
 
-    $keptUser = User::factory()->create();
+    $keptUser = User::factory()->create(['is_active' => true]);
+
+    $keptUser->tenants()->attach($this->dbTenant->getKey());
     $this->keptEmployee = CreateEmployee::make([
         'firstname' => 'Kept',
         'lastname' => 'Sub',

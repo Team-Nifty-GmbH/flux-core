@@ -18,6 +18,7 @@
                         'url' => route('search', \FluxErp\Models\User::class),
                         'method' => 'POST',
                         'params' => [
+                            'where' => [['is_active', true]],
                             'whereDoesntHave' => 'employee',
                             'fields' => [
                                 'id',

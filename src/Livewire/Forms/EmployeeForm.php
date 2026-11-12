@@ -101,6 +101,26 @@ class EmployeeForm extends FluxForm
 
     public ?string $zip = null;
 
+    protected ?int $loadedUserId = null;
+
+    public function fill($values): void
+    {
+        parent::fill($values);
+
+        $this->loadedUserId = $this->user_id;
+    }
+
+    public function toActionData(): array
+    {
+        $data = parent::toActionData();
+
+        if (array_key_exists('user_id', $data) && $data['user_id'] === $this->loadedUserId) {
+            unset($data['user_id']);
+        }
+
+        return $data;
+    }
+
     protected function getActions(): array
     {
         return [

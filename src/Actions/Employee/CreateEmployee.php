@@ -8,11 +8,14 @@ use FluxErp\Models\EmployeeDepartment;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\VacationCarryoverRule;
 use FluxErp\Rulesets\Employee\CreateEmployeeRuleset;
+use FluxErp\Traits\Action\ValidatesEmployeeUserLink;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
 class CreateEmployee extends FluxAction
 {
+    use ValidatesEmployeeUserLink;
+
     public static function models(): array
     {
         return [Employee::class];
@@ -58,6 +61,8 @@ class CreateEmployee extends FluxAction
     protected function validateData(): void
     {
         parent::validateData();
+
+        $this->validateUserLink((int) $this->getData('tenant_id'), 'createEmployee');
 
         if (
             $this->getData('employee_department_id')
