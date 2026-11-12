@@ -65,6 +65,7 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
                         'user.contact.invoiceAddress:id,contact_id,country_id',
                         'user.contact.invoiceAddress.country:id,iso_alpha2',
                     ])
+                    ->lockForUpdate()
                     ->get();
 
                 if ($commissions->isEmpty()) {
