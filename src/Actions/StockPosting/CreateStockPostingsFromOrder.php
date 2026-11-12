@@ -33,7 +33,7 @@ class CreateStockPostingsFromOrder extends FluxAction
                     ->select(['id', 'order_id', 'product_id', 'warehouse_id', 'amount', 'unit_net_price']),
                 'orderPositions.reservedStock',
                 'orderPositions.stockPostings',
-                'orderPositions.product:id,name,is_nos',
+                'orderPositions.product:id,name,is_nos,is_configurable',
                 'orderType:id,order_type_enum',
             ])
             ->first(['id', 'order_type_id', 'order_number']);
@@ -47,6 +47,10 @@ class CreateStockPostingsFromOrder extends FluxAction
         $description = __(Str::headline($order->orderType->order_type_enum->value)) . ' ' . $order->order_number;
 
         foreach ($order->orderPositions as $orderPosition) {
+            if ($orderPosition->product?->is_configurable) {
+                continue;
+            }
+
             $posting = bcabs($orderPosition->stockPostings()->sum('posting'));
 
             if (bccomp($posting, $orderPosition->amount) >= 0) {
