@@ -165,6 +165,7 @@ class MenuServiceProvider extends ServiceProvider
                 // Products
                 Menu::group(path: 'settings.children.products', label: 'Products');
                 Menu::register(route: 'settings.price-lists', path: 'settings.children.products.children.price-lists');
+                Menu::register(route: 'settings.product-configuration-groups', path: 'settings.children.products.children.product-configuration-groups');
                 Menu::register(route: 'settings.product-option-groups', path: 'settings.children.products.children.product-option-groups');
                 Menu::register(route: 'settings.product-properties', path: 'settings.children.products.children.product-properties');
                 Menu::register(route: 'settings.storage-areas', path: 'settings.children.products.children.storage-areas');

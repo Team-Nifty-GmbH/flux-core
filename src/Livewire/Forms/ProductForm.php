@@ -55,6 +55,8 @@ class ProductForm extends FluxForm
     #[Locked]
     public ?bool $is_bundle = false;
 
+    public ?bool $is_configurable = false;
+
     public ?bool $is_highlight = false;
 
     public ?bool $is_lot_tracked = false;
