@@ -13,7 +13,9 @@ use FluxErp\Models\LedgerBooking;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
+use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Transaction;
 use FluxErp\Settings\AccountingSettings;
 use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
 use FluxErp\States\Order\PaymentState\InPayment;
@@ -603,4 +605,52 @@ test('an order must not appear twice in the same payment run', function (): void
             ],
         ],
     ], ['positions.1.orders.0.order_id']);
+});
+
+test('an overpaid sales invoice offset in full by a supplier credit note is settled by ledger bookings', function (): void {
+    [$bankConnection, $invoice] = createOrderForPaymentRun($this, OrderTypeEnum::Order, '500.00');
+    [, $creditNote] = createOrderForPaymentRun($this, OrderTypeEnum::PurchaseRefund, '500.00');
+    $creditNote->update(['contact_id' => $invoice->contact_id]);
+
+    OrderTransaction::query()->create([
+        'order_id' => $invoice->getKey(),
+        'transaction_id' => Transaction::factory()
+            ->create(['amount' => 1000, 'contact_bank_connection_id' => null])
+            ->getKey(),
+        'amount' => 1000,
+        'is_accepted' => true,
+    ]);
+
+    expect($invoice->refresh()->balance)->toEqual('-500.00');
+
+    $clearing = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
+    $creditor = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
+
+    app(AccountingSettings::class)->clearing_ledger_account_id = $clearing->getKey();
+
+    Contact::query()
+        ->whereKey($invoice->contact_id)
+        ->update(['expense_ledger_account_id' => $creditor->getKey()]);
+
+    $run = CreatePaymentRun::make([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'payment_run_type_enum' => 'money_transfer',
+        'positions' => [
+            [
+                'contact_id' => $invoice->contact_id,
+                'iban' => 'DE89370400440532013000',
+                'orders' => [
+                    ['order_id' => $invoice->getKey(), 'amount' => -500],
+                    ['order_id' => $creditNote->getKey(), 'amount' => 500],
+                ],
+            ],
+        ],
+    ])->validate()->execute();
+
+    expect($run->positions()->sole()->amount)->toEqual('0.00')
+        ->and(LedgerBooking::query()->count())->toBe(2)
+        ->and($invoice->fresh()->balance)->toEqual('0.00')
+        ->and($invoice->fresh()->payment_state)->toBeInstanceOf(Paid::class)
+        ->and($creditNote->fresh()->balance)->toEqual('0.00')
+        ->and($creditNote->fresh()->payment_state)->toBeInstanceOf(Paid::class);
 });

@@ -282,3 +282,59 @@ test('a position with a pre-existing unrelated transaction stays matchable', fun
 
     expect(app(PaymentRunMatcher::class)->match($transaction))->toBeTrue();
 });
+
+test('a transfer refunding an overpaid sales invoice net of a supplier credit note settles both', function (): void {
+    $invoice = createOrderForPaymentRunMatcher($this, OrderTypeEnum::Order, '404.12');
+    $creditNote = createOrderForPaymentRunMatcher($this, OrderTypeEnum::PurchaseRefund, '200.00');
+    $creditNote->update(['contact_id' => $invoice->contact_id]);
+
+    OrderTransaction::query()->create([
+        'order_id' => $invoice->getKey(),
+        'transaction_id' => Transaction::factory()
+            ->create(['amount' => 808.24, 'contact_bank_connection_id' => null])
+            ->getKey(),
+        'amount' => 808.24,
+        'is_accepted' => true,
+    ]);
+
+    $run = CreatePaymentRun::make([
+        'payment_run_type_enum' => 'money_transfer',
+        'positions' => [
+            [
+                'contact_id' => $invoice->contact_id,
+                'iban' => 'DE89370400440532013000',
+                'orders' => [
+                    ['order_id' => $invoice->getKey(), 'amount' => -404.12],
+                    ['order_id' => $creditNote->getKey(), 'amount' => 200],
+                ],
+            ],
+        ],
+    ])->validate()->execute();
+
+    UpdatePaymentRun::make([
+        'id' => $run->getKey(),
+        'state' => 'pending',
+        'instructed_execution_date' => now()->format('Y-m-d'),
+    ])->validate()->execute();
+
+    $position = $run->positions()->sole();
+
+    $transaction = Transaction::factory()->create([
+        'amount' => -204.12,
+        'end_to_end_reference' => $position->end_to_end_id,
+        'counterpart_iban' => $position->iban,
+        'booking_date' => now(),
+    ]);
+
+    expect($position->amount)->toEqual('-204.12')
+        ->and(app(PaymentRunMatcher::class)->match($transaction))->toBeTrue()
+        ->and(OrderTransaction::query()
+            ->where('transaction_id', $transaction->getKey())
+            ->pluck('amount', 'order_id')
+            ->map(fn ($amount) => bcround((string) $amount, 2))
+            ->all())->toEqual([$invoice->getKey() => '-404.12', $creditNote->getKey() => '200.00'])
+        ->and($invoice->fresh()->balance)->toEqual('0.00')
+        ->and($invoice->fresh()->payment_state)->toBeInstanceOf(Paid::class)
+        ->and($creditNote->fresh()->balance)->toEqual('0.00')
+        ->and($creditNote->fresh()->payment_state)->toBeInstanceOf(Paid::class);
+});

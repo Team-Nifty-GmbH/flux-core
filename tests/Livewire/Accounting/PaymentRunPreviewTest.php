@@ -17,6 +17,7 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\SepaMandate;
 use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
 use FluxErp\States\Order\PaymentState\Open;
+use FluxErp\States\Order\PaymentState\Overpaid;
 use Illuminate\Support\Facades\DB;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
@@ -224,6 +225,42 @@ test('a typed amount keeps the row sign and is clamped to its own balance and th
     'a positive value typed into a payable row stays negative' => [['-500.00'], [], 'invoice', '50.00', '-50.00', null, '-50.00'],
     'a negative value typed into a credit note row stays positive' => [['-1000.00'], ['500.00'], 'credit note', '-200.00', '200.00', null, '-800.00'],
 ]);
+
+test('an overpaid sales invoice is grouped with a supplier credit note of the same contact and offset against it', function (): void {
+    $salesType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $invoice = createPayableOrderForPreview($this, $salesType, '-404.12');
+    $invoice->update(['total_gross_price' => '404.12', 'payment_state' => Overpaid::$name]);
+    $creditNote = createPayableOrderForPreview($this, $this->refundType, '200.00', $invoice->contact_id);
+
+    session(['payment_run_preview_orders' => [$invoice->getKey()]]);
+    session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
+
+    $component = Livewire::test(PaymentRunPreview::class);
+    $groups = $component->get('groups');
+
+    expect($groups)->toHaveCount(1)
+        ->and($groups[0]['amount'])->toBe('-204.12')
+        ->and(array_column($groups[0]['orders'], 'amount', 'id'))
+        ->toBe([$invoice->getKey() => '-404.12', $creditNote->getKey() => '200.00'])
+        ->and($groups[0]['orders'][1]['is_suggested'])->toBeTrue();
+
+    $component->call('createPaymentRun')->assertRedirect();
+
+    $position = PaymentRun::query()->sole()->positions()->sole();
+
+    expect($position->amount)->toEqual('-204.12')
+        ->and($position->orders()
+            ->pluck('order_payment_run.amount', 'orders.id')
+            ->map(fn ($amount) => bcround((string) $amount, 2))
+            ->all())->toEqual([$invoice->getKey() => '-404.12', $creditNote->getKey() => '200.00'])
+        ->and($invoice->fresh()->payment_state)->toBeInstanceOf(InOpenPaymentRun::class)
+        ->and($creditNote->fresh()->payment_state)->toBeInstanceOf(InOpenPaymentRun::class);
+});
 
 test('a row carries total gross price and balance with their natural sign, surviving a recap', function (): void {
     $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-300.00');

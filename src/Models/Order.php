@@ -1502,7 +1502,14 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     public function totalPaid(): string|float|int
     {
-        $paid = $this->transactions()
+        $paid = $this->totalPaidByTransactions();
+
+        return bcadd($paid, $this->totalSettledByLedgerBookings($paid), 9);
+    }
+
+    public function totalPaidByTransactions(): string
+    {
+        return $this->transactions()
             ->withPivot(['amount', 'order_currency_amount'])
             ->get()
             ->reduce(
@@ -1513,20 +1520,26 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                 ),
                 '0'
             );
-
-        return bcadd($paid, $this->totalSettledByLedgerBookings(), 9);
     }
 
     /**
      * Ledger bookings pointing at this order settle it without a bank transaction,
      * e.g. an invoice paid directly by a loan. Their amount is always positive, so
-     * the order type decides the direction it settles in.
+     * they settle towards what the transactions leave open: the remaining amount of
+     * an invoice, or the refund of an overpaid one. Without anything left open the
+     * order type decides the direction.
      */
-    public function totalSettledByLedgerBookings(): string
+    public function totalSettledByLedgerBookings(?string $paidByTransactions = null): string
     {
+        $direction = bccomp(
+            bcsub((string) ($this->total_gross_price ?? 0), $paidByTransactions ?? $this->totalPaidByTransactions(), 9),
+            '0',
+            2
+        ) ?: ($this->orderType?->order_type_enum?->multiplier() ?? 1);
+
         return bcmul(
             (string) $this->ledgerBookings()->sum('amount'),
-            $this->orderType?->order_type_enum?->multiplier() ?? '1',
+            (string) $direction,
             9
         );
     }

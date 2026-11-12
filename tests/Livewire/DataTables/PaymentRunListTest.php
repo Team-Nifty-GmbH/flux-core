@@ -366,6 +366,36 @@ test('a position left at zero or pointing against the run is dropped entirely', 
     'pointing against a direct debit' => ['direct_debit', [1000, -200], '300.00'],
 ]);
 
+test('removing the credit note from a refund position of an overpaid sales invoice raises the transfer again', function (): void {
+    $invoice = createOrderForPaymentRunList('RE-1', OrderTypeEnum::Order, '-404.12');
+    $creditNote = createOrderForPaymentRunList('GS-1', OrderTypeEnum::PurchaseRefund, '200.00');
+
+    $run = CreatePaymentRun::make([
+        'payment_run_type_enum' => 'money_transfer',
+        'positions' => [
+            [
+                'contact_id' => $invoice->contact_id,
+                'iban' => 'DE89370400440532013000',
+                'orders' => [
+                    ['order_id' => $invoice->getKey(), 'amount' => -404.12],
+                    ['order_id' => $creditNote->getKey(), 'amount' => 200],
+                ],
+            ],
+        ],
+    ])->validate()->execute();
+
+    $position = $run->positions()->sole();
+
+    Livewire::test(PaymentRunList::class)
+        ->call('edit', $run)
+        ->call('removeOrder', $creditNote->getKey());
+
+    expect($position->fresh()->amount)->toEqual('-404.12')
+        ->and($position->fresh()->orders()->pluck('orders.id')->all())->toBe([$invoice->getKey()])
+        ->and($run->fresh()->total_amount)->toEqual('-404.12')
+        ->and($creditNote->fresh()->payment_state)->toBeInstanceOf(Open::class);
+});
+
 test('removing an order rebuilds the purpose but keeps the end to end id', function (): void {
     $first = createOrderForPaymentRunList('RE-1');
     $second = createOrderForPaymentRunList('RE-2');
