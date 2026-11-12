@@ -1,13 +1,6 @@
 <?php
 
-use FluxErp\Actions\Role\CreateRole;
-use FluxErp\Actions\Role\DeleteRole;
-use FluxErp\Actions\Role\UpdateRoleUsers;
-use FluxErp\Actions\Role\UpdateUserRoles;
-use FluxErp\Actions\User\CreateUser;
-use FluxErp\Livewire\Settings\UserEdit;
 use FluxErp\Models\Contact;
-use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
 use FluxErp\Models\Tag;
@@ -15,7 +8,6 @@ use FluxErp\Models\Token;
 use FluxErp\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\Sanctum;
-use Livewire\Livewire;
 
 beforeEach(function (): void {
     $this->contactPermission = Permission::findOrCreate('model.contact.get', 'web');
@@ -90,9 +82,9 @@ test('search does not call model methods that are no relation', function (): voi
     expect(Contact::query()->count())->toBe($count);
 });
 
-test('search denies a model without model permissions', function (string $model): void {
+test('search allows a model without model permissions', function (string $model): void {
     $this->post(route('search', $model), ['searchFields' => ['id'], 'search' => '1'])
-        ->assertForbidden();
+        ->assertOk();
 })->with(['activity', 'permission', 'role', 'media', 'notification']);
 
 test('search allows tags without a model permission', function (): void {
@@ -109,20 +101,20 @@ test('search allows media as a relation', function (): void {
         ->assertOk();
 });
 
-test('search denies activities as a relation', function (): void {
+test('search allows activities as a relation', function (): void {
     $this->user->givePermissionTo($this->contactPermission);
 
     $this->post(route('search', 'contact'), ['with' => 'activitiesAsSubject'])
-        ->assertForbidden();
+        ->assertOk();
 });
 
-test('search denies a model whose permission was never registered', function (): void {
+test('search allows a model whose permission was never registered', function (): void {
     Permission::query()
         ->where('name', 'model.contact.get')
         ->delete();
 
     $this->post(route('search', 'contact'), ['selected' => [$this->contact->getKey()]])
-        ->assertForbidden();
+        ->assertOk();
 });
 
 test('search denies an untyped relation fixed with a return type', function (): void {
@@ -210,15 +202,6 @@ test('api search allows a token with the model permission', function (): void {
         ->assertOk();
 });
 
-test('a new role gets every model permission of its guard', function (): void {
-    $role = CreateRole::make(['name' => 'Fresh role', 'guard_name' => 'web'])
-        ->validate()
-        ->execute();
-
-    expect($role->hasPermissionTo($this->contactPermission))->toBeTrue()
-        ->and($role->hasPermissionTo($this->addressPermission))->toBeTrue();
-});
-
 test('the migration grants every existing role the model permissions it lacks', function (): void {
     $role = Role::findOrCreate('Without model permissions', 'web');
     $role->givePermissionTo($this->contactPermission);
@@ -246,137 +229,4 @@ test('the migration grants users without a role the model permissions', function
     expect($withoutRole->fresh()->hasDirectPermission('model.contact.get'))->toBeTrue()
         ->and($withRole->fresh()->hasDirectPermission('model.contact.get'))->toBeFalse()
         ->and($withRole->fresh()->hasPermissionTo('model.contact.get'))->toBeTrue();
-});
-
-test('a new user gets every model permission of its guard', function (): void {
-    $user = CreateUser::make([
-        'email' => 'fresh@example.com',
-        'firstname' => 'Fresh',
-        'lastname' => 'User',
-        'user_code' => 'FRESH',
-        'password' => 'Secret123!',
-    ])
-        ->validate()
-        ->execute();
-
-    expect($user->hasDirectPermission($this->contactPermission))->toBeTrue()
-        ->and($user->hasDirectPermission($this->addressPermission))->toBeTrue();
-});
-
-test('a new user loses its direct model permissions once it gets a role', function (): void {
-    $user = CreateUser::make([
-        'email' => 'roled@example.com',
-        'firstname' => 'Roled',
-        'lastname' => 'User',
-        'user_code' => 'ROLED',
-        'password' => 'Secret123!',
-    ])
-        ->validate()
-        ->execute();
-
-    UpdateUserRoles::make([
-        'user_id' => $user->getKey(),
-        'roles' => [Role::findOrCreate('Without model permissions', 'web')->getKey()],
-    ])
-        ->validate()
-        ->execute();
-
-    expect($user->fresh()->hasDirectPermission($this->contactPermission))->toBeFalse()
-        ->and($user->fresh()->hasPermissionTo($this->contactPermission))->toBeFalse();
-});
-
-test('users added to a role lose their direct model permissions', function (): void {
-    $user = CreateUser::make([
-        'email' => 'member@example.com',
-        'firstname' => 'Member',
-        'lastname' => 'User',
-        'user_code' => 'MEMBER',
-        'password' => 'Secret123!',
-    ])
-        ->validate()
-        ->execute();
-    $untouched = CreateUser::make([
-        'email' => 'untouched@example.com',
-        'firstname' => 'Untouched',
-        'lastname' => 'User',
-        'user_code' => 'UNTOUCHED',
-        'password' => 'Secret123!',
-    ])
-        ->validate()
-        ->execute();
-
-    UpdateRoleUsers::make([
-        'id' => Role::findOrCreate('Members', 'web')->getKey(),
-        'users' => [$user->getKey()],
-    ])
-        ->validate()
-        ->execute();
-
-    expect($user->fresh()->hasDirectPermission($this->contactPermission))->toBeFalse()
-        ->and($untouched->fresh()->hasDirectPermission($this->contactPermission))->toBeTrue();
-});
-
-test('a direct model permission survives saving a user whose roles stay the same', function (): void {
-    $user = User::factory()
-        ->for(Language::factory())
-        ->create(['is_active' => true]);
-    $role = Role::findOrCreate('Without model permissions', 'web');
-    $user->assignRole($role);
-
-    Livewire::actingAs($this->user)
-        ->test(UserEdit::class, ['user' => $user])
-        ->set('userForm.permissions', [$this->contactPermission->getKey()])
-        ->call('save')
-        ->assertHasNoErrors();
-
-    expect($user->fresh()->hasDirectPermission($this->contactPermission))->toBeTrue()
-        ->and($user->fresh()->hasRole($role))->toBeTrue();
-});
-
-test('a user created without a role keeps its model permissions in the user edit', function (): void {
-    Livewire::actingAs($this->user)
-        ->test(UserEdit::class, ['user' => app(User::class)])
-        ->set('userForm.email', 'edited@example.com')
-        ->set('userForm.firstname', 'Edited')
-        ->set('userForm.lastname', 'User')
-        ->set('userForm.user_code', 'EDITED')
-        ->set('userForm.password', 'Secret123!')
-        ->set('userForm.password_confirmation', 'Secret123!')
-        ->call('save')
-        ->assertHasNoErrors();
-
-    expect(User::query()->where('email', 'edited@example.com')->first()->hasDirectPermission($this->contactPermission))
-        ->toBeTrue();
-});
-
-test('a user gets the model permissions back when its last role goes', function (): void {
-    $user = User::factory()->create(['is_active' => true]);
-    $role = Role::findOrCreate('Last role', 'web');
-    $user->assignRole($role);
-
-    UpdateUserRoles::make([
-        'user_id' => $user->getKey(),
-        'roles' => [$role->getKey()],
-        'assign' => false,
-    ])
-        ->validate()
-        ->execute();
-
-    expect($user->fresh()->hasDirectPermission($this->contactPermission))->toBeTrue()
-        ->and($user->fresh()->hasDirectPermission($this->addressPermission))->toBeTrue();
-});
-
-test('users of a deleted role get the model permissions back when it was their last', function (): void {
-    $onlyRole = User::factory()->create(['is_active' => true]);
-    $otherRole = User::factory()->create(['is_active' => true]);
-    $role = Role::findOrCreate('Deleted role', 'web');
-    $onlyRole->assignRole($role);
-    $otherRole->assignRole($role, Role::findOrCreate('Remaining role', 'web'));
-
-    DeleteRole::make(['id' => $role->getKey()])
-        ->validate()
-        ->execute();
-
-    expect($onlyRole->fresh()->hasDirectPermission($this->contactPermission))->toBeTrue()
-        ->and($otherRole->fresh()->hasDirectPermission($this->contactPermission))->toBeFalse();
 });

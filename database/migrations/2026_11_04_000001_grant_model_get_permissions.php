@@ -1,6 +1,5 @@
 <?php
 
-use FluxErp\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\JoinClause;
@@ -22,7 +21,7 @@ return new class() extends Migration
                     ->select(['permissions.id', 'roles.id as role_id'])
             );
 
-        $userType = morph_alias(User::class);
+        $userType = 'user';
 
         DB::table('model_has_permissions')
             ->insertOrIgnoreUsing(

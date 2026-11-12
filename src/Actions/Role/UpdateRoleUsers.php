@@ -35,19 +35,12 @@ class UpdateRoleUsers extends FluxAction
         $role = resolve_static(Role::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
-        $withoutRoleBefore = resolve_static(User::class, 'idsWithoutRole', [$this->data['users']]);
 
         if ($this->data['assign']) {
             $role->users()->syncWithoutDetaching($this->data['users']);
         } else {
             $role->users()->detach($this->data['users']);
         }
-
-        resolve_static(
-            User::class,
-            'syncDirectModelGetPermissions',
-            [$this->data['users'], $withoutRoleBefore]
-        );
 
         return $role->users->toArray();
     }

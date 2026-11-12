@@ -41,7 +41,7 @@ class SearchModelPermission
         }
 
         $instance = app($model);
-        $this->authorize($user, $instance, ['tag']);
+        $this->authorize($user, $instance);
 
         foreach ($this->relationPaths($request) as $path) {
             $related = $instance;
@@ -56,34 +56,30 @@ class SearchModelPermission
                 abort_if($relation instanceof MorphTo, 403);
 
                 $related = $relation->getRelated();
-                $this->authorize($user, $related, ['media', 'tag']);
+                $this->authorize($user, $related);
             }
         }
 
         return $next($request);
     }
 
-    protected function authorize(Authenticatable $user, Model $model, array $openModels): void
+    protected function authorize(Authenticatable $user, Model $model): void
     {
-        if (! in_array(HasModelPermission::class, class_uses_recursive($model))) {
-            abort_unless(in_array(morph_alias($model::class), $openModels), 403);
-
+        if (
+            ! in_array(HasModelPermission::class, class_uses_recursive($model))
+            || ! resolve_static($model::class, 'hasPermission')
+        ) {
             return;
         }
 
-        if (! resolve_static($model::class, 'hasPermission')) {
-            return;
-        }
-
+        $permission = 'model.' . $model->getMorphClass() . '.get';
         $permissions = resolve_static(Permission::class, 'query')
-            ->where('name', 'model.' . morph_alias($model::class) . '.get')
+            ->where('name', $permission)
             ->whereIn('guard_name', Guard::getNames($user))
             ->get(['id', 'name', 'guard_name']);
 
-        if ($permissions->isEmpty() || ! $user->hasAnyPermission($permissions)) {
-            throw UnauthorizedException::forPermissions(
-                ['model.' . morph_alias($model::class) . '.get']
-            );
+        if ($permissions->isNotEmpty() && ! $user->hasAnyPermission($permissions)) {
+            throw UnauthorizedException::forPermissions([$permission]);
         }
     }
 
@@ -94,7 +90,7 @@ class SearchModelPermission
                 return null;
             }
 
-            $type = (new ReflectionMethod($model, $name))->getReturnType();
+            $type = new ReflectionMethod($model, $name)->getReturnType();
 
             if (! $type) {
                 abort_unless(method_exists(Model::class, $name), 403);
@@ -139,7 +135,7 @@ class SearchModelPermission
             ],
         );
 
-        return array_unique(array_filter($paths, 'is_string'));
+        return array_unique(array_filter($paths, fn (mixed $path): bool => is_string($path) && $path !== ''));
     }
 
     protected function withPaths(array $with, string $prefix = ''): array
