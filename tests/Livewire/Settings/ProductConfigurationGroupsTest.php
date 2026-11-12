@@ -1,8 +1,10 @@
 <?php
 
+use FluxErp\Enums\ConfigurationRuleTypeEnum;
 use FluxErp\Livewire\Settings\ProductConfigurationGroups;
 use FluxErp\Models\ProductConfigurationGroup;
 use FluxErp\Models\ProductConfigurationGroupItem;
+use FluxErp\Models\ProductConfigurationRule;
 use Livewire\Livewire;
 
 require_once __DIR__ . '/../../Feature/ProductConfiguration/Helpers.php';
@@ -35,8 +37,9 @@ test('can create a group', function (): void {
     ]);
 });
 
-test('can add an option to a group', function (): void {
+test('can add an option and a rule to a group', function (): void {
     $group = configurationGroup(['name' => 'Graphics']);
+    $power = configurationGroup(['name' => 'Power']);
     $product = configurationProduct(['name' => 'GPU']);
 
     $component = Livewire::test(ProductConfigurationGroups::class)
@@ -47,11 +50,20 @@ test('can add an option to a group', function (): void {
         ->call('saveItem')
         ->assertReturned(true);
 
-    $component->assertSet('items.0.product_name', 'GPU');
+    $itemId = $group->productConfigurationGroupItems()->value('id');
 
-    expect($group->productConfigurationGroupItems()->sole())
-        ->product_id->toBe($product->getKey())
-        ->and(bccomp($group->productConfigurationGroupItems()->value('surcharge'), '50', 2))->toBe(0);
+    $component->assertSet('items.0.product_name', 'GPU')
+        ->call('editRule', $itemId)
+        ->assertSet('ruleOptions.groups', [['id' => $power->getKey(), 'name' => 'Power']])
+        ->set('productConfigurationRuleForm.rule_type_enum', 'requires')
+        ->set('productConfigurationRuleForm.target_group_id', $power->getKey())
+        ->call('saveRule')
+        ->assertReturned(true)
+        ->assertSet('items.0.rules.0.target', 'Power');
+
+    expect(ProductConfigurationRule::query()->sole())
+        ->rule_type_enum->toBe(ConfigurationRuleTypeEnum::Requires)
+        ->target_group_id->toBe($power->getKey());
 });
 
 test('delete refuses a group attached to a product and keeps it', function (): void {
@@ -63,6 +75,27 @@ test('delete refuses a group attached to a product and keeps it', function (): v
         ->assertReturned(false);
 
     expect(ProductConfigurationGroup::query()->whereKey($group->getKey())->exists())->toBeTrue();
+});
+
+test('editRule fills an existing item targeting rule', function (): void {
+    $group = configurationGroup();
+    $other = configurationGroup();
+    $item = configurationItem($group);
+    $target = configurationItem($other);
+    $rule = ProductConfigurationRule::factory()->create([
+        'product_configuration_group_item_id' => $item->getKey(),
+        'rule_type_enum' => ConfigurationRuleTypeEnum::Excludes,
+    ]);
+    $rule->targetItems()->attach($target->getKey());
+
+    Livewire::test(ProductConfigurationGroups::class)
+        ->call('edit', $group->getKey())
+        ->call('editRule', $item->getKey(), $rule->getKey())
+        ->assertSet('productConfigurationRuleForm.rule_type_enum', 'excludes')
+        ->assertSet('productConfigurationRuleForm.target_items', [$target->getKey()])
+        ->assertSet('productConfigurationRuleForm.target_group_id', null)
+        ->assertSet('ruleModalOpens', 1)
+        ->assertOpensModal('edit-product-configuration-rule-modal');
 });
 
 test('deleteItem removes the option', function (): void {
@@ -77,4 +110,21 @@ test('deleteItem removes the option', function (): void {
         ->assertSet('items', []);
 
     expect(ProductConfigurationGroupItem::query()->whereKey($item->getKey())->exists())->toBeFalse();
+});
+
+test('deleteRule removes the rule', function (): void {
+    $group = configurationGroup();
+    $item = configurationItem($group);
+    $rule = ProductConfigurationRule::factory()->create([
+        'product_configuration_group_item_id' => $item->getKey(),
+        'target_group_id' => configurationGroup()->getKey(),
+    ]);
+
+    Livewire::test(ProductConfigurationGroups::class)
+        ->call('edit', $group->getKey())
+        ->call('deleteRule', $rule->getKey())
+        ->assertReturned(true)
+        ->assertSet('items.0.rules', []);
+
+    expect(ProductConfigurationRule::query()->whereKey($rule->getKey())->exists())->toBeFalse();
 });

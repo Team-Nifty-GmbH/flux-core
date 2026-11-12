@@ -63,6 +63,7 @@ class UpdateProduct extends DispatchableFluxAction implements SupportsBulkExecut
 
         if ($product->isDirty('is_configurable') && ! $product->is_configurable) {
             $product->productConfigurationGroups()->detach();
+            $product->productConfigurationDefaults()->delete();
         }
 
         $product->save();

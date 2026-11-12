@@ -1,4 +1,8 @@
 <div class="flex flex-col gap-4">
+    @foreach ($warnings as $warning)
+        <x-alert color="amber" :text="$warning" />
+    @endforeach
+
     <x-card :header="__('Configuration')">
         <div class="flex items-end gap-2">
             <div class="flex-1">
@@ -38,6 +42,23 @@
                         />
                     </div>
                 </div>
+                <x-label :label="__('Default selection')" />
+                @foreach ($assignment['items'] as $item)
+                    <div
+                        class="flex items-center justify-between gap-4"
+                        wire:key="default-{{ $item['id'] }}"
+                    >
+                        <span>{{ $item['name'] }}</span>
+                        <div class="w-32">
+                            <x-number
+                                wire:model="defaults.{{ $item['id'] }}"
+                                min="0"
+                                :max="$item['max_amount']"
+                            />
+                        </div>
+                    </div>
+                @endforeach
+
                 <div class="flex justify-end">
                     <x-button
                         color="red"

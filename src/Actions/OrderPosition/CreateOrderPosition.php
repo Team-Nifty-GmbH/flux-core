@@ -314,7 +314,7 @@ class CreateOrderPosition extends FluxAction
 
         if (! $errors && $product?->is_configurable && ! $this->getData('is_free_text')) {
             if (is_null($this->getData('configuration')) && ! $this->getData('created_from_id')) {
-                $this->data['configuration'] = [];
+                $this->data['configuration'] = $product->defaultConfiguration();
             }
 
             if (! is_null($this->getData('configuration'))) {

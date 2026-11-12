@@ -246,7 +246,7 @@ class OrderPositions extends OrderPositionList
         $this->orderPosition->is_configurable = (bool) $product->is_configurable;
 
         if ($product->is_configurable) {
-            $this->loadConfigurator($product, []);
+            $this->loadConfigurator($product, $product->defaultConfiguration());
         }
     }
 
