@@ -10,6 +10,15 @@ return new class() extends Migration
 {
     public function up(): void
     {
+        DB::table('permissions')
+            ->insertOrIgnoreUsing(
+                ['name', 'guard_name', 'created_at', 'updated_at'],
+                DB::table('permissions')
+                    ->where('guard_name', 'web')
+                    ->where('name', 'like', 'model.%.get')
+                    ->select(['name', DB::raw(DB::getPdo()->quote('token')), 'created_at', 'updated_at'])
+            );
+
         DB::table('role_has_permissions')
             ->insertOrIgnoreUsing(
                 ['permission_id', 'role_id'],
@@ -38,6 +47,21 @@ return new class() extends Migration
                     })
                     ->whereNull('users.deleted_at')
                     ->select(['permissions.id', DB::raw(DB::getPdo()->quote($userType)), 'users.id as model_id'])
+            );
+
+        DB::table('model_has_permissions')
+            ->insertOrIgnoreUsing(
+                ['permission_id', 'model_type', 'model_id'],
+                DB::table('model_has_permissions as search')
+                    ->join('permissions as search_permission', 'search_permission.id', '=', 'search.permission_id')
+                    ->join('permissions', function (JoinClause $join): void {
+                        $join->where('permissions.guard_name', 'token')
+                            ->where('permissions.name', 'like', 'model.%.get');
+                    })
+                    ->where('search_permission.name', 'api.search.{model}.get')
+                    ->where('search_permission.guard_name', 'token')
+                    ->where('search.model_type', 'token')
+                    ->select(['permissions.id', 'search.model_type', 'search.model_id'])
             );
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();

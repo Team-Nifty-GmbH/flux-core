@@ -230,3 +230,16 @@ test('the migration grants users without a role the model permissions', function
         ->and($withRole->fresh()->hasDirectPermission('model.contact.get'))->toBeFalse()
         ->and($withRole->fresh()->hasPermissionTo('model.contact.get'))->toBeTrue();
 });
+
+test('the migration grants tokens that may search the model permissions', function (): void {
+    $searchToken = Token::query()->create(['name' => 'search']);
+    $searchToken->givePermissionTo(Permission::findOrCreate('api.search.{model}.get', 'token'));
+    $otherToken = Token::query()->create(['name' => 'other']);
+    $tokenRole = Role::findOrCreate('Integration', 'token');
+
+    (require __DIR__ . '/../../../database/migrations/2026_11_04_000001_grant_model_get_permissions.php')->up();
+
+    expect($searchToken->fresh()->hasDirectPermission(Permission::findByName('model.contact.get', 'token')))->toBeTrue()
+        ->and($otherToken->fresh()->permissions)->toHaveCount(0)
+        ->and($tokenRole->fresh()->hasPermissionTo('model.contact.get', 'token'))->toBeTrue();
+});
