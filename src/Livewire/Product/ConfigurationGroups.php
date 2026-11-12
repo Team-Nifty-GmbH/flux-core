@@ -5,9 +5,13 @@ namespace FluxErp\Livewire\Product;
 use FluxErp\Actions\Product\ProductProductConfigurationGroup\CreateProductProductConfigurationGroup;
 use FluxErp\Actions\Product\ProductProductConfigurationGroup\DeleteProductProductConfigurationGroup;
 use FluxErp\Actions\Product\ProductProductConfigurationGroup\UpdateProductProductConfigurationGroup;
+use FluxErp\Actions\Product\SyncProductConfigurationDefaults;
 use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Models\Product;
+use FluxErp\Models\ProductConfigurationDefault;
 use FluxErp\Models\ProductConfigurationGroup;
+use FluxErp\Models\ProductConfigurationGroupItem;
+use FluxErp\Support\ProductConfiguration\ConfigurationValidator;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -21,10 +25,14 @@ class ConfigurationGroups extends Component
 
     public array $assignments = [];
 
+    public array $defaults = [];
+
     public ?int $groupId = null;
 
     #[Modelable]
     public ProductForm $product;
+
+    public array $warnings = [];
 
     public function mount(): void
     {
@@ -96,6 +104,21 @@ class ConfigurationGroups extends Component
                     ->validate()
                     ->execute();
             }
+
+            SyncProductConfigurationDefaults::make([
+                'product_id' => $this->product->id,
+                'defaults' => collect($this->defaults)
+                    ->filter(fn ($amount) => (int) $amount > 0)
+                    ->map(fn ($amount, $itemId) => [
+                        'product_configuration_group_item_id' => (int) $itemId,
+                        'amount' => (int) $amount,
+                    ])
+                    ->values()
+                    ->all(),
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -111,7 +134,10 @@ class ConfigurationGroups extends Component
     {
         $product = resolve_static(Product::class, 'query')
             ->whereKey($this->product->id)
-            ->with('productConfigurationGroups')
+            ->with([
+                'productConfigurationGroups.productConfigurationGroupItems.product:id,name',
+                'productConfigurationDefaults',
+            ])
             ->first();
 
         $this->assignments = $product->productConfigurationGroups
@@ -121,7 +147,22 @@ class ConfigurationGroups extends Component
                 'name' => $group->name,
                 'is_required' => (bool) $group->pivot->is_required,
                 'sort' => $group->pivot->sort,
+                'items' => $group->productConfigurationGroupItems
+                    ->map(fn (ProductConfigurationGroupItem $item) => [
+                        'id' => $item->getKey(),
+                        'name' => $item->product?->name,
+                        'max_amount' => $item->max_amount,
+                    ])
+                    ->all(),
             ])
             ->all();
+
+        $this->defaults = $product->productConfigurationDefaults
+            ->mapWithKeys(fn (ProductConfigurationDefault $default) => [
+                $default->product_configuration_group_item_id => $default->amount,
+            ])
+            ->all();
+
+        $this->warnings = ConfigurationValidator::make($product)->unsatisfiableRules();
     }
 }

@@ -33,8 +33,18 @@ class ProductConfigurationGroupItem extends FluxModel
         return $this->belongsTo(Product::class);
     }
 
+    public function productConfigurationDefaults(): HasMany
+    {
+        return $this->hasMany(ProductConfigurationDefault::class);
+    }
+
     public function productConfigurationGroup(): BelongsTo
     {
         return $this->belongsTo(ProductConfigurationGroup::class);
+    }
+
+    public function productConfigurationRules(): HasMany
+    {
+        return $this->hasMany(ProductConfigurationRule::class);
     }
 }
