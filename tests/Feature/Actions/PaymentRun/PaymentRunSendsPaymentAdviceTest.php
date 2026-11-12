@@ -55,17 +55,19 @@ function createOrderWithContact(object $testContext, string $invoiceNumber, ?str
     return [$bankConnection, $order];
 }
 
-test('with the setting off, moving a run to pending sends nothing', function (): void {
+test('moving a run to pending sends no payment advice', function (bool $autoSend, string $paymentRunType, float $amount): void {
     Queue::fake();
+
+    app(AccountingSettings::class)->auto_send_payment_advice = $autoSend;
 
     [$bankConnection, $order] = createOrderWithContact($this, 'RE-1', 'supplier@example.com');
 
     $run = CreatePaymentRun::make([
         'bank_connection_id' => $bankConnection->getKey(),
-        'payment_run_type_enum' => 'money_transfer',
+        'payment_run_type_enum' => $paymentRunType,
         'iban' => 'DE89370400440532013000',
         'orders' => [
-            ['order_id' => $order->getKey(), 'amount' => -100.00],
+            ['order_id' => $order->getKey(), 'amount' => $amount],
         ],
     ])->validate()->execute();
 
@@ -75,7 +77,10 @@ test('with the setting off, moving a run to pending sends nothing', function ():
     ])->validate()->execute();
 
     Queue::assertNotPushed(SendPaymentAdviceJob::class);
-});
+})->with([
+    'with the setting off' => [false, 'money_transfer', -100.00],
+    'for a direct debit run even with the setting on' => [true, 'direct_debit', 100.00],
+]);
 
 test('with the setting on, it sends one advice per position and reports a position without email as unsent', function (): void {
     config(['queue.default' => 'sync']);
@@ -123,30 +128,6 @@ test('with the setting on, it sends one advice per position and reports a positi
         ->exists();
 
     expect($logged)->toBeTrue();
-});
-
-test('a direct debit run sends nothing even with the setting on', function (): void {
-    Queue::fake();
-
-    app(AccountingSettings::class)->auto_send_payment_advice = true;
-
-    [$bankConnection, $order] = createOrderWithContact($this, 'RE-1', 'supplier@example.com');
-
-    $run = CreatePaymentRun::make([
-        'bank_connection_id' => $bankConnection->getKey(),
-        'payment_run_type_enum' => 'direct_debit',
-        'iban' => 'DE89370400440532013000',
-        'orders' => [
-            ['order_id' => $order->getKey(), 'amount' => 100.00],
-        ],
-    ])->validate()->execute();
-
-    UpdatePaymentRun::make([
-        'id' => $run->getKey(),
-        'state' => 'pending',
-    ])->validate()->execute();
-
-    Queue::assertNotPushed(SendPaymentAdviceJob::class);
 });
 
 test('a position netted to zero is skipped for the payment advice', function (): void {

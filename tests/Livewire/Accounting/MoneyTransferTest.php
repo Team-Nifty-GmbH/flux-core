@@ -11,10 +11,10 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use FluxErp\Tests\TestCase;
 use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
 use FluxErp\States\Order\PaymentState\Overpaid;
 use FluxErp\States\Order\PaymentState\PartialPaid;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
 function createPayableOrder(TestCase $test, OrderType $orderType, string $balance, ?int $contactId = null): Order
@@ -173,28 +173,18 @@ test('the money transfer list contains supplier credit notes', function (): void
         ->assertSee($creditNote->invoice_number);
 });
 
-test('a purchase order with a positive balance does not appear in the list', function (): void {
-    $purchaseType = OrderType::factory()->create([
-        'order_type_enum' => OrderTypeEnum::Purchase,
+test('an order type that is not owed to a supplier does not appear in the list', function (OrderTypeEnum $orderTypeEnum, string $balance): void {
+    $orderType = OrderType::factory()->create([
+        'order_type_enum' => $orderTypeEnum,
         'is_active' => true,
         'is_hidden' => false,
     ]);
 
-    $overpaidInvoice = createPayableOrder($this, $purchaseType, '500.00');
+    $order = createPayableOrder($this, $orderType, $balance);
 
     Livewire::test(MoneyTransfer::class)
-        ->assertDontSee($overpaidInvoice->invoice_number);
-});
-
-test('a sales order type does not appear in the list', function (): void {
-    $salesType = OrderType::factory()->create([
-        'order_type_enum' => OrderTypeEnum::Order,
-        'is_active' => true,
-        'is_hidden' => false,
-    ]);
-
-    $salesOrder = createPayableOrder($this, $salesType, '200.00');
-
-    Livewire::test(MoneyTransfer::class)
-        ->assertDontSee($salesOrder->invoice_number);
-});
+        ->assertDontSee($order->invoice_number);
+})->with([
+    'a purchase invoice with a positive balance' => [OrderTypeEnum::Purchase, '500.00'],
+    'a sales order with a positive balance' => [OrderTypeEnum::Order, '200.00'],
+]);

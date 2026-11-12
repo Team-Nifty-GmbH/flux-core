@@ -312,127 +312,59 @@ test('the total amount is enabled by default', function (): void {
     expect((new PaymentRunList())->enabledCols)->toContain('total_amount');
 });
 
-test('a position left pointing against a money transfer is dropped entirely', function (): void {
-    $invoice = createOrderForPaymentRunList('RE-1');
-    $creditNote = createOrderForPaymentRunList('GS-1');
+test('a position left at zero or pointing against the run is dropped entirely', function (
+    string $paymentRunType,
+    array $droppedAmounts,
+    string $untouchedAmount
+): void {
+    $droppedOrders = collect($droppedAmounts)
+        ->keys()
+        ->map(fn (int $index) => createOrderForPaymentRunList('RE-1' . $index));
     $untouched = createOrderForPaymentRunList('RE-2');
 
     $run = CreatePaymentRun::make([
-        'payment_run_type_enum' => 'money_transfer',
+        'payment_run_type_enum' => $paymentRunType,
         'positions' => [
             [
-                'contact_id' => $invoice->contact_id,
+                'contact_id' => $droppedOrders->first()->contact_id,
                 'iban' => 'DE89370400440532013000',
-                'purpose' => 'RE-1, GS-1',
-                'orders' => [
-                    ['order_id' => $invoice->getKey(), 'amount' => -1000],
-                    ['order_id' => $creditNote->getKey(), 'amount' => 200],
-                ],
+                'orders' => $droppedOrders
+                    ->map(fn (Order $order, int $index) => [
+                        'order_id' => $order->getKey(),
+                        'amount' => $droppedAmounts[$index],
+                    ])
+                    ->all(),
             ],
             [
                 'contact_id' => $untouched->contact_id,
                 'iban' => 'DE02120300000000202051',
                 'purpose' => 'RE-2',
                 'orders' => [
-                    ['order_id' => $untouched->getKey(), 'amount' => -300],
+                    ['order_id' => $untouched->getKey(), 'amount' => $untouchedAmount],
                 ],
             ],
         ],
     ])->validate()->execute();
 
-    $droppedPosition = $run->positions()->where('purpose', 'RE-1, GS-1')->first();
+    $droppedPosition = $run->positions()->where('contact_id', $droppedOrders->first()->contact_id)->sole();
 
     Livewire::test(PaymentRunList::class)
         ->call('edit', $run)
-        ->call('removeOrder', $invoice->getKey());
+        ->call('removeOrder', $droppedOrders->first()->getKey());
 
     expect(PaymentRunPosition::query()->whereKey($droppedPosition->getKey())->exists())->toBeFalse()
-        ->and($creditNote->fresh()->payment_state)->toBeInstanceOf(Open::class)
         ->and(PaymentRun::query()->whereKey($run->getKey())->exists())->toBeTrue()
         ->and($run->fresh()->positions()->count())->toBe(1)
-        ->and($run->fresh()->total_amount)->toEqual('-300.00');
-});
+        ->and($run->fresh()->total_amount)->toEqual($untouchedAmount);
 
-test('a position left at zero is dropped entirely', function (): void {
-    $first = createOrderForPaymentRunList('RE-1');
-    $second = createOrderForPaymentRunList('RE-2');
-    $creditNote = createOrderForPaymentRunList('GS-1');
-    $untouched = createOrderForPaymentRunList('RE-3');
-
-    $run = CreatePaymentRun::make([
-        'payment_run_type_enum' => 'money_transfer',
-        'positions' => [
-            [
-                'contact_id' => $first->contact_id,
-                'iban' => 'DE89370400440532013000',
-                'purpose' => 'RE-1, RE-2, GS-1',
-                'orders' => [
-                    ['order_id' => $first->getKey(), 'amount' => -1000],
-                    ['order_id' => $second->getKey(), 'amount' => -200],
-                    ['order_id' => $creditNote->getKey(), 'amount' => 200],
-                ],
-            ],
-            [
-                'contact_id' => $untouched->contact_id,
-                'iban' => 'DE02120300000000202051',
-                'purpose' => 'RE-3',
-                'orders' => [
-                    ['order_id' => $untouched->getKey(), 'amount' => -300],
-                ],
-            ],
-        ],
-    ])->validate()->execute();
-
-    $droppedPosition = $run->positions()->where('purpose', 'RE-1, RE-2, GS-1')->first();
-
-    Livewire::test(PaymentRunList::class)
-        ->call('edit', $run)
-        ->call('removeOrder', $first->getKey());
-
-    expect(PaymentRunPosition::query()->whereKey($droppedPosition->getKey())->exists())->toBeFalse()
-        ->and($second->fresh()->payment_state)->toBeInstanceOf(Open::class)
-        ->and($creditNote->fresh()->payment_state)->toBeInstanceOf(Open::class)
-        ->and($run->fresh()->total_amount)->toEqual('-300.00');
-});
-
-test('a position left pointing against a direct debit is dropped entirely', function (): void {
-    $invoice = createOrderForPaymentRunList('RE-1');
-    $creditNote = createOrderForPaymentRunList('GS-1');
-    $untouched = createOrderForPaymentRunList('RE-2');
-
-    $run = CreatePaymentRun::make([
-        'payment_run_type_enum' => 'direct_debit',
-        'positions' => [
-            [
-                'contact_id' => $invoice->contact_id,
-                'iban' => 'DE89370400440532013000',
-                'purpose' => 'RE-1, GS-1',
-                'orders' => [
-                    ['order_id' => $invoice->getKey(), 'amount' => 1000],
-                    ['order_id' => $creditNote->getKey(), 'amount' => -200],
-                ],
-            ],
-            [
-                'contact_id' => $untouched->contact_id,
-                'iban' => 'DE02120300000000202051',
-                'purpose' => 'RE-2',
-                'orders' => [
-                    ['order_id' => $untouched->getKey(), 'amount' => 300],
-                ],
-            ],
-        ],
-    ])->validate()->execute();
-
-    $droppedPosition = $run->positions()->where('purpose', 'RE-1, GS-1')->first();
-
-    Livewire::test(PaymentRunList::class)
-        ->call('edit', $run)
-        ->call('removeOrder', $invoice->getKey());
-
-    expect(PaymentRunPosition::query()->whereKey($droppedPosition->getKey())->exists())->toBeFalse()
-        ->and($creditNote->fresh()->payment_state)->toBeInstanceOf(Open::class)
-        ->and($run->fresh()->total_amount)->toEqual('300.00');
-});
+    foreach ($droppedOrders->skip(1) as $remainingOrder) {
+        expect($remainingOrder->fresh()->payment_state)->toBeInstanceOf(Open::class);
+    }
+})->with([
+    'pointing against a money transfer' => ['money_transfer', [-1000, 200], '-300.00'],
+    'left at zero' => ['money_transfer', [-1000, -200, 200], '-300.00'],
+    'pointing against a direct debit' => ['direct_debit', [1000, -200], '300.00'],
+]);
 
 test('removing an order rebuilds the purpose but keeps the end to end id', function (): void {
     $first = createOrderForPaymentRunList('RE-1');

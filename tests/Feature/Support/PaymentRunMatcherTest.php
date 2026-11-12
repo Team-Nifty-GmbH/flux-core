@@ -98,18 +98,30 @@ test('a transaction is split across the orders of its position', function (): vo
         ->and($invoice->fresh()->orderTransactions()->first()->is_accepted)->toBeTrue();
 });
 
-test('a transaction without reference matches on amount, iban and date', function (): void {
-    [$paymentRun, $position] = createNettedPosition($this);
+test('a transaction matches a money transfer position only on its direction, amount and recipient', function (
+    float $amount,
+    bool $withReference,
+    ?string $counterpartIban,
+    bool $expectedMatch
+): void {
+    [, $position] = createNettedPosition($this);
 
     $transaction = Transaction::factory()->create([
-        'amount' => -800,
-        'end_to_end_reference' => null,
-        'counterpart_iban' => $position->iban,
+        'amount' => $amount,
+        'end_to_end_reference' => $withReference ? $position->end_to_end_id : null,
+        'counterpart_iban' => $counterpartIban ?? $position->iban,
         'booking_date' => now(),
     ]);
 
-    expect(app(PaymentRunMatcher::class)->match($transaction))->toBeTrue();
-});
+    expect(app(PaymentRunMatcher::class)->match($transaction))->toBe($expectedMatch)
+        ->and(OrderTransaction::query()->where('transaction_id', $transaction->getKey())->exists())->toBe($expectedMatch);
+})->with([
+    'without reference on amount, iban and date' => [-800, false, null, true],
+    'an unrelated transaction' => [-12.34, false, 'DE02500105170137075030', false],
+    'the right reference but the wrong amount' => [-750, true, null, false],
+    'an incoming payment under the reference' => [800, true, null, false],
+    'an incoming payment from the recipient iban' => [800, false, null, false],
+]);
 
 test('a collective booking is split across all positions of the run', function (): void {
     [$paymentRun, $position] = createNettedPosition($this);
@@ -153,33 +165,6 @@ test('a position that is already assigned is left alone', function (): void {
     app(PaymentRunMatcher::class)->match($transaction);
 
     expect($position->orders()->first()->orderTransactions()->count())->toBe($countAfterFirstRun);
-});
-
-test('an unrelated transaction is not matched', function (): void {
-    createNettedPosition($this);
-
-    $transaction = Transaction::factory()->create([
-        'amount' => -12.34,
-        'end_to_end_reference' => null,
-        'counterpart_iban' => 'DE02500105170137075030',
-        'booking_date' => now(),
-    ]);
-
-    expect(app(PaymentRunMatcher::class)->match($transaction))->toBeFalse();
-});
-
-test('a transaction under the right reference but the wrong amount is not assigned', function (): void {
-    [$paymentRun, $position] = createNettedPosition($this);
-
-    $transaction = Transaction::factory()->create([
-        'amount' => -750,
-        'end_to_end_reference' => $position->end_to_end_id,
-        'counterpart_iban' => $position->iban,
-        'booking_date' => now(),
-    ]);
-
-    expect(app(PaymentRunMatcher::class)->match($transaction))->toBeFalse()
-        ->and(OrderTransaction::query()->where('transaction_id', $transaction->getKey())->exists())->toBeFalse();
 });
 
 test('a collective booking leaves a netted position untouched', function (): void {
@@ -238,31 +223,6 @@ test('a collective booking leaves a netted position untouched', function (): voi
         ->and($creditNote->fresh()->orderTransactions()->count())->toBe(0)
         ->and($invoice->fresh()->payment_state)->toBeInstanceOf(Paid::class)
         ->and($creditNote->fresh()->payment_state)->toBeInstanceOf(Paid::class);
-});
-
-test('an incoming payment is never booked onto a money transfer run', function (): void {
-    [, $position] = createNettedPosition($this);
-
-    $byReference = Transaction::factory()->create([
-        'amount' => 800,
-        'end_to_end_reference' => $position->end_to_end_id,
-        'counterpart_iban' => $position->iban,
-        'booking_date' => now(),
-    ]);
-
-    $byIban = Transaction::factory()->create([
-        'amount' => 800,
-        'end_to_end_reference' => null,
-        'counterpart_iban' => $position->iban,
-        'booking_date' => now(),
-    ]);
-
-    expect(app(PaymentRunMatcher::class)->match($byReference))->toBeFalse()
-        ->and(app(PaymentRunMatcher::class)->match($byIban))->toBeFalse()
-        ->and(OrderTransaction::query()->whereIn(
-            'transaction_id',
-            [$byReference->getKey(), $byIban->getKey()]
-        )->exists())->toBeFalse();
 });
 
 test('an outgoing payment is never booked onto a direct debit run', function (): void {
