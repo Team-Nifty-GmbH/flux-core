@@ -65,6 +65,11 @@
                     label="{{ __('Is Lot Tracked') }}"
                     wire:model="product.is_lot_tracked"
                 />
+                <x-checkbox
+                    x-bind:disabled="!isEditing"
+                    label="{{ __('Is configurable') }}"
+                    wire:model="product.is_configurable"
+                />
                 <x-flux::product.inheritance-indicator
                     :product="$this->product->getProductModel()"
                     field="is_active_export_to_web_shop"
