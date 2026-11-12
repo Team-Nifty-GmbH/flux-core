@@ -530,7 +530,7 @@ class FillOrderPositions extends FluxAction
                                         ->first()
                                         ?->currentConfiguration()
                                     : null)
-                                ?: []
+                                ?: $configurableProduct->defaultConfiguration()
                         ),
                         'price_list_id' => $validated['price_list_id'] ?? $order->price_list_id,
                         'contact_id' => $order->contact_id,

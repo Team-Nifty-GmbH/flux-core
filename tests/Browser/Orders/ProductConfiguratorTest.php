@@ -1,12 +1,14 @@
 <?php
 
+use FluxErp\Enums\ConfigurationRuleTypeEnum;
 use FluxErp\Enums\ConfigurationSelectionTypeEnum;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\ProductConfigurationRule;
 
 require_once __DIR__ . '/../../Feature/ProductConfiguration/Helpers.php';
 
-test('configure a product in an order, see a violation and save', function (): void {
+test('configure a product in an order, see a rule violation and save', function (): void {
     $priceList = PriceList::factory()->create(['is_net' => true]);
     $order = configurationOrder($priceList);
     $server = configurationProduct(['name' => 'Browser Server', 'is_configurable' => true]);
@@ -18,12 +20,19 @@ test('configure a product in an order, see a violation and save', function (): v
     $extras = configurationGroup([
         'name' => 'Extras',
         'selection_type_enum' => ConfigurationSelectionTypeEnum::Multiple,
-        'max_selections' => 1,
     ]);
     $heater = configurationItem($extras, configurationProduct(['name' => 'Heater']), ['surcharge' => 5]);
-    $fan = configurationItem($extras, configurationProduct(['name' => 'Fan']), ['surcharge' => 3]);
     attachConfigurationGroup($server, $storage, isRequired: true);
     attachConfigurationGroup($server, $extras, sort: 1);
+    $server->productConfigurationDefaults()->create([
+        'product_configuration_group_item_id' => $hdd->getKey(),
+        'amount' => 1,
+    ]);
+    $rule = ProductConfigurationRule::factory()->create([
+        'product_configuration_group_item_id' => $heater->getKey(),
+        'rule_type_enum' => ConfigurationRuleTypeEnum::Excludes,
+    ]);
+    $rule->targetItems()->attach($ssd->getKey());
 
     $page = visit(route('orders.id', $order))->assertNoSmoke();
     waitForDataTable($page);
@@ -40,13 +49,12 @@ test('configure a product in an order, see a violation and save', function (): v
     waitForElement($page, '#configurator-item-' . $ssd->getKey());
     $page->click('#configurator-item-' . $ssd->getKey());
     $page->fill('#configurator-amount-' . $heater->getKey(), '1');
-    $page->fill('#configurator-amount-' . $fan->getKey(), '1');
     $page->wait(1)
-        ->assertSee('Extras allows at most 1 selections.');
+        ->assertSee('Heater cannot be combined with Fast SSD.');
 
-    $page->fill('#configurator-amount-' . $fan->getKey(), '0');
+    $page->fill('#configurator-amount-' . $heater->getKey(), '0');
     $page->wait(1)
-        ->assertDontSee('Extras allows at most 1 selections.');
+        ->assertDontSee('Heater cannot be combined with Fast SSD.');
 
     $page->click('#configurator-save');
     waitForDataTable($page);
@@ -55,8 +63,5 @@ test('configure a product in an order, see a violation and save', function (): v
     $parent = OrderPosition::query()->where('product_id', $server->getKey())->sole();
 
     expect($parent->currentConfiguration())
-        ->toBe([
-            ['product_configuration_group_item_id' => $ssd->getKey(), 'amount' => 1],
-            ['product_configuration_group_item_id' => $heater->getKey(), 'amount' => 1],
-        ]);
+        ->toBe([['product_configuration_group_item_id' => $ssd->getKey(), 'amount' => 1]]);
 });

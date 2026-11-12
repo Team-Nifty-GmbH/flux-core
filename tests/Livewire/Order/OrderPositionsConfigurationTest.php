@@ -28,16 +28,22 @@ beforeEach(function (): void {
         ['surcharge' => 0, 'sort' => 1]
     );
     attachConfigurationGroup($this->server, $this->storage, isRequired: true);
+    $this->server->productConfigurationDefaults()->create([
+        'product_configuration_group_item_id' => $this->hdd->getKey(),
+        'amount' => 1,
+    ]);
 
     $this->orderForm = new OrderForm(Livewire::new(OrderPositions::class), 'order');
     $this->orderForm->fill($this->order->fresh(['currency']));
 });
 
-test('choosing a configurable product loads its groups', function (): void {
+test('choosing a configurable product loads groups and defaults', function (): void {
     $component = Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->call('changedProductId', $this->server->getKey())
         ->assertSet('orderPosition.is_configurable', true)
-        ->assertSet('orderPosition.configuration', [])
+        ->assertSet('orderPosition.configuration', [
+            ['product_configuration_group_item_id' => $this->hdd->getKey(), 'amount' => 1],
+        ])
         ->assertSet('configurationGroups.0.name', 'Storage')
         ->assertSet('configurationGroups.0.items.0.name', 'SSD');
 
@@ -76,9 +82,6 @@ test('saving creates the configured position', function (): void {
 test('change configuration loads the current children and replaces them on save', function (): void {
     $component = Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->call('changedProductId', $this->server->getKey())
-        ->set('orderPosition.configuration', [
-            ['product_configuration_group_item_id' => $this->hdd->getKey(), 'amount' => 1],
-        ])
         ->call('addOrderPosition');
     $parent = OrderPosition::query()->where('product_id', $this->server->getKey())->sole();
 
@@ -119,9 +122,6 @@ test('a configuration violating a rule blocks the save', function (): void {
 test('editing a configured position without touching the configuration keeps its children', function (): void {
     $component = Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->call('changedProductId', $this->server->getKey())
-        ->set('orderPosition.configuration', [
-            ['product_configuration_group_item_id' => $this->hdd->getKey(), 'amount' => 1],
-        ])
         ->call('addOrderPosition');
     $parent = OrderPosition::query()->where('product_id', $this->server->getKey())->sole();
     $childIds = $parent->children()->pluck('id')->all();

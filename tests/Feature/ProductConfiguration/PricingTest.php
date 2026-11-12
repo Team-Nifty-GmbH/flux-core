@@ -98,6 +98,19 @@ test('contact discounts reach product prices but never the surcharge', function 
         ->and(bccomp($result['positions'][1]['unit_price'], '18', 2))->toBe(0);
 });
 
+test('without configuration the defaults are priced', function (): void {
+    $this->server->productConfigurationDefaults()->create([
+        'product_configuration_group_item_id' => $this->ssd->getKey(),
+        'amount' => 1,
+    ]);
+
+    $result = ($this->calculate)(['price_list_id' => $this->netList->getKey()]);
+
+    expect($result['configuration'])
+        ->toBe([['product_configuration_group_item_id' => $this->ssd->getKey(), 'amount' => 1]])
+        ->and(bccomp($result['total_price'], '110', 2))->toBe(0);
+});
+
 test('a negative surcharge lowers the total', function (): void {
     $this->ssd->update(['surcharge' => -30]);
 

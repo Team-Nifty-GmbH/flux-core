@@ -1,6 +1,8 @@
 <?php
 
+use FluxErp\Enums\ConfigurationRuleTypeEnum;
 use FluxErp\Enums\ConfigurationSelectionTypeEnum;
+use FluxErp\Models\ProductConfigurationRule;
 use FluxErp\Support\ProductConfiguration\ConfigurationValidator;
 use Illuminate\Validation\ValidationException;
 
@@ -24,15 +26,15 @@ beforeEach(function (): void {
     attachConfigurationGroup($this->product, $this->storage, isRequired: true);
     attachConfigurationGroup($this->product, $this->extras);
 
-    $this->validate = fn (array $configuration) => ConfigurationValidator::make($this->product)
-        ->validate($configuration);
+    $this->validate = fn (array $configuration, bool $isDefault = false) => ConfigurationValidator::make($this->product)
+        ->validate($configuration, $isDefault);
     $this->entry = fn ($item, int $amount = 1) => [
         'product_configuration_group_item_id' => $item->getKey(),
         'amount' => $amount,
     ];
-    $this->messages = function (array $configuration): array {
+    $this->messages = function (array $configuration, bool $isDefault = false): array {
         try {
-            ($this->validate)($configuration);
+            ($this->validate)($configuration, $isDefault);
         } catch (ValidationException $e) {
             return $e->errors()['configuration'];
         }
@@ -84,8 +86,80 @@ test('check 4: a multiple group respects min and max once something is chosen', 
         ->and(($this->messages)([($this->entry)($this->ssd)]))->toBe([]);
 });
 
-test('check 5: a required group needs a selection', function (): void {
-    expect(($this->messages)([]))->toBe(['Storage requires a selection.']);
+test('check 5: a required group needs a selection, defaults may skip it', function (): void {
+    expect(($this->messages)([]))->toBe(['Storage requires a selection.'])
+        ->and(($this->messages)([], true))->toBe([]);
+});
+
+test('check 6: requires on a group', function (): void {
+    ProductConfigurationRule::factory()->create([
+        'product_configuration_group_item_id' => $this->ssd->getKey(),
+        'rule_type_enum' => ConfigurationRuleTypeEnum::Requires,
+        'target_group_id' => $this->extras->getKey(),
+    ]);
+
+    expect(($this->messages)([($this->entry)($this->ssd)]))
+        ->toBe(['SSD requires a selection in Extras.'])
+        ->and(($this->messages)([($this->entry)($this->ssd), ($this->entry)($this->fan), ($this->entry)($this->led)]))
+        ->toBe([]);
+});
+
+test('check 6: excludes on a group', function (): void {
+    ProductConfigurationRule::factory()->create([
+        'product_configuration_group_item_id' => $this->hdd->getKey(),
+        'rule_type_enum' => ConfigurationRuleTypeEnum::Excludes,
+        'target_group_id' => $this->extras->getKey(),
+    ]);
+
+    expect(($this->messages)([($this->entry)($this->hdd), ($this->entry)($this->fan), ($this->entry)($this->led)]))
+        ->toBe(['HDD cannot be combined with a selection in Extras.'])
+        ->and(($this->messages)([($this->entry)($this->hdd)]))->toBe([]);
+});
+
+test('check 6: requires one of several options', function (): void {
+    $rule = ProductConfigurationRule::factory()->create([
+        'product_configuration_group_item_id' => $this->ssd->getKey(),
+        'rule_type_enum' => ConfigurationRuleTypeEnum::Requires,
+    ]);
+    $rule->targetItems()->attach([$this->fan->getKey(), $this->wifi->getKey()]);
+
+    expect(($this->messages)([($this->entry)($this->ssd), ($this->entry)($this->led), ($this->entry)($this->dock)]))
+        ->toBe(['SSD requires one of Fan, WiFi.'])
+        ->and(($this->messages)([($this->entry)($this->ssd), ($this->entry)($this->wifi), ($this->entry)($this->dock)]))
+        ->toBe([]);
+});
+
+test('check 6: excludes options', function (): void {
+    $rule = ProductConfigurationRule::factory()->create([
+        'product_configuration_group_item_id' => $this->ssd->getKey(),
+        'rule_type_enum' => ConfigurationRuleTypeEnum::Excludes,
+    ]);
+    $rule->targetItems()->attach([$this->led->getKey()]);
+
+    expect(($this->messages)([($this->entry)($this->ssd), ($this->entry)($this->led), ($this->entry)($this->fan)]))
+        ->toBe(['SSD cannot be combined with LED.'])
+        ->and(($this->messages)([($this->entry)($this->ssd), ($this->entry)($this->fan), ($this->entry)($this->dock)]))
+        ->toBe([]);
+});
+
+test('check 6: requires on a group that is not attached can never be met, excludes always passes', function (): void {
+    $detached = configurationGroup(['name' => 'Cooling']);
+    configurationItem($detached);
+    ProductConfigurationRule::factory()->create([
+        'product_configuration_group_item_id' => $this->ssd->getKey(),
+        'rule_type_enum' => ConfigurationRuleTypeEnum::Requires,
+        'target_group_id' => $detached->getKey(),
+    ]);
+    ProductConfigurationRule::factory()->create([
+        'product_configuration_group_item_id' => $this->hdd->getKey(),
+        'rule_type_enum' => ConfigurationRuleTypeEnum::Excludes,
+        'target_group_id' => $detached->getKey(),
+    ]);
+
+    expect(($this->messages)([($this->entry)($this->ssd)]))->toBe(['SSD requires a selection in Cooling.'])
+        ->and(($this->messages)([($this->entry)($this->hdd)]))->toBe([])
+        ->and(ConfigurationValidator::make($this->product)->unsatisfiableRules())
+        ->toBe(['SSD requires an option from a group that is not attached to this product.']);
 });
 
 test('check 7: deleted groups and deleted options are rejected', function (): void {
@@ -105,7 +179,8 @@ test('check 7: deleted groups and deleted options are rejected', function (): vo
 test('rejects an option whose product was deleted', function (): void {
     $this->ssd->product->delete();
 
-    expect(($this->messages)([($this->entry)($this->ssd)]))->toBe(['SSD is no longer available.']);
+    expect(($this->messages)([($this->entry)($this->ssd)]))->toBe(['SSD is no longer available.'])
+        ->and(($this->messages)([($this->entry)($this->ssd)], true))->toBe(['SSD is no longer available.']);
 });
 
 test('rejects the same option twice', function (): void {

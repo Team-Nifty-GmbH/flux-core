@@ -7,6 +7,7 @@ use FluxErp\Actions\Product\ProductProductConfigurationGroup\DeleteProductProduc
 use FluxErp\Actions\Product\ProductProductConfigurationGroup\UpdateProductProductConfigurationGroup;
 use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Models\Pivots\ProductProductConfigurationGroup;
+use FluxErp\Models\ProductConfigurationDefault;
 use FluxErp\Models\VatRate;
 
 require_once __DIR__ . '/Helpers.php';
@@ -113,14 +114,24 @@ test('update the requirement and sort of an assignment', function (): void {
     expect($pivot->is_required)->toBeTrue()->and($pivot->sort)->toBe(4);
 });
 
-test('detaching a group removes only that assignment', function (): void {
+test('detaching a group removes the product defaults of that group only', function (): void {
     $product = configurationProduct(['is_configurable' => true]);
     $otherProduct = configurationProduct(['is_configurable' => true]);
     $storage = configurationGroup();
     $power = configurationGroup();
+    $ssd = configurationItem($storage);
+    $psu = configurationItem($power);
     attachConfigurationGroup($product, $storage);
     attachConfigurationGroup($product, $power);
     attachConfigurationGroup($otherProduct, $storage);
+
+    foreach ([[$product, $ssd], [$product, $psu], [$otherProduct, $ssd]] as [$owner, $item]) {
+        ProductConfigurationDefault::query()->create([
+            'product_id' => $owner->getKey(),
+            'product_configuration_group_item_id' => $item->getKey(),
+            'amount' => 1,
+        ]);
+    }
 
     $pivotId = ProductProductConfigurationGroup::query()
         ->where('product_id', $product->getKey())
@@ -129,18 +140,25 @@ test('detaching a group removes only that assignment', function (): void {
 
     DeleteProductProductConfigurationGroup::make(['pivot_id' => $pivotId])->validate()->execute();
 
-    expect($product->productConfigurationGroups()->pluck('product_configuration_groups.id')->all())
-        ->toBe([$power->getKey()])
-        ->and($otherProduct->productConfigurationGroups()->pluck('product_configuration_groups.id')->all())
-        ->toBe([$storage->getKey()]);
+    expect($product->defaultConfiguration())
+        ->toBe([['product_configuration_group_item_id' => $psu->getKey(), 'amount' => 1]])
+        ->and($otherProduct->defaultConfiguration())
+        ->toBe([['product_configuration_group_item_id' => $ssd->getKey(), 'amount' => 1]]);
 });
 
-test('switching is_configurable off detaches groups', function (): void {
+test('switching is_configurable off detaches groups and defaults', function (): void {
     $product = configurationProduct(['is_configurable' => true]);
     $group = configurationGroup();
+    $item = configurationItem($group);
     attachConfigurationGroup($product, $group);
+    ProductConfigurationDefault::query()->create([
+        'product_id' => $product->getKey(),
+        'product_configuration_group_item_id' => $item->getKey(),
+        'amount' => 1,
+    ]);
 
     UpdateProduct::make(['id' => $product->getKey(), 'is_configurable' => false])->validate()->execute();
 
-    expect($product->productConfigurationGroups()->count())->toBe(0);
+    expect($product->productConfigurationGroups()->count())->toBe(0)
+        ->and($product->defaultConfiguration())->toBe([]);
 });

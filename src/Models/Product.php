@@ -270,6 +270,11 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         return $this->hasMany(ProductCrossSelling::class);
     }
 
+    public function productConfigurationDefaults(): HasMany
+    {
+        return $this->hasMany(ProductConfigurationDefault::class);
+    }
+
     public function productConfigurationGroups(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -350,6 +355,17 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     }
 
     // Public methods
+    public function defaultConfiguration(): array
+    {
+        return $this->productConfigurationDefaults()
+            ->get(['product_configuration_group_item_id', 'amount'])
+            ->map(fn (ProductConfigurationDefault $default) => [
+                'product_configuration_group_item_id' => $default->product_configuration_group_item_id,
+                'amount' => $default->amount,
+            ])
+            ->all();
+    }
+
     /**
      * @throws Exception
      */

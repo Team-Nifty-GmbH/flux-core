@@ -19,6 +19,10 @@ beforeEach(function (): void {
     $this->ssd = configurationItem($this->storage, configurationProduct(['name' => 'SSD']), ['surcharge' => 10, 'max_amount' => 2]);
     $this->hdd = configurationItem($this->storage, configurationProduct(['name' => 'HDD']), ['surcharge' => 5]);
     attachConfigurationGroup($this->server, $this->storage);
+    $this->server->productConfigurationDefaults()->create([
+        'product_configuration_group_item_id' => $this->hdd->getKey(),
+        'amount' => 1,
+    ]);
 
     $this->fill = fn (array $position, bool $simulate = false) => FillOrderPositions::make([
         'order_id' => $this->order->getKey(),
@@ -47,7 +51,13 @@ test('fill builds children from the configuration', function (): void {
         ->and(bccomp($child->total_net_price, '40', 2))->toBe(0);
 });
 
-test('fill keeps the configuration of an existing position', function (): void {
+test('fill falls back to defaults and keeps the configuration of an existing position', function (): void {
+    ($this->fill)([]);
+    $parent = OrderPosition::query()->whereNull('parent_id')->where('order_id', $this->order->getKey())->sole();
+
+    expect($parent->currentConfiguration())
+        ->toBe([['product_configuration_group_item_id' => $this->hdd->getKey(), 'amount' => 1]]);
+
     ($this->fill)(['configuration' => [['product_configuration_group_item_id' => $this->ssd->getKey(), 'amount' => 1]]]);
     $parent = OrderPosition::query()->whereNull('parent_id')->where('order_id', $this->order->getKey())->sole();
     ($this->fill)(['id' => $parent->getKey(), 'amount' => 3]);
