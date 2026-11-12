@@ -5,6 +5,11 @@
     );
     $rowBackground = ($loop ?? false) && $loop->odd ? 'background: #f2f4f7;' : '';
     $rowBottomPadding = $descriptionChunks === [] ? 'padding-bottom: 8px;' : '';
+    $showPrice = $position->total_net_price
+        && ! (
+            $position->product_configuration_group_item_id
+            && bccomp($position->total_net_price, 0) === 0
+        );
 @endphp
 <tbody>
     <tr
@@ -89,7 +94,7 @@
                 </div>
             @endif
 
-            {{ $position->total_net_price ? Number::currency($isNet ? $position->total_net_price : $position->total_gross_price) : null }}
+            {{ $showPrice ? Number::currency($isNet ? $position->total_net_price : $position->total_gross_price) : null }}
         </td>
     </tr>
     @foreach ($descriptionChunks as $chunk)

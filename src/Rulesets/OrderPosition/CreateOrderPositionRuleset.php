@@ -11,6 +11,7 @@ use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\ProductConfigurationGroupItem;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\Unit;
 use FluxErp\Models\VatRate;
@@ -18,6 +19,7 @@ use FluxErp\Models\Warehouse;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
+use FluxErp\Rulesets\ProductConfiguration\ConfigurationRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Fluent;
 use Illuminate\Validation\Rule;
@@ -31,7 +33,8 @@ class CreateOrderPositionRuleset extends FluxRuleset
         return array_merge(
             parent::getRules(),
             resolve_static(DiscountRuleset::class, 'getRules'),
-            resolve_static(TagRuleset::class, 'getRules')
+            resolve_static(TagRuleset::class, 'getRules'),
+            resolve_static(ConfigurationRuleset::class, 'getRules')
         );
     }
 
@@ -93,6 +96,12 @@ class CreateOrderPositionRuleset extends FluxRuleset
                         'children',
                         fn (Builder $query) => $query->where('is_active', true)
                     ),
+            ],
+            'product_configuration_group_item_id' => [
+                'exclude_without:created_from_id',
+                'integer',
+                'nullable',
+                app(ModelExists::class, ['model' => ProductConfigurationGroupItem::class]),
             ],
             'supplier_contact_id' => [
                 'integer',
