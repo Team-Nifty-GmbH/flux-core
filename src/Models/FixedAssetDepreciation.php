@@ -22,6 +22,20 @@ class FixedAssetDepreciation extends FluxModel
         static::addGlobalScope(app(FixedAssetDepreciationInheritsFixedAssetTenantScope::class));
     }
 
+    public static function isMorphType(?string $type): bool
+    {
+        return filled($type) && is_a(morphed_model($type) ?? $type, FixedAssetDepreciation::class, true);
+    }
+
+    protected static function externallyDepreciated(Builder $query): Builder
+    {
+        return $query->whereColumn(
+            'fixed_assets.externally_depreciated_until',
+            '>=',
+            'fixed_asset_depreciations.booking_date'
+        );
+    }
+
     protected function casts(): array
     {
         return [
@@ -48,8 +62,17 @@ class FixedAssetDepreciation extends FluxModel
         $query->whereHas('ledgerBookings');
     }
 
-    protected function scopeUnbooked(Builder $query): void
+    protected function scopeDepreciated(Builder $query): void
     {
-        $query->whereDoesntHave('ledgerBookings');
+        $query->where(function (Builder $query): void {
+            $query->whereHas('ledgerBookings')
+                ->orWhereHas('fixedAsset', fn (Builder $query): Builder => static::externallyDepreciated($query));
+        });
+    }
+
+    protected function scopeUndepreciated(Builder $query): void
+    {
+        $query->whereDoesntHave('ledgerBookings')
+            ->whereDoesntHave('fixedAsset', fn (Builder $query): Builder => static::externallyDepreciated($query));
     }
 }

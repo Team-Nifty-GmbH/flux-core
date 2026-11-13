@@ -42,11 +42,9 @@ class UpdateLedgerBooking extends FluxAction
             ->whereKey($this->getData('id'))
             ->firstOrFail(['id', 'debit_ledger_account_id', 'credit_ledger_account_id', 'source_type']);
 
-        if (in_array(
-            morph_alias(FixedAssetDepreciation::class),
-            [$ledgerBooking->source_type, $this->getData('source_type')],
-            true
-        )) {
+        if (resolve_static(FixedAssetDepreciation::class, 'isMorphType', [$ledgerBooking->source_type])
+            || resolve_static(FixedAssetDepreciation::class, 'isMorphType', [$this->getData('source_type')])
+        ) {
             throw ValidationException::withMessages([
                 'source_type' => [__('Depreciation bookings are managed by their fixed asset.')],
             ]);

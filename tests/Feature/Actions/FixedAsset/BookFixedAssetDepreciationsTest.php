@@ -163,6 +163,44 @@ test('depreciation bookings cannot be changed or deleted as ledger bookings', fu
         ->and($booking->refresh()->amount)->toEqual(500);
 });
 
+test('skips the depreciations booked outside of flux', function (): void {
+    UpdateFixedAsset::make(['id' => $this->fixedAsset->getKey(), 'externally_depreciated_until' => '2026-04-30'])
+        ->validate()
+        ->execute();
+
+    expect(bookDepreciations(['until' => '2026-05-31']))->toBe(1)
+        ->and(depreciationBookings($this->fixedAsset)->sole()->booking_date->toDateString())->toBe('2026-05-31')
+        ->and($this->fixedAsset->refresh()->book_value)->toEqual(34500);
+});
+
+test('refuses to book onto a ledger account that is no longer usable', function (): void {
+    LedgerAccount::query()
+        ->whereKey($this->fixedAsset->depreciation_ledger_account_id)
+        ->first()
+        ->delete();
+
+    expect(fn () => bookDepreciations(['until' => '2026-05-31']))
+        ->toThrow(ValidationException::class)
+        ->and(depreciationBookings($this->fixedAsset))->toHaveCount(0);
+});
+
+test('the class name does not get around the depreciation booking guard', function (): void {
+    CreateLedgerBooking::make([
+        'debit_ledger_account_id' => $this->fixedAsset->depreciation_ledger_account_id,
+        'credit_ledger_account_id' => $this->fixedAsset->ledger_account_id,
+        'source_type' => FixedAssetDepreciation::class,
+        'source_id' => $this->fixedAsset->depreciations()->value('id'),
+        'amount' => 1,
+        'booking_date' => '2026-04-30',
+    ])
+        ->validate()
+        ->execute();
+})->throws(ValidationException::class);
+
+test('the repeatable job is not scheduled by default', function (): void {
+    expect(BookFixedAssetDepreciationsJob::defaultCron())->toBeNull();
+});
+
 test('the repeatable job books everything due until today', function (): void {
     $this->travelTo('2026-06-01 02:00:00');
 

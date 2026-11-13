@@ -3,12 +3,15 @@
 namespace FluxErp\Actions\FixedAsset;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Enums\LedgerAccountTypeEnum;
 use FluxErp\Models\FixedAsset;
 use FluxErp\Models\FixedAssetDepreciation;
+use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\LedgerBooking;
 use FluxErp\Rulesets\FixedAsset\BookFixedAssetDepreciationsRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class BookFixedAssetDepreciations extends FluxAction
 {
@@ -27,8 +30,9 @@ class BookFixedAssetDepreciations extends FluxAction
         $fixedAssets = resolve_static(FixedAsset::class, 'query')
             ->when(
                 $this->getData('fixed_asset_id'),
-                fn (Builder $query) => $query->whereKey($this->getData('fixed_asset_id'))
+                fn (Builder $query): Builder => $query->whereKey($this->getData('fixed_asset_id'))
             )
+            ->whereHas('depreciations', fn (Builder $query): Builder => $this->due($query))
             ->orderBy('id')
             ->lockForUpdate()
             ->get();
@@ -38,13 +42,11 @@ class BookFixedAssetDepreciations extends FluxAction
 
     protected function bookFixedAsset(FixedAsset $fixedAsset): int
     {
+        $this->ensureAccountsAreUsable($fixedAsset);
+
         $depreciations = $this->due($fixedAsset->depreciations()->getQuery())
             ->orderBy('sequence')
             ->get(['id', 'booking_date', 'amount']);
-
-        if ($depreciations->isEmpty()) {
-            return 0;
-        }
 
         foreach ($depreciations as $depreciation) {
             app(LedgerBooking::class, [
@@ -62,16 +64,42 @@ class BookFixedAssetDepreciations extends FluxAction
                 ->save();
         }
 
-        $fixedAsset->calculateBookValue()
-            ->save();
-
         return $depreciations->count();
     }
 
     protected function due(Builder $query): Builder
     {
         return $query->whereDate('booking_date', '<=', $this->getData('until'))
-            ->unbooked();
+            ->undepreciated();
+    }
+
+    protected function ensureAccountsAreUsable(FixedAsset $fixedAsset): void
+    {
+        $usableAccounts = resolve_static(LedgerAccount::class, 'query')
+            ->withoutGlobalScopes()
+            ->whereNull('deleted_at')
+            ->where('tenant_id', $fixedAsset->tenant_id)
+            ->where(fn (Builder $query): Builder => $query
+                ->where(fn (Builder $query): Builder => $query
+                    ->whereKey($fixedAsset->ledger_account_id)
+                    ->where('ledger_account_type_enum', LedgerAccountTypeEnum::Asset)
+                )
+                ->orWhere(fn (Builder $query): Builder => $query
+                    ->whereKey($fixedAsset->depreciation_ledger_account_id)
+                    ->where('ledger_account_type_enum', LedgerAccountTypeEnum::Expense)
+                )
+            )
+            ->count();
+
+        if ($usableAccounts !== 2) {
+            throw ValidationException::withMessages([
+                'fixed_asset_id' => [
+                    __('The ledger accounts of fixed asset :name can no longer be booked on.', [
+                        'name' => $fixedAsset->name,
+                    ]),
+                ],
+            ]);
+        }
     }
 
     protected function prepareForValidation(): void

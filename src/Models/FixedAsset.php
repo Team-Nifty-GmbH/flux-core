@@ -27,6 +27,7 @@ class FixedAsset extends FluxModel implements InteractsWithDataTables
         return [
             'acquired_at' => 'date',
             'depreciation_starts_at' => 'date',
+            'externally_depreciated_until' => 'date',
             'acquisition_cost' => Money::class,
             'residual_value' => Money::class,
             'book_value' => Money::class,
@@ -75,9 +76,9 @@ class FixedAsset extends FluxModel implements InteractsWithDataTables
     public function calculateBookValue(): static
     {
         $this->book_value = bcsub(
-            (string) $this->getAttributes()['acquisition_cost'],
+            (string) data_get($this->getAttributes(), 'acquisition_cost'),
             (string) $this->depreciations()
-                ->booked()
+                ->depreciated()
                 ->sum('amount'),
             2
         );
@@ -103,5 +104,18 @@ class FixedAsset extends FluxModel implements InteractsWithDataTables
     public function getUrl(): ?string
     {
         return $this->detailRoute();
+    }
+
+    public function hasBookedDepreciations(): bool
+    {
+        return $this->depreciations()
+            ->booked()
+            ->exists();
+    }
+
+    public function recalculateBookValue(): void
+    {
+        $this->calculateBookValue()
+            ->save();
     }
 }

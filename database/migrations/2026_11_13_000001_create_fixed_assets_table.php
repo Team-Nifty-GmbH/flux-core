@@ -36,6 +36,7 @@ return new class() extends Migration
             $table->string('number')->nullable();
             $table->date('acquired_at');
             $table->date('depreciation_starts_at');
+            $table->date('externally_depreciated_until')->nullable();
             $table->decimal('acquisition_cost', 40, 10);
             $table->decimal('residual_value', 40, 10)->default(0);
             $table->decimal('book_value', 40, 10)->default(0);
