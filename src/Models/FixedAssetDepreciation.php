@@ -47,4 +47,19 @@ class FixedAssetDepreciation extends FluxModel
     {
         $query->whereHas('ledgerBookings');
     }
+
+    protected function scopeDepreciated(Builder $query): void
+    {
+        $query->where(function (Builder $query): void {
+            $query->whereHas('ledgerBookings')
+                ->orWhereHas(
+                    'fixedAsset',
+                    fn (Builder $query): Builder => $query->whereColumn(
+                        'fixed_assets.externally_depreciated_until',
+                        '>=',
+                        'fixed_asset_depreciations.booking_date'
+                    )
+                );
+        });
+    }
 }

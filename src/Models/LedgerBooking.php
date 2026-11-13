@@ -27,11 +27,26 @@ class LedgerBooking extends FluxModel
             }
 
             static::recalculateSettledOrder($ledgerBooking->source_type, $ledgerBooking->source_id);
+            static::recalculateFixedAssetBookValue($ledgerBooking->source_type, $ledgerBooking->source_id);
         });
 
         static::deleted(function (LedgerBooking $ledgerBooking): void {
             static::recalculateSettledOrder($ledgerBooking->source_type, $ledgerBooking->source_id);
+            static::recalculateFixedAssetBookValue($ledgerBooking->source_type, $ledgerBooking->source_id);
         });
+    }
+
+    protected static function recalculateFixedAssetBookValue(?string $sourceType, int|string|null $sourceId): void
+    {
+        if (! $sourceId || $sourceType !== morph_alias(FixedAssetDepreciation::class)) {
+            return;
+        }
+
+        resolve_static(FixedAssetDepreciation::class, 'query')
+            ->whereKey($sourceId)
+            ->first()
+            ?->fixedAsset
+            ?->recalculateBookValue();
     }
 
     protected static function recalculateSettledOrder(?string $sourceType, int|string|null $sourceId): void

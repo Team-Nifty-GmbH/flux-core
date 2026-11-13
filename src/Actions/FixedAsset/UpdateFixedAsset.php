@@ -12,8 +12,6 @@ class UpdateFixedAsset extends FluxAction
 {
     use ValidatesFixedAsset;
 
-    protected array $schedule = [];
-
     public static function models(): array
     {
         return [FixedAsset::class];
@@ -32,21 +30,18 @@ class UpdateFixedAsset extends FluxAction
             ->firstOrFail();
         $fixedAsset->fill($this->getData());
 
-        if (! $this->changesSchedule($fixedAsset)) {
-            $fixedAsset->save();
+        if ($this->changesSchedule($fixedAsset)) {
+            $this->ensureNothingBooked($fixedAsset);
 
-            return $fixedAsset->withoutRelations()->fresh();
+            $schedule = $this->validateFixedAsset($fixedAsset, []);
+            $fixedAsset->depreciations()->forceDelete();
+
+            foreach ($schedule as $depreciation) {
+                $fixedAsset->depreciations()->create($depreciation);
+            }
         }
-
-        $this->ensureNothingBooked($fixedAsset);
 
         $fixedAsset->save();
-        $fixedAsset->depreciations()->forceDelete();
-
-        foreach ($this->schedule as $depreciation) {
-            $fixedAsset->depreciations()->create($depreciation);
-        }
-
         $fixedAsset->calculateBookValue()
             ->save();
 
@@ -58,7 +53,7 @@ class UpdateFixedAsset extends FluxAction
         foreach (['acquisition_cost', 'residual_value'] as $attribute) {
             if (bccomp(
                 (string) $fixedAsset->getRawOriginal($attribute),
-                (string) $fixedAsset->getAttributes()[$attribute],
+                (string) data_get($fixedAsset->getAttributes(), $attribute),
                 2
             ) !== 0) {
                 return true;
@@ -73,10 +68,7 @@ class UpdateFixedAsset extends FluxAction
 
     protected function ensureNothingBooked(FixedAsset $fixedAsset): void
     {
-        if ($fixedAsset->depreciations()
-            ->booked()
-            ->exists()
-        ) {
+        if ($fixedAsset->hasBookedDepreciations()) {
             throw ValidationException::withMessages([
                 'id' => [__('The depreciation schedule cannot be changed once a depreciation has been booked.')],
             ]);
@@ -92,7 +84,7 @@ class UpdateFixedAsset extends FluxAction
             ->firstOrFail();
         $fixedAsset->fill($this->getData());
 
-        $this->schedule = $this->validateFixedAsset($fixedAsset, array_keys($this->getData()));
+        $this->validateFixedAsset($fixedAsset, array_keys($this->getData()));
 
         if ($this->changesSchedule($fixedAsset)) {
             $this->ensureNothingBooked($fixedAsset);
