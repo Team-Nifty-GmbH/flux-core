@@ -1,5 +1,7 @@
 <?php
 
+use FluxErp\Actions\FixedAsset\BookFixedAssetDepreciations;
+use FluxErp\Actions\FixedAsset\CreateFixedAsset;
 use FluxErp\Enums\LedgerAccountTypeEnum;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Accounting\FixedAssets;
@@ -113,4 +115,43 @@ test('rejects a position of a sales order', function (): void {
         ->call('changedOrderPosition', $orderPosition->getKey())
         ->assertSet('fixedAsset.order_position_id', null)
         ->assertSet('fixedAsset.name', null);
+});
+
+test('marks assets with booked depreciations so delete is hidden', function (): void {
+    $bookedAsset = CreateFixedAsset::make([
+        'ledger_account_id' => $this->assetAccount->getKey(),
+        'depreciation_ledger_account_id' => $this->expenseAccount->getKey(),
+        'name' => 'Booked van',
+        'acquired_at' => '2026-03-20',
+        'acquisition_cost' => 36000,
+        'useful_life_months' => 72,
+    ])
+        ->validate()
+        ->execute();
+    BookFixedAssetDepreciations::make(['fixed_asset_id' => $bookedAsset->getKey(), 'until' => '2026-03-31'])
+        ->validate()
+        ->execute();
+    $openAsset = CreateFixedAsset::make([
+        'ledger_account_id' => $this->assetAccount->getKey(),
+        'depreciation_ledger_account_id' => $this->expenseAccount->getKey(),
+        'name' => 'Open van',
+        'acquired_at' => '2026-03-20',
+        'acquisition_cost' => 36000,
+        'useful_life_months' => 72,
+    ])
+        ->validate()
+        ->execute();
+
+    $rows = collect(data_get(
+        Livewire::test(FixedAssets::class)
+            ->call('loadData')
+            ->assertOk()
+            ->instance()
+            ->getDataForTesting(),
+        'data'
+    ))
+        ->keyBy('id');
+
+    expect(data_get($rows, $bookedAsset->getKey() . '.has_booked_depreciations'))->toBeTruthy()
+        ->and(data_get($rows, $openAsset->getKey() . '.has_booked_depreciations'))->toBeFalsy();
 });

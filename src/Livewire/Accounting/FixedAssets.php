@@ -5,11 +5,13 @@ namespace FluxErp\Livewire\Accounting;
 use FluxErp\Actions\FixedAsset\CreateFixedAsset;
 use FluxErp\Actions\FixedAsset\DeleteFixedAsset;
 use FluxErp\Enums\LedgerAccountTypeEnum;
-use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\DataTables\FixedAssetList;
 use FluxErp\Livewire\Forms\FixedAssetForm;
 use FluxErp\Models\FixedAsset;
 use FluxErp\Models\OrderPosition;
+use FluxErp\Rulesets\FixedAsset\CreateFixedAssetRuleset;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -44,6 +46,8 @@ class FixedAssets extends FixedAssetList
                 ->color('red')
                 ->when(resolve_static(DeleteFixedAsset::class, 'canPerformAction', [false]))
                 ->attributes([
+                    'x-cloak',
+                    'x-show' => '! record.has_booked_depreciations',
                     'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Fixed Asset')]),
                     'wire:click' => 'delete(record.id)',
                 ]),
@@ -55,14 +59,16 @@ class FixedAssets extends FixedAssetList
     {
         $orderPosition = resolve_static(OrderPosition::class, 'query')
             ->with([
-                'order:id,contact_id,order_type_id,invoice_date,system_delivery_date',
-                'order.orderType:id,order_type_enum',
+                'order:id,contact_id,invoice_date,system_delivery_date',
                 'ledgerAccount:id,ledger_account_type_enum',
             ])
             ->whereKey($orderPositionId)
             ->first(['id', 'order_id', 'tenant_id', 'ledger_account_id', 'name', 'total_net_price']);
 
-        if ($orderPosition?->order?->orderType?->order_type_enum !== OrderTypeEnum::Purchase) {
+        if (Validator::make(
+            ['order_id' => $orderPosition?->order_id],
+            ['order_id' => data_get(resolve_static(CreateFixedAssetRuleset::class, 'getRules'), 'order_id')]
+        )->fails()) {
             $this->fixedAsset->order_position_id = null;
 
             $this->notification()
@@ -128,5 +134,15 @@ class FixedAssets extends FixedAssetList
         $this->redirect(route('accounting.fixed-assets.id', ['id' => $this->fixedAsset->id]), navigate: true);
 
         return true;
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->withExists(['depreciations as has_booked_depreciations' => fn (Builder $query): Builder => $query->booked()]);
+    }
+
+    protected function getReturnKeys(): array
+    {
+        return array_merge(parent::getReturnKeys(), ['has_booked_depreciations']);
     }
 }

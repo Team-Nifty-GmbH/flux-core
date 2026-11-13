@@ -1,11 +1,21 @@
 <x-modal id="edit-fixed-asset-modal" :title="__('Fixed Asset')" size="xl">
-    <div class="flex flex-col gap-1.5">
+    <div
+        class="flex flex-col gap-1.5"
+        x-init="
+            $watch('$wire.fixedAsset.order_id', (orderId) => {
+                $wire.fixedAsset.order_position_id = null;
+                $tallstackuiSelect(
+                    'fixed-asset-order-position',
+                ).mergeRequestParams({
+                    where: [['order_id', '=', orderId ?? null]],
+                });
+            })
+        "
+    >
         <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
             <x-select.styled
                 :label="__('Purchase Order')"
-                wire:model.live.number="fixedAsset.order_id"
-                x-on:select="$wire.fixedAsset.order_position_id = null"
-                x-on:remove="$wire.fixedAsset.order_position_id = null"
+                wire:model.number="fixedAsset.order_id"
                 select="label:label|value:id"
                 :request="[
                     'url' => route('search', \FluxErp\Models\Order::class),
@@ -13,7 +23,7 @@
                 ]"
             />
             <div
-                wire:key="order-position-{{ $this->fixedAsset->order_id }}"
+                id="fixed-asset-order-position"
                 x-bind:class="
                     !$wire.fixedAsset.order_id &&
                     'pointer-events-none opacity-60'
@@ -25,14 +35,14 @@
                     x-on:select="
                         $wire.changedOrderPosition($event.detail.select.id)
                     "
-                    select="label:name|value:id|description:total_net_price"
+                    select="label:label|value:id|description:description"
                     unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\OrderPosition::class),
                         'method' => 'POST',
                         'params' => [
                             'searchFields' => ['name', 'product_number'],
-                            'where' => [['order_id', '=', $this->fixedAsset->order_id]],
+                            'where' => [['order_id', '=', null]],
                         ],
                     ]"
                 />

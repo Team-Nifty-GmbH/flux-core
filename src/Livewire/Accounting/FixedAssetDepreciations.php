@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Accounting;
 use FluxErp\Livewire\DataTables\BaseDataTable;
 use FluxErp\Models\FixedAssetDepreciation;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Modelable;
 
 class FixedAssetDepreciations extends BaseDataTable
@@ -52,31 +53,24 @@ class FixedAssetDepreciations extends BaseDataTable
     public function getBuilder(Builder $builder): Builder
     {
         return $builder
-            ->select('fixed_asset_depreciations.*')
-            ->selectRaw(
-                'case
-                    when exists (
-                        select 1 from ledger_bookings lb
-                        where lb.source_type = ?
-                          and lb.source_id = fixed_asset_depreciations.id
-                          and lb.deleted_at is null
-                    ) then ?
-                    when fixed_asset_depreciations.booking_date <= (
-                        select fa.externally_depreciated_until from fixed_assets fa
-                        where fa.id = fixed_asset_depreciations.fixed_asset_id
-                    ) then ?
-                    when fixed_asset_depreciations.booking_date <= ? then ?
-                    else ?
-                end as status',
-                [
-                    morph_alias(FixedAssetDepreciation::class),
-                    'Booked',
-                    'Booked Elsewhere',
-                    now()->toDateString(),
-                    'Due',
-                    'Open',
-                ]
-            )
+            ->withExists([
+                'ledgerBookings as is_booked',
+                'fixedAsset as is_externally_depreciated' => fn (Builder $query): Builder => resolve_static(
+                    FixedAssetDepreciation::class,
+                    'externallyDepreciated',
+                    [$query]
+                ),
+            ])
             ->where('fixed_asset_depreciations.fixed_asset_id', $this->fixedAssetId);
+    }
+
+    protected function augmentItemArray(array &$itemArray, Model $item): void
+    {
+        $itemArray['status'] = match (true) {
+            $item->is_booked => 'Booked',
+            $item->is_externally_depreciated => 'Booked Elsewhere',
+            $item->booking_date->lte(today()) => 'Due',
+            default => 'Open',
+        };
     }
 }
