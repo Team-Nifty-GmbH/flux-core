@@ -8,14 +8,14 @@ use Illuminate\Database\Eloquent\Builder;
 class LedgerBookingList extends BaseDataTable
 {
     public array $columnLabels = [
-        'debitLedgerAccount.name' => 'Debit Account',
-        'creditLedgerAccount.name' => 'Credit Account',
+        'debit_ledger_account.name' => 'Debit Account',
+        'credit_ledger_account.name' => 'Credit Account',
     ];
 
     public array $enabledCols = [
         'booking_date',
-        'debitLedgerAccount.name',
-        'creditLedgerAccount.name',
+        'debit_ledger_account.name',
+        'credit_ledger_account.name',
         'amount',
         'booking_text',
     ];

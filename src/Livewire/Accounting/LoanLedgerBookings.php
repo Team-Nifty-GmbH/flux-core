@@ -15,8 +15,8 @@ class LoanLedgerBookings extends LedgerBookingList
 
     public array $enabledCols = [
         'booking_date',
-        'debitLedgerAccount.name',
-        'creditLedgerAccount.name',
+        'debit_ledger_account.name',
+        'credit_ledger_account.name',
         'amount',
         'booking_text',
     ];
