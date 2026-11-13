@@ -230,7 +230,12 @@ test('update fixed asset locks the externally depreciated month once a depreciat
     $fixedAsset = CreateFixedAsset::make(baseFixedAssetData(['externally_depreciated_until' => '2026-04-30']))
         ->validate()
         ->execute();
-    bookFirstDepreciation($fixedAsset);
+    BookFixedAssetDepreciations::make([
+        'fixed_asset_id' => $fixedAsset->getKey(),
+        'until' => '2026-05-31',
+    ])
+        ->validate()
+        ->execute();
 
     UpdateFixedAsset::make([
         'id' => $fixedAsset->getKey(),
