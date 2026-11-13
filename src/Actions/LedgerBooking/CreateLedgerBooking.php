@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\LedgerBooking;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Models\FixedAssetDepreciation;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\LedgerBooking;
 use FluxErp\Models\Scopes\UserTenantScope;
@@ -38,6 +39,12 @@ class CreateLedgerBooking extends FluxAction
     protected function validateData(): void
     {
         parent::validateData();
+
+        if ($this->getData('source_type') === morph_alias(FixedAssetDepreciation::class)) {
+            throw ValidationException::withMessages([
+                'source_type' => [__('Depreciation bookings are managed by their fixed asset.')],
+            ]);
+        }
 
         // Bookings are also created programmatically (no authenticated user), so the
         // UserTenantScope on ModelExists cannot enforce the tenant there. Bypass only

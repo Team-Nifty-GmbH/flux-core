@@ -47,4 +47,9 @@ class FixedAssetDepreciation extends FluxModel
     {
         $query->whereHas('ledgerBookings');
     }
+
+    protected function scopeUnbooked(Builder $query): void
+    {
+        $query->whereDoesntHave('ledgerBookings');
+    }
 }
