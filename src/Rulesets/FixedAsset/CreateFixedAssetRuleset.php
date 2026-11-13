@@ -39,6 +39,7 @@ class CreateFixedAssetRuleset extends FluxRuleset
             ],
             'order_id' => [
                 'nullable',
+                'required_with:order_position_id',
                 'integer',
                 app(ModelExists::class, ['model' => Order::class]),
             ],
@@ -58,17 +59,20 @@ class CreateFixedAssetRuleset extends FluxRuleset
             'depreciation_starts_at' => 'required|date',
             'acquisition_cost' => [
                 'required',
+                'decimal:0,2',
                 app(Numeric::class, ['min' => 0.01]),
             ],
             'residual_value' => [
                 'required',
+                'decimal:0,2',
                 app(Numeric::class, ['min' => 0]),
             ],
             'depreciation_method_enum' => [
                 'required',
                 app(EnumRule::class, ['type' => DepreciationMethodEnum::class]),
             ],
-            'useful_life_months' => 'required|integer|min:1',
+            'externally_depreciated_until' => 'nullable|date',
+            'useful_life_months' => 'required|integer|min:1|max:1200',
         ];
     }
 }

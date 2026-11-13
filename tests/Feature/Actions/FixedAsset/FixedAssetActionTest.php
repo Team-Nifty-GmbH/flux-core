@@ -3,6 +3,7 @@
 use FluxErp\Actions\FixedAsset\CreateFixedAsset;
 use FluxErp\Actions\FixedAsset\DeleteFixedAsset;
 use FluxErp\Actions\FixedAsset\UpdateFixedAsset;
+use FluxErp\Actions\LedgerBooking\CreateLedgerBooking;
 use FluxErp\Enums\LedgerAccountTypeEnum;
 use FluxErp\Models\FixedAsset;
 use FluxErp\Models\FixedAssetDepreciation;
@@ -38,15 +39,17 @@ function bookFirstDepreciation(FixedAsset $fixedAsset): void
 {
     $depreciation = $fixedAsset->depreciations()->orderBy('sequence')->first();
 
-    LedgerBooking::factory()->create([
+    CreateLedgerBooking::make([
         'tenant_id' => $fixedAsset->tenant_id,
         'debit_ledger_account_id' => $fixedAsset->depreciation_ledger_account_id,
         'credit_ledger_account_id' => $fixedAsset->ledger_account_id,
         'source_type' => morph_alias(FixedAssetDepreciation::class),
         'source_id' => $depreciation->getKey(),
         'amount' => $depreciation->amount,
-        'booking_date' => $depreciation->booking_date,
-    ]);
+        'booking_date' => $depreciation->booking_date->toDateString(),
+    ])
+        ->validate()
+        ->execute();
 }
 
 test('create fixed asset generates the depreciation schedule from the acquisition month', function (): void {
@@ -143,12 +146,46 @@ test('update fixed asset rejects schedule changes once a depreciation is booked'
         ->execute();
 })->throws(ValidationException::class);
 
-test('book value only counts booked depreciations', function (): void {
+test('the stored book value follows the depreciation bookings', function (): void {
     $fixedAsset = CreateFixedAsset::make(baseFixedAssetData())->validate()->execute();
     bookFirstDepreciation($fixedAsset);
 
-    expect($fixedAsset->calculateBookValue()->book_value)->toEqual('35500.00');
+    expect($fixedAsset->refresh()->book_value)->toEqual(35500);
+
+    LedgerBooking::query()
+        ->where('source_type', morph_alias(FixedAssetDepreciation::class))
+        ->first()
+        ->delete();
+
+    expect($fixedAsset->refresh()->book_value)->toEqual(36000);
 });
+
+test('depreciations up to the externally depreciated month count towards the book value', function (): void {
+    $fixedAsset = CreateFixedAsset::make(baseFixedAssetData(['externally_depreciated_until' => '2026-05-31']))
+        ->validate()
+        ->execute();
+
+    expect($fixedAsset->book_value)->toEqual(34500)
+        ->and($fixedAsset->hasBookedDepreciations())->toBeFalse();
+
+    $updated = UpdateFixedAsset::make(['id' => $fixedAsset->getKey(), 'externally_depreciated_until' => null])
+        ->validate()
+        ->execute();
+
+    expect($updated->book_value)->toEqual(36000);
+});
+
+test('create fixed asset rejects invalid input', function (array $overrides): void {
+    CreateFixedAsset::make(baseFixedAssetData($overrides))
+        ->validate()
+        ->execute();
+})
+    ->with([
+        'more than two decimals' => [['acquisition_cost' => '1000.009']],
+        'useful life above 100 years' => [['useful_life_months' => 1201]],
+        'order position without order' => [['order_position_id' => 1]],
+    ])
+    ->throws(ValidationException::class);
 
 test('delete fixed asset removes an unbooked asset', function (): void {
     $fixedAsset = CreateFixedAsset::make(baseFixedAssetData())->validate()->execute();
