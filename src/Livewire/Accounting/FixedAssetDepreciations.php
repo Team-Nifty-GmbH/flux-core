@@ -38,6 +38,7 @@ class FixedAssetDepreciations extends BaseDataTable
         'status' => ['badge', [
             'Booked' => 'green',
             'Booked Elsewhere' => 'emerald',
+            'Disposed' => 'slate',
             'Due' => 'amber',
             'Open' => 'gray',
         ]],
@@ -60,6 +61,11 @@ class FixedAssetDepreciations extends BaseDataTable
                     'externallyDepreciated',
                     [$query]
                 ),
+                'fixedAsset as is_after_disposal' => fn (Builder $query): Builder => resolve_static(
+                    FixedAssetDepreciation::class,
+                    'afterDisposal',
+                    [$query]
+                ),
             ])
             ->where('fixed_asset_depreciations.fixed_asset_id', $this->fixedAssetId);
     }
@@ -69,6 +75,7 @@ class FixedAssetDepreciations extends BaseDataTable
         $itemArray['status'] = match (true) {
             $item->is_booked => 'Booked',
             $item->is_externally_depreciated => 'Booked Elsewhere',
+            $item->is_after_disposal => 'Disposed',
             $item->booking_date->lte(today()) => 'Due',
             default => 'Open',
         };

@@ -7,6 +7,7 @@ use FluxErp\Models\FixedAsset;
 use FluxErp\Models\FixedAssetDepreciation;
 use FluxErp\Models\LedgerBooking;
 use FluxErp\Rulesets\FixedAsset\ReverseFixedAssetDepreciationsRuleset;
+use Illuminate\Validation\ValidationException;
 
 class ReverseFixedAssetDepreciations extends FluxAction
 {
@@ -40,5 +41,20 @@ class ReverseFixedAssetDepreciations extends FluxAction
         $ledgerBookings->each(fn (LedgerBooking $ledgerBooking): ?bool => $ledgerBooking->delete());
 
         return $ledgerBookings->count();
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        if (resolve_static(FixedAsset::class, 'query')
+            ->whereKey($this->getData('fixed_asset_id'))
+            ->whereNotNull('disposed_at')
+            ->exists()
+        ) {
+            throw ValidationException::withMessages([
+                'fixed_asset_id' => [__('Revert the disposal before reversing depreciations.')],
+            ]);
+        }
     }
 }

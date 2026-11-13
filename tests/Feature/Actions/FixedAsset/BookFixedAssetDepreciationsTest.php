@@ -212,8 +212,8 @@ test('the class name does not get around the depreciation booking guard', functi
         ->execute();
 })->throws(ValidationException::class);
 
-test('the repeatable job is not scheduled by default', function (): void {
-    expect(BookFixedAssetDepreciationsJob::defaultCron())->toBeNull();
+test('the repeatable job runs on the first of each month', function (): void {
+    expect(BookFixedAssetDepreciationsJob::defaultCron()?->getExpression())->toBe('0 2 1 * *');
 });
 
 test('the repeatable job books everything due until today', function (): void {

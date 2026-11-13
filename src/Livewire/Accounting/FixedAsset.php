@@ -4,7 +4,9 @@ namespace FluxErp\Livewire\Accounting;
 
 use FluxErp\Actions\FixedAsset\BookFixedAssetDepreciations;
 use FluxErp\Actions\FixedAsset\DeleteFixedAsset;
+use FluxErp\Actions\FixedAsset\DisposeFixedAsset;
 use FluxErp\Actions\FixedAsset\ReverseFixedAssetDepreciations;
+use FluxErp\Actions\FixedAsset\RevertFixedAssetDisposal;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\FixedAssetForm;
 use FluxErp\Models\FixedAsset as FixedAssetModel;
@@ -23,6 +25,10 @@ use Throwable;
 class FixedAsset extends Component
 {
     use Actions, WithTabs;
+
+    public ?int $disposalLedgerAccountId = null;
+
+    public ?string $disposedAt = null;
 
     public FixedAssetForm $fixedAsset;
 
@@ -80,6 +86,57 @@ class FixedAsset extends Component
 
         $this->toast()
             ->success(__(':count depreciations booked', ['count' => $booked]))
+            ->send();
+
+        return true;
+    }
+
+    public function dispose(): bool
+    {
+        try {
+            DisposeFixedAsset::make([
+                'fixed_asset_id' => $this->fixedAsset->id,
+                'disposed_at' => $this->disposedAt,
+                'disposal_ledger_account_id' => $this->disposalLedgerAccountId,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->reset('disposedAt', 'disposalLedgerAccountId');
+        $this->resetForm();
+        $this->reloadTables();
+
+        $this->toast()
+            ->success(__(':model saved', ['model' => __('Disposal')]))
+            ->send();
+
+        return true;
+    }
+
+    public function revertDisposal(): bool
+    {
+        try {
+            RevertFixedAssetDisposal::make(['fixed_asset_id' => $this->fixedAsset->id])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->resetForm();
+        $this->reloadTables();
+
+        $this->toast()
+            ->success(__('Disposal reverted'))
             ->send();
 
         return true;

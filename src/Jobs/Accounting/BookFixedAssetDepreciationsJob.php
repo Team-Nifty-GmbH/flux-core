@@ -23,7 +23,7 @@ class BookFixedAssetDepreciationsJob implements Repeatable, ShouldQueue
 
     public static function defaultCron(): ?CronExpression
     {
-        return null;
+        return new CronExpression('0 2 1 * *');
     }
 
     public static function description(): ?string

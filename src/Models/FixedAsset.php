@@ -13,6 +13,7 @@ use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class FixedAsset extends FluxModel implements InteractsWithDataTables
@@ -22,12 +23,22 @@ class FixedAsset extends FluxModel implements InteractsWithDataTables
 
     protected ?string $detailRouteName = 'accounting.fixed-assets.id';
 
+    public static function ownsLedgerBookingSource(?string $type): bool
+    {
+        return filled($type)
+            && (
+                is_a(morphed_model($type) ?? $type, FixedAsset::class, true)
+                || resolve_static(FixedAssetDepreciation::class, 'isMorphType', [$type])
+            );
+    }
+
     protected function casts(): array
     {
         return [
             'acquired_at' => 'date',
             'depreciation_starts_at' => 'date',
             'externally_depreciated_until' => 'date',
+            'disposed_at' => 'date',
             'acquisition_cost' => Money::class,
             'residual_value' => Money::class,
             'book_value' => Money::class,
@@ -52,9 +63,19 @@ class FixedAsset extends FluxModel implements InteractsWithDataTables
         return $this->hasMany(FixedAssetDepreciation::class);
     }
 
+    public function disposalLedgerAccount(): BelongsTo
+    {
+        return $this->belongsTo(LedgerAccount::class, 'disposal_ledger_account_id');
+    }
+
     public function ledgerAccount(): BelongsTo
     {
         return $this->belongsTo(LedgerAccount::class);
+    }
+
+    public function ledgerBookings(): MorphMany
+    {
+        return $this->morphMany(LedgerBooking::class, 'source');
     }
 
     public function order(): BelongsTo
@@ -76,10 +97,14 @@ class FixedAsset extends FluxModel implements InteractsWithDataTables
     public function calculateBookValue(): static
     {
         $this->book_value = bcsub(
-            (string) data_get($this->getAttributes(), 'acquisition_cost'),
-            (string) $this->depreciations()
-                ->depreciated()
-                ->sum('amount'),
+            bcsub(
+                (string) data_get($this->getAttributes(), 'acquisition_cost'),
+                (string) $this->depreciations()
+                    ->depreciated()
+                    ->sum('amount'),
+                2
+            ),
+            (string) $this->ledgerBookings()->sum('amount'),
             2
         );
 
