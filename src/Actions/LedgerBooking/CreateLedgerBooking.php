@@ -40,7 +40,7 @@ class CreateLedgerBooking extends FluxAction
     {
         parent::validateData();
 
-        if ($this->getData('source_type') === morph_alias(FixedAssetDepreciation::class)) {
+        if (resolve_static(FixedAssetDepreciation::class, 'isMorphType', [$this->getData('source_type')])) {
             throw ValidationException::withMessages([
                 'source_type' => [__('Depreciation bookings are managed by their fixed asset.')],
             ]);

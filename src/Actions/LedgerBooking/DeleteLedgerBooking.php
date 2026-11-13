@@ -32,11 +32,11 @@ class DeleteLedgerBooking extends FluxAction
     {
         parent::validateData();
 
-        if (resolve_static(LedgerBooking::class, 'query')
+        $sourceType = resolve_static(LedgerBooking::class, 'query')
             ->whereKey($this->getData('id'))
-            ->where('source_type', morph_alias(FixedAssetDepreciation::class))
-            ->exists()
-        ) {
+            ->value('source_type');
+
+        if (resolve_static(FixedAssetDepreciation::class, 'isMorphType', [$sourceType])) {
             throw ValidationException::withMessages([
                 'source_type' => [__('Depreciation bookings are managed by their fixed asset.')],
             ]);

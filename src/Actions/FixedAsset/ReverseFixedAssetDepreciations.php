@@ -37,10 +37,7 @@ class ReverseFixedAssetDepreciations extends FluxAction
             )
             ->get();
 
-        $ledgerBookings->each(fn (LedgerBooking $ledgerBooking) => $ledgerBooking->delete());
-
-        $fixedAsset->calculateBookValue()
-            ->save();
+        $ledgerBookings->each(fn (LedgerBooking $ledgerBooking): ?bool => $ledgerBooking->delete());
 
         return $ledgerBookings->count();
     }

@@ -1,9 +1,9 @@
 <?php
 
+use FluxErp\Actions\FixedAsset\BookFixedAssetDepreciations;
 use FluxErp\Actions\FixedAsset\CreateFixedAsset;
 use FluxErp\Actions\FixedAsset\DeleteFixedAsset;
 use FluxErp\Actions\FixedAsset\UpdateFixedAsset;
-use FluxErp\Actions\LedgerBooking\CreateLedgerBooking;
 use FluxErp\Enums\LedgerAccountTypeEnum;
 use FluxErp\Models\FixedAsset;
 use FluxErp\Models\FixedAssetDepreciation;
@@ -37,16 +37,9 @@ function baseFixedAssetData(array $overrides = []): array
 
 function bookFirstDepreciation(FixedAsset $fixedAsset): void
 {
-    $depreciation = $fixedAsset->depreciations()->orderBy('sequence')->first();
-
-    CreateLedgerBooking::make([
-        'tenant_id' => $fixedAsset->tenant_id,
-        'debit_ledger_account_id' => $fixedAsset->depreciation_ledger_account_id,
-        'credit_ledger_account_id' => $fixedAsset->ledger_account_id,
-        'source_type' => morph_alias(FixedAssetDepreciation::class),
-        'source_id' => $depreciation->getKey(),
-        'amount' => $depreciation->amount,
-        'booking_date' => $depreciation->booking_date->toDateString(),
+    BookFixedAssetDepreciations::make([
+        'fixed_asset_id' => $fixedAsset->getKey(),
+        'until' => $fixedAsset->depreciations()->min('booking_date'),
     ])
         ->validate()
         ->execute();
