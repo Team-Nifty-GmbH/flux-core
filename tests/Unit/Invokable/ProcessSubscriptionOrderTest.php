@@ -960,6 +960,66 @@ test('deleting an order keeps a schedule that is shared with another order', fun
     expect($schedule->refresh()->trashed())->toBeFalse();
 });
 
+test('schedule preview follows the due date like the scheduler', function (
+    array $parameters,
+    string $dueAt,
+    array $expected
+): void {
+    $this->travelTo('2026-11-01 01:00:00');
+
+    $dates = Livewire::test(Scheduling::class)
+        ->set('schedule.cron.methods.basic', 'monthlyOn')
+        ->set('schedule.cron.parameters.basic', $parameters)
+        ->set('schedule.due_at', $dueAt)
+        ->instance()->schedule->getNextExecutionDates(2);
+
+    expect(array_column($dates, 'date'))->toBe($expected);
+})->with([
+    'due date in the future' => [
+        [15, '00:00'],
+        '2027-02-15 00:00:00',
+        ['2027-02-15 00:00:00', '2027-03-15 00:00:00', '2027-04-15 00:00:00'],
+    ],
+    'due date has passed' => [
+        [15, '00:00'],
+        '2026-10-15 00:00:00',
+        ['2026-11-15 00:00:00', '2026-12-15 00:00:00'],
+    ],
+    'cron matches later on the due date' => [
+        [15, '06:00'],
+        '2026-11-15 00:00:00',
+        ['2026-11-15 00:00:00', '2026-12-15 06:00:00', '2027-01-15 06:00:00'],
+    ],
+]);
+
+test('schedule preview follows the due date of a lastDayOfMonth schedule like the scheduler', function (
+    string $dueAt,
+    array $expected
+): void {
+    $this->travelTo('2026-11-01 01:00:00');
+
+    $dates = Livewire::test(Scheduling::class)
+        ->set('schedule.cron.methods.basic', 'lastDayOfMonth')
+        ->set('schedule.cron.parameters.basic', ['06:00'])
+        ->set('schedule.due_at', $dueAt)
+        ->instance()->schedule->getNextExecutionDates(2);
+
+    expect(array_column($dates, 'date'))->toBe($expected);
+})->with([
+    'due date on the month end' => [
+        '2026-11-30 06:00:00',
+        ['2026-11-30 06:00:00', '2026-12-31 06:00:00', '2027-01-31 06:00:00'],
+    ],
+    'due date earlier on the month end' => [
+        '2026-11-30 00:00:00',
+        ['2026-11-30 00:00:00', '2026-12-31 06:00:00', '2027-01-31 06:00:00'],
+    ],
+    'due date within the month' => [
+        '2026-11-15 00:00:00',
+        ['2026-11-15 00:00:00', '2026-12-31 06:00:00', '2027-01-31 06:00:00'],
+    ],
+]);
+
 test('process subscription order deactivates the schedule of a deleted order instead of failing', function (): void {
     // Orders deleted before the fix lost their pivot but kept an active schedule
     $schedule = createSubscriptionSchedule($this->subscriptionOrder, $this->targetOrderType->getKey(), false);
@@ -973,3 +1033,46 @@ test('process subscription order deactivates the schedule of a deleted order ins
     expect($result)->toBeTrue()
         ->and($schedule->refresh()->is_active)->toBeFalse();
 });
+
+test('schedule preview leaves out a run that falls exactly on the end of the schedule', function (
+    string $method,
+    array $parameters,
+    ?string $dueAt,
+    string $endsAt,
+    array $expected
+): void {
+    $this->travelTo('2026-11-01 01:00:00');
+
+    $dates = Livewire::test(Scheduling::class)
+        ->set('schedule.cron.methods.basic', $method)
+        ->set('schedule.cron.parameters.basic', $parameters)
+        ->set('schedule.due_at', $dueAt)
+        ->set('schedule.end_radio', 'ends_at')
+        ->set('schedule.ends_at', $endsAt)
+        ->instance()->schedule->getNextExecutionDates(5);
+
+    expect(array_column($dates, 'date'))->toBe($expected);
+})->with([
+    'due at equals end' => ['monthlyOn', [15, '00:00'], '2026-11-15 00:00:00', '2026-11-15 00:00:00', []],
+    'later run equals end' => [
+        'monthlyOn',
+        [15, '00:00'],
+        '2026-11-15 00:00:00',
+        '2027-01-15 00:00:00',
+        ['2026-11-15 00:00:00', '2026-12-15 00:00:00'],
+    ],
+    'last day of month equals end' => [
+        'lastDayOfMonth',
+        ['00:00'],
+        null,
+        '2026-12-31 00:00:00',
+        ['2026-11-30 00:00:00'],
+    ],
+    'run before end stays' => [
+        'monthlyOn',
+        [15, '00:00'],
+        '2026-11-15 00:00:00',
+        '2026-11-15 00:01:00',
+        ['2026-11-15 00:00:00'],
+    ],
+]);

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Console\Commands;
 
+use ErrorException;
 use FluxErp\Jobs\SyncMailAccountJob;
 use FluxErp\Models\MailAccount;
 use Illuminate\Bus\UniqueLock;
@@ -57,56 +58,69 @@ class MailListenCommand extends Command
             return static::FAILURE;
         }
 
-        try {
-            $client = $mailAccount->getImapClient();
+        $failingSince = null;
+        $syncPending = false;
 
-            if (is_null($client)) {
-                return static::FAILURE;
-            }
+        while (! $this->shouldRestart($restartSignal)) {
+            try {
+                $client = $mailAccount->getImapClient();
 
-            $connection = $client->getConnection();
-
-            if (! in_array('IDLE', $connection->getCapabilities()->validatedData())) {
-                return static::INVALID;
-            }
-
-            $client->openFolder($inbox->slug, true);
-            $syncPending = false;
-
-            while (! $this->shouldRestart($restartSignal)) {
-                $connection->idle();
-                $renewAt = now()->addMinutes(25);
-
-                while (now()->lessThan($renewAt) && ! $this->shouldRestart($restartSignal)) {
-                    try {
-                        $line = $connection->nextLine(Response::empty());
-                    } catch (RuntimeException $exception) {
-                        if (! str_contains($exception->getMessage(), 'empty response')) {
-                            throw $exception;
-                        }
-
-                        $line = '';
-                    }
-
-                    if ($syncPending || stripos($line, 'EXISTS') !== false) {
-                        $syncPending = ! $this->dispatchJob(
-                            app(SyncMailAccountJob::class, [
-                                'email' => $mailAccount,
-                                'onlyFolders' => false,
-                                'mailFolderId' => $inbox->getKey(),
-                            ])
-                        );
-                    }
+                if (is_null($client)) {
+                    return static::FAILURE;
                 }
 
-                $connection->done();
-            }
-        } catch (ConnectionFailedException|RuntimeException $exception) {
-            report($exception);
+                $connection = $client->getConnection();
 
-            return static::FAILURE;
-        } finally {
-            $mailAccount->disconnectImapClient();
+                if (! in_array('IDLE', $connection->getCapabilities()->validatedData())) {
+                    return static::INVALID;
+                }
+
+                $client->openFolder($inbox->slug, true);
+                $failingSince = null;
+
+                while (! $this->shouldRestart($restartSignal)) {
+                    $connection->idle();
+                    $renewAt = now()->addMinutes(5);
+
+                    while (now()->lessThan($renewAt) && ! $this->shouldRestart($restartSignal)) {
+                        try {
+                            $line = $connection->nextLine(Response::empty());
+                        } catch (RuntimeException $exception) {
+                            if (! str_contains($exception->getMessage(), 'empty response')
+                                || data_get($connection->meta(), 'eof')
+                            ) {
+                                throw $exception;
+                            }
+
+                            $line = '';
+                        }
+
+                        if ($syncPending || stripos($line, 'EXISTS') !== false) {
+                            $syncPending = ! $this->dispatchJob(
+                                app(SyncMailAccountJob::class, [
+                                    'email' => $mailAccount,
+                                    'onlyFolders' => false,
+                                    'mailFolderId' => $inbox->getKey(),
+                                ])
+                            );
+                        }
+                    }
+
+                    $connection->done();
+                }
+            } catch (ConnectionFailedException|RuntimeException|ErrorException $exception) {
+                $failingSince ??= now();
+                $syncPending = true;
+
+                if ($failingSince->diffInMinutes(now()) >= 30) {
+                    report($exception);
+                    $failingSince = now();
+                }
+
+                Sleep::for(30)->seconds();
+            } finally {
+                $mailAccount->disconnectImapClient();
+            }
         }
 
         return static::SUCCESS;

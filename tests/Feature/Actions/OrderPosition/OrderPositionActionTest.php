@@ -801,3 +801,47 @@ test('update order position without tags keeps the existing tags', function (): 
 
     expect($position->tags()->pluck('tags.id')->all())->toBe([$tag->getKey()]);
 });
+
+test('create order position takes the vat rate of its product', function (?float $vatRatePercentage): void {
+    $vatRate = VatRate::factory()->create(['rate_percentage' => 0.07]);
+    $product = Product::factory()->create(['vat_rate_id' => $vatRate->getKey()]);
+
+    $orderPosition = CreateOrderPosition::make(array_filter([
+        'order_id' => $this->order->getKey(),
+        'product_id' => $product->getKey(),
+        'amount' => 1,
+        'unit_price' => 100,
+        'is_net' => true,
+        'vat_rate_percentage' => $vatRatePercentage,
+    ], fn (mixed $value): bool => ! is_null($value)))
+        ->validate()
+        ->execute();
+
+    expect($orderPosition->vat_rate_id)->toBe($vatRate->getKey())
+        ->and((float) $orderPosition->vat_rate_percentage)->toEqual(0.07)
+        ->and((float) $orderPosition->total_gross_price)->toEqual(107.0);
+})->with([
+    'without percentage' => [null],
+    'with matching percentage' => [0.07],
+]);
+
+test('create order position keeps a percentage differing from the vat rate of its product', function (): void {
+    $product = Product::factory()->create([
+        'vat_rate_id' => VatRate::factory()->create(['rate_percentage' => 0.19])->getKey(),
+    ]);
+
+    $orderPosition = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'product_id' => $product->getKey(),
+        'amount' => 1,
+        'unit_price' => 100,
+        'is_net' => true,
+        'vat_rate_percentage' => 0.07,
+    ])
+        ->validate()
+        ->execute();
+
+    expect($orderPosition->vat_rate_id)->toBeNull()
+        ->and((float) $orderPosition->vat_rate_percentage)->toEqual(0.07)
+        ->and((float) $orderPosition->total_gross_price)->toEqual(107.0);
+});

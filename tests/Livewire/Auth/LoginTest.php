@@ -77,6 +77,44 @@ test('verifyTotpCode resets state when session payload is malformed', function (
     expect(Session::has('two_factor_login'))->toBeFalse();
 });
 
+test('login is locked after too many failed attempts', function (): void {
+    $component = Livewire::test(Login::class)
+        ->set('email', $this->user->email);
+
+    foreach (range(1, 5) as $attempt) {
+        $component->set('password', 'wrongpassword')->call('login');
+    }
+
+    $component->set('password', 'password')
+        ->call('login')
+        ->assertNoRedirect();
+
+    $this->assertGuest();
+});
+
+test('totp challenge is locked after too many failed attempts', function (): void {
+    $this->user->createTwoFactorAuth();
+    $this->user->twoFactorAuth->forceFill(['enabled_at' => now()])->save();
+
+    Session::put('two_factor_login', [
+        'user_id' => $this->user->getKey(),
+        'remember' => false,
+        'target' => route('dashboard'),
+    ]);
+
+    $component = Livewire::test(Login::class);
+
+    foreach (range(1, 5) as $attempt) {
+        $component->set('totpCode', 'invalid')->call('verifyTotpCode');
+    }
+
+    $component->set('totpCode', $this->user->makeTwoFactorCode())
+        ->call('verifyTotpCode')
+        ->assertNoRedirect();
+
+    $this->assertGuest();
+});
+
 test('renders successfully', function (): void {
     Livewire::test(Login::class)
         ->assertOk();

@@ -502,12 +502,19 @@ test('toggling a calendar sends only the ids of the active calendars', function 
 
             const originalFetch = window.fetch;
             window.fetch = (input, init) => {
-                window.toggleProbe.calls.push(
-                    ...(JSON.parse(init?.body || '{}').components || [])
-                        .flatMap((component) => component.calls || [])
-                        .filter((call) => call.method === 'toggleEventSource')
-                        .map((call) => call.params[0]),
-                );
+                const calls = (JSON.parse(init?.body || '{}').components || [])
+                    .flatMap((component) => component.calls || [])
+                    .filter((call) => call.method === 'toggleEventSource')
+                    .map((call) => call.params[0]);
+
+                if (calls.length) {
+                    return originalFetch(input, init).then((response) => {
+                        window.toggleProbe.status = response.status;
+                        window.toggleProbe.calls.push(...calls);
+
+                        return response;
+                    });
+                }
 
                 return originalFetch(input, init);
             };
@@ -524,7 +531,8 @@ test('toggling a calendar sends only the ids of the active calendars', function 
 
     $probe = $page->script('() => window.toggleProbe');
 
-    expect($probe['sources'])->not->toBeEmpty()->not->toContain($probe['unchecked'])
+    expect($probe['status'])->toBe(200)
+        ->and($probe['sources'])->not->toBeEmpty()->not->toContain($probe['unchecked'])
         ->and(end($probe['calls']))->toBe(array_map(fn (string $id): array => ['publicId' => $id], $probe['sources']));
 });
 
@@ -590,4 +598,48 @@ test('unchecking a calendar group stores the active calendars in a single call',
         ->and($probe['stored'])->toBe($probe['sources'])
         ->toContain((string) $other->getKey())
         ->and(array_intersect($probe['stored'], $groupIds))->toBeEmpty();
+});
+
+test('calendar uses the locale data of the user language', function (): void {
+    $language = FluxErp\Models\Language::query()->firstOrCreate(
+        ['language_code' => 'de'],
+        FluxErp\Models\Language::factory()->make(['language_code' => 'de'])->toArray()
+    );
+    $this->user->update(['language_id' => $language->getKey()]);
+
+    $calendar = createCalendarWithOwner();
+
+    $start = Carbon::today()->setTime(10, 0);
+    foreach (range(1, 10) as $i) {
+        CalendarEvent::factory()->create([
+            'calendar_id' => $calendar->getKey(),
+            'title' => 'Locale Event ' . $i,
+            'start' => $start,
+            'end' => $start->copy()->addHour(),
+            'is_all_day' => false,
+        ]);
+    }
+
+    $moreLinkText = visitCalendar()->script(<<<'JS'
+        () => new Promise((resolve) => {
+            const started = Date.now();
+            const check = () => {
+                const link = document
+                    .querySelector('[calendar-root]')
+                    ?.innerText.match(/\+ ?(\d+ )?\S+( \d+)?/)?.[0];
+
+                if (link || Date.now() - started > 10000) {
+                    resolve(link ?? '');
+                    return;
+                }
+
+                setTimeout(check, 200);
+            };
+            check();
+        })
+    JS);
+
+    expect($moreLinkText)
+        ->toContain('weitere')
+        ->not->toContain('more');
 });

@@ -47,6 +47,11 @@ class CommentCreatedNotification extends SubscribableNotification implements Sho
         return $this->model?->model?->detailRoute();
     }
 
+    public function shouldSend(object $notifiable, string $channel): bool
+    {
+        return ! is_null($this->model?->model) && ! $this->model->trashed();
+    }
+
     public function toMail(object $notifiable): MailMessage
     {
         $mail = parent::toMail($notifiable)

@@ -2,7 +2,6 @@
 
 namespace FluxErp\Livewire\Order;
 
-use Cron\CronExpression;
 use Exception;
 use FluxErp\Actions\Discount\DeleteDiscount;
 use FluxErp\Actions\Discount\UpdateDiscount;
@@ -417,11 +416,14 @@ class Order extends Component
         $this->{$orderFormName}->tenant_id = $contact?->getTenantId()
             ?? resolve_static(Tenant::class, 'default')->getKey();
         $this->{$orderFormName}->agent_id = $contact?->agent_id ?? $this->{$orderFormName}->agent_id;
-        $this->{$orderFormName}->contact_bank_connection_id = $contact?->contactBankConnections()
-            ->latest()
-            ->value('id');
         $this->{$orderFormName}->address_invoice_id = $contact?->invoice_address_id ?? $contact?->mainAddress?->id;
-        $this->{$orderFormName}->address_delivery_id = $this->{$orderFormName}->isPurchase
+        $isPurchase = $replicate
+            ? resolve_static(OrderType::class, 'query')
+                ->whereKey($this->replicateOrder->order_type_id)
+                ->value('order_type_enum')
+                ?->isPurchase()
+            : $this->order->isPurchase;
+        $this->{$orderFormName}->address_delivery_id = $isPurchase
             ? null
             : $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
         $this->{$orderFormName}->language_id = $contact?->mainAddress?->language_id
@@ -431,6 +433,9 @@ class Order extends Component
         $this->{$orderFormName}->payment_type_id = $contact?->payment_type_id;
 
         if (! $replicate) {
+            $this->order->contact_bank_connection_id = $contact?->contactBankConnections()
+                ->latest()
+                ->value('id');
             $this->order->address_invoice = resolve_static(Address::class, 'query')
                 ->whereKey($this->order->address_invoice_id)
                 ->select(['id', 'company', 'firstname', 'lastname', 'zip', 'city', 'street'])
@@ -821,15 +826,17 @@ class Order extends Component
             return;
         }
 
-        $cron = new CronExpression($schedule->cron_expression);
-        $current = Carbon::parse($schedule->due_at ?? now());
-        $cycles = $current->lessThanOrEqualTo($schedule->ends_at) ? 1 : 0;
+        $cron = resolve_static(Schedule::class, 'runCron', [$schedule->cron, $schedule->cron_expression]);
+        $current = $schedule->due_at?->isFuture()
+            ? $schedule->due_at
+            : Carbon::instance($cron->getNextRunDate(now()));
+        $cycles = $current->lessThan($schedule->ends_at) ? 1 : 0;
         $limit = 10000;
 
         while ($cycles < $limit) {
-            $current = Carbon::instance($cron->getNextRunDate($current));
+            $current = resolve_static(Schedule::class, 'nextRunAfter', [$cron, $current]);
 
-            if ($current->greaterThan($schedule->ends_at)) {
+            if ($current->greaterThanOrEqualTo($schedule->ends_at)) {
                 break;
             }
 
@@ -1054,6 +1061,20 @@ class Order extends Component
             ->send();
     }
 
+    public function updatedReplicateOrderOrderTypeId(): void
+    {
+        $this->skipRender();
+
+        $this->replicateOrder->address_delivery_id = resolve_static(OrderType::class, 'query')
+            ->whereKey($this->replicateOrder->order_type_id)
+            ->value('order_type_enum')
+            ?->isPurchase()
+                ? null
+                : $this->replicateOrder->address_delivery_id ?? resolve_static(Contact::class, 'query')
+                    ->whereKey($this->replicateOrder->contact_id)
+                    ->value('delivery_address_id');
+    }
+
     public function updatedScheduleParametersOrderTypeId(): void
     {
         $this->skipRender();
@@ -1098,10 +1119,7 @@ class Order extends Component
 
         $this->order->users = $order->users->pluck('id')->toArray();
 
-        $this->printLayouts = array_map(
-            fn (string $layout) => ['layout' => $layout, 'label' => __($layout)],
-            array_keys($this->getPrintLayouts())
-        );
+        $this->printLayouts = $this->mapPrintLayouts();
 
         $invoice = $order->invoice();
         if ($invoice) {
@@ -1197,7 +1215,7 @@ class Order extends Component
 
     protected function getTo(OffersPrinting $item, array $documents): array
     {
-        $printViews = $item->getPrintViews();
+        $printViews = $item->resolvePrintViews();
 
         $invoiceDocs = array_filter(
             $documents,
