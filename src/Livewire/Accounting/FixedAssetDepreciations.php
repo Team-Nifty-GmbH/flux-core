@@ -61,8 +61,10 @@ class FixedAssetDepreciations extends BaseDataTable
                     'externallyDepreciated',
                     [$query]
                 ),
-                'fixedAsset as is_after_disposal' => fn (Builder $query): Builder => $query->whereRaw(
-                    'fixed_asset_depreciations.booking_date > LAST_DAY(fixed_assets.disposed_at)'
+                'fixedAsset as is_after_disposal' => fn (Builder $query): Builder => resolve_static(
+                    FixedAssetDepreciation::class,
+                    'afterDisposal',
+                    [$query]
                 ),
             ])
             ->where('fixed_asset_depreciations.fixed_asset_id', $this->fixedAssetId);

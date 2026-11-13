@@ -10,6 +10,7 @@ use FluxErp\Actions\FixedAsset\UpdateFixedAsset;
 use FluxErp\Actions\LedgerBooking\DeleteLedgerBooking;
 use FluxErp\Enums\LedgerAccountTypeEnum;
 use FluxErp\Models\FixedAsset;
+use FluxErp\Models\FixedAssetDepreciation;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\LedgerBooking;
 use Illuminate\Validation\ValidationException;
@@ -55,6 +56,30 @@ test('disposal depreciates through the disposal month and books the remaining bo
         ->debit_ledger_account_id->toBe($this->disposalAccountId)
         ->credit_ledger_account_id->toBe($fixedAsset->ledger_account_id)
         ->and($disposalBooking->booking_date->toDateString())->toBe('2026-07-10');
+});
+
+test('the depreciation of the disposal month is booked on the disposal date', function (): void {
+    $fixedAsset = disposeFixedAsset('2026-07-10');
+
+    $bookingDates = LedgerBooking::query()
+        ->where('source_type', morph_alias(FixedAssetDepreciation::class))
+        ->whereIntegerInRaw('source_id', $fixedAsset->depreciations()->pluck('id'))
+        ->orderBy('booking_date')
+        ->pluck('booking_date')
+        ->map(fn ($date): string => $date->toDateString())
+        ->all();
+
+    expect($bookingDates)->toBe(['2026-03-31', '2026-04-30', '2026-05-31', '2026-06-30', '2026-07-10']);
+});
+
+test('disposal within the last month depreciated elsewhere only books the remaining book value', function (): void {
+    $this->fixedAsset->update(['externally_depreciated_until' => '2026-06-30']);
+
+    $fixedAsset = disposeFixedAsset('2026-06-15');
+
+    expect($fixedAsset->depreciations()->booked()->count())->toBe(0)
+        ->and($fixedAsset->ledgerBookings()->sole()->amount)->toEqual(34000)
+        ->and($fixedAsset->book_value)->toEqual(0);
 });
 
 test('a disposed asset is not depreciated after the disposal month', function (): void {

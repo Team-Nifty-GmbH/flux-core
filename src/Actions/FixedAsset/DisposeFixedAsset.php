@@ -89,7 +89,9 @@ class DisposeFixedAsset extends FluxAction
             $errors['disposed_at'][] = __('The disposal cannot be before the acquisition.');
         }
 
-        if ($fixedAsset->externally_depreciated_until && $disposedAt->lt($fixedAsset->externally_depreciated_until)) {
+        if ($fixedAsset->externally_depreciated_until
+            && $disposedAt->copy()->endOfMonth()->lt($fixedAsset->externally_depreciated_until)
+        ) {
             $errors['disposed_at'][] = __('The disposal cannot be before the months depreciated elsewhere.');
         }
 

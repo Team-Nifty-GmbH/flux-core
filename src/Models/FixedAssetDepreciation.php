@@ -27,6 +27,11 @@ class FixedAssetDepreciation extends FluxModel
         return filled($type) && is_a(morphed_model($type) ?? $type, FixedAssetDepreciation::class, true);
     }
 
+    public static function afterDisposal(Builder $query): Builder
+    {
+        return $query->whereRaw('fixed_asset_depreciations.booking_date > LAST_DAY(fixed_assets.disposed_at)');
+    }
+
     public static function externallyDepreciated(Builder $query): Builder
     {
         return $query->whereColumn(
@@ -59,10 +64,7 @@ class FixedAssetDepreciation extends FluxModel
     // Scopes
     protected function scopeBeforeDisposal(Builder $query): void
     {
-        $query->whereHas('fixedAsset', fn (Builder $query): Builder => $query
-            ->whereNull('fixed_assets.disposed_at')
-            ->orWhereRaw('fixed_asset_depreciations.booking_date <= LAST_DAY(fixed_assets.disposed_at)')
-        );
+        $query->whereDoesntHave('fixedAsset', fn (Builder $query): Builder => static::afterDisposal($query));
     }
 
     protected function scopeBooked(Builder $query): void

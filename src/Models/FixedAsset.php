@@ -28,7 +28,7 @@ class FixedAsset extends FluxModel implements InteractsWithDataTables
         return filled($type)
             && (
                 is_a(morphed_model($type) ?? $type, FixedAsset::class, true)
-                || FixedAssetDepreciation::isMorphType($type)
+                || resolve_static(FixedAssetDepreciation::class, 'isMorphType', [$type])
             );
     }
 

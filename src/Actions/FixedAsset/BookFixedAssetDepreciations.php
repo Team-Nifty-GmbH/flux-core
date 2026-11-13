@@ -69,7 +69,9 @@ class BookFixedAssetDepreciations extends FluxAction
                     'source_type' => morph_alias(FixedAssetDepreciation::class),
                     'source_id' => $depreciation->getKey(),
                     'amount' => $depreciation->getRawOriginal('amount'),
-                    'booking_date' => $depreciation->booking_date,
+                    'booking_date' => $fixedAsset->disposed_at?->lt($depreciation->booking_date)
+                        ? $fixedAsset->disposed_at
+                        : $depreciation->booking_date,
                     'booking_text' => Str::limit(trim($fixedAsset->number . ' ' . $fixedAsset->name), 255, ''),
                 ],
             ])

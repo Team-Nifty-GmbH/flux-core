@@ -42,7 +42,7 @@ class LedgerBooking extends FluxModel
             return;
         }
 
-        $fixedAsset = FixedAssetDepreciation::isMorphType($sourceType)
+        $fixedAsset = resolve_static(FixedAssetDepreciation::class, 'isMorphType', [$sourceType])
             ? resolve_static(FixedAssetDepreciation::class, 'query')
                 ->whereKey($sourceId)
                 ->first()

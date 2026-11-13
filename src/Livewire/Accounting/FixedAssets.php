@@ -47,7 +47,7 @@ class FixedAssets extends FixedAssetList
                 ->when(resolve_static(DeleteFixedAsset::class, 'canPerformAction', [false]))
                 ->attributes([
                     'x-cloak',
-                    'x-show' => '! record.has_booked_depreciations',
+                    'x-show' => '! record.has_booked_depreciations && ! record.disposed_at',
                     'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Fixed Asset')]),
                     'wire:click' => 'delete(record.id)',
                 ]),
@@ -143,6 +143,6 @@ class FixedAssets extends FixedAssetList
 
     protected function getReturnKeys(): array
     {
-        return array_merge(parent::getReturnKeys(), ['has_booked_depreciations']);
+        return array_merge(parent::getReturnKeys(), ['disposed_at', 'has_booked_depreciations']);
     }
 }
