@@ -7,7 +7,9 @@ use FluxErp\Actions\LedgerBooking\DeleteLedgerBooking;
 use FluxErp\Actions\LedgerBooking\UpdateLedgerBooking;
 use FluxErp\Livewire\DataTables\LedgerBookingList;
 use FluxErp\Livewire\Forms\LedgerBookingForm;
+use FluxErp\Models\FixedAssetDepreciation;
 use FluxErp\Models\LedgerBooking;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -42,6 +44,8 @@ class LedgerBookings extends LedgerBookingList
                 ->color('indigo')
                 ->when(resolve_static(UpdateLedgerBooking::class, 'canPerformAction', [false]))
                 ->attributes([
+                    'x-show' => '! record.is_depreciation',
+                    'x-cloak' => true,
                     'wire:click' => 'edit(record.id)',
                 ]),
             DataTableButton::make()
@@ -50,6 +54,8 @@ class LedgerBookings extends LedgerBookingList
                 ->color('red')
                 ->when(resolve_static(DeleteLedgerBooking::class, 'canPerformAction', [false]))
                 ->attributes([
+                    'x-show' => '! record.is_depreciation',
+                    'x-cloak' => true,
                     'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Ledger Booking')]),
                     'wire:click' => 'delete(record.id)',
                 ]),
@@ -99,5 +105,19 @@ class LedgerBookings extends LedgerBookingList
         $this->loadData();
 
         return true;
+    }
+
+    protected function augmentItemArray(array &$itemArray, Model $item): void
+    {
+        $itemArray['is_depreciation'] = resolve_static(
+            FixedAssetDepreciation::class,
+            'isMorphType',
+            [$item->source_type]
+        );
+    }
+
+    protected function getReturnKeys(): array
+    {
+        return array_merge(parent::getReturnKeys(), ['source_type']);
     }
 }
