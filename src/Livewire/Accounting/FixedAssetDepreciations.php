@@ -36,6 +36,7 @@ class FixedAssetDepreciations extends BaseDataTable
         'book_value_after' => 'money',
         'status' => ['badge', [
             'Booked' => 'green',
+            'Booked Elsewhere' => 'emerald',
             'Due' => 'amber',
             'Open' => 'gray',
         ]],
@@ -60,12 +61,17 @@ class FixedAssetDepreciations extends BaseDataTable
                           and lb.source_id = fixed_asset_depreciations.id
                           and lb.deleted_at is null
                     ) then ?
+                    when fixed_asset_depreciations.booking_date <= (
+                        select fa.externally_depreciated_until from fixed_assets fa
+                        where fa.id = fixed_asset_depreciations.fixed_asset_id
+                    ) then ?
                     when fixed_asset_depreciations.booking_date <= ? then ?
                     else ?
                 end as status',
                 [
                     morph_alias(FixedAssetDepreciation::class),
                     'Booked',
+                    'Booked Elsewhere',
                     now()->toDateString(),
                     'Due',
                     'Open',

@@ -46,7 +46,7 @@
             'method' => 'POST',
         ]"
     />
-    <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
+    <div class="grid grid-cols-1 gap-1.5 md:grid-cols-3">
         <x-date
             wire:model="fixedAsset.acquired_at"
             :label="__('Acquired At')"
@@ -55,6 +55,11 @@
         <x-date
             wire:model="fixedAsset.depreciation_starts_at"
             :label="__('Depreciation Starts At')"
+        />
+        <x-date
+            wire:model="fixedAsset.externally_depreciated_until"
+            :label="__('Depreciated Elsewhere Until')"
+            :hint="__('Months up to this date are not booked by Flux')"
         />
     </div>
     <div class="grid grid-cols-1 gap-1.5 md:grid-cols-3">

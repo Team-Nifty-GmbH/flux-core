@@ -73,3 +73,18 @@ test('saves changes to the fixed asset', function (): void {
 
     expect($this->fixedAsset->refresh()->name)->toBe('Renamed van');
 });
+
+test('marks the months depreciated elsewhere in the schedule', function (): void {
+    Livewire::test(FixedAsset::class, ['id' => $this->fixedAsset->getKey()])
+        ->set('fixedAsset.externally_depreciated_until', '2026-04-30')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $depreciations = Livewire::test(FixedAssetDepreciations::class, ['fixedAssetId' => $this->fixedAsset->getKey()])
+        ->call('loadData')
+        ->instance()
+        ->getDataForTesting();
+
+    expect(data_get($depreciations, 'data.1.status.raw'))->toBe('Booked Elsewhere')
+        ->and($this->fixedAsset->refresh()->book_value)->toEqual(35000);
+});

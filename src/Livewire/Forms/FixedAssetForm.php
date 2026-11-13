@@ -24,6 +24,8 @@ class FixedAssetForm extends FluxForm
 
     public ?string $depreciation_starts_at = null;
 
+    public ?string $externally_depreciated_until = null;
+
     #[Locked]
     public ?int $id = null;
 
