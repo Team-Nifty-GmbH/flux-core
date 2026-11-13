@@ -2967,6 +2967,7 @@
     "The depreciation cannot start before the acquisition.": "Die Abschreibung kann nicht vor der Anschaffung beginnen.",
     "The depreciation schedule cannot be changed once a depreciation has been booked.": "Der Abschreibungsplan kann nicht mehr geändert werden, sobald eine Abschreibung gebucht wurde.",
     "The employee is already assigned to this work time model": "Der Mitarbeiter ist bereits diesem Arbeitszeitmodell zugewiesen",
+    "The externally depreciated month cannot be changed once a depreciation has been booked.": "Der außerhalb abgeschriebene Monat kann nicht mehr geändert werden, sobald eine Abschreibung gebucht wurde.",
     "The extra repayment cannot be executed after the loan ends.": "Die Sondertilgung kann nicht nach dem Ende des Darlehens ausgeführt werden.",
     "The extra repayment cannot be executed before the loan starts.": "Die Sondertilgung kann nicht vor dem Beginn des Darlehens ausgeführt werden.",
     "The extra repayment exceeds the allowance of :amount left for :year.": "Die Sondertilgung übersteigt den für :year verbleibenden Freibetrag von :amount.",

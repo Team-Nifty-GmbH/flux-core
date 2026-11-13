@@ -41,6 +41,10 @@ class UpdateFixedAsset extends FluxAction
             }
         }
 
+        if ($this->changesExternalDepreciation($fixedAsset)) {
+            $this->ensureExternalDepreciationUnlocked($fixedAsset);
+        }
+
         $fixedAsset->save();
         $fixedAsset->calculateBookValue()
             ->save();
@@ -66,6 +70,23 @@ class UpdateFixedAsset extends FluxAction
                 !== $fixedAsset->depreciation_starts_at->format('Y-m');
     }
 
+    protected function changesExternalDepreciation(FixedAsset $fixedAsset): bool
+    {
+        return $fixedAsset->getOriginal('externally_depreciated_until')?->toDateString()
+            !== $fixedAsset->externally_depreciated_until?->toDateString();
+    }
+
+    protected function ensureExternalDepreciationUnlocked(FixedAsset $fixedAsset): void
+    {
+        if ($fixedAsset->hasBookedDepreciations()) {
+            throw ValidationException::withMessages([
+                'externally_depreciated_until' => [
+                    __('The externally depreciated month cannot be changed once a depreciation has been booked.'),
+                ],
+            ]);
+        }
+    }
+
     protected function ensureNothingBooked(FixedAsset $fixedAsset): void
     {
         if ($fixedAsset->hasBookedDepreciations()) {
@@ -88,6 +109,10 @@ class UpdateFixedAsset extends FluxAction
 
         if ($this->changesSchedule($fixedAsset)) {
             $this->ensureNothingBooked($fixedAsset);
+        }
+
+        if ($this->changesExternalDepreciation($fixedAsset)) {
+            $this->ensureExternalDepreciationUnlocked($fixedAsset);
         }
     }
 }

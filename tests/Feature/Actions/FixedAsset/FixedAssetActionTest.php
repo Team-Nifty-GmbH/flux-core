@@ -5,10 +5,19 @@ use FluxErp\Actions\FixedAsset\CreateFixedAsset;
 use FluxErp\Actions\FixedAsset\DeleteFixedAsset;
 use FluxErp\Actions\FixedAsset\UpdateFixedAsset;
 use FluxErp\Enums\LedgerAccountTypeEnum;
+use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Models\Address;
+use FluxErp\Models\Contact;
+use FluxErp\Models\Currency;
 use FluxErp\Models\FixedAsset;
 use FluxErp\Models\FixedAssetDepreciation;
+use FluxErp\Models\Language;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\LedgerBooking;
+use FluxErp\Models\Order;
+use FluxErp\Models\OrderType;
+use FluxErp\Models\PaymentType;
+use FluxErp\Models\PriceList;
 use FluxErp\Models\Tenant;
 use Illuminate\Validation\ValidationException;
 
@@ -33,6 +42,26 @@ function baseFixedAssetData(array $overrides = []): array
         'acquisition_cost' => 36000,
         'useful_life_months' => 72,
     ], $overrides);
+}
+
+function fixedAssetOrder(OrderTypeEnum $orderTypeEnum): Order
+{
+    $contact = Contact::factory()->create();
+
+    return Order::factory()->create([
+        'address_invoice_id' => Address::factory()
+            ->create(['contact_id' => $contact->getKey()])
+            ->getKey(),
+        'contact_id' => $contact->getKey(),
+        'tenant_id' => test()->dbTenant->getKey(),
+        'language_id' => Language::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'order_type_id' => OrderType::factory()
+            ->create(['order_type_enum' => $orderTypeEnum])
+            ->getKey(),
+    ]);
 }
 
 function bookFirstDepreciation(FixedAsset $fixedAsset): void
@@ -177,8 +206,56 @@ test('create fixed asset rejects invalid input', function (array $overrides): vo
         'more than two decimals' => [['acquisition_cost' => '1000.009']],
         'useful life above 100 years' => [['useful_life_months' => 1201]],
         'order position without order' => [['order_position_id' => 1]],
+        'externally depreciated in the future' => [['externally_depreciated_until' => '2099-12-31']],
     ])
     ->throws(ValidationException::class);
+
+test('create fixed asset accepts a purchase order', function (): void {
+    $order = fixedAssetOrder(OrderTypeEnum::Purchase);
+
+    $fixedAsset = CreateFixedAsset::make(baseFixedAssetData(['order_id' => $order->getKey()]))
+        ->validate()
+        ->execute();
+
+    expect($fixedAsset->order_id)->toBe($order->getKey());
+});
+
+test('create fixed asset rejects an order that is not a purchase', function (): void {
+    CreateFixedAsset::make(baseFixedAssetData(['order_id' => fixedAssetOrder(OrderTypeEnum::Order)->getKey()]))
+        ->validate()
+        ->execute();
+})->throws(ValidationException::class);
+
+test('update fixed asset locks the externally depreciated month once a depreciation is booked', function (): void {
+    $fixedAsset = CreateFixedAsset::make(baseFixedAssetData(['externally_depreciated_until' => '2026-04-30']))
+        ->validate()
+        ->execute();
+    bookFirstDepreciation($fixedAsset);
+
+    UpdateFixedAsset::make([
+        'id' => $fixedAsset->getKey(),
+        'externally_depreciated_until' => '2026-03-31',
+    ])
+        ->validate()
+        ->execute();
+})->throws(ValidationException::class);
+
+test('update fixed asset keeps an unchanged externally depreciated month after bookings', function (): void {
+    $fixedAsset = CreateFixedAsset::make(baseFixedAssetData(['externally_depreciated_until' => '2026-04-30']))
+        ->validate()
+        ->execute();
+    bookFirstDepreciation($fixedAsset);
+
+    $updated = UpdateFixedAsset::make([
+        'id' => $fixedAsset->getKey(),
+        'name' => 'Renamed van',
+        'externally_depreciated_until' => '2026-04-30',
+    ])
+        ->validate()
+        ->execute();
+
+    expect($updated->name)->toBe('Renamed van');
+});
 
 test('delete fixed asset removes an unbooked asset', function (): void {
     $fixedAsset = CreateFixedAsset::make(baseFixedAssetData())->validate()->execute();
