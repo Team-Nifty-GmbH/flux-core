@@ -1,0 +1,50 @@
+<?php
+
+namespace FluxErp\Models;
+
+use FluxErp\Casts\Money;
+use FluxErp\Models\Scopes\FixedAssetDepreciationInheritsFixedAssetTenantScope;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\SoftDeletes;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+
+class FixedAssetDepreciation extends FluxModel
+{
+    use Filterable, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(app(FixedAssetDepreciationInheritsFixedAssetTenantScope::class));
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'booking_date' => 'date',
+            'amount' => Money::class,
+            'book_value_after' => Money::class,
+        ];
+    }
+
+    // Relations
+    public function fixedAsset(): BelongsTo
+    {
+        return $this->belongsTo(FixedAsset::class);
+    }
+
+    public function ledgerBookings(): MorphMany
+    {
+        return $this->morphMany(LedgerBooking::class, 'source');
+    }
+
+    // Scopes
+    protected function scopeBooked(Builder $query): void
+    {
+        $query->whereHas('ledgerBookings');
+    }
+}
