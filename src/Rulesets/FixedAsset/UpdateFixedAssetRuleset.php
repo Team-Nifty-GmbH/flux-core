@@ -3,6 +3,7 @@
 namespace FluxErp\Rulesets\FixedAsset;
 
 use FluxErp\Enums\DepreciationMethodEnum;
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Contact;
 use FluxErp\Models\FixedAsset;
 use FluxErp\Models\LedgerAccount;
@@ -12,6 +13,7 @@ use FluxErp\Rules\EnumRule;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Database\Eloquent\Builder;
 
 class UpdateFixedAssetRuleset extends FluxRuleset
 {
@@ -46,7 +48,11 @@ class UpdateFixedAssetRuleset extends FluxRuleset
                 'nullable',
                 'required_with:order_position_id',
                 'integer',
-                app(ModelExists::class, ['model' => Order::class]),
+                app(ModelExists::class, ['model' => Order::class])
+                    ->whereHas(
+                        'orderType',
+                        fn (Builder $query): Builder => $query->where('order_type_enum', OrderTypeEnum::Purchase)
+                    ),
             ],
             'order_position_id' => [
                 'nullable',
@@ -74,7 +80,7 @@ class UpdateFixedAssetRuleset extends FluxRuleset
                 'required',
                 app(EnumRule::class, ['type' => DepreciationMethodEnum::class]),
             ],
-            'externally_depreciated_until' => 'nullable|date',
+            'externally_depreciated_until' => 'nullable|date|before_or_equal:today',
             'useful_life_months' => 'sometimes|required|integer|min:1|max:1200',
         ];
     }
