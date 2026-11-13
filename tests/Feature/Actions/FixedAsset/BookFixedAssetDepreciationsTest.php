@@ -173,15 +173,30 @@ test('skips the depreciations booked outside of flux', function (): void {
         ->and($this->fixedAsset->refresh()->book_value)->toEqual(34500);
 });
 
-test('refuses to book onto a ledger account that is no longer usable', function (): void {
+test('refuses to book a single asset onto a ledger account that is no longer usable', function (): void {
     LedgerAccount::query()
         ->whereKey($this->fixedAsset->depreciation_ledger_account_id)
         ->first()
         ->delete();
 
-    expect(fn () => bookDepreciations(['until' => '2026-05-31']))
+    expect(fn () => bookDepreciations([
+        'fixed_asset_id' => $this->fixedAsset->getKey(),
+        'until' => '2026-05-31',
+    ]))
         ->toThrow(ValidationException::class)
         ->and(depreciationBookings($this->fixedAsset))->toHaveCount(0);
+});
+
+test('the run skips an asset whose ledger account is no longer usable and books the others', function (): void {
+    $otherAsset = createDepreciableAsset($this->dbTenant);
+    LedgerAccount::query()
+        ->whereKey($this->fixedAsset->depreciation_ledger_account_id)
+        ->first()
+        ->delete();
+
+    expect(bookDepreciations(['until' => '2026-05-31']))->toBe(3)
+        ->and(depreciationBookings($this->fixedAsset))->toHaveCount(0)
+        ->and(depreciationBookings($otherAsset))->toHaveCount(3);
 });
 
 test('the class name does not get around the depreciation booking guard', function (): void {

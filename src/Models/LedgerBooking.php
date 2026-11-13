@@ -38,7 +38,7 @@ class LedgerBooking extends FluxModel
 
     protected static function recalculateFixedAssetBookValue(?string $sourceType, int|string|null $sourceId): void
     {
-        if (! $sourceId || ! FixedAsset::ownsLedgerBookingSource($sourceType)) {
+        if (! $sourceId || ! resolve_static(FixedAsset::class, 'ownsLedgerBookingSource', [$sourceType])) {
             return;
         }
 

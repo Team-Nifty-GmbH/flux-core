@@ -23,40 +23,42 @@
         <div
             class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
         >
-            <x-button
-                color="indigo"
-                x-cloak
-                x-show="!isEditing && !$wire.fixedAsset.disposed_at"
-                class="w-full"
-                x-on:click="isEditing = true"
-                :text="__('Edit')"
-            />
-            <x-button
-                color="indigo"
-                loading="save"
-                x-cloak
-                x-show="isEditing"
-                class="w-full"
-                x-on:click="
-                    $wire.save().then((success) => {
-                        if (success) isEditing = false;
-                    })
-                "
-                :text="__('Save')"
-            />
-            <x-button
-                color="secondary"
-                light
-                flat
-                :text="__('Cancel')"
-                x-cloak
-                x-show="isEditing"
-                class="w-full"
-                x-on:click="
-                    isEditing = false;
-                    $wire.resetForm();
-                "
-            />
+            @canAction(\FluxErp\Actions\FixedAsset\UpdateFixedAsset::class)
+                <x-button
+                    color="indigo"
+                    x-cloak
+                    x-show="!isEditing && !$wire.fixedAsset.disposed_at"
+                    class="w-full"
+                    x-on:click="isEditing = true"
+                    :text="__('Edit')"
+                />
+                <x-button
+                    color="indigo"
+                    loading="save"
+                    x-cloak
+                    x-show="isEditing"
+                    class="w-full"
+                    x-on:click="
+                        $wire.save().then((success) => {
+                            if (success) isEditing = false;
+                        })
+                    "
+                    :text="__('Save')"
+                />
+                <x-button
+                    color="secondary"
+                    light
+                    flat
+                    :text="__('Cancel')"
+                    x-cloak
+                    x-show="isEditing"
+                    class="w-full"
+                    x-on:click="
+                        isEditing = false;
+                        $wire.resetForm();
+                    "
+                />
+            @endcanAction
             @canAction(\FluxErp\Actions\FixedAsset\BookFixedAssetDepreciations::class)
                 <x-button
                     color="emerald"

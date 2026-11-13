@@ -42,7 +42,19 @@ class BookFixedAssetDepreciations extends FluxAction
 
     protected function bookFixedAsset(FixedAsset $fixedAsset): int
     {
-        $this->ensureAccountsAreUsable($fixedAsset);
+        if (! $this->hasUsableAccounts($fixedAsset)) {
+            if (! $this->getData('fixed_asset_id')) {
+                return 0;
+            }
+
+            throw ValidationException::withMessages([
+                'fixed_asset_id' => [
+                    __('The ledger accounts of fixed asset :name can no longer be booked on.', [
+                        'name' => $fixedAsset->name,
+                    ]),
+                ],
+            ]);
+        }
 
         $depreciations = $this->due($fixedAsset->depreciations()->getQuery())
             ->orderBy('sequence')
@@ -74,9 +86,9 @@ class BookFixedAssetDepreciations extends FluxAction
             ->beforeDisposal();
     }
 
-    protected function ensureAccountsAreUsable(FixedAsset $fixedAsset): void
+    protected function hasUsableAccounts(FixedAsset $fixedAsset): bool
     {
-        $usableAccounts = resolve_static(LedgerAccount::class, 'query')
+        return resolve_static(LedgerAccount::class, 'query')
             ->withoutGlobalScopes()
             ->whereNull('deleted_at')
             ->where('tenant_id', $fixedAsset->tenant_id)
@@ -90,17 +102,7 @@ class BookFixedAssetDepreciations extends FluxAction
                     ->where('ledger_account_type_enum', LedgerAccountTypeEnum::Expense)
                 )
             )
-            ->count();
-
-        if ($usableAccounts !== 2) {
-            throw ValidationException::withMessages([
-                'fixed_asset_id' => [
-                    __('The ledger accounts of fixed asset :name can no longer be booked on.', [
-                        'name' => $fixedAsset->name,
-                    ]),
-                ],
-            ]);
-        }
+            ->count() === 2;
     }
 
     protected function prepareForValidation(): void
