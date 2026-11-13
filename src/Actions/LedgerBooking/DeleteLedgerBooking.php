@@ -3,7 +3,7 @@
 namespace FluxErp\Actions\LedgerBooking;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Models\FixedAssetDepreciation;
+use FluxErp\Models\FixedAsset;
 use FluxErp\Models\LedgerBooking;
 use FluxErp\Rulesets\LedgerBooking\DeleteLedgerBookingRuleset;
 use Illuminate\Validation\ValidationException;
@@ -36,9 +36,9 @@ class DeleteLedgerBooking extends FluxAction
             ->whereKey($this->getData('id'))
             ->value('source_type');
 
-        if (resolve_static(FixedAssetDepreciation::class, 'isMorphType', [$sourceType])) {
+        if (resolve_static(FixedAsset::class, 'ownsLedgerBookingSource', [$sourceType])) {
             throw ValidationException::withMessages([
-                'source_type' => [__('Depreciation bookings are managed by their fixed asset.')],
+                'source_type' => [__('Fixed asset bookings are managed by their fixed asset.')],
             ]);
         }
     }

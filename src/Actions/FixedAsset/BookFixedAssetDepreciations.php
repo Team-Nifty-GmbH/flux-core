@@ -70,7 +70,8 @@ class BookFixedAssetDepreciations extends FluxAction
     protected function due(Builder $query): Builder
     {
         return $query->whereDate('booking_date', '<=', $this->getData('until'))
-            ->undepreciated();
+            ->undepreciated()
+            ->beforeDisposal();
     }
 
     protected function ensureAccountsAreUsable(FixedAsset $fixedAsset): void

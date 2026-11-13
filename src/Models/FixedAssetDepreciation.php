@@ -57,6 +57,14 @@ class FixedAssetDepreciation extends FluxModel
     }
 
     // Scopes
+    protected function scopeBeforeDisposal(Builder $query): void
+    {
+        $query->whereHas('fixedAsset', fn (Builder $query): Builder => $query
+            ->whereNull('fixed_assets.disposed_at')
+            ->orWhereRaw('fixed_asset_depreciations.booking_date <= LAST_DAY(fixed_assets.disposed_at)')
+        );
+    }
+
     protected function scopeBooked(Builder $query): void
     {
         $query->whereHas('ledgerBookings');

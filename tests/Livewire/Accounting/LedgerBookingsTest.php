@@ -89,7 +89,7 @@ test('depreciation bookings are marked and cannot be deleted from the page', fun
         ->call('loadData')
         ->assertOk();
 
-    expect(data_get($component->instance()->getDataForTesting(), 'data.0.is_depreciation'))->toBeTrue();
+    expect(data_get($component->instance()->getDataForTesting(), 'data.0.is_fixed_asset_booking'))->toBeTrue();
 
     $component->call('delete', $booking->getKey())
         ->assertReturned(false);

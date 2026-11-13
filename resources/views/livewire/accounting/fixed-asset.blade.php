@@ -26,7 +26,7 @@
             <x-button
                 color="indigo"
                 x-cloak
-                x-show="!isEditing"
+                x-show="!isEditing && !$wire.fixedAsset.disposed_at"
                 class="w-full"
                 x-on:click="isEditing = true"
                 :text="__('Edit')"
@@ -73,9 +73,31 @@
                     color="amber"
                     :text="__('Reverse Bookings')"
                     x-cloak
-                    x-show="!isEditing"
+                    x-show="!isEditing && !$wire.fixedAsset.disposed_at"
                     class="w-full"
                     x-on:click="$tsui.open.modal('reverse-depreciations')"
+                />
+            @endcanAction
+            @canAction(\FluxErp\Actions\FixedAsset\DisposeFixedAsset::class)
+                <x-button
+                    color="secondary"
+                    :text="__('Dispose')"
+                    x-cloak
+                    x-show="!isEditing && !$wire.fixedAsset.disposed_at"
+                    class="w-full"
+                    x-on:click="$tsui.open.modal('dispose-fixed-asset')"
+                />
+            @endcanAction
+            @canAction(\FluxErp\Actions\FixedAsset\RevertFixedAssetDisposal::class)
+                <x-button
+                    color="secondary"
+                    loading="revertDisposal"
+                    :text="__('Revert Disposal')"
+                    x-cloak
+                    x-show="!isEditing && $wire.fixedAsset.disposed_at"
+                    class="w-full"
+                    wire:click="revertDisposal()"
+                    wire:flux-confirm.type.warning="{{ __('Revert the disposal and remove its booking?') }}"
                 />
             @endcanAction
             @canAction(\FluxErp\Actions\FixedAsset\DeleteFixedAsset::class)
@@ -95,6 +117,52 @@
     </div>
     <x-flux::tabs wire:model.live="tab" :$tabs />
     @stack('fixed-asset-detail-after-tabs')
+    <x-modal id="dispose-fixed-asset" :title="__('Dispose')">
+        <div class="flex flex-col gap-1.5">
+            <x-date
+                wire:model="disposedAt"
+                :label="__('Disposed At')"
+                required
+            />
+            <x-select.styled
+                :label="__('Disposal Account')"
+                wire:model.number="disposalLedgerAccountId"
+                select="label:name|value:id|description:number"
+                required
+                unfiltered
+                :hint="__('The remaining book value is booked to this account.')"
+                :request="[
+                    'url' => route('search', \FluxErp\Models\LedgerAccount::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'where' => [
+                            ['ledger_account_type_enum', '=', \FluxErp\Enums\LedgerAccountTypeEnum::Expense->value],
+                            ['tenant_id', '=', $fixedAsset->tenant_id],
+                        ],
+                    ],
+                ]"
+            />
+        </div>
+        <x-slot:footer>
+            <x-button
+                :text="__('Cancel')"
+                color="secondary"
+                light
+                flat
+                x-on:click="$tsui.close.modal('dispose-fixed-asset')"
+            />
+            <x-button
+                :text="__('Dispose')"
+                color="indigo"
+                loading="dispose"
+                x-on:click="
+                    $wire.dispose().then((success) => {
+                        if (success) $tsui.close.modal('dispose-fixed-asset');
+                    })
+                "
+            />
+        </x-slot:footer>
+    </x-modal>
     <x-modal id="reverse-depreciations" :title="__('Reverse Bookings')">
         <x-date
             wire:model="reverseFrom"

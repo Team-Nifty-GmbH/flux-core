@@ -38,15 +38,20 @@ class LedgerBooking extends FluxModel
 
     protected static function recalculateFixedAssetBookValue(?string $sourceType, int|string|null $sourceId): void
     {
-        if (! $sourceId || ! FixedAssetDepreciation::isMorphType($sourceType)) {
+        if (! $sourceId || ! FixedAsset::ownsLedgerBookingSource($sourceType)) {
             return;
         }
 
-        resolve_static(FixedAssetDepreciation::class, 'query')
-            ->whereKey($sourceId)
-            ->first()
-            ?->fixedAsset
-            ?->recalculateBookValue();
+        $fixedAsset = FixedAssetDepreciation::isMorphType($sourceType)
+            ? resolve_static(FixedAssetDepreciation::class, 'query')
+                ->whereKey($sourceId)
+                ->first()
+                ?->fixedAsset
+            : resolve_static(FixedAsset::class, 'query')
+                ->whereKey($sourceId)
+                ->first();
+
+        $fixedAsset?->recalculateBookValue();
     }
 
     protected static function recalculateSettledOrder(?string $sourceType, int|string|null $sourceId): void

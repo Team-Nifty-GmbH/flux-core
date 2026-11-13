@@ -88,3 +88,35 @@ test('marks the months depreciated elsewhere in the schedule', function (): void
     expect(data_get($depreciations, 'data.1.status.raw'))->toBe('Booked Elsewhere')
         ->and($this->fixedAsset->refresh()->book_value)->toEqual(35000);
 });
+
+test('disposes the fixed asset and reverts the disposal', function (): void {
+    $disposalAccount = LedgerAccount::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'ledger_account_type_enum' => LedgerAccountTypeEnum::Expense,
+    ]);
+
+    $component = Livewire::test(FixedAsset::class, ['id' => $this->fixedAsset->getKey()])
+        ->set('disposedAt', '2026-04-10')
+        ->set('disposalLedgerAccountId', $disposalAccount->getKey())
+        ->call('dispose')
+        ->assertHasNoErrors()
+        ->assertSet('fixedAsset.disposed_at', fn (?string $value): bool => str_starts_with((string) $value, '2026-04-10'))
+        ->assertSet('fixedAsset.book_value', 0.0);
+
+    $bookings = Livewire::test(FixedAssetLedgerBookings::class, ['fixedAssetId' => $this->fixedAsset->getKey()])
+        ->call('loadData')
+        ->instance()
+        ->getDataForTesting();
+    $depreciations = Livewire::test(FixedAssetDepreciations::class, ['fixedAssetId' => $this->fixedAsset->getKey()])
+        ->call('loadData')
+        ->instance()
+        ->getDataForTesting();
+
+    expect(data_get($bookings, 'data'))->toHaveCount(3)
+        ->and(data_get($depreciations, 'data.2.status.raw'))->toBe('Disposed');
+
+    $component->call('revertDisposal')
+        ->assertHasNoErrors()
+        ->assertSet('fixedAsset.disposed_at', null)
+        ->assertSet('fixedAsset.book_value', 35000.0);
+});
