@@ -36,9 +36,7 @@ class UpdateFixedAsset extends FluxAction
             $schedule = $this->validateFixedAsset($fixedAsset, []);
             $fixedAsset->depreciations()->forceDelete();
 
-            foreach ($schedule as $depreciation) {
-                $fixedAsset->depreciations()->create($depreciation);
-            }
+            $fixedAsset->depreciations()->createMany($schedule);
         }
 
         if ($this->changesExternalDepreciation($fixedAsset)) {
