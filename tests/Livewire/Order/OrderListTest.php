@@ -266,6 +266,55 @@ test('creating payment reminders skips orders without a mailable address', funct
         ->and(PaymentReminder::query()->where('order_id', $unmailable->getKey())->exists())->toBeFalse();
 });
 
+test('payment reminder mails from the order list are linked to the order', function (): void {
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'email_primary' => 'reminder@example.com',
+        'is_main_address' => true,
+        'is_invoice_address' => true,
+    ]);
+
+    $order = Order::factory()->create([
+        'order_type_id' => OrderType::factory()->create([
+            'order_type_enum' => OrderTypeEnum::Order,
+            'is_active' => true,
+        ])->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'payment_type_id' => PaymentType::factory()
+            ->hasAttached($this->dbTenant, relationship: 'tenants')
+            ->create()
+            ->getKey(),
+        'price_list_id' => PriceList::factory()->create()->getKey(),
+        'currency_id' => Currency::factory()->create()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_locked' => true,
+        'invoice_number' => 'INV-2026-903',
+        'payment_reminder_current_level' => 0,
+    ]);
+
+    Order::query()->whereKey($order->getKey())->update(['balance' => 100]);
+
+    Livewire::test(OrderList::class)
+        ->set('selected', [$order->getKey()])
+        ->call('openCreatePaymentRemindersModal')
+        ->set('selectedPrintLayouts.email', ['payment-reminder'])
+        ->call('createDocuments')
+        ->assertDispatched('createFromSession', function (string $event, array $params) use ($order): bool {
+            $messages = session()->get($params['key']);
+
+            return count($messages) === 1
+                && $messages[0]['communicatables'] === [
+                    [
+                        'communicatable_type' => morph_alias(Order::class),
+                        'communicatable_id' => $order->getKey(),
+                    ],
+                ];
+        });
+});
+
 /**
  * A project that has to narrow the contact picker of the new order modal, to the
  * customers of one order type for instance, had to copy this whole view to do it. A
