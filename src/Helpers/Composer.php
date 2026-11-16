@@ -202,7 +202,9 @@ class Composer extends BaseComposer
     protected function getProcess(array $command, array $env = []): Process
     {
         $defaultEnv = [
-            'HOME' => getenv('HOME') ?: sys_get_temp_dir(),
+            'HOME' => getenv('HOME')
+                ?: (function_exists('posix_getpwuid') ? data_get(posix_getpwuid(posix_geteuid()), 'dir') : null)
+                ?: sys_get_temp_dir(),
             'XDEBUG_MODE' => 'off',
         ];
 
