@@ -106,6 +106,35 @@ test('prefills the form from a purchase order position', function (): void {
         ->assertSet('fixedAsset.acquired_at', '2026-03-18');
 });
 
+test('points out fixed assets that already exist for the position', function (): void {
+    $orderPosition = fixedAssetOrderPosition(OrderTypeEnum::Purchase);
+    $component = Livewire::test(FixedAssets::class)
+        ->call('edit')
+        ->call('changedOrderPosition', $orderPosition->getKey())
+        ->assertSet('existingFixedAssets', []);
+
+    $fixedAsset = CreateFixedAsset::make([
+        'order_id' => $orderPosition->order_id,
+        'order_position_id' => $orderPosition->getKey(),
+        'ledger_account_id' => $this->assetAccount->getKey(),
+        'depreciation_ledger_account_id' => $this->expenseAccount->getKey(),
+        'name' => 'Delivery van',
+        'acquired_at' => '2026-03-20',
+        'acquisition_cost' => 36000,
+        'useful_life_months' => 72,
+    ])
+        ->validate()
+        ->execute();
+
+    $component->call('changedOrderPosition', $orderPosition->getKey())
+        ->assertSet('existingFixedAssets', [[
+            'name' => 'Delivery van',
+            'url' => route('accounting.fixed-assets.id', ['id' => $fixedAsset->getKey()]),
+        ]])
+        ->call('edit')
+        ->assertSet('existingFixedAssets', []);
+});
+
 test('rejects a position of a sales order', function (): void {
     $orderPosition = fixedAssetOrderPosition(OrderTypeEnum::Order);
 
