@@ -1,6 +1,7 @@
 <?php
 
 use FluxErp\Actions\ContactBankConnection\CalculateContactBankConnectionBalance;
+use FluxErp\Actions\Printing;
 use FluxErp\Enums\CreditAccountPostingEnum;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Enums\RepeatableTypeEnum;
@@ -181,6 +182,44 @@ test('create documents', function (): void {
 
     $invoice = $this->order->invoice();
     expect($invoice?->getPath())->not->toBeNull();
+});
+
+test('saving after the invoice was created by sending the mail keeps the invoice state', function (): void {
+    Storage::fake();
+
+    $this->order->update(['is_locked' => false, 'invoice_number' => null]);
+
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('openCreateDocumentsModal')
+        ->set(['selectedPrintLayouts' => ['email' => ['invoice']]])
+        ->call('createDocuments')
+        ->assertDispatched('createFromSession')
+        ->assertSet('order.invoice_number', null);
+
+    // Sending the mail prints the invoice, which books it and locks the order.
+    Printing::make([
+        'model_type' => morph_alias(Order::class),
+        'model_id' => $this->order->getKey(),
+        'view' => 'invoice',
+    ])
+        ->validate()
+        ->execute();
+
+    $invoiced = $this->order->refresh();
+    $state = (string) $invoiced->state;
+    $nextReminderDate = $invoiced->payment_reminder_next_date?->toDateString();
+
+    expect($invoiced->invoice_number)->not->toBeNull()
+        ->and($state)->toBe(Open::$name)
+        ->and($nextReminderDate)->not->toBeNull();
+
+    $component->dispatch('mail-sent')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $saved = $this->order->refresh();
+    expect((string) $saved->state)->toBe($state)
+        ->and($saved->payment_reminder_next_date?->toDateString())->toBe($nextReminderDate);
 });
 
 test('the invoice preview carries what the lightbox needs', function (): void {

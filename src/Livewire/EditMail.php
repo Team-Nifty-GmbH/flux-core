@@ -720,6 +720,7 @@ class EditMail extends Component
                 ->dispatch();
         } else {
             $this->showSendResultToast($successCount, $failedCount);
+            $this->dispatch('mail-sent');
         }
 
         return $failedCount === 0;

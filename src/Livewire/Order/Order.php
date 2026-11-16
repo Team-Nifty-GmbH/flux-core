@@ -50,6 +50,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -256,6 +257,12 @@ class Order extends Component
         $this->js(<<<'JS'
             $tsui.open.modal('edit-discount');
         JS);
+    }
+
+    #[On('mail-sent')]
+    public function refreshAfterMailSent(): void
+    {
+        $this->fetchOrder($this->order->id);
     }
 
     #[Renderless]

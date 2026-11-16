@@ -114,3 +114,15 @@ test('does not accept template settings from the client', function (string $prop
         ['templateModelType', 'contact'],
     ])
     ->throws(CannotUpdateLockedPropertyException::class);
+
+test('tells the page a single mail was sent', function (): void {
+    Illuminate\Support\Facades\Mail::fake();
+
+    Livewire::actingAs($this->user)
+        ->test(EditMail::class)
+        ->set('mailMessage.to', ['customer@example.com'])
+        ->set('mailMessage.subject', 'Invoice')
+        ->set('mailMessage.html_body', '<p>Invoice</p>')
+        ->call('send')
+        ->assertDispatched('mail-sent');
+});
