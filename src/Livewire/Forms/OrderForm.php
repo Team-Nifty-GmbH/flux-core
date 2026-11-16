@@ -202,6 +202,8 @@ class OrderForm extends FluxForm
 
     public function fill($values): void
     {
+        $model = $values instanceof Order ? $values : null;
+
         if ($values instanceof Order) {
             $values->loadMissing([
                 'createdFrom',
@@ -250,6 +252,7 @@ class OrderForm extends FluxForm
                     'avatarUrl' => $values->contact?->getFirstMediaUrl('avatar'),
                 ],
             );
+            $values['users'] = array_column($values['users'] ?? [], 'id');
         }
 
         parent::fill($values);
@@ -260,6 +263,10 @@ class OrderForm extends FluxForm
         $this->payment_discount_percent = ! is_null($this->payment_discount_percent)
             ? bcmul($this->payment_discount_percent, 100)
             : null;
+
+        if ($model) {
+            $this->rememberLoadedData($model);
+        }
     }
 
     public function getContact(): ?Contact
@@ -287,6 +294,8 @@ class OrderForm extends FluxForm
 
     public function save(): void
     {
+        $this->refreshUntouchedData();
+
         if ($this->{$this->getKey()} && ! $this->is_locked) {
             $this->update();
         } elseif ($this->{$this->getKey()} && $this->is_locked) {
@@ -310,6 +319,8 @@ class OrderForm extends FluxForm
 
     public function updateLocked(): void
     {
+        $this->refreshUntouchedData();
+
         $response = $this->makeAction('update_locked')
             ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
             ->validate()

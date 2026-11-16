@@ -45,6 +45,8 @@ class TargetForm extends FluxForm
 
     public function fill($values): void
     {
+        $model = $values instanceof Target ? $values : null;
+
         if ($values instanceof Target) {
             $values->loadMissing([
                 'users' => fn (BelongsToMany $query) => $query
@@ -71,6 +73,10 @@ class TargetForm extends FluxForm
         }
 
         parent::fill($values);
+
+        if ($model) {
+            $this->rememberLoadedData($model);
+        }
     }
 
     public function modalName(): ?string

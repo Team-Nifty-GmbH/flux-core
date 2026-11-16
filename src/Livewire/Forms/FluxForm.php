@@ -7,12 +7,19 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Support\Livewire\Attributes\ExcludeFromActionData;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
+use Livewire\Attributes\Locked;
 use Livewire\Drawer\Utils;
 use Livewire\Form as BaseForm;
 use ReflectionProperty;
 
 abstract class FluxForm extends BaseForm
 {
+    #[ExcludeFromActionData, Locked]
+    public array $loadedData = [];
+
+    #[ExcludeFromActionData, Locked]
+    public ?string $loadedModel = null;
+
     protected mixed $actionResult = null;
 
     protected bool $asyncAction = false;
@@ -88,6 +95,15 @@ abstract class FluxForm extends BaseForm
         $this->reset();
     }
 
+    public function fill($values): void
+    {
+        parent::fill($values);
+
+        if ($values instanceof Model) {
+            $this->rememberLoadedData($values);
+        }
+    }
+
     public function getActionResult(): mixed
     {
         return $this->actionResult;
@@ -102,6 +118,32 @@ abstract class FluxForm extends BaseForm
         return app($this->modelClass)->query()
             ->where($this->getKey(), data_get($this, $this->getKey()))
             ->first();
+    }
+
+    public function refreshUntouchedData(): void
+    {
+        if (is_null($this->loadedModel)) {
+            return;
+        }
+
+        $model = resolve_static($this->loadedModel, 'query')
+            ->whereKey(data_get($this, $this->getKey()))
+            ->first();
+
+        if (is_null($model)) {
+            return;
+        }
+
+        $current = clone $this;
+        $current->fill($model);
+
+        foreach ($this->toActionData() as $key => $value) {
+            if (array_key_exists($key, $this->loadedData) && $this->loadedData[$key] === $value) {
+                $this->{$key} = $current->{$key};
+            }
+        }
+
+        $this->loadedData = $current->loadedData;
     }
 
     public function restore(): void
@@ -155,6 +197,8 @@ abstract class FluxForm extends BaseForm
 
     public function update(): void
     {
+        $this->refreshUntouchedData();
+
         $action = $this->makeAction('update')
             ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
             ->validate();
@@ -216,5 +260,11 @@ abstract class FluxForm extends BaseForm
     protected function makeAction(string $name, ?array $data = null): FluxAction
     {
         return $this->getActions()[$name]::make($data ?? $this->toActionData());
+    }
+
+    protected function rememberLoadedData(Model $model): void
+    {
+        $this->loadedData = $this->toActionData();
+        $this->loadedModel = $model::class;
     }
 }

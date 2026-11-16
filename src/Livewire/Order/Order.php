@@ -742,6 +742,7 @@ class Order extends Component
     #[Renderless]
     public function save(): bool
     {
+        $this->order->refreshUntouchedData();
         $this->order->address_delivery = $this->order->address_delivery ?: [];
         try {
             $action = (
@@ -751,8 +752,6 @@ class Order extends Component
             )
                 ->checkPermission()
                 ->validate();
-
-            $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this, form: $this->order);
 
@@ -760,6 +759,8 @@ class Order extends Component
         }
 
         $action->execute();
+        $this->fetchOrder($this->order->id);
+        $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         $this->toast()
             ->success(__(':model saved', ['model' => __('Order')]))
             ->send();
@@ -1116,8 +1117,6 @@ class Order extends Component
             ->firstOrFail();
 
         $this->order->fill($order);
-
-        $this->order->users = $order->users->pluck('id')->toArray();
 
         $this->printLayouts = $this->mapPrintLayouts();
 
