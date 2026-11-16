@@ -121,7 +121,7 @@ test('disposes the fixed asset and reverts the disposal', function (): void {
         ->assertSet('fixedAsset.book_value', 35000.0);
 });
 
-test('knows whether depreciations are booked so delete is hidden', function (): void {
+test('knows whether depreciations are booked so delete and reverse are shown accordingly', function (): void {
     $this->travelTo('2026-05-15');
 
     Livewire::test(FixedAsset::class, ['id' => $this->fixedAsset->getKey()])

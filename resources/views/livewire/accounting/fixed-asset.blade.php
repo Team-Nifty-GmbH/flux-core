@@ -75,7 +75,7 @@
                     color="amber"
                     :text="__('Reverse Bookings')"
                     x-cloak
-                    x-show="!isEditing && !$wire.fixedAsset.disposed_at"
+                    x-show="!isEditing && !$wire.fixedAsset.disposed_at && $wire.hasBookedDepreciations"
                     class="w-full"
                     x-on:click="$tsui.open.modal('reverse-depreciations')"
                 />
