@@ -12,6 +12,8 @@ use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\AbsenceRequest\AbsenceRequest;
 use FluxErp\Livewire\Accounting\DirectDebit;
+use FluxErp\Livewire\Accounting\FixedAsset;
+use FluxErp\Livewire\Accounting\FixedAssets;
 use FluxErp\Livewire\Accounting\LedgerBookings;
 use FluxErp\Livewire\Accounting\Loan;
 use FluxErp\Livewire\Accounting\Loans;
@@ -310,6 +312,9 @@ Route::middleware('web')
                 Route::name('accounting.')->prefix('accounting')
                     ->group(function (): void {
                         Route::get('/commissions', CommissionList::class)->name('commissions');
+                        Route::get('/fixed-assets', FixedAssets::class)->name('fixed-assets');
+                        Route::get('/fixed-assets/{id}', FixedAsset::class)->where('id', '[0-9]+')->name('fixed-assets.id')
+                            ->metadata(['model' => 'fixed_asset']);
                         Route::get('/ledger-bookings', LedgerBookings::class)->name('ledger-bookings');
                         Route::get('/loans', Loans::class)->name('loans');
                         Route::get('/loans/{id}', Loan::class)->where('id', '[0-9]+')->name('loans.id')

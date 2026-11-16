@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Casts\Money;
 use FluxErp\Enums\DepreciationMethodEnum;
 use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasFrontendAttributes;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasTenantAssignment;
 use FluxErp\Traits\Model\HasUserModification;
@@ -12,10 +13,14 @@ use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class FixedAsset extends FluxModel
+class FixedAsset extends FluxModel implements InteractsWithDataTables
 {
-    use Filterable, HasPackageFactory, HasTenantAssignment, HasUserModification, HasUuid, SoftDeletes;
+    use Filterable, HasFrontendAttributes, HasPackageFactory, HasTenantAssignment, HasUserModification, HasUuid,
+        SoftDeletes;
+
+    protected ?string $detailRouteName = 'accounting.fixed-assets.id';
 
     protected function casts(): array
     {
@@ -79,6 +84,26 @@ class FixedAsset extends FluxModel
         );
 
         return $this;
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        return null;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->number;
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->name;
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->detailRoute();
     }
 
     public function hasBookedDepreciations(): bool

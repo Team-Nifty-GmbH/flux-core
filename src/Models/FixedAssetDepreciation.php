@@ -27,7 +27,7 @@ class FixedAssetDepreciation extends FluxModel
         return filled($type) && is_a(morphed_model($type) ?? $type, FixedAssetDepreciation::class, true);
     }
 
-    protected static function externallyDepreciated(Builder $query): Builder
+    public static function externallyDepreciated(Builder $query): Builder
     {
         return $query->whereColumn(
             'fixed_assets.externally_depreciated_until',
