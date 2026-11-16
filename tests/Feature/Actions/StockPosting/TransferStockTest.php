@@ -484,6 +484,114 @@ test('a serial number outside the source storage area is rejected and nothing is
         ->and(StockPosting::query()->count())->toBe($count);
 });
 
+test('a transfer restricted to stock postings only moves those layers', function (): void {
+    $lot = Lot::factory()->create(['product_id' => $this->product->getKey()]);
+    $foreign = StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'storage_area_id' => $this->from->getKey(),
+        'lot_id' => $lot->getKey(),
+        'posting' => 5,
+        'purchase_price' => 2,
+    ]);
+    $own = StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'storage_area_id' => $this->from->getKey(),
+        'lot_id' => $lot->getKey(),
+        'posting' => 5,
+        'purchase_price' => 7,
+    ]);
+
+    $incoming = TransferStock::make([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'from_storage_area_id' => $this->from->getKey(),
+        'to_storage_area_id' => $this->to->getKey(),
+        'stock_posting_ids' => [$own->getKey()],
+        'amount' => 3,
+    ])->validate()->execute();
+
+    expect($incoming)->toHaveCount(1)
+        ->and($incoming->first()->parent_id)->toBe($own->getKey())
+        ->and(bccomp($incoming->first()->purchase_price, '7', 10))->toBe(0)
+        ->and(bccomp($own->fresh()->remaining_stock, '2', 10))->toBe(0)
+        ->and(bccomp($foreign->fresh()->remaining_stock, '5', 10))->toBe(0);
+});
+
+test('a transfer restricted to stock postings that cannot cover the amount is rejected', function (): void {
+    $own = StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'storage_area_id' => $this->from->getKey(),
+        'posting' => 2,
+    ]);
+    StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'storage_area_id' => $this->from->getKey(),
+        'posting' => 10,
+    ]);
+    $count = StockPosting::query()->count();
+
+    $transfer = TransferStock::make([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'from_storage_area_id' => $this->from->getKey(),
+        'to_storage_area_id' => $this->to->getKey(),
+        'stock_posting_ids' => [$own->getKey()],
+        'amount' => 3,
+    ])->validate();
+
+    expect(fn () => $transfer->execute())->toThrow(ValidationException::class)
+        ->and(StockPosting::query()->count())->toBe($count);
+});
+
+test('a stock posting outside the source of the transfer is rejected and nothing is booked', function (array $attributes): void {
+    StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'storage_area_id' => $this->from->getKey(),
+        'posting' => 5,
+    ]);
+    $elsewhere = StockPosting::factory()->create(array_merge([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'storage_area_id' => $this->from->getKey(),
+        'posting' => 5,
+    ], $attributes));
+    $count = StockPosting::query()->count();
+
+    TransferStock::assertValidationErrors([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'from_storage_area_id' => $this->from->getKey(),
+        'to_storage_area_id' => $this->to->getKey(),
+        'stock_posting_ids' => [$elsewhere->getKey()],
+        'amount' => 1,
+    ], 'stock_posting_ids');
+
+    expect(StockPosting::query()->count())->toBe($count);
+})->with([
+    'other storage area' => [fn () => ['storage_area_id' => $this->to->getKey()]],
+    'other product' => [fn () => ['product_id' => Product::factory()->create()->getKey()]],
+    'other warehouse' => [fn () => [
+        'warehouse_id' => ($warehouse = Warehouse::factory()->create())->getKey(),
+        'storage_area_id' => StorageArea::factory()->create(['warehouse_id' => $warehouse->getKey()])->getKey(),
+    ]],
+]);
+
+test('a stock posting that does not exist is rejected', function (): void {
+    TransferStock::assertValidationErrors([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'from_storage_area_id' => $this->from->getKey(),
+        'to_storage_area_id' => $this->to->getKey(),
+        'stock_posting_ids' => [(StockPosting::query()->max('id') ?? 0) + 1],
+        'amount' => 1,
+    ], 'stock_posting_ids.0');
+});
+
 test('a transfer returns its incoming stock postings', function (): void {
     StockPosting::factory()->count(2)->create([
         'warehouse_id' => $this->warehouse->getKey(),

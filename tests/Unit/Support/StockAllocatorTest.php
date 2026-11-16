@@ -226,3 +226,13 @@ test('a layer without storage area scope only takes layers outside any storage a
 
     expect($allocation->pluck('stockPosting.id')->all())->toBe([$loose->getKey()]);
 });
+
+test('a stock posting scope only takes those layers', function (): void {
+    ($this->layer)(5);
+    $wanted = ($this->layer)(5);
+
+    $allocation = ($this->allocator)()->forStockPostings([$wanted->getKey()])->allocate(10);
+
+    expect($allocation->pluck('stockPosting.id')->all())->toBe([$wanted->getKey()])
+        ->and(bccomp($allocation[0]['amount'], '5', 10))->toBe(0);
+});

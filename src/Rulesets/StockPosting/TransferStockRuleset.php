@@ -46,6 +46,13 @@ class TransferStockRuleset extends FluxRuleset
                 'distinct',
                 app(ModelExists::class, ['model' => SerialNumber::class]),
             ],
+            'stock_posting_ids' => 'nullable|array',
+            'stock_posting_ids.*' => [
+                'required',
+                'integer',
+                'distinct',
+                app(ModelExists::class, ['model' => StockPosting::class]),
+            ],
             'to_storage_area_id' => [
                 'nullable',
                 'integer',

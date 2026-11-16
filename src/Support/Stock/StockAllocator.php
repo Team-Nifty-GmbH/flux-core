@@ -25,6 +25,7 @@ class StockAllocator
         protected ?StockRemovalStrategyEnum $strategy = null,
         protected ?array $serialNumberIds = null,
         protected bool $withoutStorageArea = false,
+        protected ?array $stockPostingIds = null,
     ) {}
 
     /**
@@ -72,6 +73,13 @@ class StockAllocator
         return $this;
     }
 
+    public function forStockPostings(?array $stockPostingIds): static
+    {
+        $this->stockPostingIds = $stockPostingIds;
+
+        return $this;
+    }
+
     public function inStorageAreas(array $storageAreaIds): static
     {
         $this->storageAreaIds = $storageAreaIds;
@@ -92,6 +100,10 @@ class StockAllocator
             ->where('stock_postings.product_id', $this->productId)
             ->where('stock_postings.warehouse_id', $this->warehouseId)
             ->where('stock_postings.remaining_stock', '>', 0)
+            ->when(
+                $this->stockPostingIds,
+                fn (Builder $query) => $query->whereIntegerInRaw('stock_postings.id', $this->stockPostingIds)
+            )
             ->when(
                 $this->serialNumberIds,
                 fn (Builder $query) => $query->whereIntegerInRaw('stock_postings.serial_number_id', $this->serialNumberIds)

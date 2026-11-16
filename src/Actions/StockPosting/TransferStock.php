@@ -36,6 +36,7 @@ class TransferStock extends FluxAction
             lotId: $this->getData('lot_id'),
             serialNumberIds: $serialNumberIds,
             withoutStorageArea: ! $fromStorageAreaId,
+            stockPostingIds: $this->getData('stock_posting_ids') ?: null,
         )
             ->allocate($this->getData('amount'));
 
@@ -156,6 +157,19 @@ class TransferStock extends FluxAction
             && bccomp((string) count($serialNumberIds), (string) $this->getData('amount'), 10) !== 0
         ) {
             $errors['serial_number_ids'][] = 'The number of serial numbers must match the amount';
+        }
+
+        $stockPostingIds = $this->getData('stock_posting_ids');
+        if (
+            $stockPostingIds
+            && resolve_static(StockPosting::class, 'query')
+                ->whereKey($stockPostingIds)
+                ->where('product_id', $this->getData('product_id'))
+                ->where('warehouse_id', $this->getData('warehouse_id'))
+                ->where('storage_area_id', $fromStorageAreaId)
+                ->count() !== count($stockPostingIds)
+        ) {
+            $errors['stock_posting_ids'][] = 'The stock postings do not belong to the source of the transfer';
         }
 
         if ($errors) {
