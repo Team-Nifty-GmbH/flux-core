@@ -87,6 +87,8 @@ class AddressForm extends FluxForm
 
     public function fill($values): void
     {
+        $model = $values instanceof Address ? $values : null;
+
         if ($values instanceof Address) {
             $values->loadMissing(['contactOptions', 'tags:id', 'tenants:id']);
 
@@ -110,6 +112,10 @@ class AddressForm extends FluxForm
 
         if (! is_null($this->date_of_birth)) {
             $this->date_of_birth = Carbon::create($this->date_of_birth)->isoFormat('YYYY-MM-DD');
+        }
+
+        if ($model) {
+            $this->rememberLoadedData($model);
         }
     }
 

@@ -1,6 +1,7 @@
 <?php
 
 use FluxErp\Actions\ContactBankConnection\CalculateContactBankConnectionBalance;
+use FluxErp\Actions\Printing;
 use FluxErp\Enums\CreditAccountPostingEnum;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Enums\RepeatableTypeEnum;
@@ -181,6 +182,53 @@ test('create documents', function (): void {
 
     $invoice = $this->order->invoice();
     expect($invoice?->getPath())->not->toBeNull();
+});
+
+test('saving keeps the invoice state booked while the order was open', function (): void {
+    Storage::fake();
+
+    $this->order->update(['is_locked' => false, 'invoice_number' => null]);
+
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertSet('order.invoice_number', null);
+
+    Printing::make([
+        'model_type' => morph_alias(Order::class),
+        'model_id' => $this->order->getKey(),
+        'view' => 'invoice',
+    ])
+        ->validate()
+        ->execute();
+
+    $invoiced = $this->order->refresh();
+    $state = (string) $invoiced->state;
+    $nextReminderDate = $invoiced->payment_reminder_next_date?->toDateString();
+
+    expect($invoiced->invoice_number)->not->toBeNull()
+        ->and($state)->toBe(Open::$name)
+        ->and($nextReminderDate)->not->toBeNull();
+
+    $component
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    $saved = $this->order->refresh();
+    expect((string) $saved->state)->toBe($state)
+        ->and($saved->payment_reminder_next_date?->toDateString())->toBe($nextReminderDate);
+});
+
+test('saving a locked order still writes what the user changed', function (): void {
+    $this->order->update(['is_locked' => true, 'payment_reminder_next_date' => now()->addDays(3)]);
+    $nextReminderDate = now()->addDays(10)->toDateString();
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('order.payment_reminder_next_date', $nextReminderDate)
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($this->order->refresh()->payment_reminder_next_date?->toDateString())->toBe($nextReminderDate);
 });
 
 test('the invoice preview carries what the lightbox needs', function (): void {

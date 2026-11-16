@@ -85,3 +85,22 @@ test('save validates required fields', function (): void {
         ->call('save')
         ->assertReturned(false);
 });
+
+test('saving keeps a field changed elsewhere since the form was loaded', function (): void {
+    $unit = Unit::factory()->create(['name' => 'Piece', 'abbreviation' => 'pc']);
+
+    $component = Livewire::test(Units::class)
+        ->call('edit', $unit->getKey());
+
+    $unit->update(['abbreviation' => 'pcs']);
+
+    $component
+        ->set('unit.name', 'Pieces')
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    $unit->refresh();
+    expect($unit->name)->toBe('Pieces')
+        ->and($unit->abbreviation)->toBe('pcs');
+});
