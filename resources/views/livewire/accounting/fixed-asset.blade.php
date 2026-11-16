@@ -86,7 +86,7 @@
                     loading="delete"
                     :text="__('Delete')"
                     x-cloak
-                    x-show="!isEditing"
+                    x-show="!isEditing && !$wire.hasBookedDepreciations"
                     class="w-full"
                     wire:click="delete()"
                     wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Fixed Asset')]) }}"

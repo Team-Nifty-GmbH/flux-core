@@ -13,7 +13,9 @@ use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -25,6 +27,9 @@ class FixedAsset extends Component
     use Actions, WithTabs;
 
     public FixedAssetForm $fixedAsset;
+
+    #[Locked]
+    public bool $hasBookedDepreciations = false;
 
     public array $queryString = [
         'tab' => ['except' => 'fixed-asset.general'],
@@ -42,7 +47,10 @@ class FixedAsset extends Component
             throw new NotFoundHttpException('Tab not found');
         }
 
-        $this->fixedAsset->fill($this->loadFixedAsset($id));
+        $fixedAsset = $this->loadFixedAsset($id);
+
+        $this->fixedAsset->fill($fixedAsset);
+        $this->hasBookedDepreciations = $fixedAsset->has_booked_depreciations;
     }
 
     public function render(): View|Factory|Application
@@ -108,6 +116,7 @@ class FixedAsset extends Component
 
         $this->fixedAsset->reset();
         $this->fixedAsset->fill($fixedAsset);
+        $this->hasBookedDepreciations = $fixedAsset->has_booked_depreciations;
     }
 
     public function reverse(): bool
@@ -165,6 +174,9 @@ class FixedAsset extends Component
     {
         return resolve_static(FixedAssetModel::class, 'query')
             ->whereKey($id)
+            ->withExists([
+                'depreciations as has_booked_depreciations' => fn (Builder $query): Builder => $query->booked(),
+            ])
             ->firstOrFail();
     }
 }

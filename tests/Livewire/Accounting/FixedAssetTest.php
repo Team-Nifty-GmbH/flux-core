@@ -88,3 +88,15 @@ test('marks the months depreciated elsewhere in the schedule', function (): void
     expect(data_get($depreciations, 'data.1.status.raw'))->toBe('Booked Elsewhere')
         ->and($this->fixedAsset->refresh()->book_value)->toEqual(35000);
 });
+
+test('knows whether depreciations are booked so delete is hidden', function (): void {
+    $this->travelTo('2026-05-15');
+
+    Livewire::test(FixedAsset::class, ['id' => $this->fixedAsset->getKey()])
+        ->assertSet('hasBookedDepreciations', false)
+        ->call('book')
+        ->assertSet('hasBookedDepreciations', true)
+        ->set('reverseFrom', '2026-03-01')
+        ->call('reverse')
+        ->assertSet('hasBookedDepreciations', false);
+});
