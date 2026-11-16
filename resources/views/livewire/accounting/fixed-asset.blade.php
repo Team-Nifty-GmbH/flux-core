@@ -75,7 +75,7 @@
                     color="amber"
                     :text="__('Reverse Bookings')"
                     x-cloak
-                    x-show="!isEditing"
+                    x-show="!isEditing && $wire.hasBookedDepreciations"
                     class="w-full"
                     x-on:click="$tsui.open.modal('reverse-depreciations')"
                 />

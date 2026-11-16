@@ -89,7 +89,7 @@ test('marks the months depreciated elsewhere in the schedule', function (): void
         ->and($this->fixedAsset->refresh()->book_value)->toEqual(35000);
 });
 
-test('knows whether depreciations are booked so delete is hidden', function (): void {
+test('knows whether depreciations are booked so delete and reverse are shown accordingly', function (): void {
     $this->travelTo('2026-05-15');
 
     Livewire::test(FixedAsset::class, ['id' => $this->fixedAsset->getKey()])
