@@ -83,6 +83,7 @@
             :label="__('Useful Life In Months')"
             step="1"
             min="1"
+            max="600"
             required
         />
     </div>

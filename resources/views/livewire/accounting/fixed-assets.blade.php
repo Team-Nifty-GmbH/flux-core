@@ -4,6 +4,7 @@
         x-init="
             $watch('$wire.fixedAsset.order_id', (orderId) => {
                 $wire.fixedAsset.order_position_id = null;
+                $wire.existingFixedAssets = [];
                 $tallstackuiSelect(
                     'fixed-asset-order-position',
                 ).mergeRequestParams({
@@ -47,6 +48,19 @@
                     ]"
                 />
             </div>
+        </div>
+        <div x-cloak x-show="$wire.existingFixedAssets.length">
+            <x-alert color="amber" light>
+                {{ __('This position already has fixed assets. Only create another one if the position covers several assets.') }}
+                <template x-for="asset in $wire.existingFixedAssets">
+                    <a
+                        class="block underline"
+                        x-bind:href="asset.url"
+                        x-text="asset.name"
+                        wire:navigate
+                    ></a>
+                </template>
+            </x-alert>
         </div>
         <x-flux::fixed-asset.fields />
         <p class="text-sm text-gray-500 dark:text-gray-400">

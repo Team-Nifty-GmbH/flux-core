@@ -21,6 +21,8 @@ class FixedAssets extends FixedAssetList
 {
     public ?string $includeBefore = 'flux::livewire.accounting.fixed-assets';
 
+    public array $existingFixedAssets = [];
+
     public FixedAssetForm $fixedAsset;
 
     protected function getTableActions(): array
@@ -93,6 +95,15 @@ class FixedAssets extends FixedAssetList
             'acquired_at' => ($orderPosition->order->system_delivery_date ?? $orderPosition->order->invoice_date)
                 ?->toDateString(),
         ]);
+
+        $this->existingFixedAssets = resolve_static(FixedAsset::class, 'query')
+            ->where('order_position_id', $orderPosition->getKey())
+            ->get(['id', 'name'])
+            ->map(fn (FixedAsset $fixedAsset): array => [
+                'name' => $fixedAsset->name,
+                'url' => route('accounting.fixed-assets.id', ['id' => $fixedAsset->getKey()]),
+            ])
+            ->all();
     }
 
     public function delete(FixedAsset $fixedAsset): bool
@@ -117,6 +128,7 @@ class FixedAssets extends FixedAssetList
     public function edit(): void
     {
         $this->fixedAsset->reset();
+        $this->reset('existingFixedAssets');
 
         $this->modalOpen('edit-fixed-asset-modal');
     }
