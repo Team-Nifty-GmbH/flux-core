@@ -3,7 +3,7 @@
 namespace FluxErp\Actions\LedgerBooking;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Models\FixedAssetDepreciation;
+use FluxErp\Models\FixedAsset;
 use FluxErp\Models\LedgerBooking;
 use FluxErp\Rulesets\LedgerBooking\UpdateLedgerBookingRuleset;
 use Illuminate\Validation\ValidationException;
@@ -42,11 +42,11 @@ class UpdateLedgerBooking extends FluxAction
             ->whereKey($this->getData('id'))
             ->firstOrFail(['id', 'debit_ledger_account_id', 'credit_ledger_account_id', 'source_type']);
 
-        if (resolve_static(FixedAssetDepreciation::class, 'isMorphType', [$ledgerBooking->source_type])
-            || resolve_static(FixedAssetDepreciation::class, 'isMorphType', [$this->getData('source_type')])
+        if (resolve_static(FixedAsset::class, 'ownsLedgerBookingSource', [$ledgerBooking->source_type])
+            || resolve_static(FixedAsset::class, 'ownsLedgerBookingSource', [$this->getData('source_type')])
         ) {
             throw ValidationException::withMessages([
-                'source_type' => [__('Depreciation bookings are managed by their fixed asset.')],
+                'source_type' => [__('Fixed asset bookings are managed by their fixed asset.')],
             ]);
         }
 

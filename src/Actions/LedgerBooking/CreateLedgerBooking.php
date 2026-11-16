@@ -3,7 +3,7 @@
 namespace FluxErp\Actions\LedgerBooking;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Models\FixedAssetDepreciation;
+use FluxErp\Models\FixedAsset;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\LedgerBooking;
 use FluxErp\Models\Scopes\UserTenantScope;
@@ -40,9 +40,9 @@ class CreateLedgerBooking extends FluxAction
     {
         parent::validateData();
 
-        if (resolve_static(FixedAssetDepreciation::class, 'isMorphType', [$this->getData('source_type')])) {
+        if (resolve_static(FixedAsset::class, 'ownsLedgerBookingSource', [$this->getData('source_type')])) {
             throw ValidationException::withMessages([
-                'source_type' => [__('Depreciation bookings are managed by their fixed asset.')],
+                'source_type' => [__('Fixed asset bookings are managed by their fixed asset.')],
             ]);
         }
 

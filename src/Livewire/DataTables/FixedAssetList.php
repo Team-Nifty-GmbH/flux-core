@@ -13,6 +13,7 @@ class FixedAssetList extends BaseDataTable
         'acquisition_cost',
         'book_value',
         'useful_life_months',
+        'disposed_at',
     ];
 
     public array $formatters = [
@@ -21,6 +22,7 @@ class FixedAssetList extends BaseDataTable
         'residual_value' => 'money',
         'book_value' => 'money',
         'depreciation_starts_at' => 'date',
+        'disposed_at' => 'date',
     ];
 
     public array $sortable = [

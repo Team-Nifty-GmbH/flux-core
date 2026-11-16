@@ -44,9 +44,9 @@ class DeleteFixedAsset extends FluxAction
 
     protected function ensureNothingBooked(FixedAsset $fixedAsset): void
     {
-        if ($fixedAsset->hasBookedDepreciations()) {
+        if ($fixedAsset->hasBookedDepreciations() || $fixedAsset->disposed_at) {
             throw ValidationException::withMessages([
-                'id' => [__('A fixed asset with booked depreciations cannot be deleted.')],
+                'id' => [__('A fixed asset with bookings or a disposal cannot be deleted.')],
             ]);
         }
     }
