@@ -21,6 +21,14 @@
                 :request="[
                     'url' => route('search', \FluxErp\Models\Order::class),
                     'method' => 'POST',
+                    'params' => [
+                        'whereRelation' => [
+                            'orderType',
+                            'order_type_enum',
+                            '=',
+                            \FluxErp\Enums\OrderTypeEnum::Purchase->value,
+                        ],
+                    ],
                 ]"
             />
             <div
