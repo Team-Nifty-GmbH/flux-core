@@ -78,7 +78,7 @@ class CreateFixedAssetRuleset extends FluxRuleset
                 app(EnumRule::class, ['type' => DepreciationMethodEnum::class]),
             ],
             'externally_depreciated_until' => 'nullable|date|before_or_equal:today',
-            'useful_life_months' => 'required|integer|min:1|max:1200',
+            'useful_life_months' => 'required|integer|min:1|max:600',
         ];
     }
 }
