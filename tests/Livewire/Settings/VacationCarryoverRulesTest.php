@@ -26,6 +26,21 @@ test('can create vacation carryover rule with expiry date', function (): void {
     ]);
 });
 
+test('expiry month is not limited to the following year', function (): void {
+    Livewire::test(VacationCarryoverRules::class)
+        ->call('edit')
+        ->set('vacationCarryoverRuleForm.name', 'Carry for 18 months')
+        ->set('vacationCarryoverRuleForm.expires_at_month', 18)
+        ->set('vacationCarryoverRuleForm.expires_at_day', 1)
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $this->assertDatabaseHas('vacation_carryover_rules', [
+        'name' => 'Carry for 18 months',
+        'expires_at_month' => 18,
+    ]);
+});
+
 test('form fields bind to existing form properties', function (): void {
     Livewire::test(VacationCarryoverRules::class)
         ->assertDontSeeHtml('vacationCarryoverRuleForm.expires_after_months')

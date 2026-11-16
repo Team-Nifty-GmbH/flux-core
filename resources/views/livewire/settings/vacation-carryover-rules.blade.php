@@ -28,7 +28,6 @@
                 <x-number
                     wire:model="vacationCarryoverRuleForm.expires_at_month"
                     min="1"
-                    max="12"
                     :label="__('Expires At Month')"
                 />
             </div>
