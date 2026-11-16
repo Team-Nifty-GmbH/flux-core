@@ -30,9 +30,7 @@ class CreateFixedAsset extends FluxAction
         $fixedAsset = app(FixedAsset::class, ['attributes' => $this->getData()]);
         $fixedAsset->save();
 
-        foreach ($this->schedule as $depreciation) {
-            $fixedAsset->depreciations()->create($depreciation);
-        }
+        $fixedAsset->depreciations()->createMany($this->schedule);
 
         $fixedAsset->calculateBookValue()
             ->save();

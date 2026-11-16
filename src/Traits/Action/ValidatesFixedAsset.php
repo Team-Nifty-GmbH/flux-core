@@ -29,14 +29,14 @@ trait ValidatesFixedAsset
                 ->doesntExist()
         ) {
             $errors['contact_id'] = [
-                __('The selected :attribute must belong to the fixed asset tenant.', ['attribute' => 'contact_id']),
+                __('The selected :attribute must belong to the fixed asset tenant.', ['attribute' => __('Supplier')]),
             ];
         }
 
         foreach ([
-            'ledger_account_id' => LedgerAccountTypeEnum::Asset,
-            'depreciation_ledger_account_id' => LedgerAccountTypeEnum::Expense,
-        ] as $attribute => $type) {
+            'ledger_account_id' => [LedgerAccountTypeEnum::Asset, __('Fixed Asset Account')],
+            'depreciation_ledger_account_id' => [LedgerAccountTypeEnum::Expense, __('Depreciation Account')],
+        ] as $attribute => [$type, $label]) {
             if (in_array($attribute, $keys)
                 && resolve_static(LedgerAccount::class, 'query')
                     ->withoutGlobalScopes()
@@ -47,7 +47,7 @@ trait ValidatesFixedAsset
             ) {
                 $errors[$attribute] = [
                     __('The selected :attribute must be a :type account of the fixed asset tenant.', [
-                        'attribute' => $attribute,
+                        'attribute' => $label,
                         'type' => __($type->name),
                     ]),
                 ];
@@ -63,7 +63,7 @@ trait ValidatesFixedAsset
                 ->doesntExist()
         ) {
             $errors['order_id'] = [
-                __('The selected :attribute must belong to the fixed asset tenant.', ['attribute' => 'order_id']),
+                __('The selected :attribute must belong to the fixed asset tenant.', ['attribute' => __('Purchase Order')]),
             ];
         }
 
@@ -80,7 +80,10 @@ trait ValidatesFixedAsset
                 ->doesntExist()
         ) {
             $errors['order_position_id'] = [
-                __('The selected :attribute must belong to the order of the fixed asset.', ['attribute' => 'order_position_id']),
+                __(
+                    'The selected :attribute must belong to the order of the fixed asset.',
+                    ['attribute' => __('Order Position')]
+                ),
             ];
         }
 

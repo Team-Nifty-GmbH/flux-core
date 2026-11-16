@@ -38,7 +38,7 @@ class DeleteFixedAsset extends FluxAction
         $this->ensureNothingBooked(
             resolve_static(FixedAsset::class, 'query')
                 ->whereKey($this->getData('id'))
-                ->firstOrFail()
+                ->firstOrFail(['id'])
         );
     }
 
