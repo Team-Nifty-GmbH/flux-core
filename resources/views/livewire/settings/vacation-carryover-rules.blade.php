@@ -18,13 +18,20 @@
                 :hint="__('Maximum vacation days that can be carried over to next year')"
             />
 
-            <x-number
-                wire:model="vacationCarryoverRuleForm.expires_after_months"
-                min="0"
-                max="24"
-                :label="__('Expires After Months')"
-                :hint="__('Number of months after which carried over days expire')"
-            />
+            <div class="grid grid-cols-2 gap-4">
+                <x-number
+                    wire:model="vacationCarryoverRuleForm.expires_at_day"
+                    min="1"
+                    max="31"
+                    :label="__('Expires At Day')"
+                />
+                <x-number
+                    wire:model="vacationCarryoverRuleForm.expires_at_month"
+                    min="1"
+                    max="12"
+                    :label="__('Expires At Month')"
+                />
+            </div>
 
             <x-toggle
                 wire:model="vacationCarryoverRuleForm.is_active"
