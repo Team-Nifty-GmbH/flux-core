@@ -1118,8 +1118,6 @@ class Order extends Component
 
         $this->order->fill($order);
 
-        $this->order->users = $order->users->pluck('id')->toArray();
-
         $this->printLayouts = $this->mapPrintLayouts();
 
         $invoice = $order->invoice();

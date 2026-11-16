@@ -252,6 +252,7 @@ class OrderForm extends FluxForm
                     'avatarUrl' => $values->contact?->getFirstMediaUrl('avatar'),
                 ],
             );
+            $values['users'] = array_column($values['users'] ?? [], 'id');
         }
 
         parent::fill($values);
@@ -293,6 +294,8 @@ class OrderForm extends FluxForm
 
     public function save(): void
     {
+        $this->refreshUntouchedData();
+
         if ($this->{$this->getKey()} && ! $this->is_locked) {
             $this->update();
         } elseif ($this->{$this->getKey()} && $this->is_locked) {

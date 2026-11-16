@@ -127,7 +127,7 @@ class AddressForm extends FluxForm
 
     public function toActionData(): array
     {
-        $data = parent::toArray();
+        $data = parent::toActionData();
 
         $data['contact_options'] = array_filter($this->contact_options);
 

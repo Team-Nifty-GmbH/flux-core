@@ -66,6 +66,8 @@ class CommunicationForm extends FluxForm
             return;
         }
 
+        $model = $values instanceof Communication ? $values : null;
+
         if ($values instanceof Communication) {
             $values->loadMissing(['tags:id', 'communicatables']);
             $values->communicatables->map(function (Communicatable $communicatable): void {
@@ -107,6 +109,10 @@ class CommunicationForm extends FluxForm
 
             $this->slug = $message->mailAccount ?
                 $message->mailAccount->email . ' -> ' . $message->mailFolder?->slug : null;
+        }
+
+        if ($model) {
+            $this->rememberLoadedData($model);
         }
     }
 

@@ -231,6 +231,19 @@ test('saving a locked order still writes what the user changed', function (): vo
     expect($this->order->refresh()->payment_reminder_next_date?->toDateString())->toBe($nextReminderDate);
 });
 
+test('saving keeps users assigned while the order was open', function (): void {
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
+
+    $this->order->users()->sync([$this->user->getKey()]);
+
+    $component
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($this->order->users()->pluck('users.id')->all())->toBe([$this->user->getKey()]);
+});
+
 test('the invoice preview carries what the lightbox needs', function (): void {
     Storage::fake();
 
