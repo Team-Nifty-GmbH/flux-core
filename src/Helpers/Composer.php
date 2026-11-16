@@ -208,6 +208,11 @@ class Composer extends BaseComposer
             'XDEBUG_MODE' => 'off',
         ];
 
+        // A cached config keeps .env out of getenv(), so composer would miss its credentials.
+        if (! getenv('COMPOSER_AUTH') && $auth = config('flux.composer_auth')) {
+            $defaultEnv['COMPOSER_AUTH'] = $auth;
+        }
+
         $env = array_merge(
             $defaultEnv,
             $env
