@@ -42,21 +42,6 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
         $orderIds = [];
         foreach ($this->agents as $agentId => $agentData) {
             foreach (data_get($agentData, 'tenant_ids') as $tenantId) {
-                $order = CreateOrder::make([
-                    'order_type_id' => resolve_static(Tenant::class, 'query')
-                        ->whereKey($tenantId)
-                        ->value('commission_credit_note_order_type_id')
-                        ?? resolve_static(OrderType::class, 'query')
-                            ->where('order_type_enum', OrderTypeEnum::Refund)
-                            ->whereHasTenant($tenantId)
-                            ->value('id'),
-                    'tenant_id' => $tenantId,
-                    'contact_id' => data_get($agentData, 'contact_id'),
-                ])
-                    ->validate()
-                    ->execute();
-                $orderIds[] = $order->id;
-
                 $commissions = resolve_static(Commission::class, 'query')
                     ->where('user_id', $agentId)
                     ->whereKey($commissionIds)
@@ -80,7 +65,27 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
                         'user.contact.invoiceAddress:id,contact_id,country_id',
                         'user.contact.invoiceAddress.country:id,iso_alpha2',
                     ])
+                    ->lockForUpdate()
                     ->get();
+
+                if ($commissions->isEmpty()) {
+                    continue;
+                }
+
+                $order = CreateOrder::make([
+                    'order_type_id' => resolve_static(Tenant::class, 'query')
+                        ->whereKey($tenantId)
+                        ->value('commission_credit_note_order_type_id')
+                        ?? resolve_static(OrderType::class, 'query')
+                            ->where('order_type_enum', OrderTypeEnum::Refund)
+                            ->whereHasTenant($tenantId)
+                            ->value('id'),
+                    'tenant_id' => $tenantId,
+                    'contact_id' => data_get($agentData, 'contact_id'),
+                ])
+                    ->validate()
+                    ->execute();
+                $orderIds[] = $order->id;
 
                 foreach ($commissions as $commission) {
                     $orderPosition = CreateOrderPosition::make([
