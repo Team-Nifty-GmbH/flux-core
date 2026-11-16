@@ -59,7 +59,7 @@ class RevertFixedAssetDisposal extends FluxAction
         $this->ensureDisposed(
             resolve_static(FixedAsset::class, 'query')
                 ->whereKey($this->getData('fixed_asset_id'))
-                ->firstOrFail()
+                ->firstOrFail(['id', 'disposed_at'])
         );
     }
 }

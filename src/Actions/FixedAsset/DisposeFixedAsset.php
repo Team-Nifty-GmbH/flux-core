@@ -107,9 +107,14 @@ class DisposeFixedAsset extends FluxAction
             'disposal_ledger_account_id' => [
                 $this->getData('disposal_ledger_account_id'),
                 LedgerAccountTypeEnum::Expense,
+                __('Disposal Account'),
             ],
-            'ledger_account_id' => [$fixedAsset->ledger_account_id, LedgerAccountTypeEnum::Asset],
-        ] as $attribute => [$ledgerAccountId, $type]) {
+            'ledger_account_id' => [
+                $fixedAsset->ledger_account_id,
+                LedgerAccountTypeEnum::Asset,
+                __('Fixed Asset Account'),
+            ],
+        ] as $attribute => [$ledgerAccountId, $type, $label]) {
             if (resolve_static(LedgerAccount::class, 'query')
                 ->withoutGlobalScopes()
                 ->whereNull('deleted_at')
@@ -120,7 +125,7 @@ class DisposeFixedAsset extends FluxAction
             ) {
                 $errors[$attribute][] = __(
                     'The selected :attribute must be a :type account of the fixed asset tenant.',
-                    ['attribute' => $attribute, 'type' => __($type->name)]
+                    ['attribute' => $label, 'type' => __($type->name)]
                 );
             }
         }
