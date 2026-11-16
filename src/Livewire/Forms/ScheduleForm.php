@@ -68,12 +68,11 @@ class ScheduleForm extends FluxForm
             $this->cron['parameters']['timeConstraint']
         );
 
-        if (! is_null($this->name)) {
-            $this->parameters = array_merge(
-                Repeatable::get($this->name)['parameters'] ?? [],
-                $this->parameters
-            );
-        }
+        $this->parameters = array_merge(
+            ! is_null($this->name) ? data_get(Repeatable::get($this->name), 'parameters') ?? [] : [],
+            get_class_vars(static::class)['parameters'],
+            $this->parameters
+        );
 
         $this->end_radio = match (true) {
             ! is_null($this->ends_at) => 'ends_at',

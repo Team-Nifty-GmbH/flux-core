@@ -2006,3 +2006,60 @@ test('contract total prefill does not count a run that falls exactly on the end 
     'later run equals end' => ['2027-01-01 00:00:00', '2027-04-01 00:00:00', 3],
     'end after the last run' => ['2027-01-01 00:00:00', '2027-04-01 00:01:00', 4],
 ]);
+
+test('loading a schedule saved without newer parameters keeps their defaults', function (): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Subscription,
+    ]);
+
+    $targetOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    $scheduleId = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set([
+            'schedule.parameters.orderTypeId' => $targetOrderType->id,
+            'schedule.parameters.orderId' => $this->order->id,
+            'schedule.cron.methods.basic' => 'monthlyOn',
+            'schedule.cron.parameters.basic' => ['1', '00:00', null],
+        ])
+        ->call('saveSchedule')
+        ->assertReturned(true)
+        ->get('schedule.id');
+
+    Schedule::query()->whereKey($scheduleId)->update([
+        'parameters' => json_encode([
+            'orderId' => $this->order->id,
+            'orderTypeId' => $targetOrderType->id,
+        ]),
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertSet('schedule.id', $scheduleId)
+        ->assertSet('schedule.parameters.orderTypeId', $targetOrderType->id)
+        ->assertSet(
+            'schedule.parameters',
+            fn (array $parameters): bool => array_key_exists('minimumDurationValue', $parameters)
+                && array_key_exists('minimumDurationUnit', $parameters)
+                && array_key_exists('cancellationNoticeValue', $parameters)
+                && array_key_exists('cancellationNoticeUnit', $parameters)
+                && $parameters['autoPrint'] === false
+                && $parameters['printLayouts'] === []
+        )
+        ->set([
+            'schedule.parameters.minimumDurationValue' => 12,
+            'schedule.parameters.minimumDurationUnit' => 'months',
+        ])
+        ->call('saveSchedule')
+        ->assertReturned(true)
+        ->assertHasNoErrors();
+
+    expect(Schedule::query()->whereKey($scheduleId)->value('parameters'))
+        ->minimumDurationValue->toBe(12)
+        ->minimumDurationUnit->toBe('months')
+        ->orderTypeId->toBe($targetOrderType->id);
+});
