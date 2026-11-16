@@ -26,15 +26,16 @@ class TransferStock extends FluxAction
     public function performAction(): Collection
     {
         $description = $this->getData('description', 'Stock transfer');
+        $fromStorageAreaId = $this->getData('from_storage_area_id');
         $serialNumberIds = $this->getData('serial_number_ids') ?: null;
 
         $allocation = StockAllocator::make(
             productId: $this->getData('product_id'),
             warehouseId: $this->getData('warehouse_id'),
-            storageAreaIds: $this->getData('from_storage_area_id') ? [$this->getData('from_storage_area_id')] : null,
+            storageAreaIds: $fromStorageAreaId ? [$fromStorageAreaId] : null,
             lotId: $this->getData('lot_id'),
             serialNumberIds: $serialNumberIds,
-            withoutStorageArea: ! $this->getData('from_storage_area_id'),
+            withoutStorageArea: ! $fromStorageAreaId,
         )
             ->allocate($this->getData('amount'));
 
@@ -47,7 +48,9 @@ class TransferStock extends FluxAction
             bccomp($allocated, (string) $this->getData('amount'), 10) === -1
             || (
                 $serialNumberIds
-                && $allocation->pluck('stockPosting.serial_number_id')->unique()->count() !== count($serialNumberIds)
+                && $allocation->pluck('stockPosting.serial_number_id')
+                    ->unique()
+                    ->count() !== count($serialNumberIds)
             )
         ) {
             throw ValidationException::withMessages([
@@ -66,7 +69,7 @@ class TransferStock extends FluxAction
                 'parent_id' => $stockPosting->id,
                 'product_id' => $this->getData('product_id'),
                 'serial_number_id' => $stockPosting->serial_number_id,
-                'storage_area_id' => $this->getData('from_storage_area_id'),
+                'storage_area_id' => $fromStorageAreaId,
                 'warehouse_id' => $this->getData('warehouse_id'),
                 'posting' => bcmul($amount, -1),
                 'purchase_price' => $stockPosting->purchase_price,
@@ -147,8 +150,9 @@ class TransferStock extends FluxAction
             $errors['to_storage_area_id'][] = 'The target storage area cannot hold stock';
         }
 
+        $serialNumberIds = $this->getData('serial_number_ids');
         if (
-            ($serialNumberIds = $this->getData('serial_number_ids'))
+            $serialNumberIds
             && bccomp((string) count($serialNumberIds), (string) $this->getData('amount'), 10) !== 0
         ) {
             $errors['serial_number_ids'][] = 'The number of serial numbers must match the amount';

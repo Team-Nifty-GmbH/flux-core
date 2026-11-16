@@ -58,16 +58,16 @@ class StockAllocator
         return $this;
     }
 
-    public function forSerialNumbers(?array $serialNumberIds): static
+    public function forProduct(int $productId): static
     {
-        $this->serialNumberIds = $serialNumberIds;
+        $this->productId = $productId;
 
         return $this;
     }
 
-    public function forProduct(int $productId): static
+    public function forSerialNumbers(?array $serialNumberIds): static
     {
-        $this->productId = $productId;
+        $this->serialNumberIds = $serialNumberIds;
 
         return $this;
     }
@@ -94,7 +94,7 @@ class StockAllocator
             ->where('stock_postings.remaining_stock', '>', 0)
             ->when(
                 $this->serialNumberIds,
-                fn (Builder $query) => $query->whereIn('stock_postings.serial_number_id', $this->serialNumberIds)
+                fn (Builder $query) => $query->whereIntegerInRaw('stock_postings.serial_number_id', $this->serialNumberIds)
             )
             ->when(
                 $this->withoutStorageArea,
