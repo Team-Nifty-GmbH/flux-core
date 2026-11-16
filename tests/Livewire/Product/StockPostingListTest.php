@@ -1,8 +1,10 @@
 <?php
 
+use FluxErp\Actions\StockPosting\TransferStock;
 use FluxErp\Enums\StorageAreaTypeEnum;
 use FluxErp\Livewire\Product\StockPostingList;
 use FluxErp\Models\Lot;
+use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\StorageArea;
@@ -262,4 +264,26 @@ test('the bin selects send search fields so the search endpoint accepts them', f
         ->and($html)->toContain('stock-posting-storage-area-id')
         ->and($html)->toContain('transfer-from-storage-area-id')
         ->and($html)->toContain('transfer-to-storage-area-id');
+});
+
+test('transfer is refused without the transfer permission', function (): void {
+    Permission::findOrCreate('action.' . TransferStock::name(), 'web');
+    $source = StorageArea::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+    $target = StorageArea::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+    StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'storage_area_id' => $source->getKey(),
+        'posting' => 10,
+    ]);
+
+    Livewire::test(StockPostingList::class, ['productId' => $this->product->getKey()])
+        ->call('transfer')
+        ->set('stockTransfer.from_storage_area_id', $source->getKey())
+        ->set('stockTransfer.to_storage_area_id', $target->getKey())
+        ->set('stockTransfer.amount', '4')
+        ->call('saveTransfer')
+        ->assertReturned(false);
+
+    $this->assertDatabaseMissing('stock_postings', ['storage_area_id' => $target->getKey()]);
 });
