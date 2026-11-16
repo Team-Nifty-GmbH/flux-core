@@ -121,7 +121,7 @@ class Plugins extends Component
             $this->addError('getInstalled', $e->getMessage());
         }
 
-        $available = Arr::keyBy(data_get($available, 'available', []), 'name');
+        $available = Arr::keyBy(data_get($available, 'available') ?? [], 'name');
         $this->installed = data_get($composer->installed(true), 'installed', []);
 
         foreach ($available as $key => $package) {
