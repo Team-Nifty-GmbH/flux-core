@@ -52,6 +52,16 @@ class UpdateFixedAsset extends FluxAction
         return $fixedAsset->withoutRelations()->fresh();
     }
 
+    protected function prepareForValidation(): void
+    {
+        if (array_key_exists('depreciation_starts_at', $this->data) && is_null($this->data['depreciation_starts_at'])) {
+            $this->data['depreciation_starts_at'] = $this->getData('acquired_at')
+                ?? resolve_static(FixedAsset::class, 'query')
+                    ->whereKey($this->getData('id'))
+                    ->value('acquired_at');
+        }
+    }
+
     protected function changesSchedule(FixedAsset $fixedAsset): bool
     {
         foreach (['acquisition_cost', 'residual_value'] as $attribute) {
