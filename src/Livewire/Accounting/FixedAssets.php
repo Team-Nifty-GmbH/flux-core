@@ -138,7 +138,9 @@ class FixedAssets extends FixedAssetList
 
     protected function getBuilder(Builder $builder): Builder
     {
-        return $builder->withExists(['depreciations as has_booked_depreciations' => fn (Builder $query): Builder => $query->booked()]);
+        return $builder->withExists([
+            'depreciations as has_booked_depreciations' => fn (Builder $query): Builder => $query->booked(),
+        ]);
     }
 
     protected function getReturnKeys(): array
