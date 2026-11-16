@@ -135,6 +135,14 @@ test('points out fixed assets that already exist for the position', function ():
         ->assertSet('existingFixedAssets', []);
 });
 
+test('rejects a position that no longer exists', function (): void {
+    Livewire::test(FixedAssets::class)
+        ->call('edit')
+        ->call('changedOrderPosition', 999999)
+        ->assertSet('fixedAsset.order_position_id', null)
+        ->assertSet('fixedAsset.name', null);
+});
+
 test('rejects a position of a sales order', function (): void {
     $orderPosition = fixedAssetOrderPosition(OrderTypeEnum::Order);
 

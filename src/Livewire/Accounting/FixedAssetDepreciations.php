@@ -50,7 +50,7 @@ class FixedAssetDepreciations extends BaseDataTable
 
     protected string $model = FixedAssetDepreciation::class;
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder
             ->withExists([

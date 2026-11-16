@@ -67,8 +67,8 @@ class FixedAssets extends FixedAssetList
             ->whereKey($orderPositionId)
             ->first(['id', 'order_id', 'tenant_id', 'ledger_account_id', 'name', 'total_net_price']);
 
-        if (Validator::make(
-            ['order_id' => $orderPosition?->order_id],
+        if (! $orderPosition || Validator::make(
+            ['order_id' => $orderPosition->order_id],
             ['order_id' => data_get(resolve_static(CreateFixedAssetRuleset::class, 'getRules'), 'order_id')]
         )->fails()) {
             $this->fixedAsset->order_position_id = null;
@@ -80,11 +80,13 @@ class FixedAssets extends FixedAssetList
             return;
         }
 
+        $isAssetAccount = $orderPosition->ledgerAccount?->ledger_account_type_enum === LedgerAccountTypeEnum::Asset;
+
         $this->fixedAsset->fill([
             'tenant_id' => $orderPosition->tenant_id,
             'order_id' => $orderPosition->order_id,
             'contact_id' => $orderPosition->order->contact_id,
-            'ledger_account_id' => $orderPosition->ledgerAccount?->ledger_account_type_enum === LedgerAccountTypeEnum::Asset
+            'ledger_account_id' => $isAssetAccount
                 ? $orderPosition->ledger_account_id
                 : $this->fixedAsset->ledger_account_id,
             'name' => $orderPosition->name,
