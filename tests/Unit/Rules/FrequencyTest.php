@@ -10,10 +10,11 @@ test('time window passes for between and unlessBetween', function (string $metho
     )->passes();
 
     expect($passes)->toBeTrue();
-})->with(['between', 'unlessBetween'])->with([
-    'same day' => [['05:00', '22:00']],
-    'across midnight' => [['22:00', '05:00']],
-]);
+})->with(['between', 'unlessBetween'])
+    ->with([
+        'same day' => [['05:00', '22:00']],
+        'across midnight' => [['22:00', '05:00']],
+    ]);
 
 test('time window fails for invalid times', function (string $method, array $window): void {
     $passes = Validator::make(
@@ -22,8 +23,9 @@ test('time window fails for invalid times', function (string $method, array $win
     )->passes();
 
     expect($passes)->toBeFalse();
-})->with(['between', 'unlessBetween'])->with([
-    'single entry' => [['05:00']],
-    'hour out of range' => [['05:00', '24:00']],
-    'not a time' => [['05:00', 'late']],
-]);
+})->with(['between', 'unlessBetween'])
+    ->with([
+        'single entry' => [['05:00']],
+        'hour out of range' => [['05:00', '24:00']],
+        'not a time' => [['05:00', 'late']],
+    ]);
