@@ -141,6 +141,25 @@ test('a disposed asset cannot be disposed again, reversed or deleted', function 
         ->toThrow(ValidationException::class);
 });
 
+test('a disposal between validating and executing an update or reversal stops both', function (): void {
+    $update = UpdateFixedAsset::make([
+        'id' => $this->fixedAsset->getKey(),
+        'ledger_account_id' => $this->fixedAsset->ledger_account_id,
+    ])
+        ->validate();
+    $reversal = ReverseFixedAssetDepreciations::make([
+        'fixed_asset_id' => $this->fixedAsset->getKey(),
+        'from' => '2026-03-01',
+    ])
+        ->validate();
+
+    disposeFixedAsset('2026-07-10');
+
+    expect(fn () => $update->execute())->toThrow(ValidationException::class)
+        ->and(fn () => $reversal->execute())->toThrow(ValidationException::class)
+        ->and($this->fixedAsset->ledgerBookings()->count())->toBe(1);
+});
+
 test('disposal of a fully depreciated asset books nothing', function (): void {
     $this->travelTo('2032-06-01');
     $this->fixedAsset->update(['externally_depreciated_until' => '2032-02-29']);

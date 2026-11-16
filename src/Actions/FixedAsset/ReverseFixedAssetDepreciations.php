@@ -28,6 +28,8 @@ class ReverseFixedAssetDepreciations extends FluxAction
             ->lockForUpdate()
             ->firstOrFail();
 
+        $this->ensureNotDisposed($fixedAsset);
+
         $ledgerBookings = resolve_static(LedgerBooking::class, 'query')
             ->where('source_type', morph_alias(FixedAssetDepreciation::class))
             ->whereIn(
@@ -43,18 +45,23 @@ class ReverseFixedAssetDepreciations extends FluxAction
         return $ledgerBookings->count();
     }
 
-    protected function validateData(): void
+    protected function ensureNotDisposed(FixedAsset $fixedAsset): void
     {
-        parent::validateData();
-
-        if (resolve_static(FixedAsset::class, 'query')
-            ->whereKey($this->getData('fixed_asset_id'))
-            ->whereNotNull('disposed_at')
-            ->exists()
-        ) {
+        if ($fixedAsset->disposed_at) {
             throw ValidationException::withMessages([
                 'fixed_asset_id' => [__('Revert the disposal before reversing depreciations.')],
             ]);
         }
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        $this->ensureNotDisposed(
+            resolve_static(FixedAsset::class, 'query')
+                ->whereKey($this->getData('fixed_asset_id'))
+                ->firstOrFail(['id', 'disposed_at'])
+        );
     }
 }

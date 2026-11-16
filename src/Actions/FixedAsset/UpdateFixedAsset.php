@@ -30,6 +30,8 @@ class UpdateFixedAsset extends FluxAction
             ->firstOrFail();
         $fixedAsset->fill($this->getData());
 
+        $this->ensureNotDisposed($fixedAsset);
+
         if ($this->changesSchedule($fixedAsset)) {
             $this->ensureNothingBooked($fixedAsset);
 
@@ -97,6 +99,17 @@ class UpdateFixedAsset extends FluxAction
         }
     }
 
+    protected function ensureNotDisposed(FixedAsset $fixedAsset): void
+    {
+        if ($fixedAsset->getOriginal('disposed_at')
+            && array_diff(array_keys($this->getData()), ['id', 'name', 'number', 'contact_id'])
+        ) {
+            throw ValidationException::withMessages([
+                'id' => [__('Revert the disposal before changing the fixed asset.')],
+            ]);
+        }
+    }
+
     protected function ensureNothingBooked(FixedAsset $fixedAsset): void
     {
         if ($fixedAsset->hasBookedDepreciations()) {
@@ -115,13 +128,7 @@ class UpdateFixedAsset extends FluxAction
             ->firstOrFail();
         $fixedAsset->fill($this->getData());
 
-        if ($fixedAsset->getOriginal('disposed_at')
-            && array_diff(array_keys($this->getData()), ['id', 'name', 'number', 'contact_id'])
-        ) {
-            throw ValidationException::withMessages([
-                'id' => [__('Revert the disposal before changing the fixed asset.')],
-            ]);
-        }
+        $this->ensureNotDisposed($fixedAsset);
 
         $this->validateFixedAsset($fixedAsset, array_keys($this->getData()));
 
