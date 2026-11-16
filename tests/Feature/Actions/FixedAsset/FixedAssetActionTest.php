@@ -166,6 +166,22 @@ test('update fixed asset keeps the schedule when unchanged values are sent', fun
         ->and($fixedAsset->depreciations()->count())->toBe(72);
 });
 
+test('update fixed asset starts depreciating in the acquisition month when the start is cleared', function (): void {
+    $fixedAsset = CreateFixedAsset::make(baseFixedAssetData(['depreciation_starts_at' => '2026-05-01']))
+        ->validate()
+        ->execute();
+
+    $updated = UpdateFixedAsset::make([
+        'id' => $fixedAsset->getKey(),
+        'depreciation_starts_at' => null,
+    ])
+        ->validate()
+        ->execute();
+
+    expect($updated->depreciation_starts_at->toDateString())->toBe('2026-03-20')
+        ->and($updated->depreciations()->orderBy('sequence')->first()->booking_date->toDateString())->toBe('2026-03-31');
+});
+
 test('update fixed asset rejects schedule changes once a depreciation is booked', function (): void {
     $fixedAsset = CreateFixedAsset::make(baseFixedAssetData())->validate()->execute();
     bookFirstDepreciation($fixedAsset);
@@ -211,7 +227,7 @@ test('create fixed asset rejects invalid input', function (array $overrides): vo
 })
     ->with([
         'more than two decimals' => [['acquisition_cost' => '1000.009']],
-        'useful life above 100 years' => [['useful_life_months' => 1201]],
+        'useful life above 50 years' => [['useful_life_months' => 601]],
         'order position without order' => [['order_position_id' => 1]],
         'externally depreciated in the future' => [['externally_depreciated_until' => '2099-12-31']],
     ])
