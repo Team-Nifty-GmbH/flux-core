@@ -287,3 +287,32 @@ test('transfer is refused without the transfer permission', function (): void {
 
     $this->assertDatabaseMissing('stock_postings', ['storage_area_id' => $target->getKey()]);
 });
+
+test('can transfer stock into another warehouse', function (): void {
+    $source = StorageArea::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+    $otherWarehouse = Warehouse::factory()->create();
+    $target = StorageArea::factory()->create(['warehouse_id' => $otherWarehouse->getKey()]);
+    StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'storage_area_id' => $source->getKey(),
+        'posting' => 10,
+    ]);
+
+    Livewire::test(StockPostingList::class, ['productId' => $this->product->getKey()])
+        ->call('transfer')
+        ->assertSet('stockTransfer.to_warehouse_id', $this->warehouse->getKey())
+        ->set('stockTransfer.from_storage_area_id', $source->getKey())
+        ->set('stockTransfer.to_warehouse_id', $otherWarehouse->getKey())
+        ->set('stockTransfer.to_storage_area_id', $target->getKey())
+        ->set('stockTransfer.amount', '4')
+        ->call('saveTransfer')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    $this->assertDatabaseHas('stock_postings', [
+        'warehouse_id' => $otherWarehouse->getKey(),
+        'storage_area_id' => $target->getKey(),
+        'posting' => 4,
+    ]);
+});
