@@ -38,7 +38,7 @@ class DeleteLedgerBooking extends FluxAction
 
         if (resolve_static(FixedAssetDepreciation::class, 'isMorphType', [$sourceType])) {
             throw ValidationException::withMessages([
-                'source_type' => [__('Depreciation bookings are managed by their fixed asset.')],
+                'id' => [__('Depreciation bookings are managed by their fixed asset.')],
             ]);
         }
     }
