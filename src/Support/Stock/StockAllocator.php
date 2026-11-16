@@ -23,6 +23,8 @@ class StockAllocator
         protected ?array $storageAreaIds = null,
         protected ?int $lotId = null,
         protected ?StockRemovalStrategyEnum $strategy = null,
+        protected ?array $serialNumberIds = null,
+        protected bool $withoutStorageArea = false,
     ) {}
 
     /**
@@ -56,6 +58,13 @@ class StockAllocator
         return $this;
     }
 
+    public function forSerialNumbers(?array $serialNumberIds): static
+    {
+        $this->serialNumberIds = $serialNumberIds;
+
+        return $this;
+    }
+
     public function forProduct(int $productId): static
     {
         $this->productId = $productId;
@@ -83,6 +92,14 @@ class StockAllocator
             ->where('stock_postings.product_id', $this->productId)
             ->where('stock_postings.warehouse_id', $this->warehouseId)
             ->where('stock_postings.remaining_stock', '>', 0)
+            ->when(
+                $this->serialNumberIds,
+                fn (Builder $query) => $query->whereIn('stock_postings.serial_number_id', $this->serialNumberIds)
+            )
+            ->when(
+                $this->withoutStorageArea,
+                fn (Builder $query) => $query->whereNull('stock_postings.storage_area_id')
+            )
             ->when(
                 $this->storageAreaIds,
                 fn (Builder $query) => $query
@@ -117,6 +134,13 @@ class StockAllocator
                 ->orderBy('stock_postings.id'),
             default => $query->orderBy('stock_postings.id'),
         };
+    }
+
+    public function withoutStorageArea(bool $withoutStorageArea = true): static
+    {
+        $this->withoutStorageArea = $withoutStorageArea;
+
+        return $this;
     }
 
     public function withStrategy(?StockRemovalStrategyEnum $strategy): static
