@@ -74,6 +74,11 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
 
         foreach (data_get($this->data, 'purchase_invoice_positions', []) as $position) {
             data_forget($position, 'uuid');
+
+            if (! is_null(data_get($position, 'total_price')) && bccomp(data_get($position, 'amount') ?? 0, 0) !== 0) {
+                $position['unit_price'] = bcdiv($position['total_price'], $position['amount']);
+            }
+
             CreateOrderPosition::make(
                 array_merge(
                     $position,
