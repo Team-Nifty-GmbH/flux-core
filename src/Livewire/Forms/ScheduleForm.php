@@ -69,7 +69,7 @@ class ScheduleForm extends FluxForm
         );
 
         $this->parameters = array_merge(
-            ! is_null($this->name) ? data_get(Repeatable::get($this->name), 'parameters', []) : [],
+            ! is_null($this->name) ? data_get(Repeatable::get($this->name), 'parameters') ?? [] : [],
             get_class_vars(static::class)['parameters'],
             $this->parameters
         );
