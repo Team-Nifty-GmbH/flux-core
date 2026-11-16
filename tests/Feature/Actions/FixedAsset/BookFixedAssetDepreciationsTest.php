@@ -50,7 +50,7 @@ function depreciationBookings(FixedAsset $fixedAsset): Collection
 {
     return LedgerBooking::query()
         ->where('source_type', morph_alias(FixedAssetDepreciation::class))
-        ->whereIn('source_id', $fixedAsset->depreciations()->pluck('id'))
+        ->whereIntegerInRaw('source_id', $fixedAsset->depreciations()->pluck('id'))
         ->orderBy('booking_date')
         ->get();
 }
