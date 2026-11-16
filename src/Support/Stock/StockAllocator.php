@@ -3,6 +3,7 @@
 namespace FluxErp\Support\Stock;
 
 use FluxErp\Enums\StockRemovalStrategyEnum;
+use FluxErp\Enums\StorageAreaTypeEnum;
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Warehouse;
@@ -89,7 +90,10 @@ class StockAllocator
                     ->whereHas('storageArea', fn (Builder $query) => $query->where('is_active', true)),
                 fn (Builder $query) => $query->where(fn (Builder $query) => $query
                     ->whereNull('stock_postings.storage_area_id')
-                    ->orWhereHas('storageArea', fn (Builder $query) => $query->where('is_active', true))
+                    ->orWhereHas('storageArea', fn (Builder $query) => $query
+                        ->where('is_active', true)
+                        ->where('storage_area_type_enum', '!=', StorageAreaTypeEnum::Transit)
+                    )
                 )
             )
             ->when(

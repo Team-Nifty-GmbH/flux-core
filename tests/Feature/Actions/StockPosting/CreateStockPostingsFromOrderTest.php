@@ -2,6 +2,7 @@
 
 use FluxErp\Actions\StockPosting\CreateStockPostingsFromOrder;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Enums\StorageAreaTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
@@ -12,7 +13,9 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
+use FluxErp\Models\StorageArea;
 use FluxErp\Models\Warehouse;
+use Illuminate\Validation\ValidationException;
 
 beforeEach(function (): void {
     $contact = Contact::factory()
@@ -164,3 +167,28 @@ test('refunds and subscriptions book no stock', function (OrderTypeEnum $orderTy
     'purchase subscription' => OrderTypeEnum::PurchaseSubscription,
     'subscription' => OrderTypeEnum::Subscription,
 ]);
+
+test('a sales order never takes stock from a transit storage area', function (): void {
+    $transit = StorageArea::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'storage_area_type_enum' => StorageAreaTypeEnum::Transit,
+    ]);
+    $inTransit = StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'storage_area_id' => $transit->getKey(),
+        'posting' => 5,
+        'remaining_stock' => 5,
+        'reserved_stock' => 0,
+    ]);
+    $order = ($this->makeOrder)(OrderTypeEnum::Order, '3');
+
+    expect(fn () => CreateStockPostingsFromOrder::make(['id' => $order->getKey(), 'only_reserve_stock' => true])
+        ->validate()
+        ->execute()
+    )->toThrow(ValidationException::class);
+
+    expect($inTransit->refresh()->remaining_stock)->toEqual(5)
+        ->and($inTransit->reserved_stock)->toEqual(0)
+        ->and(StockPosting::query()->where('parent_id', $inTransit->getKey())->exists())->toBeFalse();
+});

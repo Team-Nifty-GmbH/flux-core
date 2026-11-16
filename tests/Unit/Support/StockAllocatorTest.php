@@ -1,6 +1,7 @@
 <?php
 
 use FluxErp\Enums\StockRemovalStrategyEnum;
+use FluxErp\Enums\StorageAreaTypeEnum;
 use FluxErp\Models\Lot;
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
@@ -179,4 +180,24 @@ test('the constructor takes the same scope as the fluent setters', function (): 
     expect($allocation)->toHaveCount(1)
         ->and($allocation[0]['stockPosting']->getKey())->toBe($inWanted->getKey())
         ->and(bccomp($allocation[0]['amount'], '10', 10))->toBe(0);
+});
+
+test('a transit storage area is skipped unless it is asked for', function (): void {
+    $shelf = StorageArea::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'storage_area_type_enum' => StorageAreaTypeEnum::Shelf,
+    ]);
+    $transit = StorageArea::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'storage_area_type_enum' => StorageAreaTypeEnum::Transit,
+    ]);
+    $onShelf = ($this->layer)(2, ['storage_area_id' => $shelf->getKey()]);
+    $inTransit = ($this->layer)(5, ['storage_area_id' => $transit->getKey()]);
+
+    $automatic = ($this->allocator)()->allocate(5);
+    $explicit = ($this->allocator)()->inStorageAreas([$transit->getKey()])->allocate(5);
+
+    expect($automatic->pluck('stockPosting.id')->all())->toBe([$onShelf->getKey()])
+        ->and($explicit->pluck('stockPosting.id')->all())->toBe([$inTransit->getKey()])
+        ->and(bccomp($explicit[0]['amount'], '5', 10))->toBe(0);
 });
