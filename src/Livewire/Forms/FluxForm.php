@@ -7,18 +7,14 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Support\Livewire\Attributes\ExcludeFromActionData;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
-use Livewire\Attributes\Locked;
 use Livewire\Drawer\Utils;
 use Livewire\Form as BaseForm;
 use ReflectionProperty;
 
 abstract class FluxForm extends BaseForm
 {
-    #[ExcludeFromActionData, Locked]
+    #[ExcludeFromActionData]
     public array $loadedData = [];
-
-    #[ExcludeFromActionData, Locked]
-    public ?string $loadedModel = null;
 
     protected mixed $actionResult = null;
 
@@ -100,7 +96,7 @@ abstract class FluxForm extends BaseForm
         parent::fill($values);
 
         if ($values instanceof Model) {
-            $this->rememberLoadedData($values);
+            $this->rememberLoadedData();
         }
     }
 
@@ -122,11 +118,13 @@ abstract class FluxForm extends BaseForm
 
     public function refreshUntouchedData(): void
     {
-        if (is_null($this->loadedModel)) {
+        $updateAction = data_get($this->getActions(), 'update');
+
+        if (! $this->loadedData || is_null($updateAction)) {
             return;
         }
 
-        $model = resolve_static($this->loadedModel, 'query')
+        $model = resolve_static(data_get(resolve_static($updateAction, 'models'), 0), 'query')
             ->whereKey(data_get($this, $this->getKey()))
             ->first();
 
@@ -267,9 +265,8 @@ abstract class FluxForm extends BaseForm
         );
     }
 
-    protected function rememberLoadedData(Model $model): void
+    protected function rememberLoadedData(): void
     {
         $this->loadedData = $this->propertyValues();
-        $this->loadedModel = $model::class;
     }
 }

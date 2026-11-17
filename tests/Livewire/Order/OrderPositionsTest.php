@@ -1206,3 +1206,16 @@ test('editing the article amount by hand drops a packaging it no longer matches'
         ->assertSet('orderPosition.unit_amount', null)
         ->assertSet('orderPosition.unit_id', null);
 });
+
+test('accepts the order the parent synced after saving it', function (): void {
+    $this->order->touch();
+    $updatedAt = $this->order->refresh()->updated_at->toJSON();
+
+    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->set('order.updated_at', $updatedAt)
+        ->set('order.loadedData.updated_at', $updatedAt)
+        ->set('orderPosition.name', 'Synced Order')
+        ->assertHasNoErrors()
+        ->assertSet('order.loadedData.updated_at', $updatedAt)
+        ->assertSet('orderPosition.name', 'Synced Order');
+});

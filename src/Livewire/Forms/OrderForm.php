@@ -265,7 +265,7 @@ class OrderForm extends FluxForm
             : null;
 
         if ($model) {
-            $this->rememberLoadedData($model);
+            $this->rememberLoadedData();
         }
     }
 

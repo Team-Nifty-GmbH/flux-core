@@ -112,7 +112,7 @@ class CommunicationForm extends FluxForm
         }
 
         if ($model) {
-            $this->rememberLoadedData($model);
+            $this->rememberLoadedData();
         }
     }
 
