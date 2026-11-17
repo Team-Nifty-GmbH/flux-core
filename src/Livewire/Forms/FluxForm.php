@@ -14,7 +14,7 @@ use ReflectionProperty;
 
 abstract class FluxForm extends BaseForm
 {
-    #[ExcludeFromActionData, Locked]
+    #[ExcludeFromActionData]
     public array $loadedData = [];
 
     #[ExcludeFromActionData, Locked]
