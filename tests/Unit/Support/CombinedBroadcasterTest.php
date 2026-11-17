@@ -108,6 +108,16 @@ test('a channel is registered on every connection', function (): void {
         ->and($second->registeredChannels())->toBe(['order.{id}']);
 });
 
+test('the channels of every connection are listed', function (): void {
+    $first = recordingBroadcaster();
+    $second = recordingBroadcaster();
+    $first->channel('order.{id}', fn () => true);
+    $second->channel('ticket.{id}', fn () => true);
+
+    expect((new CombinedBroadcaster([$first, $second]))->getChannels()->keys()->all())
+        ->toBe(['order.{id}', 'ticket.{id}']);
+});
+
 test('a mercure authorization goes to the mercure connection', function (): void {
     $pusher = recordingBroadcaster();
     $mercure = mercureBroadcaster();

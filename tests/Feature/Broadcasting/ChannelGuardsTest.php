@@ -33,7 +33,7 @@ function authorizeChannels(array $channels): JsonResponse
     $request->setLaravelSession(new Store('test', new ArraySessionHandler(120)));
     $request->setUserResolver(fn (?string $guard = null) => auth()->guard($guard)->user());
 
-    return Broadcast::connection('mercure')->auth($request);
+    return Broadcast::auth($request);
 }
 
 test('a guest is denied model and user channels when no address guard is configured', function (): void {
