@@ -137,7 +137,7 @@ abstract class FluxForm extends BaseForm
         $current = clone $this;
         $current->fill($model);
 
-        foreach ($this->toActionData() as $key => $value) {
+        foreach ($this->propertyValues() as $key => $value) {
             if (array_key_exists($key, $this->loadedData) && $this->loadedData[$key] === $value) {
                 $this->{$key} = $current->{$key};
             }
@@ -188,11 +188,7 @@ abstract class FluxForm extends BaseForm
 
     public function toActionData(): array
     {
-        return Utils::getPublicProperties(
-            $this,
-            fn (ReflectionProperty $property) => collect($property->getAttributes())
-                ->doesntContain(fn ($attribute) => $attribute->getName() === ExcludeFromActionData::class)
-        );
+        return $this->propertyValues();
     }
 
     public function update(): void
@@ -264,7 +260,16 @@ abstract class FluxForm extends BaseForm
 
     protected function rememberLoadedData(Model $model): void
     {
-        $this->loadedData = $this->toActionData();
+        $this->loadedData = $this->propertyValues();
         $this->loadedModel = $model::class;
+    }
+
+    protected function propertyValues(): array
+    {
+        return Utils::getPublicProperties(
+            $this,
+            fn (ReflectionProperty $property) => collect($property->getAttributes())
+                ->doesntContain(fn ($attribute) => $attribute->getName() === ExcludeFromActionData::class)
+        );
     }
 }
