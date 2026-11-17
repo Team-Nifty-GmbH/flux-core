@@ -44,6 +44,8 @@ test('a comment stays on the channel of the record it belongs to', function (): 
 });
 
 test('the channel of a model is open to staff and api tokens, not to portal users', function (): void {
+    Illuminate\Support\Facades\Broadcast::registerDeferredChannels();
+
     $options = (fn () => $this->retrieveChannelOptions(morph_alias(Order::class) . '.'))
         ->call(Illuminate\Support\Facades\Broadcast::driver());
 
