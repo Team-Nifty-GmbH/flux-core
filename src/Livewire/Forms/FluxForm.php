@@ -258,12 +258,6 @@ abstract class FluxForm extends BaseForm
         return $this->getActions()[$name]::make($data ?? $this->toActionData());
     }
 
-    protected function rememberLoadedData(Model $model): void
-    {
-        $this->loadedData = $this->propertyValues();
-        $this->loadedModel = $model::class;
-    }
-
     protected function propertyValues(): array
     {
         return Utils::getPublicProperties(
@@ -271,5 +265,11 @@ abstract class FluxForm extends BaseForm
             fn (ReflectionProperty $property) => collect($property->getAttributes())
                 ->doesntContain(fn ($attribute) => $attribute->getName() === ExcludeFromActionData::class)
         );
+    }
+
+    protected function rememberLoadedData(Model $model): void
+    {
+        $this->loadedData = $this->propertyValues();
+        $this->loadedModel = $model::class;
     }
 }
