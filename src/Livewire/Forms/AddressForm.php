@@ -115,7 +115,7 @@ class AddressForm extends FluxForm
         }
 
         if ($model) {
-            $this->rememberLoadedData();
+            $this->rememberLoadedData($model);
         }
     }
 

@@ -75,7 +75,7 @@ class TargetForm extends FluxForm
         parent::fill($values);
 
         if ($model) {
-            $this->rememberLoadedData();
+            $this->rememberLoadedData($model);
         }
     }
 
