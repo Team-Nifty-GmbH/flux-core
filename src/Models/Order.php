@@ -1504,6 +1504,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     {
         $paid = $this->transactions()
             ->withPivot(['amount', 'order_currency_amount'])
+            ->wherePivot('is_accepted', true)
             ->get()
             ->reduce(
                 fn (string $carry, Transaction $transaction) => bcadd(
