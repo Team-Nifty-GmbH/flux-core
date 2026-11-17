@@ -264,7 +264,7 @@ abstract class FluxForm extends BaseForm
         $this->loadedModel = $model::class;
     }
 
-    protected function propertyValues(): array
+    private function propertyValues(): array
     {
         return Utils::getPublicProperties(
             $this,

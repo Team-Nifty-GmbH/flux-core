@@ -39,6 +39,13 @@ test('filling a form from a model keeps values its toActionData derives', functi
     {
         public string $abbreviationText = '';
 
+        protected int $actionDataCalls = 0;
+
+        public function actionDataCalls(): int
+        {
+            return $this->actionDataCalls;
+        }
+
         public function fill($values): void
         {
             parent::fill($values);
@@ -48,6 +55,7 @@ test('filling a form from a model keeps values its toActionData derives', functi
 
         public function toActionData(): array
         {
+            $this->actionDataCalls++;
             $this->abbreviation = trim($this->abbreviationText);
 
             $data = parent::toActionData();
@@ -59,12 +67,14 @@ test('filling a form from a model keeps values its toActionData derives', functi
 
     $form->fill($unit);
 
-    expect($form->abbreviationText)->toBe('pc');
+    expect($form->abbreviationText)->toBe('pc')
+        ->and($form->actionDataCalls())->toBe(0);
 
     $form->name = 'Pieces';
     $form->setCheckPermission(false)->update();
 
     $unit->refresh();
-    expect($unit->name)->toBe('Pieces')
+    expect($form->actionDataCalls())->toBe(1)
+        ->and($unit->name)->toBe('Pieces')
         ->and($unit->abbreviation)->toBe('pc');
 });
