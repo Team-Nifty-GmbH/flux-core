@@ -68,6 +68,10 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
             if (! $contact->exists) {
                 $contact->getSerialNumber(['customer_number', 'creditor_number', 'debtor_number']);
             }
+
+            if ($contact->exists && $contact->isDirty(['vat_id', 'delivery_address_id', 'main_address_id'])) {
+                $contact->vat_rate_id = $contact->getCountryVatRateId();
+            }
         });
     }
 
@@ -259,6 +263,34 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
         return $this->getFirstMediaUrl('avatar', 'thumb') ?: static::icon()->getUrl();
     }
 
+    public function getCountryVatRateId(): ?int
+    {
+        $countryId = resolve_static(Address::class, 'query')
+            ->whereKey($this->delivery_address_id ?? $this->main_address_id)
+            ->value('country_id');
+        $country = $countryId
+            ? resolve_static(Country::class, 'query')
+                ->whereKey($countryId)
+                ->first(['id', 'is_eu_country', 'vat_rate_id'])
+            : null;
+
+        // EU deliveries are only tax exempt for customers with a VAT ID.
+        if ($country?->vat_rate_id && (! $country->is_eu_country || filled($this->vat_id))) {
+            return $country->vat_rate_id;
+        }
+
+        // Keep a manually chosen rate, drop one that came from a country.
+        if ($this->vat_rate_id
+            && resolve_static(Country::class, 'query')
+                ->where('vat_rate_id', $this->vat_rate_id)
+                ->exists()
+        ) {
+            return null;
+        }
+
+        return $this->vat_rate_id;
+    }
+
     public function getDescription(): ?string
     {
         return $this->mainAddress?->getDescription();
@@ -294,6 +326,15 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
             })
             ->useDisk('public')
             ->singleFile();
+    }
+
+    public function syncCountryVatRate(): void
+    {
+        $this->vat_rate_id = $this->getCountryVatRateId();
+
+        if ($this->isDirty('vat_rate_id')) {
+            $this->save();
+        }
     }
 
     public function toSearchableArray(): array

@@ -5,6 +5,7 @@ namespace FluxErp\Rulesets\Country;
 use FluxErp\Models\Country;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
+use FluxErp\Models\VatRate;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
@@ -26,6 +27,12 @@ class CreateCountryRuleset extends FluxRuleset
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => Currency::class]),
+            ],
+            'vat_rate_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => VatRate::class])
+                    ->where('is_tax_exemption', true),
             ],
             'name' => 'required|string|max:255',
             'iso_alpha2' => 'required|string|max:255|unique:countries,iso_alpha2',

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Jobs\SyncCountryVatRateJob;
 use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasDefault;
 use FluxErp\Traits\Model\HasPackageFactory;
@@ -16,6 +17,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Country extends FluxModel
 {
     use Filterable, HasDefault, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, Searchable, SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::saved(function (Country $country): void {
+            if ($country->wasChanged('vat_rate_id')) {
+                SyncCountryVatRateJob::dispatch(
+                    $country->getKey(),
+                    data_get($country->getPrevious(), 'vat_rate_id')
+                );
+            }
+        });
+    }
 
     protected function casts(): array
     {
@@ -55,5 +68,10 @@ class Country extends FluxModel
     public function tenants(): HasMany
     {
         return $this->hasMany(Tenant::class);
+    }
+
+    public function vatRate(): BelongsTo
+    {
+        return $this->belongsTo(VatRate::class);
     }
 }

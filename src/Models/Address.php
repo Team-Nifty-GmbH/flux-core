@@ -237,6 +237,18 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     ->first()
                     ?->searchable();
             }
+
+            if ($address->wasRecentlyCreated
+                || $address->wasChanged(['country_id', 'contact_id', 'is_delivery_address', 'is_main_address'])
+            ) {
+                resolve_static(Contact::class, 'query')
+                    ->whereKey(array_filter([
+                        $address->contact_id,
+                        data_get($address->getPrevious(), 'contact_id'),
+                    ]))
+                    ->get()
+                    ->each(fn (Contact $contact) => $contact->syncCountryVatRate());
+            }
         });
 
         static::deleted(function (Address $address): void {
