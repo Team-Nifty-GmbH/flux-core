@@ -119,6 +119,9 @@ test('the delivery address decides over the main address', function (): void {
 });
 
 test('changing the rate of a country updates its contacts', function (): void {
+    // CI runs a real queue, the job has to run inside the test.
+    config()->set('queue.default', 'sync');
+
     $domesticContact = contactInCountry($this->domestic);
     $thirdCountryContact = contactInCountry($this->thirdCountry);
     $otherContact = contactInCountry($this->eu, ['vat_id' => null, 'vat_rate_id' => $this->manualRate->getKey()]);
