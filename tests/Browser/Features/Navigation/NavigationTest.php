@@ -29,6 +29,28 @@ test('wire:navigate preserves layout on page change', function (): void {
         ->assertScript("!!document.querySelector('aside, nav')");
 });
 
+test('sidebar stays collapsed while the pointer only passes over it', function (): void {
+    $menuOpen = "Alpine.\$data(document.getElementById('main-navigation')).menuOpen";
+
+    visit(route('dashboard'))
+        ->assertNoSmoke()
+        ->hover('main >> nth=0')
+        ->hover('#main-navigation nav a >> nth=0')
+        ->assertScript("{$menuOpen} === false")
+        ->hover('main >> nth=0')
+        ->wait(0.6)
+        ->assertScript("{$menuOpen} === false");
+});
+
+test('sidebar expands once the pointer rests on it', function (): void {
+    visit(route('dashboard'))
+        ->assertNoSmoke()
+        ->hover('main >> nth=0')
+        ->hover('#main-navigation nav a >> nth=0')
+        ->wait(0.6)
+        ->assertScript("Alpine.\$data(document.getElementById('main-navigation')).menuOpen === true");
+});
+
 test('loading overlay exists in DOM', function (): void {
     visit(route('dashboard'))
         ->assertRoute('dashboard')

@@ -1,7 +1,7 @@
 <!-- Static sidebar for desktop -->
 <div
     x-on:mouseover.away="closeMenu()"
-    x-on:mouseover="showMenu()"
+    x-on:mouseover="showMenuOnRest()"
     x-bind:class="
         menuOpen ? 'w-full! md:w-72! overflow-y-auto' : 'overflow-hidden'
     "
