@@ -48,3 +48,28 @@ test('renders the time picker without a schedule preview', function (): void {
         ->not->toContain('<x-')
         ->not->toContain('previewSchedule');
 });
+
+test('previews the next runs of a schedule with timezone in app timezone', function (): void {
+    $this->travelTo(Illuminate\Support\Carbon::create(2026, 3, 27, 12, 0, 0, 'UTC'));
+
+    $component = Livewire::test(Scheduling::class)
+        ->set('schedule.cron.methods.basic', 'dailyAt')
+        ->set('schedule.cron.parameters.basic', ['06:00', null, null])
+        ->set('schedule.timezone', 'Europe/Berlin');
+
+    $dates = array_column($component->instance()->schedule->getNextExecutionDates(3), 'date');
+
+    expect($dates)->toBe(['2026-03-28 05:00:00', '2026-03-29 04:00:00', '2026-03-30 04:00:00']);
+});
+
+test('previews the next runs of a schedule without timezone in app timezone', function (): void {
+    $this->travelTo(Illuminate\Support\Carbon::create(2026, 3, 27, 12, 0, 0, 'UTC'));
+
+    $component = Livewire::test(Scheduling::class)
+        ->set('schedule.cron.methods.basic', 'dailyAt')
+        ->set('schedule.cron.parameters.basic', ['06:00', null, null]);
+
+    $dates = array_column($component->instance()->schedule->getNextExecutionDates(2), 'date');
+
+    expect($dates)->toBe(['2026-03-28 06:00:00', '2026-03-29 06:00:00']);
+});

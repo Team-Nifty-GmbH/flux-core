@@ -54,6 +54,10 @@ class UpdateScheduleRuleset extends FluxRuleset
             'due_at' => 'date|nullable',
             'ends_at' => 'date|nullable',
             'recurrences' => 'exclude_unless:ends_at,null|nullable|integer|min:1',
+            'timezone' => [
+                'nullable',
+                'timezone',
+            ],
             'is_active' => 'boolean',
 
             'orders' => 'array|nullable',
