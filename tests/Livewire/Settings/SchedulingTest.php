@@ -73,3 +73,32 @@ test('previews the next runs of a schedule without timezone in app timezone', fu
 
     expect($dates)->toBe(['2026-03-28 06:00:00', '2026-03-29 06:00:00']);
 });
+
+test('a new schedule starts with the display timezone', function (): void {
+    config()->set('flux.display_timezone', 'Europe/Berlin');
+
+    Livewire::test(Scheduling::class)
+        ->call('edit')
+        ->assertSet('schedule.timezone', 'Europe/Berlin');
+});
+
+test('editing a schedule without timezone keeps it without timezone', function (): void {
+    config()->set('flux.display_timezone', 'Europe/Berlin');
+
+    $schedule = FluxErp\Models\Schedule::query()->create([
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => FluxErp\Invokable\ProcessSubscriptionOrder::class,
+        'type' => 'invokable',
+        'cron' => [
+            'methods' => ['basic' => 'dailyAt', 'dayConstraint' => null, 'timeConstraint' => null],
+            'parameters' => ['basic' => ['06:00'], 'dayConstraint' => [], 'timeConstraint' => []],
+        ],
+        'parameters' => ['orderId' => 1],
+        'is_active' => true,
+    ]);
+
+    Livewire::test(Scheduling::class)
+        ->call('edit', $schedule->getKey())
+        ->assertSet('schedule.id', $schedule->getKey())
+        ->assertSet('schedule.timezone', null);
+});
