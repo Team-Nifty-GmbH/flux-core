@@ -50,7 +50,10 @@ class Guard extends \Laravel\Sanctum\Guard
             if (! $accessToken->tokenable->isValid()) {
                 $accessToken->delete();
             }
-        } elseif (! $isValid) {
+        } elseif (
+            ! $isValid
+            && (is_null($accessToken->tokenable) || $this->hasValidProvider($accessToken->tokenable))
+        ) {
             $accessToken->delete();
         }
 
