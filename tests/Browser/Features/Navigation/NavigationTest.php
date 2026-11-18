@@ -42,6 +42,24 @@ test('sidebar stays collapsed while the pointer only passes over it', function (
         ->assertScript("{$menuOpen} === false");
 });
 
+test('sidebar stays collapsed when the pointer leaves the window over it', function (): void {
+    $menuOpen = "Alpine.\$data(document.getElementById('main-navigation')).menuOpen";
+
+    $page = visit(route('dashboard'))
+        ->assertNoSmoke()
+        ->hover('main >> nth=0')
+        ->hover('#main-navigation nav a >> nth=0');
+
+    $page->script(<<<'JS'
+        () => document
+            .querySelector('#main-navigation > div')
+            .dispatchEvent(new MouseEvent('mouseleave'))
+    JS);
+
+    $page->wait(0.6)
+        ->assertScript("{$menuOpen} === false");
+});
+
 test('sidebar expands once the pointer rests on it', function (): void {
     visit(route('dashboard'))
         ->assertNoSmoke()

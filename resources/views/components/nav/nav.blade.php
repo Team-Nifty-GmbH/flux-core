@@ -2,6 +2,7 @@
 <div
     x-on:mouseover.away="closeMenu()"
     x-on:mouseover="showMenuOnRest()"
+    x-on:mouseleave="closeMenu()"
     x-bind:class="
         menuOpen ? 'w-full! md:w-72! overflow-y-auto' : 'overflow-hidden'
     "
