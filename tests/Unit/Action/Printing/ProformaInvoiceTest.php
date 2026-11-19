@@ -269,7 +269,7 @@ test('proforma invoice shows the expected delivery date', function (): void {
 test('proforma invoice states an undetermined delivery date instead of falling back to today', function (): void {
     $this->withoutVite();
 
-    $this->order->update(['system_delivery_date' => null]);
+    $this->order->update(['system_delivery_date' => null, 'order_date' => now()->subMonth()]);
 
     $html = Printing::make([
         'model_type' => $this->order->getMorphClass(),
