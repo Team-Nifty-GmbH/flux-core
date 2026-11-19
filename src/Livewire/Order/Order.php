@@ -45,6 +45,7 @@ use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -636,11 +637,6 @@ class Order extends Component
     #[Renderless]
     public function recalculateOrderTotals(): void
     {
-        $this->order->total_net_price = 0;
-        $this->order->total_gross_price = 0;
-        $this->order->total_vats = [];
-        $this->order->total_base_net_price = 0;
-
         $order = resolve_static(OrderModel::class, 'query')
             ->whereKey($this->order->id)
             ->first([
@@ -657,7 +653,14 @@ class Order extends Component
 
         $order->calculatePrices()->save();
 
-        $this->order->fill($order);
+        foreach (Arr::only($order->toArray(), array_keys($order->getChanges())) as $key => $value) {
+            if (! property_exists($this->order, $key)) {
+                continue;
+            }
+
+            $this->order->{$key} = $value;
+            $this->order->loadedData[$key] = $this->order->{$key};
+        }
     }
 
     #[Renderless]
