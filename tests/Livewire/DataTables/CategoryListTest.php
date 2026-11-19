@@ -39,6 +39,7 @@ test('filtering for a child category returns its family instead of nothing', fun
         'parent_id' => $root->getKey(),
         'name' => $childName = Str::uuid()->toString(),
     ]);
+    $unrelated = Category::factory()->create(['model_type' => morph_alias(Product::class)]);
 
     $rows = Livewire::test(CategoryList::class)
         ->set('userFilters', [[[
@@ -51,5 +52,6 @@ test('filtering for a child category returns its family instead of nothing', fun
         ->instance()
         ->getDataForTesting()['data'];
 
-    expect(array_column($rows, 'id'))->toBe([$root->getKey(), $child->getKey()]);
+    expect(array_column($rows, 'id'))->toBe([$root->getKey(), $child->getKey()])
+        ->not->toContain($unrelated->getKey());
 });
