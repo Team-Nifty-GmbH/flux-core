@@ -327,7 +327,7 @@ test('cannot start a second daily pause while one is still running', function ()
         ->assertSet('dailyWorkTime.id', $workTime->getKey())
         ->assertSet('dailyWorkTimePause.id', null);
 
-    WorkTimeModel::factory()->create([
+    $runningPause = WorkTimeModel::factory()->create([
         'user_id' => $this->user->getKey(),
         'parent_id' => $workTime->getKey(),
         'started_at' => now()->subMinutes(5),
@@ -338,7 +338,7 @@ test('cannot start a second daily pause while one is still running', function ()
     ]);
 
     $component->call('togglePauseWorkDay', true)
-        ->assertHasErrors('is_pause');
+        ->assertSet('dailyWorkTimePause.id', $runningPause->getKey());
 
     expect(
         WorkTimeModel::query()

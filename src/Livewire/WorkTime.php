@@ -233,7 +233,14 @@ class WorkTime extends Component
             $this->dailyWorkTimePause->is_locked = true;
         }
 
-        $this->dailyWorkTimePause->save();
+        try {
+            $this->dailyWorkTimePause->save();
+        } catch (ValidationException $e) {
+            exception_to_notifications($e, $this, form: $this->dailyWorkTimePause);
+            $this->loadWorkTimes();
+
+            return;
+        }
 
         if (! $start) {
             $this->dailyWorkTimePause->reset();
