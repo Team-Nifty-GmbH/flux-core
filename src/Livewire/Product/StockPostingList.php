@@ -142,6 +142,7 @@ class StockPostingList extends BaseStockPostingList
         $this->stockTransfer->product_id = $this->productId;
         $this->stockTransfer->warehouse_id =
             $this->warehouseId ?? resolve_static(Warehouse::class, 'default')?->getKey();
+        $this->stockTransfer->to_warehouse_id = $this->stockTransfer->warehouse_id;
 
         $this->modalOpen('transfer-stock-modal');
     }

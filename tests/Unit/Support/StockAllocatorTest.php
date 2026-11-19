@@ -1,8 +1,10 @@
 <?php
 
 use FluxErp\Enums\StockRemovalStrategyEnum;
+use FluxErp\Enums\StorageAreaTypeEnum;
 use FluxErp\Models\Lot;
 use FluxErp\Models\Product;
+use FluxErp\Models\SerialNumber;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\StorageArea;
 use FluxErp\Models\Warehouse;
@@ -179,4 +181,58 @@ test('the constructor takes the same scope as the fluent setters', function (): 
     expect($allocation)->toHaveCount(1)
         ->and($allocation[0]['stockPosting']->getKey())->toBe($inWanted->getKey())
         ->and(bccomp($allocation[0]['amount'], '10', 10))->toBe(0);
+});
+
+test('a transit storage area is skipped unless it is asked for', function (): void {
+    $shelf = StorageArea::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'storage_area_type_enum' => StorageAreaTypeEnum::Shelf,
+    ]);
+    $transit = StorageArea::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'storage_area_type_enum' => StorageAreaTypeEnum::Transit,
+    ]);
+    $onShelf = ($this->layer)(2, ['storage_area_id' => $shelf->getKey()]);
+    $inTransit = ($this->layer)(5, ['storage_area_id' => $transit->getKey()]);
+
+    $automatic = ($this->allocator)()->allocate(5);
+    $explicit = ($this->allocator)()->inStorageAreas([$transit->getKey()])->allocate(5);
+
+    expect($automatic->pluck('stockPosting.id')->all())->toBe([$onShelf->getKey()])
+        ->and($explicit->pluck('stockPosting.id')->all())->toBe([$inTransit->getKey()])
+        ->and(bccomp($explicit[0]['amount'], '5', 10))->toBe(0);
+});
+
+test('a serial number scope only takes the layers of those serial numbers', function (): void {
+    [$first, $second, $third] = SerialNumber::factory()->count(3)->create()->all();
+    ($this->layer)(1, ['serial_number_id' => $first->getKey()]);
+    $secondLayer = ($this->layer)(1, ['serial_number_id' => $second->getKey()]);
+    $thirdLayer = ($this->layer)(1, ['serial_number_id' => $third->getKey()]);
+
+    $allocation = ($this->allocator)()
+        ->forSerialNumbers([$second->getKey(), $third->getKey()])
+        ->allocate(3);
+
+    expect($allocation->pluck('stockPosting.id')->all())
+        ->toBe([$secondLayer->getKey(), $thirdLayer->getKey()]);
+});
+
+test('a layer without storage area scope only takes layers outside any storage area', function (): void {
+    $storageArea = StorageArea::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+    ($this->layer)(5, ['storage_area_id' => $storageArea->getKey()]);
+    $loose = ($this->layer)(5);
+
+    $allocation = ($this->allocator)()->withoutStorageArea()->allocate(10);
+
+    expect($allocation->pluck('stockPosting.id')->all())->toBe([$loose->getKey()]);
+});
+
+test('a stock posting scope only takes those layers', function (): void {
+    ($this->layer)(5);
+    $wanted = ($this->layer)(5);
+
+    $allocation = ($this->allocator)()->forStockPostings([$wanted->getKey()])->allocate(10);
+
+    expect($allocation->pluck('stockPosting.id')->all())->toBe([$wanted->getKey()])
+        ->and(bccomp($allocation[0]['amount'], '5', 10))->toBe(0);
 });

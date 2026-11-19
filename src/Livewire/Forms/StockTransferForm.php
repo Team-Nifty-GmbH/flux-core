@@ -18,6 +18,8 @@ class StockTransferForm extends FluxForm
 
     public ?int $to_storage_area_id = null;
 
+    public ?int $to_warehouse_id = null;
+
     public ?int $warehouse_id = null;
 
     protected function getActions(): array

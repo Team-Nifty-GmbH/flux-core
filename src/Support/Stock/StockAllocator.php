@@ -3,6 +3,7 @@
 namespace FluxErp\Support\Stock;
 
 use FluxErp\Enums\StockRemovalStrategyEnum;
+use FluxErp\Enums\StorageAreaTypeEnum;
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Warehouse;
@@ -22,6 +23,9 @@ class StockAllocator
         protected ?array $storageAreaIds = null,
         protected ?int $lotId = null,
         protected ?StockRemovalStrategyEnum $strategy = null,
+        protected ?array $serialNumberIds = null,
+        protected bool $withoutStorageArea = false,
+        protected ?array $stockPostingIds = null,
     ) {}
 
     /**
@@ -62,6 +66,20 @@ class StockAllocator
         return $this;
     }
 
+    public function forSerialNumbers(?array $serialNumberIds): static
+    {
+        $this->serialNumberIds = $serialNumberIds;
+
+        return $this;
+    }
+
+    public function forStockPostings(?array $stockPostingIds): static
+    {
+        $this->stockPostingIds = $stockPostingIds;
+
+        return $this;
+    }
+
     public function inStorageAreas(array $storageAreaIds): static
     {
         $this->storageAreaIds = $storageAreaIds;
@@ -83,13 +101,28 @@ class StockAllocator
             ->where('stock_postings.warehouse_id', $this->warehouseId)
             ->where('stock_postings.remaining_stock', '>', 0)
             ->when(
+                $this->stockPostingIds,
+                fn (Builder $query) => $query->whereIntegerInRaw('stock_postings.id', $this->stockPostingIds)
+            )
+            ->when(
+                $this->serialNumberIds,
+                fn (Builder $query) => $query->whereIntegerInRaw('stock_postings.serial_number_id', $this->serialNumberIds)
+            )
+            ->when(
+                $this->withoutStorageArea,
+                fn (Builder $query) => $query->whereNull('stock_postings.storage_area_id')
+            )
+            ->when(
                 $this->storageAreaIds,
                 fn (Builder $query) => $query
                     ->whereIn('stock_postings.storage_area_id', $this->storageAreaIds)
                     ->whereHas('storageArea', fn (Builder $query) => $query->where('is_active', true)),
                 fn (Builder $query) => $query->where(fn (Builder $query) => $query
                     ->whereNull('stock_postings.storage_area_id')
-                    ->orWhereHas('storageArea', fn (Builder $query) => $query->where('is_active', true))
+                    ->orWhereHas('storageArea', fn (Builder $query) => $query
+                        ->where('is_active', true)
+                        ->where('storage_area_type_enum', '!=', StorageAreaTypeEnum::Transit)
+                    )
                 )
             )
             ->when(
@@ -113,6 +146,13 @@ class StockAllocator
                 ->orderBy('stock_postings.id'),
             default => $query->orderBy('stock_postings.id'),
         };
+    }
+
+    public function withoutStorageArea(bool $withoutStorageArea = true): static
+    {
+        $this->withoutStorageArea = $withoutStorageArea;
+
+        return $this;
     }
 
     public function withStrategy(?StockRemovalStrategyEnum $strategy): static
