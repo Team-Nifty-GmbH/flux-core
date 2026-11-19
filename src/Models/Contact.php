@@ -265,24 +265,21 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
 
     public function getCountryVatRateId(): ?int
     {
-        $countryId = resolve_static(Address::class, 'query')
+        $country = resolve_static(Address::class, 'query')
             ->whereKey($this->delivery_address_id ?? $this->main_address_id)
-            ->value('country_id');
-        $country = $countryId
-            ? resolve_static(Country::class, 'query')
-                ->whereKey($countryId)
-                ->first(['id', 'is_eu_country', 'vat_rate_id'])
-            : null;
+            ->with('country:id,is_eu_country,tax_exemption_id')
+            ->first(['id', 'country_id'])
+            ?->country;
 
         // EU deliveries are only tax exempt for customers with a VAT ID.
-        if ($country?->vat_rate_id && (! $country->is_eu_country || filled($this->vat_id))) {
-            return $country->vat_rate_id;
+        if ($country?->tax_exemption_id && (! $country->is_eu_country || filled($this->vat_id))) {
+            return $country->tax_exemption_id;
         }
 
         // Keep a manually chosen rate, drop one that came from a country.
         if ($this->vat_rate_id
             && resolve_static(Country::class, 'query')
-                ->where('vat_rate_id', $this->vat_rate_id)
+                ->where('tax_exemption_id', $this->vat_rate_id)
                 ->exists()
         ) {
             return null;

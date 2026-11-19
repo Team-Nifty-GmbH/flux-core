@@ -9,20 +9,19 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
 
 class SyncCountryVatRateJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable;
 
-    public function __construct(public int $countryId, public ?int $previousVatRateId = null) {}
+    public function __construct(public int $countryId, public ?int $previousTaxExemptionId = null) {}
 
     public function handle(): void
     {
-        $vatRateId = resolve_static(Country::class, 'query')
+        $taxExemptionId = resolve_static(Country::class, 'query')
             ->whereKey($this->countryId)
-            ->value('vat_rate_id');
+            ->value('tax_exemption_id');
         $inCountry = fn (Builder $query) => $query->where('country_id', $this->countryId);
 
         resolve_static(Contact::class, 'query')
@@ -32,11 +31,11 @@ class SyncCountryVatRateJob implements ShouldQueue
                     ->whereNull('delivery_address_id')
                     ->whereHas('mainAddress', $inCountry)
                 )
-                ->when($vatRateId, fn (Builder $query) => $query->orWhere('vat_rate_id', $vatRateId))
+                ->when($taxExemptionId, fn (Builder $query) => $query->orWhere('vat_rate_id', $taxExemptionId))
             )
             ->chunkById(100, fn (Collection $contacts) => $contacts->each(function (Contact $contact): void {
                 // The former rate of this country was no manual choice of the contact.
-                if ($this->previousVatRateId && $contact->vat_rate_id === $this->previousVatRateId) {
+                if ($this->previousTaxExemptionId && $contact->vat_rate_id === $this->previousTaxExemptionId) {
                     $contact->vat_rate_id = null;
                 }
 

@@ -30,7 +30,7 @@ class UpdateCountryRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Currency::class, 'subject' => Country::class]),
             ],
-            'vat_rate_id' => [
+            'tax_exemption_id' => [
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => VatRate::class, 'subject' => Country::class])

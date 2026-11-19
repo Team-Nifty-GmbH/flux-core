@@ -28,7 +28,7 @@ class CreateCountryRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Currency::class]),
             ],
-            'vat_rate_id' => [
+            'tax_exemption_id' => [
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => VatRate::class])

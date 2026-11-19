@@ -20,11 +20,11 @@ class Country extends FluxModel
 
     protected static function booted(): void
     {
-        static::saved(function (Country $country): void {
-            if ($country->wasChanged('vat_rate_id')) {
+        static::updated(function (Country $country): void {
+            if ($country->wasChanged('tax_exemption_id')) {
                 SyncCountryVatRateJob::dispatch(
                     $country->getKey(),
-                    data_get($country->getPrevious(), 'vat_rate_id')
+                    data_get($country->getPrevious(), 'tax_exemption_id')
                 );
             }
         });
@@ -70,8 +70,8 @@ class Country extends FluxModel
         return $this->hasMany(Tenant::class);
     }
 
-    public function vatRate(): BelongsTo
+    public function taxExemption(): BelongsTo
     {
-        return $this->belongsTo(VatRate::class);
+        return $this->belongsTo(VatRate::class, 'tax_exemption_id');
     }
 }

@@ -18,7 +18,7 @@
             :options="$currencies"
         />
         <x-select.styled
-            wire:model="country.vat_rate_id"
+            wire:model="country.tax_exemption_id"
             :label="__('Tax Exemption')"
             :hint="__('Applied to contacts with a delivery address in this country. In EU countries only to contacts with a VAT ID.')"
             select="label:name|value:id"

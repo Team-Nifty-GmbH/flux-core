@@ -9,7 +9,7 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('countries', function (Blueprint $table): void {
-            $table->foreignId('vat_rate_id')
+            $table->foreignId('tax_exemption_id')
                 ->nullable()
                 ->after('currency_id')
                 ->constrained('vat_rates')
@@ -20,7 +20,7 @@ return new class() extends Migration
     public function down(): void
     {
         Schema::table('countries', function (Blueprint $table): void {
-            $table->dropConstrainedForeignId('vat_rate_id');
+            $table->dropConstrainedForeignId('tax_exemption_id');
         });
     }
 };

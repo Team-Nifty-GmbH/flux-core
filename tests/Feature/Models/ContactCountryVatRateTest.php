@@ -24,10 +24,10 @@ beforeEach(function (): void {
 
     $this->domestic = Country::factory()->create($countryDefaults + ['is_eu_country' => true]);
     $this->eu = Country::factory()->create(
-        $countryDefaults + ['is_eu_country' => true, 'vat_rate_id' => $this->euRate->getKey()]
+        $countryDefaults + ['is_eu_country' => true, 'tax_exemption_id' => $this->euRate->getKey()]
     );
     $this->thirdCountry = Country::factory()->create(
-        $countryDefaults + ['is_eu_country' => false, 'vat_rate_id' => $this->nonEuRate->getKey()]
+        $countryDefaults + ['is_eu_country' => false, 'tax_exemption_id' => $this->nonEuRate->getKey()]
     );
 });
 
@@ -128,9 +128,9 @@ test('changing the rate of a country updates its contacts', function (): void {
 
     UpdateCountry::make([
         'id' => $this->domestic->getKey(),
-        'vat_rate_id' => $this->manualRate->getKey(),
+        'tax_exemption_id' => $this->manualRate->getKey(),
     ])->validate()->execute();
-    UpdateCountry::make(['id' => $this->thirdCountry->getKey(), 'vat_rate_id' => null])->validate()->execute();
+    UpdateCountry::make(['id' => $this->thirdCountry->getKey(), 'tax_exemption_id' => null])->validate()->execute();
 
     expect($domesticContact->refresh()->vat_rate_id)->toBeNull()
         ->and($thirdCountryContact->refresh()->vat_rate_id)->toBeNull()
@@ -146,25 +146,25 @@ test('a country only accepts a tax exemption rate', function (): void {
     try {
         UpdateCountry::make([
             'id' => $this->domestic->getKey(),
-            'vat_rate_id' => $standardRate->getKey(),
+            'tax_exemption_id' => $standardRate->getKey(),
         ])->validate()->execute();
         $this->fail('The standard rate was accepted.');
     } catch (ValidationException $e) {
-        expect($e->errors())->toHaveKey('vat_rate_id');
+        expect($e->errors())->toHaveKey('tax_exemption_id');
     }
 
-    expect($this->domestic->refresh()->vat_rate_id)->toBeNull();
+    expect($this->domestic->refresh()->tax_exemption_id)->toBeNull();
 });
 
 test('the rate can be set in the country form', function (): void {
     Livewire::test(Countries::class)
         ->call('edit', $this->domestic->getKey())
-        ->set('country.vat_rate_id', $this->manualRate->getKey())
+        ->set('country.tax_exemption_id', $this->manualRate->getKey())
         ->call('save')
         ->assertHasNoErrors()
         ->assertReturned(true);
 
-    expect($this->domestic->refresh()->vat_rate_id)->toBe($this->manualRate->getKey());
+    expect($this->domestic->refresh()->tax_exemption_id)->toBe($this->manualRate->getKey());
 });
 
 test('the sync command reports in dry run and fixes otherwise', function (): void {

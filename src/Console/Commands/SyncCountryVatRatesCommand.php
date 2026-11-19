@@ -17,7 +17,8 @@ class SyncCountryVatRatesCommand extends Command
 
     public function handle(): int
     {
-        $vatRates = resolve_static(VatRate::class, 'query')->pluck('name', 'id');
+        $vatRates = resolve_static(VatRate::class, 'query')
+            ->pluck('name', 'id');
         $rows = [];
 
         resolve_static(Contact::class, 'query')
@@ -32,8 +33,8 @@ class SyncCountryVatRatesCommand extends Command
                     $rows[] = [
                         $contact->getKey(),
                         $contact->customer_number,
-                        $vatRates->get($contact->vat_rate_id, '-'),
-                        $vatRates->get($vatRateId, '-'),
+                        $vatRates->get($contact->vat_rate_id) ?? '-',
+                        $vatRates->get($vatRateId) ?? '-',
                     ];
 
                     if (! $this->option('dry-run')) {

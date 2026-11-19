@@ -30,7 +30,7 @@ class CountryForm extends FluxForm
 
     public ?string $name = null;
 
-    public ?int $vat_rate_id = null;
+    public ?int $tax_exemption_id = null;
 
     protected function getActions(): array
     {
