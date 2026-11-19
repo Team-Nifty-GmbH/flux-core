@@ -171,11 +171,11 @@ test('the sync command reports in dry run and fixes otherwise', function (): voi
     $contact = contactInCountry($this->thirdCountry);
     Contact::query()->whereKey($contact->getKey())->update(['vat_rate_id' => null]);
 
-    $this->artisan('flux:sync-country-vat-rates', ['--dry-run' => true])
+    $this->artisan('flux:sync-country-tax-exemptions', ['--dry-run' => true])
         ->expectsOutputToContain($contact->customer_number)
         ->assertSuccessful();
     expect($contact->refresh()->vat_rate_id)->toBeNull();
 
-    $this->artisan('flux:sync-country-vat-rates')->assertSuccessful();
+    $this->artisan('flux:sync-country-tax-exemptions')->assertSuccessful();
     expect($contact->refresh()->vat_rate_id)->toBe($this->nonEuRate->getKey());
 });

@@ -70,7 +70,7 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
             }
 
             if ($contact->exists && $contact->isDirty(['vat_id', 'delivery_address_id', 'main_address_id'])) {
-                $contact->vat_rate_id = $contact->getCountryVatRateId();
+                $contact->vat_rate_id = $contact->getCountryTaxExemptionId();
             }
         });
     }
@@ -263,11 +263,11 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
         return $this->getFirstMediaUrl('avatar', 'thumb') ?: static::icon()->getUrl();
     }
 
-    public function getCountryVatRateId(): ?int
+    public function getCountryTaxExemptionId(): ?int
     {
         $country = resolve_static(Address::class, 'query')
             ->whereKey($this->delivery_address_id ?? $this->main_address_id)
-            ->with('country:id,is_eu_country,tax_exemption_id')
+            ->with('country:id,tax_exemption_id,is_eu_country')
             ->first(['id', 'country_id'])
             ?->country;
 
@@ -325,9 +325,9 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
             ->singleFile();
     }
 
-    public function syncCountryVatRate(): void
+    public function syncCountryTaxExemption(): void
     {
-        $this->vat_rate_id = $this->getCountryVatRateId();
+        $this->vat_rate_id = $this->getCountryTaxExemptionId();
 
         if ($this->isDirty('vat_rate_id')) {
             $this->save();

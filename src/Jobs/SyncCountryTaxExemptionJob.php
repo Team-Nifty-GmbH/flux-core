@@ -11,7 +11,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
 
-class SyncCountryVatRateJob implements ShouldQueue
+class SyncCountryTaxExemptionJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
@@ -39,7 +39,7 @@ class SyncCountryVatRateJob implements ShouldQueue
                     $contact->vat_rate_id = null;
                 }
 
-                $contact->syncCountryVatRate();
+                $contact->syncCountryTaxExemption();
             }));
     }
 }

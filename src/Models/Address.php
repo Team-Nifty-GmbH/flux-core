@@ -247,7 +247,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                         data_get($address->getPrevious(), 'contact_id'),
                     ]))
                     ->get()
-                    ->each(fn (Contact $contact) => $contact->syncCountryVatRate());
+                    ->each(fn (Contact $contact) => $contact->syncCountryTaxExemption());
             }
         });
 
