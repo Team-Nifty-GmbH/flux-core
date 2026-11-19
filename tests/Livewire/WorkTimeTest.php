@@ -339,6 +339,7 @@ test('cannot start a second daily pause while one is still running', function ()
 
     $component->call('togglePauseWorkDay', true)
         ->assertHasErrors('is_pause')
+        ->assertToastNotification(type: 'error')
         ->assertSet('dailyWorkTimePause.id', $runningPause->getKey());
 
     expect(

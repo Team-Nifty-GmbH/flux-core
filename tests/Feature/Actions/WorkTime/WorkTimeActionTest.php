@@ -53,3 +53,35 @@ test('delete work time', function (): void {
     expect(DeleteWorkTime::make(['id' => $wt->getKey()])
         ->validate()->execute())->toBeTrue();
 });
+
+test('running pause of one user does not block a pause for another user', function (): void {
+    $employee = FluxErp\Models\User::factory()->create();
+
+    $employeeWorkTime = WorkTime::factory()->create([
+        'user_id' => $employee->getKey(),
+        'ended_at' => null,
+        'is_daily_work_time' => true,
+        'is_pause' => false,
+        'is_locked' => false,
+    ]);
+
+    // running pause of the terminal account, which must not block the employee
+    WorkTime::factory()->create([
+        'user_id' => $this->user->getKey(),
+        'ended_at' => null,
+        'is_daily_work_time' => true,
+        'is_pause' => true,
+        'is_locked' => false,
+    ]);
+
+    $pause = CreateWorkTime::make([
+        'user_id' => $employee->getKey(),
+        'parent_id' => $employeeWorkTime->getKey(),
+        'started_at' => now()->subMinutes(5)->toDateTimeString(),
+        'is_daily_work_time' => true,
+        'is_locked' => false,
+        'is_pause' => true,
+    ])->validate()->execute();
+
+    expect($pause->user_id)->toBe($employee->getKey());
+});
