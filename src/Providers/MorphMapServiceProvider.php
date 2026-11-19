@@ -38,6 +38,8 @@ use FluxErp\Models\EmployeeDepartment;
 use FluxErp\Models\EventSubscription;
 use FluxErp\Models\FailedJob;
 use FluxErp\Models\Favorite;
+use FluxErp\Models\FixedAsset;
+use FluxErp\Models\FixedAssetDepreciation;
 use FluxErp\Models\Holiday;
 use FluxErp\Models\Industry;
 use FluxErp\Models\JobBatch;
@@ -206,6 +208,8 @@ class MorphMapServiceProvider extends ServiceProvider
             'event_subscription' => EventSubscription::class,
             'failed_job' => FailedJob::class,
             'favorite' => Favorite::class,
+            'fixed_asset' => FixedAsset::class,
+            'fixed_asset_depreciation' => FixedAssetDepreciation::class,
             'holiday' => Holiday::class,
             'industry' => Industry::class,
             'job_batch' => JobBatch::class,
