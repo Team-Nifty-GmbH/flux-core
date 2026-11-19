@@ -35,22 +35,25 @@ class Guard extends \Laravel\Sanctum\Guard
 
         $accessToken->last_used_at ?? $accessToken->last_used_at = $accessToken->created_at;
 
+        $tokenable = $accessToken->tokenable;
+        $ownsToken = ! is_null($tokenable) && $this->hasValidProvider($tokenable);
+
         $isValid =
-            (! $this->expiration || $accessToken->last_used_at->gt(now()->subMinutes($this->expiration)))
-            && $this->hasValidProvider($accessToken->tokenable)
-            && (! $accessToken->tokenable instanceof Token || $accessToken->tokenable->isValid());
+            $ownsToken
+            && (! $this->expiration || $accessToken->last_used_at->gt(now()->subMinutes($this->expiration)))
+            && (! $tokenable instanceof Token || $tokenable->isValid());
 
         if (is_callable(Sanctum::$accessTokenAuthenticationCallback)) {
             $isValid = (bool) (Sanctum::$accessTokenAuthenticationCallback)($accessToken, $isValid);
         }
 
-        if ($accessToken->tokenable instanceof Token) {
-            $isValid = $isValid && $accessToken->tokenable->use();
+        if ($tokenable instanceof Token) {
+            $isValid = $isValid && $tokenable->use();
 
-            if (! $accessToken->tokenable->isValid()) {
+            if ($ownsToken && ! $tokenable->isValid()) {
                 $accessToken->delete();
             }
-        } elseif (! $isValid) {
+        } elseif (! $isValid && ($ownsToken || is_null($tokenable))) {
             $accessToken->delete();
         }
 
