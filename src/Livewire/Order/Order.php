@@ -45,6 +45,7 @@ use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -636,28 +637,32 @@ class Order extends Component
     #[Renderless]
     public function recalculateOrderTotals(): void
     {
-        $this->order->total_net_price = 0;
-        $this->order->total_gross_price = 0;
-        $this->order->total_vats = [];
-        $this->order->total_base_net_price = 0;
+        $columns = [
+            'id',
+            'parent_id',
+            'created_from_id',
+            'contact_id',
+            'currency_id',
+            'order_type_id',
+            'price_list_id',
+            'payment_discount_percent',
+            'invoice_number',
+        ];
 
         $order = resolve_static(OrderModel::class, 'query')
             ->whereKey($this->order->id)
-            ->first([
-                'id',
-                'parent_id',
-                'created_from_id',
-                'contact_id',
-                'currency_id',
-                'order_type_id',
-                'price_list_id',
-                'payment_discount_percent',
-                'invoice_number',
-            ]);
+            ->first($columns);
 
         $order->calculatePrices()->save();
 
-        $this->order->fill($order);
+        foreach (Arr::except($order->attributesToArray(), $columns) as $key => $value) {
+            if (! property_exists($this->order, $key)) {
+                continue;
+            }
+
+            $this->order->{$key} = $value;
+            $this->order->loadedData[$key] = $this->order->{$key};
+        }
     }
 
     #[Renderless]

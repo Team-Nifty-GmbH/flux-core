@@ -711,6 +711,48 @@ test('recalculate order totals', function (): void {
         ->assertNotSet('order.total_gross_price', 0);
 });
 
+test('recalculating the totals keeps unsaved header changes', function (): void {
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('order.header', 'Changed header');
+
+    $this->order->orderPositions()->first()->update([
+        'amount' => 2,
+        'total_net_price' => 200,
+        'total_base_net_price' => 200,
+        'total_gross_price' => 238,
+        'total_base_gross_price' => 238,
+    ]);
+
+    $component
+        ->call('recalculateOrderTotals')
+        ->assertSet('order.header', 'Changed header')
+        ->assertSet('order.total_net_price', $this->order->refresh()->total_net_price)
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($this->order->refresh()->header)->toBe('Changed header')
+        ->and(bccomp($this->order->total_net_price, 200))->toBe(0);
+});
+
+test('recalculating the totals shows totals another session already stored', function (): void {
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
+
+    $this->order->orderPositions()->first()->update([
+        'amount' => 2,
+        'total_net_price' => 200,
+        'total_base_net_price' => 200,
+        'total_gross_price' => 238,
+        'total_base_gross_price' => 238,
+    ]);
+    $this->order->refresh()->calculatePrices()->save();
+
+    $component
+        ->call('recalculateOrderTotals')
+        ->assertSet('order.total_net_price', $this->order->refresh()->total_net_price)
+        ->assertSet('order.total_gross_price', $this->order->total_gross_price);
+});
+
 test('render view data', function (): void {
     $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
     $viewData = $component->instance()->render()->getData();
