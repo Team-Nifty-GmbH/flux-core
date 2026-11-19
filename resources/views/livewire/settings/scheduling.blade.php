@@ -95,6 +95,12 @@
                 wire:model="schedule.cron.parameters.timeConstraint.1"
             />
         </div>
+        <x-select.styled
+            wire:model="schedule.timezone"
+            searchable
+            :label="__('Timezone')"
+            :options="timezone_identifiers_list()"
+        />
         <x-label :label="__('End')" />
         <x-radio
             id="schedule-end-never-radio"

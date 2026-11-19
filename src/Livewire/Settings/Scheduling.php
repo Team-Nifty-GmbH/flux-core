@@ -102,6 +102,11 @@ class Scheduling extends ScheduleList
         $this->schedule->reset();
         $this->schedule->fill($schedule);
 
+        // Existing schedules without a timezone keep running in app.timezone.
+        if (! $schedule->exists) {
+            $this->schedule->timezone = config('flux.display_timezone');
+        }
+
         $this->js(<<<'JS'
             $tsui.open.modal('edit-schedule-modal');
         JS);
