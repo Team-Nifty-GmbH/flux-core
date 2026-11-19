@@ -85,7 +85,7 @@ test('a deadlock stays a query exception so the transaction can retry', function
     Exceptions::assertNothingReported();
 });
 
-test('a relation this installation has no columns for is not a failure', function (): void {
+test('merging an address moves its roles without reporting a failure', function (): void {
     Exceptions::fake();
     Log::spy();
 

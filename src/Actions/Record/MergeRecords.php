@@ -128,15 +128,6 @@ class MergeRecords extends FluxAction
                 $method = new ReflectionMethod($mainRecord, $relationItem->name);
                 $relation = $method->invoke($mainRecord);
 
-                if (! Schema::hasColumns(
-                    $relation instanceof BelongsToMany ? $relation->getTable() : $relation->getRelated()->getTable(),
-                    $relation instanceof BelongsToMany
-                        ? [$relation->getForeignPivotKeyName(), $relation->getRelatedPivotKeyName()]
-                        : [$relation->getForeignKeyName()]
-                )) {
-                    continue;
-                }
-
                 // On MorphOne and HasOne relations if it is not from the main record,
                 // it must be updated accordingly, and the related record from the main record must be deleted.
                 // For now, related records from these relations are not replaced to avoid data loss.
@@ -232,7 +223,7 @@ class MergeRecords extends FluxAction
                 report($e);
 
                 throw ValidationException::withMessages([
-                    $relationItem->name => [__('Related records could not be moved, nothing was merged.')],
+                    $relationItem->name => ['Related records could not be moved, nothing was merged.'],
                 ]);
             }
         }
