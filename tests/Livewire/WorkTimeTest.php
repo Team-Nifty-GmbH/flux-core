@@ -312,3 +312,39 @@ test('toggle daily work time', function (): void {
 
     expect(bcround($dbDailyWorkTime->total_time_ms, 0))->toEqual(bcround($dbDailyWorkTime->started_at->diffInMilliseconds($dbDailyWorkTime->ended_at), 0));
 });
+
+test('cannot start a second daily pause while one is still running', function (): void {
+    $workTime = WorkTimeModel::factory()->create([
+        'user_id' => $this->user->getKey(),
+        'started_at' => now()->subHours(2),
+        'ended_at' => null,
+        'is_daily_work_time' => true,
+        'is_pause' => false,
+        'is_locked' => false,
+    ]);
+
+    $component = Livewire::test(WorkTime::class)
+        ->assertSet('dailyWorkTime.id', $workTime->getKey())
+        ->assertSet('dailyWorkTimePause.id', null);
+
+    WorkTimeModel::factory()->create([
+        'user_id' => $this->user->getKey(),
+        'parent_id' => $workTime->getKey(),
+        'started_at' => now()->subMinutes(5),
+        'ended_at' => null,
+        'is_daily_work_time' => true,
+        'is_pause' => true,
+        'is_locked' => false,
+    ]);
+
+    $component->call('togglePauseWorkDay', true)
+        ->assertHasErrors('is_pause');
+
+    expect(
+        WorkTimeModel::query()
+            ->where('user_id', $this->user->getKey())
+            ->where('is_pause', true)
+            ->where('is_locked', false)
+            ->count()
+    )->toBe(1);
+});
