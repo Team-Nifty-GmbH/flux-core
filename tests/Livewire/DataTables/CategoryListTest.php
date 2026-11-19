@@ -3,6 +3,7 @@
 use FluxErp\Livewire\DataTables\CategoryList;
 use FluxErp\Models\Category;
 use FluxErp\Models\Product;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
@@ -29,4 +30,26 @@ test('lists children below their root category', function (): void {
 
     expect(array_column($rows, 'id'))->toBe([$root->getKey(), $child->getKey()])
         ->and(array_column($rows, 'depth'))->toBe([0, 1]);
+});
+
+test('filtering for a child category returns its family instead of nothing', function (): void {
+    $root = Category::factory()->create(['model_type' => morph_alias(Product::class)]);
+    $child = Category::factory()->create([
+        'model_type' => morph_alias(Product::class),
+        'parent_id' => $root->getKey(),
+        'name' => $childName = Str::uuid()->toString(),
+    ]);
+
+    $rows = Livewire::test(CategoryList::class)
+        ->set('userFilters', [[[
+            'column' => 'name',
+            'operator' => '=',
+            'value' => $childName,
+        ]]])
+        ->call('loadData')
+        ->assertOk()
+        ->instance()
+        ->getDataForTesting()['data'];
+
+    expect(array_column($rows, 'id'))->toBe([$root->getKey(), $child->getKey()]);
 });

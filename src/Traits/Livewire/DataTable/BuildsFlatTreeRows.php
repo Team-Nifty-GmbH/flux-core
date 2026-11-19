@@ -11,13 +11,9 @@ trait BuildsFlatTreeRows
 {
     protected function buildFlatTreeRows(Builder $query): array
     {
-        $rootIds = $this->resolvesMatchesToRoots()
-            ? $this->resolveRootIds($query)
-            : $query->pluck($this->modelTable . '.' . $this->modelKeyName);
-
         $records = $this->prepareFamilyTreeQuery(
             resolve_static($this->getModel(), 'familyTree')
-                ->whereKey($rootIds)
+                ->whereKey($this->resolveRootIds($query))
         )
             ->get();
 
@@ -102,10 +98,5 @@ trait BuildsFlatTreeRows
             })
             ->unique()
             ->values();
-    }
-
-    protected function resolvesMatchesToRoots(): bool
-    {
-        return true;
     }
 }
