@@ -236,7 +236,7 @@ class WorkTime extends Component
         try {
             $this->dailyWorkTimePause->save();
         } catch (ValidationException $e) {
-            exception_to_notifications($e, $this, form: $this->dailyWorkTimePause);
+            exception_to_notifications($e, $this);
             $this->loadWorkTimes();
 
             return;
