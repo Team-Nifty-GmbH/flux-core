@@ -9,6 +9,11 @@
                 document.addEventListener('livewire:navigating', () => {
                     this.closeMenu(true);
                 });
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'hidden') {
+                        this.closeMenu();
+                    }
+                });
             },
             open: [],
             toggleMenu(key) {
@@ -38,7 +43,10 @@
 
                 this.hoverTimer = setTimeout(() => {
                     this.hoverTimer = null;
-                    this.showMenu();
+
+                    if (this.$root.matches(':hover')) {
+                        this.showMenu();
+                    }
                 }, 300);
             },
             closeMenu(force = null) {

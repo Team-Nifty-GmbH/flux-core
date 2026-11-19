@@ -60,6 +60,40 @@ test('sidebar stays collapsed when the pointer leaves the window over it', funct
         ->assertScript("{$menuOpen} === false");
 });
 
+test('sidebar stays collapsed when the page is hidden while the pointer rests on it', function (): void {
+    $menuOpen = "Alpine.\$data(document.getElementById('main-navigation')).menuOpen";
+
+    $page = visit(route('dashboard'))
+        ->assertNoSmoke()
+        ->hover('main >> nth=0')
+        ->hover('#main-navigation nav a >> nth=0');
+
+    $page->script(<<<'JS'
+        () => {
+            Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
+            document.dispatchEvent(new Event('visibilitychange'));
+        }
+    JS);
+
+    $page->wait(0.6)
+        ->assertScript("{$menuOpen} === false");
+});
+
+test('sidebar stays collapsed when the pointer is gone once the delay ends', function (): void {
+    $menuOpen = "Alpine.\$data(document.getElementById('main-navigation')).menuOpen";
+
+    $page = visit(route('dashboard'))
+        ->assertNoSmoke()
+        ->hover('main >> nth=0');
+
+    $page->script(<<<'JS'
+        () => Alpine.$data(document.getElementById('main-navigation')).showMenuOnRest()
+    JS);
+
+    $page->wait(0.6)
+        ->assertScript("{$menuOpen} === false");
+});
+
 test('sidebar expands once the pointer rests on it', function (): void {
     visit(route('dashboard'))
         ->assertNoSmoke()
