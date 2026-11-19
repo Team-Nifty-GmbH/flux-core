@@ -637,23 +637,25 @@ class Order extends Component
     #[Renderless]
     public function recalculateOrderTotals(): void
     {
+        $columns = [
+            'id',
+            'parent_id',
+            'created_from_id',
+            'contact_id',
+            'currency_id',
+            'order_type_id',
+            'price_list_id',
+            'payment_discount_percent',
+            'invoice_number',
+        ];
+
         $order = resolve_static(OrderModel::class, 'query')
             ->whereKey($this->order->id)
-            ->first([
-                'id',
-                'parent_id',
-                'created_from_id',
-                'contact_id',
-                'currency_id',
-                'order_type_id',
-                'price_list_id',
-                'payment_discount_percent',
-                'invoice_number',
-            ]);
+            ->first($columns);
 
         $order->calculatePrices()->save();
 
-        foreach (Arr::only($order->toArray(), array_keys($order->getChanges())) as $key => $value) {
+        foreach (Arr::except($order->attributesToArray(), $columns) as $key => $value) {
             if (! property_exists($this->order, $key)) {
                 continue;
             }
