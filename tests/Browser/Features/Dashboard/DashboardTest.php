@@ -3,6 +3,10 @@
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Models\Widget;
 
+afterEach(function (): void {
+    Closure::bind(fn () => Dashboard::$registeredPresets = [], null, Dashboard::class)();
+});
+
 test('dashboard loads without js errors', function (): void {
     visit(route('dashboard'))
         ->assertRoute('dashboard')
@@ -96,4 +100,101 @@ test('a moved widget is saved with its new position', function (): void {
             ->pluck('order_row')
             ->all()
     )->toBe([2]);
+});
+
+test('resetting a group to the default asks before deleting the own widgets', function (): void {
+    $page = visit(route('dashboard'))
+        ->assertRoute('dashboard')
+        ->assertNoSmoke();
+
+    $dashboard = "Alpine.\$data(document.querySelector('[x-data=\"dashboard()\"]'))";
+    $count = "document.querySelectorAll('.grid-stack > .grid-stack-item').length";
+    $ownWidgets = fn () => Widget::query()
+        ->where('widgetable_id', $this->user->getKey())
+        ->where('dashboard_component', Dashboard::class)
+        ->count();
+
+    $page->script(<<<'JS'
+        () => document.querySelector('button[x-on\\:click="editGridMode(true)"]').click()
+    JS);
+    $page->script("() => {$dashboard}.selectWidget(Object.keys({$dashboard}.\$wire.availableWidgets)[0])");
+    waitForCondition($page, "() => {$count} === 1 && ! {$dashboard}.isLoading", 12000);
+    $page->script("() => {$dashboard}.save()");
+    waitForCondition($page, "() => ! {$dashboard}.editGrid && ! {$dashboard}.isLoading", 12000);
+
+    expect($ownWidgets())->toBe(1);
+
+    $page->script(<<<'JS'
+        () => document.querySelector('button[x-on\\:click="editGridMode(true)"]').click()
+    JS);
+    $page->script(<<<'JS'
+        () => document.querySelector('button[wire\\:click="resetToRoleDashboard"]').click()
+    JS);
+
+    $page->assertSee('Do you really want to reset this group to the default?');
+
+    expect($ownWidgets())->toBe(1);
+
+    $page->script(<<<'JS'
+        () => [...document.querySelectorAll('button')]
+            .filter((button) => button.offsetParent !== null && button.innerText.trim() === 'Reset')
+            .pop()
+            .click()
+    JS);
+    waitForCondition($page, "() => ! {$dashboard}.editGrid && ! {$dashboard}.isLoading", 12000);
+
+    expect($ownWidgets())->toBe(0);
+});
+
+test('applying a preset asks before replacing the own widgets', function (): void {
+    Dashboard::registerPreset('finance', [
+        ['component_name' => array_key_first(FluxErp\Facades\Widget::all()), 'group' => null],
+    ]);
+
+    $page = visit(route('dashboard'))
+        ->assertRoute('dashboard')
+        ->assertNoSmoke();
+
+    $dashboard = "Alpine.\$data(document.querySelector('[x-data=\"dashboard()\"]'))";
+    $count = "document.querySelectorAll('.grid-stack > .grid-stack-item').length";
+    $ownWidgetIds = fn () => Widget::query()
+        ->where('widgetable_id', $this->user->getKey())
+        ->where('dashboard_component', Dashboard::class)
+        ->pluck('id')
+        ->all();
+
+    $page->script(<<<'JS'
+        () => document.querySelector('button[x-on\\:click="editGridMode(true)"]').click()
+    JS);
+    $page->script("() => {$dashboard}.selectWidget(Object.keys({$dashboard}.\$wire.availableWidgets)[0])");
+    waitForCondition($page, "() => {$count} === 1 && ! {$dashboard}.isLoading", 12000);
+    $page->script("() => {$dashboard}.save()");
+    waitForCondition($page, "() => ! {$dashboard}.editGrid && ! {$dashboard}.isLoading", 12000);
+
+    $before = $ownWidgetIds();
+    expect($before)->toHaveCount(1);
+
+    $page->script(<<<'JS'
+        () => document.querySelector('button[x-on\\:click="editGridMode(true)"]').click()
+    JS);
+    $page->script(<<<'JS'
+        () => document.querySelector('[wire\\:click^="applyPreset"]').click()
+    JS);
+
+    $page->assertSee('Do you really want to apply this preset?');
+    $page->wait(1);
+
+    expect($ownWidgetIds())->toBe($before);
+
+    $page->script(<<<'JS'
+        () => [...document.querySelectorAll('button')]
+            .filter((button) => button.offsetParent !== null && button.innerText.trim() === 'Apply')
+            .pop()
+            .click()
+    JS);
+    waitForCondition($page, "() => ! {$dashboard}.editGrid && ! {$dashboard}.isLoading", 12000);
+
+    expect($ownWidgetIds())
+        ->toHaveCount(1)
+        ->not->toBe($before);
 });
