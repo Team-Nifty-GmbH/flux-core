@@ -61,6 +61,7 @@ trait RendersWidgets
     public function resetWidgets(): void
     {
         $this->widgets();
+        $this->dispatch('dashboard-reset');
     }
 
     #[Renderless]
