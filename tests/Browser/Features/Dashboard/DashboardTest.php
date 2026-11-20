@@ -121,6 +121,7 @@ test('cancelling the edit mode asks before discarding the changes', function ():
     JS);
 
     $page->assertSee('Do you really want to discard the changes?');
+    $page->wait(1);
 
     expect($page->script("() => {$count}"))->toBe(1);
 

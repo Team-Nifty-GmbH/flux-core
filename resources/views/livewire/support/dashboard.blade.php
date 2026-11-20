@@ -3,7 +3,7 @@
     x-init.once="reInit().disable()"
     x-on:livewire:navigated.window="reInit().disable()"
     x-on:gridstack-reinit.window="reinitWithPositionSaving()"
-    x-on:dashboard-reset.window="onPostReset()"
+    x-on:dashboard-reset="onPostReset()"
     x-on:remove-group.window="removeNewGroup($event.detail.groupName)"
 >
     @section('dashboard-widget-select')
