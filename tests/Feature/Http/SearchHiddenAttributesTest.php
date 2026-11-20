@@ -5,6 +5,7 @@ use FluxErp\Models\User;
 use Illuminate\Testing\TestResponse;
 
 beforeEach(function (): void {
+    grantModelPermissions($this->user);
     $this->target = User::factory()->create(['password' => 'secret-password']);
     $this->target->forceFill(['remember_token' => 'secret-remember-token'])->saveQuietly();
     $this->hash = $this->target->getRawOriginal('password');
