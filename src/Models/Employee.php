@@ -30,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
@@ -85,7 +86,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
 
     public function syncWorkTimes(): void
     {
-        resolve_static(WorkTime::class, 'query')
+        $workTimes = resolve_static(WorkTime::class, 'query')
             ->withTrashed()
             ->where(fn (Builder $query) => $query
                 ->where('employee_id', $this->getKey())
@@ -100,30 +101,39 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
                         ->orWhere('employee_id', '!=', $this->getKey())
                     )
                 )
-            )
-            ->get()
-            ->each(function (WorkTime $workTime): void {
-                $previousEmployeeId = $workTime->employee_id;
+            );
 
-                $workTime->employee_id = $this->user_id && (int) $workTime->user_id === (int) $this->user_id
-                    ? $this->getKey()
-                    : null;
-                $workTime->save();
+        $days = $workTimes->clone()
+            ->where('is_daily_work_time', true)
+            ->where('is_locked', true)
+            ->get(['id', 'employee_id', 'user_id', 'started_at'])
+            ->flatMap(fn (WorkTime $workTime) => [
+                [$workTime->employee_id, $workTime->started_at->toDateString()],
+                [
+                    $this->user_id && (int) $workTime->user_id === (int) $this->user_id ? $this->getKey() : null,
+                    $workTime->started_at->toDateString(),
+                ],
+            ])
+            ->filter(fn (array $day) => $day[0])
+            ->unique(fn (array $day) => implode('|', $day));
 
-                if (! $previousEmployeeId || ! $workTime->is_daily_work_time || ! $workTime->is_locked) {
-                    return;
-                }
+        $workTimes->update([
+            'employee_id' => $this->user_id
+                ? DB::raw('CASE WHEN user_id = ' . (int) $this->user_id . ' THEN ' . (int) $this->getKey() . ' END')
+                : null,
+        ]);
 
-                try {
-                    CloseEmployeeDay::make([
-                        'employee_id' => $previousEmployeeId,
-                        'date' => $workTime->started_at,
-                    ])
-                        ->validate()
-                        ->execute();
-                } catch (Throwable) {
-                }
-            });
+        foreach ($days as [$employeeId, $date]) {
+            try {
+                CloseEmployeeDay::make([
+                    'employee_id' => $employeeId,
+                    'date' => $date,
+                ])
+                    ->validate()
+                    ->execute();
+            } catch (Throwable) {
+            }
+        }
     }
 
     // Relations

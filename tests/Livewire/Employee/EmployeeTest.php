@@ -136,3 +136,35 @@ test('saving a stale general form keeps a user linked meanwhile', function (): v
         ->user_id->toBe($user->getKey())
         ->firstname->toBe('Renamed');
 });
+
+test('saving a stale general form keeps a link changed or removed meanwhile', function (bool $relink): void {
+    $loadedUser = User::factory()->create(['is_active' => true]);
+    $loadedUser->tenants()->attach($this->dbTenant->getKey());
+
+    $employee = app(EmployeeModel::class)->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'user_id' => $loadedUser->getKey(),
+        'firstname' => 'Loaded',
+        'lastname' => 'Link',
+        'employment_date' => now()->subYear()->format('Y-m-d'),
+        'is_active' => true,
+    ]);
+
+    $component = Livewire::test(Employee::class, ['id' => $employee->getKey()])
+        ->assertSet('employee.user_id', $loadedUser->getKey());
+
+    $newUserId = $relink ? User::factory()->create(['is_active' => true])->getKey() : null;
+    $employee->update(['user_id' => $newUserId]);
+
+    $component
+        ->set('employee.firstname', 'Renamed')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect($employee->refresh())
+        ->user_id->toBe($newUserId)
+        ->firstname->toBe('Renamed');
+})->with([
+    'changed' => true,
+    'removed' => false,
+]);
