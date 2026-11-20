@@ -78,6 +78,7 @@ trait RendersWidgets
 
         $this->widgets();
         $this->dispatch('gridstack-reinit');
+        $this->dispatch('dashboard-reset');
     }
 
     #[Computed]

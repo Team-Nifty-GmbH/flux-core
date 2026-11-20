@@ -118,7 +118,8 @@
                         @foreach ($this->presets as $preset)
                             <x-dropdown.items
                                 :text="__($preset)"
-                                x-on:click="$wire.applyPreset({{ \Illuminate\Support\Js::from($preset) }}).then(onPostReset.bind($data))"
+                                wire:flux-confirm.type.warning="{{ __('wire:confirm.apply.dashboard-preset') }}"
+                                wire:click="applyPreset({{ \Illuminate\Support\Js::from($preset) }})"
                             />
                         @endforeach
                     </x-dropdown>

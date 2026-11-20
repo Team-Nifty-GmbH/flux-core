@@ -3464,6 +3464,7 @@
     "When using the like or not like filter, you can use the % sign as a placeholder. Examples: \"test%\" for values that start with \"test\", \"%test\" for values that end with \"test\", and \"%test%\" for values that contain \"test\" anywhere.": "Wenn Sie den Filter \"wie\" oder \"nicht wie\" verwenden, können Sie das % Zeichen als Platzhalter verwenden. Beispiele: \"test%\" für Werte, die mit \"test\" beginnen, \"%test\" für Werte, die mit \"test\" enden, und \"%test%\" für Werte, die \"test\" irgendwo enthalten.",
     "Whoops!": "Hoppla!",
     "Width": "Breite",
+    "wire:confirm.apply.dashboard-preset": "Vorlage anwenden|Soll diese Vorlage wirklich angewendet werden? Deine eigenen Widgets in ihren Gruppen werden ersetzt.|Abbrechen|Anwenden",
     "wire:confirm.cancel.dashboard-edit": "Änderungen verwerfen|Sollen die Änderungen wirklich verworfen werden?|Abbrechen|Verwerfen",
     "wire:confirm.clear.queue": "Warteschlange leeren|Soll die Warteschlange wirklich geleert werden?|Abbrechen|Leeren",
     "wire:confirm.commission-credit-notes": "Gutschriften erstellen|Sollen Gutschriften für die ausgewählten Provisionen erstellt werden?|Abbrechen|Erstellen",
