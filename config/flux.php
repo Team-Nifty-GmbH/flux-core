@@ -7,6 +7,8 @@ return [
 
     'license_key' => env('FLUX_LICENSE_KEY'),
 
+    'composer_auth' => env('COMPOSER_AUTH'),
+
     'formal_salutation' => env('FLUX_FORMAL_SALUTATION', true),
 
     'flux_url' => env('FLUX_URL'),
@@ -26,6 +28,7 @@ return [
     'media' => [
         'conversion' => env('MEDIA_CONVERSIONS_DISK', 'public'),
         'disk' => env('MEDIA_DISK', 'local'),
+        'max_image_pixels' => (int) env('FLUX_MEDIA_MAX_IMAGE_PIXELS', 50_000_000),
     ],
 
     'file_uploads' => [
@@ -39,6 +42,7 @@ return [
 
     'mail' => [
         'max_message_size' => (int) env('FLUX_MAIL_MAX_MESSAGE_SIZE', 25 * 1024 * 1024),
+        'sync_time_budget' => (int) env('FLUX_MAIL_SYNC_TIME_BUDGET', 300),
     ],
 
     'vite' => [

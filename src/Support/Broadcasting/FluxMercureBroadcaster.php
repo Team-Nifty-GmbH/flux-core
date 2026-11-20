@@ -74,34 +74,14 @@ class FluxMercureBroadcaster extends MercureBroadcaster
 
     protected function compactGrant(Grant $grant): Grant
     {
-        if (! array_is_list($grant->topics)) {
-            return $grant;
-        }
+        $isList = array_is_list($grant->topics);
+        [$exact, $patterns] = $this->compactTopics($isList ? $grant->topics : data_get($grant->topics, 'exact') ?? []);
+        $patterns = array_merge(
+            $patterns,
+            $isList ? [] : $this->compactSubscriptionPatterns(data_get($grant->topics, 'urlpattern') ?? [])
+        );
 
-        $groups = [];
-        $exact = [];
-
-        foreach ($grant->topics as $topic) {
-            if (preg_match('/^(.+\.)([A-Za-z0-9_-]+)$/', $topic, $match)) {
-                $groups[$match[1]][] = $match[2];
-            } else {
-                $exact[] = $topic;
-            }
-        }
-
-        $patterns = [];
-
-        foreach ($groups as $prefix => $ids) {
-            if (count($ids) === 1) {
-                $exact[] = $prefix . $ids[0];
-
-                continue;
-            }
-
-            $patterns[] = $this->escapePattern($prefix) . ':id(' . implode('|', array_unique($ids)) . ')';
-        }
-
-        if ($patterns === []) {
+        if ($isList && $patterns === []) {
             return $grant;
         }
 
@@ -110,6 +90,68 @@ class FluxMercureBroadcaster extends MercureBroadcaster
             array_filter(['exact' => $exact, 'urlpattern' => $patterns]),
             $grant->payload
         );
+    }
+
+    protected function compactSubscriptionPatterns(array $patterns): array
+    {
+        $groups = [];
+        $compact = [];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match('/^(.+\.)([A-Za-z0-9_-]+)\{\/:subscriber\}\?$/', $pattern, $match)) {
+                $groups[$match[1]][] = $match[2];
+            } else {
+                $compact[] = $pattern;
+            }
+        }
+
+        foreach ($groups as $prefix => $ids) {
+            $compact[] = $prefix
+                . (count($ids) === 1 ? $ids[0] : ':id(' . implode('|', array_unique($ids)) . ')')
+                . '{/:subscriber}?';
+        }
+
+        return $compact;
+    }
+
+    /**
+     * @return array{0: array<int, string>, 1: array<int, string>} exact topics and url patterns
+     */
+    protected function compactTopics(array $topics): array
+    {
+        $groups = [];
+        $exact = [];
+
+        foreach ($topics as $topic) {
+            if (preg_match('/^(.+\.)([A-Za-z0-9_-]+)$/', $topic, $match)) {
+                $groups[$match[1]]['ids'][] = $match[2];
+            } elseif (preg_match('/^(.+-)([A-Za-z0-9_]+)\.$/', $topic, $match)) {
+                $groups[$match[1]]['names'][] = $match[2];
+            } else {
+                $exact[] = $topic;
+            }
+        }
+
+        $patterns = [];
+
+        foreach ($groups as $prefix => $group) {
+            $ids = data_get($group, 'ids') ?? [];
+            $names = data_get($group, 'names') ?? [];
+
+            if (count($ids) === 1) {
+                $exact[] = $prefix . $ids[0];
+            } elseif ($ids !== []) {
+                $patterns[] = $this->escapePattern($prefix) . ':id(' . implode('|', array_unique($ids)) . ')';
+            }
+
+            if (count($names) === 1) {
+                $exact[] = $prefix . $names[0] . '.';
+            } elseif ($names !== []) {
+                $patterns[] = $this->escapePattern($prefix) . ':name(' . implode('|', array_unique($names)) . ').';
+            }
+        }
+
+        return [$exact, $patterns];
     }
 
     protected function escapePattern(string $value): string
@@ -123,8 +165,36 @@ class FluxMercureBroadcaster extends MercureBroadcaster
     {
         return parent::makeAuthorizationCookie(
             $request,
-            array_map(fn (Grant $grant): Grant => $this->compactGrant($grant), $grants),
+            array_map(fn (Grant $grant): Grant => $this->compactGrant($grant), $this->mergePresenceGrants($grants)),
             $user
         );
+    }
+
+    /**
+     * Presence channels get one grant each. Channels with the same member data can
+     * share one, which is what keeps the token small enough for a browser cookie.
+     */
+    protected function mergePresenceGrants(array $grants): array
+    {
+        $merged = [];
+
+        foreach ($grants as $index => $grant) {
+            if (array_is_list($grant->topics)) {
+                $merged[$index] = $grant;
+
+                continue;
+            }
+
+            $key = json_encode([$grant->actions, $grant->payload]);
+            $existing = $merged[$key] ?? null;
+
+            $merged[$key] = new Grant(
+                $grant->actions,
+                $existing ? array_merge_recursive($existing->topics, $grant->topics) : $grant->topics,
+                $grant->payload
+            );
+        }
+
+        return array_values($merged);
     }
 }

@@ -22,6 +22,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Queue;
 use Throwable;
 use Webklex\PHPIMAP\Exceptions\ImapServerErrorException;
 
@@ -36,7 +37,8 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
     public function __construct(
         MailAccount|string $email,
         public readonly bool $onlyFolders = false,
-        public readonly ?int $mailFolderId = null
+        public readonly ?int $mailFolderId = null,
+        public readonly ?int $resumeAtFolderId = null
     ) {
         if (is_string($email)) {
             $this->mailAccount = resolve_static(MailAccount::class, 'query')
@@ -142,11 +144,27 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
             >= static::CONNECTION_FAILURE_GRACE_MINUTES * 60;
     }
 
+    protected function queueIsPaused(): bool
+    {
+        return Queue::isPaused(
+            $this->job?->getConnectionName() ?? config('queue.default'),
+            $this->job?->getQueue() ?? 'default'
+        );
+    }
+
     protected function sync(): void
     {
+        $deadline = now()->addSeconds(
+            min(config('flux.mail.sync_time_budget'), $this->uniqueFor() - 600)
+        );
+
+        if ($this->queueIsPaused()) {
+            return;
+        }
+
         $driver = app(MailDriverManager::class)->driver($this->mailAccount->protocol);
 
-        if (is_null($this->mailFolderId)) {
+        if (is_null($this->mailFolderId) && is_null($this->resumeAtFolderId)) {
             $driver->syncFolders($this->mailAccount);
         }
 
@@ -157,20 +175,31 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
         $folders = $this->mailAccount->mailFolders()
             ->where('is_active', true)
             ->when($this->mailFolderId, fn (Builder $query, int $id): Builder => $query->whereKey($id))
+            ->when(
+                $this->resumeAtFolderId,
+                fn (Builder $query, int $id): Builder => $query->where('id', '>=', $id)
+            )
+            ->orderBy('id')
             ->get()
             ->each(fn (MailFolder $folder) => $folder->setRelation('mailAccount', $this->mailAccount));
         $total = $folders->count();
         $failure = null;
-        $deadline = now()->addSeconds($this->uniqueFor() - 600);
+        $stoppedAt = null;
 
         try {
             $folders->each(function (MailFolder $folder, int $index) use (
                 $driver,
                 $total,
                 $deadline,
-                &$failure
+                &$failure,
+                &$stoppedAt
             ): bool {
-                if (now()->greaterThanOrEqualTo($deadline)) {
+                if (
+                    $this->queueIsPaused()
+                    || ($index > 0 && now()->greaterThanOrEqualTo($deadline))
+                ) {
+                    $stoppedAt = $folder;
+
                     return false;
                 }
 
@@ -195,7 +224,10 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
                                 ]),
                             ]);
 
-                            if (now()->greaterThanOrEqualTo($deadline)) {
+                            if (
+                                now()->greaterThanOrEqualTo($deadline)
+                                || $this->queueIsPaused()
+                            ) {
                                 throw new MailSyncTimeBudgetExhausted();
                             }
                         }
@@ -207,6 +239,8 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
                 try {
                     $driver->syncMessages($folder);
                 } catch (MailSyncTimeBudgetExhausted) {
+                    $stoppedAt = $folder;
+
                     return false;
                 } catch (Throwable $e) {
                     if ($this->isConnectionFailure($e)) {
@@ -228,6 +262,22 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
 
                 return true;
             });
+
+            if (! is_null($stoppedAt) && ! $this->queueIsPaused()) {
+                if (! is_null($failure)) {
+                    report($failure);
+                }
+
+                $this->appendToChain(
+                    app(static::class, [
+                        'email' => $this->mailAccount,
+                        'mailFolderId' => $this->mailFolderId,
+                        'resumeAtFolderId' => $stoppedAt->getKey(),
+                    ])
+                );
+
+                return;
+            }
 
             if (! is_null($failure)) {
                 throw $failure;

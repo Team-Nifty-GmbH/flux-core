@@ -71,3 +71,16 @@ test('totp code does not log in a user deactivated after the password step', fun
 
     $this->assertGuest();
 });
+
+test('posting to login is locked after too many failed attempts', function (): void {
+    $this->actingAsGuest();
+
+    foreach (range(1, 5) as $attempt) {
+        $this->post('/login', ['email' => $this->user->email, 'password' => 'wrongpassword']);
+    }
+
+    $this->post('/login', ['email' => $this->user->email, 'password' => 'password'])
+        ->assertSessionHasErrors('email');
+
+    $this->assertGuest('web');
+});

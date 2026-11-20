@@ -123,17 +123,27 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 // legacy/migration case (e.g. yearlyOn at 06:00 with due_at at midnight)
                 // where letting the regular scheduler fire would double-run today. For
                 // schedules whose due_at IS a valid cron tick (hourly, everyTwoHours,
-                // monthly, ...), the next future tick is a NEW occurrence and must not
-                // be skipped.
+                // monthly, ...), or that run several times a day, the next future tick
+                // is a NEW occurrence and must not be skipped.
                 $dueAtMatchesCron = false;
+                $runsSeveralTimesADay = false;
                 try {
-                    $dueAtMatchesCron = (new CronExpression($event->expression))
-                        ->isDue($repeatable->due_at);
+                    $cronExpression = new CronExpression($event->expression);
+                    $dueAtMatchesCron = $cronExpression->isDue($repeatable->due_at);
+                    $runsSeveralTimesADay = resolve_static(
+                        ScheduleModel::class,
+                        'runsSeveralTimesADay',
+                        [$cronExpression, $nextRunDate]
+                    );
                 } catch (Throwable) {
                     // ignore - treat as no match
                 }
 
-                if (! $dueAtMatchesCron && Carbon::instance($nextRunDate)->isSameDay(now())) {
+                if (
+                    ! $dueAtMatchesCron
+                    && ! $runsSeveralTimesADay
+                    && Carbon::instance($nextRunDate)->isSameDay(now())
+                ) {
                     if (data_get($repeatable->cron, 'methods.basic') === FrequenciesEnum::LastDayOfMonth->value) {
                         $parts = explode(' ', $event->expression);
                         $nextRunDate = $nextRunDate->copy()->addMonthNoOverflow()->endOfMonth()

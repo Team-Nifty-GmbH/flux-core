@@ -10,6 +10,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -20,8 +21,10 @@ class CreateTaskModal extends Component
 
     public array $availableStates = [];
 
+    #[Locked]
     public ?int $modelId = null;
 
+    #[Locked]
     public ?string $modelType = null;
 
     public TaskForm $task;

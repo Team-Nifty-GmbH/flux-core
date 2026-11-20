@@ -25,6 +25,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Scout\Searchable;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -38,7 +39,7 @@ abstract class Communication extends CommunicationList
 
     public CommunicationForm $communication;
 
-    #[Modelable]
+    #[Locked, Modelable]
     public ?int $modelId = null;
 
     protected ?string $includeBefore = 'flux::livewire.features.communications.communication';

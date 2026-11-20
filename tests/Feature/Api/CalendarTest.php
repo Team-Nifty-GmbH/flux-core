@@ -9,6 +9,7 @@ uses(Illuminate\Foundation\Testing\WithFaker::class);
 
 beforeEach(function (): void {
     $this->calendars = Calendar::factory()->count(3)->create();
+    $this->user->calendars()->attach($this->calendars->modelKeys(), ['permission' => 'owner']);
 
     $this->permissions = [
         'show' => Permission::findOrCreate('api.calendars.{id}.get'),

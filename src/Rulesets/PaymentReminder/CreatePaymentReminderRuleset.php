@@ -2,7 +2,6 @@
 
 namespace FluxErp\Rulesets\PaymentReminder;
 
-use FluxErp\Models\Media;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentReminder;
 use FluxErp\Rules\ModelExists;
@@ -20,11 +19,6 @@ class CreatePaymentReminderRuleset extends FluxRuleset
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => Order::class]),
-            ],
-            'media_id' => [
-                'nullable',
-                'integer',
-                app(ModelExists::class, ['model' => Media::class]),
             ],
             'reminder_level' => 'nullable|integer|min:1',
             'mark_as_sent' => 'nullable|boolean',

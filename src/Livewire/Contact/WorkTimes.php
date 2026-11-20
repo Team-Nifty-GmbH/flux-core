@@ -4,12 +4,13 @@ namespace FluxErp\Livewire\Contact;
 
 use FluxErp\Livewire\DataTables\WorkTimeList;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
 
 class WorkTimes extends WorkTimeList
 {
-    #[Modelable]
+    #[Locked, Modelable]
     public int $contactId;
 
     #[Renderless]

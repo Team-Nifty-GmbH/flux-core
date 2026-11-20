@@ -9,6 +9,11 @@
                 document.addEventListener('livewire:navigating', () => {
                     this.closeMenu(true);
                 });
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'hidden') {
+                        this.closeMenu();
+                    }
+                });
             },
             open: [],
             toggleMenu(key) {
@@ -31,7 +36,23 @@
                     this.forced = true;
                 }
             },
+            showMenuOnRest() {
+                if (this.menuOpen || this.hoverTimer) {
+                    return;
+                }
+
+                this.hoverTimer = setTimeout(() => {
+                    this.hoverTimer = null;
+
+                    if (this.$root.matches(':hover')) {
+                        this.showMenu();
+                    }
+                }, 300);
+            },
             closeMenu(force = null) {
+                clearTimeout(this.hoverTimer);
+                this.hoverTimer = null;
+
                 if (this.forced && !force) {
                     return;
                 }
@@ -39,6 +60,7 @@
                 this.menuOpen = false;
             },
             forced: false,
+            hoverTimer: null,
             menuOpen: false,
             favoritesOpen: false,
         }"

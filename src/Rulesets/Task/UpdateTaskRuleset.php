@@ -64,6 +64,7 @@ class UpdateTaskRuleset extends FluxRuleset
                 'exclude_if:has_start_reminder,false',
                 'integer',
                 'min:0',
+                'max:4294967295',
             ],
             'due_date' => 'present|date|nullable|after_or_equal:start_date',
             'due_time' => [
@@ -76,6 +77,7 @@ class UpdateTaskRuleset extends FluxRuleset
                 'exclude_if:has_due_reminder,false',
                 'integer',
                 'min:0',
+                'max:4294967295',
             ],
             'priority' => 'sometimes|required|integer|min:0',
             'state' => [

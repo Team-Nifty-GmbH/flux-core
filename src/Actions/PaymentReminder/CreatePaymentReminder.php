@@ -3,7 +3,6 @@
 namespace FluxErp\Actions\PaymentReminder;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Models\Media;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentReminder;
 use FluxErp\Rulesets\PaymentReminder\CreatePaymentReminderRuleset;
@@ -55,19 +54,6 @@ class CreatePaymentReminder extends FluxAction
         ) {
             throw ValidationException::withMessages([
                 'order_id' => ['Unable to create payment reminder for given order.'],
-            ])->errorBag('updatePaymentReminder');
-        }
-
-        // Validate Media
-        if (($this->data['media_id'] ?? false)
-            && ! resolve_static(Media::class, 'query')
-                ->whereKey($this->data['media_id'])
-                ->where('model_type', app(Order::class)->getMorphClass())
-                ->where('model_id', $this->data['order_id'])
-                ->exists()
-        ) {
-            throw ValidationException::withMessages([
-                'media_id' => [__('validation.exists', ['attribute' => 'media_id'])],
             ])->errorBag('updatePaymentReminder');
         }
     }

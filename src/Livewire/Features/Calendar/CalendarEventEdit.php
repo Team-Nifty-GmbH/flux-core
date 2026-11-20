@@ -24,6 +24,21 @@ class CalendarEventEdit extends Component
         $this->currentEditComponent = data_get($this->event, 'edit_component');
     }
 
+    public function editComponent(): string
+    {
+        $editComponent = data_get($this->event, 'edit_component');
+
+        return is_string($editComponent)
+            && livewire_component_exists($editComponent)
+            && is_a(
+                app('livewire.factory')->resolveComponentClass($editComponent),
+                CalendarEvent::class,
+                true
+            )
+                ? $editComponent
+                : 'features.calendar.calendar-event';
+    }
+
     public function updatedEvent(): void
     {
         if ($this->currentEditComponent !== data_get($this->event, 'edit_component')) {

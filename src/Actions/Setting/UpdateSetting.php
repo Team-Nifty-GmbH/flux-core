@@ -108,13 +108,13 @@ class UpdateSetting extends FluxAction
 
     protected function validateSettingsProperties(string $settingsClass): array
     {
-        $config = app(SettingsConfig::class, ['settingsClass' => $settingsClass]);
+        $config = app(SettingsConfig::class, ['settingsClass' => resolve_static($settingsClass, 'class')]);
         $rules = [];
 
         foreach ($config->getReflectedProperties() as $propertyName => $reflectionProperty) {
             $rules[$propertyName] = $this->extractRulesFromType($reflectionProperty->getType());
         }
 
-        return $rules;
+        return array_merge($rules, resolve_static($settingsClass, 'rules'));
     }
 }

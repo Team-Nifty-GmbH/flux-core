@@ -5,6 +5,7 @@ namespace FluxErp\Support\Broadcasting;
 use Illuminate\Broadcasting\Broadcasters\Broadcaster;
 use Illuminate\Broadcasting\Broadcasters\MercureBroadcaster;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Throwable;
 
@@ -60,6 +61,18 @@ class CombinedBroadcaster extends Broadcaster
         }
 
         return $this;
+    }
+
+    public function getChannels(): Collection
+    {
+        return new Collection(
+            array_merge(
+                ...array_map(
+                    fn (Broadcaster $broadcaster): array => $broadcaster->getChannels()->all(),
+                    $this->broadcasters
+                )
+            )
+        );
     }
 
     public function validAuthenticationResponse($request, $result)

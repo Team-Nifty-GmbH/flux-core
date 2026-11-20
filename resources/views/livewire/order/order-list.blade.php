@@ -29,7 +29,7 @@
                     <x-select.styled
                         :label="__('Order type')"
                         required
-                        wire:model="order.order_type_id"
+                        wire:model.live="order.order_type_id"
                         select="label:name|value:id"
                         :options="$orderTypes"
                     />

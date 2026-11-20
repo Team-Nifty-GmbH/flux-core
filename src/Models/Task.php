@@ -56,10 +56,17 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
                 $task->progress = 1;
             }
 
+            $timezone = data_get(auth()->user(), 'timezone')
+                ?? config('flux.display_timezone')
+                ?? config('app.timezone');
+
             if ($task->start_date) {
-                $newStartDatetime = $task->start_time
-                    ? $task->start_date->copy()->setTimeFromTimeString($task->start_time)
-                    : $task->start_date->copy()->startOfDay();
+                $startDate = $task->start_date->copy()->shiftTimezone($timezone);
+                $newStartDatetime = ($task->start_time
+                    ? $startDate->setTimeFromTimeString($task->start_time)
+                    : $startDate->startOfDay()
+                )
+                    ->setTimezone(config('app.timezone'));
 
                 if ($task->start_datetime?->timestamp !== $newStartDatetime->timestamp) {
                     $task->start_reminder_sent_at = null;
@@ -73,9 +80,12 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             }
 
             if ($task->due_date) {
-                $newDueDatetime = $task->due_time
-                    ? $task->due_date->copy()->setTimeFromTimeString($task->due_time)
-                    : $task->due_date->copy()->endOfDay();
+                $dueDate = $task->due_date->copy()->shiftTimezone($timezone);
+                $newDueDatetime = ($task->due_time
+                    ? $dueDate->setTimeFromTimeString($task->due_time)
+                    : $dueDate->endOfDay()
+                )
+                    ->setTimezone(config('app.timezone'));
 
                 if ($task->due_datetime?->timestamp !== $newDueDatetime->timestamp) {
                     $task->due_reminder_sent_at = null;

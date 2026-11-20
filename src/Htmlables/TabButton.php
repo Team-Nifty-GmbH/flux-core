@@ -129,6 +129,11 @@ class TabButton implements Htmlable
         return $this;
     }
 
+    public function isRenderable(): bool
+    {
+        return $this->shouldRender && $this->userHasTabPermission(false);
+    }
+
     public function loading(string $loading): static
     {
         $this->loading = $loading;
@@ -180,7 +185,7 @@ class TabButton implements Htmlable
 
     public function toHtml(): string
     {
-        if (! $this->shouldRender || ! $this->userHasTabPermission(false)) {
+        if (! $this->isRenderable()) {
             return '';
         }
 

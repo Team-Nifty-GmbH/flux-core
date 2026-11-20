@@ -218,8 +218,8 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
                 $order->calculateBalance();
 
-                if (is_null($order->payment_reminder_next_date) && ! is_null($order->invoice_date)) {
-                    $order->payment_reminder_next_date = $order->invoice_date->addDays(
+                if (is_null($order->payment_reminder_next_date) && ! is_null($order->payment_target_date)) {
+                    $order->payment_reminder_next_date = $order->payment_target_date->copy()->addDays(
                         $order->payment_reminder_days_1
                     );
                 }
@@ -1277,6 +1277,12 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     public function getSerialNumber(string|array $types, ?int $tenantId = null): static
     {
         if (in_array('invoice_number', Arr::wrap($types))) {
+            if (! $this->contact()->exists()) {
+                throw ValidationException::withMessages([
+                    'contact_id' => [__('The contact of this order no longer exists')],
+                ]);
+            }
+
             $rules = [
                 'has_contact_delivery_lock' => 'declined',
             ];
@@ -1498,6 +1504,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     {
         $paid = $this->transactions()
             ->withPivot(['amount', 'order_currency_amount'])
+            ->wherePivot('is_accepted', true)
             ->get()
             ->reduce(
                 fn (string $carry, Transaction $transaction) => bcadd(

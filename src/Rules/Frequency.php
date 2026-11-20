@@ -227,7 +227,6 @@ class Frequency implements DataAwareRule, ValidationRule
                     || ! is_string($value[1])
                     || ! preg_match('/^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/', $value[0])
                     || ! preg_match('/^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/', $value[1])
-                    || $value[1] > $value[0]
                 ) {
                     $fail('The :attribute must be an array with two entries, ' .
                         'both entries must be a valid time string.'

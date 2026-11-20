@@ -40,7 +40,7 @@ beforeEach(function (): void {
         $request->setLaravelSession(new Store('test', new ArraySessionHandler(120)));
         $request->setUserResolver(fn (?string $requested = null) => $requested === $guard ? $user : null);
 
-        $response = Broadcast::connection('mercure')->auth($request);
+        $response = Broadcast::auth($request);
 
         return $response instanceof JsonResponse && ! data_get($response->getData(true), 'channel_names.0.denied');
     };

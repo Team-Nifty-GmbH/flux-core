@@ -9,7 +9,7 @@
     "
 >
     <div>
-        <div wire:click="showNotifications()">
+        <div x-on:click="$tsui.open.slide('notifications-slide')">
             <x-button.circle color="indigo" icon="bell" />
             <div
                 class="z-10 -mt-11 pl-5"
@@ -35,6 +35,13 @@
         >
             <div
                 x-data="{
+                    loading: false,
+                    settle: null,
+                    init() {
+                        new ResizeObserver(() => this.queueFill()).observe(
+                            $refs.toasts,
+                        );
+                    },
                     addToast(event) {
                         const list = $tallstackuiToast($refs.toasts.id);
                         list.alpineComponent.add(event);
@@ -42,6 +49,43 @@
                         if (list.element.parentElement !== $refs.toasts) {
                             $refs.toasts.prepend(list.element);
                         }
+
+                        this.queueFill();
+                    },
+                    queueFill() {
+                        clearTimeout(this.settle);
+                        this.settle = setTimeout(() => this.fill(), 50);
+                    },
+                    fill() {
+                        // A toast is hidden until its own init shows it, so the list only
+                        // has its real height once every toast is visible.
+                        const pending = [
+                            ...$refs.toasts.querySelectorAll(
+                                '[x-data^=tallstackui_toastLoop]',
+                            ),
+                        ].some((toast) => !toast.checkVisibility());
+
+                        if (pending) {
+                            this.queueFill();
+
+                            return;
+                        }
+
+                        if (
+                            this.loading ||
+                            !show ||
+                            !$wire.hasMore ||
+                            $refs.more.getBoundingClientRect().top >=
+                                window.innerHeight
+                        ) {
+                            return;
+                        }
+
+                        this.loading = true;
+                        $wire.showNotifications().finally(() => {
+                            this.loading = false;
+                            this.queueFill();
+                        });
                     },
                     removeAll() {
                         $tallstackuiToast(
@@ -61,7 +105,7 @@
                     wire:ignore
                 >
                     <x-toast scope="relative" />
-                    <div x-intersect="show && $wire.showNotifications()"></div>
+                    <div x-ref="more" x-intersect="fill()"></div>
                 </div>
             </div>
             <x-slot:footer>
@@ -70,6 +114,7 @@
                         color="indigo"
                         class="w-full"
                         :text="__('Mark all as read')"
+                        loading="markAllAsRead"
                         x-on:click.prevent="
                             $wire
                                 .markAllAsRead()

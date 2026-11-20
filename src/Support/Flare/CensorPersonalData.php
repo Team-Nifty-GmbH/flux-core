@@ -4,8 +4,10 @@ namespace FluxErp\Support\Flare;
 
 use Closure;
 use Illuminate\Database\QueryException;
-use Spatie\FlareClient\FlareMiddleware\FlareMiddleware;
+use Illuminate\Support\Arr;
+use Spatie\FlareClient\Context\ContextProvider;
 use Spatie\FlareClient\Report;
+use Spatie\FlareClient\ReportFactory;
 
 /**
  * Error reports leave the server, so they must not carry personal data.
@@ -13,11 +15,46 @@ use Spatie\FlareClient\Report;
  * request body, query strings carry search terms, and the user and bound route
  * models are serialized with all their attributes.
  */
-class CensorPersonalData implements FlareMiddleware
+class CensorPersonalData
 {
+    use CensorsCommandLines, CensorsUrls;
+
     public const string CENSORED = '<CENSORED>';
 
-    public function handle(Report $report, Closure $next)
+    protected const array CENSORED_BRANCHES = [
+        'context',
+        'dumps',
+        'laravel_context',
+        'logs',
+    ];
+
+    protected const array CENSORED_HEADERS = [
+        'api-key',
+        'authorization',
+        'cookie',
+        'set-cookie',
+        'x-csrf-token',
+        'x-forwarded-for',
+        'x-real-ip',
+        'x-xsrf-token',
+    ];
+
+    protected const array JOB_METADATA = [
+        'attempts',
+        'backoff',
+        'connection',
+        'failOnTimeout',
+        'maxExceptions',
+        'maxTries',
+        'name',
+        'pushedAt',
+        'queue',
+        'retryUntil',
+        'timeout',
+        'uuid',
+    ];
+
+    public function handle(Report|ReportFactory $report, Closure $next): mixed
     {
         $throwable = $report->getThrowable();
         if ($throwable instanceof QueryException) {
@@ -27,45 +64,47 @@ class CensorPersonalData implements FlareMiddleware
         $context = $report->allContext();
 
         // Console and queue reports carry no request.
-        if (! array_key_exists('request_data', $context)) {
-            return $next($report);
+        if (array_key_exists('request_data', $context)) {
+            $context = $this->censorRequest($context);
         }
 
-        // allContext() merges the provided context recursively over the
-        // collected one, so an array would only add keys. A scalar replaces
-        // the whole branch.
-        $censored = [
-            'request_data' => [
-                'queryString' => static::CENSORED,
-                'body' => static::CENSORED,
-                'files' => static::CENSORED,
-            ],
-            'cookies' => static::CENSORED,
-            'session' => static::CENSORED,
-        ];
-
-        if ($url = data_get($context, 'request.url')) {
-            $censored['request']['url'] = strtok($url, '?');
-        }
-
-        if ($referer = data_get($context, 'headers.referer')) {
-            $censored['headers']['referer'] = strtok($referer, '?');
-        }
-
-        if (is_array($user = data_get($context, 'user'))) {
-            $censored['user'] = array_map(
-                fn (mixed $value) => static::CENSORED,
-                array_diff_key($user, array_flip(['id', 'uuid']))
-            );
-        }
-
-        foreach (data_get($context, 'route.routeParameters') ?? [] as $name => $parameter) {
-            if (! is_scalar($parameter)) {
-                $censored['route']['routeParameters'][$name] = static::CENSORED;
+        foreach (static::CENSORED_BRANCHES as $branch) {
+            if (array_key_exists($branch, $context)) {
+                $context[$branch] = [];
             }
         }
 
-        $report->userProvidedContext(array_replace_recursive($context, $censored));
+        if (array_key_exists('exception', $context)) {
+            $context['exception'] = Arr::only($context['exception'], 'raw_sql');
+        }
+
+        if (array_key_exists('arguments', $context)) {
+            $context['arguments'] = $this->censorCommandLine($context['arguments']);
+        }
+
+        if (array_key_exists('job', $context)) {
+            $context['job'] = Arr::only($context['job'], static::JOB_METADATA);
+        }
+
+        if (is_array(data_get($context, 'view.data'))) {
+            $context['view']['data'] = [];
+        }
+
+        // The Flare API rejects request_data with a scalar, and an array provided
+        // on top of the collected context only adds keys. So the collected context
+        // itself has to go, otherwise the real values stay in the report.
+        $report->useContext(
+            new readonly class($context) implements ContextProvider
+            {
+                public function __construct(private array $context) {}
+
+                public function toArray(): array
+                {
+                    return $this->context;
+                }
+            }
+        );
+        $report->userProvidedContext($context);
 
         return $next($report);
     }
@@ -79,5 +118,63 @@ class CensorPersonalData implements FlareMiddleware
 
         return str_replace($bindings, static::CENSORED, $exception->getPrevious()?->getMessage() ?? '')
             . ' (Connection: ' . $exception->getConnectionName() . ', SQL: ' . $exception->getSql() . ')';
+    }
+
+    protected function censorRequest(array $context): array
+    {
+        $censored = [
+            'cookies' => static::CENSORED,
+            'session' => static::CENSORED,
+        ];
+
+        if ($url = data_get($context, 'request.url')) {
+            $censored['request']['url'] = $this->censorUrl($url);
+        }
+
+        if ($referer = data_get($context, 'headers.referer')) {
+            $censored['headers']['referer'] = $this->censorUrl($referer);
+        }
+
+        if (data_get($context, 'request.ip')) {
+            $censored['request']['ip'] = null;
+        }
+
+        foreach (static::CENSORED_HEADERS as $header) {
+            if (array_key_exists($header, data_get($context, 'headers') ?? [])) {
+                $censored['headers'][$header] = static::CENSORED;
+            }
+        }
+
+        if (is_array($user = data_get($context, 'user'))) {
+            $censored['user'] = array_map(
+                fn (mixed $value) => static::CENSORED,
+                array_diff_key($user, array_flip(['id', 'uuid']))
+            );
+        }
+
+        foreach (data_get($context, 'route.routeParameters') ?? [] as $name => $parameter) {
+            if (! is_numeric($parameter)) {
+                $censored['route']['routeParameters'][$name] = static::CENSORED;
+            }
+        }
+
+        $context = array_replace_recursive($context, $censored);
+        $context['request_data'] = [
+            'queryString' => [],
+            'body' => [],
+            'files' => [],
+        ];
+
+        if (is_array($components = data_get($context, 'livewire'))) {
+            $context['livewire'] = array_map(
+                fn (array $component): array => array_map(
+                    fn (mixed $value): mixed => is_array($value) ? [] : $value,
+                    $component
+                ),
+                $components
+            );
+        }
+
+        return $context;
     }
 }
