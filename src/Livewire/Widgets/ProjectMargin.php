@@ -32,10 +32,7 @@ class ProjectMargin extends ValueBox implements HasWidgetOptions
     #[Renderless]
     public function calculateSum(): void
     {
-        $sum = $this->getOrderQuery()
-            ->sum($this->sumColumn());
-
-        $this->sum = Number::format($sum, 2)
+        $this->sum = Number::format($this->getOrderQuery()->sum($this->sumColumn()), 2)
             . ' ' . resolve_static(Currency::class, 'default')->symbol;
     }
 
