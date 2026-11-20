@@ -38,6 +38,15 @@ test('renders successfully', function (): void {
         ->assertOk();
 });
 
+test('renders a contact whose main address was deleted', function (): void {
+    $this->contact->refresh()->mainAddress()->first()->deleteQuietly();
+
+    Livewire::test(Contact::class, ['id' => $this->contact->id])
+        ->assertOk()
+        ->assertSet('contact.id', $this->contact->id)
+        ->assertSet('contact.main_address', []);
+});
+
 test('switch tabs', function (): void {
     Livewire::test(Contact::class, ['id' => $this->contact->id])->cycleTabs();
 });

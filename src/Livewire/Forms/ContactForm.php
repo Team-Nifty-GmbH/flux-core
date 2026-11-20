@@ -181,6 +181,7 @@ class ContactForm extends FluxForm
             $values['categories'] = array_column($values['categories'] ?? [], 'id');
             $values['industries'] = array_column($values['industries'] ?? [], 'id');
             $values['tenants'] = array_column($values['tenants'] ?? [], 'id');
+            $values['main_address'] ??= [];
         }
 
         parent::fill($values);
