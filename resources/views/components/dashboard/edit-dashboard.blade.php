@@ -1,3 +1,4 @@
+@php($canEditRoleDashboards = $canEdit && $this->canEditRoleDashboards())
 <div class="flex items-center gap-4">
     @if (in_array(\FluxErp\Traits\Livewire\Dashboard\SupportsGrouping::class, class_uses_recursive($this)) && $canEdit)
         <template x-for="group in allGroups">
@@ -93,7 +94,7 @@
                     class="shrink-0"
                 />
             </div>
-            @if ($this->canEditRoleDashboards())
+            @if ($canEditRoleDashboards)
                 <div class="mt-4" x-cloak x-show="!editGrid">
                     <x-button
                         color="secondary"
@@ -128,7 +129,7 @@
                     light
                     loading
                     wire:flux-confirm.type.warning="{{ __('wire:confirm.reset.dashboard-group') }}"
-                    x-on:click="$wire.resetToRoleDashboard().then(onPostReset.bind($data))"
+                    wire:click="resetToRoleDashboard"
                     :text="__('Reset to default')"
                     class="shrink-0"
                 />
@@ -184,7 +185,7 @@
     </x-slot>
 </x-modal>
 
-@if ($canEdit && $this->canEditRoleDashboards())
+@if ($canEditRoleDashboards)
     <x-modal
         id="save-role-dashboard-modal"
         :title="__('Save as role default')"
@@ -197,6 +198,15 @@
             :request="[
                 'url' => route('search', \FluxErp\Models\Role::class),
                 'method' => 'POST',
+                'params' => [
+                    'where' => [
+                        [
+                            'guard_name',
+                            '=',
+                            'web',
+                        ],
+                    ],
+                ],
             ]"
         />
 

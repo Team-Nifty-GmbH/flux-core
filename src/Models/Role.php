@@ -22,6 +22,13 @@ class Role extends SpatieRole implements InteractsWithDataTables
 
     protected $hidden = ['pivot'];
 
+    protected static function booted(): void
+    {
+        static::deleted(function (Role $role): void {
+            $role->widgets()->delete();
+        });
+    }
+
     // Relations
     public function users(): BelongsToMany
     {

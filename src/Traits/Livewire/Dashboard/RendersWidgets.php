@@ -113,7 +113,7 @@ trait RendersWidgets
             ->delete();
 
         $this->widgets();
-        $this->dispatch('gridstack-reinit');
+        $this->dispatch('dashboard-reset');
     }
 
     #[Renderless]
@@ -195,7 +195,7 @@ trait RendersWidgets
                             $this->copyableWidgetAttributes($widget),
                             ['dashboard_component' => static::class]
                         ),
-                        $this->widgets
+                        array_values($this->filterWidgets($this->widgets))
                     )
                 );
         });
