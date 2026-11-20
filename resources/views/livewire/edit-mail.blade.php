@@ -43,6 +43,13 @@
                 </div>
             </div>
 
+            <div x-cloak x-show="$wire.multiple">
+                <x-alert
+                    color="blue"
+                    :text="__('Recipients, attachments and placeholders are filled in for every record when sending')"
+                />
+            </div>
+
             @php
                 $receiverSearchRequest = [
                     'url' => route('search', \FluxErp\Models\Address::class),
