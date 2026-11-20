@@ -2,6 +2,8 @@
 
 namespace FluxErp\Http\Controllers;
 
+use FluxErp\Contracts\ExcludedFromSearch;
+use FluxErp\Models\Activity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -30,6 +32,8 @@ class SearchController extends Controller
         $model = qualify_model(str_replace('/', '\\', $model));
 
         abort_unless(class_exists($model) && is_a($model, Model::class, true), 404);
+
+        abort_if(is_a($model, ExcludedFromSearch::class, true), 403);
 
         $this->guardRequest(app($model), $request);
 
@@ -308,7 +312,7 @@ class SearchController extends Controller
     {
         abort_unless($model, 422);
 
-        $hidden = array_map(strtolower(...), $model->getHidden());
+        $hidden = array_map(strtolower(...), $this->hiddenColumns($model));
 
         foreach ($this->columnsOf($columns) as $column) {
             if (is_string($column)) {
@@ -389,6 +393,14 @@ class SearchController extends Controller
         $this->guardColumns($model, $request->input('where'));
     }
 
+    // activity rows carry the logged attributes of their subject, hidden ones included
+    protected function hiddenColumns(Model $model): array
+    {
+        return $model instanceof Activity
+            ? array_merge($model->getHidden(), ['attribute_changes', 'properties'])
+            : $model->getHidden();
+    }
+
     protected function isRelation(Model $model, string $name): bool
     {
         if ($model->relationResolver($model::class, $name)) {
@@ -440,6 +452,7 @@ class SearchController extends Controller
 
         foreach (explode('.', $path) as $name) {
             abort_unless($model && $this->isRelation($model, $name), 422);
+            abort_if(in_array(strtolower($name), array_map(strtolower(...), $model->getHidden()), true), 403);
 
             $relation = $model->{$name}();
             $model = $relation instanceof MorphTo ? null : $relation->getRelated();
@@ -475,7 +488,11 @@ class SearchController extends Controller
 
     protected function visibleOnly(Model $item, array $keys): array
     {
-        $keys = array_diff(array_filter($keys, 'is_string'), $item->getHidden());
+        $hidden = array_map(strtolower(...), $item->getHidden());
+        $keys = array_filter(
+            $keys,
+            fn (mixed $key): bool => is_string($key) && ! in_array(strtolower($key), $hidden, true)
+        );
 
         $keys = array_filter($keys, function (string $key) use ($item): bool {
             if ($item->hasAttribute($key) || $this->isRelation($item, $key)) {

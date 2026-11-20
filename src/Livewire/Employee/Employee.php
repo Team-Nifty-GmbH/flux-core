@@ -72,6 +72,10 @@ class Employee extends Component
                 ->wireModel('employee.id'),
             TabButton::make('employee.general')
                 ->text(__('General')),
+            TabButton::make('employee.salary')
+                ->text(__('Salary'))
+                ->isLivewireComponent()
+                ->wireModel('employee.id'),
             TabButton::make('employee.absence-requests')
                 ->text(__('Absence Requests'))
                 ->isLivewireComponent()
