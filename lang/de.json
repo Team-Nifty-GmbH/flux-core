@@ -73,6 +73,7 @@
     "A list of all the languages": "Liste aller Sprachen",
     "A list of all the order types": "Liste aller Auftragsarten",
     "A list of all the price lists": "Liste aller Preislisten",
+    "A pause is already running.": "Es läuft bereits eine Pause.",
     "A product with existing variants cannot itself become a variant.": "Ein Produkt mit vorhandenen Varianten kann nicht selbst zur Variante werden.",
     "A purchase order cannot be a supplementary order.": "Ein Einkaufsauftrag kann kein Nachtrag sein.",
     "A supplementary order must belong to the contact of the project.": "Ein Nachtrag muss zum Kunden des Projekts gehören.",
