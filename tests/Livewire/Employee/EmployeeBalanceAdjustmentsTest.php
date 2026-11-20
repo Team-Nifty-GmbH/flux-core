@@ -5,6 +5,7 @@ use FluxErp\Enums\EmployeeBalanceAdjustmentTypeEnum;
 use FluxErp\Livewire\Employee\EmployeeBalanceAdjustments;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeBalanceAdjustment;
+use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
@@ -131,3 +132,8 @@ test('save validates required fields', function (): void {
         ->call('save')
         ->assertReturned(false);
 });
+
+test('does not accept another employee from the client', function (): void {
+    Livewire::test(EmployeeBalanceAdjustments::class, ['employeeId' => 1])
+        ->set('employeeId', 2);
+})->throws(CannotUpdateLockedPropertyException::class);

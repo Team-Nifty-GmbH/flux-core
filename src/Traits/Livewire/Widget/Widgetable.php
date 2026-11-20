@@ -2,9 +2,11 @@
 
 namespace FluxErp\Traits\Livewire\Widget;
 
+use FluxErp\Support\Auth\PermissionSet;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 trait Widgetable
 {
@@ -27,8 +29,14 @@ trait Widgetable
         return __(Str::headline(class_basename(static::class)));
     }
 
+    public function hydrateWidgetable(): void
+    {
+        $this->ensureWidgetPermission();
+    }
+
     public function mountWidgetable(): void
     {
+        $this->ensureWidgetPermission();
         $this->subscribeLiveUpdates();
     }
 
@@ -44,6 +52,19 @@ trait Widgetable
     public function showTitle(): bool
     {
         return true;
+    }
+
+    protected function ensureWidgetPermission(): void
+    {
+        if (is_null($this->dashboardComponent)) {
+            return;
+        }
+
+        $permission = 'widget.' . $this->getName();
+
+        if (! PermissionSet::make()->allows($permission)) {
+            throw UnauthorizedException::forPermissions([$permission]);
+        }
     }
 
     protected function isDateDependent(): bool

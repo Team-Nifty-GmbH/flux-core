@@ -6,12 +6,13 @@ use FluxErp\Livewire\HumanResources\WorkTimes as HumanResourcesWorkTimes;
 use FluxErp\Models\Project;
 use FluxErp\Models\Task;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
 
 class WorkTimes extends HumanResourcesWorkTimes
 {
-    #[Modelable]
+    #[Locked, Modelable]
     public int $projectId;
 
     public function mount(): void

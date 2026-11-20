@@ -12,7 +12,7 @@ use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
 use FluxErp\States\Order\PaymentState\Open;
 use FluxErp\States\Order\PaymentState\Paid;
 
-function createOrderForPaymentRun(object $test, string $paymentState = InOpenPaymentRun::class): Order
+function createOrderWithPaymentState(object $test, string $paymentState = InOpenPaymentRun::class): Order
 {
     $contact = Contact::factory()->create();
     $address = Address::factory()->create([
@@ -46,7 +46,7 @@ test('removing an order from a payment run reopens it', function (): void {
         'state' => 'open',
     ]);
 
-    $order = createOrderForPaymentRun($this);
+    $order = createOrderWithPaymentState($this);
     $paymentRun->orders()->attach($order->getKey(), ['amount' => '100.00']);
 
     $paymentRun->orders()->detach($order->getKey());
@@ -60,7 +60,7 @@ test('removing a settled order from a payment run keeps it paid', function (): v
         'state' => 'open',
     ]);
 
-    $order = createOrderForPaymentRun($this, Paid::class);
+    $order = createOrderWithPaymentState($this, Paid::class);
     $paymentRun->orders()->attach($order->getKey(), ['amount' => '100.00']);
 
     $paymentRun->orders()->detach($order->getKey());
@@ -78,7 +78,7 @@ test('an order that sits in another open run stays in a payment run state', func
         'state' => 'open',
     ]);
 
-    $order = createOrderForPaymentRun($this);
+    $order = createOrderWithPaymentState($this);
     $first->orders()->attach($order->getKey(), ['amount' => '100.00']);
     $second->orders()->attach($order->getKey(), ['amount' => '100.00']);
 

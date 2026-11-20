@@ -340,7 +340,6 @@ class Addresses extends Component
         $this->edit = true;
     }
 
-    #[Renderless]
     public function save(): void
     {
         $isNew = ! $this->addressId;
@@ -355,6 +354,12 @@ class Addresses extends Component
 
             return;
         }
+
+        if ($this->getErrorBag()->isEmpty()) {
+            $this->skipRender();
+        }
+
+        $this->resetErrorBag();
 
         if ($isNew) {
             $this->addressId = $this->address->id;

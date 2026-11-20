@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Enums\PropertyTypeEnum;
 use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Livewire\Product\Product;
 use FluxErp\Models\Address;
@@ -414,4 +415,82 @@ test('saving a product without changing anything keeps its supplier values', fun
 
     expect($pivot?->supplier_product_number)->toBe('SUP-1')
         ->and($pivot?->note)->toBe('keep me');
+});
+
+test('adding a property after saving keeps the properties the product already has', function (): void {
+    $existing = ProductProperty::factory()->count(3)->create(['property_type_enum' => PropertyTypeEnum::Option]);
+    $this->product->productProperties()->sync($existing->modelKeys());
+    $added = ProductProperty::factory()->create(['property_type_enum' => PropertyTypeEnum::Option]);
+
+    $component = Livewire::test(Product::class, ['id' => $this->product->getKey()])
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true)
+        ->call('showProductPropertiesModal')
+        ->set('selectedProductProperties.' . $added->getKey(), true)
+        ->call('addProductProperties')
+        ->assertReturned(true)
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    $expected = array_merge($existing->modelKeys(), [$added->getKey()]);
+    sort($expected);
+
+    $displayed = array_column(
+        data_get($component->get('displayedProductProperties'), '*.option.*'),
+        'id'
+    );
+    sort($displayed);
+
+    expect($this->product->productProperties()->pluck('product_properties.id')->sort()->values()->all())
+        ->toBe($expected)
+        ->and($displayed)
+        ->toBe($expected);
+});
+
+test('saving twice keeps every property value', function (): void {
+    $text = ProductProperty::factory()->create(['property_type_enum' => PropertyTypeEnum::Text]);
+    $option = ProductProperty::factory()->create(['property_type_enum' => PropertyTypeEnum::Option]);
+    $this->product->productProperties()->attach([
+        $text->getKey() => ['value' => 'Nepal'],
+        $option->getKey() => ['value' => 'keep me'],
+    ]);
+
+    Livewire::test(Product::class, ['id' => $this->product->getKey()])
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true)
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($this->product->productProperties()->pluck('value', 'product_properties.id')->all())
+        ->toEqual([
+            $text->getKey() => 'Nepal',
+            $option->getKey() => 'keep me',
+        ]);
+});
+
+test('adding a property keeps the existing ones when the form holds them as a plain list', function (): void {
+    $existing = ProductProperty::factory()->count(3)->create(['property_type_enum' => PropertyTypeEnum::Option]);
+    $this->product->productProperties()->sync($existing->modelKeys());
+    $added = ProductProperty::factory()->create(['property_type_enum' => PropertyTypeEnum::Option]);
+
+    $component = Livewire::test(Product::class, ['id' => $this->product->getKey()]);
+
+    $expected = array_merge($existing->modelKeys(), [$added->getKey()]);
+    sort($expected);
+
+    $component
+        ->set('product.product_properties', array_values($component->get('product.product_properties')))
+        ->call('showProductPropertiesModal')
+        ->set('selectedProductProperties.' . $added->getKey(), true)
+        ->call('addProductProperties')
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($this->product->productProperties()->pluck('product_properties.id')->sort()->values()->all())
+        ->toBe($expected);
 });

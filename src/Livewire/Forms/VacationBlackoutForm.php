@@ -15,7 +15,7 @@ class VacationBlackoutForm extends FluxForm
 
     public ?string $description = null;
 
-    public array $employeeDepartments = [];
+    public array $employee_departments = [];
 
     public array $employees = [];
 

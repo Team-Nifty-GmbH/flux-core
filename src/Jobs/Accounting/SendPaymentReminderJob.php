@@ -109,8 +109,8 @@ class SendPaymentReminderJob implements ShouldQueue
             ],
             'communicatables' => [
                 [
-                    'model_type' => $order->getMorphClass(),
-                    'model_id' => $order->getKey(),
+                    'communicatable_type' => $order->getMorphClass(),
+                    'communicatable_id' => $order->getKey(),
                 ],
             ],
         ])

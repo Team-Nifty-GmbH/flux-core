@@ -79,7 +79,9 @@ export default function () {
             this.editGrid = mode;
         },
         async syncGridOnNewItem() {
-            const snapshot = Array.from(await this.$wire.widgets);
+            const snapshot = Array.from(await this.$wire.widgets, (widget) => ({
+                ...widget,
+            }));
             const onScreen = this.grid.getGridItems();
             const newSnapshot = [];
             // update x,y coordinates and type of widget if selected
@@ -125,7 +127,9 @@ export default function () {
             await this.$wire.set('sync', true);
         },
         async syncGridOnDelete() {
-            const snapshot = Array.from(this.$wire.widgets);
+            const snapshot = Array.from(this.$wire.widgets, (widget) => ({
+                ...widget,
+            }));
             const onScreen = this.grid.getGridItems();
             const newSnapshot = [];
             onScreen.forEach((item) => {
@@ -146,7 +150,9 @@ export default function () {
         },
         async save() {
             this.isLoading = true;
-            const snapshot = Array.from(await this.$wire.widgets);
+            const snapshot = Array.from(await this.$wire.widgets, (widget) => ({
+                ...widget,
+            }));
             const onScreen = this.grid.getGridItems();
             const newSnapshot = [];
             // update x,y coordinates on save

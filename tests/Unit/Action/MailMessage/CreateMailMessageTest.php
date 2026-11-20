@@ -206,6 +206,41 @@ test('create ticket from mail message', function (): void {
     ]);
 });
 
+test('create ticket from mail message without text body', function (?string $textBody, ?string $htmlBody, string $expected): void {
+    Event::fake('action.executed: ' . CreateMailMessage::class);
+    file_put_contents($path = tempnam(sys_get_temp_dir(), 'imap_'), 'log');
+
+    $action = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'from' => 'Tester McTestFace <' . $this->address->email_primary . '>',
+        'to' => [$this->mailAccount->email],
+        'subject' => $subject = Str::uuid()->toString(),
+        'text_body' => $textBody,
+        'html_body' => $htmlBody,
+        'communication_type_enum' => 'mail',
+        'date' => now()->format('Y-m-d H:i:s'),
+        'tags' => [],
+        'attachments' => [
+            ['file_name' => 'protocol.txt', 'name' => 'protocol.txt', 'media' => $path],
+        ],
+    ]);
+    $action->validate()->execute();
+
+    (new CreateMailExecutedSubscriber())->handle($action);
+
+    $ticket = Ticket::query()->where('title', $subject)->first();
+
+    expect($ticket)->not->toBeNull()
+        ->and($ticket->media()->count())->toBeGreaterThan(0)
+        ->and($ticket->description)->toBe($expected === '{subject}' ? $subject : $expected);
+})->with([
+    'empty text body, html body' => ['', '<p>Das Protokoll von nuxfon hängt an.</p>', '<p>Das Protokoll von nuxfon hängt an.</p>'],
+    'empty text and html body' => ['', '', '{subject}'],
+    'null bodies' => [null, null, '{subject}'],
+    'too short body' => ['Hi', null, '{subject}'],
+]);
+
 test('keeps special characters in the subject', function (string $subject, string $expected): void {
     $result = CreateMailMessage::make([
         'mail_account_id' => $this->mailAccount->id,

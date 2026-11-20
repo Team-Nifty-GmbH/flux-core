@@ -8,6 +8,7 @@ use FluxErp\Models\Scopes\FamilyTreeScope;
 use FluxErp\Models\User;
 use FluxErp\Support\Mentions\MentionPillRefresher;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\BindsModelRecord;
 use FluxErp\Traits\Livewire\WithFilePond;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -26,7 +27,7 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 abstract class Comments extends Component
 {
-    use Actions, WithFilePond, WithPagination;
+    use Actions, BindsModelRecord, WithFilePond, WithPagination;
 
     public CommentForm $commentForm;
 

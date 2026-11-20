@@ -7,6 +7,12 @@ use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
 use FluxErp\Notifications\Comment\CommentCreatedNotification;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Notifications\Channels\BroadcastChannel;
+use Illuminate\Notifications\Channels\DatabaseChannel;
+use Illuminate\Notifications\Events\BroadcastNotificationCreated;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 
 beforeEach(function (): void {
     $language = Language::factory()->create();
@@ -121,4 +127,105 @@ test('toMail carries no attachments when the comment has no media', function ():
 
     expect($mail->attachments)->toBeEmpty()
         ->and($mail->rawAttachments)->toBeEmpty();
+});
+
+test('broadcast of a long comment stays below the reverb message limit', function (): void {
+    Event::fake([BroadcastNotificationCreated::class]);
+    $this->actingAs($this->user);
+
+    $comment = str_repeat('<p>Ein längerer Kommentar mit <strong>viel</strong> Text</p>', 400);
+    $this->taskComment->update(['comment' => $comment]);
+
+    $notification = new CommentCreatedNotification();
+    $notification->model = $this->taskComment;
+
+    $this->user->notifyNow($notification, [BroadcastChannel::class, DatabaseChannel::class]);
+
+    Event::assertDispatched(
+        BroadcastNotificationCreated::class,
+        function (BroadcastNotificationCreated $event): bool {
+            expect(strlen(json_encode($event->broadcastWith())))->toBeLessThan(10_000)
+                ->and($event->data['description'])->not->toContain('<strong>')
+                ->and($event->data['description'])->toStartWith('Ein längerer Kommentar');
+
+            return true;
+        }
+    );
+
+    expect($this->user->notifications()->first()->data['description'])->toBe($comment);
+});
+
+test('broadcast of a short comment keeps its markup', function (): void {
+    Event::fake([BroadcastNotificationCreated::class]);
+    $this->actingAs($this->user);
+
+    $this->taskComment->update(['comment' => '<p>Kurzer <strong>Kommentar</strong></p>']);
+
+    $notification = new CommentCreatedNotification();
+    $notification->model = $this->taskComment;
+
+    $this->user->notifyNow($notification, [BroadcastChannel::class]);
+
+    Event::assertDispatched(
+        BroadcastNotificationCreated::class,
+        fn (BroadcastNotificationCreated $event): bool => $event->data['description']
+            === '<p>Kurzer <strong>Kommentar</strong></p>'
+    );
+});
+
+test('comment model event broadcasts only its key', function (): void {
+    expect($this->taskComment->broadcastWith())
+        ->toBe(['model' => ['id' => $this->taskComment->getKey()]]);
+});
+
+describe('queued for a comment that is gone afterwards', function (): void {
+    beforeEach(function (): void {
+        config(['queue.default' => 'database']);
+        $this->actingAs($this->user);
+
+        $notification = new CommentCreatedNotification();
+        $notification->model = $this->taskComment;
+        $notification->event = $this->taskComment;
+
+        $this->user->notify($notification);
+
+        expect(DB::table('jobs')->count())->toBeGreaterThan(0);
+    });
+
+    test('force deleted comment ends the job without failing it', function (): void {
+        $this->taskComment->forceDelete();
+
+        Artisan::call('queue:work', ['--stop-when-empty' => true, '--memory' => 4096, '--sleep' => 0]);
+
+        expect(DB::table('jobs')->count())->toBe(0)
+            ->and(DB::table('failed_jobs')->count())->toBe(0)
+            ->and($this->user->notifications()->count())->toBe(0);
+    });
+
+    test('soft deleted comment sends nothing', function (): void {
+        $this->taskComment->delete();
+
+        Artisan::call('queue:work', ['--stop-when-empty' => true, '--memory' => 4096, '--sleep' => 0]);
+
+        expect(DB::table('jobs')->count())->toBe(0)
+            ->and(DB::table('failed_jobs')->count())->toBe(0)
+            ->and($this->user->notifications()->count())->toBe(0);
+    });
+
+    test('deleted parent model sends nothing', function (): void {
+        $this->task->delete();
+
+        Artisan::call('queue:work', ['--stop-when-empty' => true, '--memory' => 4096, '--sleep' => 0]);
+
+        expect(DB::table('jobs')->count())->toBe(0)
+            ->and(DB::table('failed_jobs')->count())->toBe(0)
+            ->and($this->user->notifications()->count())->toBe(0);
+    });
+
+    test('existing comment is still delivered', function (): void {
+        Artisan::call('queue:work', ['--stop-when-empty' => true, '--memory' => 4096, '--sleep' => 0]);
+
+        expect(DB::table('failed_jobs')->count())->toBe(0)
+            ->and($this->user->notifications()->count())->toBeGreaterThan(0);
+    });
 });

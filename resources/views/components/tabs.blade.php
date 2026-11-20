@@ -54,6 +54,13 @@
         $tabProperty = $attributes->wire('model')->value();
         $activeTab = $this->{$tabProperty};
         $activeTabButton = $tabs[$activeTab] ?? null;
+        $defaultTab = data_get(get_class_vars($this::class), $tabProperty);
+
+        if ($activeTab !== $defaultTab && ! $activeTabButton?->isRenderable()) {
+            $activeTab = $defaultTab;
+            $activeTabButton = $tabs[$activeTab] ?? null;
+        }
+
         $boundModelKey = $activeTabButton?->wireModel;
         $boundModelValue = $boundModelKey ? data_get($this, $boundModelKey) : null;
 
@@ -71,7 +78,7 @@
                 :is="$activeTab"
                 wire:key="tab-{{ $tabProperty }}-{{ $activeTab }}{{ is_null($boundModelValue) ? '' : '-' . $boundModelValue }}"
             />
-        @else
+        @elseif ($activeTabButton || $activeTab === $defaultTab)
             <x-dynamic-component :component="$activeTab" />
         @endif
     </div>

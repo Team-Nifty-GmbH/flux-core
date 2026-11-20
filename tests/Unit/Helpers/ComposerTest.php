@@ -14,6 +14,22 @@ test('getProcess includes HOME environment variable', function (): void {
     expect($env)->toHaveKey('HOME');
 });
 
+test('getProcess passes composer auth from config when the environment has none', function (): void {
+    $previous = getenv('COMPOSER_AUTH');
+    putenv('COMPOSER_AUTH');
+    config(['flux.composer_auth' => '{"http-basic":{"repo.example.com":{"username":"u","password":"p"}}}']);
+
+    try {
+        $composer = new Composer(new Filesystem(), base_path());
+        $process = (new ReflectionMethod($composer, 'getProcess'))->invoke($composer, ['echo', 'test']);
+
+        expect($process->getEnv())
+            ->toHaveKey('COMPOSER_AUTH', '{"http-basic":{"repo.example.com":{"username":"u","password":"p"}}}');
+    } finally {
+        $previous === false ? putenv('COMPOSER_AUTH') : putenv('COMPOSER_AUTH=' . $previous);
+    }
+});
+
 test('installedMetadata reads what composer wrote instead of asking it again', function (): void {
     $path = sys_get_temp_dir() . '/flux-composer-' . uniqid();
     mkdir($path . '/vendor/composer', 0777, true);

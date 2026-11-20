@@ -7,10 +7,13 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Rulesets\CalendarEvent\UpdateCalendarEventRuleset;
+use FluxErp\Traits\Action\ChecksCalendarEventAccess;
 use Illuminate\Support\Arr;
 
 class UpdateCalendarEvent extends FluxAction
 {
+    use ChecksCalendarEventAccess;
+
     public static function models(): array
     {
         return [CalendarEvent::class];
