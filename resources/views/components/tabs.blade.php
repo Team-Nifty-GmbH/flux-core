@@ -56,9 +56,10 @@
         $activeTabButton = $tabs[$activeTab] ?? null;
         $defaultTab = data_get(get_class_vars($this::class), $tabProperty);
 
-        if ($activeTab !== $defaultTab && ! $activeTabButton?->isRenderable()) {
-            $activeTab = $defaultTab;
-            $activeTabButton = $tabs[$activeTab] ?? null;
+        if (! $activeTabButton?->isRenderable()) {
+            $activeTabButton = collect($tabs)->first(fn ($tab) => $tab->isRenderable());
+            $activeTab = $activeTabButton?->component ?? $defaultTab;
+            $this->{$tabProperty} = $activeTab;
         }
 
         $boundModelKey = $activeTabButton?->wireModel;
