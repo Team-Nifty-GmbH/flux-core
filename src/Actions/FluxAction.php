@@ -31,16 +31,7 @@ abstract class FluxAction
 
     protected array $data;
 
-    protected array $dontTrim = [
-        'current_password',
-        'password',
-        'password_confirmation',
-        'smtp_password',
-        'prefix',
-        'suffix',
-        'html_body',
-        'text_body',
-    ];
+    protected array $dontTrim = [];
 
     protected bool $keepEmptyStrings = false;
 
@@ -381,19 +372,17 @@ abstract class FluxAction
 
     protected function trimStrings(array $data): array
     {
-        foreach ($data as $key => $value) {
+        return Arr::map($data, function (mixed $value, int|string $key): mixed {
             if (in_array($key, $this->dontTrim, true)) {
-                continue;
+                return $value;
             }
 
-            $data[$key] = match (true) {
-                is_string($value) => Str::trim($value),
-                is_array($value) => $this->trimStrings($value),
-                default => $value,
-            };
-        }
+            if (is_array($value)) {
+                return $this->trimStrings($value);
+            }
 
-        return $data;
+            return is_string($value) ? Str::trim($value) : $value;
+        });
     }
 
     protected function validateData(): void
