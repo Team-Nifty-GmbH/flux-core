@@ -47,6 +47,17 @@ test('renders a contact whose main address was deleted', function (): void {
         ->assertSet('contact.main_address', []);
 });
 
+test('saving the contact keeps its main address in the form', function (): void {
+    $mainAddress = $this->contact->refresh()->mainAddress()->first();
+
+    Livewire::test(Contact::class, ['id' => $this->contact->id])
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true)
+        ->assertSet('contact.main_address.id', $mainAddress->getKey())
+        ->assertSet('contact.main_address.name', $mainAddress->name);
+});
+
 test('switch tabs', function (): void {
     Livewire::test(Contact::class, ['id' => $this->contact->id])->cycleTabs();
 });
