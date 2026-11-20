@@ -25,10 +25,13 @@ test('a tab without permission does not render its content', function (): void {
 });
 
 test('a tab without permission from the url renders the default tab instead', function (): void {
+    $this->user->givePermissionTo('tab.contact.addresses');
+
     Livewire::withQueryParams(['tab' => 'contact.accounting'])
         ->test(Contact::class, ['id' => $this->contact->getKey()])
         ->assertDontSeeLivewire('contact.accounting')
-        ->assertSeeLivewire('contact.addresses');
+        ->assertSeeLivewire('contact.addresses')
+        ->assertSet('tab', 'contact.addresses');
 });
 
 test('a tab with permission renders its content', function (): void {
@@ -39,9 +42,19 @@ test('a tab with permission renders its content', function (): void {
         ->assertSeeLivewire('contact.accounting');
 });
 
-test('the default tab renders without permission', function (): void {
+test('a default tab without permission falls back to the first permitted tab', function (): void {
     Livewire::test(Contact::class, ['id' => $this->contact->getKey()])
-        ->assertSeeLivewire('contact.addresses');
+        ->assertDontSeeLivewire('contact.addresses')
+        ->assertSeeLivewire('contact.orders')
+        ->assertSet('tab', 'contact.orders');
+});
+
+test('the default tab renders with permission', function (): void {
+    $this->user->givePermissionTo('tab.contact.addresses');
+
+    Livewire::test(Contact::class, ['id' => $this->contact->getKey()])
+        ->assertSeeLivewire('contact.addresses')
+        ->assertSet('tab', 'contact.addresses');
 });
 
 test('an unknown tab does not render a component of that name', function (): void {
