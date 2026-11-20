@@ -17,7 +17,7 @@ class CreateSalaryComponentRuleset extends FluxRuleset
             'employee_id' => [
                 'required',
                 'integer',
-                new ModelExists(Employee::class),
+                app(ModelExists::class, ['model' => Employee::class]),
             ],
             'name' => 'required|string|max:255',
             'amount' => [

@@ -14,7 +14,7 @@ class DeleteSalaryComponentRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(SalaryComponent::class),
+                app(ModelExists::class, ['model' => SalaryComponent::class]),
             ],
         ];
     }

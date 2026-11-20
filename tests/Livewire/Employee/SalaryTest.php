@@ -101,6 +101,7 @@ test('salary changes are not written to the activity log', function (): void {
     $properties = Activity::query()
         ->where('subject_type', $this->employee->getMorphClass())
         ->where('subject_id', $this->employee->getKey())
+        ->toBase()
         ->pluck('attribute_changes')
         ->toJson();
 

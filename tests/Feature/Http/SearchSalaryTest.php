@@ -177,3 +177,26 @@ test('logged salary changes of older rows are not returned', function (): void {
         ->and($employee)->toContain('Developer')
         ->not->toContain('base_salary');
 });
+
+test('logged changes are dropped when the subject type is not loaded', function (): void {
+    DB::table('activity_log')->insert([
+        'log_name' => 'model_events',
+        'description' => 'updated',
+        'subject_type' => $this->employee->getMorphClass(),
+        'subject_id' => $this->employee->getKey(),
+        'event' => 'updated',
+        'attribute_changes' => json_encode([
+            'attributes' => ['base_salary' => 9000],
+            'old' => ['base_salary' => 2000],
+            'custom' => 'kept',
+        ]),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $activity = Activity::query()
+        ->latest('id')
+        ->first(['id', 'attribute_changes']);
+
+    expect($activity->attribute_changes->toArray())->toBe(['custom' => 'kept']);
+});

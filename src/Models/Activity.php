@@ -85,6 +85,10 @@ class Activity extends BaseActivity
             return collect();
         }
 
+        if (! array_key_exists('subject_type', $this->getAttributes())) {
+            return collect(Arr::except($changes, ['attributes', 'old']));
+        }
+
         $subjectClass = $this->subject_type ? morphed_model($this->subject_type) ?? $this->subject_type : null;
         $hidden = $subjectClass && class_exists($subjectClass) ? app($subjectClass)->getHidden() : [];
 

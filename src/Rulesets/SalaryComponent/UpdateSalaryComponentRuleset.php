@@ -17,7 +17,7 @@ class UpdateSalaryComponentRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(SalaryComponent::class),
+                app(ModelExists::class, ['model' => SalaryComponent::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
             'amount' => [
