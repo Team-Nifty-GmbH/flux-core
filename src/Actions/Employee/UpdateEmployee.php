@@ -6,10 +6,13 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDepartment;
 use FluxErp\Rulesets\Employee\UpdateEmployeeRuleset;
+use FluxErp\Traits\Action\ValidatesEmployeeUserLink;
 use Illuminate\Validation\ValidationException;
 
 class UpdateEmployee extends FluxAction
 {
+    use ValidatesEmployeeUserLink;
+
     public static function models(): array
     {
         return [Employee::class];
@@ -38,7 +41,11 @@ class UpdateEmployee extends FluxAction
 
         $employee = resolve_static(Employee::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first(['id', 'employee_department_id', 'location_id']);
+            ->first(['id', 'employee_department_id', 'location_id', 'tenant_id', 'user_id']);
+
+        if ($this->getData('user_id') !== $employee->user_id) {
+            $this->validateUserLink((int) $employee->tenant_id, 'updateEmployee');
+        }
 
         if (
             $this->getData('employee_department_id')
@@ -51,7 +58,7 @@ class UpdateEmployee extends FluxAction
             throw ValidationException::withMessages([
                 'employee_department_id' => ['The selected department is not available for the selected location.'],
             ])
-                ->errorBag('createEmployee');
+                ->errorBag('updateEmployee');
         } elseif (
             $this->getData('location_id')
             && $employee->employee_department_id
@@ -63,7 +70,7 @@ class UpdateEmployee extends FluxAction
             throw ValidationException::withMessages([
                 'location_id' => ['The selected location is not available for the given department.'],
             ])
-                ->errorBag('createEmployee');
+                ->errorBag('updateEmployee');
         }
     }
 }

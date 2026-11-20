@@ -21,7 +21,6 @@ beforeEach(function (): void {
 
     $this->employee = app(Employee::class)->create([
         'tenant_id' => $this->dbTenant->getKey(),
-        'user_id' => $this->user->getKey(),
         'firstname' => 'Test',
         'lastname' => 'Employee',
         'is_active' => true,
