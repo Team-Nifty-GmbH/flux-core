@@ -6,6 +6,7 @@ use FluxErp\Livewire\Product\Product;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
+use FluxErp\Models\Pivots\ProductSupplier;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
@@ -317,6 +318,28 @@ test('the packaging ean field reaches the supplier block', function (): void {
     Livewire::test(Product::class, ['id' => $this->product->id])
         ->assertOk()
         ->assertSeeHtml('supplier.packaging_ean');
+});
+
+test('the supplier block renders the fields the pivot model declares', function (): void {
+    $relabeled = new class() extends ProductSupplier
+    {
+        public static function formFields(): array
+        {
+            return array_merge(
+                parent::formFields(),
+                ['note' => ['label' => 'Remark for the buyer']]
+            );
+        }
+    };
+    app()->bind(ProductSupplier::class, $relabeled::class);
+
+    $component = Livewire::test(Product::class, ['id' => $this->product->id])
+        ->assertOk()
+        ->assertSee('Remark for the buyer');
+
+    foreach (resolve_static(ProductSupplier::class, 'pivotColumns') as $column) {
+        $component->assertSeeHtml('supplier.' . $column);
+    }
 });
 
 test('the price per basic unit reaches the prices tab', function (): void {

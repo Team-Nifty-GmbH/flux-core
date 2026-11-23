@@ -9,19 +9,29 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProductSupplier extends FluxPivot
 {
-    protected static array $pivotColumns = [
-        'packaging_unit_id',
-        'manufacturer_product_number',
-        'supplier_product_number',
-        'supplier_product_name',
-        'packaging_amount',
-        'items_per_packaging',
-        'packaging_ean',
-        'purchase_price',
-        'note',
+    protected static array $formFields = [
+        'supplier_product_number' => ['label' => 'Supplier product number'],
+        'supplier_product_name' => ['label' => 'Supplier product name'],
+        'manufacturer_product_number' => ['label' => 'Manufacturer product number'],
+        'packaging_amount' => ['label' => 'Amount per Packaging', 'type' => 'number', 'step' => '0.01'],
+        'packaging_unit_id' => ['label' => 'Packaging Unit', 'type' => 'unit'],
+        'items_per_packaging' => ['label' => 'Items per Packaging', 'type' => 'number', 'step' => '1'],
+        'packaging_ean' => ['label' => 'Packaging EAN'],
+        'purchase_price' => ['label' => 'Purchase Price', 'type' => 'number', 'step' => '0.01'],
+        'note' => ['label' => 'Note'],
     ];
 
     protected $table = 'product_supplier';
+
+    public static function formFields(): array
+    {
+        return static::$formFields;
+    }
+
+    public static function pivotColumns(): array
+    {
+        return array_keys(static::formFields());
+    }
 
     // Relations
     public function contact(): BelongsTo
