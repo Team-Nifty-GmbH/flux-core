@@ -323,3 +323,51 @@ test('a ledger account error stays off the sibling transaction forms', function 
             'transactionForm.amount',
         ]);
 });
+
+test('assigning several foreign currency orders splits the remaining transaction amount', function (): void {
+    $bankConnection = BankConnection::factory()->create();
+    $transaction = Transaction::factory()->create([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'amount' => 859.38,
+    ]);
+    $usd = Currency::factory()->create(['iso' => 'USD', 'is_default' => false]);
+
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
+    $orderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+    ]);
+    $createOrder = fn (int $currencyId, float $balance) => Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'tenant_id' => Tenant::default()->getKey(),
+        'language_id' => Language::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'currency_id' => $currencyId,
+        'order_type_id' => $orderType->getKey(),
+        'balance' => $balance,
+    ]);
+
+    $euroOrder = $createOrder(Currency::default()->getKey(), 300);
+    $smallUsdOrder = $createOrder($usd->getKey(), 23.74);
+    $largeUsdOrder = $createOrder($usd->getKey(), 127.96);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('assignOrdersModal', $transaction)
+        ->set('selectedOrders', [$smallUsdOrder->getKey(), $euroOrder->getKey(), $largeUsdOrder->getKey()])
+        ->call('assignOrders')
+        ->assertOk();
+
+    $amounts = OrderTransaction::query()
+        ->where('transaction_id', $transaction->getKey())
+        ->pluck('amount', 'order_id');
+
+    expect($amounts)->toHaveCount(3)
+        ->and(bcround($amounts->sum(), 2))->toEqual('859.38')
+        ->and(bcround($amounts[$euroOrder->getKey()], 2))->toEqual('300.00')
+        ->and(bcround($amounts[$smallUsdOrder->getKey()], 2))->toEqual('87.54')
+        ->and(bcround($amounts[$largeUsdOrder->getKey()], 2))->toEqual('471.84');
+});

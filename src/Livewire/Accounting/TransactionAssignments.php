@@ -181,35 +181,54 @@ class TransactionAssignments extends Component
     {
         $transactionCurrencyId = $this->transactionForm->currency_id;
 
-        resolve_static(Order::class, 'query')
+        [$foreignCurrencyOrders, $orders] = resolve_static(Order::class, 'query')
             ->whereKey($this->selectedOrders)
             ->get(['id', 'currency_id', 'balance'])
-            ->each(function (Order $order) use ($transactionCurrencyId): void {
-                $data = [
+            ->partition(fn (Order $order) => $order->currency_id !== $transactionCurrencyId);
+
+        $orders->each(fn (Order $order) => $this->createOrderTransaction([
+            'transaction_id' => $this->transactionForm->id,
+            'order_id' => $order->getKey(),
+            'amount' => $order->balance,
+            'is_accepted' => true,
+        ]));
+
+        if ($foreignCurrencyOrders->isNotEmpty()) {
+            $transaction = resolve_static(Transaction::class, 'query')
+                ->whereKey($this->transactionForm->id)
+                ->first(['id', 'balance']);
+            $remainingAmount = bcsub(
+                $transaction->balance,
+                $transaction->orderTransactions()->where('is_accepted', false)->sum('amount'),
+                2
+            );
+            $remainingOrderBalance = $foreignCurrencyOrders->reduce(
+                fn (string $carry, Order $order) => bcadd($carry, $order->balance, 9),
+                '0'
+            );
+
+            foreach ($foreignCurrencyOrders as $order) {
+                $amount = bccomp($remainingOrderBalance, 0, 9) !== 0
+                    ? bcround(
+                        bcdiv(bcmul($remainingAmount, $order->balance, 9), $remainingOrderBalance, 9),
+                        2
+                    )
+                    : '0';
+                $remainingAmount = bcsub($remainingAmount, $amount, 2);
+                $remainingOrderBalance = bcsub($remainingOrderBalance, $order->balance, 9);
+
+                $this->createOrderTransaction([
                     'transaction_id' => $this->transactionForm->id,
                     'order_id' => $order->getKey(),
-                ];
-
-                if ($order->currency_id !== $transactionCurrencyId) {
-                    $data['order_currency_amount'] = $order->balance;
-                    $data['amount'] = $this->transactionForm->amount;
-                    $data['exchange_rate'] = bccomp($this->transactionForm->amount ?? 0, 0, 9) !== 0
-                        ? bcdiv($order->balance, $this->transactionForm->amount, 9)
-                        : null;
-                    $data['is_accepted'] = false;
-                } else {
-                    $data['amount'] = $order->balance;
-                    $data['is_accepted'] = true;
-                }
-
-                try {
-                    CreateOrderTransaction::make($data)
-                        ->validate()
-                        ->execute();
-                } catch (ValidationException|UnauthorizedException $e) {
-                    exception_to_notifications($e, $this, form: $this->orderTransactionForm);
-                }
-            });
+                    'amount' => $amount,
+                    'order_currency_amount' => $order->balance,
+                    'exchange_rate' => bccomp($amount, 0, 9) !== 0
+                        ? bcdiv($order->balance, $amount, 9)
+                        : null,
+                    'is_accepted' => false,
+                ]);
+            }
+        }
 
         $this->selectedOrders = [];
         $this->refreshTransactions();
@@ -609,6 +628,17 @@ class TransactionAssignments extends Component
         $this->reset('search', 'range', 'bankAccounts');
         $this->resetPage();
         $this->refreshTransactions();
+    }
+
+    protected function createOrderTransaction(array $data): void
+    {
+        try {
+            CreateOrderTransaction::make($data)
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this, form: $this->orderTransactionForm);
+        }
     }
 
     protected function refreshTransactions(bool $renderless = true): void
