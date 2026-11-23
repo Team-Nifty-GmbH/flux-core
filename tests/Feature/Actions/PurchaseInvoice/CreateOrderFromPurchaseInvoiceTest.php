@@ -272,3 +272,46 @@ test('a position on a deleted vat rate is reported instead of finishing', functi
     expect($errors ?? [])->toHaveKey('purchase_invoice_positions.0.vat_rate_id')
         ->and(Order::query()->count())->toBe($countBefore);
 });
+
+test('the order takes the position total of the invoice when the unit price does not add up', function (): void {
+    $purchaseInvoice = ($this->createPurchaseInvoice)(42.91);
+    $purchaseInvoice->purchaseInvoicePositions()->delete();
+    $purchaseInvoice->purchaseInvoicePositions()->createMany([
+        [
+            'name' => 'MultiSIM',
+            'amount' => 3,
+            'unit_price' => 19.992,
+            'total_price' => 19.992,
+            'vat_rate_id' => $this->vatRate->getKey(),
+        ],
+        [
+            'name' => 'Incoming calls',
+            'amount' => 240,
+            'unit_price' => 2.7608,
+            'total_price' => 2.7608,
+            'vat_rate_id' => $this->vatRate->getKey(),
+        ],
+        [
+            'name' => 'Discount',
+            'amount' => -1,
+            'unit_price' => 32.011,
+            'total_price' => -32.011,
+            'vat_rate_id' => $this->vatRate->getKey(),
+        ],
+        [
+            'name' => 'Monthly plan',
+            'amount' => 1,
+            'unit_price' => 52.1682,
+            'total_price' => 52.1682,
+            'vat_rate_id' => $this->vatRate->getKey(),
+        ],
+    ]);
+
+    $order = CreateOrderFromPurchaseInvoice::make(['id' => $purchaseInvoice->getKey()])
+        ->validate()
+        ->execute();
+
+    expect(bcround(bcmul($order->total_gross_price, -1), 2))->toBe('42.91')
+        ->and(bcround(bcmul($order->orderPositions()->where('name', 'MultiSIM')->value('total_gross_price'), -1), 2))
+        ->toBe('19.99');
+});
