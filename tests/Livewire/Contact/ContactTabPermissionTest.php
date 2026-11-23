@@ -49,6 +49,19 @@ test('a default tab without permission falls back to the first permitted tab', f
         ->assertSet('tab', 'contact.orders');
 });
 
+test('no tab content renders when no tab is permitted', function (): void {
+    $component = Livewire::test(Contact::class, ['id' => $this->contact->getKey()]);
+
+    foreach ($component->instance()->getTabs() as $tab) {
+        Permission::findOrCreate('tab.' . $tab->component, 'web');
+    }
+
+    Livewire::test(Contact::class, ['id' => $this->contact->getKey()])
+        ->assertDontSeeLivewire('contact.addresses')
+        ->assertDontSeeLivewire('contact.orders')
+        ->assertDontSeeLivewire('contact.accounting');
+});
+
 test('the default tab renders with permission', function (): void {
     $this->user->givePermissionTo('tab.contact.addresses');
 

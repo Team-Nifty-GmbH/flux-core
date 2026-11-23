@@ -79,7 +79,7 @@
                 :is="$activeTab"
                 wire:key="tab-{{ $tabProperty }}-{{ $activeTab }}{{ is_null($boundModelValue) ? '' : '-' . $boundModelValue }}"
             />
-        @elseif ($activeTabButton || $activeTab === $defaultTab)
+        @elseif ($activeTabButton || ($activeTab === $defaultTab && ! isset($tabs[$defaultTab])))
             <x-dynamic-component :component="$activeTab" />
         @endif
     </div>
