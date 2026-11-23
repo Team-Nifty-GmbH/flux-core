@@ -82,11 +82,11 @@ test('a moved widget is saved with its new position', function (): void {
     $page->script(<<<'JS'
         () => document.querySelector('button[x-on\\:click="editGridMode(true)"]').click()
     JS);
-    $page->script("() => {$dashboard}.selectWidget(Object.keys({$dashboard}.\$wire.availableWidgets)[0])");
+    $page->script("() => { {$dashboard}.selectWidget(Object.keys({$dashboard}.\$wire.availableWidgets)[0]); }");
     waitForCondition($page, "() => {$count} === 1 && ! {$dashboard}.isLoading", 12000);
 
     $page->script("() => {$dashboard}.grid.update({$dashboard}.grid.getGridItems()[0], { y: 2 })");
-    $page->script("() => {$dashboard}.save()");
+    $page->script("() => { {$dashboard}.save(); }");
     waitForCondition($page, "() => ! {$dashboard}.editGrid && ! {$dashboard}.isLoading", 12000);
 
     expect(
@@ -109,7 +109,7 @@ test('cancelling the edit mode asks before discarding the changes', function ():
     $page->script(<<<'JS'
         () => document.querySelector('button[x-on\\:click="editGridMode(true)"]').click()
     JS);
-    $page->script("() => {$dashboard}.selectWidget(Object.keys({$dashboard}.\$wire.availableWidgets)[0])");
+    $page->script("() => { {$dashboard}.selectWidget(Object.keys({$dashboard}.\$wire.availableWidgets)[0]); }");
     waitForCondition($page, "() => {$count} === 1 && ! {$dashboard}.isLoading", 12000);
 
     $page->script(<<<'JS'
