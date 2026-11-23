@@ -498,3 +498,20 @@ test('a day without target hours is no work day', function (): void {
     expect($dayData->get('target_hours'))->toBe('0.00')
         ->and($dayData->get('is_work_day'))->toBeFalse();
 });
+
+test('a sunday schedule stored as weekday 0 sets the target hours of a sunday', function (): void {
+    $this->workTimeModel->update([
+        'weekly_hours' => 42,
+        'work_days_per_week' => 7,
+    ]);
+    $this->workTimeModel->schedules()->create([
+        'week_number' => 1,
+        'weekday' => Carbon::SUNDAY,
+        'work_hours' => 2,
+    ]);
+    $employee = reloadEmployeeWithWorkTimeModel($this->employee);
+
+    $dayData = CloseEmployeeDay::calculateDayData($employee, Carbon::now()->next(Carbon::SUNDAY));
+
+    expect($dayData->get('target_hours'))->toBe('2.00');
+});
