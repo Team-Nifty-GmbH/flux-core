@@ -73,17 +73,18 @@ class TopProductsByUnitSold extends ValueList
         $this->calculateList();
     }
 
-    protected function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderLocked' => 'calculateList',
-        ];
-    }
-
     protected function hasLoadMore(): bool
     {
         return true;
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Order::class) => [
+                Order::class => ['locked'],
+            ],
+        ];
     }
 
     protected function query(): Builder

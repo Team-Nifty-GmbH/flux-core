@@ -9,6 +9,8 @@ use FluxErp\Enums\EmployeeBalanceAdjustmentTypeEnum;
 use FluxErp\Livewire\Employee\Dashboard;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\Employee;
+use FluxErp\Models\EmployeeBalanceAdjustment;
+use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -177,5 +179,25 @@ class VacationYearlyOverview extends Component
         }
 
         $this->yearlyData = array_reverse($data);
+    }
+
+    protected function liveUpdateMethod(): string
+    {
+        return 'calculateYearlyData';
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(AbsenceRequest::class) => [
+                AbsenceRequest::class => ['created', 'updated', 'deleted'],
+            ],
+            $this->modelChannel(EmployeeBalanceAdjustment::class) => [
+                EmployeeBalanceAdjustment::class => ['created', 'updated', 'deleted'],
+            ],
+            $this->modelChannel(EmployeeWorkTimeModel::class) => [
+                EmployeeWorkTimeModel::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
     }
 }

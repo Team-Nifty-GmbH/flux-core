@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Actions\Media\UploadMedia;
+use FluxErp\Actions\PurchaseInvoice\BlockPurchaseInvoiceFile;
 use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Forms\ContactForm;
@@ -23,6 +24,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\ComponentAttributeBag;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Renderless;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -31,6 +34,9 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 class PurchaseInvoiceList extends BaseDataTable
 {
     use WithDocumentScanning, WithFilePond, WithFileUploads;
+
+    #[Locked]
+    public ?int $assignToOrderId = null;
 
     public bool $positiveEmptyState = true;
 
@@ -113,13 +119,49 @@ class PurchaseInvoiceList extends BaseDataTable
         ];
     }
 
+    protected function getRowActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->icon('no-symbol')
+                ->color('red')
+                ->text(__('Block File'))
+                ->when(fn () => resolve_static(BlockPurchaseInvoiceFile::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'x-show' => '! record.order_id',
+                    'x-cloak' => true,
+                    'wire:flux-confirm.type.error' => __('Block this file? It will be deleted and never stored again.'),
+                    'wire:click' => 'blockFile(record.id)',
+                ]),
+        ];
+    }
+
+    #[Renderless]
+    public function blockFile(int $purchaseInvoiceId): bool
+    {
+        try {
+            BlockPurchaseInvoiceFile::make(['id' => $purchaseInvoiceId])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
     #[Renderless]
     public function delete(): bool
     {
         try {
             $this->purchaseInvoiceForm->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->purchaseInvoiceForm);
 
             return false;
         }
@@ -139,6 +181,8 @@ class PurchaseInvoiceList extends BaseDataTable
             $this->fillEditFormFromPurchaseInvoice($purchaseInvoice);
         }
 
+        $this->refreshAssignableOrders();
+
         $this->js(<<<'JS'
             $tsui.open.modal('edit-purchase-invoice-modal');
         JS);
@@ -150,6 +194,9 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->resetErrorBag();
         $this->purchaseInvoiceForm->reset();
         $this->mediaForm->reset();
+        $this->reset('assignToOrderId');
+
+        $this->refreshAssignableOrders();
     }
 
     #[Renderless]
@@ -169,6 +216,8 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->purchaseInvoiceForm->iban = $bankConnection?->iban;
 
         $this->purchaseInvoiceForm->findMostUsedLedgerAccountId();
+
+        $this->refreshAssignableOrders();
     }
 
     #[Renderless]
@@ -185,7 +234,7 @@ class PurchaseInvoiceList extends BaseDataTable
         try {
             $this->createContactForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->createContactForm);
 
             return false;
         }
@@ -199,16 +248,35 @@ class PurchaseInvoiceList extends BaseDataTable
     }
 
     #[Renderless]
+    public function refreshAssignableOrders(): void
+    {
+        $this->dispatch(
+            'assignable-orders.load',
+            contactId: $this->purchaseInvoiceForm->contact_id,
+            invoiceTotal: $this->purchaseInvoiceForm->total_gross_price,
+        );
+    }
+
+    #[Renderless]
+    #[On('assignable-orders.selected')]
+    public function assignableOrderSelected(?int $orderId = null): void
+    {
+        $this->assignToOrderId = $orderId;
+    }
+
+    #[Renderless]
     public function finish(): bool
     {
         try {
-            $this->purchaseInvoiceForm->finish();
+            $this->purchaseInvoiceForm->finish($this->assignToOrderId);
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->purchaseInvoiceForm);
 
             return false;
         }
 
+        $this->reset('assignToOrderId');
+        $this->refreshAssignableOrders();
         $this->loadData();
 
         return true;
@@ -264,7 +332,7 @@ class PurchaseInvoiceList extends BaseDataTable
 
                 $successCount++;
             } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+                exception_to_notifications($e, $this, form: $this->purchaseInvoiceForm);
 
                 $errorCount++;
             }
@@ -295,7 +363,7 @@ class PurchaseInvoiceList extends BaseDataTable
         try {
             $this->purchaseInvoiceForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->purchaseInvoiceForm);
 
             return false;
         }
@@ -321,12 +389,19 @@ class PurchaseInvoiceList extends BaseDataTable
 
     protected function getBuilder(Builder $builder): Builder
     {
-        return $builder->with(['media', 'invoice']);
+        return $builder
+            ->addSelect('purchase_invoices.order_id')
+            ->with(['media', 'invoice']);
     }
 
     protected function getLayout(): string
     {
         return 'tall-datatables::layouts.grid';
+    }
+
+    protected function getReturnKeys(): array
+    {
+        return array_merge(parent::getReturnKeys(), ['order_id']);
     }
 
     protected function getRowAttributes(): ComponentAttributeBag
@@ -365,6 +440,7 @@ class PurchaseInvoiceList extends BaseDataTable
                     ->get(['id', 'name', 'requires_manual_transfer'])
                     ->toArray(),
                 'vatRates' => resolve_static(VatRate::class, 'query')
+                    ->where('is_purchase', true)
                     ->get(['id', 'name', 'rate_percentage'])
                     ->toArray(),
             ]
@@ -381,5 +457,6 @@ class PurchaseInvoiceList extends BaseDataTable
         }
 
         $itemArray['media.file_name'] = $media?->file_name;
+        $itemArray['order_id'] = $item->order_id;
     }
 }

@@ -4,6 +4,7 @@ namespace FluxErp\Actions;
 
 use FluxErp\Contracts\SupportsBulkExecution;
 use FluxErp\Models\Permission;
+use FluxErp\Models\Token;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Traits\Action\HasActionEvents;
 use FluxErp\Traits\Action\SupportsApiRequests;
@@ -29,6 +30,8 @@ abstract class FluxAction
     protected ?Authenticatable $actingAs;
 
     protected array $data;
+
+    protected array $dontTrim = [];
 
     protected bool $keepEmptyStrings = false;
 
@@ -82,27 +85,28 @@ abstract class FluxAction
             return true;
         }
 
-        try {
-            resolve_static(
-                Permission::class,
-                'findByName',
-                [
-                    'name' => 'action.' . static::name(),
-                ]
-            );
-        } catch (PermissionDoesNotExist) {
+        $permission = 'action.' . static::name();
+
+        $user = auth()->user();
+
+        if ($user?->can($permission)) {
             return true;
         }
 
-        if (! auth()->user()?->can('action.' . static::name())) {
-            if ($throwException) {
-                throw UnauthorizedException::forPermissions(['action.' . static::name()]);
-            } else {
-                return false;
+        // A token holds only what it was granted, a permission missing from the store grants nothing
+        if (! $user instanceof Token) {
+            try {
+                resolve_static(Permission::class, 'findByName', ['name' => $permission]);
+            } catch (PermissionDoesNotExist) {
+                return true;
             }
         }
 
-        return true;
+        if ($throwException) {
+            throw UnauthorizedException::forPermissions([$permission]);
+        }
+
+        return false;
     }
 
     public static function description(): ?string
@@ -271,6 +275,7 @@ abstract class FluxAction
             $data = $data->toArray();
         }
 
+        $data = $this->trimStrings($data);
         $this->data = $keepEmptyStrings ? $data : $this->convertEmptyStringToNull($data);
 
         return $this;
@@ -363,6 +368,21 @@ abstract class FluxAction
     protected function prepareForValidation(): void
     {
         //
+    }
+
+    protected function trimStrings(array $data): array
+    {
+        return Arr::map($data, function (mixed $value, int|string $key): mixed {
+            if (in_array($key, $this->dontTrim, true)) {
+                return $value;
+            }
+
+            if (is_array($value)) {
+                return $this->trimStrings($value);
+            }
+
+            return is_string($value) ? Str::trim($value) : $value;
+        });
     }
 
     protected function validateData(): void

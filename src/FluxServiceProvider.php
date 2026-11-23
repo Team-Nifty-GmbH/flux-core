@@ -17,9 +17,11 @@ use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Http\Middleware\SanitizeSocketId;
 use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
 use FluxErp\Livewire\Product\Product;
+use FluxErp\Mail\ImapHeaderDecoder;
 use FluxErp\Mail\MailDriverManager;
 use FluxErp\Models\Activity;
 use FluxErp\Models\Currency;
+use FluxErp\Models\Media;
 use FluxErp\Models\Notification;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
@@ -32,21 +34,29 @@ use FluxErp\Providers\ComponentServiceProvider;
 use FluxErp\Providers\EditorServiceProvider;
 use FluxErp\Providers\EventServiceProvider;
 use FluxErp\Providers\MacroServiceProvider;
+use FluxErp\Providers\MentionableTypeServiceProvider;
 use FluxErp\Providers\MenuServiceProvider;
 use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\RepeatableServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
+use FluxErp\Providers\SettingsServiceProvider;
 use FluxErp\Providers\TestServiceProvider;
 use FluxErp\Providers\ViewServiceProvider;
 use FluxErp\Providers\WidgetServiceProvider;
 use FluxErp\Support\Bus\Dispatcher as FluxDispatcher;
 use FluxErp\Support\Container\ProductTypeManager;
+use FluxErp\Support\Flare\CensoringSender;
+use FluxErp\Support\Flare\CensorPersonalData;
+use FluxErp\Support\MediaLibrary\ImageGenerators\Image as ImageGenerator;
+use FluxErp\Support\MediaLibrary\ImageGenerators\Pdf as PdfGenerator;
+use GuzzleHttp\Client;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Bus;
@@ -56,7 +66,14 @@ use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Laravel\Scout\Scout;
+use Meilisearch\Client as MeilisearchClient;
+use Spatie\FlareClient\Senders\Sender;
+use Spatie\LaravelIgnition\FlareMiddleware\AddQueries;
 use Spatie\LaravelPasskeys\Http\Controllers\AuthenticateUsingPasskeyController as BaseAuthenticateUsingPasskeyController;
+use Spatie\MediaLibrary\Conversions\ImageGenerators\Image as BaseImageGenerator;
+use Spatie\MediaLibrary\Conversions\ImageGenerators\Pdf as BasePdfGenerator;
+use Spatie\MediaLibrary\MediaCollections\Models\Observers\MediaObserver;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Symfony\Component\Finder\Finder;
@@ -96,6 +113,7 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         $this->bootRoutes();
+        $this->bootMeilisearchClient();
 
         ProductType::register(
             name: 'product',
@@ -122,6 +140,8 @@ class FluxServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
         $this->registerConfig();
         $this->registerExtensions();
+        $this->app->booting(fn () => $this->censorFlareReports());
+        $this->app->extend(Sender::class, fn (Sender $sender) => app(CensoringSender::class, ['sender' => $sender]));
 
         app('livewire')->componentHook(SupportFormObjects::class);
         $this->app->bind(DatabaseNotification::class, Notification::class);
@@ -143,13 +163,53 @@ class FluxServiceProvider extends ServiceProvider
         $this->app->register(MacroServiceProvider::class);
 
         $this->app->register(ActionServiceProvider::class);
+        $this->app->register(MentionableTypeServiceProvider::class);
         $this->app->register(RepeatableServiceProvider::class);
         $this->app->register(WidgetServiceProvider::class);
         $this->app->register(EditorServiceProvider::class);
         $this->app->register(MenuServiceProvider::class);
+        $this->app->register(SettingsServiceProvider::class);
 
         if ($this->app->runningUnitTests()) {
             $this->app->register(TestServiceProvider::class);
+        }
+    }
+
+    protected function applyMailSettings(): void
+    {
+        try {
+            $settings = app(Settings\MailSettings::class);
+            $previousConfig = [];
+
+            if (! is_null($settings->mailer)) {
+                $previousConfig['mail.default'] = config('mail.default');
+                config()->set('mail.default', $settings->mailer);
+            }
+
+            $defaultMailer = config('mail.default');
+
+            $configMap = [
+                'host' => "mail.mailers.{$defaultMailer}.host",
+                'port' => "mail.mailers.{$defaultMailer}.port",
+                'username' => "mail.mailers.{$defaultMailer}.username",
+                'password' => "mail.mailers.{$defaultMailer}.password",
+                'encryption' => "mail.mailers.{$defaultMailer}.encryption",
+                'from_address' => 'mail.from.address',
+                'from_name' => 'mail.from.name',
+            ];
+
+            foreach ($configMap as $property => $configKey) {
+                if (! is_null($settings->{$property})) {
+                    $previousConfig[$configKey] = config($configKey);
+                    config()->set($configKey, $settings->{$property});
+                }
+            }
+        } catch (Throwable $e) {
+            foreach ($previousConfig ?? [] as $configKey => $value) {
+                config()->set($configKey, $value);
+            }
+
+            report($e);
         }
     }
 
@@ -160,6 +220,48 @@ class FluxServiceProvider extends ServiceProvider
             : once(fn () => $this->findCommands());
 
         $this->commands($commands);
+    }
+
+    protected function bootMeilisearchClient(): void
+    {
+        if (! class_exists(MeilisearchClient::class)) {
+            return;
+        }
+
+        // Scout binds the client without an HTTP client, so a dead Meilisearch blocks every request
+        // until max_execution_time. This overrides Scout's binding (registered in register()).
+        $this->app->singleton(MeilisearchClient::class, fn () => new MeilisearchClient(
+            config('scout.meilisearch.host'),
+            config('scout.meilisearch.key'),
+            new Client(['timeout' => config('flux.meilisearch.timeout')]),
+            clientAgents: [sprintf('Meilisearch Laravel Scout (v%s)', Scout::VERSION)],
+        ));
+    }
+
+    protected function bootMiddleware(): void
+    {
+        /** @var Kernel $kernel */
+        $kernel = $this->app->make(Kernel::class);
+
+        if (! $kernel->hasMiddleware(InvokeDeferredCallbacks::class)) {
+            $kernel->prependMiddleware(InvokeDeferredCallbacks::class);
+        }
+
+        $kernel->prependMiddlewareToGroup('api', EnsureFrontendRequestsAreStateful::class);
+
+        $kernel->appendMiddlewareToGroup('web', Localization::class);
+        $kernel->appendMiddlewareToGroup('web', AuthContextMiddleware::class);
+        $kernel->appendMiddlewareToGroup('web', SanitizeSocketId::class);
+
+        $this->app['router']->aliasMiddleware('2fa.setup', EnsureTwoFactorSetup::class);
+        $this->app['router']->aliasMiddleware('ability', CheckForAnyAbility::class);
+        $this->app['router']->aliasMiddleware('media.signed', AuthenticatedUserMediaOrSignature::class);
+        $this->app['router']->aliasMiddleware('localization', Localization::class);
+        $this->app['router']->aliasMiddleware('permission', Permissions::class);
+        $this->app['router']->aliasMiddleware('role', RoleMiddleware::class);
+        $this->app['router']->aliasMiddleware('role_or_permission', RoleOrPermissionMiddleware::class);
+
+        Bus::pipeThrough([app(SetJobAuthenticatedUserMiddleware::class)]);
     }
 
     protected function bootRoutes(): void
@@ -186,6 +288,22 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         RouteFacade::pattern('id', '[0-9]+');
+    }
+
+    protected function censorFlareReports(): void
+    {
+        // Only when laravel-ignition is installed and has merged its config.
+        if (! is_array(config('flare.flare_middleware'))) {
+            return;
+        }
+
+        // Query bindings hold searched and saved values, stack frame
+        // arguments the strings passed between functions.
+        config([
+            'flare.flare_middleware.' . AddQueries::class . '.report_query_bindings' => false,
+            'flare.flare_middleware.' . resolve_static(CensorPersonalData::class, 'class') => [],
+            'ignition.with_stack_frame_arguments' => false,
+        ]);
     }
 
     protected function findCommands(): array
@@ -242,6 +360,7 @@ class FluxServiceProvider extends ServiceProvider
             'ts-ui.components.dialog.1.blur' => 'md',
             'ts-ui.components.modal.1.z-index' => 'z-30',
             'ts-ui.components.slide.1.z-index' => 'z-30',
+            'permission.register_octane_reset_listener' => true,
         ]);
 
         $this->booted(function (): void {
@@ -250,9 +369,22 @@ class FluxServiceProvider extends ServiceProvider
             config(['permission.display_permission_in_exception' => true]);
             config(['activitylog.activitymodel' => resolve_static(Activity::class, 'class')]);
             config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
+            config([
+                'media-library.image_generators' => array_map(
+                    fn (mixed $generator): mixed => match ($generator) {
+                        BaseImageGenerator::class => ImageGenerator::class,
+                        BasePdfGenerator::class => PdfGenerator::class,
+                        default => $generator,
+                    },
+                    config('media-library.image_generators', [])
+                ),
+            ]);
             config(['two-factor.recovery.enabled' => false]);
             config(['passkeys.models.authenticatable' => resolve_static(User::class, 'class')]);
             config(['passkeys.actions.store_passkey' => resolve_static(StorePasskeyAction::class, 'class')]);
+            config(['imap.decoding.decoder.header' => resolve_static(ImapHeaderDecoder::class, 'class')]);
+
+            resolve_static(Media::class, 'class')::observe(MediaObserver::class);
         });
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
@@ -265,8 +397,19 @@ class FluxServiceProvider extends ServiceProvider
                 );
         }
 
+        if (! config()->has('broadcasting.connections.combined')) {
+            config()->set('broadcasting.connections.combined', [
+                'driver' => 'combined',
+                'connections' => config('flux.broadcasting.combined_connections'),
+            ]);
+        }
+
         if (! app()->configurationIsCached()) {
             config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);
+            config([
+                'scout.queue' => config('flux.scout.queue'),
+                'scout.after_commit' => true,
+            ]);
         }
 
         if ($this->app->runningInConsole()) {
@@ -277,27 +420,6 @@ class FluxServiceProvider extends ServiceProvider
                 ],
             ]);
         }
-    }
-
-    protected function bootMiddleware(): void
-    {
-        /** @var Kernel $kernel */
-        $kernel = $this->app->make(Kernel::class);
-        $kernel->prependMiddlewareToGroup('api', EnsureFrontendRequestsAreStateful::class);
-
-        $kernel->appendMiddlewareToGroup('web', Localization::class);
-        $kernel->appendMiddlewareToGroup('web', AuthContextMiddleware::class);
-        $kernel->appendMiddlewareToGroup('web', SanitizeSocketId::class);
-
-        $this->app['router']->aliasMiddleware('2fa.setup', EnsureTwoFactorSetup::class);
-        $this->app['router']->aliasMiddleware('ability', CheckForAnyAbility::class);
-        $this->app['router']->aliasMiddleware('media.signed', AuthenticatedUserMediaOrSignature::class);
-        $this->app['router']->aliasMiddleware('localization', Localization::class);
-        $this->app['router']->aliasMiddleware('permission', Permissions::class);
-        $this->app['router']->aliasMiddleware('role', RoleMiddleware::class);
-        $this->app['router']->aliasMiddleware('role_or_permission', RoleOrPermissionMiddleware::class);
-
-        Bus::pipeThrough([app(SetJobAuthenticatedUserMiddleware::class)]);
     }
 
     protected function registerExtensions(): void
@@ -332,43 +454,5 @@ class FluxServiceProvider extends ServiceProvider
                 'auth.providers.users',
                 $usersProvider
             );
-    }
-
-    protected function applyMailSettings(): void
-    {
-        try {
-            $settings = app(Settings\MailSettings::class);
-            $previousConfig = [];
-
-            if (! is_null($settings->mailer)) {
-                $previousConfig['mail.default'] = config('mail.default');
-                config()->set('mail.default', $settings->mailer);
-            }
-
-            $defaultMailer = config('mail.default');
-
-            $configMap = [
-                'host' => "mail.mailers.{$defaultMailer}.host",
-                'port' => "mail.mailers.{$defaultMailer}.port",
-                'username' => "mail.mailers.{$defaultMailer}.username",
-                'password' => "mail.mailers.{$defaultMailer}.password",
-                'encryption' => "mail.mailers.{$defaultMailer}.encryption",
-                'from_address' => 'mail.from.address',
-                'from_name' => 'mail.from.name',
-            ];
-
-            foreach ($configMap as $property => $configKey) {
-                if (! is_null($settings->{$property})) {
-                    $previousConfig[$configKey] = config($configKey);
-                    config()->set($configKey, $settings->{$property});
-                }
-            }
-        } catch (Throwable $e) {
-            foreach ($previousConfig ?? [] as $configKey => $value) {
-                config()->set($configKey, $value);
-            }
-
-            report($e);
-        }
     }
 }

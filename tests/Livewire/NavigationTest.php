@@ -33,24 +33,24 @@ test('passes unread notification counts per menu area to the view', function ():
 });
 
 test('passes unread notification counts per sub menu route to the view', function (): void {
-    createNavigationNotification('accounting.payment-reminders');
+    createNavigationNotification('accounting.payment-reminder-run');
 
     Livewire::actingAs($this->user)
         ->test(Navigation::class)
         ->assertViewHas(
             'childNotificationCounts',
-            fn (array $counts): bool => ($counts['accounting.payment-reminders'] ?? 0) === 1
+            fn (array $counts): bool => ($counts['accounting.payment-reminder-run'] ?? 0) === 1
         );
 });
 
 test('counts a sub menu detail notification on its closest sub menu route', function (): void {
-    createNavigationNotification('accounting.payment-reminders.show');
+    createNavigationNotification('accounting.payment-reminder-run.show');
 
     Livewire::actingAs($this->user)
         ->test(Navigation::class)
         ->assertViewHas(
             'childNotificationCounts',
-            fn (array $counts): bool => ($counts['accounting.payment-reminders'] ?? 0) === 1
+            fn (array $counts): bool => ($counts['accounting.payment-reminder-run'] ?? 0) === 1
         );
 });
 
@@ -98,7 +98,7 @@ test('navigation cache is invalidated when user permissions change', function ()
 });
 
 test('renders the sub menu notification badge for dotted route names', function (): void {
-    createNavigationNotification('accounting.payment-reminders');
+    createNavigationNotification('accounting.payment-reminder-run');
 
     Livewire::actingAs($this->user)
         ->test(Navigation::class)

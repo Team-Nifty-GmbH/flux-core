@@ -87,4 +87,13 @@ class SickRateBox extends ValueBox
     {
         return 'heart';
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(EmployeeDay::class) => [
+                EmployeeDay::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

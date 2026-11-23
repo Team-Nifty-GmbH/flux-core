@@ -4,11 +4,13 @@ namespace FluxErp\Traits\Model;
 
 use FluxErp\Models\Media as FluxMedia;
 use FluxErp\Models\MediaFolder;
+use FluxErp\Models\Scopes\FamilyTreeScope;
 use FluxErp\Support\MediaLibrary\MediaCollection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Spatie\Image\Enums\Fit;
 use Spatie\Image\Exceptions\InvalidManipulation;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -30,6 +32,7 @@ trait InteractsWithMedia
         $mediaFolders = resolve_static(MediaFolder::class, 'familyTree')
             ->whereKey($this->mediaFolders()->pluck('id')->toArray())
             ->whereKeyNot($exclude)
+            ->whereNull('parent_collection')
             ->get()
             ->flatten();
 
@@ -82,37 +85,44 @@ trait InteractsWithMedia
         foreach ($mediaCollections as $mediaCollection) {
             $slug = data_get($mediaCollection, 'slug') ?? '';
 
-            if (
-                is_null(data_get($mediaCollection, 'id'))
-                && str_contains($slug, '.')
-            ) {
-                $cursor = &$undotted;
-                $childSlug = '';
+            if (! str_contains($slug, '.')) {
+                Arr::set($undotted, $slug, $mediaCollection);
 
-                foreach (explode('.', $slug) as $part) {
-                    $childSlug = $childSlug === '' ? $part : $childSlug . '.' . $part;
+                continue;
+            }
 
-                    if (! array_key_exists($part, $cursor) || ! is_array($cursor[$part])) {
-                        $cursor[$part] = [
-                            'name' => Str::headline($part),
-                            'slug' => $childSlug,
-                        ];
-                    }
+            $parts = explode('.', $slug);
+            $lastIndex = count($parts) - 1;
+            $cursor = &$undotted;
+            $childSlug = '';
 
-                    if (
-                        ! array_key_exists('children', $cursor[$part])
-                        || ! is_array($cursor[$part]['children'])
-                    ) {
-                        $cursor[$part]['children'] = [];
-                    }
+            foreach ($parts as $index => $part) {
+                $childSlug = $childSlug === '' ? $part : $childSlug . '.' . $part;
 
-                    $cursor = &$cursor[$part]['children'];
+                if ($index === $lastIndex && ! is_null(data_get($mediaCollection, 'id'))) {
+                    $cursor[$part] = $mediaCollection;
+
+                    break;
                 }
 
-                unset($cursor);
-            } else {
-                Arr::set($undotted, $slug, $mediaCollection);
+                if (! array_key_exists($part, $cursor) || ! is_array($cursor[$part])) {
+                    $cursor[$part] = [
+                        'name' => Str::headline($part),
+                        'slug' => $childSlug,
+                    ];
+                }
+
+                if (
+                    ! array_key_exists('children', $cursor[$part])
+                    || ! is_array($cursor[$part]['children'])
+                ) {
+                    $cursor[$part]['children'] = [];
+                }
+
+                $cursor = &$cursor[$part]['children'];
             }
+
+            unset($cursor);
         }
 
         return $this->calculateTree($undotted);
@@ -134,36 +144,31 @@ trait InteractsWithMedia
     public function registerMediaConversions(?Media $media = null): void
     {
         $this->addMediaConversion('preview')
-            ->width(150)
-            ->height(150)
+            ->fit(Fit::Max, 150, 150)
             ->keepOriginalImageFormat()
             ->quality(80)
             ->optimize();
 
         $this->addMediaConversion('thumb')
-            ->width(100)
-            ->height(100)
+            ->fit(Fit::Max, 100, 100)
             ->keepOriginalImageFormat()
             ->quality(80)
             ->optimize();
 
         $this->addMediaConversion('thumb_280x280')
-            ->width(280)
-            ->height(280)
+            ->fit(Fit::Max, 280, 280)
             ->keepOriginalImageFormat()
             ->quality(80)
             ->optimize();
 
         $this->addMediaConversion('thumb_400x400')
-            ->width(400)
-            ->height(400)
+            ->fit(Fit::Max, 400, 400)
             ->keepOriginalImageFormat()
             ->quality(80)
             ->optimize();
 
         $this->addMediaConversion('thumb_800x800')
-            ->width(800)
-            ->height(800)
+            ->fit(Fit::Max, 800, 800)
             ->keepOriginalImageFormat()
             ->quality(80)
             ->optimize();
@@ -180,7 +185,21 @@ trait InteractsWithMedia
                 'is_readonly' => data_get($item, 'is_readonly') ?? false,
                 'is_static' => data_get($item, 'is_static') ?? false,
                 'children' => array_merge(
-                    $this->calculateTree(data_get($item, 'children') ?? []),
+                    $this->calculateTree(
+                        array_merge(
+                            data_get($item, 'children') ?? [],
+                            is_null($id) ?
+                                $this->mediaFolders()
+                                    ->where('parent_collection', $slug)
+                                    ->withGlobalScope(
+                                        resolve_static(FamilyTreeScope::class, 'class'),
+                                        app(FamilyTreeScope::class)
+                                    )
+                                    ->get()
+                                    ->toArray()
+                                : []
+                        )
+                    ),
                     resolve_static(FluxMedia::class, 'query')
                         ->when(
                             $id,

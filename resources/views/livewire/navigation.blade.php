@@ -9,6 +9,11 @@
                 document.addEventListener('livewire:navigating', () => {
                     this.closeMenu(true);
                 });
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'hidden') {
+                        this.closeMenu();
+                    }
+                });
             },
             open: [],
             toggleMenu(key) {
@@ -31,7 +36,23 @@
                     this.forced = true;
                 }
             },
+            showMenuOnRest() {
+                if (this.menuOpen || this.hoverTimer) {
+                    return;
+                }
+
+                this.hoverTimer = setTimeout(() => {
+                    this.hoverTimer = null;
+
+                    if (this.$root.matches(':hover')) {
+                        this.showMenu();
+                    }
+                }, 300);
+            },
             closeMenu(force = null) {
+                clearTimeout(this.hoverTimer);
+                this.hoverTimer = null;
+
                 if (this.forced && !force) {
                     return;
                 }
@@ -39,8 +60,8 @@
                 this.menuOpen = false;
             },
             forced: false,
+            hoverTimer: null,
             menuOpen: false,
-            frequentlyVisitedOpen: false,
             favoritesOpen: false,
         }"
     >
@@ -136,59 +157,6 @@
                         </div>
                     @endforeach
                 </div>
-                @if (! is_null($visits))
-                    <div class="whitespace-nowrap">
-                        <div
-                            x-on:click="
-                                frequentlyVisitedOpen = !frequentlyVisitedOpen
-                            "
-                            class="dark:text-light dark:hover:bg-indigo flex cursor-pointer items-center rounded-md py-2 text-gray-500 text-white transition-colors hover:bg-gray-800/50"
-                        >
-                            <div class="w-16 flex-none">
-                                <div
-                                    class="flex w-full justify-center text-white"
-                                >
-                                    <x-icon name="clock" class="h-4 w-4" />
-                                </div>
-                            </div>
-                            <span class="truncate text-sm text-white">
-                                {{ __("Frequently visited") }}
-                            </span>
-                            <span aria-hidden="true" class="ml-auto pr-2 pl-2">
-                                <x-icon
-                                    name="chevron-left"
-                                    class="h-4 w-4 transform text-white transition-transform"
-                                    x-bind:class="{
-                                        '-rotate-90': frequentlyVisitedOpen,
-                                    }"
-                                />
-                            </span>
-                        </div>
-                        <div x-show="frequentlyVisitedOpen" x-cloak x-collapse>
-                            @foreach ($visits as $visit)
-                                <a
-                                    wire:navigate
-                                    href="{{ $visit }}"
-                                    class="dark:text-light dark:hover:bg-indigo flex items-center rounded-md py-2 text-gray-500 text-white transition-colors hover:bg-gray-800/50"
-                                >
-                                    <div class="w-16 flex-none">
-                                        <div
-                                            class="flex w-full justify-center text-white"
-                                        >
-                                            <x-icon
-                                                :name="$navigations->first(fn ($item) => str_starts_with($visit, data_get($item, 'uri')) && data_get($item, 'uri') !== '/')['icon'] ?? 'no-symbol'"
-                                                class="h-4 w-4"
-                                            />
-                                        </div>
-                                    </div>
-                                    <span class="truncate text-sm text-white">
-                                        {{ $visit }}
-                                    </span>
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
 
                 @if (! is_null($favorites))
                     <div class="whitespace-nowrap">

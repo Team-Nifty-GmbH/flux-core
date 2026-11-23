@@ -3,13 +3,20 @@
 namespace FluxErp\Listeners;
 
 use FluxErp\Actions\Communication\CreateCommunication;
-use FluxErp\Actions\Communication\UpdateCommunication;
+use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Enums\CommunicationTypeEnum;
+use FluxErp\Jobs\AppendMailToSentFolderJob;
 use FluxErp\Models\Communication;
+use FluxErp\Models\MailAccount;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Http\File;
 use Illuminate\Mail\Events\MessageSending;
+use Illuminate\Mail\Events\MessageSent;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\Mime\Email;
+use Throwable;
 
 class MessageSendingEventSubscriber
 {
@@ -38,8 +45,9 @@ class MessageSendingEventSubscriber
                 function ($attachment) {
                     $attachment['model_type'] = morph_alias(Communication::class);
                     $attachment['collection_name'] = 'attachments';
-                    $attachment['media_type'] = 'string';
-                    $attachment['media'] = data_get($attachment, 'path');
+                    $attachment['media'] = is_file(data_get($attachment, 'path') ?? '')
+                        ? new File($attachment['path'])
+                        : null;
 
                     return $attachment;
                 },
@@ -52,14 +60,28 @@ class MessageSendingEventSubscriber
         $communicationForm['subject'] = (string) data_get($communicationForm, 'subject');
         $communicationForm['text_body'] = (string) data_get($communicationForm, 'body');
         $communicationForm['html_body'] = (string) data_get($communicationForm, 'html_body');
+        $communicationForm['message_id'] = $this->ensureMessageId($event->message);
+        $communicationForm['mail_account_id'] = $this->sendingMailAccount(
+            $event->message,
+            data_get($communicationForm, 'mail_account_id')
+        )
+            ?->getKey();
 
-        $communicationAction = data_get($communicationForm, 'id')
-            ? UpdateCommunication::make($communicationForm)
-            : CreateCommunication::make($communicationForm);
+        $communication = ($communicationId = data_get($event->data, 'communicationId'))
+            ? resolve_static(Communication::class, 'query')
+                ->whereKey($communicationId)
+                ->first()
+            : null;
 
-        $communication = $communicationAction
-            ->validate()
-            ->execute();
+        if ($communication) {
+            $this->stampCommunication($communication, $communicationForm);
+        } else {
+            unset($communicationForm['id']);
+
+            $communication = CreateCommunication::make($communicationForm)
+                ->validate()
+                ->execute();
+        }
 
         foreach (data_get($communicationForm, 'communicatables', []) as $communicatable) {
             $communicatableModel = morphed_model(data_get($communicatable, 'communicatable_type'))::query()
@@ -76,11 +98,96 @@ class MessageSendingEventSubscriber
         $this->injectTracker($event->message, $communication);
     }
 
+    public function handleSent(MessageSent $event): void
+    {
+        if (! $communicationForm = data_get($event->data, 'mailMessageForm')) {
+            return;
+        }
+
+        if ($communicationId = data_get($event->data, 'communicationId')) {
+            resolve_static(Communication::class, 'query')
+                ->whereKey($communicationId)
+                ->whereNotNull('send_error')
+                ->update(['send_error' => null]);
+        }
+
+        try {
+            $mailAccount = $this->sendingMailAccount($event->message, data_get($communicationForm, 'mail_account_id'));
+
+            if ($mailAccount) {
+                dispatch(app(
+                    AppendMailToSentFolderJob::class,
+                    ['mailAccount' => $mailAccount, 'message' => $event->sent->toString()]
+                ));
+            }
+        } catch (Throwable $e) {
+            report($e);
+        }
+    }
+
     public function subscribe(): array
     {
         return [
             MessageSending::class => 'handle',
+            MessageSent::class => 'handleSent',
         ];
+    }
+
+    protected function ensureMessageId(Email $email): string
+    {
+        if ($header = $email->getHeaders()->get('Message-ID')) {
+            return $header->getId();
+        }
+
+        $messageId = $email->generateMessageId();
+        $email->getHeaders()->addIdHeader('Message-ID', $messageId);
+
+        return $messageId;
+    }
+
+    protected function sendingMailAccount(Email $email, int|string|null $mailAccountId = null): ?MailAccount
+    {
+        if ($mailAccountId) {
+            return resolve_static(MailAccount::class, 'query')
+                ->whereKey($mailAccountId)
+                ->first();
+        }
+
+        if (! $address = data_get($email->getFrom(), '0')?->getAddress()) {
+            return null;
+        }
+
+        return resolve_static(MailAccount::class, 'query')
+            ->where(fn ($query) => $query->where('smtp_email', $address)->orWhere('email', $address))
+            ->orderBy('id')
+            ->first();
+    }
+
+    protected function stampCommunication(Communication $communication, array $communicationForm): void
+    {
+        $isFirstAttempt = is_null($communication->message_id);
+
+        $communication->forceFill(Arr::only(
+            $communicationForm,
+            ['subject', 'html_body', 'message_id', 'mail_account_id']
+        ))
+            ->save();
+
+        if (! $isFirstAttempt) {
+            return;
+        }
+
+        foreach (data_get($communicationForm, 'attachments') ?? [] as $attachment) {
+            try {
+                UploadMedia::make(array_merge(
+                    Arr::except($attachment, 'media_type'),
+                    ['model_id' => $communication->getKey()]
+                ))
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException) {
+            }
+        }
     }
 
     protected function injectTracker(Email $email, Communication $communication): void

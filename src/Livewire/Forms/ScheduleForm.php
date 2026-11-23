@@ -2,11 +2,9 @@
 
 namespace FluxErp\Livewire\Forms;
 
-use Cron\CronExpression;
 use FluxErp\Actions\Schedule\CreateSchedule;
 use FluxErp\Actions\Schedule\DeleteSchedule;
 use FluxErp\Actions\Schedule\UpdateSchedule;
-use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Facades\Repeatable;
 use FluxErp\Models\Order;
 use FluxErp\Models\Schedule as ScheduleModel;
@@ -56,6 +54,8 @@ class ScheduleForm extends FluxForm
 
     public ?int $recurrences = null;
 
+    public ?string $timezone = null;
+
     public function fill($values): void
     {
         parent::fill($values);
@@ -70,12 +70,11 @@ class ScheduleForm extends FluxForm
             $this->cron['parameters']['timeConstraint']
         );
 
-        if (! is_null($this->name)) {
-            $this->parameters = array_merge(
-                Repeatable::get($this->name)['parameters'] ?? [],
-                $this->parameters
-            );
-        }
+        $this->parameters = array_merge(
+            ! is_null($this->name) ? data_get(Repeatable::get($this->name), 'parameters') ?? [] : [],
+            get_class_vars(static::class)['parameters'],
+            $this->parameters
+        );
 
         $this->end_radio = match (true) {
             ! is_null($this->ends_at) => 'ends_at',
@@ -202,7 +201,7 @@ class ScheduleForm extends FluxForm
         $dates = [];
 
         if ($dueAt && $dueAt->isFuture()) {
-            if (! $endsAt || $dueAt->lessThanOrEqualTo($endsAt)) {
+            if (! $endsAt || $dueAt->lessThan($endsAt)) {
                 $dates[] = $this->buildExecutionEntry($dueAt, $periodStart, $expression);
             }
         }
@@ -215,45 +214,26 @@ class ScheduleForm extends FluxForm
             return $dates;
         }
 
-        $from = $dueAt && $dueAt->isFuture() ? $dueAt : now();
+        // The cron runs in the schedule timezone, the preview shows app.timezone like due_at.
+        $timezone = $this->timezone ?? config('app.timezone');
 
         try {
-            if ($method === FrequenciesEnum::LastDayOfMonth->value) {
-                $parts = explode(' ', $expression);
-                $current = $from;
+            $cron = resolve_static(ScheduleModel::class, 'runCron', [$this->cron, $expression]);
+            $next = $dueAt && $dueAt->isFuture()
+                ? resolve_static(ScheduleModel::class, 'nextRunAfter', [$cron, $dueAt->copy()->setTimezone($timezone)])
+                : Carbon::instance($cron->getNextRunDate(now($timezone)));
 
-                for ($i = 0; $i < $maxDates; $i++) {
-                    // copy() because Carbon is mutable: without it $next would alias $current,
-                    // the <= check would always be true and every other month would be skipped.
-                    $next = $current->copy()->endOfMonth()
-                        ->setTime((int) $parts[1], (int) $parts[0]);
-
-                    if ($next->lessThanOrEqualTo($current)) {
-                        $next = $current->copy()->addMonthNoOverflow()->endOfMonth()
-                            ->setTime((int) $parts[1], (int) $parts[0]);
-                    }
-
-                    if ($endsAt && $next->greaterThan($endsAt)) {
-                        break;
-                    }
-
-                    $dates[] = $this->buildExecutionEntry($next, $periodStart, $expression);
-                    $current = $next->copy()->addDay();
+            for ($i = 0; $i < $maxDates; $i++) {
+                if ($endsAt && $next->greaterThanOrEqualTo($endsAt)) {
+                    break;
                 }
-            } else {
-                $cron = new CronExpression($expression);
-                $current = $from;
 
-                for ($i = 0; $i < $maxDates; $i++) {
-                    $next = Carbon::instance($cron->getNextRunDate($current));
-
-                    if ($endsAt && $next->greaterThan($endsAt)) {
-                        break;
-                    }
-
-                    $dates[] = $this->buildExecutionEntry($next, $periodStart, $expression);
-                    $current = $next;
-                }
+                $dates[] = $this->buildExecutionEntry(
+                    $next->copy()->setTimezone(config('app.timezone')),
+                    $periodStart,
+                    $expression
+                );
+                $next = Carbon::instance($cron->getNextRunDate($next));
             }
         } catch (Throwable) {
             return $dates;

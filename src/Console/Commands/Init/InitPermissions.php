@@ -9,6 +9,8 @@ use FluxErp\Facades\Action;
 use FluxErp\Facades\Widget;
 use FluxErp\Http\Controllers\Controller;
 use FluxErp\Models\Permission;
+use FluxErp\Models\Role;
+use FluxErp\Notifications\NewActionPermissionsNotification;
 use FluxErp\Traits\Livewire\WithTabs;
 use FluxErp\Traits\Model\HasModelPermission;
 use Illuminate\Console\Command;
@@ -17,7 +19,6 @@ use Illuminate\Support\Facades\Route;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionFunction;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 use function Livewire\invade;
 
@@ -27,19 +28,32 @@ class InitPermissions extends Command
 
     protected $signature = 'init:permissions';
 
-    private array $currentPermissions = [];
+    protected array $currentPermissions = [];
+
+    protected array $knownPermissions = [];
+
+    protected array $newActionPermissions = [];
+
+    protected array $preexistingPermissions = [];
 
     public function handle(): void
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
-        $this->currentPermissions = array_flip(
-            resolve_static(Permission::class, 'query')
-                ->pluck('id')
-                ->toArray()
-        );
+
+        $this->knownPermissions = resolve_static(Permission::class, 'query')
+            ->get(['id', 'name', 'guard_name'])
+            ->mapWithKeys(fn (Permission $permission): array => [
+                $permission->guard_name . '|' . $permission->name => $permission->getKey(),
+            ])
+            ->all();
+
+        $this->currentPermissions = array_flip(array_values($this->knownPermissions));
+        $this->preexistingPermissions = $this->currentPermissions;
+        $this->newActionPermissions = [];
 
         $this->registerActionPermission();
         $this->registerActionPermission('sanctum');
+        $this->registerActionPermission('token');
         $this->registerModelGetPermission();
         $this->registerRoutePermissions();
         $this->registerWidgetPermissions();
@@ -50,6 +64,21 @@ class InitPermissions extends Command
             ->whereKey(array_keys($this->currentPermissions))
             ->delete();
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+        $this->reportNewActionPermissions();
+    }
+
+    protected function keepPermission(string $name, string $guardName = 'web'): int
+    {
+        $key = $guardName . '|' . $name;
+
+        $id = $this->knownPermissions[$key] ??= resolve_static(Permission::class, 'query')
+            ->create(['name' => $name, 'guard_name' => $guardName])
+            ->getKey();
+
+        unset($this->currentPermissions[$id]);
+
+        return $id;
     }
 
     protected function registerActionPermission(string $guardName = 'web'): void
@@ -57,17 +86,38 @@ class InitPermissions extends Command
         $this->info('Registering action permissions for guard ' . $guardName . '…');
         foreach (Action::all() as $action) {
             if ($action['class']::hasPermission()) {
-                $permission = resolve_static(
-                    Permission::class,
-                    'findOrCreate',
-                    [
-                        'name' => 'action.' . $action['name'],
-                        'guardName' => $guardName,
-                    ]
-                );
-                unset($this->currentPermissions[$permission->id]);
+                $id = $this->keepPermission('action.' . $action['name'], $guardName);
+
+                if ($guardName !== 'token' && ! array_key_exists($id, $this->preexistingPermissions)) {
+                    $this->newActionPermissions['action.' . $action['name']] = true;
+                }
             }
         }
+    }
+
+    protected function reportNewActionPermissions(): void
+    {
+        if (! $this->newActionPermissions) {
+            return;
+        }
+
+        $permissions = array_keys($this->newActionPermissions);
+        sort($permissions);
+
+        $this->warn('New action permissions, no role holds them yet:');
+        foreach ($permissions as $permission) {
+            $this->line('  ' . $permission);
+        }
+
+        if (! $this->preexistingPermissions) {
+            return;
+        }
+
+        resolve_static(Role::class, 'query')
+            ->where('name', 'Super Admin')
+            ->where('guard_name', 'web')
+            ->first()
+            ?->notify(NewActionPermissionsNotification::make($permissions));
     }
 
     protected function registerModelGetPermission(): void
@@ -82,20 +132,11 @@ class InitPermissions extends Command
             if (in_array(HasModelPermission::class, class_uses_recursive($class))
                 && resolve_static($class, 'hasPermission')
             ) {
-                $permission = resolve_static(
-                    Permission::class,
-                    'findOrCreate',
-                    [
-                        'name' => 'model.' . $alias . '.get',
-                        'guardName' => 'web',
-                    ]
-                );
+                $id = $this->keepPermission('model.' . $alias . '.get');
 
-                if (is_null(data_get($this->currentPermissions, $permission->id))) {
-                    $newPermissions[] = $permission->getKey();
+                if (! array_key_exists($id, $this->preexistingPermissions)) {
+                    $newPermissions[] = $id;
                 }
-
-                unset($this->currentPermissions[$permission->id]);
             }
         }
 
@@ -139,16 +180,7 @@ class InitPermissions extends Command
             $authGuards = explode(',', str_replace('auth:', '', $guard));
 
             foreach ($authGuards as $guard) {
-                $permission = resolve_static(
-                    Permission::class,
-                    'findOrCreate',
-                    [
-                        'name' => $permissionName,
-                        'guardName' => $guard,
-                    ]
-                );
-
-                unset($this->currentPermissions[$permission->id]);
+                $this->keepPermission($permissionName, $guard);
             }
 
             $bar->advance();
@@ -175,15 +207,7 @@ class InitPermissions extends Command
     {
         $this->info('Registering widget permissions…');
         foreach (Widget::all() as $widget) {
-            $permission = resolve_static(
-                Permission::class,
-                'findOrCreate',
-                [
-                    'name' => 'widget.' . $widget['component_name'],
-                    'guardName' => 'web',
-                ]
-            );
-            unset($this->currentPermissions[$permission->id]);
+            $this->keepPermission('widget.' . $widget['component_name']);
         }
     }
 
@@ -199,15 +223,7 @@ class InitPermissions extends Command
             $componentInstance = new $component();
 
             foreach ($componentInstance->renderingWithTabs()->getTabsToRender() as $tab) {
-                $permission = resolve_static(
-                    Permission::class,
-                    'findOrCreate',
-                    [
-                        'name' => 'tab.' . $tab->component,
-                        'guardName' => 'web',
-                    ]
-                );
-                unset($this->currentPermissions[$permission->id]);
+                $this->keepPermission('tab.' . $tab->component);
             }
         }
     }
@@ -223,21 +239,13 @@ class InitPermissions extends Command
         foreach (Relation::morphMap() as $alias => $class) {
             $model = app($class);
             if ($model instanceof OffersPrinting) {
-                foreach ($model->getPrintViews() as $key => $view) {
-                    $permission = resolve_static(
-                        Permission::class,
-                        'findOrCreate',
-                        [
-                            'name' => print_view_to_permission($key, $alias),
-                            'guardName' => 'web',
-                        ]
-                    );
+                foreach ($model->getAvailableViews() as $key) {
+                    $id = $this->keepPermission(print_view_to_permission($key, $alias));
+                    $this->keepPermission(print_view_to_permission($key, $alias), 'token');
 
-                    if (is_null(data_get($this->currentPermissions, $permission->id))) {
-                        $newPermissions[] = $permission->getKey();
+                    if (! array_key_exists($id, $this->preexistingPermissions)) {
+                        $newPermissions[] = $id;
                     }
-
-                    unset($this->currentPermissions[$permission->id]);
                 }
             }
         }

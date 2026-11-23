@@ -99,6 +99,32 @@
         </x-slot:footer>
     </x-modal>
 
+    <x-modal id="transaction-attachment-modal" :title="__('Attachment')">
+        <x-flux::features.media.upload-form-object
+            wire:model="attachment"
+            :multiple="false"
+            accept="application/pdf, image/jpeg, image/png, image/svg+xml"
+        />
+        <x-slot:footer>
+            <x-button
+                color="secondary"
+                :text="__('Cancel')"
+                x-on:click="$tsui.close.modal('transaction-attachment-modal')"
+            />
+            @stack('transaction-attachment-modal-footer')
+            <x-button
+                :text="__('Save')"
+                x-on:click="
+                    $wire.saveAttachment().then((success) => {
+                        if (success)
+                            $tsui.close.modal('transaction-attachment-modal');
+                    })
+                "
+                loading="saveAttachment()"
+            />
+        </x-slot:footer>
+    </x-modal>
+
     <x-modal
         id="order-transaction-modal"
         x-on:open="$tsui.focus('order-transaction-amount')"
@@ -230,6 +256,13 @@
             />
             @stack('order-transaction-modal-footer')
             <x-button
+                :text="__('Adjust order to payment')"
+                color="amber"
+                wire:flux-confirm.type.warning="{{ __('The order total will be changed to the payment amount. Continue?') }}"
+                wire:click="adjustOrderToPayment()"
+                loading="adjustOrderToPayment()"
+            />
+            <x-button
                 :text="__('Save')"
                 x-on:click="$wire.saveOrderTransaction()"
                 loading="saveOrderTransaction()"
@@ -308,6 +341,85 @@
                 :text="__('Save')"
                 x-on:click="$wire.saveLedgerAccountTransaction()"
                 loading="saveLedgerAccountTransaction()"
+            />
+        </x-slot:footer>
+    </x-modal>
+
+    <x-modal
+        id="loan-installment-transaction-modal"
+        :title="__('Assign loan installment')"
+    >
+        <div class="flex flex-col gap-4">
+            <x-select.styled
+                :label="__('Loan Installment')"
+                wire:model.number="loanInstallmentTransactionForm.loan_installment_id"
+                select="label:label|value:id|description:description"
+                unfiltered
+                :request="[
+                    'url' => route('search', \FluxErp\Models\LoanInstallment::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'searchFields' => ['sequence', 'loan.name', 'loan.number'],
+                        'with' => 'loan',
+                    ],
+                ]"
+            />
+            <div class="flex flex-col gap-2">
+                <x-number
+                    :label="__('Transaction Amount')"
+                    wire:model="loanInstallmentTransactionForm.amount"
+                    step="0.01"
+                    placeholder="0.00"
+                />
+                <div>
+                    <x-button
+                        sm
+                        color="secondary"
+                        x-cloak
+                        x-show="
+                            $wire.loanInstallmentTransactionForm
+                                .transactionBalance !== null &&
+                            $wire.loanInstallmentTransactionForm.amount !==
+                                $wire.loanInstallmentTransactionForm
+                                    .transactionBalance
+                        "
+                        x-on:click="
+                            $wire.loanInstallmentTransactionForm.amount =
+                                $wire.loanInstallmentTransactionForm.transactionBalance
+                        "
+                    >
+                        <x-slot:text>
+                            {{ __('Apply transaction amount') }} (<span
+                                x-html="
+                                    $nuxbe.format.money(
+                                        $wire.loanInstallmentTransactionForm
+                                            .transactionBalance,
+                                    )
+                                "
+                            ></span
+                            >)
+                        </x-slot:text>
+                    </x-button>
+                </div>
+            </div>
+            <x-input
+                :label="__('Note')"
+                wire:model="loanInstallmentTransactionForm.note"
+            />
+        </div>
+        <x-slot:footer>
+            <x-button
+                color="secondary"
+                :text="__('Cancel')"
+                x-on:click="
+                    $tsui.close.modal('loan-installment-transaction-modal')
+                "
+            />
+            @stack('loan-installment-transaction-modal-footer')
+            <x-button
+                :text="__('Save')"
+                x-on:click="$wire.saveLoanInstallmentTransaction()"
+                loading="saveLoanInstallmentTransaction()"
             />
         </x-slot:footer>
     </x-modal>
@@ -405,7 +517,7 @@
                                 class="flex w-full flex-col p-4 lg:w-1/2 lg:border-r-2 lg:border-b-0"
                             >
                                 <div class="flex justify-between gap-4">
-                                    <div class="flex gap-4">
+                                    <div class="flex min-w-0 gap-4">
                                         <x-avatar
                                             borderless
                                             :image="route('icons', ['name' => 'user'])"
@@ -423,21 +535,21 @@
                                             x-bind:src="transaction?.avatar_url ?? '{{ route('icons', ['name' => 'user']) }}'"
                                         />
                                         <div
-                                            class="flex flex-col justify-between"
+                                            class="flex min-w-0 flex-col justify-between"
                                         >
                                             <div
-                                                class="w-full text-lg font-semibold"
+                                                class="w-full text-lg font-semibold wrap-anywhere"
                                                 x-text="transaction.counterpart_name ?? '{{ __('Unknown') }}'"
                                             ></div>
                                             <div
-                                                class="w-full font-semibold text-slate-400"
+                                                class="w-full font-semibold wrap-anywhere text-slate-400"
                                                 x-text="
                                                     transaction.counterpart_iban
                                                 "
                                             ></div>
                                         </div>
                                     </div>
-                                    <div class="flex flex-col gap-2">
+                                    <div class="flex shrink-0 flex-col gap-2">
                                         <div
                                             class="flex w-full justify-end text-lg font-semibold"
                                             x-html="
@@ -457,32 +569,25 @@
                                                     )
                                                 "
                                             ></span>
-                                            <x-dropdown icon="banknotes">
-                                                <div class="p-2">
-                                                    <b
-                                                        x-text="
-                                                            transaction
-                                                                .bank_connection
-                                                                .bank_name
-                                                        "
-                                                    ></b>
-                                                    <br />
-                                                    <span
-                                                        x-text="
-                                                            transaction
-                                                                .bank_connection
-                                                                .iban
-                                                        "
-                                                    ></span>
-                                                </div>
-                                            </x-dropdown>
                                         </div>
+                                        <div
+                                            class="flex w-full justify-end text-sm text-slate-400"
+                                            x-text="
+                                                transaction.bank_connection
+                                                    ?.name ??
+                                                transaction.bank_connection
+                                                    ?.bank_name
+                                            "
+                                        ></div>
                                     </div>
                                 </div>
                                 <div
                                     class="mt-2 flex flex-row justify-between border-t border-slate-200 pt-2"
                                 >
-                                    <div x-text="transaction.purpose"></div>
+                                    <div
+                                        class="min-w-0 wrap-anywhere"
+                                        x-text="transaction.purpose"
+                                    ></div>
                                 </div>
                             </div>
                             <div
@@ -523,9 +628,9 @@
                                             />
                                         </div>
                                         <div
-                                            class="flex w-full justify-between rounded bg-slate-100 p-2 font-semibold"
+                                            class="flex w-full min-w-0 justify-between rounded bg-slate-100 p-2 font-semibold"
                                         >
-                                            <div class="flex gap-2">
+                                            <div class="flex min-w-0 gap-2">
                                                 <div class="block">
                                                     <x-button
                                                         class="h-full"
@@ -685,6 +790,84 @@
                                         </div>
                                     </div>
                                 </template>
+                                <template
+                                    x-for="
+                                        loanInstallmentTransaction in
+                                        transaction.loan_installment_transactions
+                                    "
+                                >
+                                    <div
+                                        class="group flex flex-row items-center gap-2 px-2"
+                                    >
+                                        <div
+                                            class="group/button relative w-fit rounded-full"
+                                        >
+                                            <x-button.circle
+                                                x-bind:color="
+                                                    loanInstallmentTransaction.is_accepted
+                                                        ? 'emerald'
+                                                        : 'amber'
+                                                "
+                                                rounded
+                                                icon="banknotes"
+                                                class="block transition-opacity duration-200 group-hover/button:opacity-0"
+                                            />
+                                            <x-button.circle
+                                                color="red"
+                                                rounded
+                                                icon="link-slash"
+                                                wire:click="deleteLoanInstallmentTransaction(loanInstallmentTransaction.pivot_id)"
+                                                wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Assignment')]) }}"
+                                                class="absolute top-0 left-0 opacity-0 transition-opacity duration-200 group-hover/button:opacity-100"
+                                            />
+                                        </div>
+                                        <div
+                                            class="flex w-full justify-between rounded bg-slate-100 p-2 font-semibold"
+                                        >
+                                            <div>
+                                                <div
+                                                    x-text="
+                                                        loanInstallmentTransaction
+                                                            .loan_installment
+                                                            ?.loan?.name +
+                                                        ' {{ __('No.') }} ' +
+                                                        loanInstallmentTransaction
+                                                            .loan_installment
+                                                            ?.sequence
+                                                    "
+                                                ></div>
+                                                <div
+                                                    class="text-xs font-normal text-slate-500"
+                                                    x-text="
+                                                        loanInstallmentTransaction.note
+                                                    "
+                                                ></div>
+                                            </div>
+                                            <div class="flex gap-2">
+                                                <div
+                                                    class="flex items-center justify-end font-semibold"
+                                                    x-html="
+                                                        $nuxbe.format.money(
+                                                            loanInstallmentTransaction.amount,
+                                                            {
+                                                                colored: true,
+                                                            },
+                                                        )
+                                                    "
+                                                ></div>
+                                                <div class="block">
+                                                    <x-button
+                                                        class="h-full"
+                                                        color="secondary"
+                                                        sm
+                                                        icon="pencil"
+                                                        wire:click="editLoanInstallmentTransaction(loanInstallmentTransaction.pivot_id)"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
                                 <div class="px-2 pt-2">
                                     <div class="flex flex-col">
                                         <div
@@ -697,7 +880,8 @@
                                                     sm
                                                     x-cloak
                                                     x-show="
-                                                        transaction.suggestions >
+                                                        transaction.suggestions +
+                                                            transaction.loan_suggestions >
                                                         0
                                                     "
                                                     color="emerald"
@@ -734,6 +918,24 @@
                                                     sm
                                                     light
                                                     color="gray"
+                                                    icon="paper-clip"
+                                                    wire:click="attachmentModal(transaction.id)"
+                                                >
+                                                    <x-slot:text>
+                                                        <span
+                                                            x-text="
+                                                                transaction
+                                                                    .media?.[0]
+                                                                    ?.file_name ??
+                                                                '{{ __('Attachment') }}'
+                                                            "
+                                                        ></span>
+                                                    </x-slot:text>
+                                                </x-button>
+                                                <x-button
+                                                    sm
+                                                    light
+                                                    color="gray"
                                                     wire:click="assignOrdersModal(transaction.id)"
                                                     x-cloak
                                                     x-show="
@@ -758,6 +960,19 @@
                                                 />
                                                 <x-button
                                                     sm
+                                                    light
+                                                    color="gray"
+                                                    wire:click="assignLoanInstallmentModal(transaction.id)"
+                                                    x-cloak
+                                                    x-show="
+                                                        parseFloat(
+                                                            transaction.balance,
+                                                        ) !== 0
+                                                    "
+                                                    :text="__('Assign loan installment')"
+                                                />
+                                                <x-button
+                                                    sm
                                                     color="red"
                                                     wire:click="toggleIgnoreTransaction(transaction.id)"
                                                     x-cloak
@@ -765,6 +980,8 @@
                                                         transaction.order_transactions_count ===
                                                             0 &&
                                                         transaction.ledger_account_transactions_count ===
+                                                            0 &&
+                                                        transaction.loan_installment_transactions_count ===
                                                             0 &&
                                                         !transaction.is_ignored
                                                     "

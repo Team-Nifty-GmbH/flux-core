@@ -120,7 +120,7 @@
                         :icon="$action['icon']"
                         :disabled="! $action['enabled']"
                         color="primary"
-                        wire:click="executeAction(@js($action['class']))"
+                        wire:click="executeAction({{ \Illuminate\Support\Js::from($action['class']) }})"
                         wire:loading.attr="disabled"
                     />
                 @endforeach

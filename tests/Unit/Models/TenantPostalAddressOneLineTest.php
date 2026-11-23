@@ -2,7 +2,7 @@
 
 use FluxErp\Models\Tenant;
 
-it('combines name street postcode and city in postal_address_one_line', function (): void {
+test('combines name street postcode and city in postal_address_one_line', function (): void {
     $tenant = Tenant::factory()->create([
         'name' => 'Acme Corp',
         'street' => 'Example Street 1',
@@ -13,7 +13,7 @@ it('combines name street postcode and city in postal_address_one_line', function
     expect($tenant->postal_address_one_line)->toBe('Acme Corp | Example Street 1 | 12345 Example City');
 });
 
-it('omits postcode segment from postal_address_one_line when both postcode and city are empty', function (): void {
+test('omits postcode segment from postal_address_one_line when both postcode and city are empty', function (): void {
     $tenant = Tenant::factory()->create([
         'name' => 'Acme Corp',
         'street' => 'Example Street 1',
@@ -24,7 +24,7 @@ it('omits postcode segment from postal_address_one_line when both postcode and c
     expect($tenant->postal_address_one_line)->toBe('Acme Corp | Example Street 1');
 });
 
-it('shows only postcode in postal_address_one_line when city is missing', function (): void {
+test('shows only postcode in postal_address_one_line when city is missing', function (): void {
     $tenant = Tenant::factory()->create([
         'name' => 'Acme Corp',
         'street' => 'Example Street 1',
@@ -35,7 +35,7 @@ it('shows only postcode in postal_address_one_line when city is missing', functi
     expect($tenant->postal_address_one_line)->toBe('Acme Corp | Example Street 1 | 12345');
 });
 
-it('shows only city in postal_address_one_line when postcode is missing', function (): void {
+test('shows only city in postal_address_one_line when postcode is missing', function (): void {
     $tenant = Tenant::factory()->create([
         'name' => 'Acme Corp',
         'street' => 'Example Street 1',

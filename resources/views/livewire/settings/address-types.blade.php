@@ -19,12 +19,6 @@
             </div>
         @endif
 
-        <div class="mt-2">
-            <x-toggle
-                :label="__('Is Unique')"
-                wire:model="addressType.is_unique"
-            />
-        </div>
         <x-toggle :label="__('Is Locked')" wire:model="addressType.is_locked" />
     </div>
     <x-slot:footer>

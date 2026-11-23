@@ -6,7 +6,6 @@
         <div class="flex items-center space-x-5">
             <label for="avatar">
                 <x-avatar
-                    xl
                     :label="$productImage === '' ? strtoupper(substr($serialNumber->id ?? '', 0, 2)) : false"
                     :image="$productImage"
                 />

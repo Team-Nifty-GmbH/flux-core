@@ -192,7 +192,12 @@ class Notifications extends Component
     #[Renderless]
     public function translate(string $key): string
     {
-        return __(Str::headline(class_basename($key)));
+        return __(
+            Str::of(class_basename($key))
+                ->before('Notification')
+                ->headline()
+                ->toString()
+        );
     }
 
     protected function getDirtyNotificationChannels(array $notification): void

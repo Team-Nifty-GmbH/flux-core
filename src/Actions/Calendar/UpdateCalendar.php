@@ -6,11 +6,14 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Models\Calendar;
 use FluxErp\Rulesets\Calendar\UpdateCalendarRuleset;
+use FluxErp\Traits\Action\ChecksCalendarAccess;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
 class UpdateCalendar extends FluxAction
 {
+    use ChecksCalendarAccess;
+
     public static function models(): array
     {
         return [Calendar::class];

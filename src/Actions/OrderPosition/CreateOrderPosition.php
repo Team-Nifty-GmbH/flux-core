@@ -10,6 +10,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\Tag;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rules\Numeric;
@@ -37,6 +38,7 @@ class CreateOrderPosition extends FluxAction
     public function performAction(): OrderPosition
     {
         $tags = Arr::pull($this->data, 'tags', []);
+        $recalculateOrder = Arr::pull($this->data, 'recalculate_order', false);
         $order = resolve_static(Order::class, 'query')
             ->with(['orderType:id,order_type_enum', 'priceList:id,is_net'])
             ->whereKey($this->getData('order_id'))
@@ -51,6 +53,10 @@ class CreateOrderPosition extends FluxAction
         $this->data['price_list_id'] ??= data_get($order, 'price_list_id')
             ?? resolve_static(PriceList::class, 'default')?->getKey();
         $this->data['vat_rate_id'] = data_get($order, 'vat_rate_id') ?? data_get($this->data, 'vat_rate_id');
+
+        if (data_get($order, 'vat_rate_id')) {
+            unset($this->data['vat_rate_percentage']);
+        }
 
         if (is_int($this->getData('sort_number'))) {
             $currentHighestSortNumber = resolve_static(OrderPosition::class, 'query')
@@ -75,6 +81,7 @@ class CreateOrderPosition extends FluxAction
                 ->whereKey($this->getData('product_id'))
                 ->with([
                     'bundleProducts:id,name',
+                    'vatRate:id,rate_percentage',
                 ])
                 ->first();
 
@@ -82,7 +89,6 @@ class CreateOrderPosition extends FluxAction
                 $product->localize($order->language_id);
             }
 
-            data_set($this->data, 'vat_rate_id', $product->vat_rate_id, false);
             data_set($this->data, 'name', $product->name, false);
             data_set($this->data, 'description', $product->description, false);
             data_set($this->data, 'product_number', $product->product_number, false);
@@ -91,6 +97,19 @@ class CreateOrderPosition extends FluxAction
 
             if (! $this->getData('origin_position_id') && $product->bundle_type_enum === BundleTypeEnum::Group) {
                 $this->data['is_free_text'] = true;
+            }
+
+            $vatRatePercentage = $this->getData('vat_rate_percentage');
+
+            if (
+                is_null($this->getData('vat_rate_id'))
+                && ! $this->getData('is_free_text')
+                && (
+                    is_null($vatRatePercentage)
+                    || bccomp($vatRatePercentage, $product->vatRate?->rate_percentage ?? 0) === 0
+                )
+            ) {
+                $this->data['vat_rate_id'] = $product->vat_rate_id;
             }
         }
 
@@ -141,7 +160,15 @@ class CreateOrderPosition extends FluxAction
                 });
         }
 
-        $orderPosition->attachTags($tags);
+        if ($tags) {
+            $orderPosition->attachTags(resolve_static(Tag::class, 'query')->whereKey($tags)->get());
+        }
+
+        if ($recalculateOrder) {
+            $orderPosition->order
+                ->calculatePrices()
+                ->save();
+        }
 
         return $orderPosition->withoutRelations()->fresh();
     }

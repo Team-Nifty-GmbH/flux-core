@@ -53,3 +53,18 @@ test('delete event subscription', function (): void {
     expect(DeleteEventSubscription::make(['id' => $sub->getKey()])
         ->validate()->execute())->toBeTrue();
 });
+
+test('update event subscription without a signed in user rejects the subscription', function (): void {
+    $sub = CreateEventSubscription::make([
+        'channel' => 'test-channel',
+        'event' => 'test-event',
+        'subscribable_type' => morph_alias($this->user::class),
+        'subscribable_id' => $this->user->getKey(),
+        'is_broadcast' => true,
+        'is_notifiable' => false,
+    ])->validate()->execute();
+
+    auth()->forgetGuards();
+
+    UpdateEventSubscription::assertValidationErrors(['id' => $sub->getKey()], 'id');
+});

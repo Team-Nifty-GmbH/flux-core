@@ -134,6 +134,7 @@ return [
     'required_with_all' => 'The :attribute field is required when :values are present.',
     'required_without' => 'The :attribute field is required when :values is not present.',
     'required_without_all' => 'The :attribute field is required when none of :values are present.',
+    'resource_unavailable' => 'The selected resource is not available in the chosen time range.',
     'same' => 'The :attribute and :other must match.',
     'size' => [
         'array' => 'The :attribute must contain :size items.',
@@ -513,6 +514,7 @@ return [
         'packages' => 'Packages',
         'packages.*' => 'Package',
         'parameters' => 'Parameters',
+        'parent_collection' => 'Parent Folder',
         'parent_id' => 'Parent ID',
         'password' => 'Password',
         'paused_time_ms' => 'Paused Time in ms',
@@ -636,7 +638,6 @@ return [
         'serial_number_range_id' => 'Serial Number Range ID',
         'session_id' => 'Session ID',
         'settings' => 'Settings',
-        'shipping_costs_net_price' => 'Shipping Costs Net Price',
         'signed_date' => 'Signed Date',
         'simulate' => 'Simulate',
         'slug' => 'Slug',

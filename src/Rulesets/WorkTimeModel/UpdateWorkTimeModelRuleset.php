@@ -41,6 +41,7 @@ class UpdateWorkTimeModelRuleset extends FluxRuleset
                 'required',
                 Rule::enum(OvertimeCompensationEnum::class),
             ],
+            'has_fixed_hours' => 'boolean',
             'is_active' => 'boolean',
 
             'schedules' => 'nullable|array',

@@ -5,13 +5,13 @@ namespace FluxErp\Traits\Livewire\Dashboard;
 use FluxErp\Enums\ComparisonTypeEnum;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Facades\Widget;
-use FluxErp\Models\Permission;
+use FluxErp\Support\Auth\PermissionSet;
 use FluxErp\Traits\Livewire\EnsureUsedInLivewire;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Js;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
-use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 trait RendersWidgets
 {
@@ -32,6 +32,7 @@ trait RendersWidgets
 
     public bool $sync = false;
 
+    #[Locked]
     public array $widgets = [];
 
     #[Computed]
@@ -60,12 +61,13 @@ trait RendersWidgets
     public function resetWidgets(): void
     {
         $this->widgets();
+        $this->dispatch('dashboard-reset')->self();
     }
 
     #[Renderless]
     public function saveWidgets(?array $widgets = null): void
     {
-        $widgetsToSave = array_values($widgets ?? $this->widgets);
+        $widgetsToSave = array_values($this->filterWidgets($widgets ?? $this->widgets));
 
         $existingItemIds = array_filter(Arr::pluck($widgetsToSave, 'id'), 'is_numeric');
 
@@ -86,11 +88,18 @@ trait RendersWidgets
                 ->updateOrCreate(
                     ['id' => is_numeric(data_get($widget, 'id')) ? data_get($widget, 'id') : null],
                     array_merge(
-                        [
-                            'dashboard_component' => static::class,
-                            'group' => $this->group ?? null,
-                        ],
-                        Arr::except($widget, 'id')
+                        ['group' => $this->group ?? null],
+                        Arr::only($widget, [
+                            'component_name',
+                            'group',
+                            'name',
+                            'config',
+                            'height',
+                            'width',
+                            'order_column',
+                            'order_row',
+                        ]),
+                        ['dashboard_component' => static::class]
                     )
                 );
             $mergedWidget = array_merge($widget, $savedWidget->toArray());
@@ -113,7 +122,7 @@ trait RendersWidgets
     {
         $this->widgets = array_merge(
             array_filter($this->widgets, fn (array $widget) => data_get($widget, 'group') !== $this->group),
-            $widgets
+            array_values($this->filterWidgets($widgets))
         );
     }
 
@@ -205,35 +214,19 @@ trait RendersWidgets
 
     protected function filterWidgets(array $widgets): array
     {
+        $permissions = PermissionSet::make();
+
         $widgets = array_filter(
             $widgets,
-            function (array $widget) {
-                $name = $widget['component_name'];
+            function (mixed $widget) use ($permissions): bool {
+                $componentName = data_get($widget, 'component_name');
+                $registeredWidget = is_string($componentName) ? Widget::get($componentName) : null;
 
-                if (
-                    collect(Arr::wrap(data_get($widget, 'dashboard_component')))
-                        ->map(fn (string $dashboardClass) => resolve_static($dashboardClass, 'class'))
-                        ->doesntContain(static::class)
-                ) {
-                    return false;
-                }
-
-                try {
-                    $permissionExists = ! is_null(
-                        resolve_static(
-                            Permission::class,
-                            'findByName',
-                            [
-                                'name' => 'widget.' . $name,
-                            ]
-                        )
-                    );
-                } catch (PermissionDoesNotExist) {
-                    $permissionExists = false;
-                }
-
-                return (! $permissionExists || auth()->user()->can('widget.' . $name))
-                    && ! is_null(Widget::get($name));
+                return data_get($registeredWidget, 'component_name') === $componentName
+                    && collect(Arr::wrap(data_get($registeredWidget, 'dashboard_component')))
+                        ->map(fn (string $dashboardClass): string => resolve_static($dashboardClass, 'class'))
+                        ->contains(static::class)
+                    && $permissions->allows('widget.' . $componentName);
             }
         );
 

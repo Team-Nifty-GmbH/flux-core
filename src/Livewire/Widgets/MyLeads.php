@@ -5,7 +5,9 @@ namespace FluxErp\Livewire\Widgets;
 use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Lead\LeadList;
+use FluxErp\Models\Lead;
 use FluxErp\Models\LeadState;
+use FluxErp\Models\User;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -100,5 +102,14 @@ class MyLeads extends Component implements HasWidgetOptions
             ->whereNot('is_lost', true)
             ->pluck('id')
             ->toArray();
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(User::class, auth()->id()) => [
+                Lead::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
     }
 }

@@ -12,11 +12,12 @@ use FluxErp\Livewire\Widgets\Employee\OvertimeBalanceBox;
 use FluxErp\Livewire\Widgets\Employee\VacationBalanceBox;
 use FluxErp\Livewire\Widgets\Employee\VacationYearlyOverview;
 use FluxErp\Livewire\Widgets\Employee\WorkTimeOverview;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
 
 class Dashboard extends BaseDashboard
 {
-    #[Modelable]
+    #[Locked, Modelable]
     public ?int $employeeId = null;
 
     public array $params = [

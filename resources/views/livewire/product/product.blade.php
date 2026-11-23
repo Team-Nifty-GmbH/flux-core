@@ -3,7 +3,7 @@
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5"
     >
         <div class="flex items-center space-x-5">
-            <x-avatar xl :image="$product->avatar_url ?? ''"></x-avatar>
+            <x-avatar :image="$product->avatar_url ?? ''" />
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex">
@@ -98,6 +98,17 @@
             @stack('product-detail-header-actions')
         </div>
     </div>
+    <x-flux::product.inheritance-orphan-banner
+        :visible="$this->isOrphanedParent"
+    />
+    @if ($state = $this->inheritanceState)
+        <x-badge color="amber" sm>
+            {{ __(':fields fields overridden, :prices prices differing', $state) }}
+        </x-badge>
+    @endif
+    <x-flux::product.variant-bulk-reset
+        :counters="$this->inheritanceCounters"
+    />
     <x-flux::tabs wire:model.live="tab" wire:loading="tab" :$tabs wire:ignore />
     @stack('product-detail-after-tabs')
 </div>

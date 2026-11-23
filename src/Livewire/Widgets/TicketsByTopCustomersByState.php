@@ -190,4 +190,13 @@ class TicketsByTopCustomersByState extends Chart implements HasWidgetOptions
 
         $this->redirectRoute('tickets', navigate: true);
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Ticket::class) => [
+                Ticket::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

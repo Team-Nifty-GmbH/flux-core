@@ -4,7 +4,11 @@ namespace FluxErp\Livewire\Widgets\Employee;
 
 use FluxErp\Livewire\Employee\Dashboard;
 use FluxErp\Livewire\Support\Widgets\ValueBox;
+use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\Employee;
+use FluxErp\Models\EmployeeBalanceAdjustment;
+use FluxErp\Models\EmployeeDay;
+use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Locked;
 
@@ -57,5 +61,26 @@ class VacationBalanceBox extends ValueBox
     protected function icon(): string
     {
         return 'calendar';
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Employee::class) => [
+                Employee::class => ['updated'],
+            ],
+            $this->modelChannel(AbsenceRequest::class) => [
+                AbsenceRequest::class => ['created', 'updated', 'deleted'],
+            ],
+            $this->modelChannel(EmployeeBalanceAdjustment::class) => [
+                EmployeeBalanceAdjustment::class => ['created', 'updated', 'deleted'],
+            ],
+            $this->modelChannel(EmployeeDay::class) => [
+                EmployeeDay::class => ['created', 'updated', 'deleted'],
+            ],
+            $this->modelChannel(EmployeeWorkTimeModel::class) => [
+                EmployeeWorkTimeModel::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
     }
 }

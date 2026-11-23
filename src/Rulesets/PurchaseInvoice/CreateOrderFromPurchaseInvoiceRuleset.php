@@ -4,17 +4,17 @@ namespace FluxErp\Rulesets\PurchaseInvoice;
 
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
+use FluxErp\Models\VatRate;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\ContactBankConnection\BankConnectionRuleset;
 use FluxErp\Rulesets\FluxRuleset;
-use FluxErp\Rulesets\PurchaseInvoicePosition\UpdatePurchaseInvoicePositionRuleset;
-use Illuminate\Support\Arr;
 
 class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
 {
@@ -23,13 +23,15 @@ class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
         return array_merge(
             parent::getRules(),
             resolve_static(BankConnectionRuleset::class, 'getRules'),
+            resolve_static(PurchaseInvoicePositionRuleset::class, 'getRules'),
             [
-                'purchase_invoice_positions' => 'array',
+                'purchase_invoice_positions.*.vat_rate_id' => [
+                    'required',
+                    'integer',
+                    app(ModelExists::class, ['model' => VatRate::class])
+                        ->where('is_purchase', true),
+                ],
             ],
-            Arr::prependKeysWith(
-                resolve_static(UpdatePurchaseInvoicePositionRuleset::class, 'getRules'),
-                'purchase_invoice_positions.*'
-            ),
         );
     }
 
@@ -63,6 +65,11 @@ class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => User::class])
                     ->where('is_active', true),
             ],
+            'order_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Order::class]),
+            ],
             'order_type_id' => [
                 'required',
                 'integer',
@@ -82,8 +89,9 @@ class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
             'invoice_date' => 'required|date',
             'payment_target_date' => 'nullable|date',
             'payment_discount_target_date' => 'nullable|date',
+            'payment_discount_target' => 'required|integer|min:0',
             'payment_discount_percent' => [
-                'nullable',
+                'required',
                 app(Numeric::class, ['min' => 0, 'max' => 1]),
             ],
             'total_gross_price' => [

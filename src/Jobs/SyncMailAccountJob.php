@@ -6,6 +6,8 @@ use Cron\CronExpression;
 use FluxErp\Console\Scheduling\Repeatable;
 use FluxErp\Contracts\ReportsSyncProgress;
 use FluxErp\Contracts\ShouldBeMonitored;
+use FluxErp\Exceptions\MailSyncTimeBudgetExhausted;
+use FluxErp\Mail\ImapMessageBuilder;
 use FluxErp\Mail\MailDriverManager;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
@@ -14,18 +16,30 @@ use FluxErp\Traits\Job\TracksSchedule;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Queue;
+use Throwable;
+use Webklex\PHPIMAP\Exceptions\ImapServerErrorException;
 
 class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, IsMonitored, Queueable, SerializesModels, TracksSchedule;
 
+    public const int CONNECTION_FAILURE_GRACE_MINUTES = 30;
+
     private readonly MailAccount $mailAccount;
 
-    public function __construct(MailAccount|string $email, public readonly bool $onlyFolders = false)
-    {
+    public function __construct(
+        MailAccount|string $email,
+        public readonly bool $onlyFolders = false,
+        public readonly ?int $mailFolderId = null,
+        public readonly ?int $resumeAtFolderId = null
+    ) {
         if (is_string($email)) {
             $this->mailAccount = resolve_static(MailAccount::class, 'query')
                 ->where('email', $email)
@@ -74,43 +88,24 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
 
     public function handle(): void
     {
-        $driver = app(MailDriverManager::class)->driver($this->mailAccount->protocol);
-
-        $driver->syncFolders($this->mailAccount);
-
-        if ($this->onlyFolders) {
+        if ($this->mailAccount->isSyncPaused()) {
             return;
         }
 
-        $folders = $this->mailAccount->mailFolders()
-            ->where('is_active', true)
-            ->get();
-        $total = $folders->count();
-
         try {
-            $folders->each(function (MailFolder $folder, int $index) use ($driver, $total): void {
-                if ($driver instanceof ReportsSyncProgress) {
-                    $driver->withProgressCallback(
-                        fn (int $processed, int $totalMessages) => $this->queueUpdate([
-                            'progress' => ($index + ($totalMessages > 0 ? min($processed / $totalMessages, 1) : 1))
-                                / $total
-                                * 100,
-                            'message' => __(':processed of :total mails (:folder)', [
-                                'processed' => $processed,
-                                'total' => $totalMessages,
-                                'folder' => $folder->name,
-                            ]),
-                        ])
-                    );
-                }
+            $this->sync();
 
-                $driver->syncMessages($folder);
-                $this->queueProgressChunk($total, 1);
-            });
-        } finally {
-            if ($driver instanceof ReportsSyncProgress) {
-                $driver->withProgressCallback(null);
+            Cache::forget($this->connectionFailureCacheKey());
+        } catch (Throwable $e) {
+            if (! $this->isConnectionFailure($e) || $this->isOutageOverdue()) {
+                throw $e;
             }
+
+            Log::warning('Mail server unreachable, the next sync run tries again: ' . $e->getMessage(), [
+                'mail_account_id' => $this->mailAccount->getKey(),
+            ]);
+        } finally {
+            $this->mailAccount->disconnectImapClient();
         }
     }
 
@@ -122,5 +117,175 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
     public function uniqueId(): string
     {
         return $this->mailAccount->uuid;
+    }
+
+    public function uniqueFor(): int
+    {
+        return 3600;
+    }
+
+    protected function connectionFailureCacheKey(): string
+    {
+        return 'mail-sync-connection-failure:' . $this->mailAccount->uuid;
+    }
+
+    protected function isConnectionFailure(Throwable $e): bool
+    {
+        return resolve_static(ImapMessageBuilder::class, 'isLostConnection', [$e])
+            || ($e instanceof ImapServerErrorException
+                && preg_match('/\[(AUTHENTICATIONFAILED|UNAVAILABLE)\]/', $e->getMessage()));
+    }
+
+    protected function isOutageOverdue(): bool
+    {
+        Cache::add($this->connectionFailureCacheKey(), now()->getTimestamp());
+
+        return now()->getTimestamp() - Cache::get($this->connectionFailureCacheKey())
+            >= static::CONNECTION_FAILURE_GRACE_MINUTES * 60;
+    }
+
+    protected function queueIsPaused(): bool
+    {
+        return Queue::isPaused(
+            $this->job?->getConnectionName() ?? config('queue.default'),
+            $this->job?->getQueue() ?? 'default'
+        );
+    }
+
+    protected function sync(): void
+    {
+        $deadline = now()->addSeconds(
+            min(config('flux.mail.sync_time_budget'), $this->uniqueFor() - 600)
+        );
+
+        if ($this->queueIsPaused()) {
+            return;
+        }
+
+        $driver = app(MailDriverManager::class)->driver($this->mailAccount->protocol);
+
+        if (is_null($this->mailFolderId) && is_null($this->resumeAtFolderId)) {
+            $driver->syncFolders($this->mailAccount);
+        }
+
+        if ($this->onlyFolders) {
+            return;
+        }
+
+        $folders = $this->mailAccount->mailFolders()
+            ->where('is_active', true)
+            ->when($this->mailFolderId, fn (Builder $query, int $id): Builder => $query->whereKey($id))
+            ->when(
+                $this->resumeAtFolderId,
+                fn (Builder $query, int $id): Builder => $query->where('id', '>=', $id)
+            )
+            ->orderBy('id')
+            ->get()
+            ->each(fn (MailFolder $folder) => $folder->setRelation('mailAccount', $this->mailAccount));
+        $total = $folders->count();
+        $failure = null;
+        $stoppedAt = null;
+
+        try {
+            $folders->each(function (MailFolder $folder, int $index) use (
+                $driver,
+                $total,
+                $deadline,
+                &$failure,
+                &$stoppedAt
+            ): bool {
+                if (
+                    $this->queueIsPaused()
+                    || ($index > 0 && now()->greaterThanOrEqualTo($deadline))
+                ) {
+                    $stoppedAt = $folder;
+
+                    return false;
+                }
+
+                if ($driver instanceof ReportsSyncProgress) {
+                    $driver->withProgressCallback(
+                        function (int $processed, int $totalMessages) use (
+                            $index,
+                            $total,
+                            $folder,
+                            $deadline
+                        ): void {
+                            $folderProgress = $totalMessages > 0
+                                ? min($processed / $totalMessages, 1)
+                                : 1;
+
+                            $this->queueUpdate([
+                                'progress' => ($index + $folderProgress) / $total * 100,
+                                'message' => __(':processed of :total mails (:folder)', [
+                                    'processed' => $processed,
+                                    'total' => $totalMessages,
+                                    'folder' => $folder->name,
+                                ]),
+                            ]);
+
+                            if (
+                                now()->greaterThanOrEqualTo($deadline)
+                                || $this->queueIsPaused()
+                            ) {
+                                throw new MailSyncTimeBudgetExhausted();
+                            }
+                        }
+                    );
+                }
+
+                // One broken folder must not keep the others from syncing.
+                // The first failure fails the job once all folders had their turn.
+                try {
+                    $driver->syncMessages($folder);
+                } catch (MailSyncTimeBudgetExhausted) {
+                    $stoppedAt = $folder;
+
+                    return false;
+                } catch (Throwable $e) {
+                    if ($this->isConnectionFailure($e)) {
+                        if (! is_null($failure)) {
+                            report($failure);
+                        }
+
+                        throw $e;
+                    }
+
+                    if (is_null($failure)) {
+                        $failure = $e;
+                    } else {
+                        report($e);
+                    }
+                }
+
+                $this->queueProgressChunk($total, 1);
+
+                return true;
+            });
+
+            if (! is_null($stoppedAt) && ! $this->queueIsPaused()) {
+                if (! is_null($failure)) {
+                    report($failure);
+                }
+
+                $this->appendToChain(
+                    app(static::class, [
+                        'email' => $this->mailAccount,
+                        'mailFolderId' => $this->mailFolderId,
+                        'resumeAtFolderId' => $stoppedAt->getKey(),
+                    ])
+                );
+
+                return;
+            }
+
+            if (! is_null($failure)) {
+                throw $failure;
+            }
+        } finally {
+            if ($driver instanceof ReportsSyncProgress) {
+                $driver->withProgressCallback(null);
+            }
+        }
     }
 }

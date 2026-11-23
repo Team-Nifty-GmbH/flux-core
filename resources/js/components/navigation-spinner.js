@@ -18,6 +18,22 @@ export default function () {
 
         if (!overlay || !spinner) return;
 
+        const main = document.querySelector('main');
+        const box = main?.getBoundingClientRect();
+        const fillsViewport =
+            !box || (box.left <= 0 && box.right >= window.innerWidth);
+
+        for (const side of ['top', 'left', 'right', 'bottom']) {
+            spinner.style[side] = '';
+        }
+
+        if (!fillsViewport) {
+            spinner.style.top = `${Math.round(box.top)}px`;
+            spinner.style.left = `${Math.round(box.left)}px`;
+            spinner.style.right = `${Math.round(window.innerWidth - box.right)}px`;
+            spinner.style.bottom = `${Math.round(window.innerHeight - box.bottom)}px`;
+        }
+
         overlay.classList.remove('hidden');
 
         spinnerTimeout = setTimeout(() => {

@@ -18,8 +18,9 @@ class UpdateCommentRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Comment::class]),
             ],
-            'is_internal' => 'required_without:is_sticky|boolean',
-            'is_sticky' => 'required_without:is_internal|boolean',
+            'comment' => 'sometimes|required|string',
+            'is_internal' => 'sometimes|boolean',
+            'is_sticky' => 'sometimes|boolean',
         ];
     }
 }

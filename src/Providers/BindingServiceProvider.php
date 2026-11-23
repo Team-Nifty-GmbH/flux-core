@@ -13,11 +13,13 @@ use FluxErp\DataType\ObjectHandler;
 use FluxErp\DataType\Registry;
 use FluxErp\DataType\SerializableHandler;
 use FluxErp\DataType\StringHandler;
+use FluxErp\Support\MediaLibrary\FileAdder;
 use FluxErp\Support\MediaLibrary\UrlGenerator;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
+use Spatie\MediaLibrary\MediaCollections\FileAdder as SpatieFileAdder;
 use Spatie\MediaLibrary\Support\UrlGenerator\DefaultUrlGenerator;
 
 class BindingServiceProvider extends ServiceProvider implements DeferrableProvider
@@ -28,6 +30,7 @@ class BindingServiceProvider extends ServiceProvider implements DeferrableProvid
             Registry::class,
             'datatype.registry',
             DefaultUrlGenerator::class,
+            SpatieFileAdder::class,
             StatefulGuard::class,
         ];
     }
@@ -36,6 +39,7 @@ class BindingServiceProvider extends ServiceProvider implements DeferrableProvid
     {
         $this->app->bind(StatefulGuard::class, fn () => Auth::guard('web'));
         $this->app->bind(DefaultUrlGenerator::class, UrlGenerator::class);
+        $this->app->bind(SpatieFileAdder::class, FileAdder::class);
 
         $this->app->singleton(Registry::class, function () {
             $registry = new Registry();

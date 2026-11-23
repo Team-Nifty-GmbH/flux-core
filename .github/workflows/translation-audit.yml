@@ -16,7 +16,7 @@ env:
 jobs:
   discover-locales:
     name: Discover Locales
-    runs-on: [self-hosted, Linux]
+    runs-on: ubuntu-latest
     container:
       image: ghcr.io/team-nifty-gmbh/flux-ci:php8.5
       credentials:
@@ -37,7 +37,7 @@ jobs:
   audit:
     name: Audit ${{ matrix.locale }}
     needs: discover-locales
-    runs-on: [self-hosted, Linux]
+    runs-on: ubuntu-latest
     container:
       image: ghcr.io/team-nifty-gmbh/flux-ci:php8.5
       credentials:

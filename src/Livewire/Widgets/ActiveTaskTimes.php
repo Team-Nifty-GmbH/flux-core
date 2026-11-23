@@ -39,11 +39,12 @@ class ActiveTaskTimes extends ValueList
             ->toArray();
     }
 
-    protected function getListeners(): array
+    protected function liveUpdates(): array
     {
         return [
-            'echo-private:' . resolve_static(WorkTime::class, 'getBroadcastChannel')
-                . ',.WorkTimeTaskUpdated' => 'calculateList',
+            $this->modelChannel(WorkTime::class) => [
+                WorkTime::class => ['taskUpdated', 'deleted'],
+            ],
         ];
     }
 }

@@ -52,24 +52,21 @@ class UpdateSetting extends FluxAction
     protected function extractRulesFromType(?ReflectionType $type): array
     {
         if (! $type) {
-            return [
-                'sometimes',
-                'required',
-            ];
+            return ['sometimes'];
         }
 
         $rules = match (true) {
             $type instanceof ReflectionUnionType => $this->getRulesForUnionType($type),
-            $type instanceof ReflectionIntersectionType => ['sometimes', 'required', 'object'],
+            $type instanceof ReflectionIntersectionType => ['sometimes', 'object'],
             $type instanceof ReflectionNamedType => array_merge(
-                ['sometimes', 'required'],
+                ['sometimes'],
                 $this->getRulesForNamedType($type)
             ),
-            default => ['sometimes', 'required'],
+            default => ['sometimes'],
         };
 
         if ($type->allowsNull()) {
-            return array_merge(['nullable'], array_diff($rules, ['sometimes', 'required']));
+            return array_merge(['nullable'], array_diff($rules, ['sometimes']));
         }
 
         return $rules;
@@ -93,7 +90,7 @@ class UpdateSetting extends FluxAction
 
     protected function getRulesForUnionType(ReflectionUnionType $type): array
     {
-        $rules = ['sometimes', 'required'];
+        $rules = ['sometimes'];
         $types = [];
 
         foreach ($type->getTypes() as $unionType) {
@@ -111,13 +108,13 @@ class UpdateSetting extends FluxAction
 
     protected function validateSettingsProperties(string $settingsClass): array
     {
-        $config = app(SettingsConfig::class, ['settingsClass' => $settingsClass]);
+        $config = app(SettingsConfig::class, ['settingsClass' => resolve_static($settingsClass, 'class')]);
         $rules = [];
 
         foreach ($config->getReflectedProperties() as $propertyName => $reflectionProperty) {
             $rules[$propertyName] = $this->extractRulesFromType($reflectionProperty->getType());
         }
 
-        return $rules;
+        return array_merge($rules, resolve_static($settingsClass, 'rules'));
     }
 }

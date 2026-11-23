@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Exception;
 use FluxErp\Actions\Order\UpdateOrder;
+use FluxErp\Actions\OrderPosition\PriceCalculation;
 use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Actions\Transaction\CreateTransaction;
 use FluxErp\Casts\Money;
@@ -15,9 +16,12 @@ use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Enums\PaymentRunTypeEnum;
+use FluxErp\Events\Order\DocumentSignedEvent;
 use FluxErp\Events\Order\OrderApprovalRequestEvent;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\OrderPaymentRun;
+use FluxErp\Models\Pivots\OrderProject;
 use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Pivots\OrderUser;
@@ -28,9 +32,11 @@ use FluxErp\States\Order\OrderState;
 use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
 use FluxErp\States\Order\PaymentState\InPayment;
 use FluxErp\States\Order\PaymentState\Open;
+use FluxErp\States\Order\PaymentState\Overpaid;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\States\Order\PaymentState\PartialPaid;
 use FluxErp\States\Order\PaymentState\PaymentState;
+use FluxErp\States\PaymentRun\NotSuccessful;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Support\Collection\OrderCollection;
 use FluxErp\Traits\HasStates;
@@ -47,6 +53,7 @@ use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\Mentionable;
 use FluxErp\Traits\Model\Printable;
 use FluxErp\Traits\Model\Trackable;
 use FluxErp\Traits\Scout\Searchable;
@@ -56,6 +63,7 @@ use FluxErp\View\Printing\Order\FinalInvoice;
 use FluxErp\View\Printing\Order\Invoice;
 use FluxErp\View\Printing\Order\Offer;
 use FluxErp\View\Printing\Order\OrderConfirmation;
+use FluxErp\View\Printing\Order\ProformaInvoice;
 use FluxErp\View\Printing\Order\Refund;
 use FluxErp\View\Printing\Order\Retoure;
 use FluxErp\View\Printing\Order\SupplierOrder;
@@ -69,21 +77,22 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Number;
 use Illuminate\Support\Traits\Conditionable;
+use Illuminate\Validation\ValidationException;
 use RoundingMode;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
 {
     use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasFrontendAttributes,
         HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasStates, HasTenantAssignment,
-        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
+        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Mentionable, Printable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -209,8 +218,8 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
                 $order->calculateBalance();
 
-                if (is_null($order->payment_reminder_next_date) && ! is_null($order->invoice_date)) {
-                    $order->payment_reminder_next_date = $order->invoice_date->addDays(
+                if (is_null($order->payment_reminder_next_date) && ! is_null($order->payment_target_date)) {
+                    $order->payment_reminder_next_date = $order->payment_target_date->copy()->addDays(
                         $order->payment_reminder_days_1
                     );
                 }
@@ -218,6 +227,10 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
             if ($order->isDirty('payment_discount_percent')) {
                 $order->calculateBalanceDueDiscount();
+            }
+
+            if ($order->isDirty('contract_total_amount')) {
+                $order->calculateBalance();
             }
 
             if ($order->isDirty('iban')
@@ -265,6 +278,52 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                 && $order->responsible_user_id
             ) {
                 $order->responsibleUser?->subscribeNotificationChannel($order->broadcastChannel());
+            }
+
+            // The responsible user holds a wildcard subscription already, creator and agent only
+            // need to hear about signatures, which arrive on the public link without anyone logged in.
+            // On insert the original attributes are not synced yet, created_by is the authenticated user.
+            $signedEvent = resolve_static(DocumentSignedEvent::class, 'class');
+            if ($order->wasChanged('agent_id') && $order->getOriginal('agent_id')) {
+                $formerAgent = resolve_static(User::class, 'query')
+                    ->whereKey($order->getOriginal('agent_id'))
+                    ->first();
+
+                if ($formerAgent && ! $order->getCreatedBy()?->is($formerAgent)) {
+                    $formerAgent->unsubscribeNotificationChannel($order->broadcastChannel(), $signedEvent);
+                }
+            }
+
+            collect([
+                $order->wasRecentlyCreated ? auth()->user() : null,
+                ($order->wasRecentlyCreated || $order->wasChanged('agent_id')) && $order->agent_id
+                    ? $order->agent()->first()
+                    : null,
+            ])
+                ->filter(fn ($user) => $user instanceof User)
+                ->unique(fn (User $user) => $user->getKey())
+                ->each(function (User $user) use ($order, $signedEvent): void {
+                    try {
+                        $user->subscribeNotificationChannel($order->broadcastChannel(), $signedEvent);
+                    } catch (UnauthorizedException|ValidationException) {
+                    }
+                });
+
+            // Every write to a generated order routes through here, so the parent
+            // contract's remaining balance stays current no matter which action
+            // created or adjusted the child.
+            if (
+                ($order->wasRecentlyCreated || $order->wasChanged('total_gross_price'))
+                && $order->created_from_id
+            ) {
+                $contract = $order->createdFrom;
+
+                if (
+                    ! is_null($contract?->contract_total_amount)
+                    && $contract->orderType?->order_type_enum?->isSubscription()
+                ) {
+                    $contract->calculateBalance()->save();
+                }
             }
         });
 
@@ -417,6 +476,11 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         ];
     }
 
+    public static function mentionTypeIcon(): string
+    {
+        return 'document-text';
+    }
+
     protected function casts(): array
     {
         return [
@@ -425,10 +489,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             'state' => OrderState::class,
             'payment_state' => PaymentState::class,
             'delivery_state' => DeliveryState::class,
-            'shipping_costs_net_price' => Money::class,
-            'shipping_costs_gross_price' => Money::class,
-            'shipping_costs_vat_price' => Money::class,
-            'shipping_costs_vat_rate_percentage' => Percentage::class,
             'total_base_net_price' => Money::class,
             'total_base_gross_price' => Money::class,
             'total_base_discounted_net_price' => Money::class,
@@ -448,6 +508,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             'total_position_discount_percentage' => Percentage::class,
             'total_position_discount_flat' => Money::class,
             'balance' => Money::class,
+            'contract_total_amount' => Money::class,
             'payment_reminder_next_date' => 'date',
             'order_date' => 'date',
             'invoice_date' => 'date',
@@ -458,6 +519,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             'customer_delivery_date' => 'date',
             'date_of_approval' => 'date',
             'is_locked' => 'boolean',
+            'is_self_billed' => 'boolean',
             'is_imported' => 'boolean',
             'is_confirmed' => 'boolean',
             'requires_approval' => 'boolean',
@@ -539,6 +601,11 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return $this->belongsTo(Language::class);
     }
 
+    public function ledgerBookings(): MorphMany
+    {
+        return $this->morphMany(LedgerBooking::class, 'source');
+    }
+
     public function lead(): BelongsTo
     {
         return $this->belongsTo(Lead::class);
@@ -606,6 +673,12 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ->using(OrderSchedule::class);
     }
 
+    public function supplementedProjects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'order_project')
+            ->using(OrderProject::class);
+    }
+
     public function tasks(): HasManyThrough
     {
         return $this->hasManyThrough(Task::class, Project::class);
@@ -655,7 +728,10 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     {
         return $this->getFirstMedia('invoice')
             ?? $this->getFirstMedia('final-invoice')
-            ?? $this->getFirstMedia('refund');
+            ?? $this->getFirstMedia('refund')
+            ?? ($this->createdFrom?->orderType?->order_type_enum?->isSubscription()
+                ? $this->createdFrom->getFirstMedia('invoice')
+                : null);
     }
 
     public function refund(): ?Media
@@ -664,8 +740,44 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     }
 
     // Public methods
+    public function broadcastOn(string $event): array
+    {
+        return array_merge(
+            Arr::wrap(parent::broadcastOn($event)),
+            $this->recordBroadcastChannels(Contact::class, [
+                $this->contact_id,
+                data_get($this->getPrevious(), 'contact_id'),
+            ]),
+            $this->recordBroadcastChannels(User::class, [
+                $this->approval_user_id,
+                data_get($this->getPrevious(), 'approval_user_id'),
+            ])
+        );
+    }
+
     public function calculateBalance(): static
     {
+        // Subscription contracts are never invoiced themselves; their balance tracks
+        // the remaining contract volume instead of an open invoice amount. Generated
+        // rates store their totals signed inconsistently (replication applies the
+        // type multiplier, AdjustOrderTotal counteracts it), so sum absolutes.
+        if ($this->orderType?->order_type_enum?->isSubscription()) {
+            $this->balance = is_null($this->contract_total_amount)
+                ? null
+                : bcround(
+                    bcsub(
+                        $this->contract_total_amount,
+                        (string) $this->createdOrders()
+                            ->selectRaw('COALESCE(SUM(ABS(total_gross_price)), 0) AS aggregate')
+                            ->value('aggregate'),
+                        9
+                    ),
+                    2
+                );
+
+            return $this;
+        }
+
         $this->balance = bcround(
             bcsub(
                 $this->total_gross_price,
@@ -758,32 +870,35 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     public function calculatePaymentState(): static
     {
-        if (! $this->transactions()->exists()) {
-            // Don't reset to Open if order is in a payment run state
-            // Payment run lifecycle manages InOpenPaymentRun and InPayment
-            if (
-                ! $this->payment_state instanceof InOpenPaymentRun
-                && ! $this->payment_state instanceof InPayment
-                && $this->payment_state->canTransitionTo(Open::class)
-            ) {
-                $this->payment_state->transitionTo(Open::class);
-            }
-        } else {
-            if (
-                bccomp(
-                    bcround($this->totalPaid(), 2),
-                    bcround($this->total_gross_price, 2),
-                    2
-                ) === 0
-            ) {
-                if ($this->payment_state->canTransitionTo(Paid::class)) {
-                    $this->payment_state->transitionTo(Paid::class);
-                }
-            } else {
-                if ($this->payment_state->canTransitionTo(PartialPaid::class)) {
-                    $this->payment_state->transitionTo(PartialPaid::class);
-                }
-            }
+        $paymentState = Open::class;
+
+        if ($this->transactions()->exists() || $this->ledgerBookings()->exists()) {
+            $totalPaid = bcround($this->totalPaid(), 2);
+            $totalGrossPrice = bcround($this->total_gross_price, 2);
+
+            $paymentState = match (true) {
+                bccomp($totalPaid, $totalGrossPrice, 2) === 0 => Paid::class,
+                // e.g. a payment and its charge back cancel each other out
+                bccomp($totalPaid, 0, 2) === 0 => Open::class,
+                bccomp($totalPaid, 0, 2) === bccomp($totalGrossPrice, 0, 2)
+                    && bccomp(bcabs($totalPaid), bcabs($totalGrossPrice), 2) === 1 => Overpaid::class,
+                default => PartialPaid::class,
+            };
+        }
+
+        // Don't reset to Open if order is in a payment run state
+        // Payment run lifecycle manages InOpenPaymentRun and InPayment
+        if (
+            ! (
+                $paymentState === Open::class
+                && (
+                    $this->payment_state instanceof InOpenPaymentRun
+                    || $this->payment_state instanceof InPayment
+                )
+            )
+            && $this->payment_state->canTransitionTo($paymentState)
+        ) {
+            $this->payment_state->transitionTo($paymentState);
         }
 
         $this->calculateBalance();
@@ -794,12 +909,105 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     public function calculatePrices(): static
     {
         return $this
+            ->calculateShippingVat()
             ->calculateTotalNetPrice()
             ->calculateDiscounts()
             ->calculateTotalVats()
             ->calculateTotalGrossPrice()
             ->calculateMargin()
             ->when(! is_null($this->invoice_number), fn (Order $order) => $order->calculateBalance());
+    }
+
+    /**
+     * Shipping is an ancillary service and shares the vat rate of the goods it ships
+     * (Art. 78 VAT Directive, Abschn. 3.10 UStAE). Goods with mixed rates give the
+     * shipping a rate weighted by their net value and no vat_rate_id, so the vat totals
+     * split it over the rates of the goods. Without goods the shipping keeps the rate
+     * of its own product.
+     */
+    public function calculateShippingVat(): static
+    {
+        if ($this->invoice_number) {
+            return $this;
+        }
+
+        [$shippingPositions, $goods] = $this->orderPositions()
+            ->where('is_alternative', false)
+            ->where(fn (Builder $query) => $query
+                ->where('is_free_text', false)
+                ->orWhereDoesntHave('children')
+            )
+            ->whereNotNull('vat_rate_percentage')
+            ->with([
+                'product:id,parent_id,vat_rate_id,is_shipping_item',
+                'product.vatRate:id,rate_percentage',
+            ])
+            ->get()
+            ->partition(fn (OrderPosition $orderPosition): bool => (bool) $orderPosition->product?->is_shipping_item);
+
+        if ($shippingPositions->isEmpty()) {
+            return $this;
+        }
+
+        $netByVatRate = $goods
+            ->groupBy(
+                fn (OrderPosition $orderPosition): string => (string) (
+                    $orderPosition->vat_rate_id ?? $orderPosition->vat_rate_percentage
+                )
+            )
+            ->map(fn (Collection $positions): array => [
+                'net' => $positions->reduce(
+                    fn (string $carry, OrderPosition $orderPosition): string => bcadd(
+                        $carry,
+                        $orderPosition->total_net_price,
+                        9
+                    ),
+                    '0'
+                ),
+                'vat_rate_id' => $positions->first()->vat_rate_id,
+                'vat_rate_percentage' => $positions->first()->vat_rate_percentage,
+            ]);
+        $goodsNet = $netByVatRate
+            ->reduce(fn (string $carry, array $rate): string => bcadd($carry, $rate['net'], 9), '0');
+        $sharedVatRatePercentage = bccomp($goodsNet, 0, 9) === 0
+            ? null
+            : $netByVatRate->reduce(
+                fn (string $carry, array $rate): string => bcadd(
+                    $carry,
+                    bcmul(bcdiv($rate['net'], $goodsNet, 9), $rate['vat_rate_percentage'], 9),
+                    9
+                ),
+                '0'
+            );
+
+        foreach ($shippingPositions as $shippingPosition) {
+            if (is_null($sharedVatRatePercentage)) {
+                $vatRateId = $shippingPosition->product?->vat_rate_id;
+                $vatRatePercentage = $shippingPosition->product?->vatRate?->rate_percentage;
+
+                if (is_null($vatRatePercentage)) {
+                    continue;
+                }
+            } else {
+                $vatRateId = $netByVatRate->count() === 1 ? $netByVatRate->first()['vat_rate_id'] : null;
+                $vatRatePercentage = $sharedVatRatePercentage;
+            }
+
+            if (
+                $shippingPosition->vat_rate_id === $vatRateId
+                && bccomp($shippingPosition->vat_rate_percentage, $vatRatePercentage, 9) === 0
+            ) {
+                continue;
+            }
+
+            $shippingPosition->vat_rate_id = $vatRateId;
+            PriceCalculation::make($shippingPosition, ['vat_rate_percentage' => $vatRatePercentage])
+                ->calculate();
+            unset($shippingPosition->unit_price);
+            $shippingPosition->save();
+        }
+
+        return $this;
     }
 
     public function calculateSubscriptionEndDate(): Carbon|CarbonInterface
@@ -854,10 +1062,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ->where('is_alternative', false)
             ->sum('total_base_gross_price');
 
-        $this->total_base_gross_price = bcround(
-            bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0),
-            2
-        );
+        $this->total_base_gross_price = bcround($totalBaseGross, 2);
         $this->total_base_discounted_gross_price = $this->total_gross_price;
 
         return $this;
@@ -874,14 +1079,8 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ->where(fn ($q) => $q->where('is_free_text', false)->orWhereDoesntHave('children'))
             ->sum('total_base_net_price');
 
-        $this->total_net_price = bcround(
-            bcadd($totalNet, $this->shipping_costs_net_price ?: 0, 9),
-            2
-        );
-        $this->total_base_net_price = bcround(
-            bcadd($totalBaseNet, $this->shipping_costs_net_price ?: 0, 9),
-            2
-        );
+        $this->total_net_price = bcround($totalNet, 2);
+        $this->total_base_net_price = bcround($totalBaseNet, 2);
         $this->total_base_discounted_net_price = $this->total_net_price;
 
         $this->total_position_discount_percentage = diff_percentage(
@@ -897,17 +1096,53 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return $this;
     }
 
+    /**
+     * Shipping with a weighted rate has no vat_rate_id and no rate of its own to report.
+     * Its net amount is spread over the rates of the goods by their share of the goods net,
+     * which is what the weighted rate was derived from.
+     */
     public function calculateTotalVats(): static
     {
         $positionsByVatRate = $this->orderPositions()
             ->where('is_alternative', false)
             ->where(fn ($q) => $q->where('is_free_text', false)->orWhereDoesntHave('children'))
             ->whereNotNull('vat_rate_percentage')
+            ->where(fn (Builder $query) => $query
+                ->whereNotNull('vat_rate_id')
+                ->orWhereDoesntHave('product', fn (Builder $query) => $query->where('is_shipping_item', true))
+            )
             ->reorder()
             ->groupBy(['vat_rate_percentage', 'vat_rate_id'])
             ->selectRaw('sum(total_net_price) as total_net_price, vat_rate_percentage, vat_rate_id')
             ->get()
             ->keyBy(fn (OrderPosition $item) => $item->vat_rate_id ?? $item->vat_rate_percentage);
+
+        $sharedShippingNet = (string) $this->orderPositions()
+            ->where('is_alternative', false)
+            ->whereNull('vat_rate_id')
+            ->whereNotNull('vat_rate_percentage')
+            ->whereRelation('product', 'is_shipping_item', true)
+            ->sum('total_net_price');
+        $goodsNet = $positionsByVatRate->reduce(
+            fn (string $carry, OrderPosition $item) => bcadd($carry, $item->total_net_price, 9),
+            '0'
+        );
+
+        $hasSharedShipping = bccomp($sharedShippingNet, 0, 9) !== 0 && bccomp($goodsNet, 0, 9) !== 0;
+
+        if ($hasSharedShipping) {
+            $positionsByVatRate->transform(
+                function (OrderPosition $item) use ($sharedShippingNet, $goodsNet): OrderPosition {
+                    $item->total_net_price = bcadd(
+                        $item->total_net_price,
+                        bcmul($sharedShippingNet, bcdiv($item->total_net_price, $goodsNet, 9), 9),
+                        9
+                    );
+
+                    return $item;
+                }
+            );
+        }
 
         $baseAmounts = $positionsByVatRate->mapWithKeys(
             fn (OrderPosition $item) => [($item->vat_rate_id ?? $item->vat_rate_percentage) => $item->total_net_price]
@@ -967,33 +1202,13 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                     ),
                 ];
             })
-            ->when($this->shipping_costs_vat_price, function (SupportCollection $vats): SupportCollection {
-                return $vats->put(
-                    $this->shipping_costs_vat_rate_percentage,
-                    [
-                        'vat_rate_percentage' => $this->shipping_costs_vat_rate_percentage,
-                        'total_vat_price' => bcadd(
-                            $this->shipping_costs_vat_price,
-                            data_get(
-                                $vats->get($this->shipping_costs_vat_rate_percentage),
-                                'total_vat_price'
-                            ) ?? 0,
-                            9
-                        ),
-                        'total_net_price' => bcadd(
-                            $this->shipping_costs_net_price,
-                            data_get(
-                                $vats->get($this->shipping_costs_vat_rate_percentage),
-                                'total_net_price'
-                            ) ?? 0,
-                            9
-                        ),
-                    ]
-                );
-            })
             ->sortBy('vat_rate_percentage')
             ->values()
             ->toArray();
+
+        if ($hasSharedShipping) {
+            $this->balanceRoundedTotalVats($positionsByVatRate);
+        }
 
         return $this;
     }
@@ -1053,6 +1268,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return [
             'invoice' => Invoice::class,
             'final-invoice' => FinalInvoice::class,
+            'proforma-invoice' => ProformaInvoice::class,
             'offer' => Offer::class,
             'order-confirmation' => OrderConfirmation::class,
             'retoure' => Retoure::class,
@@ -1066,6 +1282,12 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     public function getSerialNumber(string|array $types, ?int $tenantId = null): static
     {
         if (in_array('invoice_number', Arr::wrap($types))) {
+            if (! $this->contact()->exists()) {
+                throw ValidationException::withMessages([
+                    'contact_id' => [__('The contact of this order no longer exists')],
+                ]);
+            }
+
             $rules = [
                 'has_contact_delivery_lock' => 'declined',
             ];
@@ -1211,6 +1433,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                     [
                         'invoice' => Invoice::class,
                         'final-invoice' => FinalInvoice::class,
+                        'proforma-invoice' => ProformaInvoice::class,
                         'offer' => Offer::class,
                         'order-confirmation' => OrderConfirmation::class,
                         'retoure' => Retoure::class,
@@ -1284,8 +1507,9 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     public function totalPaid(): string|float|int
     {
-        return $this->transactions()
+        $paid = $this->transactions()
             ->withPivot(['amount', 'order_currency_amount'])
+            ->wherePivot('is_accepted', true)
             ->get()
             ->reduce(
                 fn (string $carry, Transaction $transaction) => bcadd(
@@ -1295,6 +1519,22 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                 ),
                 '0'
             );
+
+        return bcadd($paid, $this->totalSettledByLedgerBookings(), 9);
+    }
+
+    /**
+     * Ledger bookings pointing at this order settle it without a bank transaction,
+     * e.g. an invoice paid directly by a loan. Their amount is always positive, so
+     * the order type decides the direction it settles in.
+     */
+    public function totalSettledByLedgerBookings(): string
+    {
+        return bcmul(
+            (string) $this->ledgerBookings()->sum('amount'),
+            $this->orderType?->order_type_enum?->multiplier() ?? '1',
+            9
+        );
     }
 
     public function toCalendarEvent(?array $info = null): array
@@ -1445,11 +1685,33 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     protected function scopeWherePaymentReminderEligible(Builder $query): Builder
     {
+        $remindableOrderTypes = collect(OrderTypeEnum::cases())
+            ->filter(fn (OrderTypeEnum $case) => ! $case->isPurchase()
+                && bccomp($case->multiplier(), '1') === 0
+            )
+            ->map(fn (OrderTypeEnum $case) => $case->value)
+            ->all();
+
         return $query
             ->whereNotNull('invoice_number')
             ->where('is_locked', true)
-            ->whereNotState('payment_state', Paid::class)
             ->where('balance', '>', 0)
+            ->whereNotState('payment_state', [Paid::class, InPayment::class, InOpenPaymentRun::class])
+            ->whereHas(
+                'orderType',
+                fn (Builder $query) => $query->whereIn('order_type_enum', $remindableOrderTypes)
+            )
+            // Direct debit invoices are collected by us, so they only become
+            // remindable once at least one debit run for them has failed.
+            ->where(fn (Builder $query) => $query
+                ->whereRelation('paymentType', 'is_direct_debit', false)
+                ->orWhereHas(
+                    'paymentRuns',
+                    fn (Builder $query) => $query
+                        ->where('payment_run_type_enum', PaymentRunTypeEnum::DirectDebit)
+                        ->where('state', NotSuccessful::$name)
+                )
+            )
             ->whereHasMailablePaymentReminderAddress();
     }
 
@@ -1461,6 +1723,53 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     }
 
     // Protected methods
+    /**
+     * Rounding every rate on its own can miss the rounded vat of the whole order by a
+     * cent once shipping is split over several rates. The missing cents go to the rates
+     * with the largest rounding remainder, so the vat totals add up to the order.
+     */
+    protected function balanceRoundedTotalVats(Collection $positionsByVatRate): void
+    {
+        $exactVats = $positionsByVatRate->mapWithKeys(
+            fn (OrderPosition $item): array => [
+                (string) ($item->vat_rate_id ?? $item->vat_rate_percentage) => bcmul(
+                    $item->total_net_price ?? 0,
+                    $item->vat_rate_percentage,
+                    9
+                ),
+            ]
+        );
+        $totalVats = collect($this->total_vats);
+        $exactTotalVat = $exactVats->reduce(fn (string $carry, string $vat): string => bcadd($carry, $vat, 9), '0');
+        $roundedTotalVat = $totalVats
+            ->reduce(fn (string $carry, array $vat): string => bcadd($carry, $vat['total_vat_price'], 9), '0');
+        $cents = bcmul(bcsub(bcround($exactTotalVat, 2), $roundedTotalVat, 9), 100, 0);
+
+        if (bccomp($cents, 0) === 0) {
+            return;
+        }
+
+        $isMissing = bccomp($cents, 0) === 1;
+        $remainders = $totalVats->map(
+            fn (array $vat): string => bcsub(
+                $exactVats->get((string) ($vat['vat_rate_id'] ?? $vat['vat_rate_percentage'])) ?? 0,
+                $vat['total_vat_price'],
+                9
+            )
+        );
+        $indexes = ($isMissing ? $remainders->sortDesc() : $remainders->sort())
+            ->keys()
+            ->take((int) ltrim($cents, '-'));
+        $step = $isMissing ? '0.01' : '-0.01';
+
+        $this->total_vats = $totalVats
+            ->map(fn (array $vat, int $index): array => $indexes->contains($index)
+                ? array_merge($vat, ['total_vat_price' => bcadd($vat['total_vat_price'], $step, 2)])
+                : $vat
+            )
+            ->toArray();
+    }
+
     protected function makeAllSearchableUsing(Builder $query): Builder
     {
         return $query->with(

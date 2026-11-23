@@ -30,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\EloquentSortable\Sortable;
@@ -39,6 +40,8 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
 {
     use CascadeSoftDeletes, Commentable, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations,
         HasSerialNumberRange, HasTags, HasTenantAssignment, HasUserModification, HasUuid, LogsActivity, SortableTrait;
+
+    protected static bool $recalculatesSlugPositions = true;
 
     public array $sortable = [
         'order_column_name' => 'sort_number',
@@ -80,12 +83,26 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
                         ]);
                 }
 
-                $orderPosition->order->recalculateOrderPositionSlugPositions();
+                if (static::$recalculatesSlugPositions) {
+                    $orderPosition->order->recalculateOrderPositionSlugPositions();
+                }
             }
         });
     }
 
     // Public static methods
+    public static function withoutSlugPositionRecalculation(callable $callback): mixed
+    {
+        $previous = static::$recalculatesSlugPositions;
+        static::$recalculatesSlugPositions = false;
+
+        try {
+            return $callback();
+        } finally {
+            static::$recalculatesSlugPositions = $previous;
+        }
+    }
+
     public static function aggregateColumns(string $type): array
     {
         return match ($type) {
@@ -129,6 +146,8 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         return [
             'customer_delivery_date',
             'possible_delivery_date',
+            'system_delivery_date',
+            'system_delivery_date_end',
             'created_at',
             'updated_at',
         ];
@@ -152,6 +171,8 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
             'vat_rate_percentage' => Percentage::class,
             'customer_delivery_date' => 'date:Y-m-d',
             'possible_delivery_date' => 'date:Y-m-d',
+            'system_delivery_date' => 'date:Y-m-d',
+            'system_delivery_date_end' => 'date:Y-m-d',
             'product_prices' => 'array',
             'post_on_credit_account' => CreditAccountPostingEnum::class,
             'is_alternative' => 'boolean',
@@ -268,6 +289,11 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         return $this->belongsTo(Tenant::class);
     }
 
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
+    }
+
     public function vatRate(): BelongsTo
     {
         return $this->belongsTo(VatRate::class);
@@ -320,6 +346,22 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     public function getTagsAttribute(): Collection
     {
         return $this->tags()->get();
+    }
+
+    protected function performancePeriodEnd(): Attribute
+    {
+        return Attribute::get(
+            fn (): ?Carbon => $this->system_delivery_date
+                ? $this->system_delivery_date_end
+                : $this->order?->system_delivery_date_end
+        );
+    }
+
+    protected function performancePeriodStart(): Attribute
+    {
+        return Attribute::get(
+            fn (): ?Carbon => $this->system_delivery_date ?? $this->order?->system_delivery_date
+        );
     }
 
     protected function slugPosition(): Attribute

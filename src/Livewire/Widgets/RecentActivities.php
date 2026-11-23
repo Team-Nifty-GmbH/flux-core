@@ -20,9 +20,19 @@ class RecentActivities extends ValueList
     public function calculateList(): void
     {
         $this->items = resolve_static(Activity::class, 'query')
+            ->select([
+                'id',
+                'description',
+                'subject_type',
+                'subject_id',
+                'causer_type',
+                'causer_id',
+                'created_at',
+            ])
             ->with(['causer:id,name', 'subject'])
             ->whereNot('event', 'visit')
             ->latest()
+            ->latest('id')
             ->limit($this->limit)
             ->get()
             ->map(fn (Activity $item) => [
@@ -63,9 +73,12 @@ class RecentActivities extends ValueList
     #[Renderless]
     public function hasMore(): bool
     {
-        return $this->limit < resolve_static(Activity::class, 'query')
+        return resolve_static(Activity::class, 'query')
             ->whereNot('event', 'visit')
-            ->count();
+            ->latest()
+            ->offset($this->limit)
+            ->limit(1)
+            ->exists();
     }
 
     #[Renderless]
@@ -76,16 +89,17 @@ class RecentActivities extends ValueList
         $this->calculateList();
     }
 
-    protected function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Activity::class, 'getBroadcastChannel')
-                . ',.ActivityCreated' => 'calculateList',
-        ];
-    }
-
     protected function hasLoadMore(): bool
     {
         return true;
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Activity::class) => [
+                Activity::class => ['created'],
+            ],
+        ];
     }
 }

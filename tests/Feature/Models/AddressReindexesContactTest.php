@@ -1,0 +1,107 @@
+<?php
+
+use FluxErp\Models\Address;
+use FluxErp\Models\Contact;
+use Laravel\Scout\EngineManager;
+use Laravel\Scout\Engines\NullEngine;
+
+beforeEach(function (): void {
+    // The collection engine reads the database instead of an index, so it can
+    // not tell whether a model was handed to the engine at all.
+    $this->engine = new class() extends NullEngine
+    {
+        public array $updated = [];
+
+        public function update($models): void
+        {
+            foreach ($models as $model) {
+                // Keyed by class, a contact and an address share the same ids.
+                $this->updated[] = $model::class . ':' . $model->getKey();
+            }
+        }
+    };
+
+    $engine = $this->engine;
+
+    app(EngineManager::class)->extend('spy', fn () => $engine);
+    config()->set('scout.driver', 'spy');
+    config()->set('scout.queue', false);
+});
+
+test('a new main address hands its contact to the search index', function (): void {
+    $contact = Contact::factory()->create();
+    $this->engine->updated = [];
+
+    Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+        'lastname' => 'Penkova',
+    ]);
+
+    expect($this->engine->updated)->toContain(Contact::class . ':' . $contact->getKey());
+});
+
+test('a renamed main address hands its contact to the search index', function (): void {
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+        'lastname' => 'Penkova',
+    ]);
+    $this->engine->updated = [];
+
+    $address->update(['lastname' => 'Petrova']);
+
+    expect($this->engine->updated)->toContain(Contact::class . ':' . $contact->getKey());
+});
+
+test('a moved main address hands its contact to the search index', function (): void {
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+        'street' => 'Am Ried 16 b',
+    ]);
+    $this->engine->updated = [];
+
+    $address->fresh()->update(['street' => 'Lerchenweg 2', 'zip' => '87448', 'city' => 'Waltenhofen']);
+
+    expect($this->engine->updated)->toContain(Contact::class . ':' . $contact->getKey());
+});
+
+test('a main address moved to another contact hands its old contact to the search index', function (): void {
+    $oldContact = Contact::factory()->create();
+    $newContact = Contact::factory()->create();
+    $address = Address::factory()->create([
+        'contact_id' => $oldContact->getKey(),
+        'is_main_address' => true,
+    ]);
+    $remaining = Address::factory()->create([
+        'contact_id' => $oldContact->getKey(),
+        'is_main_address' => false,
+    ]);
+    $this->engine->updated = [];
+
+    $address->fresh()->update(['contact_id' => $newContact->getKey()]);
+
+    expect($this->engine->updated)->toContain(Contact::class . ':' . $oldContact->getKey())
+        ->and($oldContact->fresh()->main_address_id)->toBe($remaining->getKey());
+});
+
+test('a secondary address leaves its contact alone', function (): void {
+    $contact = Contact::factory()->create();
+    Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+    $this->engine->updated = [];
+
+    Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => false,
+        'is_invoice_address' => false,
+        'is_delivery_address' => false,
+    ]);
+
+    expect($this->engine->updated)->not->toContain(Contact::class . ':' . $contact->getKey());
+});

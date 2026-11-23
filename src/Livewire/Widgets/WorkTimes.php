@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Models\WorkTime;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 
@@ -23,5 +24,14 @@ class WorkTimes extends MyWorkTimes
     {
         $this->skipRender();
         $this->calculateByTimeFrame();
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(WorkTime::class) => [
+                WorkTime::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
     }
 }

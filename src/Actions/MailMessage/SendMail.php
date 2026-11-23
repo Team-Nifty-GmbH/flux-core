@@ -2,12 +2,15 @@
 
 namespace FluxErp\Actions\MailMessage;
 
+use FluxErp\Actions\Communication\CreateCommunication;
 use FluxErp\Actions\DispatchableFluxAction;
+use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Mail\GenericMail;
 use FluxErp\Models\Communication;
 use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\MailAccount;
 use FluxErp\Rulesets\MailMessage\SendMailRuleset;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
@@ -18,6 +21,13 @@ use Throwable;
 
 class SendMail extends DispatchableFluxAction
 {
+    protected ?int $communicationId = null;
+
+    protected array $dontTrim = [
+        'html_body',
+        'text_body',
+    ];
+
     public static function models(): array
     {
         return [Communication::class];
@@ -28,9 +38,17 @@ class SendMail extends DispatchableFluxAction
         return SendMailRuleset::class;
     }
 
+    public function forCommunication(Communication $communication): static
+    {
+        $this->communicationId = $communication->getKey();
+
+        return $this;
+    }
+
     public function performAction(): array
     {
         $mail = GenericMail::make($this->data, $this->getData('blade_parameters'));
+        $mail->communicationId = $this->resolveCommunication()->getKey();
 
         $mailer = Mail::mailer();
         $useDefaultMailer = true;
@@ -44,7 +62,11 @@ class SendMail extends DispatchableFluxAction
                 $mailer = $mailAccount->mailer();
                 $mail->from(
                     $mailAccount->smtp_email ?? config('mail.from.address'),
-                    auth()->user()?->name ?? $mailAccount->smtp_email ?? config('mail.from.address')
+                    $this->getData('from_name')
+                        ?: $mailAccount->smtp_from_name
+                        ?: auth()->user()?->name
+                        ?? $mailAccount->smtp_email
+                        ?? config('mail.from.address')
                 );
                 $useDefaultMailer = false;
             }
@@ -67,6 +89,8 @@ class SendMail extends DispatchableFluxAction
                 'message' => __('Email(s) sent successfully!'),
             ];
         } catch (Throwable $e) {
+            $mail->failed($e);
+
             return [
                 'success' => false,
                 'message' => __('Failed to send email!'),
@@ -128,6 +152,41 @@ class SendMail extends DispatchableFluxAction
         $this->data['to'] = Arr::wrap($this->getData('to') ?? []);
         $this->data['cc'] = Arr::wrap($this->getData('cc') ?? []);
         $this->data['bcc'] = Arr::wrap($this->getData('bcc') ?? []);
+    }
+
+    protected function resolveCommunication(): Communication
+    {
+        $communication = $this->communicationId
+            ? resolve_static(Communication::class, 'query')
+                ->whereKey($this->communicationId)
+                ->where(
+                    fn (Builder $query) => $query
+                        ->whereNull('message_id')
+                        ->orWhereNotNull('send_error')
+                )
+                ->where('communication_type_enum', CommunicationTypeEnum::Mail)
+                ->first()
+            : null;
+
+        return $communication ?? CreateCommunication::make([
+            'communication_type_enum' => CommunicationTypeEnum::Mail,
+            'mail_account_id' => $this->getData('mail_account_id'),
+            'to' => $this->getData('to'),
+            'cc' => $this->getData('cc'),
+            'bcc' => $this->getData('bcc'),
+            'subject' => $this->getData('subject'),
+            'text_body' => $this->getData('text_body'),
+            'html_body' => $this->getData('html_body'),
+            'communicatables' => array_map(
+                fn (array $communicatable): array => Arr::only(
+                    $communicatable,
+                    ['communicatable_type', 'communicatable_id']
+                ),
+                $this->getData('communicatables') ?? []
+            ),
+        ])
+            ->validate()
+            ->execute();
     }
 
     protected function validateData(): void

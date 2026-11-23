@@ -19,12 +19,14 @@ use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\Mentionable;
 use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Model\Trackable;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
@@ -32,7 +34,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable
 {
     use Commentable, Communicatable, Filterable, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange,
-        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, SoftDeletes, Trackable;
+        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Mentionable, SoftDeletes, Trackable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -64,6 +66,11 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
     }
 
     // Public static methods
+    public static function mentionTypeIcon(): string
+    {
+        return 'chat-bubble-left-right';
+    }
+
     public static function scoutIndexSettings(): ?array
     {
         return static::baseScoutIndexSettings() ?? [
@@ -107,6 +114,25 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
     }
 
     // Public methods
+    public function broadcastOn(string $event): array
+    {
+        return array_merge(
+            Arr::wrap(parent::broadcastOn($event)),
+            $this->recordBroadcastChannels(
+                User::class,
+                match ($event) {
+                    'created', 'trashed' => [],
+                    default => $this->relationLoaded('users')
+                        ? $this->users->modelKeys()
+                        : resolve_static(TicketUser::class, 'query')
+                            ->where('ticket_id', $this->getKey())
+                            ->pluck('user_id')
+                            ->all(),
+                }
+            )
+        );
+    }
+
     public function costColumn(): string
     {
         return 'total_cost';

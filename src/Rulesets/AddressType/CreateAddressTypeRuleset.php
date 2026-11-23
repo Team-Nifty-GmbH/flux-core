@@ -24,7 +24,6 @@ class CreateAddressTypeRuleset extends FluxRuleset
             ],
             'name' => 'required|string|max:255',
             'is_locked' => 'boolean',
-            'is_unique' => 'boolean',
 
             'tenants' => 'array|nullable',
             'tenants.*' => [

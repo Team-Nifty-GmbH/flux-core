@@ -10,6 +10,7 @@ use FluxErp\Livewire\Forms\CountryForm;
 use FluxErp\Models\Country;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
+use FluxErp\Models\VatRate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -62,7 +63,7 @@ class Countries extends CountryList
         try {
             $this->country->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->country);
 
             return false;
         }
@@ -86,7 +87,7 @@ class Countries extends CountryList
         try {
             $this->country->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->country);
 
             return false;
         }
@@ -105,6 +106,10 @@ class Countries extends CountryList
                     ->get(['id', 'name'])
                     ->toArray(),
                 'currencies' => resolve_static(Currency::class, 'query')
+                    ->get(['id', 'name'])
+                    ->toArray(),
+                'vatRates' => resolve_static(VatRate::class, 'query')
+                    ->where('is_tax_exemption', true)
                     ->get(['id', 'name'])
                     ->toArray(),
             ]

@@ -24,6 +24,7 @@ use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\Mentionable;
 use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Model\Trackable;
 use FluxErp\Traits\Scout\Searchable;
@@ -31,7 +32,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as MediaLibraryMedia;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
@@ -39,7 +42,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, IsSubscribable, Targetable
 {
     use Categorizable, Commentable, Filterable, HasFrontendAttributes, HasPackageFactory, HasStates, HasTags,
-        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, SoftDeletes, Trackable;
+        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Mentionable, SoftDeletes, Trackable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -53,10 +56,17 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
                 $task->progress = 1;
             }
 
+            $timezone = data_get(auth()->user(), 'timezone')
+                ?? config('flux.display_timezone')
+                ?? config('app.timezone');
+
             if ($task->start_date) {
-                $newStartDatetime = $task->start_time
-                    ? $task->start_date->copy()->setTimeFromTimeString($task->start_time)
-                    : $task->start_date->copy()->startOfDay();
+                $startDate = $task->start_date->copy()->shiftTimezone($timezone);
+                $newStartDatetime = ($task->start_time
+                    ? $startDate->setTimeFromTimeString($task->start_time)
+                    : $startDate->startOfDay()
+                )
+                    ->setTimezone(config('app.timezone'));
 
                 if ($task->start_datetime?->timestamp !== $newStartDatetime->timestamp) {
                     $task->start_reminder_sent_at = null;
@@ -70,9 +80,12 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             }
 
             if ($task->due_date) {
-                $newDueDatetime = $task->due_time
-                    ? $task->due_date->copy()->setTimeFromTimeString($task->due_time)
-                    : $task->due_date->copy()->endOfDay();
+                $dueDate = $task->due_date->copy()->shiftTimezone($timezone);
+                $newDueDatetime = ($task->due_time
+                    ? $dueDate->setTimeFromTimeString($task->due_time)
+                    : $dueDate->endOfDay()
+                )
+                    ->setTimezone(config('app.timezone'));
 
                 if ($task->due_datetime?->timestamp !== $newDueDatetime->timestamp) {
                     $task->due_reminder_sent_at = null;
@@ -223,6 +236,26 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     }
 
     // Public methods
+    public function broadcastOn(string $event): array
+    {
+        return array_merge(
+            Arr::wrap(parent::broadcastOn($event)),
+            $this->recordBroadcastChannels(User::class, [
+                $this->responsible_user_id,
+                data_get($this->getPrevious(), 'responsible_user_id'),
+                ...match ($event) {
+                    'created', 'trashed' => [],
+                    default => $this->relationLoaded('users')
+                        ? $this->users->modelKeys()
+                        : resolve_static(TaskUser::class, 'query')
+                            ->where('task_id', $this->getKey())
+                            ->pluck('user_id')
+                            ->all(),
+                },
+            ])
+        );
+    }
+
     public function costColumn(): string
     {
         return 'total_cost';
@@ -254,8 +287,7 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     public function registerMediaConversions(?MediaLibraryMedia $media = null): void
     {
         $this->addMediaConversion('thumb')
-            ->width(368)
-            ->height(232)
+            ->fit(Fit::Max, 368, 232)
             ->optimize()
             ->nonQueued()
             ->performOnCollections('files');

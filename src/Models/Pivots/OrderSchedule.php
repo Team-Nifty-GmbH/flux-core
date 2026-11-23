@@ -13,7 +13,12 @@ class OrderSchedule extends FluxPivot
     protected static function booted(): void
     {
         static::deleting(function (OrderSchedule $pivot): void {
-            if (! static::query()->where('schedule_id', $pivot->schedule_id)->whereKeyNot($pivot)->exists()) {
+            // A cascaded delete loads the pivot without its key, so compare by order instead
+            if (! static::query()
+                ->where('schedule_id', $pivot->schedule_id)
+                ->where('order_id', '!=', $pivot->order_id)
+                ->exists()
+            ) {
                 $pivot->schedule()->delete();
             }
         });

@@ -95,7 +95,7 @@ test('create contact maximum', function (): void {
         'payment_reminder_days_1' => rand(1, 1024),
         'payment_reminder_days_2' => rand(1, 1024),
         'payment_reminder_days_3' => rand(1, 1024),
-        'discount_days' => rand(0, 1024),
+        'discount_days' => rand(1, 1024),
         'discount_percent' => rand(1, 100) / 100,
         'credit_line' => rand(0, 8192),
         'has_sensitive_reminder' => true,

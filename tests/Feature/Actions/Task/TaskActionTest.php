@@ -65,3 +65,98 @@ test('delete task', function (): void {
 
     expect($result)->toBeTrue();
 });
+
+test('update task without dates fails validation', function (): void {
+    $task = Task::factory()->create();
+
+    UpdateTask::assertValidationErrors([
+        'id' => $task->getKey(),
+        'name' => 'Renamed',
+    ], ['start_date', 'due_date']);
+});
+
+test('update task dates without times keeps the times and reminders', function (): void {
+    $task = Task::factory()->create([
+        'start_date' => '2026-11-02',
+        'start_time' => '09:30:00',
+        'has_start_reminder' => true,
+        'start_reminder_minutes_before' => 30,
+        'due_date' => '2026-11-06',
+        'due_time' => '16:00:00',
+        'has_due_reminder' => true,
+        'due_reminder_minutes_before' => 60,
+    ]);
+
+    UpdateTask::make([
+        'id' => $task->getKey(),
+        'start_date' => '2026-11-03',
+        'due_date' => '2026-11-09',
+    ])
+        ->validate()
+        ->execute();
+
+    expect($task->refresh())
+        ->start_date->toDateString()->toBe('2026-11-03')
+        ->start_time->toBe('09:30:00')
+        ->has_start_reminder->toBeTrue()
+        ->start_reminder_minutes_before->toBe(30)
+        ->due_date->toDateString()->toBe('2026-11-09')
+        ->due_time->toBe('16:00:00')
+        ->has_due_reminder->toBeTrue()
+        ->due_reminder_minutes_before->toBe(60);
+});
+
+test('update task clearing a date turns its reminder off', function (): void {
+    $task = Task::factory()->create([
+        'start_date' => '2026-11-02',
+        'has_start_reminder' => true,
+        'start_reminder_minutes_before' => 30,
+        'due_date' => '2026-11-06',
+        'has_due_reminder' => true,
+        'due_reminder_minutes_before' => 60,
+    ]);
+
+    UpdateTask::make([
+        'id' => $task->getKey(),
+        'start_date' => null,
+        'due_date' => '2026-11-06',
+    ])
+        ->validate()
+        ->execute();
+
+    expect($task->refresh())
+        ->start_date->toBeNull()
+        ->has_start_reminder->toBeFalse()
+        ->due_date->toDateString()->toBe('2026-11-06')
+        ->has_due_reminder->toBeTrue()
+        ->due_reminder_minutes_before->toBe(60);
+});
+
+test('create task rejects reminder minutes above the column limit', function (): void {
+    CreateTask::assertValidationErrors([
+        'name' => 'Far reminder',
+        'start_date' => '2026-04-01',
+        'has_start_reminder' => true,
+        'start_reminder_minutes_before' => 4294967296,
+        'due_date' => '2026-04-30',
+        'has_due_reminder' => true,
+        'due_reminder_minutes_before' => 4294967296,
+    ], ['start_reminder_minutes_before', 'due_reminder_minutes_before']);
+});
+
+test('update task rejects reminder minutes above the column limit', function (): void {
+    $task = Task::factory()->create([
+        'start_date' => '2026-04-01',
+        'due_date' => '2026-04-30',
+    ]);
+
+    UpdateTask::assertValidationErrors([
+        'id' => $task->getKey(),
+        'start_date' => '2026-04-01',
+        'has_start_reminder' => true,
+        'start_reminder_minutes_before' => 4294967296,
+        'due_date' => '2026-04-30',
+        'has_due_reminder' => true,
+        'due_reminder_minutes_before' => 4294967296,
+    ], ['start_reminder_minutes_before', 'due_reminder_minutes_before']);
+});

@@ -1,112 +1,93 @@
 <?php
 
-use FluxErp\Facades\Action;
-use FluxErp\Facades\Widget;
-use FluxErp\Htmlables\TabButton;
-use FluxErp\Livewire\Dashboard\Dashboard;
-use FluxErp\Livewire\Product\Product;
+use FluxErp\Console\Commands\Init\InitPermissions;
 use FluxErp\Models\Permission;
-use FluxErp\Traits\Livewire\WithTabs;
-use Illuminate\Support\Facades\Event;
-use Livewire\Component;
-use Livewire\Livewire;
-use function Livewire\invade;
+use FluxErp\Models\Role;
+use FluxErp\Notifications\NewActionPermissionsNotification;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 
-test('init permissions', function (): void {
-    $actionsWithPermission = 0;
-    foreach (Action::all() as $action) {
-        if ($action['class']::hasPermission()) {
-            $actionsWithPermission++;
-        }
-    }
+test('creates a permission for every action, model, route, widget, tab and print view', function (): void {
+    Artisan::call(InitPermissions::class);
 
-    $finder = app('livewire.finder');
-    $componentTabs = [];
-    foreach (invade($finder)->classComponents as $component) {
-        if (! in_array(WithTabs::class, class_uses_recursive($component))) {
-            continue;
-        }
+    $permissions = Permission::query()->get(['name', 'guard_name']);
+    $prefixed = ['action', 'model', 'print', 'tab', 'widget'];
+    $prefixes = $permissions->pluck('name')->map(fn (string $name): string => strtok($name, '.'))->unique();
 
-        $componentInstance = new $component();
-        foreach ($componentInstance->getTabs() as $tab) {
-            $componentTabs[] = 'tab.' . $tab->component;
-        }
-    }
+    expect($prefixes->intersect($prefixed)->sort()->values()->all())->toBe($prefixed)
+        ->and($prefixes->diff($prefixed)->all())->not->toBe([])
+        ->and($permissions->pluck('guard_name')->unique()->sort()->values()->all())->toBe(['sanctum', 'token', 'web'])
+        ->and($permissions->where('name', 'action.order.create')->pluck('guard_name')->sort()->values()->all())
+        ->toBe(['sanctum', 'token', 'web'])
+        ->and($permissions->pluck('name'))->toContain('model.order.get');
+});
 
-    // Add Custom Widget
-    Livewire::component('custom-widget-that-never-exists', new class() extends Component
-    {
-        use FluxErp\Traits\Livewire\Widget\Widgetable;
+test('running it twice changes nothing', function (): void {
+    Artisan::call(InitPermissions::class);
+    $first = Permission::query()->orderBy('guard_name')->orderBy('name')->get(['name', 'guard_name'])->toArray();
 
-        public static function dashboardComponent(): string
-        {
-            return Dashboard::class;
-        }
+    Artisan::call(InitPermissions::class);
+    $second = Permission::query()->orderBy('guard_name')->orderBy('name')->get(['name', 'guard_name'])->toArray();
 
-        public static function getLabel(): string
-        {
-            return 'Custom Widget';
-        }
+    expect($first)->toBe($second);
+});
 
-        public function render()
-        {
-            return <<<'blade'
-                    <div id="custom-widget">Hello from custom widget</div>
-                blade;
+test('does not reload the permission table once per permission', function (): void {
+    $reads = 0;
+
+    DB::listen(function (QueryExecuted $query) use (&$reads): void {
+        if (str_contains($query->sql, 'from `permissions`')) {
+            $reads++;
         }
     });
-    Widget::register('custom-widget-that-never-exists', 'custom-widget-that-never-exists');
 
-    // Add Custom Tab
-    Event::listen('tabs.rendering: ' . Product::class, function (Component $component): void {
-        $component->mergeTabsToRender([
-            TabButton::make('custom-tab-that-never-exists')->text('Custom Tab'),
-        ]);
-    });
+    Artisan::call(InitPermissions::class);
 
-    // Add unused permission
-    Permission::create(['name' => 'unused.permission']);
-    $this->assertDatabaseHas('permissions', ['name' => 'unused.permission']);
+    expect($reads)->toBeLessThan(50)
+        ->and(Permission::query()->count())->toBeGreaterThan(1000);
+});
 
-    // Execute artisan command
-    $this->artisan('init:permissions')
-        ->assertExitCode(0)
-        ->expectsOutput('Registering action permissions for guard web…')
-        ->expectsOutput('Registering action permissions for guard sanctum…')
-        ->expectsOutput('Registering route permissions…')
-        ->expectsOutput('Registering widget permissions…')
-        ->expectsOutput('Registering tab permissions…');
+test('lists newly created action permissions and notifies super admins once', function (): void {
+    Artisan::call(InitPermissions::class);
 
-    $this->assertDatabaseCount('roles', count(config('auth.guards')));
+    Permission::query()->where('name', 'action.order.create')->delete();
+    $role = Role::query()->create(['name' => 'Sales', 'guard_name' => 'web']);
+    $this->user->assignRole(Role::findByName('Super Admin', 'web'));
+    Notification::fake();
 
-    expect(Permission::query()
-        ->whereNot('name', 'like', 'widget.%')
-        ->whereNot('name', 'like', 'action.%')
-        ->whereNot('name', 'like', 'tab.%')
-        ->count())->toBeGreaterThan(0);
+    Artisan::call(InitPermissions::class);
 
-    // Assert all action permissions created
-    expect(Permission::query()
-        ->where('guard_name', 'web')
-        ->where('name', 'like', 'action.%')
-        ->count())->toEqual($actionsWithPermission);
-    expect(Permission::query()
-        ->where('guard_name', 'sanctum')
-        ->where('name', 'like', 'action.%')
-        ->count())->toEqual($actionsWithPermission);
+    expect(Artisan::output())->toContain('action.order.create')
+        ->and($role->refresh()->hasPermissionTo('action.order.create'))->toBeFalse();
 
-    // Assert all widget permissions created
-    expect(Permission::query()->where('name', 'like', 'widget.%')->count())->toEqual(count(Widget::all()));
+    Notification::assertSentToTimes($this->user, NewActionPermissionsNotification::class, 1);
+    Notification::assertSentTo(
+        $this->user,
+        NewActionPermissionsNotification::class,
+        fn (NewActionPermissionsNotification $notification): bool => substr_count(
+            $notification->toArray($this->user)['description'],
+            'action.order.create'
+        ) === 1
+    );
+});
 
-    // Assert all tab permissions created (plus one for custom tab)
-    expect(Permission::query()->where('name', 'like', 'tab.%')->count())->toEqual(count(array_unique($componentTabs)) + 1);
+test('does not notify when no action permission is new', function (): void {
+    Artisan::call(InitPermissions::class);
+    $this->user->assignRole(Role::findByName('Super Admin', 'web'));
+    Notification::fake();
 
-    // Assert custom widget permission created
-    $this->assertDatabaseHas('permissions', ['name' => 'widget.custom-widget-that-never-exists']);
+    Artisan::call(InitPermissions::class);
 
-    // Assert custom tab permission created
-    $this->assertDatabaseHas('permissions', ['name' => 'tab.custom-tab-that-never-exists']);
+    Notification::assertNothingSent();
+});
 
-    // Assert unused permission removed
-    $this->assertDatabaseMissing('permissions', ['name' => 'unused.permission']);
+test('does not notify on a fresh install', function (): void {
+    $this->user->assignRole(Role::findOrCreate('Super Admin', 'web'));
+    Notification::fake();
+
+    expect(Artisan::call(InitPermissions::class))->toBe(0);
+
+    Notification::assertNothingSent();
 });

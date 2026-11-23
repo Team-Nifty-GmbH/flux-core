@@ -11,12 +11,14 @@ use FluxErp\Models\Order;
 use FluxErp\Models\Project;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Livewire;
 use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
 class ProjectMargin extends ValueBox implements HasWidgetOptions
 {
+    #[Locked]
     public ?int $projectId = null;
 
     public static function getCategory(): ?string
@@ -32,7 +34,7 @@ class ProjectMargin extends ValueBox implements HasWidgetOptions
     #[Renderless]
     public function calculateSum(): void
     {
-        $this->sum = Number::format($this->getOrderQuery()->sum('margin'), 2)
+        $this->sum = Number::format($this->getOrderQuery()->sum($this->sumColumn()), 2)
             . ' ' . resolve_static(Currency::class, 'default')->symbol;
     }
 
@@ -71,12 +73,28 @@ class ProjectMargin extends ValueBox implements HasWidgetOptions
 
         return $query->where(function (Builder $query): void {
             $query->whereRelation('projects', 'id', $this->projectId)
-                ->orWhereRelation('parent.projects', 'id', $this->projectId);
+                ->orWhereRelation('parent.projects', 'id', $this->projectId)
+                ->orWhereRelation('supplementedProjects', 'projects.id', $this->projectId)
+                ->orWhereRelation('parent.supplementedProjects', 'projects.id', $this->projectId);
         });
     }
 
     protected function icon(): string
     {
         return 'banknotes';
+    }
+
+    protected function sumColumn(): string
+    {
+        return 'margin';
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Order::class) => [
+                Order::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
     }
 }

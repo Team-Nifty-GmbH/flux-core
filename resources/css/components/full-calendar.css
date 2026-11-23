@@ -1,65 +1,45 @@
-.fc .fc-toolbar.fc-header-toolbar {
+/*
+FullCalendar v7 hashes its internal class names, so the calendar is themed through
+the classic theme's CSS variables instead of by overriding `.fc-*` selectors.
+The few stable class names used below are attached explicitly via the `*Class`
+options in resources/js/components/calendar.js.
+*/
+
+:root {
+    --fc-classic-primary: var(--color-indigo-600);
+    --fc-classic-primary-foreground: #fff;
+    --fc-classic-background: var(--color-white);
+    --fc-classic-border: var(--color-gray-200);
+    --fc-classic-strong-border: var(--color-gray-300);
+    --fc-classic-today: --alpha(var(--color-indigo-500) / 12%);
+}
+
+@media not print {
+    [data-color-scheme='dark'] {
+        --fc-classic-background: var(--color-slate-800);
+        --fc-classic-faint: var(--color-slate-700);
+        --fc-classic-border: var(--color-slate-600);
+        --fc-classic-strong-border: var(--color-slate-500);
+        --fc-classic-today: --alpha(var(--color-indigo-400) / 18%);
+    }
+}
+
+.fc-header-toolbar {
     @apply mb-0 p-4;
 }
 
-.fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-top a {
-    @apply rounded-full bg-indigo-600 font-semibold text-white;
+.fc-toolbar-title {
+    @apply text-lg font-semibold;
 }
 
-.fc-day {
-    @apply bg-white text-gray-800 dark:bg-slate-800;
-}
-
-.fc-day.fc-day-other {
-    @apply bg-gray-50 text-gray-500 dark:bg-slate-700;
-}
-
-.fc-daygrid-day-top {
-    @apply text-sm text-gray-700;
-}
-
-.fc-h-event {
-    @apply opacity-75 hover:opacity-100;
-}
-
-.fc-button {
-    @apply capitalize!;
-}
-
-.fc-scrollgrid {
-    @apply border-r-0! border-b-0! border-l-0! border-gray-200!;
-}
-
-.fc-col-header-cell .fc-scrollgrid-sync-inner {
+.fc-day-header {
     @apply py-2 font-semibold;
 }
 
-.fc-col-header-cell-cushion {
-    @apply dark:text-white;
+.fc-block-event {
+    @apply opacity-75 hover:opacity-100;
 }
 
-.fc-event-time {
-    @apply dark:text-white;
-}
-
-.fc-event-title {
-    @apply dark:text-white;
-}
-
-.fc-daygrid-day-number {
-    @apply dark:text-white;
-}
-
-.fc-theme-standard td,
-.fc-theme-standard th,
-.fc-theme-standard .fc-scrollgrid {
-    @apply border dark:border-slate-600;
-}
-
-.fc table {
-    @apply border-collapse text-sm;
-}
-
-.fc-toolbar-title {
-    @apply text-lg! font-semibold!;
+.fc-view {
+    @apply text-sm;
 }

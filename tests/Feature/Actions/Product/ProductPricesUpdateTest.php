@@ -18,7 +18,7 @@ test('creates price in target price list when it has no own price', function ():
     ]);
 
     expect(
-        $product->prices()->where('price_list_id', $targetPriceList->getKey())->exists()
+        $product->ownPrices()->where('price_list_id', $targetPriceList->getKey())->exists()
     )->toBeFalse();
 
     ProductPricesUpdate::make([
@@ -30,7 +30,7 @@ test('creates price in target price list when it has no own price', function ():
         'alteration' => 0,
     ])->validate()->execute();
 
-    $createdPrice = $product->prices()
+    $createdPrice = $product->ownPrices()
         ->where('price_list_id', $targetPriceList->getKey())
         ->first();
 
@@ -67,6 +67,6 @@ test('still updates an existing price in the target price list', function (): vo
 
     expect((float) $existing->fresh()->price)->toBe(10.0)
         ->and(
-            $product->prices()->where('price_list_id', $targetPriceList->getKey())->count()
+            $product->ownPrices()->where('price_list_id', $targetPriceList->getKey())->count()
         )->toBe(1);
 });

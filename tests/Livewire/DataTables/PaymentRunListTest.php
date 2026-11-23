@@ -68,3 +68,66 @@ test('edit is renderless so it does not trigger empty re-render', function (): v
 
     expect($attributes)->not->toBeEmpty('edit() must have #[Renderless] to prevent clearing table data');
 });
+
+test('the list carries the total amount of a payment run', function (): void {
+    $paymentRun = PaymentRun::query()->create([
+        'payment_run_type_enum' => 'money_transfer',
+        'state' => 'open',
+    ]);
+
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
+    $orderType = OrderType::factory()->create();
+
+    $orderData = [
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'tenant_id' => Tenant::default()->getKey(),
+        'language_id' => Language::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'order_type_id' => $orderType->getKey(),
+    ];
+
+    $paymentRun->orders()->attach(Order::factory()->create($orderData)->getKey(), ['amount' => '100.00']);
+    $paymentRun->orders()->attach(Order::factory()->create($orderData)->getKey(), ['amount' => '250.50']);
+
+    expect((float) $paymentRun->refresh()->total_amount)->toBe(350.50);
+});
+
+test('removing an order updates the stored total', function (): void {
+    $paymentRun = PaymentRun::query()->create([
+        'payment_run_type_enum' => 'money_transfer',
+        'state' => 'open',
+    ]);
+
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
+    $orderType = OrderType::factory()->create();
+
+    $orderData = [
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'tenant_id' => Tenant::default()->getKey(),
+        'language_id' => Language::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'order_type_id' => $orderType->getKey(),
+    ];
+
+    $stays = Order::factory()->create($orderData);
+    $goes = Order::factory()->create($orderData);
+
+    $paymentRun->orders()->attach($stays->getKey(), ['amount' => '100.00']);
+    $paymentRun->orders()->attach($goes->getKey(), ['amount' => '250.50']);
+
+    $paymentRun->orders()->detach($goes->getKey());
+
+    expect((float) $paymentRun->refresh()->total_amount)->toBe(100.0);
+});
+
+test('the total amount is enabled by default', function (): void {
+    expect((new PaymentRunList())->enabledCols)->toContain('total_amount');
+});

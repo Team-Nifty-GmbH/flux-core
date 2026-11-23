@@ -87,7 +87,7 @@
     <a
         x-show="downloadUrl"
         x-bind:href="downloadUrl"
-        x-bind:download="downloadName"
+        download
         x-on:click.stop
         target="_blank"
         rel="noopener"

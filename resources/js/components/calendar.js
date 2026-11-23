@@ -1,5 +1,3 @@
-import momentTimezonePlugin from '@fullcalendar/moment-timezone';
-
 const calendar = () => {
     return {
         calendarItem: {},
@@ -376,8 +374,16 @@ const calendar = () => {
                     timeGridPlugin,
                     listPlugin,
                     interactionPlugin,
-                    momentTimezonePlugin,
+                    classicThemePlugin,
                 ],
+                locales: allLocales,
+                // v7 hashes its own class names, so expose stable hooks for the
+                // application stylesheet and the calendar-week title suffix below.
+                viewClass: 'fc-view',
+                toolbarTitleClass: 'fc-toolbar-title',
+                headerToolbarClass: 'fc-header-toolbar',
+                dayHeaderClass: 'fc-day-header',
+                blockEventClass: 'fc-block-event',
                 initialView: 'dayGridMonth',
                 slotDuration: '00:15:00',
                 initialDate: new Date(),
@@ -526,8 +532,7 @@ const calendar = () => {
                         let calendarBadge = document.createElement('div');
                         calendarBadge.className =
                             'size-3 rounded-full shrink-0';
-                        calendarBadge.style.backgroundColor =
-                            info.backgroundColor;
+                        calendarBadge.style.backgroundColor = info.color;
                         leftContent.appendChild(calendarBadge);
                     }
 

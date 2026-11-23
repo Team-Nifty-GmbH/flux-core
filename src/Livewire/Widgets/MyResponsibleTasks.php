@@ -5,6 +5,9 @@ namespace FluxErp\Livewire\Widgets;
 use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Task\TaskList;
+use FluxErp\Models\Pivots\TaskUser;
+use FluxErp\Models\Task;
+use FluxErp\Models\User;
 use FluxErp\States\Task\TaskState;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\Factory;
@@ -53,13 +56,6 @@ class MyResponsibleTasks extends Component implements HasWidgetOptions
                 'hasMore' => $tasks->count() > $this->limit,
             ]
         );
-    }
-
-    public function getListeners(): array
-    {
-        return [
-            'echo-private:' . auth()->user()->broadcastChannel() . ',.TaskLocked' => '$refresh',
-        ];
     }
 
     public function loadMore(): void
@@ -121,5 +117,15 @@ class MyResponsibleTasks extends Component implements HasWidgetOptions
                 'model_type',
                 'model_id',
             ]);
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(User::class, auth()->id()) => [
+                Task::class => ['created', 'updated', 'deleted'],
+                TaskUser::class => ['created', 'deleted'],
+            ],
+        ];
     }
 }

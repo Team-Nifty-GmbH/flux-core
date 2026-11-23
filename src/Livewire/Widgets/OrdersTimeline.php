@@ -123,11 +123,12 @@ class OrdersTimeline extends TimelineChart implements HasWidgetOptions
         return true;
     }
 
-    protected function getListeners(): array
+    protected function liveUpdates(): array
     {
         return [
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderLocked' => 'calculateByTimeFrame',
+            $this->modelChannel(Order::class) => [
+                Order::class => ['created', 'updated', 'deleted'],
+            ],
         ];
     }
 }

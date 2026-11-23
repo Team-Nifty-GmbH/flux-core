@@ -6,6 +6,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 
+// language_code is unique, and parallel workers may have seeded the code already;
+// creating it blindly made this file fail intermittently in CI.
+function languageWithCode(string $code): Language
+{
+    return Language::query()->firstOrCreate(
+        ['language_code' => $code],
+        Language::factory()->make(['language_code' => $code])->toArray()
+    );
+}
+
 test('sets locale from content-language header', function (): void {
     $request = Request::create('/test', 'GET');
     $request->headers->set('content-language', 'fr');
@@ -17,7 +27,7 @@ test('sets locale from content-language header', function (): void {
 });
 
 test('sets locale from accept-language header', function (): void {
-    Language::factory()->create(['language_code' => 'es']);
+    languageWithCode('es');
 
     auth()->logout();
 
@@ -31,7 +41,7 @@ test('sets locale from accept-language header', function (): void {
 });
 
 test('matches base language from accept-language header', function (): void {
-    Language::query()->firstOrCreate(['language_code' => 'de'], Language::factory()->make(['language_code' => 'de'])->toArray());
+    languageWithCode('de');
 
     auth()->logout();
 
@@ -44,7 +54,7 @@ test('matches base language from accept-language header', function (): void {
 });
 
 test('prefers content-language over accept-language header', function (): void {
-    Language::factory()->create(['language_code' => 'es']);
+    languageWithCode('es');
 
     auth()->logout();
 
@@ -58,8 +68,8 @@ test('prefers content-language over accept-language header', function (): void {
 });
 
 test('prefers user language over accept-language header', function (): void {
-    $language = Language::factory()->create(['language_code' => 'it']);
-    Language::factory()->create(['language_code' => 'es']);
+    $language = languageWithCode('it');
+    languageWithCode('es');
 
     $this->user->update(['language_id' => $language->getKey()]);
     $this->user->load('language');
@@ -87,7 +97,7 @@ test('falls back to default language', function (): void {
 });
 
 test('caches language codes as array not collection', function (): void {
-    Language::factory()->create(['language_code' => 'ja']);
+    languageWithCode('ja');
 
     auth()->logout();
     Cache::forget('available_language_codes');

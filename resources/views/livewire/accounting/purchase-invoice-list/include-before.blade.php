@@ -97,15 +97,15 @@
                                 select="label:label|value:contact_id"
                                 unfiltered
                                 :request="[
-                                'url' => route('search', \FluxErp\Models\Address::class),
-                                'method' => 'POST',
-                                'params' => [
-                                    'option-value' => 'contact_id',
-                                    'fields' => ['name', 'contact_id', 'firstname', 'lastname', 'company', 'contact'],
-                                    'where' => [['is_main_address', '=', true]],
-                                    'with' => ['contact.media'],
-                                ],
-                            ]"
+                                    'url' => route('search', \FluxErp\Models\Address::class),
+                                    'method' => 'POST',
+                                    'params' => [
+                                        'option-value' => 'contact_id',
+                                        'fields' => ['name', 'contact_id', 'firstname', 'lastname', 'company', 'contact'],
+                                        'where' => [['is_main_address', '=', true]],
+                                        'with' => ['contact.media'],
+                                    ],
+                                ]"
                             />
                         </div>
                         @canAction(\FluxErp\Actions\Contact\CreateContact::class)
@@ -159,6 +159,9 @@
                                 "
                             />
                         </div>
+                    </div>
+                    <div x-cloak x-show="!$wire.purchaseInvoiceForm.order_id">
+                        <livewire:accounting.assignable-orders />
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <x-input
@@ -267,10 +270,10 @@
                                         select="label:label|value:id"
                                         unfiltered
                                         :request="[
-                                        'url' => route('search', \FluxErp\Models\User::class),
-                                        'method' => 'POST',
-                                        'params' => ['with' => 'media'],
-                                    ]"
+                                            'url' => route('search', \FluxErp\Models\User::class),
+                                            'method' => 'POST',
+                                            'params' => ['with' => 'media'],
+                                        ]"
                                     />
                                 </div>
                                 <div
@@ -357,13 +360,13 @@
                                         select="label:label|value:id"
                                         unfiltered
                                         :request="[
-                                        'url' => route('search', \FluxErp\Models\User::class),
-                                        'method' => 'POST',
-                                        'params' => [
-                                            'with' => 'media',
-                                            'fields' => ['id', 'name', 'email', 'iban', 'bic', 'bank_name', 'account_holder'],
-                                        ],
-                                    ]"
+                                            'url' => route('search', \FluxErp\Models\User::class),
+                                            'method' => 'POST',
+                                            'params' => [
+                                                'with' => 'media',
+                                                'fields' => ['id', 'name', 'email', 'iban', 'bic', 'bank_name', 'account_holder'],
+                                            ],
+                                        ]"
                                     />
                                 </div>
                                 <x-input
@@ -553,14 +556,14 @@
                                                 select="label:label|value:id|description:product_number"
                                                 unfiltered
                                                 :request="[
-                                                'url' => route('search', \FluxErp\Models\Product::class),
-                                                'method' => 'POST',
-                                                'params' => [
-                                                    'whereDoesntHave' => 'children',
-                                                    'fields' => ['id', 'name', 'product_number'],
-                                                    'with' => 'media',
-                                                ],
-                                            ]"
+                                                    'url' => route('search', \FluxErp\Models\Product::class),
+                                                    'method' => 'POST',
+                                                    'params' => [
+                                                        'whereDoesntHave' => 'children',
+                                                        'fields' => ['id', 'name', 'product_number'],
+                                                        'with' => 'media',
+                                                    ],
+                                                ]"
                                             />
                                         </div>
                                     </div>
@@ -581,7 +584,7 @@
                                                 )
                                             "
                                             x-model.number="position.amount"
-                                            :label="__('Amount')"
+                                            :label="__('Quantity')"
                                         />
                                         <x-number
                                             step="0.01"
@@ -639,6 +642,24 @@
                                                 select="label:name|value:id"
                                                 :options="$vatRates"
                                             />
+                                            <span
+                                                class="mt-1 block text-sm font-medium text-red-500"
+                                                x-cloak
+                                                x-show="
+                                                    $wire.$errors.has(
+                                                        'purchaseInvoiceForm.purchase_invoice_positions.' +
+                                                            index +
+                                                            '.vat_rate_id',
+                                                    )
+                                                "
+                                                x-text="
+                                                    $wire.$errors.first(
+                                                        'purchaseInvoiceForm.purchase_invoice_positions.' +
+                                                            index +
+                                                            '.vat_rate_id',
+                                                    )
+                                                "
+                                            ></span>
                                         </div>
                                     </div>
 
@@ -666,18 +687,18 @@
                                             select="label:name|value:id|description:number"
                                             unfiltered
                                             :request="[
-                                            'url' => route('search', \FluxErp\Models\LedgerAccount::class),
-                                            'method' => 'POST',
-                                            'params' => [
-                                                'where' => [
-                                                    [
-                                                        'ledger_account_type_enum',
-                                                        '=',
-                                                        \FluxErp\Enums\LedgerAccountTypeEnum::Expense
+                                                'url' => route('search', \FluxErp\Models\LedgerAccount::class),
+                                                'method' => 'POST',
+                                                'params' => [
+                                                    'where' => [
+                                                        [
+                                                            'ledger_account_type_enum',
+                                                            '=',
+                                                            \FluxErp\Enums\LedgerAccountTypeEnum::Expense
+                                                        ],
                                                     ],
                                                 ],
-                                            ],
-                                        ]"
+                                            ]"
                                         />
                                     </div>
                                 </div>
@@ -841,6 +862,7 @@
                                 },
                                 {
                                     uploadDisabled: '{{ __('Upload not allowed - Read Only') }}',
+                                    tooManyFiles: '{{ __('Too many files at once, please try again') }}',
                                 },
                             ),
                         }"

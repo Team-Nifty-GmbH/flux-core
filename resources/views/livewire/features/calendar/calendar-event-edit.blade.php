@@ -22,7 +22,7 @@
     "
 >
     @php
-        $editComponent = $event->edit_component ?? 'features.calendar.calendar-event';
+        $editComponent = $this->editComponent();
     @endphp
     <x-modal id="edit-event-modal" scope="headless" persistent>
         <div>

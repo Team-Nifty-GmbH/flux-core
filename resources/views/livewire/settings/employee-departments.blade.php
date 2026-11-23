@@ -57,7 +57,7 @@
             <x-select.styled
                 wire:model="employeeDepartmentForm.manager_employee_id"
                 :label="__('Department Manager')"
-                select="label:name|value:id"
+                select="label:label|value:id"
                 unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Employee::class),

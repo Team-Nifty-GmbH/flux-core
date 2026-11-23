@@ -126,4 +126,13 @@ class ContactsByContactOrigin extends CircleChart implements HasWidgetOptions
     {
         return true;
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Contact::class) => [
+                Contact::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

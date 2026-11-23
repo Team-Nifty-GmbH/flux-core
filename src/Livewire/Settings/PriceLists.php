@@ -103,7 +103,7 @@ class PriceLists extends PriceListList
         try {
             $this->priceList->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->priceList);
 
             return false;
         }
@@ -164,7 +164,7 @@ class PriceLists extends PriceListList
         try {
             $this->priceList->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->priceList);
 
             return false;
         }

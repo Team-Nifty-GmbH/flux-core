@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Contact;
 
 use Exception;
+use FluxErp\Actions\Contact\DeleteContact;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ContactForm;
@@ -15,6 +16,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -29,6 +31,9 @@ class Contact extends Component
     public $avatar;
 
     public ContactForm $contact;
+
+    #[Locked]
+    public int $contactId;
 
     public bool $edit = false;
 
@@ -51,6 +56,7 @@ class Contact extends Component
         $this->avatar = $contact->getAvatarUrl();
 
         $this->contact->fill($contact);
+        $this->contactId = $contact->getKey();
     }
 
     public function render(): View|Factory|Application
@@ -81,9 +87,12 @@ class Contact extends Component
     public function delete(): void
     {
         try {
-            $this->contact->delete();
+            DeleteContact::make(['id' => $this->contactId])
+                ->checkPermission()
+                ->validate()
+                ->execute();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->contact);
 
             return;
         }
@@ -95,7 +104,7 @@ class Contact extends Component
     public function getListeners(): array
     {
         $model = app(ContactModel::class);
-        $model->id = $this->contact->id;
+        $model->id = $this->contactId;
         $channel = $model->broadcastChannel(false);
 
         return [
@@ -144,7 +153,9 @@ class Contact extends Component
                 ->isLivewireComponent()
                 ->wireModel('contact'),
             TabButton::make('contact.statistics')
-                ->text(__('Statistics')),
+                ->text(__('Statistics'))
+                ->isLivewireComponent()
+                ->wireModel('contact.id'),
         ];
     }
 
@@ -165,7 +176,7 @@ class Contact extends Component
         try {
             $this->contact->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->contact);
 
             return false;
         }

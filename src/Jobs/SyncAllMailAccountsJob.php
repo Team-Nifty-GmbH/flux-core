@@ -4,10 +4,12 @@ namespace FluxErp\Jobs;
 
 use Cron\CronExpression;
 use FluxErp\Console\Scheduling\Repeatable;
+use FluxErp\Mail\MailDriverManager;
 use FluxErp\Models\MailAccount;
 use FluxErp\Traits\Job\TracksSchedule;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 
@@ -56,7 +58,10 @@ class SyncAllMailAccountsJob implements Repeatable, ShouldQueue
     public function handle(): void
     {
         resolve_static(MailAccount::class, 'query')
-            ->whereNotNull('host')
+            ->where(fn (Builder $query): Builder => $query
+                ->whereNotNull('host')
+                ->orWhereNotIn('protocol', app(MailDriverManager::class)->imapFamilyDriverNames())
+            )
             ->each(fn (MailAccount $mailAccount) => SyncMailAccountJob::dispatch($mailAccount));
     }
 }

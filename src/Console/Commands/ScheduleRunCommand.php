@@ -61,7 +61,12 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 continue;
             }
 
-            $event->description($repeatable->class . ':' . $repeatable->getKey());
+            // Without a timezone of its own the schedule keeps running in app.timezone.
+            $timezone = $repeatable->timezone ?? config('app.timezone');
+
+            if ($repeatable->timezone) {
+                $event->timezone($repeatable->timezone);
+            }
 
             if (
                 is_a($repeatable->class, RepeatableInterface::class, true)
@@ -76,7 +81,7 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
             // still has the past due_at) can pick the same row up and run it again.
             // Re-fetch from the DB and skip when last_run already covers the cron's
             // most recent past occurrence.
-            $event->skip(function () use ($repeatable): bool {
+            $event->skip(function () use ($repeatable, $timezone): bool {
                 if (! $repeatable->refresh()->last_run || ! $repeatable->cron_expression) {
                     return false;
                 }
@@ -84,7 +89,7 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 try {
                     $previousOccurrence = Carbon::instance(
                         (new CronExpression($repeatable->cron_expression))
-                            ->getPreviousRunDate(now()->toDateTime(), 0, true)
+                            ->getPreviousRunDate(now($timezone)->toDateTime(), 0, true)
                     );
                 } catch (Throwable) {
                     return false;
@@ -107,10 +112,10 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
 
             if (data_get($repeatable->cron, 'methods.basic') === FrequenciesEnum::LastDayOfMonth->value) {
                 $parts = explode(' ', $event->expression);
-                $nextRunDate = now()->addMonthNoOverflow()->endOfMonth()
+                $nextRunDate = now($timezone)->addMonthNoOverflow()->endOfMonth()
                     ->setTime((int) $parts[1], (int) $parts[0]);
             } else {
-                $nextRunDate = (new CronExpression($event->expression))->getNextRunDate(now());
+                $nextRunDate = (new CronExpression($event->expression))->getNextRunDate(now($timezone));
             }
 
             // Mark event as overdue
@@ -125,17 +130,27 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 // legacy/migration case (e.g. yearlyOn at 06:00 with due_at at midnight)
                 // where letting the regular scheduler fire would double-run today. For
                 // schedules whose due_at IS a valid cron tick (hourly, everyTwoHours,
-                // monthly, ...), the next future tick is a NEW occurrence and must not
-                // be skipped.
+                // monthly, ...), or that run several times a day, the next future tick
+                // is a NEW occurrence and must not be skipped.
                 $dueAtMatchesCron = false;
+                $runsSeveralTimesADay = false;
                 try {
-                    $dueAtMatchesCron = (new CronExpression($event->expression))
-                        ->isDue($repeatable->due_at);
+                    $cronExpression = new CronExpression($event->expression);
+                    $dueAtMatchesCron = $cronExpression->isDue($repeatable->due_at->copy()->setTimezone($timezone));
+                    $runsSeveralTimesADay = resolve_static(
+                        ScheduleModel::class,
+                        'runsSeveralTimesADay',
+                        [$cronExpression, $nextRunDate]
+                    );
                 } catch (Throwable) {
                     // ignore - treat as no match
                 }
 
-                if (! $dueAtMatchesCron && Carbon::instance($nextRunDate)->isSameDay(now())) {
+                if (
+                    ! $dueAtMatchesCron
+                    && ! $runsSeveralTimesADay
+                    && Carbon::instance($nextRunDate)->isSameDay(now($timezone))
+                ) {
                     if (data_get($repeatable->cron, 'methods.basic') === FrequenciesEnum::LastDayOfMonth->value) {
                         $parts = explode(' ', $event->expression);
                         $nextRunDate = $nextRunDate->copy()->addMonthNoOverflow()->endOfMonth()
@@ -145,6 +160,9 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                     }
                 }
             }
+
+            // The cron is evaluated in the schedule timezone, due_at is stored in app.timezone.
+            $nextRunDate = Carbon::instance($nextRunDate)->setTimezone(config('app.timezone'));
 
             $repeatable->cron_expression = $event->expression;
             $repeatable->save();
@@ -177,7 +195,10 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
         }
 
         // Register repeatables with defaultCron that aren't in the DB
-        $scheduledClasses = $repeatables->pluck('class')->all();
+        $scheduledClasses = resolve_static(ScheduleModel::class, 'query')
+            ->distinct()
+            ->pluck('class')
+            ->all();
 
         Repeatable::all()->each(function (array $repeatable) use ($schedule, $scheduledClasses): void {
             if (in_array($repeatable['class'], $scheduledClasses)) {
@@ -232,7 +253,7 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
         ?array $parameters,
         ?int $scheduleId = null
     ): mixed {
-        return match ($type) {
+        $event = match ($type) {
             RepeatableTypeEnum::Command => $schedule->command($class, $parameters ?? []),
             RepeatableTypeEnum::Job => $schedule->job(tap(
                 $parameters ? new $class(...$parameters) : new $class(),
@@ -246,5 +267,16 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
             RepeatableTypeEnum::Shell => $schedule->exec($class, $parameters ?? []),
             default => null,
         };
+
+        if (is_null($event)) {
+            return null;
+        }
+
+        $name = $scheduleId ? $class . ':' . $scheduleId : $class;
+
+        // Callback events carry no command, so Laravel would report a failure as "Scheduled command []"
+        $event->command ??= $name;
+
+        return $event->name($name);
     }
 }

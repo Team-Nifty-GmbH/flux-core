@@ -432,6 +432,12 @@ function apexCharts($wire) {
                     bar: {
                         borderRadius: 4,
                         borderRadiusApplication: 'end',
+                        // 'all' also rounds the base of a stack by mirroring that segment
+                        // with a CSS transform (transform-box: fill-box). WebKit keeps the
+                        // box of the first animation frame, so in an iOS WKWebView the base
+                        // segments animate below the axis. Rounding only the far end needs
+                        // no mirror.
+                        borderRadiusWhenStacked: 'last',
                         columnWidth: '60%',
                     },
                     pie: {

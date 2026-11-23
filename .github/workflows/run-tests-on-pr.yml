@@ -3,9 +3,31 @@ name: tests
 on:
   push:
     branches: [dev]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/dependabot.yml'
+      - '.github/workflows/build-main-assets.yml'
+      - '.github/workflows/code-standards.yml'
+      - '.github/workflows/dependabot-auto-merge.yml'
+      - '.github/workflows/release.yml'
+      - '.github/workflows/translation-audit.yml'
   pull_request:
     branches: [main, dev]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/dependabot.yml'
+      - '.github/workflows/build-main-assets.yml'
+      - '.github/workflows/code-standards.yml'
+      - '.github/workflows/dependabot-auto-merge.yml'
+      - '.github/workflows/release.yml'
+      - '.github/workflows/translation-audit.yml'
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -20,7 +42,7 @@ env:
 jobs:
   lint:
     name: Lint
-    runs-on: [self-hosted, Linux]
+    runs-on: ubuntu-latest
     container:
       image: ghcr.io/team-nifty-gmbh/flux-ci:php8.5
       credentials:
@@ -59,7 +81,7 @@ jobs:
   unit-feature:
     name: Unit & Feature Tests
     needs: lint
-    runs-on: [self-hosted, Linux]
+    runs-on: ubuntu-latest
     container:
       image: ghcr.io/team-nifty-gmbh/flux-ci:php8.5
       credentials:
@@ -138,7 +160,7 @@ jobs:
   livewire:
     name: Livewire Tests
     needs: lint
-    runs-on: [self-hosted, Linux]
+    runs-on: ubuntu-latest
     container:
       image: ghcr.io/team-nifty-gmbh/flux-ci:php8.5
       credentials:
@@ -214,7 +236,7 @@ jobs:
   browser:
     name: Browser Tests
     needs: lint
-    runs-on: [self-hosted, Linux]
+    runs-on: ubuntu-latest
     container:
       image: ghcr.io/team-nifty-gmbh/flux-ci:php8.5
       credentials:
@@ -258,36 +280,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Fix git ownership
-        run: git config --global --add safe.directory $GITHUB_WORKSPACE
-
-      - name: Configure Composer GitHub auth
-        run: composer config --global github-oauth.github.com ${{ github.token }}
-
-      - name: Change Laravel Version Dependencies
-        run: composer require "laravel/framework:${{ env.LARAVEL_VERSION }}" "orchestra/testbench:${{ env.TESTBENCH_VERSION }}" --no-interaction --no-update
-
-      - name: Install Composer dependencies
-        run: composer install --no-progress --prefer-dist --optimize-autoloader
-
-      - name: Install npm dependencies
-        run: npm i
-
-      - name: Build frontend assets
-        run: npm run build
-
-      - name: Clear Orchestra Testbench Cache
-        run: ./vendor/bin/testbench view:clear
-
-      - name: Create schema
-        run: |
-          ./vendor/bin/testbench migrate --force
-          ./vendor/bin/testbench schema:dump
-
-      - name: Install Playwright Browsers
-        run: npx playwright install chromium
-        env:
-          PLAYWRIGHT_BROWSERS_PATH: /tmp/pw-browsers
+      - name: Prepare
+        uses: ./.github/actions/prepare-browser-tests
+        with:
+          laravel-version: ${{ env.LARAVEL_VERSION }}
+          testbench-version: ${{ env.TESTBENCH_VERSION }}
+          github-token: ${{ github.token }}
 
       - name: Run Browser Tests
         run: composer test-browser
@@ -303,12 +301,3 @@ jobs:
             tests/Browser/Screenshots/
             vendor/orchestra/testbench-core/laravel/storage/logs/
           retention-days: 7
-
-  cleanup:
-    name: Cleanup Docker resources
-    runs-on: [self-hosted, Linux]
-    needs: [unit-feature, livewire, browser]
-    if: always()
-    steps:
-      - name: Prune unused Docker images older than 7 days
-        run: docker image prune -af --filter "until=168h"

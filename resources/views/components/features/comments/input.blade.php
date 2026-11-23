@@ -14,6 +14,7 @@
             },
             {
                 uploadDisabled: '{{ __('Upload not allowed - Read Only') }}',
+                tooManyFiles: '{{ __('Too many files at once, please try again') }}',
             },
         ),
         selectionProxy: {},
@@ -46,12 +47,16 @@
                 })
             "
         >
-            <x-avatar image="{{ route('icons', ['name' => 'user']) }}" xl />
+            <x-avatar image="{{ route('icons', ['name' => 'user']) }}" />
         </div>
         <div class="min-w-0 flex-1">
             <div x-ref="upload">
                 <div x-ref="textarea">
-                    <x-flux::editor class="comment-input" scope="comment" />
+                    <x-flux::editor
+                        class="comment-input"
+                        scope="comment"
+                        :mentionable="\FluxErp\Facades\MentionableType::getRecordMentionableTypes(keysOnly: true)"
+                    />
                 </div>
                 <div class="grow pt-4">
                     @canAction(\FluxErp\Actions\Media\UploadMedia::class)
@@ -75,6 +80,7 @@
                         />
                         <x-button
                             color="indigo"
+                            data-test="comment-submit"
                             x-on:click="
                                 saveComment(
                                     $refs.textarea,
@@ -88,7 +94,7 @@
                                     if (success) clearPond();
                                 })
                             "
-                            spinner="saveComment"
+                            loading="saveComment"
                             wire:loading.attr="disabled"
                             x-bind:disabled="isLoadingFiles.length > 0"
                             :text="auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true ? __('Save internal') : __('Save')"
@@ -109,7 +115,7 @@
                                         if (success) clearPond();
                                     })
                                 "
-                                spinner="saveComment"
+                                loading="saveComment"
                                 x-bind:disabled="isLoadingFiles.length > 0"
                                 wire:loading.attr="disabled"
                                 :text="__('Answer to customer')"

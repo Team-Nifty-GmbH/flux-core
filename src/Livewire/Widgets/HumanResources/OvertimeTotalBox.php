@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Widgets\HumanResources;
 use FluxErp\Livewire\HumanResources\Dashboard;
 use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\Employee;
+use FluxErp\Models\EmployeeDay;
 use Illuminate\Support\Number;
 
 class OvertimeTotalBox extends ValueBox
@@ -58,5 +59,17 @@ class OvertimeTotalBox extends ValueBox
     protected function icon(): string
     {
         return 'clock';
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Employee::class) => [
+                Employee::class => ['created', 'updated', 'deleted'],
+            ],
+            $this->modelChannel(EmployeeDay::class) => [
+                EmployeeDay::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
     }
 }

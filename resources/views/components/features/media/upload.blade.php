@@ -18,16 +18,38 @@
                     this.uploadFiles(event.dataTransfer.files, event)
                 }
             },
-            uploadError() {
+            uploadError(message = null) {
                 this.isUploading = false
                 this.progress = 0
                 $tsui
                     .interaction('dialog')
                     .error(
                         '{{ __('File upload failed') }}',
-                        '{{ __('Your file upload failed. Please try again.') }}',
+                        message ??
+                            '{{ __('Your file upload failed. Please try again.') }}',
                     )
                     .send()
+            },
+            rejectFiles(rejected) {
+                let name = $nuxbe.escapeHtml(rejected.file.name)
+
+                if (rejected.reason === 'size') {
+                    return this.uploadError(
+                        '{{ __('The file :name is :size. The maximum upload size is :max.') }}'
+                            .replace(':name', () => name)
+                            .replace(':size', () => rejected.size)
+                            .replace(':max', () => rejected.maxSize),
+                    )
+                }
+
+                this.uploadError(
+                    '{{ __('The file type of :name is not accepted. Allowed types: :types.') }}'
+                        .replace(':name', () => name)
+                        .replace(
+                            ':types',
+                            () => $nuxbe.escapeHtml(rejected.accept),
+                        ),
+                )
             },
             uploadSuccess(success, files) {
                 this.isUploading = false
@@ -38,6 +60,17 @@
                 this.progress = progress
             },
             uploadFiles(files, event) {
+                let rejected = $nuxbe.validateFiles(files, {
+                    maxSize: {{ \FluxErp\Helpers\Helper::getMaxUploadSizeInBytes() }},
+                    accept: '{{ $attributes->get('accept') }}',
+                })
+
+                if (rejected) {
+                    event.target.value = ''
+
+                    return this.rejectFiles(rejected)
+                }
+
                 this.isUploading = true
                 let $this = this
                 $wire.uploadMultiple(

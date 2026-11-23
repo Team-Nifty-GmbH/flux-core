@@ -7,6 +7,7 @@ use FluxErp\Livewire\Forms\ContactBankConnectionForm;
 use FluxErp\Livewire\Forms\TransactionForm;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -20,7 +21,7 @@ class CreditAccounts extends BankConnections
 
     public ContactBankConnectionForm $contactBankConnection;
 
-    #[Modelable]
+    #[Locked, Modelable]
     public int $contactId;
 
     public array $enabledCols = [
@@ -69,7 +70,7 @@ class CreditAccounts extends BankConnections
         try {
             $this->contactBankConnection->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->contactBankConnection);
 
             return false;
         }
@@ -84,7 +85,7 @@ class CreditAccounts extends BankConnections
         try {
             $this->transactionForm->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->transactionForm);
 
             return false;
         }

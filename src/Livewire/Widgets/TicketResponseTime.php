@@ -192,4 +192,14 @@ class TicketResponseTime extends Component
 
         return 'text-red-600 dark:text-red-400';
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Ticket::class) => [
+                Ticket::class => ['created', 'updated', 'deleted'],
+                Comment::class => ['created'],
+            ],
+        ];
+    }
 }

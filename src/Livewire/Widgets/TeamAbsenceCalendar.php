@@ -69,6 +69,20 @@ class TeamAbsenceCalendar extends Component
         return view('flux::livewire.widgets.team-absence-calendar');
     }
 
+    public function loadData(): void
+    {
+        $this->month = max(1, min(12, $this->month));
+        $this->year = max(1970, min(2100, $this->year));
+
+        $this->monthName = Carbon::create($this->year, $this->month)
+            ->locale(app()->getLocale())
+            ->monthName;
+
+        $this->prepareCalendarDays();
+        $this->loadAbsenceTypes();
+        $this->loadDepartments();
+    }
+
     public function nextMonth(): void
     {
         $this->month++;
@@ -89,20 +103,6 @@ class TeamAbsenceCalendar extends Component
         }
 
         $this->loadData();
-    }
-
-    protected function loadData(): void
-    {
-        $this->month = max(1, min(12, $this->month));
-        $this->year = max(1970, min(2100, $this->year));
-
-        $this->monthName = Carbon::create($this->year, $this->month)
-            ->locale(app()->getLocale())
-            ->monthName;
-
-        $this->prepareCalendarDays();
-        $this->loadAbsenceTypes();
-        $this->loadDepartments();
     }
 
     protected function holidayAbsenceType(): array
@@ -294,5 +294,14 @@ class TeamAbsenceCalendar extends Component
             ->sortBy('name')
             ->values()
             ->toArray();
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(AbsenceRequest::class) => [
+                AbsenceRequest::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
     }
 }

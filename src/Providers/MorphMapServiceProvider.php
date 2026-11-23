@@ -10,6 +10,7 @@ use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
 use FluxErp\Models\AttributeTranslation;
 use FluxErp\Models\BankConnection;
+use FluxErp\Models\BlockedFile;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Models\CalendarUserSetting;
@@ -45,12 +46,18 @@ use FluxErp\Models\Lead;
 use FluxErp\Models\LeadLossReason;
 use FluxErp\Models\LeadState;
 use FluxErp\Models\LedgerAccount;
+use FluxErp\Models\LedgerBooking;
+use FluxErp\Models\Loan;
+use FluxErp\Models\LoanExtraRepayment;
+use FluxErp\Models\LoanInstallment;
 use FluxErp\Models\Location;
 use FluxErp\Models\Log;
+use FluxErp\Models\Lot;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use FluxErp\Models\Media;
 use FluxErp\Models\MediaFolder;
+use FluxErp\Models\Mention;
 use FluxErp\Models\Notification;
 use FluxErp\Models\NotificationSetting;
 use FluxErp\Models\Order;
@@ -87,12 +94,14 @@ use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
 use FluxErp\Models\Pivots\HolidayLocation;
 use FluxErp\Models\Pivots\JobBatchable;
 use FluxErp\Models\Pivots\LedgerAccountTransaction;
+use FluxErp\Models\Pivots\LoanInstallmentTransaction;
 use FluxErp\Models\Pivots\LocationVacationBlackout;
 use FluxErp\Models\Pivots\MailAccountUser;
 use FluxErp\Models\Pivots\MediaFolderModel;
 use FluxErp\Models\Pivots\OrderPaymentRun;
 use FluxErp\Models\Pivots\OrderPositionStockPosting;
 use FluxErp\Models\Pivots\OrderPositionTask;
+use FluxErp\Models\Pivots\OrderProject;
 use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Pivots\OrderTypeTenant;
@@ -126,6 +135,8 @@ use FluxErp\Models\PushSubscription;
 use FluxErp\Models\QueueMonitor;
 use FluxErp\Models\RebateAgreement;
 use FluxErp\Models\RecordOrigin;
+use FluxErp\Models\Resource;
+use FluxErp\Models\ResourceBooking;
 use FluxErp\Models\Role;
 use FluxErp\Models\Schedule;
 use FluxErp\Models\SepaMandate;
@@ -133,6 +144,7 @@ use FluxErp\Models\SerialNumber;
 use FluxErp\Models\SerialNumberRange;
 use FluxErp\Models\Snapshot;
 use FluxErp\Models\StockPosting;
+use FluxErp\Models\StorageArea;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Target;
 use FluxErp\Models\Task;
@@ -168,6 +180,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'address_type' => AddressType::class,
             'attribute_translation' => AttributeTranslation::class,
             'bank_connection' => BankConnection::class,
+            'blocked_file' => BlockedFile::class,
             'calendar' => Calendar::class,
             'calendar_event' => CalendarEvent::class,
             'calendar_user_setting' => CalendarUserSetting::class,
@@ -203,12 +216,18 @@ class MorphMapServiceProvider extends ServiceProvider
             'lead_loss_reason' => LeadLossReason::class,
             'lead_state' => LeadState::class,
             'ledger_account' => LedgerAccount::class,
+            'ledger_booking' => LedgerBooking::class,
+            'loan' => Loan::class,
+            'loan_extra_repayment' => LoanExtraRepayment::class,
+            'loan_installment' => LoanInstallment::class,
             'location' => Location::class,
             'log' => Log::class,
+            'lot' => Lot::class,
             'mail_account' => MailAccount::class,
             'mail_folder' => MailFolder::class,
             'media' => Media::class,
             'media_folder' => MediaFolder::class,
+            'mention' => Mention::class,
             'notification' => Notification::class,
             'database_notification' => Notification::class,
             'notification_setting' => NotificationSetting::class,
@@ -237,6 +256,8 @@ class MorphMapServiceProvider extends ServiceProvider
             'queue_monitor' => QueueMonitor::class,
             'rebate_agreement' => RebateAgreement::class,
             'record_origin' => RecordOrigin::class,
+            'resource' => Resource::class,
+            'resource_booking' => ResourceBooking::class,
             'role' => Role::class,
             'schedule' => Schedule::class,
             'sepa_mandate' => SepaMandate::class,
@@ -244,6 +265,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'serial_number_range' => SerialNumberRange::class,
             'snapshot' => Snapshot::class,
             'stock_posting' => StockPosting::class,
+            'storage_area' => StorageArea::class,
             'tag' => Tag::class,
             'target' => Target::class,
             'task' => Task::class,
@@ -290,12 +312,14 @@ class MorphMapServiceProvider extends ServiceProvider
             'holiday_location' => HolidayLocation::class,
             'job_batchable' => JobBatchable::class,
             'ledger_account_transaction' => LedgerAccountTransaction::class,
+            'loan_installment_transaction' => LoanInstallmentTransaction::class,
             'location_vacation_blackout' => LocationVacationBlackout::class,
             'mail_account_user' => MailAccountUser::class,
             'media_folder_model' => MediaFolderModel::class,
             'order_payment_run' => OrderPaymentRun::class,
             'order_position_stock_posting' => OrderPositionStockPosting::class,
             'order_position_task' => OrderPositionTask::class,
+            'order_project' => OrderProject::class,
             'order_schedule' => OrderSchedule::class,
             'order_transaction' => OrderTransaction::class,
             'order_type_tenant' => OrderTypeTenant::class,

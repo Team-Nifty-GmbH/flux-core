@@ -98,7 +98,7 @@ class Project extends Component
 
             $this->redirect(route('projects'));
         } catch (Exception $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->project);
         }
     }
 
@@ -115,6 +115,10 @@ class Project extends Component
                 ->isLivewireComponent()
                 ->wireModel('project.id')
                 ->text(__('Work Times')),
+            TabButton::make('project.orders')
+                ->isLivewireComponent()
+                ->wireModel('project.id')
+                ->text(__('Orders')),
             TabButton::make('project.dashboard')
                 ->isLivewireComponent()
                 ->wireModel('project.id')
@@ -138,7 +142,7 @@ class Project extends Component
         try {
             $this->project->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->project);
 
             return false;
         }

@@ -7,6 +7,7 @@ use FluxErp\Enums\ChartColorEnum;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\TicketList;
 use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
+use FluxErp\Models\Pivots\TicketUser;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
 use FluxErp\States\Ticket\TicketState;
@@ -161,5 +162,17 @@ class TicketsPerUser extends BarChart implements HasWidgetOptions
             ->store();
 
         $this->redirectRoute('tickets', navigate: true);
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Ticket::class) => [
+                Ticket::class => ['created', 'updated', 'deleted'],
+            ],
+            $this->modelChannel(TicketUser::class) => [
+                TicketUser::class => ['created', 'deleted'],
+            ],
+        ];
     }
 }

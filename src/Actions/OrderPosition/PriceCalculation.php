@@ -20,10 +20,13 @@ class PriceCalculation
     public function __construct(protected OrderPosition $orderPosition, protected array $data)
     {
         $this->orderPosition->loadMissing([
-            'product:id,vat_rate_id',
+            'product:id,parent_id,vat_rate_id',
             'product.vatRate:id,rate_percentage',
-            'product.prices:id,price_list_id,price',
-            'product.prices.priceList:id,is_net',
+            'product.ownPrices:id,product_id,price_list_id,price',
+            'product.ownPrices.priceList:id,is_net,is_purchase',
+            'product.parent:id,parent_id',
+            'product.parent.ownPrices:id,product_id,price_list_id,price',
+            'product.parent.ownPrices.priceList:id,is_net,is_purchase',
         ]);
     }
 
@@ -97,7 +100,10 @@ class PriceCalculation
             : $discountedPrice;
 
         $totalDiscountPercentage = diff_percentage($preDiscountedPrice, $discountedPrice);
-        $margin = bcsub($discountedNetPrice, bcmul($this->orderPosition->purchase_price, $this->orderPosition->amount));
+        $margin = bcsub(
+            $discountedNetPrice,
+            bcmul($this->orderPosition->purchase_price ?? 0, $this->orderPosition->amount)
+        );
 
         $multiplier = $this->orderPosition->order->orderType->order_type_enum->multiplier();
         $this->orderPosition->margin = bcmul($margin, $multiplier);
@@ -126,30 +132,21 @@ class PriceCalculation
 
     protected function calculatePurchasePrice(): void
     {
-        if (! is_null($this->orderPosition->purchase_price)) {
-            return;
-        }
-
         $stockPosting = resolve_static(StockPosting::class, 'query')
             ->where('product_id', $this->orderPosition->product_id)
             ->where('warehouse_id', $this->orderPosition->warehouse_id)
-            ->whereNot('posting', 0)
+            ->where('posting', '>', 0)
+            ->whereNotNull('purchase_price')
             ->orderByDesc('id')
-            ->first();
+            ->first(['id', 'purchase_price']);
 
         if ($stockPosting) {
-            $purchasePrice = bcdiv($stockPosting->purchase_price, $stockPosting->posting);
-        } else {
-            $purchasePrice = $this->orderPosition->product?->prices()
-                ->whereRelation('priceList', 'is_purchase')
-                ->first()
-                ?->getNet($this->orderPosition->vat_rate_percentage);
+            $this->orderPosition->purchase_price = $stockPosting->purchase_price;
+
+            return;
         }
 
-        $this->orderPosition->purchase_price = bcmul(
-            $purchasePrice ?? 0,
-            $this->orderPosition->amount ?? 0
-        );
+        $this->orderPosition->purchase_price ??= $this->orderPosition->product?->purchasePrice();
     }
 
     protected function calculateTotalPrices(): void
@@ -173,12 +170,13 @@ class PriceCalculation
 
         // Collect & set missing data
         if ($this->orderPosition->product) {
-            $this->orderPosition->product_prices = $this->orderPosition->product->prices()
-                ->get([
-                    'id',
-                    'price_list_id',
-                    'price',
-                ]);
+            $this->orderPosition->product_prices = $this->orderPosition->product->prices
+                ->map(fn (Price $price) => [
+                    'id' => $price->getKey(),
+                    'price_list_id' => $price->price_list_id,
+                    'price' => $price->price,
+                ])
+                ->all();
         }
 
         $this->orderPosition->unit_price = $price;

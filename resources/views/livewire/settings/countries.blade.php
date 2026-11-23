@@ -17,6 +17,13 @@
             select="label:name|value:id"
             :options="$currencies"
         />
+        <x-select.styled
+            wire:model="country.tax_exemption_id"
+            :label="__('Tax Exemption')"
+            :hint="__('Applied to contacts with a delivery address in this country. In EU countries only to contacts with a VAT ID.')"
+            select="label:name|value:id"
+            :options="$vatRates"
+        />
         <x-input wire:model="country.iso_alpha2" :label="__('ISO alpha2')" />
         <x-input wire:model="country.iso_alpha3" :label="__('ISO alpha3')" />
         <x-input wire:model="country.iso_numeric" :label="__('ISO numeric')" />

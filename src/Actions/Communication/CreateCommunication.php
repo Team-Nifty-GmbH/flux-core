@@ -12,9 +12,15 @@ use FluxErp\Rulesets\Communication\CreateCommunicationRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
+use SplFileInfo;
 
 class CreateCommunication extends FluxAction
 {
+    protected array $dontTrim = [
+        'html_body',
+        'text_body',
+    ];
+
     public static function models(): array
     {
         return [Communication::class];
@@ -66,7 +72,12 @@ class CreateCommunication extends FluxAction
             $attachment['model_id'] = $communication->id;
             $attachment['model_type'] = morph_alias(Communication::class);
             $attachment['collection_name'] = 'attachments';
-            $attachment['media_type'] = 'string';
+
+            if (data_get($attachment, 'media') instanceof SplFileInfo) {
+                unset($attachment['media_type']);
+            } else {
+                $attachment['media_type'] = 'string';
+            }
 
             try {
                 UploadMedia::make($attachment)->validate()->execute();

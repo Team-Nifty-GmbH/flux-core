@@ -7,6 +7,7 @@ use FluxErp\Livewire\Forms\EmployeeBalanceAdjustmentForm;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
 
 class EmployeeBalanceAdjustments extends EmployeeBalanceAdjustmentList
@@ -18,7 +19,7 @@ class EmployeeBalanceAdjustments extends EmployeeBalanceAdjustmentList
     #[DataTableForm]
     public EmployeeBalanceAdjustmentForm $employeeBalanceAdjustmentForm;
 
-    #[Modelable]
+    #[Locked, Modelable]
     public ?int $employeeId = null;
 
     public ?string $includeBefore = 'flux::livewire.employee.employee-balance-adjustments';

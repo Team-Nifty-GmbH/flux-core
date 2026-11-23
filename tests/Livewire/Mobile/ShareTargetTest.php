@@ -91,3 +91,13 @@ test('duplicate files still complete with partial success', function (): void {
 
     expect(resolve_static(PurchaseInvoice::class, 'query')->count())->toBe(1);
 });
+
+test('the action button carries a click expression livewire can parse', function (): void {
+    $component = Livewire::test(ShareTarget::class)
+        ->set('files', [fakeSharedInvoice()])
+        ->assertOk()
+        ->assertDontSeeHtml('@js(');
+
+    expect($component->html())
+        ->toContain('executeAction(\'' . addslashes(CreatePurchaseInvoice::class) . '\')');
+});

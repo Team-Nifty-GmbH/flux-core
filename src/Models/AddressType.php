@@ -22,7 +22,6 @@ class AddressType extends FluxModel
     {
         return [
             'is_locked' => 'boolean',
-            'is_unique' => 'boolean',
         ];
     }
 

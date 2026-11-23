@@ -151,6 +151,7 @@ test('update product option group', function (): void {
 test('update product option group validation fails', function (): void {
     $productOptionGroup = [
         'id' => $this->productOptionGroups[0]->id,
+        'name' => null,
     ];
 
     $this->user->givePermissionTo($this->permissions['update']);

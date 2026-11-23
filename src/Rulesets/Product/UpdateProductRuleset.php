@@ -3,6 +3,7 @@
 namespace FluxErp\Rulesets\Product;
 
 use FluxErp\Enums\BundleTypeEnum;
+use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Models\Media;
 use FluxErp\Models\Product;
@@ -62,33 +63,35 @@ class UpdateProductRuleset extends FluxRuleset
             'cover_media_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Media::class]),
+                app(ModelExists::class, ['model' => Media::class, 'subject' => Product::class]),
             ],
             'parent_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Product::class]),
+                app(ModelExists::class, ['model' => Product::class, 'subject' => Product::class])
+                    ->whereNull('parent_id'),
             ],
             'vat_rate_id' => [
                 'sometimes',
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => VatRate::class]),
+                app(ModelExists::class, ['model' => VatRate::class, 'subject' => Product::class])
+                    ->where('is_sales', true),
             ],
             'unit_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Unit::class]),
+                app(ModelExists::class, ['model' => Unit::class, 'subject' => Product::class]),
             ],
             'purchase_unit_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Unit::class]),
+                app(ModelExists::class, ['model' => Unit::class, 'subject' => Product::class]),
             ],
             'reference_unit_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Unit::class]),
+                app(ModelExists::class, ['model' => Unit::class, 'subject' => Product::class]),
             ],
 
             'bundle_type_enum' => [
@@ -97,7 +100,10 @@ class UpdateProductRuleset extends FluxRuleset
                 Rule::enum(BundleTypeEnum::class),
             ],
 
-            'product_number' => 'string|nullable',
+            'product_number' => [
+                'string',
+                'nullable',
+            ],
             'name' => 'string|max:255',
             'description' => 'string|nullable',
             'weight_gram' => 'numeric|nullable',
@@ -111,13 +117,18 @@ class UpdateProductRuleset extends FluxRuleset
                 'required_if:is_service,true',
                 Rule::enum(TimeUnitEnum::class),
             ],
+            'stock_removal_strategy_enum' => [
+                'nullable',
+                Rule::enum(StockRemovalStrategyEnum::class),
+            ],
             'ean' => 'string|nullable',
             'customs_tariff_number' => 'string|nullable|max:64',
-            'stock' => 'integer|nullable',
             'min_delivery_time' => 'integer|nullable',
             'max_delivery_time' => 'integer|nullable',
             'restock_time' => 'integer|nullable',
+            'min_shelf_life_days' => 'nullable|integer|min:0',
             'purchase_steps' => 'numeric|nullable',
+            'packaging_ean' => 'string|max:255|nullable',
             'min_purchase' => 'numeric|nullable',
             'max_purchase' => 'numeric|nullable',
             'seo_keywords' => 'string|nullable',
@@ -131,6 +142,7 @@ class UpdateProductRuleset extends FluxRuleset
 
             'is_active' => 'boolean',
             'is_highlight' => 'boolean',
+            'is_lot_tracked' => 'boolean',
             'is_bundle' => [
                 'required_with:bundle_type_enum',
                 'required_if:bundle_type_enum,null',
@@ -138,6 +150,8 @@ class UpdateProductRuleset extends FluxRuleset
             ],
             'is_service' => 'boolean',
             'is_shipping_free' => 'boolean',
+            'is_shipping_item' => 'boolean',
+            'is_variant_parent' => 'boolean',
             'has_serial_numbers' => 'boolean',
             'is_nos' => 'boolean',
             'is_active_export_to_web_shop' => 'boolean',

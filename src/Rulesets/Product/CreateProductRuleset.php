@@ -3,6 +3,7 @@
 namespace FluxErp\Rulesets\Product;
 
 use FluxErp\Enums\BundleTypeEnum;
+use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Facades\ProductType;
 use FluxErp\Models\Product;
@@ -50,12 +51,14 @@ class CreateProductRuleset extends FluxRuleset
             'parent_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Product::class]),
+                app(ModelExists::class, ['model' => Product::class])
+                    ->whereNull('parent_id'),
             ],
             'vat_rate_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => VatRate::class]),
+                app(ModelExists::class, ['model' => VatRate::class])
+                    ->where('is_sales', true),
             ],
             'unit_id' => [
                 'integer',
@@ -95,13 +98,18 @@ class CreateProductRuleset extends FluxRuleset
                 'required_if:is_service,true',
                 Rule::enum(TimeUnitEnum::class),
             ],
+            'stock_removal_strategy_enum' => [
+                'nullable',
+                Rule::enum(StockRemovalStrategyEnum::class),
+            ],
             'ean' => 'string|nullable',
             'customs_tariff_number' => 'string|nullable|max:64',
-            'stock' => 'integer|nullable',
             'min_delivery_time' => 'integer|nullable',
             'max_delivery_time' => 'integer|nullable',
             'restock_time' => 'integer|nullable',
+            'min_shelf_life_days' => 'nullable|integer|min:0',
             'purchase_steps' => 'numeric|nullable',
+            'packaging_ean' => 'string|max:255|nullable',
             'min_purchase' => 'numeric|nullable',
             'max_purchase' => 'numeric|nullable',
             'seo_keywords' => 'string|nullable',
@@ -115,9 +123,11 @@ class CreateProductRuleset extends FluxRuleset
 
             'is_active' => 'boolean',
             'is_highlight' => 'boolean',
+            'is_lot_tracked' => 'boolean',
             'is_bundle' => 'boolean',
             'is_service' => 'boolean',
             'is_shipping_free' => 'boolean',
+            'is_shipping_item' => 'boolean',
             'has_serial_numbers' => 'boolean',
             'is_nos' => 'boolean',
             'is_active_export_to_web_shop' => 'boolean',

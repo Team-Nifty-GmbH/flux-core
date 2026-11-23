@@ -60,4 +60,13 @@ class HeadcountBox extends ValueBox
     {
         return 'users';
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Employee::class) => [
+                Employee::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

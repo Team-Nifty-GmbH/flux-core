@@ -90,6 +90,10 @@
                         @if ($printers ?? false)
                             <div
                                 class="flex items-center gap-1.5 overflow-hidden text-ellipsis whitespace-nowrap"
+                                x-bind:class="
+                                    printLayout.is_printable === false &&
+                                    'invisible'
+                                "
                             >
                                 <x-checkbox
                                     wire:model="selectedPrintLayouts.print"
@@ -217,7 +221,7 @@
                         :label="__('Printer')"
                         wire:model="printJobForm.printer_id"
                         x-on:select="
-                            $tallstackuiSelect('print-job-size').setOptions(
+                            $tallstackuiSelect('print-job-size-{{ strtolower($this->getId()) }}').setOptions(
                                 $event.detail.select.media_sizes,
                             )
                         "
@@ -238,7 +242,7 @@
                         />
                     </div>
                     <div
-                        id="print-job-size"
+                        id="print-job-size-{{ strtolower($this->getId()) }}"
                         x-cloak
                         x-show="$wire.printJobForm.printer_id"
                         x-collapse

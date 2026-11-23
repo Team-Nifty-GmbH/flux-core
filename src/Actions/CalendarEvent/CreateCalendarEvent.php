@@ -8,12 +8,15 @@ use FluxErp\Helpers\Helper;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Rulesets\CalendarEvent\CreateCalendarEventRuleset;
+use FluxErp\Traits\Action\ChecksCalendarEventAccess;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 
 class CreateCalendarEvent extends FluxAction
 {
+    use ChecksCalendarEventAccess;
+
     public static function models(): array
     {
         return [CalendarEvent::class];

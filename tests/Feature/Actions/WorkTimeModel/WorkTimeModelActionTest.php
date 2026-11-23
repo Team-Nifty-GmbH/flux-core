@@ -38,6 +38,37 @@ test('update work time model', function (): void {
     expect($updated)->name->toBe('35h Week');
 });
 
+test('update work time model stores an empty break as zero', function (): void {
+    $model = CreateWorkTimeModel::make([
+        'name' => '40h Week',
+        'cycle_weeks' => 1,
+        'weekly_hours' => 40,
+        'annual_vacation_days' => 30,
+        'overtime_compensation' => 'payment',
+    ])->validate()->execute();
+
+    $updated = UpdateWorkTimeModel::make([
+        'id' => $model->getKey(),
+        'schedules' => [
+            [
+                'week_number' => 1,
+                'days' => [
+                    [
+                        'weekday' => 1,
+                        'start_time' => '08:00',
+                        'end_time' => '16:00',
+                        'work_hours' => 8,
+                        'break_minutes' => null,
+                    ],
+                ],
+            ],
+        ],
+    ])->validate()->execute();
+
+    expect($updated->schedules)->toHaveCount(1)
+        ->and($updated->schedules->first()->break_minutes)->toBe(0);
+});
+
 test('delete work time model', function (): void {
     $model = CreateWorkTimeModel::make([
         'name' => 'Temp',

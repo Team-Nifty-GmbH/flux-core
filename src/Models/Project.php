@@ -7,6 +7,7 @@ use FluxErp\Actions\Project\UpdateProject;
 use FluxErp\Casts\TimeDuration;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\Contracts\IsSubscribable;
+use FluxErp\Models\Pivots\OrderProject;
 use FluxErp\States\Project\ProjectState;
 use FluxErp\Traits\HasStates;
 use FluxErp\Traits\Model\Commentable;
@@ -21,11 +22,13 @@ use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\Mentionable;
 use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Model\Trackable;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
@@ -35,7 +38,7 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
 {
     use Commentable, Filterable, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations,
         HasSerialNumberRange, HasStates, HasTags, HasTenantAssignment, HasUserModification, HasUuid, InteractsWithMedia,
-        LogsActivity, SoftDeletes, Trackable;
+        LogsActivity, Mentionable, SoftDeletes, Trackable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -116,6 +119,12 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
     public function responsibleUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsible_user_id');
+    }
+
+    public function supplementaryOrders(): BelongsToMany
+    {
+        return $this->belongsToMany(Order::class, 'order_project')
+            ->using(OrderProject::class);
     }
 
     public function tasks(): HasMany

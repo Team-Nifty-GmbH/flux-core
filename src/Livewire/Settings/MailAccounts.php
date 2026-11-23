@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Settings;
 use Exception;
 use FluxErp\Actions\MailAccount\CreateMailAccount;
 use FluxErp\Actions\MailAccount\DeleteMailAccount;
+use FluxErp\Actions\MailAccount\DiscoverMailAccountSettings;
 use FluxErp\Actions\MailAccount\UpdateMailAccount;
 use FluxErp\Actions\MailFolder\UpdateMailFolder;
 use FluxErp\Jobs\SyncMailAccountJob;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -26,6 +28,9 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 class MailAccounts extends MailAccountList
 {
     public array $folders = [];
+
+    #[Locked]
+    public bool $isSyncPaused = false;
 
     public MailAccountForm $mailAccount;
 
@@ -86,7 +91,7 @@ class MailAccounts extends MailAccountList
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->mailAccount);
 
             return false;
         }
@@ -101,8 +106,55 @@ class MailAccounts extends MailAccountList
     {
         $this->mailAccount->reset();
         $this->mailAccount->fill($mailAccount);
+        $this->isSyncPaused = $mailAccount->isSyncPaused();
 
         $this->modalOpen('edit-mail-account');
+    }
+
+    #[Renderless]
+    public function discoverSettings(bool $keepExistingSettings = false): void
+    {
+        try {
+            $settings = DiscoverMailAccountSettings::make(['email' => $this->mailAccount->email])
+                ->validate()
+                ->execute();
+        } catch (ValidationException $e) {
+            if (! $keepExistingSettings) {
+                exception_to_notifications($e, $this);
+            }
+
+            return;
+        }
+
+        if (! $settings) {
+            $this->toast()
+                ->warning(__('No settings found, please enter them manually'))
+                ->send();
+
+            return;
+        }
+
+        $blocks = [
+            'host' => ['host', 'port', 'encryption'],
+            'smtp_host' => ['smtp_host', 'smtp_port', 'smtp_encryption', 'smtp_user'],
+        ];
+
+        foreach ($blocks as $key => $fields) {
+            if (! array_key_exists($key, $settings)
+                || ($keepExistingSettings && filled($this->mailAccount->{$key}))
+            ) {
+                continue;
+            }
+
+            // Set the whole block, so a field the source left out does not keep a stale value.
+            foreach ($fields as $field) {
+                $this->mailAccount->{$field} = data_get($settings, $field);
+            }
+        }
+
+        $this->toast()
+            ->success(__('Settings found via :source', ['source' => data_get($settings, 'source')]))
+            ->send();
     }
 
     #[Renderless]
@@ -129,7 +181,7 @@ class MailAccounts extends MailAccountList
             $this->mailAccount->save();
             $this->mailAccount->reset();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->mailAccount);
 
             return false;
         }
@@ -146,7 +198,7 @@ class MailAccounts extends MailAccountList
             $this->mailFolder->reset();
             $this->loadFolders();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->mailFolder);
         }
     }
 
@@ -209,7 +261,7 @@ class MailAccounts extends MailAccountList
                 ->success(__('Connection successful'))
                 ->send();
         } catch (ValidationException|Exception $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->mailAccount);
         }
     }
 

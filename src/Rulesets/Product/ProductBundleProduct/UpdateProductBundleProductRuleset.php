@@ -23,7 +23,11 @@ class UpdateProductBundleProductRuleset extends FluxRuleset
                 'sometimes',
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Product::class]),
+                app(ModelExists::class, [
+                    'model' => Product::class,
+                    'subject' => BundleProductProduct::class,
+                    'subjectKeyName' => 'pivot_id',
+                ]),
             ],
             'count' => 'sometimes|required|numeric|gt:0',
         ];

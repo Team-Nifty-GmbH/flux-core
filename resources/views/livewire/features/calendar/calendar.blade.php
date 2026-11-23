@@ -164,22 +164,17 @@
                         $wire.toggleEventSource(
                             calendar
                                 .getEventSources()
-                                .map((source) => source.internalEventSource),
+                                .map((source) => ({ publicId: source.id })),
                         );
                     },
                 }"
                 x-on:folder-tree-uncheck="
-                    (event) => {
-                        hideEventSource(event.detail);
-                        storeSettings();
-                    }
+                    (event) => hideEventSource(event.detail)
                 "
                 x-on:folder-tree-check="
-                    (event) => {
-                        showEventSource(event.detail);
-                        storeSettings();
-                    }
+                    (event) => showEventSource(event.detail)
                 "
+                x-on:folder-tree-check-updated="storeSettings()"
                 x-on:folder-tree-select="
                     (event) => {
                         let { children, ...calendar } = event.detail;

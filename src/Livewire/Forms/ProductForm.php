@@ -6,7 +6,9 @@ use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\RestoreProduct;
 use FluxErp\Actions\Product\UpdateProduct;
+use FluxErp\Models\Product;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
 
 class ProductForm extends FluxForm
@@ -55,11 +57,15 @@ class ProductForm extends FluxForm
 
     public ?bool $is_highlight = false;
 
+    public ?bool $is_lot_tracked = false;
+
     public ?bool $is_nos = false;
 
     public ?bool $is_service = false;
 
     public ?bool $is_shipping_free = false;
+
+    public ?bool $is_shipping_item = false;
 
     public ?int $max_delivery_time = null;
 
@@ -69,7 +75,11 @@ class ProductForm extends FluxForm
 
     public ?float $min_purchase = null;
 
+    public ?int $min_shelf_life_days = null;
+
     public ?string $name = null;
+
+    public ?string $packaging_ean = null;
 
     public ?array $parent = null;
 
@@ -103,6 +113,8 @@ class ProductForm extends FluxForm
 
     public ?int $stock = null;
 
+    public ?string $stock_removal_strategy_enum = null;
+
     public array $suppliers = [];
 
     public array $tags = [];
@@ -119,27 +131,29 @@ class ProductForm extends FluxForm
 
     public ?float $weight_gram = null;
 
+    protected ?Product $cachedProductModel = null;
+
     public function fill($values): void
     {
         if ($values instanceof Model) {
             $values->loadMissing([
                 'bundleProducts:id',
-                'categories:id',
+                'ownCategories:id',
                 'tenants:id',
                 'coverMedia',
                 'parent',
-                'productProperties:id,product_property_group_id,name,property_type_enum,product_product_property.value',
-                'productProperties.productPropertyGroup:id,name',
-                'suppliers:id,main_address_id,customer_number,' .
-                    'product_supplier.contact_id,' .
-                    'product_supplier.manufacturer_product_number,' .
-                    'product_supplier.purchase_price',
-                'suppliers.mainAddress:id,name',
+                'ownProductProperties:id,product_property_group_id,name,property_type_enum,product_product_property.value',
+                'ownProductProperties.productPropertyGroup:id,name',
+                'ownSuppliers:id,main_address_id,customer_number',
+                'ownSuppliers.mainAddress:id,name',
                 'tags:id',
                 'vatRate:id,rate_percentage',
             ]);
 
-            $values->append('avatar_url');
+            $values->setRelation('categories', $values->ownCategories)
+                ->setRelation('productProperties', $values->ownProductProperties)
+                ->setRelation('suppliers', $values->ownSuppliers)
+                ->append('avatar_url');
         }
 
         parent::fill($values);
@@ -160,6 +174,23 @@ class ProductForm extends FluxForm
                 'count' => $bundleProduct['pivot']['count'] ?? 0,
             ];
         }, $this->bundle_products);
+
+        // The supplier fields live on the pivot, the form binds and saves them flat.
+        $this->suppliers = array_map(
+            fn (array $supplier) => array_merge(Arr::except($supplier, 'pivot'), $supplier['pivot'] ?? []),
+            $this->suppliers
+        );
+    }
+
+    public function getProductModel(): ?Product
+    {
+        if (! $this->id) {
+            return null;
+        }
+
+        return $this->cachedProductModel ??= resolve_static(Product::class, 'query')
+            ->whereKey($this->id)
+            ->first();
     }
 
     protected function getActions(): array

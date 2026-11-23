@@ -21,7 +21,6 @@ use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Context;
 use Throwable;
@@ -105,12 +104,6 @@ class QueueMonitor extends FluxModel
     }
 
     // Public methods
-    public function broadcastWith(): array
-    {
-        // This ensures the payload doesnt get too large
-        return ['model' => Arr::except($this->withoutRelations()->toArray(), ['exception'])];
-    }
-
     public function canBeRetried(): bool
     {
         return ! $this->retried

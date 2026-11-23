@@ -30,13 +30,13 @@ use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\Mentionable;
 use FluxErp\Traits\Model\MonitorsQueue;
 use FluxErp\Traits\Model\Notifiable;
 use FluxErp\Traits\Model\Printable;
 use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\View\Printing\Address\AddressLabel;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -46,6 +46,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
@@ -56,7 +57,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 {
     use Commentable, Communicatable, Filterable, HasCalendars, HasCart, HasDefaultTargetableColumns,
         HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags, HasTenantAssignment, HasTenants,
-        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, MonitorsQueue, Notifiable, Printable,
+        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Mentionable, MonitorsQueue, Notifiable, Printable,
         SoftDeletes;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
@@ -114,8 +115,11 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                 $firstAddressId = resolve_static(Address::class, 'query')
                     ->where('contact_id', $previousContactId)
                     ->value('id');
+                $storedFlags = resolve_static(Address::class, 'query')
+                    ->whereKey($address->getKey())
+                    ->first(['is_main_address', 'is_invoice_address', 'is_delivery_address']);
 
-                if (data_get($address->getPrevious(), 'is_main_address') ?? $address->is_main_address) {
+                if (data_get($address->getPrevious(), 'is_main_address') ?? $storedFlags->is_main_address) {
                     $oldContactUpdates['main_address_id'] = $firstAddressId;
                     $oldContactAddressesUpdates['is_main_address'] = true;
 
@@ -124,7 +128,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     }
                 }
 
-                if (data_get($address->getPrevious(), 'is_invoice_address') ?? $address->is_invoice_address) {
+                if (data_get($address->getPrevious(), 'is_invoice_address') ?? $storedFlags->is_invoice_address) {
                     $oldContactUpdates['invoice_address_id'] = $firstAddressId;
                     $oldContactAddressesUpdates['is_invoice_address'] = true;
 
@@ -133,7 +137,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     }
                 }
 
-                if (data_get($address->getPrevious(), 'is_delivery_address') ?? $address->is_delivery_address) {
+                if (data_get($address->getPrevious(), 'is_delivery_address') ?? $storedFlags->is_delivery_address) {
                     $oldContactUpdates['delivery_address_id'] = $firstAddressId;
                     $oldContactAddressesUpdates['is_delivery_address'] = true;
 
@@ -156,9 +160,15 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                         ->update($oldContactUpdates);
 
                     resolve_static(Address::class, 'query')
-                        ->whereKeyNot($address->getKey())
-                        ->where('contact_id', $previousContactId)
+                        ->whereKey($firstAddressId)
                         ->update($oldContactAddressesUpdates);
+
+                    if (array_key_exists('main_address_id', $oldContactUpdates)) {
+                        resolve_static(Contact::class, 'query')
+                            ->whereKey($previousContactId)
+                            ->first()
+                            ?->searchable();
+                    }
                 }
             }
 
@@ -218,6 +228,27 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     ->where('contact_id', $address->contact_id)
                     ->update($addressesUpdates);
             }
+
+            if ($address->is_main_address
+                && ($address->wasRecentlyCreated || $address->wasChanged())
+            ) {
+                resolve_static(Contact::class, 'query')
+                    ->whereKey($address->contact_id)
+                    ->first()
+                    ?->searchable();
+            }
+
+            if ($address->wasRecentlyCreated
+                || $address->wasChanged(['country_id', 'contact_id', 'is_delivery_address', 'is_main_address'])
+            ) {
+                resolve_static(Contact::class, 'query')
+                    ->whereKey(array_filter([
+                        $address->contact_id,
+                        data_get($address->getPrevious(), 'contact_id'),
+                    ]))
+                    ->get()
+                    ->each(fn (Contact $contact) => $contact->syncCountryTaxExemption());
+            }
         });
 
         static::deleted(function (Address $address): void {
@@ -225,10 +256,13 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                 ->where('contact_id', $address->contact_id)
                 ->exists()
             ) {
-                resolve_static(Contact::class, 'query')
+                $contact = resolve_static(Contact::class, 'query')
                     ->whereKey($address->contact_id)
-                    ->first()
-                    ?->delete();
+                    ->first();
+
+                if ($contact && ! $contact->isInCascadingDeletes()) {
+                    $contact->delete();
+                }
 
                 return;
             }
@@ -279,6 +313,8 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     ->update($contactUpdates);
 
                 $mainAddress->update($addressUpdates);
+
+                $address->updateQuietly(array_fill_keys(array_keys($addressUpdates), false));
             }
         });
     }
@@ -499,10 +535,10 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
      */
     public function broadcastOn($event): array
     {
-        return [
-            new PrivateChannel($this->broadcastChannel()),
-            new PrivateChannel((app(Contact::class))->broadcastChannel() . $this->contact_id),
-        ];
+        return array_merge(
+            Arr::wrap(parent::broadcastOn($event)),
+            $this->recordBroadcastChannels(Contact::class, [$this->contact_id])
+        );
     }
 
     public function detailRouteParams(): array

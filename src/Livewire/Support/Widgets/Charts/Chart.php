@@ -109,6 +109,13 @@ abstract class Chart extends Component
     }
 
     #[Renderless]
+    public function calculateByTimeFrame(): void
+    {
+        $this->calculateChart();
+        $this->updateData();
+    }
+
+    #[Renderless]
     public function getWidgetOptions(): array
     {
         return $this instanceof HasWidgetOptions ? $this->options() : [];
@@ -123,10 +130,10 @@ abstract class Chart extends Component
     protected function getOptions(): array
     {
         $public = [];
-        $reflection = new ReflectionClass(static::class);
+        $reflection = new ReflectionClass(self::class);
         $properties = array_filter(
             $reflection->getProperties(ReflectionProperty::IS_PUBLIC),
-            fn ($property) => ! in_array($property->getName(), ['timeFrame', 'options'])
+            fn ($property) => ! in_array($property->getName(), ['chartTypes', 'config', 'options', 'withSpinner'])
         );
 
         foreach ($properties as $property) {

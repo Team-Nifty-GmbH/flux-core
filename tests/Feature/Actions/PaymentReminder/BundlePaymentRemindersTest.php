@@ -2,15 +2,17 @@
 
 use FluxErp\Actions\PaymentReminder\BundlePaymentReminders;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Jobs\Accounting\SendPaymentReminderJob;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
+use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
-use FluxErp\Models\PaymentReminder;
+use FluxErp\Models\PaymentReminderText;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use Spatie\Activitylog\Models\Activity;
+use Illuminate\Support\Facades\Queue;
 
 beforeEach(function (): void {
     $contact = Contact::factory()->create();
@@ -26,51 +28,150 @@ beforeEach(function (): void {
     ]);
     $paymentType = PaymentType::factory()
         ->hasAttached($this->dbTenant, relationship: 'tenants')
-        ->create();
+        ->create([
+            'is_direct_debit' => false,
+        ]);
 
-    $this->order = Order::factory()->create([
-        'order_type_id' => $orderType->getKey(),
-        'address_invoice_id' => $address->getKey(),
-        'contact_id' => $contact->getKey(),
-        'payment_type_id' => $paymentType->getKey(),
-        'price_list_id' => PriceList::factory()->create()->getKey(),
-        'tenant_id' => $this->dbTenant->getKey(),
-        'currency_id' => Currency::factory()->create()->getKey(),
-        'language_id' => $this->defaultLanguage->getKey(),
-        'is_locked' => true,
-        'invoice_number' => 'INV-2026-100',
-        'balance' => 100,
-        'payment_reminder_current_level' => 0,
-        'payment_reminder_next_date' => now()->subDay()->toDateString(),
-    ]);
+    $this->createOverdueOrder = function (string $invoiceNumber, int $currentLevel = 0) use (
+        $orderType,
+        $address,
+        $contact,
+        $paymentType
+    ): Order {
+        $order = Order::factory()->create([
+            'order_type_id' => $orderType->getKey(),
+            'address_invoice_id' => $address->getKey(),
+            'contact_id' => $contact->getKey(),
+            'payment_type_id' => $paymentType->getKey(),
+            'price_list_id' => PriceList::factory()->create()->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
+            'currency_id' => Currency::factory()->create()->getKey(),
+            'language_id' => $this->defaultLanguage->getKey(),
+            'is_locked' => true,
+            'invoice_number' => $invoiceNumber,
+            'balance' => 100,
+            'payment_reminder_current_level' => $currentLevel,
+            'payment_reminder_next_date' => now()->subDay()->toDateString(),
+        ]);
 
-    $this->order->update(['balance' => 100]);
+        $order->update(['balance' => 100]);
+
+        return $order;
+    };
+
+    $this->order = ($this->createOverdueOrder)('INV-2026-100');
+
+    $this->configureLevel = fn (int $level, bool $withTemplate = true) => PaymentReminderText::factory()
+        ->create([
+            'reminder_level' => $level,
+            'email_template_id' => $withTemplate ? EmailTemplate::factory()->create()->getKey() : null,
+        ]);
 });
 
-test('bundle requires order_ids', function (): void {
-    BundlePaymentReminders::assertValidationErrors([], 'order_ids');
+test('bundle requires orders', function (): void {
+    BundlePaymentReminders::assertValidationErrors([], 'orders');
 });
 
-test('failed send leaves no reminder record and logs activity on order', function (): void {
-    $orderId = $this->order->getKey();
-    $originalLevel = $this->order->payment_reminder_current_level;
-    $originalNextDate = $this->order->payment_reminder_next_date?->toDateString();
+test('dispatches a send job per eligible order', function (): void {
+    Queue::fake();
+    ($this->configureLevel)(1);
 
-    BundlePaymentReminders::make(['order_ids' => [$orderId]])
+    $result = BundlePaymentReminders::make([
+        'orders' => [
+            ['id' => $this->order->getKey(), 'recipient' => null],
+        ],
+    ])
         ->validate()
         ->execute();
 
-    expect(PaymentReminder::query()->where('order_id', $orderId)->count())->toBe(0);
+    expect($result['queued'])->toBe(1);
 
-    $order = Order::query()->whereKey($orderId)->first();
-    expect($order->payment_reminder_current_level)->toBe($originalLevel);
-    expect($order->payment_reminder_next_date?->toDateString())->toBe($originalNextDate);
+    Queue::assertPushed(
+        SendPaymentReminderJob::class,
+        fn (SendPaymentReminderJob $job) => $job->orderId === $this->order->getKey()
+    );
+});
 
-    $failureLogged = Activity::query()
-        ->where('subject_type', morph_alias(Order::class))
-        ->where('subject_id', $orderId)
-        ->where('event', 'payment_reminder_send_failed')
-        ->exists();
+test('passes the recipient override to the job', function (): void {
+    Queue::fake();
+    ($this->configureLevel)(1);
 
-    expect($failureLogged)->toBeTrue();
+    BundlePaymentReminders::make([
+        'orders' => [
+            ['id' => $this->order->getKey(), 'recipient' => 'override@example.com'],
+        ],
+    ])
+        ->validate()
+        ->execute();
+
+    Queue::assertPushed(
+        SendPaymentReminderJob::class,
+        fn (SendPaymentReminderJob $job) => $job->recipientOverride === 'override@example.com'
+    );
+});
+
+test('reports orders whose reminder level has no text instead of queueing them', function (): void {
+    Queue::fake();
+
+    $result = BundlePaymentReminders::make([
+        'orders' => [
+            ['id' => $this->order->getKey(), 'recipient' => null],
+        ],
+    ])
+        ->validate()
+        ->execute();
+
+    expect($result['queued'])->toBe(0)
+        ->and($result['unsendable'])->toHaveCount(1)
+        ->and($result['unsendable'][0]['id'])->toBe($this->order->getKey())
+        ->and($result['unsendable'][0]['reminder_level'])->toBe(1)
+        ->and($result['unsendable'][0]['invoice_number'])->toBe('INV-2026-100')
+        ->and($result['unsendable'][0]['reason'])->toBeString();
+
+    Queue::assertNotPushed(SendPaymentReminderJob::class);
+});
+
+test('reports orders whose reminder text has no email template instead of queueing them', function (): void {
+    Queue::fake();
+    ($this->configureLevel)(1, withTemplate: false);
+
+    $result = BundlePaymentReminders::make([
+        'orders' => [
+            ['id' => $this->order->getKey(), 'recipient' => null],
+        ],
+    ])
+        ->validate()
+        ->execute();
+
+    expect($result['queued'])->toBe(0)
+        ->and($result['unsendable'])->toHaveCount(1)
+        ->and($result['unsendable'][0]['id'])->toBe($this->order->getKey());
+
+    Queue::assertNotPushed(SendPaymentReminderJob::class);
+});
+
+test('queues the configured orders and reports only the unconfigured ones', function (): void {
+    Queue::fake();
+    ($this->configureLevel)(1);
+
+    $unconfigured = ($this->createOverdueOrder)('INV-2026-101', currentLevel: 1);
+
+    $result = BundlePaymentReminders::make([
+        'orders' => [
+            ['id' => $this->order->getKey(), 'recipient' => null],
+            ['id' => $unconfigured->getKey(), 'recipient' => null],
+        ],
+    ])
+        ->validate()
+        ->execute();
+
+    expect($result['queued'])->toBe(1)
+        ->and($result['unsendable'])->toHaveCount(1)
+        ->and($result['unsendable'][0]['id'])->toBe($unconfigured->getKey())
+        ->and($result['unsendable'][0]['reminder_level'])->toBe(2);
+
+    Queue::assertPushed(
+        SendPaymentReminderJob::class,
+        fn (SendPaymentReminderJob $job) => $job->orderId === $this->order->getKey()
+    );
 });

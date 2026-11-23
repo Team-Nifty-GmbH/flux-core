@@ -26,7 +26,7 @@ class UpdatePaymentRunRuleset extends FluxRuleset
             'bank_connection_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => BankConnection::class]),
+                app(ModelExists::class, ['model' => BankConnection::class, 'subject' => PaymentRun::class]),
             ],
             'sepa_mandate_type_enum' => [
                 'nullable',

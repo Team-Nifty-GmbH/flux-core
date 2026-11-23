@@ -50,7 +50,11 @@ class CreateContact extends FluxAction
                     continue;
                 }
 
-                $attachDiscounts[] = CreateDiscount::make($discount)
+                $attachDiscounts[] = CreateDiscount::make([
+                    ...$discount,
+                    'model_type' => $contact->getMorphClass(),
+                    'model_id' => $contact->getKey(),
+                ])
                     ->checkPermission()
                     ->validate()
                     ->execute()
@@ -89,7 +93,11 @@ class CreateContact extends FluxAction
     protected function prepareForValidation(): void
     {
         $this->data['price_list_id'] ??= resolve_static(PriceList::class, 'default')?->getKey();
-        $this->data['payment_type_id'] ??= resolve_static(PaymentType::class, 'default')?->getKey();
+        $this->data['payment_type_id'] ??= resolve_static(PaymentType::class, 'query')
+            ->where('is_default', true)
+            ->where('is_active', true)
+            ->where('is_sales', true)
+            ->value('id');
         $this->data['currency_id'] ??= resolve_static(Currency::class, 'default')?->getKey();
     }
 

@@ -33,8 +33,14 @@
                                 "ms",
                             )
                             : 0
-                    }}
+                    }},
+                @else
+                    null,
+                    null,
+                    false,
+                    0,
                 @endif
+                @js($mentionable)
             )(), {
                 showBladeVariables: false,
                 bladeVariables: @js($bladeVariables)
@@ -122,7 +128,7 @@
                         />
                         <div x-collapse x-cloak x-show="expanded" class="pt-2">
                             @foreach ($collapsible->dropdownContent() as $action)
-                                {!! $action->render() !!}
+                                {!! $action instanceof \Stringable ? $action : $action->render() !!}
                             @endforeach
                         </div>
                     </div>

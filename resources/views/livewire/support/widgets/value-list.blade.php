@@ -42,7 +42,11 @@
                                                 <i class="ph ph-caret-up"></i>
                                             </x-slot:left>
                                             <span
-                                                x-text="item.growthRate + '%'"
+                                                x-text="
+                                                    $nuxbe.format.percentage(
+                                                        item.growthRate / 100,
+                                                    )
+                                                "
                                             ></span>
                                         </x-badge>
                                         <x-badge
@@ -55,7 +59,11 @@
                                                 <i class="ph ph-caret-down"></i>
                                             </x-slot:left>
                                             <span
-                                                x-text="item.growthRate + '%'"
+                                                x-text="
+                                                    $nuxbe.format.percentage(
+                                                        item.growthRate / 100,
+                                                    )
+                                                "
                                             ></span>
                                         </x-badge>
                                     </div>
@@ -78,7 +86,11 @@
                                                 <i class="ph ph-caret-up"></i>
                                             </x-slot:left>
                                             <span
-                                                x-text="item.growthRate + '%'"
+                                                x-text="
+                                                    $nuxbe.format.percentage(
+                                                        item.growthRate / 100,
+                                                    )
+                                                "
                                             ></span>
                                         </x-badge>
                                         <x-badge
@@ -91,7 +103,11 @@
                                                 <i class="ph ph-caret-down"></i>
                                             </x-slot:left>
                                             <span
-                                                x-text="item.growthRate + '%'"
+                                                x-text="
+                                                    $nuxbe.format.percentage(
+                                                        item.growthRate / 100,
+                                                    )
+                                                "
                                             ></span>
                                         </x-badge>
                                     </div>

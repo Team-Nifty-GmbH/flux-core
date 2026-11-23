@@ -14,7 +14,11 @@ use FluxErp\Traits\Model\LogsActivity;
 use Illuminate\Contracts\Mail\Mailer;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
+use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
+use Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream;
+use Throwable;
 use Webklex\IMAP\Facades\Client as ImapClient;
 use Webklex\PHPIMAP\Client;
 use Webklex\PHPIMAP\Exceptions\AuthFailedException;
@@ -29,6 +33,8 @@ class MailAccount extends FluxModel
 {
     use HasPackageFactory, HasUserModification, HasUuid, LogsActivity;
 
+    public const int MAX_FAILED_LOGINS = 5;
+
     public bool $supportsHierarchicalFolders = true;
 
     protected $hidden = [
@@ -36,13 +42,37 @@ class MailAccount extends FluxModel
         'smtp_password',
     ];
 
+    protected ?Collection $imapFolders = null;
+
     private ?Client $imapClient = null;
+
+    protected static function booted(): void
+    {
+        static::updating(function (MailAccount $mailAccount): void {
+            if ($mailAccount->isDirty([
+                'protocol',
+                'host',
+                'port',
+                'encryption',
+                'email',
+                'password',
+                'has_o_auth',
+                'has_valid_certificate',
+            ])) {
+                $mailAccount->failed_logins = 0;
+            }
+        });
+    }
 
     protected function casts(): array
     {
         return [
             'password' => 'encrypted',
             'smtp_password' => 'encrypted',
+            'has_auto_assign' => 'boolean',
+            'has_o_auth' => 'boolean',
+            'has_valid_certificate' => 'boolean',
+            'smtp_has_valid_certificate' => 'boolean',
         ];
     }
 
@@ -65,6 +95,32 @@ class MailAccount extends FluxModel
     }
 
     // Public methods
+    public function appendToSentFolder(string $message): void
+    {
+        if (! $this->host || ! $this->email) {
+            return;
+        }
+
+        $sentFolder = $this->mailFolders()
+            ->where('is_sent', true)
+            ->first();
+
+        if (! $sentFolder) {
+            return;
+        }
+
+        try {
+            $this->getImapClient()
+                ?->getConnection()
+                ->appendMessage($sentFolder->slug, $message, ['\Seen'])
+                ->validatedData();
+        } catch (Throwable $e) {
+            report($e);
+        } finally {
+            $this->disconnectImapClient();
+        }
+    }
+
     /**
      * @throws ImapBadRequestException
      * @throws RuntimeException
@@ -75,10 +131,14 @@ class MailAccount extends FluxModel
      */
     public function connect(): ?Client
     {
+        if ($this->isSyncPaused()) {
+            return null;
+        }
+
         event(new Connecting($this));
 
         try {
-            return ImapClient::make([
+            $client = ImapClient::make([
                 'protocol' => $this->protocol ?: 'imap',
                 'host' => $this->host,
                 'port' => $this->port,
@@ -90,10 +150,33 @@ class MailAccount extends FluxModel
             ])
                 ->connect();
         } catch (AuthFailedException $e) {
+            $this->countFailedLogin();
             logger($e->getMessage(), ['mail_account_id' => $this->id]);
+
+            return null;
+        } catch (ImapServerErrorException $e) {
+            if (! str_contains($e->getMessage(), '[UNAVAILABLE]')) {
+                $this->countFailedLogin();
+            }
+
+            throw $e;
         }
 
-        return null;
+        $this->clearFailedLogins();
+
+        return $client;
+    }
+
+    public function disconnectImapClient(): void
+    {
+        $client = $this->imapClient;
+        $this->imapClient = null;
+        $this->imapFolders = null;
+
+        try {
+            $client?->disconnect();
+        } catch (Throwable) {
+        }
     }
 
     public function getImapClient(): ?Client
@@ -105,32 +188,24 @@ class MailAccount extends FluxModel
         return $this->imapClient;
     }
 
-    public function syncFolders(): array
+    public function getImapFolder(string $path): ?Folder
     {
-        $client = $this->getImapClient();
+        if (is_null($this->imapFolders)) {
+            $client = $this->getImapClient();
 
-        if (! $client) {
-            return [];
+            if (! $client) {
+                return null;
+            }
+
+            $this->imapFolders = $client->getFolders(false)->keyBy('path');
         }
 
-        $folderIds = [];
-        $folders = $client->getFolders($this->supportsHierarchicalFolders, soft_fail: true);
+        return $this->imapFolders->get($path);
+    }
 
-        foreach ($folders as $folder) {
-            $folderIds = array_merge($folderIds, $this->syncFolder($folder));
-        }
-
-        resolve_static(MailFolder::class, 'query')
-            ->whereKeyNot(array_values($folderIds))
-            ->where('mail_account_id', $this->getKey())
-            ->get('id')
-            ->each(
-                fn (MailFolder $folder) => DeleteMailFolder::make(['id' => $folder->getKey()])
-                    ->validate()
-                    ->execute()
-            );
-
-        return $folderIds;
+    public function isSyncPaused(): bool
+    {
+        return $this->failed_logins >= static::MAX_FAILED_LOGINS;
     }
 
     public function mailer(): Mailer
@@ -152,6 +227,21 @@ class MailAccount extends FluxModel
 
         $mailer = Mail::build($config);
 
+        if ($this->smtp_has_valid_certificate === false) {
+            $transport = $mailer->getSymfonyTransport();
+            $stream = $transport instanceof EsmtpTransport ? $transport->getStream() : null;
+
+            if ($stream instanceof SocketStream) {
+                $stream->setStreamOptions([
+                    'ssl' => [
+                        'verify_peer' => false,
+                        'verify_peer_name' => false,
+                        'allow_self_signed' => true,
+                    ],
+                ]);
+            }
+        }
+
         $mailer->alwaysFrom($this->smtp_email, $fromName);
 
         if ($this->smtp_reply_to) {
@@ -161,7 +251,96 @@ class MailAccount extends FluxModel
         return $mailer;
     }
 
+    /**
+     * Drop the cached client and connect again.
+     *
+     * The client is held for the lifetime of the model, so once the server has
+     * closed the connection every later call hands out the same dead stream.
+     * Anything recovering from a lost connection has to clear the cache first,
+     * otherwise it retries into the same broken socket.
+     */
+    public function reconnectImapClient(): ?Client
+    {
+        $this->disconnectImapClient();
+
+        return $this->getImapClient();
+    }
+
+    public function syncFolders(): array
+    {
+        $client = $this->getImapClient();
+
+        if (! $client) {
+            return [];
+        }
+
+        $folderIds = [];
+        $folders = $client->getFolders($this->supportsHierarchicalFolders, soft_fail: true);
+
+        foreach ($folders as $folder) {
+            $folderIds = array_merge($folderIds, $this->syncFolder($folder));
+        }
+
+        $staleFolders = resolve_static(MailFolder::class, 'query')
+            ->whereKeyNot(array_values($folderIds))
+            ->where('mail_account_id', $this->getKey())
+            ->get(['id', 'parent_id']);
+
+        $staleFolderIds = array_flip($staleFolders->modelKeys());
+
+        $staleFolders
+            ->reject(fn (MailFolder $folder): bool => array_key_exists($folder->parent_id ?? 0, $staleFolderIds))
+            ->each(
+                fn (MailFolder $folder) => DeleteMailFolder::make(['id' => $folder->getKey()])
+                    ->validate()
+                    ->execute()
+            );
+
+        return $folderIds;
+    }
+
     // Protected methods
+    protected function clearFailedLogins(): void
+    {
+        if (! $this->exists || ! $this->failed_logins) {
+            return;
+        }
+
+        $this->forceFill(['failed_logins' => 0])
+            ->syncOriginalAttribute('failed_logins');
+
+        resolve_static(MailAccount::class, 'query')
+            ->whereKey($this->getKey())
+            ->update(['failed_logins' => 0]);
+    }
+
+    protected function countFailedLogin(): void
+    {
+        if (! $this->exists) {
+            return;
+        }
+
+        $this->failed_logins++;
+        $this->syncOriginalAttribute('failed_logins');
+
+        resolve_static(MailAccount::class, 'query')
+            ->whereKey($this->getKey())
+            ->increment('failed_logins');
+    }
+
+    /**
+     * Servers name their sent folder in the language of the mailbox. Only the english defaults
+     * are recognized, and only when the folder first appears, so a folder unmarked by hand stays
+     * unmarked. Any other sent folder is marked by hand.
+     */
+    protected function isNewSentFolder(Folder $folder): bool
+    {
+        return in_array($folder->name, ['Sent', 'Sent Items', 'Sent Messages', 'Sent Mail'])
+            && ! $this->mailFolders()
+                ->where('is_sent', true)
+                ->exists();
+    }
+
     protected function syncFolder(Folder $folder, ?int $parentId = null): array
     {
         $folderIds = [];
@@ -180,6 +359,10 @@ class MailAccount extends FluxModel
             'parent_id' => $parentId,
             'name' => $folder->name,
             'slug' => $folder->path,
+            // A \Noselect folder is a container only (e.g. Exchange "Public Folders"),
+            // selecting it fails. Keep it for the tree, but never sync its messages.
+            ...($folder->no_select ? ['is_active' => false] : []),
+            ...(! $mailFolder && $this->isNewSentFolder($folder) ? ['is_sent' => true] : []),
         ])
             ->validate()
             ->execute();

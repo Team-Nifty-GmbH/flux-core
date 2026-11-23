@@ -5,14 +5,17 @@ namespace FluxErp\Livewire\Widgets;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class SearchBar extends Component
 {
     public bool $show = false;
 
+    #[Locked]
     public ?string $widgetComponent = null;
 
+    #[Locked]
     public ?int $widgetId = null;
 
     public string $widgetModel = '';

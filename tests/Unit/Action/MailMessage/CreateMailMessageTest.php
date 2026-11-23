@@ -7,9 +7,14 @@ use FluxErp\Models\Comment;
 use FluxErp\Models\Contact;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
+use FluxErp\Models\PurchaseInvoice;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\Ticket;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 beforeEach(function (): void {
     $contact = Contact::factory()->create();
@@ -111,6 +116,65 @@ test('strips quoted conversation from comment created from mail reply', function
         ->and($comment->comment)->not->toContain('[flux:quote]');
 });
 
+test('purchase invoice from mail message skips supplier on tenant domain', function (
+    array $tenantAttributes,
+    string $senderDomain,
+    bool $expectsContact
+): void {
+    Event::fake('action.executed: ' . CreateMailMessage::class);
+
+    $tenant = Tenant::factory()->create($tenantAttributes);
+
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'email_primary' => 'rechnung@' . $senderDomain,
+    ]);
+
+    $mailFolder = MailFolder::factory()->create([
+        'mail_account_id' => $this->mailAccount->getKey(),
+        'can_create_purchase_invoice' => true,
+    ]);
+
+    $action = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->getKey(),
+        'mail_folder_id' => $mailFolder->getKey(),
+        'from' => 'Tester McTestFace <' . $address->email_primary . '>',
+        'to' => [$this->mailAccount->email],
+        'subject' => Str::uuid()->toString(),
+        'text_body' => faker()->text(),
+        'html_body' => '<p>' . faker()->text() . '</p>',
+        'communication_type_enum' => 'mail',
+        'date' => now()->format('Y-m-d H:i:s'),
+        'tags' => [],
+    ]);
+    $message = $action->validate()->execute();
+
+    $message->addMedia(UploadedFile::fake()->create('invoice.pdf', 10, 'application/pdf'))
+        ->toMediaCollection('attachments');
+    $message->refresh();
+
+    (new CreateMailExecutedSubscriber())->handle($action);
+
+    $purchaseInvoice = PurchaseInvoice::query()->latest('id')->first();
+
+    expect($purchaseInvoice)->not->toBeNull()
+        ->and($purchaseInvoice->contact_id)->toBe($expectsContact ? $contact->getKey() : null);
+
+    if (! $expectsContact) {
+        // The matching tenant owns the invoice, not the default tenant.
+        expect($purchaseInvoice->tenant_id)->toBe($tenant->getKey())
+            ->and($tenant->refresh()->is_default)->toBeFalse();
+    }
+})->with([
+    'tenant email domain' => [['email' => 'buchhaltung@team-nifty.test'], 'team-nifty.test', false],
+    'tenant website domain' => [['website' => 'https://www.team-nifty.test/impressum'], 'team-nifty.test', false],
+    'tenant email subdomain' => [['email' => 'buchhaltung@team-nifty.test'], 'mail.team-nifty.test', false],
+    'foreign domain' => [['email' => 'buchhaltung@team-nifty.test'], 'supplier.test', true],
+    'domain suffix lookalike' => [['email' => 'buchhaltung@team-nifty.test'], 'notteam-nifty.test', true],
+    'tenant website without a dot' => [['website' => 'test'], 'supplier.test', true],
+]);
+
 test('create ticket from mail message', function (): void {
     Event::fake('action.executed: ' . CreateMailMessage::class);
 
@@ -140,4 +204,193 @@ test('create ticket from mail message', function (): void {
         'description' => $action->getData('text_body'),
         'created_by' => $this->address->getMorphClass() . ':' . $this->address->getKey(),
     ]);
+});
+
+test('create ticket from mail message without text body', function (?string $textBody, ?string $htmlBody, string $expected): void {
+    Event::fake('action.executed: ' . CreateMailMessage::class);
+    file_put_contents($path = tempnam(sys_get_temp_dir(), 'imap_'), 'log');
+
+    $action = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'from' => 'Tester McTestFace <' . $this->address->email_primary . '>',
+        'to' => [$this->mailAccount->email],
+        'subject' => $subject = Str::uuid()->toString(),
+        'text_body' => $textBody,
+        'html_body' => $htmlBody,
+        'communication_type_enum' => 'mail',
+        'date' => now()->format('Y-m-d H:i:s'),
+        'tags' => [],
+        'attachments' => [
+            ['file_name' => 'protocol.txt', 'name' => 'protocol.txt', 'media' => $path],
+        ],
+    ]);
+    $action->validate()->execute();
+
+    (new CreateMailExecutedSubscriber())->handle($action);
+
+    $ticket = Ticket::query()->where('title', $subject)->first();
+
+    expect($ticket)->not->toBeNull()
+        ->and($ticket->media()->count())->toBeGreaterThan(0)
+        ->and($ticket->description)->toBe($expected === '{subject}' ? $subject : $expected);
+})->with([
+    'empty text body, html body' => ['', '<p>Das Protokoll von nuxfon hängt an.</p>', '<p>Das Protokoll von nuxfon hängt an.</p>'],
+    'empty text and html body' => ['', '', '{subject}'],
+    'null bodies' => [null, null, '{subject}'],
+    'too short body' => ['Hi', null, '{subject}'],
+]);
+
+test('keeps special characters in the subject', function (string $subject, string $expected): void {
+    $result = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'from' => 'Tester McTestFace <' . $this->address->email_primary . '>',
+        'to' => [$this->mailAccount->email],
+        'subject' => $subject,
+        'text_body' => faker()->text(),
+        'html_body' => '<p>' . faker()->text() . '</p>',
+        'communication_type_enum' => 'mail',
+        'date' => now()->format('Y-m-d H:i:s'),
+        'tags' => [],
+    ])
+        ->validate()
+        ->execute();
+
+    expect($expected)->toBe($result->subject);
+})->with([
+    'umlauts' => ['Kündigung des Tee Abo Vertrags', 'Kündigung des Tee Abo Vertrags'],
+    'dash and umlaut' => ['Gmund Colors – mehr Möglichkeiten', 'Gmund Colors – mehr Möglichkeiten'],
+    'emoji' => ['📦 Dein Paket wurde geliefert', '📦 Dein Paket wurde geliefert'],
+    'encoded word' => ['=?UTF-8?Q?Login_nicht_m=C3=B6glich?=', 'Login nicht möglich'],
+    'partly encoded' => ['Neu =?utf-8?b?ZsO8cg==?= Sie', 'Neu für Sie'],
+    'iso encoded word' => ['=?iso-8859-1?Q?Restbest=E4nde_2026?=', 'Restbestände 2026'],
+    'question marks' => ['Preis: 5? oder 6?', 'Preis: 5? oder 6?'],
+]);
+
+test('keeps special characters in the html body', function (): void {
+    $result = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'from' => 'Tester McTestFace <' . $this->address->email_primary . '>',
+        'to' => [$this->mailAccount->email],
+        'subject' => Str::uuid()->toString(),
+        'text_body' => faker()->text(),
+        'html_body' => '<p>Grüße aus München – 100 % Bio 🍵</p>',
+        'communication_type_enum' => 'mail',
+        'date' => now()->format('Y-m-d H:i:s'),
+        'tags' => [],
+    ])
+        ->validate()
+        ->execute();
+
+    expect('<p>Grüße aus München – 100 % Bio 🍵</p>')->toBe($result->html_body);
+});
+
+test('skips a blocked attachment and keeps the others', function (): void {
+    $blocked = tempnam(sys_get_temp_dir(), 'logo_');
+    file_put_contents($blocked, 'logo content');
+    $allowed = tempnam(sys_get_temp_dir(), 'invoice_');
+    file_put_contents($allowed, 'invoice content');
+    FluxErp\Models\BlockedFile::query()->create(['hash' => md5_file($blocked), 'file_name' => 'logo.txt']);
+
+    $message = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'from' => 'Tester McTestFace <' . $this->address->email_primary . '>',
+        'to' => [$this->mailAccount->email],
+        'subject' => Str::uuid()->toString(),
+        'communication_type_enum' => 'mail',
+        'date' => now()->format('Y-m-d H:i:s'),
+        'attachments' => [
+            ['file_name' => 'logo.txt', 'name' => 'logo.txt', 'media' => $blocked],
+            ['file_name' => 'invoice.txt', 'name' => 'invoice.txt', 'media' => $allowed],
+        ],
+    ])->validate()->execute();
+
+    expect($message->getMedia('attachments')->pluck('file_name')->all())->toBe(['invoice.txt']);
+});
+
+test('skips an attachment with a disallowed extension and keeps the others', function (): void {
+    Log::spy();
+    $files = collect(['December_Itinerary.shtml', 'imglib.php', 'invoice.txt'])
+        ->mapWithKeys(function (string $name): array {
+            $path = tempnam(sys_get_temp_dir(), 'imap_');
+            file_put_contents($path, $name . ' content');
+
+            return [$name => $path];
+        });
+
+    $message = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'from' => 'Tester McTestFace <' . $this->address->email_primary . '>',
+        'to' => [$this->mailAccount->email],
+        'subject' => Str::uuid()->toString(),
+        'communication_type_enum' => 'mail',
+        'date' => now()->format('Y-m-d H:i:s'),
+        'attachments' => $files
+            ->map(fn (string $path, string $name): array => ['file_name' => $name, 'name' => $name, 'media' => $path])
+            ->values()
+            ->all(),
+    ])->validate()->execute();
+
+    expect($message->getMedia('attachments')->pluck('file_name')->all())->toBe(['invoice.txt']);
+    Log::shouldHaveReceived('warning')->twice();
+});
+
+test('skips a blocked attachment given as content', function (): void {
+    FluxErp\Models\BlockedFile::query()->create(['hash' => md5('logo content'), 'file_name' => 'logo.txt']);
+
+    $message = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'from' => 'Tester McTestFace <' . $this->address->email_primary . '>',
+        'to' => [$this->mailAccount->email],
+        'subject' => Str::uuid()->toString(),
+        'communication_type_enum' => 'mail',
+        'date' => now()->format('Y-m-d H:i:s'),
+        'attachments' => [
+            ['file_name' => 'logo.txt', 'name' => 'logo.txt', 'media' => 'logo content'],
+        ],
+    ])->validate()->execute();
+
+    expect($message->getMedia('attachments'))->toHaveCount(0);
+});
+
+test('stores a long subject, sender and message id in full', function (string $subject, string $expected): void {
+    $from = str_repeat('N', 400) . ' <sender@example.com>';
+    $messageId = '<' . str_repeat('a', 900) . '@example.com>';
+
+    $result = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'message_id' => $messageId,
+        'from' => $from,
+        'subject' => $subject,
+        'communication_type_enum' => 'mail',
+        'tags' => [],
+    ])
+        ->validate()
+        ->execute()
+        ->fresh();
+
+    expect($result->subject)->toBe($expected)
+        ->and($result->from)->toBe($from)
+        ->and($result->message_id)->toBe($messageId);
+})->with([
+    'plain' => [str_repeat('s', 400), str_repeat('s', 400)],
+    'mime encoded' => ['=?UTF-8?B?' . base64_encode(str_repeat('ä', 400)) . '?=', str_repeat('ä', 400)],
+]);
+
+test('rejects a message id longer than 998 characters', function (): void {
+    expect(fn () => CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'message_id' => '<' . str_repeat('a', 998) . '>',
+        'from' => 'sender@example.com',
+        'subject' => 'Too long',
+        'communication_type_enum' => 'mail',
+        'tags' => [],
+    ])->validate())->toThrow(ValidationException::class);
 });

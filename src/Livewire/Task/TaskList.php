@@ -151,7 +151,7 @@ class TaskList extends BaseTaskList
         try {
             $this->task->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->task);
 
             return false;
         }

@@ -2,11 +2,13 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Models\Pivots\MediaFolderModel;
 use FluxErp\Traits\Model\CascadeSoftDeletes;
 use FluxErp\Traits\Model\HasParentChildRelations;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
@@ -15,8 +17,18 @@ class MediaFolder extends FluxModel implements HasMedia
 {
     use CascadeSoftDeletes, HasParentChildRelations, HasUserModification, HasUuid, InteractsWithMedia;
 
+    protected array $cascadeDeletes = [
+        'children',
+    ];
+
     protected static function booted(): void
     {
+        static::saving(function (MediaFolder $model): void {
+            if ($model->parent_id) {
+                $model->parent_collection = null;
+            }
+        });
+
         static::creating(function (MediaFolder $model): void {
             $model->slug ??= Str::of($model->name)
                 ->replace('.', '_')
@@ -25,32 +37,14 @@ class MediaFolder extends FluxModel implements HasMedia
         });
 
         static::created(function (MediaFolder $model): void {
-            $model->slug = implode('.',
-                array_filter([
-                    $model->parent?->slug,
-                    Str::of($model->name)
-                        ->replace('.', '_')
-                        ->snake()
-                        ->append('|' . $model->getKey())
-                        ->toString(),
-                ])
-            );
+            $model->slug = $model->buildSlug();
 
             $model->saveQuietly();
         });
 
         static::updating(function (MediaFolder $model): void {
-            if ($model->isDirty(['parent_id', 'name'])) {
-                $model->slug = implode('.',
-                    array_filter([
-                        $model->parent?->slug,
-                        Str::of($model->name)
-                            ->replace('.', '_')
-                            ->snake()
-                            ->append('|' . $model->getKey())
-                            ->toString(),
-                    ])
-                );
+            if ($model->isDirty(['parent_id', 'parent_collection', 'name'])) {
+                $model->slug = $model->buildSlug();
             }
         });
 
@@ -79,5 +73,24 @@ class MediaFolder extends FluxModel implements HasMedia
             'mime_types' => 'array',
             'is_readonly' => 'boolean',
         ];
+    }
+
+    public function mediaFolderModel(): HasOne
+    {
+        return $this->hasOne(MediaFolderModel::class, 'media_folder_id');
+    }
+
+    public function buildSlug(): string
+    {
+        return implode('.',
+            array_filter([
+                $this->parent?->slug ?? $this->parent_collection,
+                Str::of($this->name)
+                    ->replace('.', '_')
+                    ->snake()
+                    ->append('|' . $this->getKey())
+                    ->toString(),
+            ])
+        );
     }
 }

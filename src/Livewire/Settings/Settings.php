@@ -19,6 +19,7 @@ class Settings extends Component
 {
     public array $setting = [];
 
+    #[Locked]
     #[Url(as: 'setting-entry')]
     public ?string $settingComponent = null;
 
@@ -42,8 +43,17 @@ class Settings extends Component
 
     public function showSetting(array $setting): void
     {
-        $this->settingComponent = data_get($setting, 'component');
-        $this->setting = $setting;
+        $component = data_get($setting, 'component');
+        $allowedSetting = is_string($component) ? $this->findSettingByComponent($this->settings, $component) : null;
+
+        if (is_null($allowedSetting)) {
+            $this->skipRender();
+
+            return;
+        }
+
+        $this->settingComponent = $component;
+        $this->setting = $allowedSetting;
     }
 
     protected function findSettingByComponent(array $settings, string $component): ?array

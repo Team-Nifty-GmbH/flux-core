@@ -70,7 +70,7 @@ class ProductPropertyGroups extends ProductPropertyGroupList
         try {
             $this->productPropertyGroup->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->productPropertyGroup);
 
             return;
         }
@@ -98,7 +98,7 @@ class ProductPropertyGroups extends ProductPropertyGroupList
         try {
             $this->productPropertyGroup->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->productPropertyGroup);
 
             return false;
         }

@@ -60,7 +60,7 @@ class WatchlistCard extends Component
         try {
             $this->cartForm->delete();
         } catch (ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->cartForm);
 
             return;
         }

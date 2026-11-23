@@ -187,4 +187,16 @@ class AttendanceOverview extends CircleChart
     {
         return true;
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(EmployeeDay::class) => [
+                EmployeeDay::class => ['created', 'updated', 'deleted'],
+            ],
+            $this->modelChannel(AbsenceRequest::class) => [
+                AbsenceRequest::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

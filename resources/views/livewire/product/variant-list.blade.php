@@ -162,7 +162,7 @@
             <x-button
                 color="indigo"
                 x-show="!Object.values($wire.variants).length > 0"
-                spinner="next()"
+                loading="next"
                 :text="__('Next')"
                 wire:click="next()"
             />
@@ -179,7 +179,7 @@
                 color="indigo"
                 x-show="Object.values($wire.variants).length > 0"
                 x-cloak
-                spinner="save()"
+                loading="save"
                 :text="__('Save')"
                 wire:flux-confirm.type.error="{{ __('Save Variants') }}|{{ __('Non existing product option combinations will be deleted!') }}|{{ __('Cancel') }}|{{ __('OK') }}"
                 x-on:click="
@@ -190,6 +190,12 @@
             />
         </x-slot:footer>
     </x-modal>
+    <div class="mb-4 flex items-center gap-2">
+        <x-toggle
+            wire:model.live="onlyOverrides"
+            :label="__('Show overrides only')"
+        />
+    </div>
     <div wire:ignore>
         @include('tall-datatables::livewire.data-table')
     </div>

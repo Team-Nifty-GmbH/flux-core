@@ -11,8 +11,8 @@ use FluxErp\Actions\Plugins\Upload;
 use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\View\View;
-use Illuminate\Process\Exceptions\ProcessFailedException;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
@@ -24,11 +24,16 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use RuntimeException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 #[Lazy]
 class Plugins extends Component
 {
     use Actions, WithFileUploads;
+
+    public static int $availableFresh = 300;
+
+    public static int $availableStale = 3600;
 
     public MediaUploadForm $file;
 
@@ -101,7 +106,22 @@ class Plugins extends Component
     {
         /** @var \FluxErp\Helpers\Composer $composer */
         $composer = app('composer');
-        $available = Arr::keyBy(data_get($composer->showAvailable(), 'available', []), 'name');
+
+        try {
+            $available = Cache::flexible(
+                'flux.plugins.available',
+                [static::$availableFresh, static::$availableStale],
+                fn (): array => $composer->showAvailable()
+            );
+        } catch (ProcessFailedException $e) {
+            $available = [];
+            $this->toast()
+                ->error(__('Failed to load available plugins.'))
+                ->send();
+            $this->addError('getInstalled', $e->getMessage());
+        }
+
+        $available = Arr::keyBy(data_get($available, 'available') ?? [], 'name');
         $this->installed = data_get($composer->installed(true), 'installed', []);
 
         foreach ($available as $key => $package) {
@@ -317,5 +337,16 @@ class Plugins extends Component
             ->send();
 
         $this->checkForUpdates();
+    }
+
+    protected function composerState(): string
+    {
+        return hash(
+            'xxh128',
+            implode('', array_map(
+                fn (string $file): string => is_file(base_path($file)) ? (string) filemtime(base_path($file)) : '',
+                ['composer.lock', 'composer.json']
+            ))
+        );
     }
 }

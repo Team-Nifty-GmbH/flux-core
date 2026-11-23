@@ -25,12 +25,12 @@ class UpdateTransactionRuleset extends FluxRuleset
             'parent_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Transaction::class]),
+                app(ModelExists::class, ['model' => Transaction::class, 'subject' => Transaction::class]),
             ],
             'currency_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Currency::class]),
+                app(ModelExists::class, ['model' => Currency::class, 'subject' => Transaction::class]),
             ],
             'value_date' => 'sometimes|required|date',
             'booking_date' => 'sometimes|required|date',
