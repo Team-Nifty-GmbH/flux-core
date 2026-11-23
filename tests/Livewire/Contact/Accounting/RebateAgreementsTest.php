@@ -139,7 +139,6 @@ test('calculating shows the volume and settling redirects to the created refund 
         'address_delivery_id' => $address->getKey(),
         'invoice_number' => 'RE-LW-1',
         'invoice_date' => '2025-06-01',
-        'shipping_costs_net_price' => 0,
     ]);
     $order->orderPositions()->create([
         'tenant_id' => $this->dbTenant->getKey(),

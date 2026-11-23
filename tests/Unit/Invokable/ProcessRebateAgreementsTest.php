@@ -35,7 +35,6 @@ function rebateAgreementWithVolume(string $periodEnd, float $net = 120000): Reba
         'address_delivery_id' => $address->getKey(),
         'invoice_number' => 'RE-' . fake()->unique()->numberBetween(1, 999999),
         'invoice_date' => '2025-06-01',
-        'shipping_costs_net_price' => 0,
     ]);
 
     $order->orderPositions()->create([

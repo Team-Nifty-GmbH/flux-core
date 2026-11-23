@@ -61,7 +61,6 @@ beforeEach(function (): void {
         'address_delivery_id' => $this->address->getKey(),
         'invoice_number' => 'RE-1',
         'invoice_date' => '2025-06-01',
-        'shipping_costs_net_price' => 0,
     ]);
 
     foreach ([

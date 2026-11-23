@@ -32,7 +32,6 @@ function rebateOrder(array $positions, array $attributes = []): Order
         'address_delivery_id' => test()->address->getKey(),
         'invoice_number' => 'RE-' . fake()->unique()->numberBetween(1, 999999),
         'invoice_date' => '2025-06-01',
-        'shipping_costs_net_price' => 0,
     ], Arr::except($attributes, ['order_type'])));
 
     // PriceCalculation signs the totals with the order type multiplier, which creating the
