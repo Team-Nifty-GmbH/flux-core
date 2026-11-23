@@ -606,36 +606,36 @@
                         </x-slot:sub-value>
                         <x-slot:actions>
                             @foreach (resolve_static(\FluxErp\Models\Pivots\ProductSupplier::class, 'formFields') as $field => $definition)
-                                @switch(data_get($definition, 'type'))
-                                    @case('unit')
-                                        <div
-                                            x-bind:class="{
-                                                'pointer-events-none': !isEditing,
-                                            }"
-                                        >
-                                            <x-select.styled
-                                                x-model.number="supplier.{{ $field }}"
-                                                :label="__($definition['label'])"
-                                                select="label:name|value:id"
-                                                :options="$units"
-                                            />
-                                        </div>
-                                        @break
-                                    @case('number')
-                                        <x-number
-                                            x-bind:disabled="!isEditing"
-                                            x-model="supplier.{{ $field }}"
-                                            :label="__($definition['label'])"
-                                            :step="data_get($definition, 'step')"
-                                        />
-                                        @break
-                                    @default
-                                        <x-input
-                                            x-bind:disabled="!isEditing"
-                                            x-model="supplier.{{ $field }}"
-                                            :label="__($definition['label'])"
-                                        />
-                                @endswitch
+                            @switch (data_get($definition, 'type'))
+                            @case ('unit')
+                            <div
+                                x-bind:class="{
+                                    'pointer-events-none': !isEditing,
+                                }"
+                            >
+                                <x-select.styled
+                                    x-model.number="supplier.{{ $field }}"
+                                    :label="__($definition['label'])"
+                                    select="label:name|value:id"
+                                    :options="$units"
+                                />
+                            </div>
+                            @break
+                            @case ('number')
+                            <x-number
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.{{ $field }}"
+                                :label="__($definition['label'])"
+                                :step="data_get($definition, 'step')"
+                            />
+                            @break
+                            @default
+                            <x-input
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.{{ $field }}"
+                                :label="__($definition['label'])"
+                            />
+                            @endswitch
                             @endforeach
                             @stack('product-supplier-fields')
                             <div class="mt-6">
