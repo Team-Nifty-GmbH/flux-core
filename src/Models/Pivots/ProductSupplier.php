@@ -30,7 +30,7 @@ class ProductSupplier extends FluxPivot
 
     public static function pivotColumns(): array
     {
-        return array_keys(static::formFields());
+        return array_values(array_unique(array_merge(parent::pivotColumns(), array_keys(static::formFields()))));
     }
 
     // Relations
