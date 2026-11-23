@@ -85,6 +85,38 @@ test('an invoice paid twice is overpaid', function (): void {
         ->and($order->balance)->toEqual(-404.12);
 });
 
+test('a pending assignment next to the payment does not count as paid', function (): void {
+    OrderTransaction::query()->create([
+        'order_id' => $this->order->getKey(),
+        'transaction_id' => Transaction::factory()
+            ->create(['amount' => 404.12, 'contact_bank_connection_id' => null])
+            ->getKey(),
+        'amount' => 404.12,
+        'is_accepted' => false,
+    ]);
+
+    ($this->assignPayment)(404.12);
+
+    $order = $this->order->refresh();
+
+    expect($order->payment_state)->toBeInstanceOf(Paid::class)
+        ->and($order->balance)->toEqual(0);
+});
+
+test('withdrawing the acceptance of the payment reopens the invoice', function (): void {
+    ($this->assignPayment)(404.12);
+
+    OrderTransaction::query()
+        ->where('order_id', $this->order->getKey())
+        ->sole()
+        ->update(['is_accepted' => false]);
+
+    $order = $this->order->refresh();
+
+    expect($order->payment_state)->toBeInstanceOf(Open::class)
+        ->and($order->balance)->toEqual(404.12);
+});
+
 test('an invoice whose payment was charged back is open again', function (): void {
     ($this->assignPayment)(404.12);
     ($this->assignPayment)(-404.12);

@@ -61,6 +61,13 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 continue;
             }
 
+            // Without a timezone of its own the schedule keeps running in app.timezone.
+            $timezone = $repeatable->timezone ?? config('app.timezone');
+
+            if ($repeatable->timezone) {
+                $event->timezone($repeatable->timezone);
+            }
+
             if (
                 is_a($repeatable->class, RepeatableInterface::class, true)
                 && $repeatable->class::withoutOverlapping()
@@ -74,7 +81,7 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
             // still has the past due_at) can pick the same row up and run it again.
             // Re-fetch from the DB and skip when last_run already covers the cron's
             // most recent past occurrence.
-            $event->skip(function () use ($repeatable): bool {
+            $event->skip(function () use ($repeatable, $timezone): bool {
                 if (! $repeatable->refresh()->last_run || ! $repeatable->cron_expression) {
                     return false;
                 }
@@ -82,7 +89,7 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 try {
                     $previousOccurrence = Carbon::instance(
                         (new CronExpression($repeatable->cron_expression))
-                            ->getPreviousRunDate(now()->toDateTime(), 0, true)
+                            ->getPreviousRunDate(now($timezone)->toDateTime(), 0, true)
                     );
                 } catch (Throwable) {
                     return false;
@@ -105,10 +112,10 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
 
             if (data_get($repeatable->cron, 'methods.basic') === FrequenciesEnum::LastDayOfMonth->value) {
                 $parts = explode(' ', $event->expression);
-                $nextRunDate = now()->addMonthNoOverflow()->endOfMonth()
+                $nextRunDate = now($timezone)->addMonthNoOverflow()->endOfMonth()
                     ->setTime((int) $parts[1], (int) $parts[0]);
             } else {
-                $nextRunDate = (new CronExpression($event->expression))->getNextRunDate(now());
+                $nextRunDate = (new CronExpression($event->expression))->getNextRunDate(now($timezone));
             }
 
             // Mark event as overdue
@@ -129,7 +136,7 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 $runsSeveralTimesADay = false;
                 try {
                     $cronExpression = new CronExpression($event->expression);
-                    $dueAtMatchesCron = $cronExpression->isDue($repeatable->due_at);
+                    $dueAtMatchesCron = $cronExpression->isDue($repeatable->due_at->copy()->setTimezone($timezone));
                     $runsSeveralTimesADay = resolve_static(
                         ScheduleModel::class,
                         'runsSeveralTimesADay',
@@ -142,7 +149,7 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 if (
                     ! $dueAtMatchesCron
                     && ! $runsSeveralTimesADay
-                    && Carbon::instance($nextRunDate)->isSameDay(now())
+                    && Carbon::instance($nextRunDate)->isSameDay(now($timezone))
                 ) {
                     if (data_get($repeatable->cron, 'methods.basic') === FrequenciesEnum::LastDayOfMonth->value) {
                         $parts = explode(' ', $event->expression);
@@ -153,6 +160,9 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                     }
                 }
             }
+
+            // The cron is evaluated in the schedule timezone, due_at is stored in app.timezone.
+            $nextRunDate = Carbon::instance($nextRunDate)->setTimezone(config('app.timezone'));
 
             $repeatable->cron_expression = $event->expression;
             $repeatable->save();

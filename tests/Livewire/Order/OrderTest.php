@@ -1,6 +1,7 @@
 <?php
 
 use FluxErp\Actions\ContactBankConnection\CalculateContactBankConnectionBalance;
+use FluxErp\Actions\Printing;
 use FluxErp\Enums\CreditAccountPostingEnum;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Enums\RepeatableTypeEnum;
@@ -181,6 +182,66 @@ test('create documents', function (): void {
 
     $invoice = $this->order->invoice();
     expect($invoice?->getPath())->not->toBeNull();
+});
+
+test('saving keeps the invoice state booked while the order was open', function (): void {
+    Storage::fake();
+
+    $this->order->update(['is_locked' => false, 'invoice_number' => null]);
+
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertSet('order.invoice_number', null);
+
+    Printing::make([
+        'model_type' => morph_alias(Order::class),
+        'model_id' => $this->order->getKey(),
+        'view' => 'invoice',
+    ])
+        ->validate()
+        ->execute();
+
+    $invoiced = $this->order->refresh();
+    $state = (string) $invoiced->state;
+    $nextReminderDate = $invoiced->payment_reminder_next_date?->toDateString();
+
+    expect($invoiced->invoice_number)->not->toBeNull()
+        ->and($state)->toBe(Open::$name)
+        ->and($nextReminderDate)->not->toBeNull();
+
+    $component
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    $saved = $this->order->refresh();
+    expect((string) $saved->state)->toBe($state)
+        ->and($saved->payment_reminder_next_date?->toDateString())->toBe($nextReminderDate);
+});
+
+test('saving a locked order still writes what the user changed', function (): void {
+    $this->order->update(['is_locked' => true, 'payment_reminder_next_date' => now()->addDays(3)]);
+    $nextReminderDate = now()->addDays(10)->toDateString();
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('order.payment_reminder_next_date', $nextReminderDate)
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($this->order->refresh()->payment_reminder_next_date?->toDateString())->toBe($nextReminderDate);
+});
+
+test('saving keeps users assigned while the order was open', function (): void {
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
+
+    $this->order->users()->sync([$this->user->getKey()]);
+
+    $component
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($this->order->users()->pluck('users.id')->all())->toBe([$this->user->getKey()]);
 });
 
 test('the invoice preview carries what the lightbox needs', function (): void {
@@ -648,6 +709,48 @@ test('recalculate order totals', function (): void {
         ->assertOk()
         ->assertNotSet('order.total_net_price', 0)
         ->assertNotSet('order.total_gross_price', 0);
+});
+
+test('recalculating the totals keeps unsaved header changes', function (): void {
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('order.header', 'Changed header');
+
+    $this->order->orderPositions()->first()->update([
+        'amount' => 2,
+        'total_net_price' => 200,
+        'total_base_net_price' => 200,
+        'total_gross_price' => 238,
+        'total_base_gross_price' => 238,
+    ]);
+
+    $component
+        ->call('recalculateOrderTotals')
+        ->assertSet('order.header', 'Changed header')
+        ->assertSet('order.total_net_price', $this->order->refresh()->total_net_price)
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($this->order->refresh()->header)->toBe('Changed header')
+        ->and(bccomp($this->order->total_net_price, 200))->toBe(0);
+});
+
+test('recalculating the totals shows totals another session already stored', function (): void {
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
+
+    $this->order->orderPositions()->first()->update([
+        'amount' => 2,
+        'total_net_price' => 200,
+        'total_base_net_price' => 200,
+        'total_gross_price' => 238,
+        'total_base_gross_price' => 238,
+    ]);
+    $this->order->refresh()->calculatePrices()->save();
+
+    $component
+        ->call('recalculateOrderTotals')
+        ->assertSet('order.total_net_price', $this->order->refresh()->total_net_price)
+        ->assertSet('order.total_gross_price', $this->order->total_gross_price);
 });
 
 test('render view data', function (): void {
@@ -1945,3 +2048,60 @@ test('contract total prefill does not count a run that falls exactly on the end 
     'later run equals end' => ['2027-01-01 00:00:00', '2027-04-01 00:00:00', 3],
     'end after the last run' => ['2027-01-01 00:00:00', '2027-04-01 00:01:00', 4],
 ]);
+
+test('loading a schedule saved without newer parameters keeps their defaults', function (): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Subscription,
+    ]);
+
+    $targetOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    $scheduleId = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set([
+            'schedule.parameters.orderTypeId' => $targetOrderType->id,
+            'schedule.parameters.orderId' => $this->order->id,
+            'schedule.cron.methods.basic' => 'monthlyOn',
+            'schedule.cron.parameters.basic' => ['1', '00:00', null],
+        ])
+        ->call('saveSchedule')
+        ->assertReturned(true)
+        ->get('schedule.id');
+
+    Schedule::query()->whereKey($scheduleId)->update([
+        'parameters' => json_encode([
+            'orderId' => $this->order->id,
+            'orderTypeId' => $targetOrderType->id,
+        ]),
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertSet('schedule.id', $scheduleId)
+        ->assertSet('schedule.parameters.orderTypeId', $targetOrderType->id)
+        ->assertSet(
+            'schedule.parameters',
+            fn (array $parameters): bool => array_key_exists('minimumDurationValue', $parameters)
+                && array_key_exists('minimumDurationUnit', $parameters)
+                && array_key_exists('cancellationNoticeValue', $parameters)
+                && array_key_exists('cancellationNoticeUnit', $parameters)
+                && $parameters['autoPrint'] === false
+                && $parameters['printLayouts'] === []
+        )
+        ->set([
+            'schedule.parameters.minimumDurationValue' => 12,
+            'schedule.parameters.minimumDurationUnit' => 'months',
+        ])
+        ->call('saveSchedule')
+        ->assertReturned(true)
+        ->assertHasNoErrors();
+
+    expect(Schedule::query()->whereKey($scheduleId)->value('parameters'))
+        ->minimumDurationValue->toBe(12)
+        ->minimumDurationUnit->toBe('months')
+        ->orderTypeId->toBe($targetOrderType->id);
+});

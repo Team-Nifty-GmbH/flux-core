@@ -31,7 +31,10 @@ class OrderTransaction extends FluxPivot
                     ->save();
             }
 
-            if ($orderTransaction->order_id && $orderTransaction->is_accepted) {
+            if (
+                $orderTransaction->order_id
+                && ($orderTransaction->is_accepted || $orderTransaction->wasChanged('is_accepted'))
+            ) {
                 $orderTransaction->order->calculatePaymentState()->save();
             }
 

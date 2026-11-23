@@ -20,6 +20,10 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateAddress extends FluxAction
 {
+    protected array $dontTrim = [
+        'password',
+    ];
+
     public static function models(): array
     {
         return [Address::class];

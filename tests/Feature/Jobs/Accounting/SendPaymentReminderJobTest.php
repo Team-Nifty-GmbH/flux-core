@@ -106,3 +106,19 @@ test('fails the job when the reminder mail cannot be sent', function (): void {
     expect($logged)->toBeTrue()
         ->and(PaymentReminder::query()->where('order_id', $orderId)->count())->toBe(0);
 });
+
+test('links the sent reminder mail to the order', function (): void {
+    $orderId = $this->order->getKey();
+
+    PaymentReminderText::factory()->create([
+        'reminder_level' => 1,
+        'email_template_id' => EmailTemplate::factory()->create()->getKey(),
+    ]);
+
+    Mail::fake();
+
+    (new SendPaymentReminderJob($orderId))->handle();
+
+    expect(PaymentReminder::query()->where('order_id', $orderId)->count())->toBe(1)
+        ->and(Order::query()->whereKey($orderId)->first()->communications()->count())->toBe(1);
+});

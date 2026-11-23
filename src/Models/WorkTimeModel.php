@@ -45,9 +45,9 @@ class WorkTimeModel extends FluxModel
 
         $weekday = $date?->dayOfWeekIso;
 
-        $scheduledHours = $weekday
+        $scheduledHours = $date
             ? $this->schedules()
-                ->where('weekday', $weekday)
+                ->where('weekday', $date->dayOfWeek)
                 ->value('work_hours')
             : null;
 
