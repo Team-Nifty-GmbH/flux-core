@@ -8,6 +8,11 @@ use FluxErp\Rulesets\SerialNumberRange\CreateSerialNumberRangeRuleset;
 
 class CreateSerialNumberRange extends FluxAction
 {
+    protected array $dontTrim = [
+        'prefix',
+        'suffix',
+    ];
+
     public static function models(): array
     {
         return [SerialNumberRange::class];
