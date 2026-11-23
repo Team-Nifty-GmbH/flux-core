@@ -7,6 +7,8 @@ return [
 
     'license_key' => env('FLUX_LICENSE_KEY'),
 
+    'composer_auth' => env('COMPOSER_AUTH'),
+
     'formal_salutation' => env('FLUX_FORMAL_SALUTATION', true),
 
     'flux_url' => env('FLUX_URL'),

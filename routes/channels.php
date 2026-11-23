@@ -4,8 +4,10 @@ use FluxErp\Facades\Action;
 use FluxErp\Http\Controllers\BroadcastingBatchAuthController;
 use FluxErp\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\ClassMorphViolationException;
 use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
@@ -28,51 +30,65 @@ $configuredGuards = fn (array $guards): array => array_values(
     array_intersect($guards, array_keys(config('auth.guards', [])))
 );
 
-foreach (Relation::morphMap() as $class) {
-    $class = resolve_static($class, 'class');
-    if (! in_array(BroadcastsEvents::class, class_uses_recursive($class))) {
-        continue;
+$morphMap = Relation::morphMap();
+
+Broadcast::deferChannels(function (Collection $registered) use ($morphMap, $configuredGuards): void {
+    foreach ($morphMap as $class) {
+        $class = resolve_static($class, 'class');
+        if (! in_array(BroadcastsEvents::class, class_uses_recursive($class))) {
+            continue;
+        }
+
+        // User has a dedicated ownership-scoped channel below; skip the generic one.
+        if (is_a($class, morphed_model('user'), true)) {
+            continue;
+        }
+
+        try {
+            $channel = class_to_broadcast_channel($class);
+            $modelChannel = class_to_broadcast_channel($class, false) . '.';
+        } catch (ClassMorphViolationException $e) {
+            report($e);
+
+            continue;
+        }
+
+        if (! $registered->has($channel)) {
+            Broadcast::channel(
+                $channel,
+                function (Authenticatable $user, int|string $key) use ($class) {
+                    auth()->setUser($user);
+
+                    $record = $class::query()->where(app($class)->getRouteKeyName(), $key)->first();
+
+                    if (is_null($record) || ! is_a($user, morphed_model('address'))) {
+                        return ! is_null($record);
+                    }
+
+                    $attributes = $record->getAttributes();
+                    $contactId = match (true) {
+                        is_a($record, morphed_model('contact')) => $record->getKey(),
+                        array_key_exists('contact_id', $attributes) => data_get($attributes, 'contact_id'),
+                        data_get($attributes, 'authenticatable_type') === morph_alias(morphed_model('address')) => resolve_static(
+                            morphed_model('address'),
+                            'query'
+                        )
+                            ->whereKey(data_get($attributes, 'authenticatable_id'))
+                            ->value('contact_id'),
+                        default => null,
+                    };
+
+                    return ! is_null($contactId) && (int) $contactId === (int) $user->contact_id;
+                },
+                ['guards' => $configuredGuards(['web', 'address'])]
+            );
+        }
+
+        if (! $registered->has($modelChannel)) {
+            Broadcast::channel($modelChannel, fn () => true, ['guards' => ['web', 'token']]);
+        }
     }
-
-    // User has a dedicated ownership-scoped channel below; skip the generic one.
-    if (is_a($class, morphed_model('user'), true)) {
-        continue;
-    }
-
-    $channel = class_to_broadcast_channel($class);
-
-    Broadcast::channel(
-        $channel,
-        function (Authenticatable $user, int|string $key) use ($class) {
-            auth()->setUser($user);
-
-            $record = $class::query()->where(app($class)->getRouteKeyName(), $key)->first();
-
-            if (is_null($record) || ! is_a($user, morphed_model('address'))) {
-                return ! is_null($record);
-            }
-
-            $attributes = $record->getAttributes();
-            $contactId = match (true) {
-                is_a($record, morphed_model('contact')) => $record->getKey(),
-                array_key_exists('contact_id', $attributes) => data_get($attributes, 'contact_id'),
-                data_get($attributes, 'authenticatable_type') === morph_alias(morphed_model('address')) => resolve_static(
-                    morphed_model('address'),
-                    'query'
-                )
-                    ->whereKey(data_get($attributes, 'authenticatable_id'))
-                    ->value('contact_id'),
-                default => null,
-            };
-
-            return ! is_null($contactId) && (int) $contactId === (int) $user->contact_id;
-        },
-        ['guards' => $configuredGuards(['web', 'address'])]
-    );
-
-    $channel = class_to_broadcast_channel($class, false);
-    Broadcast::channel($channel . '.', fn () => true, ['guards' => ['web', 'token']]);
-}
+});
 
 Broadcast::channel(
     class_to_broadcast_channel(morphed_model('user'), false) . '.{id}',

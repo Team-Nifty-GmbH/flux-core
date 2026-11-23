@@ -202,9 +202,16 @@ class Composer extends BaseComposer
     protected function getProcess(array $command, array $env = []): Process
     {
         $defaultEnv = [
-            'HOME' => getenv('HOME') ?: sys_get_temp_dir(),
+            'HOME' => getenv('HOME')
+                ?: (function_exists('posix_getpwuid') ? data_get(posix_getpwuid(posix_geteuid()), 'dir') : null)
+                ?: sys_get_temp_dir(),
             'XDEBUG_MODE' => 'off',
         ];
+
+        // A cached config keeps .env out of getenv(), so composer would miss its credentials.
+        if (! getenv('COMPOSER_AUTH') && $auth = config('flux.composer_auth')) {
+            $defaultEnv['COMPOSER_AUTH'] = $auth;
+        }
 
         $env = array_merge(
             $defaultEnv,

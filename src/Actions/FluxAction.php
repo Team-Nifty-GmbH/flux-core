@@ -31,6 +31,8 @@ abstract class FluxAction
 
     protected array $data;
 
+    protected array $dontTrim = [];
+
     protected bool $keepEmptyStrings = false;
 
     protected mixed $result = null;
@@ -273,6 +275,7 @@ abstract class FluxAction
             $data = $data->toArray();
         }
 
+        $data = $this->trimStrings($data);
         $this->data = $keepEmptyStrings ? $data : $this->convertEmptyStringToNull($data);
 
         return $this;
@@ -365,6 +368,21 @@ abstract class FluxAction
     protected function prepareForValidation(): void
     {
         //
+    }
+
+    protected function trimStrings(array $data): array
+    {
+        return Arr::map($data, function (mixed $value, int|string $key): mixed {
+            if (in_array($key, $this->dontTrim, true)) {
+                return $value;
+            }
+
+            if (is_array($value)) {
+                return $this->trimStrings($value);
+            }
+
+            return is_string($value) ? Str::trim($value) : $value;
+        });
     }
 
     protected function validateData(): void

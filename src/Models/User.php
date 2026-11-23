@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection as BaseCollection;
@@ -146,9 +147,9 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     }
 
     // Relations
-    public function absenceRequests(): HasMany
+    public function absenceRequests(): HasManyThrough
     {
-        return $this->hasMany(AbsenceRequest::class);
+        return $this->hasManyThrough(AbsenceRequest::class, Employee::class);
     }
 
     public function activities(): MorphMany

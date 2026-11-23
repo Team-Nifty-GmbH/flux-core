@@ -58,3 +58,34 @@ test('updating a schedule cannot clear its repetition', function (): void {
 
     expect(data_get($schedule->refresh()->cron, 'methods.basic'))->toBe('yearlyOn');
 });
+
+test('a schedule only accepts a valid timezone', function (): void {
+    $schedule = Schedule::query()->create([
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => 'invokable',
+        'cron' => [
+            'methods' => ['basic' => 'dailyAt', 'dayConstraint' => null, 'timeConstraint' => null],
+            'parameters' => ['basic' => ['06:00'], 'dayConstraint' => [], 'timeConstraint' => []],
+        ],
+        'parameters' => ['orderId' => 1],
+        'is_active' => true,
+    ]);
+
+    UpdateSchedule::assertValidationErrors(
+        ['id' => $schedule->getKey(), 'timezone' => 'Europe/Nowhere'],
+        ['timezone']
+    );
+
+    expect($schedule->refresh()->timezone)->toBeNull();
+
+    $updated = UpdateSchedule::make(['id' => $schedule->getKey(), 'timezone' => 'Europe/Berlin'])
+        ->validate()
+        ->execute();
+
+    expect($updated->timezone)->toBe('Europe/Berlin');
+});
+
+test('create schedule rejects an invalid timezone', function (): void {
+    CreateSchedule::assertValidationErrors(['timezone' => 'Mars/Olympus'], ['timezone']);
+});

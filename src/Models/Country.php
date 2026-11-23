@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Jobs\SyncCountryTaxExemptionJob;
 use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasDefault;
 use FluxErp\Traits\Model\HasPackageFactory;
@@ -16,6 +17,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Country extends FluxModel
 {
     use Filterable, HasDefault, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, Searchable, SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::updated(function (Country $country): void {
+            if ($country->wasChanged('tax_exemption_id')) {
+                SyncCountryTaxExemptionJob::dispatch(
+                    $country->getKey(),
+                    data_get($country->getPrevious(), 'tax_exemption_id')
+                );
+            }
+        });
+    }
 
     protected function casts(): array
     {
@@ -50,6 +63,11 @@ class Country extends FluxModel
     public function regions(): HasMany
     {
         return $this->hasMany(CountryRegion::class);
+    }
+
+    public function taxExemption(): BelongsTo
+    {
+        return $this->belongsTo(VatRate::class, 'tax_exemption_id');
     }
 
     public function tenants(): HasMany

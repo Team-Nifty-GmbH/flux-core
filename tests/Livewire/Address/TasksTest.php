@@ -18,19 +18,28 @@ test('renders successfully', function (): void {
         ->assertOk();
 });
 
-test('renders the reminder fields', function (): void {
+test('refuses a reminder with invalid minutes before', function (string $field, mixed $minutes): void {
     $address = Address::factory()->create([
         'contact_id' => Contact::factory()->create()->getKey(),
     ]);
+    $type = str_starts_with($field, 'start') ? 'start' : 'due';
 
     Livewire::test(Tasks::class, ['modelId' => $address->getKey()])
-        ->assertSeeHtml('x-show="$wire.task.start_date"')
-        ->assertSeeHtml('wire:model="task.has_start_reminder"')
-        ->assertSeeHtml('wire:model="task.start_reminder_minutes_before"')
-        ->assertSeeHtml('x-show="$wire.task.due_date"')
-        ->assertSeeHtml('wire:model="task.has_due_reminder"')
-        ->assertSeeHtml('wire:model="task.due_reminder_minutes_before"');
-});
+        ->set('task.name', $name = Str::uuid()->toString())
+        ->set('task.' . $type . '_date', now()->addDay()->toDateString())
+        ->set('task.has_' . $type . '_reminder', true)
+        ->set('task.' . $field, $minutes)
+        ->call('save')
+        ->assertHasErrors('task.' . $field)
+        ->assertReturned(false);
+
+    $this->assertDatabaseMissing('tasks', ['name' => $name]);
+})->with([
+    'missing start minutes' => ['start_reminder_minutes_before', null],
+    'negative start minutes' => ['start_reminder_minutes_before', -5],
+    'missing due minutes' => ['due_reminder_minutes_before', null],
+    'negative due minutes' => ['due_reminder_minutes_before', -5],
+]);
 
 test('can create a task with reminders on the address', function (): void {
     $address = Address::factory()->create([
