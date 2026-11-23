@@ -46,7 +46,7 @@
             <div x-cloak x-show="$wire.multiple">
                 <x-alert
                     color="blue"
-                    :text="__('Recipients, attachments and placeholders are filled in for every record when sending')"
+                    :text="__('Recipients, attachments and placeholders are filled in individually for every record when sending')"
                 />
             </div>
 
