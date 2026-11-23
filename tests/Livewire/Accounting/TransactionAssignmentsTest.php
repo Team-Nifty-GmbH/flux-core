@@ -324,22 +324,12 @@ test('a ledger account error stays off the sibling transaction forms', function 
         ]);
 });
 
-test('assigning several foreign currency orders splits the remaining transaction amount', function (): void {
-    $bankConnection = BankConnection::factory()->create();
-    $transaction = Transaction::factory()->create([
-        'bank_connection_id' => $bankConnection->getKey(),
-        'currency_id' => Currency::default()->getKey(),
-        'amount' => 859.38,
-    ]);
-    $usd = Currency::factory()->create(['iso' => 'USD', 'is_default' => false]);
-
+function createTransactionAssignmentsOrder(int $currencyId, float $balance): Order
+{
     $contact = Contact::factory()->create();
     $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
-    $orderType = OrderType::factory()->create([
-        'order_type_enum' => OrderTypeEnum::Order,
-        'is_active' => true,
-    ]);
-    $createOrder = fn (int $currencyId, float $balance) => Order::factory()->create([
+
+    return Order::factory()->create([
         'address_invoice_id' => $address->getKey(),
         'contact_id' => $contact->getKey(),
         'tenant_id' => Tenant::default()->getKey(),
@@ -347,13 +337,33 @@ test('assigning several foreign currency orders splits the remaining transaction
         'price_list_id' => PriceList::default()->getKey(),
         'payment_type_id' => PaymentType::default()->getKey(),
         'currency_id' => $currencyId,
-        'order_type_id' => $orderType->getKey(),
+        'order_type_id' => OrderType::factory()
+            ->create([
+                'order_type_enum' => OrderTypeEnum::Order,
+                'is_active' => true,
+            ])
+            ->getKey(),
         'balance' => $balance,
     ]);
+}
 
-    $euroOrder = $createOrder(Currency::default()->getKey(), 300);
-    $smallUsdOrder = $createOrder($usd->getKey(), 23.74);
-    $largeUsdOrder = $createOrder($usd->getKey(), 127.96);
+function createTransactionAssignmentsTransaction(float $amount): Transaction
+{
+    return Transaction::factory()->create([
+        'bank_connection_id' => BankConnection::factory()->create()->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'amount' => $amount,
+        'balance' => $amount,
+    ]);
+}
+
+test('assigning several foreign currency orders splits the remaining transaction amount', function (): void {
+    $transaction = createTransactionAssignmentsTransaction(859.38);
+    $usd = Currency::factory()->create(['iso' => 'USD', 'is_default' => false]);
+
+    $euroOrder = createTransactionAssignmentsOrder(Currency::default()->getKey(), 300);
+    $smallUsdOrder = createTransactionAssignmentsOrder($usd->getKey(), 23.74);
+    $largeUsdOrder = createTransactionAssignmentsOrder($usd->getKey(), 127.96);
 
     Livewire::test(TransactionAssignments::class)
         ->call('assignOrdersModal', $transaction)
@@ -370,4 +380,56 @@ test('assigning several foreign currency orders splits the remaining transaction
         ->and(bcround($amounts[$euroOrder->getKey()], 2))->toEqual('300.00')
         ->and(bcround($amounts[$smallUsdOrder->getKey()], 2))->toEqual('87.54')
         ->and(bcround($amounts[$largeUsdOrder->getKey()], 2))->toEqual('471.84');
+});
+
+test('foreign currency orders get no suggestion once the transaction amount is used up', function (): void {
+    $transaction = createTransactionAssignmentsTransaction(100);
+    $usd = Currency::factory()->create(['iso' => 'USD', 'is_default' => false]);
+
+    $euroOrder = createTransactionAssignmentsOrder(Currency::default()->getKey(), 120);
+    $usdOrder = createTransactionAssignmentsOrder($usd->getKey(), 50);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('assignOrdersModal', $transaction)
+        ->set('selectedOrders', [$euroOrder->getKey(), $usdOrder->getKey()])
+        ->call('assignOrders')
+        ->assertOk();
+
+    expect(OrderTransaction::query()
+        ->where('transaction_id', $transaction->getKey())
+        ->pluck('order_id')
+        ->all()
+    )->toEqual([$euroOrder->getKey()]);
+});
+
+test('a pending ledger account suggestion reduces the amount left for foreign currency orders', function (): void {
+    $transaction = createTransactionAssignmentsTransaction(100);
+    $usd = Currency::factory()->create(['iso' => 'USD', 'is_default' => false]);
+    $usdOrder = createTransactionAssignmentsOrder($usd->getKey(), 50);
+
+    FluxErp\Models\Pivots\LedgerAccountTransaction::factory()->create([
+        'ledger_account_id' => LedgerAccount::factory()
+            ->create([
+                'tenant_id' => Tenant::default()->getKey(),
+                'ledger_account_type_enum' => FluxErp\Enums\LedgerAccountTypeEnum::Expense,
+            ])
+            ->getKey(),
+        'transaction_id' => $transaction->getKey(),
+        'amount' => 40,
+        'is_accepted' => false,
+    ]);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('assignOrdersModal', $transaction)
+        ->set('selectedOrders', [$usdOrder->getKey()])
+        ->call('assignOrders')
+        ->assertOk();
+
+    expect(bcround(
+        OrderTransaction::query()
+            ->where('transaction_id', $transaction->getKey())
+            ->where('order_id', $usdOrder->getKey())
+            ->value('amount'),
+        2
+    ))->toEqual('60.00');
 });
