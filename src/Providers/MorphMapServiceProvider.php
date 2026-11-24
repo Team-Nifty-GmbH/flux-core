@@ -137,6 +137,7 @@ use FluxErp\Models\RecordOrigin;
 use FluxErp\Models\Resource;
 use FluxErp\Models\ResourceBooking;
 use FluxErp\Models\Role;
+use FluxErp\Models\SalaryComponent;
 use FluxErp\Models\Schedule;
 use FluxErp\Models\SepaMandate;
 use FluxErp\Models\SerialNumber;
@@ -257,6 +258,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'resource' => Resource::class,
             'resource_booking' => ResourceBooking::class,
             'role' => Role::class,
+            'salary_component' => SalaryComponent::class,
             'schedule' => Schedule::class,
             'sepa_mandate' => SepaMandate::class,
             'serial_number' => SerialNumber::class,
