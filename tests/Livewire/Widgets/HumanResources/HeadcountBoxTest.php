@@ -30,7 +30,6 @@ test('counts only employed employees', function (): void {
     for ($i = 0; $i < 3; $i++) {
         $employee = app(Employee::class)->create([
             'tenant_id' => $this->dbTenant->getKey(),
-            'user_id' => $this->user->getKey(),
             'firstname' => 'Active',
             'lastname' => 'Employee' . $i,
             'is_active' => true,
@@ -49,7 +48,6 @@ test('counts only employed employees', function (): void {
 
     $terminated = app(Employee::class)->create([
         'tenant_id' => $this->dbTenant->getKey(),
-        'user_id' => $this->user->getKey(),
         'firstname' => 'Terminated',
         'lastname' => 'Employee',
         'is_active' => true,
@@ -73,7 +71,6 @@ test('counts only employed employees', function (): void {
 test('sub value shows hires and departures for current month', function (): void {
     $newHire = app(Employee::class)->create([
         'tenant_id' => $this->dbTenant->getKey(),
-        'user_id' => $this->user->getKey(),
         'firstname' => 'New',
         'lastname' => 'Hire',
         'is_active' => true,
@@ -89,7 +86,6 @@ test('sub value shows hires and departures for current month', function (): void
 
     $departure = app(Employee::class)->create([
         'tenant_id' => $this->dbTenant->getKey(),
-        'user_id' => $this->user->getKey(),
         'firstname' => 'Leaving',
         'lastname' => 'Employee',
         'is_active' => true,

@@ -37,7 +37,8 @@ beforeEach(function (): void {
 });
 
 test('creating notifies the department manager', function (): void {
-    $managerUser = User::factory()->create();
+    $managerUser = User::factory()->create(['is_active' => true]);
+    $managerUser->tenants()->attach($this->dbTenant->getKey());
     $manager = CreateEmployee::make([
         'firstname' => 'Manager',
         'lastname' => 'One',
@@ -82,7 +83,9 @@ test('creating notifies each initial substitute', function (): void {
         'work_time_model_id' => $this->wtm->getKey(),
     ])->validate()->execute();
 
-    $substituteUser = User::factory()->create();
+    $substituteUser = User::factory()->create(['is_active' => true]);
+
+    $substituteUser->tenants()->attach($this->dbTenant->getKey());
     $substitute = CreateEmployee::make([
         'firstname' => 'Sub',
         'lastname' => 'Stitute',
@@ -141,7 +144,8 @@ test('creating does not notify a manager who has no user', function (): void {
 });
 
 test('creating does not notify the auth user even if they are the manager', function (): void {
-    $managerUser = User::factory()->create();
+    $managerUser = User::factory()->create(['is_active' => true]);
+    $managerUser->tenants()->attach($this->dbTenant->getKey());
     $manager = CreateEmployee::make([
         'firstname' => 'Self',
         'lastname' => 'Manager',

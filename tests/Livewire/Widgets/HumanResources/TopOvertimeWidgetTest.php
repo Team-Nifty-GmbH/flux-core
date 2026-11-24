@@ -27,7 +27,6 @@ test('renders successfully', function (): void {
 test('ranks employees by overtime descending', function (): void {
     $employeeHigh = app(Employee::class)->create([
         'tenant_id' => $this->dbTenant->getKey(),
-        'user_id' => $this->user->getKey(),
         'firstname' => 'High',
         'lastname' => 'Overtime',
         'is_active' => true,
@@ -59,7 +58,6 @@ test('ranks employees by overtime descending', function (): void {
 
     $employeeLow = app(Employee::class)->create([
         'tenant_id' => $this->dbTenant->getKey(),
-        'user_id' => $this->user->getKey(),
         'firstname' => 'Low',
         'lastname' => 'Overtime',
         'is_active' => true,
