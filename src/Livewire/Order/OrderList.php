@@ -455,6 +455,16 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         );
     }
 
+    protected function getCommunicatableId(OffersPrinting $item): int
+    {
+        return $item instanceof PaymentReminder ? $item->order_id : $item->getKey();
+    }
+
+    protected function getCommunicatableType(OffersPrinting $item): string
+    {
+        return $item instanceof PaymentReminder ? morph_alias(Order::class) : $item->getMorphClass();
+    }
+
     protected function getDefaultTemplateId(OffersPrinting $item): ?int
     {
         if ($item instanceof PaymentReminder) {

@@ -23,6 +23,11 @@ class SendMail extends DispatchableFluxAction
 {
     protected ?int $communicationId = null;
 
+    protected array $dontTrim = [
+        'html_body',
+        'text_body',
+    ];
+
     public static function models(): array
     {
         return [Communication::class];

@@ -5,6 +5,7 @@ namespace FluxErp\Actions\Record;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Activity;
 use FluxErp\Rulesets\Record\MergeRecordsRuleset;
+use Illuminate\Database\DetectsConcurrencyErrors;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -32,6 +33,8 @@ use TeamNiftyGmbH\DataTable\Helpers\RelationFinder;
 
 class MergeRecords extends FluxAction
 {
+    use DetectsConcurrencyErrors;
+
     public static function models(): array
     {
         return [];
@@ -213,13 +216,15 @@ class MergeRecords extends FluxAction
             } catch (ReflectionException) {
                 continue;
             } catch (QueryException $e) {
-                logger()->warning('MergeRecords: skipping relation due to query exception', [
-                    'relation' => $relationItem->name,
-                    'model' => $mainRecord::class,
-                    'message' => $e->getMessage(),
-                ]);
+                if ($this->causedByConcurrencyError($e)) {
+                    throw $e;
+                }
 
-                continue;
+                report($e);
+
+                throw ValidationException::withMessages([
+                    $relationItem->name => ['Related records could not be moved, nothing was merged.'],
+                ]);
             }
         }
 

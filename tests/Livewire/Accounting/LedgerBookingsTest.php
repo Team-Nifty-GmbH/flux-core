@@ -63,3 +63,18 @@ test('can delete a ledger booking', function (): void {
 
     $this->assertSoftDeleted('ledger_bookings', ['id' => $booking->getKey()]);
 });
+
+test('list shows debit and credit account names', function (): void {
+    LedgerBooking::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'debit_ledger_account_id' => $this->debitAccount->getKey(),
+        'credit_ledger_account_id' => $this->creditAccount->getKey(),
+    ]);
+
+    $data = Livewire::test(LedgerBookings::class)
+        ->instance()
+        ->getDataForTesting();
+
+    expect(data_get($data, ['data', 0, 'debit_ledger_account.name']))->toBe($this->debitAccount->name)
+        ->and(data_get($data, ['data', 0, 'credit_ledger_account.name']))->toBe($this->creditAccount->name);
+});

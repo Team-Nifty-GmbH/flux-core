@@ -45,6 +45,7 @@ use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -636,28 +637,32 @@ class Order extends Component
     #[Renderless]
     public function recalculateOrderTotals(): void
     {
-        $this->order->total_net_price = 0;
-        $this->order->total_gross_price = 0;
-        $this->order->total_vats = [];
-        $this->order->total_base_net_price = 0;
+        $columns = [
+            'id',
+            'parent_id',
+            'created_from_id',
+            'contact_id',
+            'currency_id',
+            'order_type_id',
+            'price_list_id',
+            'payment_discount_percent',
+            'invoice_number',
+        ];
 
         $order = resolve_static(OrderModel::class, 'query')
             ->whereKey($this->order->id)
-            ->first([
-                'id',
-                'parent_id',
-                'created_from_id',
-                'contact_id',
-                'currency_id',
-                'order_type_id',
-                'price_list_id',
-                'payment_discount_percent',
-                'invoice_number',
-            ]);
+            ->first($columns);
 
         $order->calculatePrices()->save();
 
-        $this->order->fill($order);
+        foreach (Arr::except($order->attributesToArray(), $columns) as $key => $value) {
+            if (! property_exists($this->order, $key)) {
+                continue;
+            }
+
+            $this->order->{$key} = $value;
+            $this->order->loadedData[$key] = $this->order->{$key};
+        }
     }
 
     #[Renderless]
@@ -742,6 +747,7 @@ class Order extends Component
     #[Renderless]
     public function save(): bool
     {
+        $this->order->refreshUntouchedData();
         $this->order->address_delivery = $this->order->address_delivery ?: [];
         try {
             $action = (
@@ -751,8 +757,6 @@ class Order extends Component
             )
                 ->checkPermission()
                 ->validate();
-
-            $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this, form: $this->order);
 
@@ -760,6 +764,8 @@ class Order extends Component
         }
 
         $action->execute();
+        $this->fetchOrder($this->order->id);
+        $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         $this->toast()
             ->success(__(':model saved', ['model' => __('Order')]))
             ->send();
@@ -1116,8 +1122,6 @@ class Order extends Component
             ->firstOrFail();
 
         $this->order->fill($order);
-
-        $this->order->users = $order->users->pluck('id')->toArray();
 
         $this->printLayouts = $this->mapPrintLayouts();
 

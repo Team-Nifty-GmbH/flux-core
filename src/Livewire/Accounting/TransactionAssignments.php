@@ -22,6 +22,7 @@ use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Validation\ValidationException;
@@ -181,35 +182,19 @@ class TransactionAssignments extends Component
     {
         $transactionCurrencyId = $this->transactionForm->currency_id;
 
-        resolve_static(Order::class, 'query')
+        [$foreignCurrencyOrders, $orders] = resolve_static(Order::class, 'query')
             ->whereKey($this->selectedOrders)
             ->get(['id', 'currency_id', 'balance'])
-            ->each(function (Order $order) use ($transactionCurrencyId): void {
-                $data = [
-                    'transaction_id' => $this->transactionForm->id,
-                    'order_id' => $order->getKey(),
-                ];
+            ->partition(fn (Order $order) => $order->currency_id !== $transactionCurrencyId);
 
-                if ($order->currency_id !== $transactionCurrencyId) {
-                    $data['order_currency_amount'] = $order->balance;
-                    $data['amount'] = $this->transactionForm->amount;
-                    $data['exchange_rate'] = bccomp($this->transactionForm->amount ?? 0, 0, 9) !== 0
-                        ? bcdiv($order->balance, $this->transactionForm->amount, 9)
-                        : null;
-                    $data['is_accepted'] = false;
-                } else {
-                    $data['amount'] = $order->balance;
-                    $data['is_accepted'] = true;
-                }
+        $orders->each(fn (Order $order) => $this->createOrderTransaction([
+            'transaction_id' => $this->transactionForm->id,
+            'order_id' => $order->getKey(),
+            'amount' => $order->balance,
+            'is_accepted' => true,
+        ]));
 
-                try {
-                    CreateOrderTransaction::make($data)
-                        ->validate()
-                        ->execute();
-                } catch (ValidationException|UnauthorizedException $e) {
-                    exception_to_notifications($e, $this, form: $this->orderTransactionForm);
-                }
-            });
+        $this->assignForeignCurrencyOrders($foreignCurrencyOrders);
 
         $this->selectedOrders = [];
         $this->refreshTransactions();
@@ -609,6 +594,74 @@ class TransactionAssignments extends Component
         $this->reset('search', 'range', 'bankAccounts');
         $this->resetPage();
         $this->refreshTransactions();
+    }
+
+    protected function assignForeignCurrencyOrders(Collection $orders): void
+    {
+        if ($orders->isEmpty()) {
+            return;
+        }
+
+        $transaction = resolve_static(Transaction::class, 'query')
+            ->whereKey($this->transactionForm->id)
+            ->first(['id', 'amount', 'balance']);
+        $remainingAmount = bcsub(
+            $transaction->balance,
+            bcadd(
+                bcadd(
+                    $transaction->orderTransactions()->where('is_accepted', false)->sum('amount'),
+                    $transaction->ledgerAccountTransactions()->where('is_accepted', false)->sum('amount'),
+                    9
+                ),
+                $transaction->loanInstallmentTransactions()->where('is_accepted', false)->sum('amount'),
+                9
+            ),
+            2
+        );
+
+        if (bccomp(bcmul($remainingAmount, $transaction->amount, 9), 0, 9) !== 1) {
+            return;
+        }
+
+        $remainingOrderBalance = $orders->reduce(
+            fn (string $carry, Order $order) => bcadd($carry, $order->balance, 9),
+            '0'
+        );
+
+        foreach ($orders as $order) {
+            $amount = bccomp($remainingOrderBalance, 0, 9) !== 0
+                ? bcround(
+                    bcdiv(bcmul($remainingAmount, $order->balance, 9), $remainingOrderBalance, 9),
+                    2
+                )
+                : '0';
+            $remainingAmount = bcsub($remainingAmount, $amount, 2);
+            $remainingOrderBalance = bcsub($remainingOrderBalance, $order->balance, 9);
+
+            if (bccomp($amount, 0, 2) === 0) {
+                continue;
+            }
+
+            $this->createOrderTransaction([
+                'transaction_id' => $this->transactionForm->id,
+                'order_id' => $order->getKey(),
+                'amount' => $amount,
+                'order_currency_amount' => $order->balance,
+                'exchange_rate' => bcdiv($order->balance, $amount, 9),
+                'is_accepted' => false,
+            ]);
+        }
+    }
+
+    protected function createOrderTransaction(array $data): void
+    {
+        try {
+            CreateOrderTransaction::make($data)
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this, form: $this->orderTransactionForm);
+        }
     }
 
     protected function refreshTransactions(bool $renderless = true): void

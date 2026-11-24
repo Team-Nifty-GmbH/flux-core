@@ -61,11 +61,13 @@ test('claiming a reminder leaves the modification of the task untouched', functi
 });
 
 test('due reminder claimed by another run is not sent again', function (): void {
-    changeTaskRowOnFirstRetrieve(['due_reminder_sent_at' => now()]);
+    changeTaskRowOnFirstRetrieve(['due_reminder_sent_at' => $claimedAt = now()->subMinute()]);
 
     (new SendTaskRemindersJob())->handle();
 
     Event::assertNotDispatched(TaskReminderEvent::class);
+    expect($this->dueTask->refresh()->due_reminder_sent_at->toDateTimeString())
+        ->toBe($claimedAt->toDateTimeString());
 });
 
 test('due reminder of a moved due date stays pending', function (): void {
@@ -92,7 +94,7 @@ test('start reminder claimed by another run is not sent again', function (): voi
         'start_reminder_minutes_before' => 10,
     ]);
 
-    changeTaskRowOnFirstRetrieve(['start_reminder_sent_at' => now()]);
+    changeTaskRowOnFirstRetrieve(['start_reminder_sent_at' => now()->subMinute()]);
 
     (new SendTaskRemindersJob())->handle();
 

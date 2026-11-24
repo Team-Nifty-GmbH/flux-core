@@ -12,6 +12,10 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateUser extends FluxAction
 {
+    protected array $dontTrim = [
+        'password',
+    ];
+
     public static function models(): array
     {
         return [User::class];

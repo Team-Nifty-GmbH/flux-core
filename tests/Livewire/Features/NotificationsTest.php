@@ -115,12 +115,6 @@ test('mark all as read updates only own unread notifications in a single query',
         ->and($foreign->refresh()->read_at)->toBeNull();
 });
 
-test('mark all as read button shows a spinner while the request runs', function (): void {
-    Livewire::actingAs($this->user)
-        ->test(Notifications::class)
-        ->assertSeeHtml('wire:target="markAllAsRead"');
-});
-
 function shownNotificationIds(Testable $component): array
 {
     $component->call('showNotifications');

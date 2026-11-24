@@ -14,6 +14,11 @@ use Illuminate\Support\Carbon;
 
 class UpdateCommunication extends FluxAction
 {
+    protected array $dontTrim = [
+        'html_body',
+        'text_body',
+    ];
+
     public static function models(): array
     {
         return [Communication::class];

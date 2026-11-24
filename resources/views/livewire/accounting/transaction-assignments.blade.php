@@ -135,6 +135,10 @@
                     id="order-transaction-amount"
                     :label="__('Amount')"
                     wire:model="orderTransactionForm.amount"
+                    x-on:change="
+                        $wire.orderTransactionForm.orderCurrencyIso &&
+                            $wire.calcExchangeRate()
+                    "
                     step="0.01"
                     :corner-hint="__('Amount')"
                     placeholder="0.00"

@@ -5,6 +5,10 @@ use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Loan;
 use FluxErp\Models\LoanInstallment;
 
+beforeEach(function (): void {
+    grantModelPermissions($this->user);
+});
+
 test('a dotted search field searches the relation instead of failing', function (): void {
     $contact = Contact::factory()
         ->hasAttached($this->dbTenant, relationship: 'tenants')
