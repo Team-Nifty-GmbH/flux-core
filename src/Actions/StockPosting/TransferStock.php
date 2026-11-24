@@ -35,8 +35,8 @@ class TransferStock extends FluxAction
             storageAreaIds: $fromStorageAreaId ? [$fromStorageAreaId] : null,
             lotId: $this->getData('lot_id'),
             serialNumberIds: $serialNumberIds,
-            withoutStorageArea: ! $fromStorageAreaId,
             stockPostingIds: $this->getData('stock_posting_ids') ?: null,
+            withoutStorageArea: ! $fromStorageAreaId,
         )
             ->allocate($this->getData('amount'));
 

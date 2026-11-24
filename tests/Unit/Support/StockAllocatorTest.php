@@ -227,6 +227,19 @@ test('a layer without storage area scope only takes layers outside any storage a
     expect($allocation->pluck('stockPosting.id')->all())->toBe([$loose->getKey()]);
 });
 
+test('the layer without storage area scope wins over a storage area scope', function (): void {
+    $storageArea = StorageArea::factory()->create(['warehouse_id' => $this->warehouse->getKey()]);
+    ($this->layer)(5, ['storage_area_id' => $storageArea->getKey()]);
+    $loose = ($this->layer)(5);
+
+    $allocation = ($this->allocator)()
+        ->inStorageAreas([$storageArea->getKey()])
+        ->withoutStorageArea()
+        ->allocate(10);
+
+    expect($allocation->pluck('stockPosting.id')->all())->toBe([$loose->getKey()]);
+});
+
 test('a stock posting scope only takes those layers', function (): void {
     ($this->layer)(5);
     $wanted = ($this->layer)(5);

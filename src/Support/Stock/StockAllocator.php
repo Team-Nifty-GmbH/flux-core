@@ -24,8 +24,8 @@ class StockAllocator
         protected ?int $lotId = null,
         protected ?StockRemovalStrategyEnum $strategy = null,
         protected ?array $serialNumberIds = null,
-        protected bool $withoutStorageArea = false,
         protected ?array $stockPostingIds = null,
+        protected bool $withoutStorageArea = false,
     ) {}
 
     /**
@@ -110,18 +110,18 @@ class StockAllocator
             )
             ->when(
                 $this->withoutStorageArea,
-                fn (Builder $query) => $query->whereNull('stock_postings.storage_area_id')
-            )
-            ->when(
-                $this->storageAreaIds,
-                fn (Builder $query) => $query
-                    ->whereIn('stock_postings.storage_area_id', $this->storageAreaIds)
-                    ->whereHas('storageArea', fn (Builder $query) => $query->where('is_active', true)),
-                fn (Builder $query) => $query->where(fn (Builder $query) => $query
-                    ->whereNull('stock_postings.storage_area_id')
-                    ->orWhereHas('storageArea', fn (Builder $query) => $query
-                        ->where('is_active', true)
-                        ->where('storage_area_type_enum', '!=', StorageAreaTypeEnum::Transit)
+                fn (Builder $query) => $query->whereNull('stock_postings.storage_area_id'),
+                fn (Builder $query) => $query->when(
+                    $this->storageAreaIds,
+                    fn (Builder $query) => $query
+                        ->whereIn('stock_postings.storage_area_id', $this->storageAreaIds)
+                        ->whereHas('storageArea', fn (Builder $query) => $query->where('is_active', true)),
+                    fn (Builder $query) => $query->where(fn (Builder $query) => $query
+                        ->whereNull('stock_postings.storage_area_id')
+                        ->orWhereHas('storageArea', fn (Builder $query) => $query
+                            ->where('is_active', true)
+                            ->where('storage_area_type_enum', '!=', StorageAreaTypeEnum::Transit)
+                        )
                     )
                 )
             )
