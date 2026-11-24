@@ -174,7 +174,7 @@
                 outline
                 md
                 label="Prepend"
-                class="w-full cursor-pointer gap-x-4 py-2"
+                class="dark:text-primary-400 w-full cursor-pointer gap-x-4 py-2"
                 x-on:click="expanded = !expanded"
             >
                 <x-slot:text>

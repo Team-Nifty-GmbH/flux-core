@@ -10,6 +10,7 @@ use FluxErp\View\Components\Icon;
 use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use ReflectionClass;
@@ -163,6 +164,7 @@ class ViewServiceProvider extends ServiceProvider
     protected function registerViews(): void
     {
         config(['view.paths' => array_merge(config('view.paths', []), [__DIR__ . '/../../resources/error-views'])]);
+        View::prependNamespace('passkeys', __DIR__ . '/../../resources/views/vendor/passkeys');
 
         $this->app->booted(function (): void {
             Blade::component(Icon::class, app(ComponentPrefix::class)->add('icon'));
