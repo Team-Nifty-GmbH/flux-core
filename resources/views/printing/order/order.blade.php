@@ -108,6 +108,29 @@
                                     </td>
                                 </tr>
                             @endif
+                            @if ($model->host_name)
+                                <tr style="line-height: 1">
+                                    <td
+                                        style="
+                                            padding-top: 0;
+                                            padding-bottom: 0;
+                                            text-align: left;
+                                            font-weight: 600;
+                                        "
+                                    >
+                                        {{ __('Host of the meal') }}
+                                    </td>
+                                    <td
+                                        style="
+                                            padding-top: 0;
+                                            padding-bottom: 0;
+                                            text-align: right;
+                                        "
+                                    >
+                                        {{ $model->host_name }}
+                                    </td>
+                                </tr>
+                            @endif
 
                         @show
                     </tbody>
