@@ -545,11 +545,22 @@
     @apply bg-dark-600;
 }
 
-.dark :is(.apexcharts-xaxis-annotations, .apexcharts-yaxis-annotations, .apexcharts-point-annotations) rect:not(.apexcharts-annotation-rect) {
+.dark
+    :is(
+        .apexcharts-xaxis-annotations,
+        .apexcharts-yaxis-annotations,
+        .apexcharts-point-annotations
+    )
+    rect:not(.apexcharts-annotation-rect) {
     fill: var(--color-dark-700);
 }
 
-.dark :is(.apexcharts-xaxis-annotation-label, .apexcharts-yaxis-annotation-label, .apexcharts-point-annotation-label) {
+.dark
+    :is(
+        .apexcharts-xaxis-annotation-label,
+        .apexcharts-yaxis-annotation-label,
+        .apexcharts-point-annotation-label
+    ) {
     fill: var(--color-dark-200);
 }
 
