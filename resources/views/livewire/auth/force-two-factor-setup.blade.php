@@ -4,7 +4,9 @@
         <x-flux::logo fill="#0690FA" class="h-24" />
     </div>
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
-        <div class="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
+        <div
+            class="dark:bg-dark-800 bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10"
+        >
             @section('force-two-factor-setup')
                 <div class="space-y-6">
                     @section('force-two-factor-setup.intro')
@@ -13,10 +15,12 @@
                                 name="shield-exclamation"
                                 class="mx-auto size-12 text-indigo-600"
                             />
-                            <h2 class="mt-2 text-2xl font-bold text-gray-900">
+                            <h2
+                                class="dark:text-dark-100 mt-2 text-2xl font-bold text-gray-900"
+                            >
                                 {{ __('Two-factor authentication required') }}
                             </h2>
-                            <p class="mt-2 text-sm text-gray-600">
+                            <p class="dark:text-dark-400 mt-2 text-sm text-gray-600">
                                 {{ __('Your administrator requires you to enable a second authentication factor before you can continue. Please choose a method below to finish setting up your account.') }}
                             </p>
                         </div>
@@ -28,36 +32,36 @@
                                 <button
                                     type="button"
                                     wire:click="selectTotp()"
-                                    class="flex cursor-pointer flex-col items-start space-y-3 rounded-lg border border-gray-300 p-6 text-left transition hover:border-indigo-500 hover:shadow-md"
+                                    class="dark:border-dark-600 flex cursor-pointer flex-col items-start space-y-3 rounded-lg border border-gray-300 p-6 text-left transition hover:border-indigo-500 hover:shadow-md"
                                 >
                                     <x-icon
                                         name="device-phone-mobile"
                                         class="size-8 text-indigo-600"
                                     />
                                     <div
-                                        class="text-base font-semibold text-gray-900"
+                                        class="dark:text-dark-100 text-base font-semibold text-gray-900"
                                     >
                                         {{ __('Authenticator app') }}
                                     </div>
-                                    <p class="text-sm text-gray-600">
+                                    <p class="dark:text-dark-400 text-sm text-gray-600">
                                         {{ __('Use an app like Google Authenticator, 1Password or Authy. The app generates a 6-digit code that changes every 30 seconds. You enter that code on every login.') }}
                                     </p>
                                 </button>
                                 <button
                                     type="button"
                                     wire:click="selectPasskey()"
-                                    class="flex cursor-pointer flex-col items-start space-y-3 rounded-lg border border-gray-300 p-6 text-left transition hover:border-indigo-500 hover:shadow-md"
+                                    class="dark:border-dark-600 flex cursor-pointer flex-col items-start space-y-3 rounded-lg border border-gray-300 p-6 text-left transition hover:border-indigo-500 hover:shadow-md"
                                 >
                                     <x-icon
                                         name="finger-print"
                                         class="size-8 text-indigo-600"
                                     />
                                     <div
-                                        class="text-base font-semibold text-gray-900"
+                                        class="dark:text-dark-100 text-base font-semibold text-gray-900"
                                     >
                                         {{ __('Passkey') }}
                                     </div>
-                                    <p class="text-sm text-gray-600">
+                                    <p class="dark:text-dark-400 text-sm text-gray-600">
                                         {{ __('Use Touch ID, Face ID, Windows Hello or a hardware key. The passkey is bound to this device or your password manager and replaces typing a code.') }}
                                     </p>
                                 </button>
@@ -73,11 +77,13 @@
                     @elseif ($method === \FluxErp\Enums\TwoFactorMethodEnum::Totp)
                         @section('force-two-factor-setup.totp')
                             <div class="space-y-4">
-                                <h3 class="text-lg font-semibold text-gray-900">
+                                <h3
+                                    class="dark:text-dark-100 text-lg font-semibold text-gray-900"
+                                >
                                     {{ __('Set up your authenticator app') }}
                                 </h3>
                                 <ol
-                                    class="list-inside list-decimal space-y-2 text-sm text-gray-700"
+                                    class="dark:text-dark-300 list-inside list-decimal space-y-2 text-sm text-gray-700"
                                 >
                                     <li>
                                         {{ __('Install an authenticator app on your phone (Google Authenticator, 1Password, Authy, ...)') }}
@@ -94,11 +100,11 @@
                                     x-html="$wire.qrCodeSvg"
                                 ></div>
                                 <div class="text-center">
-                                    <p class="text-xs text-gray-500">
+                                    <p class="dark:text-dark-400 text-xs text-gray-500">
                                         {{ __('Or enter this key manually:') }}
                                     </p>
                                     <code
-                                        class="mt-1 inline-block rounded bg-gray-100 px-2 py-1 font-mono text-sm"
+                                        class="dark:bg-dark-700 mt-1 inline-block rounded bg-gray-100 px-2 py-1 font-mono text-sm"
                                     >
                                         {{ $secretKey }}
                                     </code>
@@ -144,11 +150,13 @@
                                 x-show="browserSupportsWebAuthn()"
                                 x-cloak
                             >
-                                <h3 class="text-lg font-semibold text-gray-900">
+                                <h3
+                                    class="dark:text-dark-100 text-lg font-semibold text-gray-900"
+                                >
                                     {{ __('Register a passkey') }}
                                 </h3>
                                 <ol
-                                    class="list-inside list-decimal space-y-2 text-sm text-gray-700"
+                                    class="dark:text-dark-300 list-inside list-decimal space-y-2 text-sm text-gray-700"
                                 >
                                     <li>
                                         {{ __('Give the passkey a name (for example "MacBook" or "iPhone").') }}

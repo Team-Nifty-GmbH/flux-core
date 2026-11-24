@@ -14,7 +14,10 @@
                     class="dark:bg-secondary-600 w-full bg-gray-100 px-4 py-2.5 text-xs font-semibold text-gray-900 dark:text-gray-50"
                     x-text="$wire.modelLabels[model].label"
                 ></div>
-                <ul class="mt-2 text-sm text-gray-800" role="none">
+                <ul
+                    class="dark:text-dark-200 mt-2 text-sm text-gray-800"
+                    role="none"
+                >
                     <template x-for="item in items">
                         <li
                             class="flex cursor-pointer items-center space-x-1.5 px-4 py-2 select-none hover:bg-indigo-600 hover:text-white"

@@ -1,5 +1,8 @@
 @props(['collapsed' => false])
-<div x-data="{ expanded: false }" class="space-y-8 divide-y divide-gray-200">
+<div
+    x-data="{ expanded: false }"
+    class="dark:divide-dark-600 space-y-8 divide-y divide-gray-200"
+>
     <div class="space-y-2.5">
         @section('general')
             <x-input
@@ -171,7 +174,7 @@
                 outline
                 md
                 label="Prepend"
-                class="w-full cursor-pointer gap-x-4 py-2"
+                class="dark:text-primary-400 w-full cursor-pointer gap-x-4 py-2"
                 x-on:click="expanded = !expanded"
             >
                 <x-slot:text>
