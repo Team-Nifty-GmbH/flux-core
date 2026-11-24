@@ -169,7 +169,7 @@ class TransferStock extends FluxAction
                 ->where('storage_area_id', $fromStorageAreaId)
                 ->count() !== count($stockPostingIds)
         ) {
-            $errors['stock_posting_ids'][] = 'The stock postings do not belong to the source of the transfer';
+            $errors['stock_posting_ids'][] = 'Some stock postings do not belong to the source of the transfer';
         }
 
         if ($errors) {

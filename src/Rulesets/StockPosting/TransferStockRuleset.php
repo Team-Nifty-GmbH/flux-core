@@ -60,7 +60,7 @@ class TransferStockRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => StorageArea::class]),
             ],
             'to_warehouse_id' => [
-                'nullable',
+                'required',
                 'integer',
                 app(ModelExists::class, ['model' => Warehouse::class]),
             ],

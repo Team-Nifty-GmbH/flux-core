@@ -658,3 +658,27 @@ test('a user without the transfer permission is refused even with stock posting 
         ->toThrow(UnauthorizedException::class)
         ->and(StockPosting::query()->where('storage_area_id', $this->to->getKey())->exists())->toBeFalse();
 });
+
+test('a transfer given its ids as strings is accepted', function (): void {
+    $toWarehouse = Warehouse::factory()->create();
+    $toArea = StorageArea::factory()->create(['warehouse_id' => $toWarehouse->getKey()]);
+    StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'storage_area_id' => $this->from->getKey(),
+        'posting' => 5,
+    ]);
+
+    $incoming = TransferStock::make([
+        'warehouse_id' => (string) $this->warehouse->getKey(),
+        'to_warehouse_id' => (string) $toWarehouse->getKey(),
+        'product_id' => (string) $this->product->getKey(),
+        'from_storage_area_id' => (string) $this->from->getKey(),
+        'to_storage_area_id' => (string) $toArea->getKey(),
+        'amount' => '2',
+    ])->validate()->execute();
+
+    expect($incoming)->toHaveCount(1)
+        ->and($incoming->first()->storage_area_id)->toBe($toArea->getKey())
+        ->and($incoming->first()->warehouse_id)->toBe($toWarehouse->getKey());
+});

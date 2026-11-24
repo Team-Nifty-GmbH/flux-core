@@ -33,11 +33,7 @@ class CreateStockPosting extends FluxAction
         $serialNumber = null;
 
         if ($serialNumberData) {
-            $serialNumber = resolve_static(
-                CreateSerialNumber::class,
-                'make',
-                ['data' => $serialNumberData]
-            )
+            $serialNumber = CreateSerialNumber::make($serialNumberData)
                 ->checkPermission()
                 ->validate()
                 ->execute();
