@@ -120,7 +120,7 @@
                                         x-on:click="
                                             $tsui.open.modal('password-reset')
                                         "
-                                        class="cursor-pointer font-medium text-indigo-600 hover:text-indigo-500"
+                                        class="cursor-pointer font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
                                     >
                                         {{ __('Reset password') }}
                                     </a>

@@ -22,7 +22,14 @@ function apexCharts($wire) {
             }
 
             this.height = this.$el.querySelector('.chart').clientHeight;
+            const themeObserver = new MutationObserver(() =>
+                this.chart.updateOptions(this.options),
+            );
+            themeObserver.observe(document.body, {
+                attributeFilter: ['class'],
+            });
             document.addEventListener('livewire:navigating', () => {
+                themeObserver.disconnect();
                 this.chart.destroy();
             });
 
