@@ -89,6 +89,11 @@ class ViewServiceProvider extends ServiceProvider
             ->block('wrapper.class', 'inline-flex shrink-0 items-center justify-center overflow-hidden bg-secondary-200! dark:bg-secondary-600!');
 
         TallStackUi::customize()
+            ->form('range')
+            ->block('input.base', 'dark:bg-dark-600 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 transition')
+            ->block('dual.track.base', 'dark:bg-dark-600 absolute inset-x-0 top-1/2 -translate-y-1/2 rounded-lg bg-gray-200');
+
+        TallStackUi::customize()
             ->form('toggle')
             ->block('background.class', 'bg-gray-200 dark:bg-dark-600 block cursor-pointer rounded-full group-focus:ring-0 group-focus:ring-offset-0 peer-focus:ring-0 peer-focus:ring-offset-0');
 
