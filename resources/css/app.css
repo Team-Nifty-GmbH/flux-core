@@ -493,6 +493,38 @@
     @apply bg-dark-400;
 }
 
+.dark [x-data^='tallstackui_alert'].bg-primary-50 {
+    @apply bg-primary-500/15;
+
+    .text-primary-600 {
+        @apply text-primary-300;
+    }
+}
+
+.dark [x-data^='tallstackui_alert'].bg-secondary-50 {
+    @apply bg-secondary-500/15;
+
+    .text-secondary-600 {
+        @apply text-secondary-300;
+    }
+}
+
+.dark [x-data^='tallstackui_alert'].bg-red-50 {
+    @apply bg-red-500/15;
+
+    .text-red-600 {
+        @apply text-red-300;
+    }
+}
+
+.dark [x-data^='tallstackui_alert'].bg-amber-50 {
+    @apply bg-amber-500/15;
+
+    .text-amber-600 {
+        @apply text-amber-300;
+    }
+}
+
 .dark .filepond--panel-root {
     @apply bg-dark-700;
 }
