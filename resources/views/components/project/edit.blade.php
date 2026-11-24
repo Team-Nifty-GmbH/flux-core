@@ -1,5 +1,8 @@
 @props(['collapsed' => false])
-<div x-data="{ expanded: false }" class="space-y-8 divide-y divide-gray-200 dark:divide-dark-600">
+<div
+    x-data="{ expanded: false }"
+    class="dark:divide-dark-600 space-y-8 divide-y divide-gray-200"
+>
     <div class="space-y-2.5">
         @section('general')
             <x-input

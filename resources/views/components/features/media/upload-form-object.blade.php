@@ -126,7 +126,7 @@
                     {{ __('(Or drag files to the page)') }}
                 </em>
                 <div
-                    class="mt-3 h-[2px] w-1/2 bg-gray-200 dark:bg-dark-600"
+                    class="dark:bg-dark-600 mt-3 h-[2px] w-1/2 bg-gray-200"
                     x-show="isUploading"
                     x-cloak
                 >

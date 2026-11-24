@@ -1,5 +1,5 @@
 <x-modal :id="$orderType->modalName()" :title="__('Order Type')">
-    <div class="space-y-8 divide-y divide-gray-200 dark:divide-dark-600">
+    <div class="dark:divide-dark-600 space-y-8 divide-y divide-gray-200">
         <div>
             <div class="mt-6 grid grid-cols-1 sm:grid-cols-6">
                 <div class="space-y-3 sm:col-span-6">

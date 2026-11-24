@@ -30,7 +30,7 @@
                     "
                 ></div>
                 <div
-                    class="mt-2 flex w-full flex-row justify-between border-t border-slate-200 dark:border-dark-600 pt-2"
+                    class="dark:border-dark-600 mt-2 flex w-full flex-row justify-between border-t border-slate-200 pt-2"
                 >
                     <div x-text="$wire.transactionForm.purpose"></div>
                 </div>
@@ -77,7 +77,7 @@
                     "
                 ></div>
                 <div
-                    class="mt-2 flex w-full flex-row justify-between border-t border-slate-200 dark:border-dark-600 pt-2"
+                    class="dark:border-dark-600 mt-2 flex w-full flex-row justify-between border-t border-slate-200 pt-2"
                 >
                     <div x-text="$wire.transactionForm.purpose"></div>
                 </div>
@@ -515,7 +515,7 @@
                 <div class="mt-2 flex flex-col gap-2">
                     <template x-for="transaction in data.data">
                         <div
-                            class="flex flex-col rounded border-2 border-slate-200 dark:border-dark-600 lg:flex-row"
+                            class="dark:border-dark-600 flex flex-col rounded border-2 border-slate-200 lg:flex-row"
                         >
                             <div
                                 class="flex w-full flex-col p-4 lg:w-1/2 lg:border-r-2 lg:border-b-0"
@@ -586,7 +586,7 @@
                                     </div>
                                 </div>
                                 <div
-                                    class="mt-2 flex flex-row justify-between border-t border-slate-200 dark:border-dark-600 pt-2"
+                                    class="dark:border-dark-600 mt-2 flex flex-row justify-between border-t border-slate-200 pt-2"
                                 >
                                     <div
                                         class="min-w-0 wrap-anywhere"
@@ -632,7 +632,7 @@
                                             />
                                         </div>
                                         <div
-                                            class="flex w-full min-w-0 justify-between rounded bg-slate-100 dark:bg-dark-700 p-2 font-semibold"
+                                            class="dark:bg-dark-700 flex w-full min-w-0 justify-between rounded bg-slate-100 p-2 font-semibold"
                                         >
                                             <div class="flex min-w-0 gap-2">
                                                 <div class="block">
@@ -748,7 +748,7 @@
                                             />
                                         </div>
                                         <div
-                                            class="flex w-full justify-between rounded bg-slate-100 dark:bg-dark-700 p-2 font-semibold"
+                                            class="dark:bg-dark-700 flex w-full justify-between rounded bg-slate-100 p-2 font-semibold"
                                         >
                                             <div>
                                                 <div
@@ -826,7 +826,7 @@
                                             />
                                         </div>
                                         <div
-                                            class="flex w-full justify-between rounded bg-slate-100 dark:bg-dark-700 p-2 font-semibold"
+                                            class="dark:bg-dark-700 flex w-full justify-between rounded bg-slate-100 p-2 font-semibold"
                                         >
                                             <div>
                                                 <div
@@ -875,7 +875,7 @@
                                 <div class="px-2 pt-2">
                                     <div class="flex flex-col">
                                         <div
-                                            class="flex flex-col-reverse gap-2 border-t border-slate-200 dark:border-dark-600 pt-2 lg:flex-row lg:items-center lg:justify-between"
+                                            class="dark:border-dark-600 flex flex-col-reverse gap-2 border-t border-slate-200 pt-2 lg:flex-row lg:items-center lg:justify-between"
                                         >
                                             <div
                                                 class="flex flex-row flex-wrap gap-2"

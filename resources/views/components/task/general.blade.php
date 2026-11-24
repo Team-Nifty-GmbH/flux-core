@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-4 divide-y divide-gray-200 dark:divide-dark-600">
+<div class="dark:divide-dark-600 flex flex-col gap-4 divide-y divide-gray-200">
     <div
         class="flex flex-col gap-2"
         x-data="{
