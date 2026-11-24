@@ -162,6 +162,8 @@ class ViewServiceProvider extends ServiceProvider
 
     protected function registerViews(): void
     {
+        config(['view.paths' => array_merge(config('view.paths', []), [__DIR__ . '/../../resources/error-views'])]);
+
         $this->app->booted(function (): void {
             Blade::component(Icon::class, app(ComponentPrefix::class)->add('icon'));
 
