@@ -61,6 +61,15 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
             $employee->syncWorkTimes();
         });
 
+        static::deleted(function (Employee $employee): void {
+            if ($employee->isForceDeleting() || ! $employee->user_id) {
+                return;
+            }
+
+            $employee->user_id = null;
+            $employee->saveQuietly();
+        });
+
         static::updated(function (Employee $employee): void {
             if ($employee->wasChanged('user_id')) {
                 $employee->syncWorkTimes();
@@ -82,58 +91,6 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
             'salary_type' => SalaryTypeEnum::class,
             'is_active' => 'boolean',
         ];
-    }
-
-    public function syncWorkTimes(): void
-    {
-        $workTimes = resolve_static(WorkTime::class, 'query')
-            ->withTrashed()
-            ->where(fn (Builder $query) => $query
-                ->where('employee_id', $this->getKey())
-                ->whereNotNull('user_id')
-                ->where('user_id', '!=', $this->user_id ?? 0)
-            )
-            ->when($this->user_id, fn (Builder $query) => $query
-                ->orWhere(fn (Builder $query) => $query
-                    ->where('user_id', $this->user_id)
-                    ->where(fn (Builder $query) => $query
-                        ->whereNull('employee_id')
-                        ->orWhere('employee_id', '!=', $this->getKey())
-                    )
-                )
-            );
-
-        $days = $workTimes->clone()
-            ->where('is_daily_work_time', true)
-            ->where('is_locked', true)
-            ->get(['id', 'employee_id', 'user_id', 'started_at'])
-            ->flatMap(fn (WorkTime $workTime) => [
-                [$workTime->employee_id, $workTime->started_at->toDateString()],
-                [
-                    $this->user_id && (int) $workTime->user_id === (int) $this->user_id ? $this->getKey() : null,
-                    $workTime->started_at->toDateString(),
-                ],
-            ])
-            ->filter(fn (array $day) => $day[0])
-            ->unique(fn (array $day) => implode('|', $day));
-
-        $workTimes->update([
-            'employee_id' => $this->user_id
-                ? DB::raw('CASE WHEN user_id = ' . (int) $this->user_id . ' THEN ' . (int) $this->getKey() . ' END')
-                : null,
-        ]);
-
-        foreach ($days as [$employeeId, $date]) {
-            try {
-                CloseEmployeeDay::make([
-                    'employee_id' => $employeeId,
-                    'date' => $date,
-                ])
-                    ->validate()
-                    ->execute();
-            } catch (Throwable) {
-            }
-        }
     }
 
     // Relations
@@ -483,6 +440,58 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
                 ]);
             })
             ->useDisk('private');
+    }
+
+    public function syncWorkTimes(): void
+    {
+        $workTimes = resolve_static(WorkTime::class, 'query')
+            ->withTrashed()
+            ->where(fn (Builder $query) => $query
+                ->where('employee_id', $this->getKey())
+                ->whereNotNull('user_id')
+                ->where('user_id', '!=', $this->user_id ?? 0)
+            )
+            ->when($this->user_id, fn (Builder $query) => $query
+                ->orWhere(fn (Builder $query) => $query
+                    ->where('user_id', $this->user_id)
+                    ->where(fn (Builder $query) => $query
+                        ->whereNull('employee_id')
+                        ->orWhere('employee_id', '!=', $this->getKey())
+                    )
+                )
+            );
+
+        $days = $workTimes->clone()
+            ->where('is_daily_work_time', true)
+            ->where('is_locked', true)
+            ->get(['id', 'employee_id', 'user_id', 'started_at'])
+            ->flatMap(fn (WorkTime $workTime) => [
+                [$workTime->employee_id, $workTime->started_at->toDateString()],
+                [
+                    $this->user_id && $workTime->user_id == $this->user_id ? $this->getKey() : null,
+                    $workTime->started_at->toDateString(),
+                ],
+            ])
+            ->filter(fn (array $day) => $day[0])
+            ->unique(fn (array $day) => implode('|', $day));
+
+        $workTimes->update([
+            'employee_id' => $this->user_id
+                ? DB::raw('CASE WHEN user_id = ' . (int) $this->user_id . ' THEN ' . $this->getKey() . ' END')
+                : null,
+        ]);
+
+        foreach ($days as [$employeeId, $date]) {
+            try {
+                CloseEmployeeDay::make([
+                    'employee_id' => $employeeId,
+                    'date' => $date,
+                ])
+                    ->validate()
+                    ->execute();
+            } catch (Throwable) {
+            }
+        }
     }
 
     // Scopes

@@ -62,7 +62,7 @@ class CreateEmployee extends FluxAction
     {
         parent::validateData();
 
-        $this->validateUserLink((int) $this->getData('tenant_id'), 'createEmployee');
+        $this->validateUserLink($this->getData('tenant_id'), 'createEmployee');
 
         if (
             $this->getData('employee_department_id')

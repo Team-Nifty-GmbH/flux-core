@@ -44,7 +44,7 @@ class UpdateEmployee extends FluxAction
             ->first(['id', 'employee_department_id', 'location_id', 'tenant_id', 'user_id']);
 
         if ($this->getData('user_id') !== $employee->user_id) {
-            $this->validateUserLink((int) $employee->tenant_id, 'updateEmployee');
+            $this->validateUserLink($employee->tenant_id, 'updateEmployee');
         }
 
         if (

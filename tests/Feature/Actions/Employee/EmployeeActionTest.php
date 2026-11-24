@@ -223,7 +223,8 @@ test('deleting an employee frees its user and keeps the work times with it', fun
 
     DeleteEmployee::make(['id' => $employee->getKey()])->validate()->execute();
 
-    expect($workTime->refresh()->employee_id)->toBe($employee->getKey());
+    expect($employee->refresh()->user_id)->toBeNull()
+        ->and($workTime->refresh()->employee_id)->toBe($employee->getKey());
 
     $other = ($this->createEmployee)(['user_id' => $user->getKey()]);
 
