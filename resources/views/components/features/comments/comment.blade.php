@@ -13,7 +13,7 @@
             <div class="flex gap-1.5">
                 <div
                     x-text="comment.created_by ?? '{{ __('Unknown') }}'"
-                    class="font-medium text-gray-500"
+                    class="dark:text-dark-300 font-medium text-gray-500"
                 ></div>
                 @if ($this->isPublic === true)
                     <x-badge
@@ -177,7 +177,7 @@
             <span
                 x-cloak
                 x-show="comment.edited_at"
-                class="text-gray-500 italic"
+                class="dark:text-dark-400 text-gray-500 italic"
             >
                 &middot; {{ __('edited') }}
                 <span
