@@ -187,12 +187,34 @@ class TransactionAssignments extends Component
             ->get(['id', 'currency_id', 'balance'])
             ->partition(fn (Order $order) => $order->currency_id !== $transactionCurrencyId);
 
-        $orders->each(fn (Order $order) => $this->createOrderTransaction([
-            'transaction_id' => $this->transactionForm->id,
-            'order_id' => $order->getKey(),
-            'amount' => $order->balance,
-            'is_accepted' => true,
-        ]));
+        $remainingAmount = $this->remainingTransactionAmount($this->assignedTransaction());
+
+        $sortedOrders = $orders->sortBy(
+            fn (Order $order) => bccomp(bcmul($remainingAmount, $order->balance, 9), 0, 9) === -1 ? 0 : 1
+        );
+
+        foreach ($sortedOrders as $order) {
+            $amount = match (bccomp(bcmul($remainingAmount, $order->balance, 9), 0, 9)) {
+                -1 => $order->balance,
+                1 => bccomp(bcabs($remainingAmount), bcabs($order->balance), 9) === -1
+                    ? $remainingAmount
+                    : $order->balance,
+                default => null,
+            };
+
+            if (is_null($amount)) {
+                continue;
+            }
+
+            $remainingAmount = bcsub($remainingAmount, $amount, 2);
+
+            $this->createOrderTransaction([
+                'transaction_id' => $this->transactionForm->id,
+                'order_id' => $order->getKey(),
+                'amount' => $amount,
+                'is_accepted' => true,
+            ]);
+        }
 
         $this->assignForeignCurrencyOrders($foreignCurrencyOrders);
 
@@ -602,22 +624,8 @@ class TransactionAssignments extends Component
             return;
         }
 
-        $transaction = resolve_static(Transaction::class, 'query')
-            ->whereKey($this->transactionForm->id)
-            ->first(['id', 'amount', 'balance']);
-        $remainingAmount = bcsub(
-            $transaction->balance,
-            bcadd(
-                bcadd(
-                    $transaction->orderTransactions()->where('is_accepted', false)->sum('amount'),
-                    $transaction->ledgerAccountTransactions()->where('is_accepted', false)->sum('amount'),
-                    9
-                ),
-                $transaction->loanInstallmentTransactions()->where('is_accepted', false)->sum('amount'),
-                9
-            ),
-            2
-        );
+        $transaction = $this->assignedTransaction();
+        $remainingAmount = $this->remainingTransactionAmount($transaction);
 
         if (bccomp(bcmul($remainingAmount, $transaction->amount, 9), 0, 9) !== 1) {
             return;
@@ -651,6 +659,30 @@ class TransactionAssignments extends Component
                 'is_accepted' => false,
             ]);
         }
+    }
+
+    protected function assignedTransaction(): Transaction
+    {
+        return resolve_static(Transaction::class, 'query')
+            ->whereKey($this->transactionForm->id)
+            ->first(['id', 'amount', 'balance']);
+    }
+
+    protected function remainingTransactionAmount(Transaction $transaction): string
+    {
+        return bcsub(
+            $transaction->balance,
+            bcadd(
+                bcadd(
+                    $transaction->orderTransactions()->where('is_accepted', false)->sum('amount'),
+                    $transaction->ledgerAccountTransactions()->where('is_accepted', false)->sum('amount'),
+                    9
+                ),
+                $transaction->loanInstallmentTransactions()->where('is_accepted', false)->sum('amount'),
+                9
+            ),
+            2
+        );
     }
 
     protected function createOrderTransaction(array $data): void

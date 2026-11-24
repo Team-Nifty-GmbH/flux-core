@@ -433,3 +433,98 @@ test('a pending ledger account suggestion reduces the amount left for foreign cu
         2
     ))->toEqual('60.00');
 });
+
+test('an order is assigned no more than the remaining transaction amount', function (): void {
+    $transaction = createTransactionAssignmentsTransaction(80);
+    $order = createTransactionAssignmentsOrder(Currency::default()->getKey(), 100);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('assignOrdersModal', $transaction)
+        ->set('selectedOrders', [$order->getKey()])
+        ->call('assignOrders')
+        ->assertOk();
+
+    expect(bcround(
+        OrderTransaction::query()
+            ->where('transaction_id', $transaction->getKey())
+            ->where('order_id', $order->getKey())
+            ->value('amount'),
+        2
+    ))->toEqual('80.00')
+        ->and(bcround($transaction->refresh()->balance, 2))->toEqual('0.00');
+});
+
+test('several orders share the remaining transaction amount', function (): void {
+    $transaction = createTransactionAssignmentsTransaction(150);
+    $firstOrder = createTransactionAssignmentsOrder(Currency::default()->getKey(), 100);
+    $secondOrder = createTransactionAssignmentsOrder(Currency::default()->getKey(), 100);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('assignOrdersModal', $transaction)
+        ->set('selectedOrders', [$firstOrder->getKey(), $secondOrder->getKey()])
+        ->call('assignOrders')
+        ->assertOk();
+
+    $amounts = OrderTransaction::query()
+        ->where('transaction_id', $transaction->getKey())
+        ->pluck('amount', 'order_id');
+
+    expect(bcround($amounts[$firstOrder->getKey()], 2))->toEqual('100.00')
+        ->and(bcround($amounts[$secondOrder->getKey()], 2))->toEqual('50.00');
+});
+
+test('an order smaller than the transaction is assigned its full balance', function (): void {
+    $transaction = createTransactionAssignmentsTransaction(500);
+    $order = createTransactionAssignmentsOrder(Currency::default()->getKey(), 100);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('assignOrdersModal', $transaction)
+        ->set('selectedOrders', [$order->getKey()])
+        ->call('assignOrders')
+        ->assertOk();
+
+    expect(bcround(
+        OrderTransaction::query()
+            ->where('transaction_id', $transaction->getKey())
+            ->value('amount'),
+        2
+    ))->toEqual('100.00');
+});
+
+test('a credit note is netted before the invoices are capped', function (): void {
+    $transaction = createTransactionAssignmentsTransaction(100);
+    $invoice = createTransactionAssignmentsOrder(Currency::default()->getKey(), 150);
+    $creditNote = createTransactionAssignmentsOrder(Currency::default()->getKey(), -50);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('assignOrdersModal', $transaction)
+        ->set('selectedOrders', [$invoice->getKey(), $creditNote->getKey()])
+        ->call('assignOrders')
+        ->assertOk();
+
+    $amounts = OrderTransaction::query()
+        ->where('transaction_id', $transaction->getKey())
+        ->pluck('amount', 'order_id');
+
+    expect(bcround($amounts[$invoice->getKey()], 2))->toEqual('150.00')
+        ->and(bcround($amounts[$creditNote->getKey()], 2))->toEqual('-50.00')
+        ->and(bcround($transaction->refresh()->balance, 2))->toEqual('0.00');
+});
+
+test('no order is assigned once the transaction amount is used up', function (): void {
+    $transaction = createTransactionAssignmentsTransaction(100);
+    $firstOrder = createTransactionAssignmentsOrder(Currency::default()->getKey(), 100);
+    $secondOrder = createTransactionAssignmentsOrder(Currency::default()->getKey(), 40);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('assignOrdersModal', $transaction)
+        ->set('selectedOrders', [$firstOrder->getKey(), $secondOrder->getKey()])
+        ->call('assignOrders')
+        ->assertOk();
+
+    expect(OrderTransaction::query()
+        ->where('transaction_id', $transaction->getKey())
+        ->pluck('order_id')
+        ->all()
+    )->toEqual([$firstOrder->getKey()]);
+});
