@@ -10,7 +10,7 @@
     class="position-item mb-2 text-sm"
 >
     <div
-        class="dark:bg-dark-700 rounded-md border bg-white p-3 shadow-xs"
+        class="dark:bg-dark-800 rounded-md border bg-white p-3 shadow-xs"
         @if (! $this->order->is_locked)
             x-bind:class="{
                 'cursor-move':

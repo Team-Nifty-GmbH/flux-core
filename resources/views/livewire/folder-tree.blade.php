@@ -359,7 +359,7 @@
                                     class="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition group-hover:opacity-100"
                                 >
                                     <span
-                                        class="dark:bg-dark-700/95 dark:text-dark-100 inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-1.5 text-sm font-medium text-gray-900"
+                                        class="dark:bg-dark-800/95 dark:text-dark-100 inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-1.5 text-sm font-medium text-gray-900"
                                     >
                                         <svg
                                             class="h-4 w-4"

@@ -62,7 +62,7 @@
                         </span>
                         @if ($isHalfDayHoliday)
                             <div
-                                class="dark:bg-dark-900/40 absolute inset-0 bg-white/40"
+                                class="dark:bg-dark-800/40 absolute inset-0 bg-white/40"
                                 style="
                                     clip-path: polygon(
                                         100% 0,
@@ -131,7 +131,7 @@
                             </span>
                             @if ($isHalfDay)
                                 <div
-                                    class="dark:bg-dark-900/40 absolute inset-0 bg-white/40"
+                                    class="dark:bg-dark-800/40 absolute inset-0 bg-white/40"
                                     style="
                                         clip-path: polygon(
                                             100% 0,
