@@ -16,6 +16,11 @@ use Spatie\MediaLibrary\MediaCollections\Exceptions\FileNameNotAllowed;
 
 class CreateMailMessage extends FluxAction
 {
+    protected array $dontTrim = [
+        'html_body',
+        'text_body',
+    ];
+
     public static function models(): array
     {
         return [Communication::class];

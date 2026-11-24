@@ -67,3 +67,26 @@ test('JobFinishedNotification still carries the accept action stored on the moni
     expect(data_get($payload, 'accept.label'))->toBe('Download');
     expect(data_get($payload, 'accept.url'))->toBe('https://example.test/storage/exports/test.xlsx');
 });
+
+test('job notifications render without error when accept and reject are empty', function (string $notification, ?string $value): void {
+    $this->withoutDeprecationHandling();
+
+    $monitor = QueueMonitor::factory()->create([
+        'job_id' => 'job-without-actions',
+        'job_batch_id' => null,
+        'accept' => $value,
+        'reject' => $value,
+    ]);
+
+    $payload = (new $notification($monitor))->toArray($this->notifiable);
+
+    expect(data_get($payload, 'accept'))->toBeNull();
+    expect(data_get($payload, 'reject'))->toBeNull();
+})->with([
+    JobStartedNotification::class,
+    JobProcessingNotification::class,
+    JobFinishedNotification::class,
+])->with([
+    'null' => [null],
+    'empty string' => [''],
+]);

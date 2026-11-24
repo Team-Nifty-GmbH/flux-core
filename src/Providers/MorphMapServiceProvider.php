@@ -57,6 +57,7 @@ use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use FluxErp\Models\Media;
 use FluxErp\Models\MediaFolder;
+use FluxErp\Models\Mention;
 use FluxErp\Models\Notification;
 use FluxErp\Models\NotificationSetting;
 use FluxErp\Models\Order;
@@ -225,6 +226,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'mail_folder' => MailFolder::class,
             'media' => Media::class,
             'media_folder' => MediaFolder::class,
+            'mention' => Mention::class,
             'notification' => Notification::class,
             'database_notification' => Notification::class,
             'notification_setting' => NotificationSetting::class,

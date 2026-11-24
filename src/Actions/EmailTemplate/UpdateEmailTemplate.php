@@ -8,6 +8,11 @@ use FluxErp\Rulesets\EmailTemplate\UpdateEmailTemplateRuleset;
 
 class UpdateEmailTemplate extends FluxAction
 {
+    protected array $dontTrim = [
+        'html_body',
+        'text_body',
+    ];
+
     public static function models(): array
     {
         return [EmailTemplate::class];

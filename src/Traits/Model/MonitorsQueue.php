@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 trait MonitorsQueue
 {
-    public function jobBatches()
+    public function jobBatches(): MorphToMany
     {
         return $this->morphToMany(JobBatch::class, 'job_batchable', 'job_batchables');
     }

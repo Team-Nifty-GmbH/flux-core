@@ -72,6 +72,34 @@ test('create address strips email angle brackets', function (): void {
     expect($address->email)->toBe('john@example.com');
 });
 
+test('create address accepts emails with pasted surrounding whitespace', function (): void {
+    $address = CreateAddress::make([
+        'contact_id' => $this->contact->getKey(),
+        'email_primary' => "\u{200B} john@example.com\u{00A0}",
+        'email' => "\u{FEFF}login@example.com ",
+    ])->validate()->execute();
+
+    expect($address)
+        ->email_primary->toBe('john@example.com')
+        ->email->toBe('login@example.com');
+});
+
+test('update address accepts emails with pasted surrounding whitespace', function (): void {
+    $address = Address::factory()->create([
+        'contact_id' => $this->contact->getKey(),
+    ]);
+
+    $updated = UpdateAddress::make([
+        'id' => $address->getKey(),
+        'email_primary' => ' john@example.com ',
+        'email' => "login@example.com\u{200B}",
+    ])->validate()->execute();
+
+    expect($updated)
+        ->email_primary->toBe('john@example.com')
+        ->email->toBe('login@example.com');
+});
+
 test('update address', function (): void {
     $address = Address::factory()->create([
         'contact_id' => $this->contact->getKey(),

@@ -9,6 +9,7 @@ use FluxErp\Http\Controllers\CalendarSearchController;
 use FluxErp\Http\Controllers\MentionableSearchController;
 use FluxErp\Http\Controllers\PrivateMediaController;
 use FluxErp\Http\Controllers\SearchController;
+use FluxErp\Http\Middleware\SearchModelPermission;
 use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\AbsenceRequest\AbsenceRequest;
 use FluxErp\Livewire\Accounting\DirectDebit;
@@ -416,6 +417,7 @@ Route::middleware('web')
                 ->name('search.mentionable');
             Route::any('/search/{model?}', SearchController::class)
                 ->where('model', '(.*)')
+                ->middleware(SearchModelPermission::class)
                 ->name('search');
             Route::any('/calendar-search', CalendarSearchController::class)
                 ->name('calendar-search');

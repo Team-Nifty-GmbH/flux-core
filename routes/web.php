@@ -51,7 +51,7 @@ Route::middleware('web')
             Route::get('/signature-public/{uuid}', SignaturePublicLink::class)->name('signature.public');
         });
 
-        Route::middleware(['auth:web', 'throttle:300,1'])->group(function (): void {
+        Route::middleware(['auth:web', 'throttle:300,1,file-pond'])->group(function (): void {
             Route::match(['POST', 'PATCH'], '/file-pond/chunk', [FilePondChunkController::class, 'handle'])
                 ->name('file-pond.chunk');
 

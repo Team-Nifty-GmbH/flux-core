@@ -175,12 +175,13 @@ class ContactForm extends FluxForm
     public function fill($values): void
     {
         if ($values instanceof Contact) {
-            $values->loadMissing(['categories:id', 'industries:id', 'tenants:id']);
+            $values->loadMissing(['categories:id', 'industries:id', 'tenants:id', 'mainAddress']);
 
             $values = $values->toArray();
             $values['categories'] = array_column($values['categories'] ?? [], 'id');
             $values['industries'] = array_column($values['industries'] ?? [], 'id');
             $values['tenants'] = array_column($values['tenants'] ?? [], 'id');
+            $values['main_address'] ??= [];
         }
 
         parent::fill($values);

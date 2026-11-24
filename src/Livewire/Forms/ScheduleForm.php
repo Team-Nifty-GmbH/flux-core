@@ -54,6 +54,8 @@ class ScheduleForm extends FluxForm
 
     public ?int $recurrences = null;
 
+    public ?string $timezone = null;
+
     public function fill($values): void
     {
         parent::fill($values);
@@ -212,18 +214,25 @@ class ScheduleForm extends FluxForm
             return $dates;
         }
 
+        // The cron runs in the schedule timezone, the preview shows app.timezone like due_at.
+        $timezone = $this->timezone ?? config('app.timezone');
+
         try {
             $cron = resolve_static(ScheduleModel::class, 'runCron', [$this->cron, $expression]);
             $next = $dueAt && $dueAt->isFuture()
-                ? resolve_static(ScheduleModel::class, 'nextRunAfter', [$cron, $dueAt])
-                : Carbon::instance($cron->getNextRunDate(now()));
+                ? resolve_static(ScheduleModel::class, 'nextRunAfter', [$cron, $dueAt->copy()->setTimezone($timezone)])
+                : Carbon::instance($cron->getNextRunDate(now($timezone)));
 
             for ($i = 0; $i < $maxDates; $i++) {
                 if ($endsAt && $next->greaterThanOrEqualTo($endsAt)) {
                     break;
                 }
 
-                $dates[] = $this->buildExecutionEntry($next, $periodStart, $expression);
+                $dates[] = $this->buildExecutionEntry(
+                    $next->copy()->setTimezone(config('app.timezone')),
+                    $periodStart,
+                    $expression
+                );
                 $next = Carbon::instance($cron->getNextRunDate($next));
             }
         } catch (Throwable) {

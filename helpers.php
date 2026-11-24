@@ -614,6 +614,12 @@ if (! function_exists('morph_alias')) {
     {
         $class = resolve_static($class, 'class');
 
+        $alias = array_search($class, Illuminate\Database\Eloquent\Relations\Relation::morphMap(), true);
+
+        if ($alias !== false) {
+            return $alias;
+        }
+
         if (
             class_exists($class)
             && in_array(FluxErp\Traits\Model\HasParentMorphClass::class, class_uses_recursive($class))

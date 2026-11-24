@@ -4,6 +4,7 @@ use FluxErp\Facades\Action;
 use FluxErp\Http\Controllers\BroadcastingBatchAuthController;
 use FluxErp\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\ClassMorphViolationException;
 use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
@@ -43,7 +44,14 @@ Broadcast::deferChannels(function (Collection $registered) use ($morphMap, $conf
             continue;
         }
 
-        $channel = class_to_broadcast_channel($class);
+        try {
+            $channel = class_to_broadcast_channel($class);
+            $modelChannel = class_to_broadcast_channel($class, false) . '.';
+        } catch (ClassMorphViolationException $e) {
+            report($e);
+
+            continue;
+        }
 
         if (! $registered->has($channel)) {
             Broadcast::channel(
@@ -76,10 +84,8 @@ Broadcast::deferChannels(function (Collection $registered) use ($morphMap, $conf
             );
         }
 
-        $channel = class_to_broadcast_channel($class, false) . '.';
-
-        if (! $registered->has($channel)) {
-            Broadcast::channel($channel, fn () => true, ['guards' => ['web', 'token']]);
+        if (! $registered->has($modelChannel)) {
+            Broadcast::channel($modelChannel, fn () => true, ['guards' => ['web', 'token']]);
         }
     }
 });
