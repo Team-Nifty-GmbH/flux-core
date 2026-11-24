@@ -79,5 +79,5 @@ test('StockRemovalStrategyEnum is localizable', function (): void {
 
 test('StorageAreaTypeEnum has every storage area type', function (): void {
     expect(StorageAreaTypeEnum::values())
-        ->toBe(['aisle', 'container', 'goods-in', 'goods-out', 'packing', 'quarantine', 'rack', 'shelf', 'zone']);
+        ->toBe(['aisle', 'container', 'goods-in', 'goods-out', 'packing', 'quarantine', 'rack', 'shelf', 'transit', 'zone']);
 });

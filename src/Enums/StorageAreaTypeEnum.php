@@ -25,5 +25,7 @@ class StorageAreaTypeEnum extends FluxEnum
 
     final public const string Shelf = 'shelf';
 
+    final public const string Transit = 'transit';
+
     final public const string Zone = 'zone';
 }
