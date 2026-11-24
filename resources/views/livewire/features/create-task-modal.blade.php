@@ -1,7 +1,7 @@
 <div>
     <x-modal id="create-task-modal" :title="__('Create Task')">
         <div
-            class="space-y-8 divide-y divide-gray-200"
+            class="space-y-8 divide-y divide-gray-200 dark:divide-dark-600"
             x-data="{
                 formatter: @js(resolve_static(\FluxErp\Models\Task::class, 'typeScriptAttributes')),
             }"

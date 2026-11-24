@@ -234,6 +234,15 @@
     ::file-selector-button {
         border-color: var(--color-gray-200, currentcolor);
     }
+
+    .dark,
+    .dark *,
+    .dark ::after,
+    .dark ::before,
+    .dark ::backdrop,
+    .dark ::file-selector-button {
+        border-color: var(--color-dark-600, currentcolor);
+    }
 }
 
 @utility indent-icon {
@@ -461,6 +470,60 @@
     #map {
         @apply z-0 h-96;
     }
+}
+
+:root:has(> body.dark) {
+    color-scheme: dark;
+}
+
+:root:has(> body.dark)::-webkit-scrollbar-track,
+.dark ::-webkit-scrollbar-track {
+    @apply bg-dark-800;
+}
+
+:root:has(> body.dark)::-webkit-scrollbar-thumb,
+.dark ::-webkit-scrollbar-thumb,
+.dark .soft-scrollbar::-webkit-scrollbar-thumb,
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-dark-500;
+}
+
+:root:has(> body.dark)::-webkit-scrollbar-thumb:hover,
+.dark ::-webkit-scrollbar-thumb:hover {
+    @apply bg-dark-400;
+}
+
+.dark .filepond--panel-root {
+    @apply bg-dark-700;
+}
+
+.dark .filepond--drop-label {
+    @apply text-dark-300;
+}
+
+.dark .apexcharts-toolbar {
+    @apply bg-transparent;
+}
+
+.dark .apexcharts-menu {
+    @apply border-dark-600 bg-dark-700 text-dark-200;
+}
+
+.dark .apexcharts-menu-item:hover {
+    @apply bg-dark-600;
+}
+
+.dark .leaflet-bar a,
+.dark .leaflet-control-attribution {
+    @apply border-dark-600 bg-dark-700 text-dark-200;
+}
+
+.dark .leaflet-bar a:hover {
+    @apply bg-dark-600;
+}
+
+.dark .leaflet-control-attribution a {
+    @apply text-primary-400;
 }
 
 .sortable-ghost {

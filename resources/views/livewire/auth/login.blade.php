@@ -7,7 +7,7 @@
         <x-flux::logo fill="#0690FA" class="h-24" />
     </div>
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div class="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
+        <div class="bg-white dark:bg-dark-800 px-4 py-8 shadow sm:rounded-lg sm:px-10">
             <div class="mt-6">
                 @section('password-reset-dialog')
                     <x-modal id="password-reset" :title="__('Reset password')">
@@ -49,11 +49,11 @@
                                     class="mx-auto size-12 text-indigo-600"
                                 />
                                 <h3
-                                    class="mt-2 text-lg font-semibold text-gray-900"
+                                    class="mt-2 text-lg font-semibold text-gray-900 dark:text-dark-100"
                                 >
                                     {{ __('Two-Factor Authentication') }}
                                 </h3>
-                                <p class="mt-1 text-sm text-gray-600">
+                                <p class="mt-1 text-sm text-gray-600 dark:text-dark-400">
                                     {{ __('Enter the code from your authenticator app') }}
                                 </p>
                             </div>
@@ -165,14 +165,14 @@
                                             class="absolute inset-0 flex items-center"
                                         >
                                             <div
-                                                class="w-full border-t border-gray-300"
+                                                class="w-full border-t border-gray-300 dark:border-dark-600"
                                             ></div>
                                         </div>
                                         <div
                                             class="relative flex justify-center text-sm"
                                         >
                                             <span
-                                                class="bg-white px-2 text-gray-500"
+                                                class="bg-white px-2 text-gray-500 dark:bg-dark-800 dark:text-dark-400"
                                             >
                                                 {{ __('Or') }}
                                             </span>

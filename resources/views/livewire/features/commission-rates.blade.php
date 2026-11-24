@@ -4,8 +4,8 @@
         z-index="z-30"
         :title="$commissionRate->id ? __('Edit Commission Rate') : __('Create Commission Rate')"
     >
-        <div class="space-y-8 divide-y divide-gray-200">
-            <div class="space-y-8 divide-y divide-gray-200">
+        <div class="space-y-8 divide-y divide-gray-200 dark:divide-dark-600">
+            <div class="space-y-8 divide-y divide-gray-200 dark:divide-dark-600">
                 <div>
                     <div
                         class="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-6"

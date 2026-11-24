@@ -3,7 +3,7 @@
         <x-flux::logo fill="#0690FA" class="h-24" />
     </div>
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div class="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
+        <div class="bg-white dark:bg-dark-800 px-4 py-8 shadow sm:rounded-lg sm:px-10">
             <div class="mt-6">
                 <form class="flex flex-col gap-6" wire:submit="resetPassword()">
                     <x-password

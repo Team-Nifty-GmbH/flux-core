@@ -10,7 +10,7 @@
     class="position-item mb-2 text-sm"
 >
     <div
-        class="rounded-md border bg-white p-3 shadow-xs"
+        class="rounded-md border bg-white p-3 shadow-xs dark:bg-dark-700"
         @if (! $this->order->is_locked)
             x-bind:class="{
                 'cursor-move':
@@ -70,7 +70,7 @@
         x-cloak
         x-show="isExpanded({{ data_get($position, "id") }})"
         x-collapse
-        class="mt-2 border-l-2 border-gray-200 pl-6"
+        class="mt-2 border-l-2 border-gray-200 pl-6 dark:border-dark-600"
     >
         <div
             class="nested-sortable space-y-2"
@@ -89,7 +89,7 @@
                 @endforeach
             @elseif (data_get($position, "is_free_text"))
                 <div
-                    class="empty-sort-placeholder flex h-8 items-center justify-center rounded-md border border-dashed border-gray-300"
+                    class="empty-sort-placeholder flex h-8 items-center justify-center rounded-md border border-dashed border-gray-300 dark:border-dark-500"
                 >
                     <span class="text-gray-400">
                         {{ __("Drop items here…") }}

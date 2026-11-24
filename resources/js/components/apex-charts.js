@@ -306,7 +306,7 @@ function apexCharts($wire) {
             return options;
         },
         get defaultOptions() {
-            const isDark = document.documentElement.classList.contains('dark');
+            const isDark = document.body.classList.contains('dark');
 
             return {
                 noData: {
@@ -342,6 +342,7 @@ function apexCharts($wire) {
                     type: null,
                     height: this.height,
                     fontFamily: 'inherit',
+                    foreColor: isDark ? '#d1d5db' : '#373d3f',
                     toolbar: {
                         show: true,
                         tools: {

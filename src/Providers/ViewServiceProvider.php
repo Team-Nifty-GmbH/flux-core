@@ -85,7 +85,11 @@ class ViewServiceProvider extends ServiceProvider
     {
         TallStackUi::customize()
             ->avatar()
-            ->block('wrapper.class', 'inline-flex shrink-0 items-center justify-center overflow-hidden bg-secondary-200!');
+            ->block('wrapper.class', 'inline-flex shrink-0 items-center justify-center overflow-hidden bg-secondary-200! dark:bg-secondary-600!');
+
+        TallStackUi::customize()
+            ->form('toggle')
+            ->block('background.class', 'bg-gray-200 dark:bg-dark-600 block cursor-pointer rounded-full group-focus:ring-0 group-focus:ring-offset-0 peer-focus:ring-0 peer-focus:ring-offset-0');
 
         TallStackUi::customize()
             ->dropdown()

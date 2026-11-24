@@ -5,8 +5,8 @@
     wire="showTicketModal"
     :title="__('New Ticket')"
 >
-    <div class="space-y-8 divide-y divide-gray-200">
-        <div class="space-y-8 divide-y divide-gray-200">
+    <div class="space-y-8 divide-y divide-gray-200 dark:divide-dark-600">
+        <div class="space-y-8 divide-y divide-gray-200 dark:divide-dark-600">
             <div>
                 <div class="mt-6 grid grid-cols-1 gap-1.5 sm:grid-cols-6">
                     <div class="sm:col-span-6">

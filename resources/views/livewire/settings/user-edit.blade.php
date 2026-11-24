@@ -177,7 +177,7 @@
             @show
         </form>
     @show
-    <div class="border-b border-gray-200" x-data="{ active: 'roles' }">
+    <div class="border-b border-gray-200 dark:border-dark-600" x-data="{ active: 'roles' }">
         <nav class="mt-2 -mb-px flex space-x-8 pb-5" aria-label="Tabs">
             <div
                 x-on:click="active = 'roles'"
