@@ -35,8 +35,8 @@ class JobFinishedNotification extends Notification implements HasToastNotificati
 
     public function toToastNotification(object $notifiable): ToastNotification
     {
-        $accept = unserialize($this->model->accept) ?: null;
-        $reject = unserialize($this->model->reject) ?: null;
+        $accept = ($this->model->accept ? unserialize($this->model->accept) : null) ?: null;
+        $reject = ($this->model->reject ? unserialize($this->model->reject) : null) ?: null;
 
         $persistentOverride = data_get($this->model->data, 'toast_persistent');
         $timeoutOverride = data_get($this->model->data, 'toast_timeout');
