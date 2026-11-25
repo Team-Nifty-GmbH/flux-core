@@ -4,7 +4,6 @@ use FluxErp\Models\Order;
 use FluxErp\Models\PaymentRunPosition;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 return new class() extends Migration
 {
@@ -40,10 +39,10 @@ return new class() extends Migration
                             ?: $order?->contactBankConnection?->account_holder,
                         'amount' => $pivot->amount,
                         'purpose' => $order?->invoice_number,
-                        'end_to_end_id' => $order?->invoice_number ?: Str::uuid()->toString(),
                     ],
                 ]);
                 $position->save();
+                $position->update(['end_to_end_id' => 'PR' . $pivot->payment_run_id . '-' . $position->getKey()]);
 
                 DB::table('order_payment_run')
                     ->where('pivot_id', $pivot->pivot_id)

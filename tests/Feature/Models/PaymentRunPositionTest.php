@@ -79,7 +79,25 @@ test('every existing pivot row gets its own position', function (): void {
 
     expect($position)->not->toBeNull()
         ->and($position->amount)->toEqual('-250.00')
-        ->and($position->end_to_end_id)->toBe('RE-1');
+        ->and($position->end_to_end_id)->toBe('PR' . $paymentRun->getKey() . '-' . $position->getKey());
+});
+
+test('orders sharing an invoice number in one old run each get their own position', function (): void {
+    $paymentRun = PaymentRun::factory()->create();
+
+    foreach (range(1, 2) as $i) {
+        DB::table('order_payment_run')->insert([
+            'order_id' => createOrderForPaymentRunPosition($this, ['invoice_number' => 'SUPPLIER-1'])->getKey(),
+            'payment_run_id' => $paymentRun->getKey(),
+            'payment_run_position_id' => null,
+            'amount' => '-100.00',
+        ]);
+    }
+
+    $this->migration->backfill();
+
+    expect(DB::table('order_payment_run')->whereNull('payment_run_position_id')->count())->toBe(0)
+        ->and($paymentRun->positions()->pluck('purpose')->all())->toBe(['SUPPLIER-1', 'SUPPLIER-1']);
 });
 
 test('the backfill covers every page, not just the first', function (): void {
