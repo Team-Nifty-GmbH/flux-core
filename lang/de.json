@@ -675,6 +675,7 @@
     "Comment could not be saved": "Kommentar konnte nicht gespeichert werden",
     "Comment Created": "Kommentar erstellt",
     "Comments": "Kommentare",
+    "Comments without answer to customer": "Kommentare ohne Antwort an Kunden",
     "Commission": "Kommission",
     "commission": "Kommission",
     "Commission Agent": "Vertreter",
@@ -3565,6 +3566,5 @@
     "Zone": "Zone",
     "{1} :count invoice|[2,*] :count invoices": "{1} :count Rechnung|[2,*] :count Rechnungen",
     "Ø :days days per employee": "Ø :days Tage pro Mitarbeiter",
-    "Ø :hours h per employee": "Ø :hours Std. pro Mitarbeiter",
-    "Comments without answer to customer": "Kommentare ohne Antwort an Kunden"
+    "Ø :hours h per employee": "Ø :hours Std. pro Mitarbeiter"
 }
