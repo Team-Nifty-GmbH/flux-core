@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use ReflectionClass;
+use RuntimeException;
 use Symfony\Component\Finder\Finder;
 use TeamNiftyGmbH\DataTable\Helpers\SchemaInfo;
 
@@ -400,7 +401,7 @@ class FluxOptimize extends Command
     protected function forgetCache(string $path): void
     {
         if (! @unlink($path) && file_exists($path)) {
-            unlink($path);
+            throw new RuntimeException('Could not delete ' . $path);
         }
     }
 
