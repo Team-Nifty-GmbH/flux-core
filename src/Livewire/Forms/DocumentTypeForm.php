@@ -20,6 +20,8 @@ class DocumentTypeForm extends FluxForm
 
     public bool $is_payroll_record = false;
 
+    public bool $is_required = false;
+
     public array $model_types = [];
 
     public ?string $name = null;

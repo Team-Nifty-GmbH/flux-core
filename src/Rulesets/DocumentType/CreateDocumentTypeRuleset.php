@@ -26,6 +26,7 @@ class CreateDocumentTypeRuleset extends FluxRuleset
             'retention_years' => 'required_if_accepted:is_payroll_record|nullable|integer|min:1|max:100',
             'is_owner_uploadable' => 'boolean',
             'is_payroll_record' => 'boolean',
+            'is_required' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

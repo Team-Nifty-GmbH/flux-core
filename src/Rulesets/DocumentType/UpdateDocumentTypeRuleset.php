@@ -32,6 +32,7 @@ class UpdateDocumentTypeRuleset extends FluxRuleset
             'retention_years' => 'nullable|integer|min:1|max:100',
             'is_owner_uploadable' => 'boolean',
             'is_payroll_record' => 'boolean',
+            'is_required' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

@@ -17,6 +17,7 @@ class DocumentType extends FluxModel
             'retention_years' => 'integer',
             'is_owner_uploadable' => 'boolean',
             'is_payroll_record' => 'boolean',
+            'is_required' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

@@ -49,7 +49,7 @@ class CreatePayrollDocumentTypes extends FluxAction
     protected function documentTypes(): array
     {
         return [
-            ['name' => 'Employment contract'],
+            ['name' => 'Employment contract', 'is_required' => true],
             ['name' => 'Proof of insurance exemption'],
             ['name' => 'Pension insurance exemption request'],
             ['name' => 'Declaration of other employments', 'is_owner_uploadable' => true],
@@ -59,7 +59,7 @@ class CreatePayrollDocumentTypes extends FluxAction
             ['name' => 'Notice from a social insurance agency'],
             ['name' => 'Proof of parenthood', 'is_owner_uploadable' => true],
             ['name' => 'Residence and work permit', 'is_owner_uploadable' => true],
-            ['name' => 'Proof of health insurance', 'is_owner_uploadable' => true],
+            ['name' => 'Proof of health insurance', 'is_owner_uploadable' => true, 'is_required' => true],
         ];
     }
 }

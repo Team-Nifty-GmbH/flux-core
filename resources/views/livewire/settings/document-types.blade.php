@@ -37,6 +37,11 @@
             :hint="__('Payroll records (§ 8 BVV) always need a retention period.')"
         />
         <x-toggle
+            wire:model.boolean="documentTypeForm.is_required"
+            :label="__('Required')"
+            :hint="__('Every employed record needs an approved document of this type.')"
+        />
+        <x-toggle
             wire:model.boolean="documentTypeForm.is_active"
             :label="__('Is Active')"
         />

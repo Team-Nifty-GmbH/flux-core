@@ -125,3 +125,10 @@ test('update document type locks the approved documents once the type gets a ret
     expect($document->retain_until->toDateString())->toBe('2031-12-31')
         ->and($document->isLocked())->toBeTrue();
 });
+
+test('create payroll document types marks contract and health insurance as required', function (): void {
+    CreatePayrollDocumentTypes::make()->validate()->execute();
+
+    expect(DocumentType::query()->where('is_required', true)->orderBy('name')->pluck('name')->all())
+        ->toBe(['Employment contract', 'Proof of health insurance']);
+});

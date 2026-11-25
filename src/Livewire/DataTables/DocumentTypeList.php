@@ -11,6 +11,7 @@ class DocumentTypeList extends BaseDataTable
         'retention_years',
         'is_owner_uploadable',
         'is_payroll_record',
+        'is_required',
         'is_active',
     ];
 
