@@ -39,6 +39,7 @@ class UploadDocumentRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => DocumentType::class])
                     ->where('is_active', true),
             ],
+            'previous_version_id' => 'nullable|integer',
             'document_date' => 'required|date',
             'media' => 'required|file',
         ];

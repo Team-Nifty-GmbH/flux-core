@@ -312,3 +312,74 @@ test('force deleting a record removes its unlocked documents', function (): void
 
     expect(Media::query()->withoutGlobalScopes()->whereKey($media->getKey())->exists())->toBeFalse();
 });
+
+test('upload stores the sha256 checksum of the file', function (): void {
+    $media = uploadDocument($this->employee, $this->documentType);
+
+    expect($media->checksum)->toBe(hash('sha256', "%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n"))
+        ->and($media->hasIntactFile())->toBeTrue();
+});
+
+test('a changed file no longer matches its checksum', function (): void {
+    $media = uploadDocument($this->employee, $this->documentType);
+
+    file_put_contents($media->getPath(), 'tampered');
+
+    expect($media->hasIntactFile())->toBeFalse();
+});
+
+test('a new version keeps the previous document locked and points to it', function (): void {
+    $previous = uploadDocument($this->employee, $this->documentType);
+
+    $version = uploadDocument($this->employee, $this->documentType, [
+        'previous_version_id' => $previous->getKey(),
+        'media' => documentPdf('contract-corrected.pdf'),
+    ]);
+
+    $previous = Media::query()->withoutGlobalScopes()->whereKey($previous->getKey())->sole();
+
+    expect($version->previous_version_id)->toBe($previous->getKey())
+        ->and($previous->review_state)->toBe(DocumentReviewStateEnum::Approved)
+        ->and($previous->isLocked())->toBeTrue()
+        ->and($previous->nextVersion->getKey())->toBe($version->getKey());
+});
+
+test('a new version refuses a document of another record', function (): void {
+    $otherEmployee = app(Employee::class)->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'firstname' => 'Other',
+        'lastname' => 'Employee',
+        'is_active' => true,
+    ]);
+    $previous = uploadDocument($otherEmployee, $this->documentType);
+
+    expect(fn () => uploadDocument($this->employee, $this->documentType, [
+        'previous_version_id' => $previous->getKey(),
+    ]))->toThrow(ValidationException::class, 'previous version');
+
+    expect(Media::query()->withoutGlobalScopes()->where('model_id', $this->employee->getKey())->exists())
+        ->toBeFalse();
+});
+
+test('a new version refuses another document type', function (): void {
+    $previous = uploadDocument($this->employee, $this->documentType);
+    $otherType = DocumentType::factory()->create(['model_types' => ['employee']]);
+
+    expect(fn () => uploadDocument($this->employee, $otherType, [
+        'previous_version_id' => $previous->getKey(),
+    ]))->toThrow(ValidationException::class, 'previous version');
+
+    expect(Media::query()->withoutGlobalScopes()->whereNotNull('previous_version_id')->exists())->toBeFalse();
+});
+
+test('a document can only be replaced once', function (): void {
+    $previous = uploadDocument($this->employee, $this->documentType);
+    uploadDocument($this->employee, $this->documentType, ['previous_version_id' => $previous->getKey()]);
+
+    expect(fn () => uploadDocument($this->employee, $this->documentType, [
+        'previous_version_id' => $previous->getKey(),
+    ]))->toThrow(ValidationException::class, 'previous version');
+
+    expect(Media::query()->withoutGlobalScopes()->where('previous_version_id', $previous->getKey())->count())
+        ->toBe(1);
+});

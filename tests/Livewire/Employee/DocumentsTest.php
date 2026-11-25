@@ -122,3 +122,36 @@ test('downloads a document of the employee', function (): void {
         ->call('downloadDocument', $document->getKey())
         ->assertFileDownloaded($document->file_name);
 });
+
+test('uploading a new version links it to the previous document', function (): void {
+    $previous = personnelFileDocument($this->employee, $this->documentType);
+
+    Livewire::test(Documents::class, ['employeeId' => $this->employee->getKey()])
+        ->call('newVersion', $previous->getKey())
+        ->assertSet('documentForm.previous_version_id', $previous->getKey())
+        ->assertSet('documentForm.document_type_id', $this->documentType->getKey())
+        ->set(
+            'documentForm.media',
+            UploadedFile::fake()->createWithContent('contract-corrected.pdf', "%PDF-1.4\n%%EOF\n")
+        )
+        ->call('saveUpload')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect(Media::query()->withoutGlobalScopes()->where('previous_version_id', $previous->getKey())->sole())
+        ->model_id->toBe($this->employee->getKey());
+});
+
+test('a replaced document is marked as superseded', function (): void {
+    $previous = personnelFileDocument($this->employee, $this->documentType);
+    $current = personnelFileDocument($this->employee, $this->documentType);
+    $current->forceFill(['previous_version_id' => $previous->getKey()])->save();
+
+    $data = Livewire::test(Documents::class, ['employeeId' => $this->employee->getKey()])
+        ->call('loadData')
+        ->instance()
+        ->getDataForTesting();
+
+    expect(collect(data_get($data, 'data'))->pluck('is_superseded', 'id')->sortKeys()->all())
+        ->toBe([$previous->getKey() => true, $current->getKey() => false]);
+});

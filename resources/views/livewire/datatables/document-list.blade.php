@@ -1,11 +1,17 @@
 <x-modal id="upload-document-modal" :title="__('Upload document')">
     <div class="flex flex-col gap-1.5">
-        <x-select.styled
-            :label="__('Document Type')"
-            wire:model="documentForm.document_type_id"
-            :options="$documentTypes"
-            required
-        />
+        <div
+            x-bind:class="
+                $wire.documentForm.previous_version_id && 'pointer-events-none'
+            "
+        >
+            <x-select.styled
+                :label="__('Document Type')"
+                wire:model="documentForm.document_type_id"
+                :options="$documentTypes"
+                required
+            />
+        </div>
         <x-date
             :label="__('Document date')"
             wire:model="documentForm.document_date"

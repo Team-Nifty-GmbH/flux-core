@@ -7,6 +7,7 @@ use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Enums\DocumentReviewStateEnum;
 use FluxErp\Models\DocumentType;
 use FluxErp\Models\Media;
+use FluxErp\Models\Scopes\ExcludeDocumentsScope;
 use FluxErp\Rulesets\Document\UploadDocumentRuleset;
 use FluxErp\Support\Media\DocumentRetention;
 use Illuminate\Support\Arr;
@@ -41,6 +42,8 @@ class UploadDocument extends FluxAction
 
         $media->forceFill([
             'document_type_id' => $this->getData('document_type_id'),
+            'previous_version_id' => $this->getData('previous_version_id'),
+            'checksum' => $media->calculateChecksum(),
             'document_date' => $this->getData('document_date'),
             'review_state' => $isReviewer ? DocumentReviewStateEnum::Approved : DocumentReviewStateEnum::Pending,
             'reviewed_at' => $isReviewer ? now() : null,
@@ -52,6 +55,18 @@ class UploadDocument extends FluxAction
         $media->save();
 
         return $media->refresh();
+    }
+
+    protected function isValidPreviousVersion(): bool
+    {
+        return resolve_static(Media::class, 'query')
+            ->withoutGlobalScope(ExcludeDocumentsScope::class)
+            ->whereKey($this->getData('previous_version_id'))
+            ->where('model_type', $this->getData('model_type'))
+            ->where('model_id', $this->getData('model_id'))
+            ->where('document_type_id', $this->getData('document_type_id'))
+            ->whereDoesntHave('nextVersion')
+            ->exists();
     }
 
     protected function prepareForValidation(): void
@@ -81,6 +96,14 @@ class UploadDocument extends FluxAction
         ) {
             throw ValidationException::withMessages([
                 'document_type_id' => [__('This document type cannot be uploaded here.')],
+            ]);
+        }
+
+        if ($this->getData('previous_version_id') && ! $this->isValidPreviousVersion()) {
+            throw ValidationException::withMessages([
+                'previous_version_id' => [
+                    __('The previous version must be a current document of the same type on this record.'),
+                ],
             ]);
         }
     }
