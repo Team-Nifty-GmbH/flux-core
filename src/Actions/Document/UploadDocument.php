@@ -7,7 +7,6 @@ use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Enums\DocumentReviewStateEnum;
 use FluxErp\Models\DocumentType;
 use FluxErp\Models\Media;
-use FluxErp\Models\Scopes\ExcludeDocumentsScope;
 use FluxErp\Rulesets\Document\UploadDocumentRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
@@ -60,7 +59,7 @@ class UploadDocument extends FluxAction
     protected function isValidPreviousVersion(): bool
     {
         return resolve_static(Media::class, 'query')
-            ->withoutGlobalScope(ExcludeDocumentsScope::class)
+            ->documents()
             ->whereKey($this->getData('previous_version_id'))
             ->where('model_type', $this->getData('model_type'))
             ->where('model_id', $this->getData('model_id'))
