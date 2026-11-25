@@ -8,6 +8,8 @@ class CoreSettings extends FluxSettings
 
     public bool $install_done;
 
+    public array $internal_comment_models;
+
     public ?string $license_key;
 
     public static function group(): string

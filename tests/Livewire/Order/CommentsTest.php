@@ -132,3 +132,32 @@ test('renders successfully', function (): void {
             return true;
         });
 });
+
+test('comments of a model listed as internal only offer no answer to the customer', function (): void {
+    Comment::query()->where('model_id', $this->order->id)->delete();
+
+    Livewire::withoutLazyLoading()
+        ->test(Comments::class, ['modelId' => $this->order->id])
+        ->assertSet('isPublic', true)
+        ->assertSee(__('Answer to customer'))
+        ->call('saveComment', ['comment' => 'to the customer', 'is_internal' => false]);
+
+    $settings = app(FluxErp\Settings\CoreSettings::class);
+    $settings->internal_comment_models = [morph_alias(Order::class)];
+    $settings->save();
+
+    Livewire::withoutLazyLoading()
+        ->test(Comments::class, ['modelId' => $this->order->id])
+        ->assertSet('isPublic', false)
+        ->assertDontSee(__('Answer to customer'))
+        ->call('saveComment', ['comment' => 'kept internal', 'is_internal' => false]);
+
+    expect(Comment::query()->where('model_id', $this->order->id)->pluck('is_internal', 'comment')->all())
+        ->toEqual(['to the customer' => false, 'kept internal' => true]);
+});
+
+test('the core settings offer every commentable model', function (): void {
+    expect(collect(FluxErp\Livewire\Forms\Settings\CoreSettingsForm::commentModelOptions())->pluck('value'))
+        ->toContain(morph_alias(Order::class))
+        ->not->toContain(morph_alias(Currency::class));
+});

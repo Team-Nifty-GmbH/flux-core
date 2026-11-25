@@ -6,6 +6,7 @@ use FluxErp\Livewire\Forms\CommentForm;
 use FluxErp\Models\Comment;
 use FluxErp\Models\Scopes\FamilyTreeScope;
 use FluxErp\Models\User;
+use FluxErp\Settings\CoreSettings;
 use FluxErp\Support\Mentions\MentionPillRefresher;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\BindsModelRecord;
@@ -51,6 +52,13 @@ abstract class Comments extends Component
 
     public function mount(): void
     {
+        if (in_array(
+            morph_alias($this->modelType),
+            rescue(fn (): array => app(CoreSettings::class)->internal_comment_models, [], false)
+        )) {
+            $this->isPublic = false;
+        }
+
         if ($this->modelId < 1) {
             return;
         }
@@ -207,7 +215,7 @@ abstract class Comments extends Component
                 'model_id' => $this->modelId,
                 'is_internal' => auth()->user()?->getMorphClass() !== morph_alias(User::class)
                     ? false
-                    : data_get($comment, 'is_internal', true),
+                    : ! $this->isPublic || data_get($comment, 'is_internal', true),
             ]
         )
         );

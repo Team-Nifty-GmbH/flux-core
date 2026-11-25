@@ -3565,5 +3565,6 @@
     "Zone": "Zone",
     "{1} :count invoice|[2,*] :count invoices": "{1} :count Rechnung|[2,*] :count Rechnungen",
     "Ø :days days per employee": "Ø :days Tage pro Mitarbeiter",
-    "Ø :hours h per employee": "Ø :hours Std. pro Mitarbeiter"
+    "Ø :hours h per employee": "Ø :hours Std. pro Mitarbeiter",
+    "Comments without answer to customer": "Kommentare ohne Antwort an Kunden"
 }
