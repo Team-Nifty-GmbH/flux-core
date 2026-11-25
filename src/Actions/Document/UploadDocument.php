@@ -8,7 +8,6 @@ use FluxErp\Enums\DocumentReviewStateEnum;
 use FluxErp\Models\DocumentType;
 use FluxErp\Models\Media;
 use FluxErp\Rulesets\Document\UploadDocumentRuleset;
-use FluxErp\Support\Media\DocumentRetention;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -37,19 +36,20 @@ class UploadDocument extends FluxAction
             ->validate()
             ->execute();
 
-        $isReviewer = resolve_static(ReviewDocument::class, 'canPerformAction', [false]);
-
         $media->forceFill([
             'document_type_id' => $this->getData('document_type_id'),
             'document_date' => $this->getData('document_date'),
-            'review_state' => $isReviewer ? DocumentReviewStateEnum::Approved : DocumentReviewStateEnum::Pending,
-            'reviewed_at' => $isReviewer ? now() : null,
-            'reviewed_by' => $isReviewer && auth()->check()
-                ? auth()->user()->getMorphClass() . ':' . auth()->id()
-                : null,
-        ]);
-        $media->retain_until = $isReviewer ? app(DocumentRetention::class)($media) : null;
-        $media->save();
+            'review_state' => DocumentReviewStateEnum::Pending,
+        ])->save();
+
+        if (resolve_static(ReviewDocument::class, 'canPerformAction', [false])) {
+            return ReviewDocument::make([
+                'id' => $media->getKey(),
+                'review_state' => DocumentReviewStateEnum::Approved,
+            ])
+                ->validate()
+                ->execute();
+        }
 
         return $media->refresh();
     }

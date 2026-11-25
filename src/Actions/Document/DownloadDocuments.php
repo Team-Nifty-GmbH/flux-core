@@ -5,10 +5,8 @@ namespace FluxErp\Actions\Document;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\DocumentReviewStateEnum;
 use FluxErp\Models\Media;
-use FluxErp\Models\Scopes\ExcludeDocumentsScope;
 use FluxErp\Rulesets\Document\DownloadDocumentsRuleset;
 use FluxErp\Support\MediaLibrary\FluxMediaStream;
-use Illuminate\Database\Eloquent\Builder;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class DownloadDocuments extends FluxAction
@@ -31,14 +29,10 @@ class DownloadDocuments extends FluxAction
     public function performAction(): FluxMediaStream
     {
         $media = resolve_static(Media::class, 'query')
-            ->withoutGlobalScope(ExcludeDocumentsScope::class)
+            ->documents()
             ->where('model_type', $this->getData('model_type'))
             ->whereIntegerInRaw('model_id', $this->getData('model_ids'))
             ->where('review_state', DocumentReviewStateEnum::Approved)
-            ->when(
-                $this->getData('year'),
-                fn (Builder $query, int $year) => $query->whereYear('document_date', $year)
-            )
             ->with(['documentType:id,name', 'model'])
             ->orderBy('document_date')
             ->get()

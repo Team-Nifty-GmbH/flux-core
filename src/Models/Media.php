@@ -9,6 +9,7 @@ use FluxErp\Support\MediaLibrary\MediaCollection;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -105,11 +106,6 @@ class Media extends BaseMedia
         return $this->model->getMediaCollection($this->collection_name);
     }
 
-    public function isDocument(): bool
-    {
-        return ! is_null($this->document_type_id);
-    }
-
     public function isLocked(): bool
     {
         return $this->retain_until?->gte(today()) ?? false;
@@ -141,5 +137,11 @@ class Media extends BaseMedia
         }
 
         return parent::stream($conversion);
+    }
+
+    protected function scopeDocuments(Builder $query): void
+    {
+        $query->withoutGlobalScope(ExcludeDocumentsScope::class)
+            ->whereNotNull($query->qualifyColumn('document_type_id'));
     }
 }

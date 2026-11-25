@@ -26,7 +26,6 @@ class DownloadDocumentsRuleset extends FluxRuleset
             ],
             'model_ids' => 'required|array',
             'model_ids.*' => 'required|integer',
-            'year' => 'nullable|integer|min:1900|max:9999',
         ];
     }
 }

@@ -12,7 +12,6 @@ use FluxErp\Enums\DocumentReviewStateEnum;
 use FluxErp\Livewire\Forms\DocumentForm;
 use FluxErp\Models\DocumentType;
 use FluxErp\Models\Media;
-use FluxErp\Models\Scopes\ExcludeDocumentsScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
@@ -278,10 +277,9 @@ class DocumentList extends BaseDataTable
 
     protected function getBuilder(Builder $builder): Builder
     {
-        return $builder->withoutGlobalScope(ExcludeDocumentsScope::class)
+        return $builder->documents()
             ->where('model_type', $this->modelType)
             ->where('model_id', $this->modelId)
-            ->whereNotNull('document_type_id')
             ->addSelect(['review_state', 'retain_until']);
     }
 
@@ -312,11 +310,10 @@ class DocumentList extends BaseDataTable
     protected function ownDocument(int $id): Media
     {
         return resolve_static(Media::class, 'query')
-            ->withoutGlobalScope(ExcludeDocumentsScope::class)
+            ->documents()
             ->whereKey($id)
             ->where('model_type', $this->modelType)
             ->where('model_id', $this->modelId)
-            ->whereNotNull('document_type_id')
             ->firstOrFail();
     }
 }

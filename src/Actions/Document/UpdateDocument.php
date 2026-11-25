@@ -4,7 +4,6 @@ namespace FluxErp\Actions\Document;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Media;
-use FluxErp\Models\Scopes\ExcludeDocumentsScope;
 use FluxErp\Rulesets\Document\UpdateDocumentRuleset;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
@@ -24,7 +23,7 @@ class UpdateDocument extends FluxAction
     public function performAction(): Media
     {
         $media = resolve_static(Media::class, 'query')
-            ->withoutGlobalScope(ExcludeDocumentsScope::class)
+            ->documents()
             ->whereKey($this->getData('id'))
             ->firstOrFail();
 
@@ -38,7 +37,7 @@ class UpdateDocument extends FluxAction
         parent::validateData();
 
         $retainUntil = resolve_static(Media::class, 'query')
-            ->withoutGlobalScope(ExcludeDocumentsScope::class)
+            ->documents()
             ->whereKey($this->getData('id'))
             ->value('retain_until');
 

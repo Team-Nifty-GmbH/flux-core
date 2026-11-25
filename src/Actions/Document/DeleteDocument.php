@@ -4,7 +4,6 @@ namespace FluxErp\Actions\Document;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Media;
-use FluxErp\Models\Scopes\ExcludeDocumentsScope;
 use FluxErp\Rulesets\Document\DeleteDocumentRuleset;
 use Illuminate\Validation\ValidationException;
 
@@ -23,7 +22,7 @@ class DeleteDocument extends FluxAction
     public function performAction(): ?bool
     {
         return resolve_static(Media::class, 'query')
-            ->withoutGlobalScope(ExcludeDocumentsScope::class)
+            ->documents()
             ->whereKey($this->getData('id'))
             ->firstOrFail()
             ->delete();
@@ -34,7 +33,7 @@ class DeleteDocument extends FluxAction
         parent::validateData();
 
         if (resolve_static(Media::class, 'query')
-            ->withoutGlobalScope(ExcludeDocumentsScope::class)
+            ->documents()
             ->whereKey($this->getData('id'))
             ->first()
             ->isLocked()

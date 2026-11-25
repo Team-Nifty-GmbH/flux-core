@@ -5,7 +5,6 @@ namespace FluxErp\Actions\Document;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\DocumentReviewStateEnum;
 use FluxErp\Models\Media;
-use FluxErp\Models\Scopes\ExcludeDocumentsScope;
 use FluxErp\Rulesets\Document\ReviewDocumentRuleset;
 use FluxErp\Support\Media\DocumentRetention;
 
@@ -24,7 +23,7 @@ class ReviewDocument extends FluxAction
     public function performAction(): Media
     {
         $media = resolve_static(Media::class, 'query')
-            ->withoutGlobalScope(ExcludeDocumentsScope::class)
+            ->documents()
             ->whereKey($this->getData('id'))
             ->firstOrFail();
 

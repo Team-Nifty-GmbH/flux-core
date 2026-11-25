@@ -4,7 +4,6 @@ namespace FluxErp\Actions\Document;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Media;
-use FluxErp\Models\Scopes\ExcludeDocumentsScope;
 use FluxErp\Rulesets\Document\DownloadDocumentRuleset;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -29,7 +28,7 @@ class DownloadDocument extends FluxAction
     public function performAction(): StreamedResponse
     {
         return resolve_static(Media::class, 'query')
-            ->withoutGlobalScope(ExcludeDocumentsScope::class)
+            ->documents()
             ->whereKey($this->getData('id'))
             ->firstOrFail()
             ->toResponse(request());
@@ -41,7 +40,7 @@ class DownloadDocument extends FluxAction
 
         if (! static::canPerformAction(false)
             && ! resolve_static(Media::class, 'query')
-                ->withoutGlobalScope(ExcludeDocumentsScope::class)
+                ->documents()
                 ->whereKey($this->getData('id'))
                 ->first()
                 ->model
