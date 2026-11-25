@@ -97,3 +97,15 @@ test('lists employees with documents whose retention has ended', function (): vo
 
     expect(collect($expired)->pluck('count', 'id')->all())->toBe([$employee->getKey() => 2]);
 });
+
+test('leaves out soft deleted employees whose page cannot be opened', function (): void {
+    $employee = employedEmployee($this->workTimeModel, 'Deleted');
+    personnelFileEntry($employee, $this->contract, ['retain_until' => today()->subDay()]);
+    $employee->delete();
+
+    $expired = Livewire::withoutLazyLoading()
+        ->test(PersonnelFileStatusWidget::class)
+        ->get('expiredDocuments');
+
+    expect($expired)->toBe([]);
+});

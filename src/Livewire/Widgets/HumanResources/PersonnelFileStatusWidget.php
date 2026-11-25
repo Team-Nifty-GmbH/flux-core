@@ -84,13 +84,12 @@ class PersonnelFileStatusWidget extends Component
             ->pluck('count', 'model_id');
 
         return resolve_static(Employee::class, 'query')
-            ->withTrashed()
             ->whereIntegerInRaw('id', $counts->keys()->all())
             ->orderBy('name')
             ->get(['id', 'name'])
             ->map(fn (Employee $employee): array => [
                 'id' => $employee->getKey(),
-                'name' => $employee->getLabel(),
+                'name' => $employee->name,
                 'count' => (int) $counts->get($employee->getKey()),
             ]);
     }
@@ -127,7 +126,7 @@ class PersonnelFileStatusWidget extends Component
         return $employees
             ->map(fn (Employee $employee): array => [
                 'id' => $employee->getKey(),
-                'name' => $employee->getLabel(),
+                'name' => $employee->name,
                 'document_types' => $documentTypes
                     ->reject(fn (DocumentType $documentType): bool => in_array(
                         $documentType->getKey(),
