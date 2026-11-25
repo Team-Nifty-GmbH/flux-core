@@ -155,3 +155,16 @@ test('a replaced document is marked as superseded', function (): void {
     expect(collect(data_get($data, 'data'))->pluck('is_superseded', 'id')->sortKeys()->all())
         ->toBe([$previous->getKey() => true, $current->getKey() => false]);
 });
+
+test('a document of an inactive type offers no new version', function (): void {
+    $document = personnelFileDocument($this->employee, $this->documentType);
+    $this->documentType->update(['is_active' => false]);
+
+    $data = Livewire::test(Documents::class, ['employeeId' => $this->employee->getKey()])
+        ->call('loadData')
+        ->instance()
+        ->getDataForTesting();
+
+    expect(collect(data_get($data, 'data'))->pluck('is_type_active', 'id')->all())
+        ->toBe([$document->getKey() => false]);
+});

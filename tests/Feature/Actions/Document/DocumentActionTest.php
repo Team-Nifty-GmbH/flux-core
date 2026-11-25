@@ -383,3 +383,42 @@ test('a document can only be replaced once', function (): void {
     expect(Media::query()->withoutGlobalScopes()->where('previous_version_id', $previous->getKey())->count())
         ->toBe(1);
 });
+
+test('a rejected version does not block a new version of the approved document', function (): void {
+    $previous = uploadDocument($this->employee, $this->documentType);
+    uploadDocument($this->employee, $this->documentType, ['previous_version_id' => $previous->getKey()])
+        ->forceFill(['review_state' => DocumentReviewStateEnum::Rejected])
+        ->save();
+
+    expect(Media::query()->withoutGlobalScopes()->withExists('nextVersion')->whereKey($previous->getKey())->sole())
+        ->next_version_exists->toBeFalsy();
+
+    $version = uploadDocument($this->employee, $this->documentType, [
+        'previous_version_id' => $previous->getKey(),
+    ]);
+
+    expect($version->previous_version_id)->toBe($previous->getKey());
+});
+
+test('a new version refuses a previous document that is not approved', function (DocumentReviewStateEnum $state): void {
+    $previous = uploadDocument($this->employee, $this->documentType);
+    $previous->forceFill(['review_state' => $state])->save();
+
+    expect(fn () => uploadDocument($this->employee, $this->documentType, [
+        'previous_version_id' => $previous->getKey(),
+    ]))->toThrow(ValidationException::class, 'previous version');
+})
+    ->with([DocumentReviewStateEnum::Pending, DocumentReviewStateEnum::Rejected]);
+
+test('a new version refuses previous version id zero with a validation error', function (): void {
+    expect(fn () => uploadDocument($this->employee, $this->documentType, ['previous_version_id' => 0]))
+        ->toThrow(ValidationException::class);
+});
+
+test('a missing file is not intact', function (): void {
+    $media = uploadDocument($this->employee, $this->documentType);
+
+    unlink($media->getPath());
+
+    expect($media->hasIntactFile())->toBeFalse();
+});

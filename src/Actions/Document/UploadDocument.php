@@ -65,6 +65,7 @@ class UploadDocument extends FluxAction
             ->where('model_type', $this->getData('model_type'))
             ->where('model_id', $this->getData('model_id'))
             ->where('document_type_id', $this->getData('document_type_id'))
+            ->where('review_state', DocumentReviewStateEnum::Approved)
             ->whereDoesntHave('nextVersion')
             ->exists();
     }
@@ -99,7 +100,7 @@ class UploadDocument extends FluxAction
             ]);
         }
 
-        if ($this->getData('previous_version_id') && ! $this->isValidPreviousVersion()) {
+        if (! is_null($this->getData('previous_version_id')) && ! $this->isValidPreviousVersion()) {
             throw ValidationException::withMessages([
                 'previous_version_id' => [
                     __('The previous version must be a current document of the same type on this record.'),

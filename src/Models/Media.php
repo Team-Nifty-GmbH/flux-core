@@ -92,7 +92,8 @@ class Media extends BaseMedia
     public function nextVersion(): HasOne
     {
         return $this->hasOne(Media::class, 'previous_version_id')
-            ->withoutGlobalScope(ExcludeDocumentsScope::class);
+            ->withoutGlobalScope(ExcludeDocumentsScope::class)
+            ->where('review_state', '!=', DocumentReviewStateEnum::Rejected);
     }
 
     public function previousVersion(): BelongsTo
@@ -131,7 +132,8 @@ class Media extends BaseMedia
 
     public function hasIntactFile(): bool
     {
-        return ! is_null($this->checksum) && hash_equals($this->checksum, $this->calculateChecksum());
+        return ! is_null($this->checksum)
+            && rescue(fn () => hash_equals($this->checksum, $this->calculateChecksum()), false, false);
     }
 
     public function isLocked(): bool

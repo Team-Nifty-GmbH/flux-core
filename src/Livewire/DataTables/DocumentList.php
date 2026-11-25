@@ -96,7 +96,7 @@ class DocumentList extends BaseDataTable
                 ->when(fn () => resolve_static(UploadDocument::class, 'canPerformAction', [false]))
                 ->attributes([
                     'x-cloak' => true,
-                    'x-show' => 'record.is_approved && ! record.is_superseded',
+                    'x-show' => 'record.is_approved && ! record.is_superseded && record.is_type_active',
                     'wire:click' => 'newVersion(record.id)',
                 ]),
             DataTableButton::make()
@@ -292,6 +292,7 @@ class DocumentList extends BaseDataTable
         $itemArray['is_approved'] = $item->review_state === DocumentReviewStateEnum::Approved;
         $itemArray['is_locked'] = $item->isLocked();
         $itemArray['is_superseded'] = (bool) $item->next_version_exists;
+        $itemArray['is_type_active'] = (bool) $item->document_type_is_active;
     }
 
     protected function documentTypeQuery(): Builder
@@ -306,7 +307,10 @@ class DocumentList extends BaseDataTable
             ->where('model_type', $this->modelType)
             ->where('model_id', $this->modelId)
             ->addSelect(['review_state', 'retain_until'])
-            ->withExists('nextVersion');
+            ->withExists([
+                'nextVersion',
+                'documentType as document_type_is_active' => fn (Builder $query) => $query->where('is_active', true),
+            ]);
     }
 
     protected function getDocumentTypes(): array
