@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\RebateAgreement\SettleRebateAgreement;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
@@ -12,6 +13,7 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\RebateAgreement;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 use Illuminate\Validation\ValidationException;
 
@@ -166,6 +168,38 @@ test('an already settled agreement cannot be settled twice', function (): void {
         ->validate()
         ->execute();
 })->throws(ValidationException::class);
+
+test('deleting the refund order allows settling the agreement again', function (): void {
+    $firstOrder = SettleRebateAgreement::make(['id' => $this->agreement->getKey()])
+        ->validate()
+        ->execute();
+
+    DeleteOrder::make(['id' => $firstOrder->getKey()])
+        ->validate()
+        ->execute();
+
+    $secondOrder = SettleRebateAgreement::make(['id' => $this->agreement->getKey()])
+        ->validate()
+        ->execute();
+
+    expect($secondOrder->getKey())->not->toBe($firstOrder->getKey())
+        ->and(bcround($secondOrder->total_net_price, 2))->toBe('-3600.00')
+        ->and($this->agreement->refresh()->rebate_order_id)->toBe($secondOrder->getKey());
+});
+
+test('the refund order is created on the default tenant of the contact', function (): void {
+    $this->dbTenant->update(['is_default' => false]);
+    $defaultTenant = Tenant::factory()->create(['is_default' => true]);
+    $this->contact->tenants()->attach($defaultTenant);
+    $this->paymentType->tenants()->attach($defaultTenant);
+    $this->contact->update(['payment_type_id' => $this->paymentType->getKey()]);
+
+    $order = SettleRebateAgreement::make(['id' => $this->agreement->getKey()])
+        ->validate()
+        ->execute();
+
+    expect($order->tenant_id)->toBe($defaultTenant->getKey());
+});
 
 test('settling an agreement whose volume reaches no tier fails without creating an order', function (): void {
     $this->agreement->update(['tiers' => [['from_volume' => 500000, 'percentage' => 0.02]]]);

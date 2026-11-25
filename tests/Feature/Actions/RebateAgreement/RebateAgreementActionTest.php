@@ -4,8 +4,12 @@ use FluxErp\Actions\RebateAgreement\CreateRebateAgreement;
 use FluxErp\Actions\RebateAgreement\DeleteRebateAgreement;
 use FluxErp\Actions\RebateAgreement\UpdateRebateAgreement;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Currency;
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
+use FluxErp\Models\PriceList;
 use FluxErp\Models\RebateAgreement;
 
 function refundOrderTypeId(): int
@@ -94,8 +98,16 @@ test('update rebate agreement', function (): void {
 });
 
 test('a settled rebate agreement can neither be updated nor deleted', function (): void {
+    $contact = Contact::factory()->create();
     $rebateAgreement = RebateAgreement::factory()->create([
-        'contact_id' => Contact::factory()->create()->getKey(),
+        'contact_id' => $contact->getKey(),
+        'rebate_order_id' => Order::factory()->create([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'order_type_id' => refundOrderTypeId(),
+            'currency_id' => Currency::factory()->create()->getKey(),
+            'price_list_id' => PriceList::factory()->create()->getKey(),
+            'address_invoice_id' => Address::factory()->create(['contact_id' => $contact->getKey()])->getKey(),
+        ])->getKey(),
         'settled_at' => now(),
     ]);
 

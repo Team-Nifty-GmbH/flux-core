@@ -74,7 +74,7 @@ class RebateCalculator
     protected function getVolumeByVatRate(): Collection
     {
         return resolve_static(OrderPosition::class, 'query')
-            ->whereIntegerInRaw('order_id', $this->getOrdersQuery()->pluck('id')->all())
+            ->whereIn('order_id', $this->getOrdersQuery()->select('id'))
             ->where('is_alternative', false)
             ->where(
                 fn (Builder $query) => $query

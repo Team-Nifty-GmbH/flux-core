@@ -43,18 +43,15 @@ class SettleRebateAgreement extends FluxAction
             ->lockForUpdate()
             ->first();
 
-        if ($rebateAgreement->settled_at) {
+        if ($rebateAgreement->rebateOrder()->exists()) {
             throw ValidationException::withMessages([
                 'id' => ['The rebate agreement is already settled.'],
             ])
                 ->errorBag('settleRebateAgreement');
         }
 
-        $contact = $rebateAgreement->contact;
-
         $order = CreateOrder::make([
-            'tenant_id' => $contact->tenants()->value('tenants.id'),
-            'contact_id' => $contact->getKey(),
+            'contact_id' => $rebateAgreement->contact_id,
             'currency_id' => $this->currencyId,
             'order_type_id' => $rebateAgreement->order_type_id,
         ])
@@ -116,7 +113,7 @@ class SettleRebateAgreement extends FluxAction
             ->first();
         $errors = [];
 
-        if ($rebateAgreement->settled_at) {
+        if ($rebateAgreement->rebateOrder()->exists()) {
             $errors['id'][] = 'The rebate agreement is already settled.';
         }
 

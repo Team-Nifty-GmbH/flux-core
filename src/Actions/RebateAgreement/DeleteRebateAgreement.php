@@ -33,9 +33,9 @@ class DeleteRebateAgreement extends FluxAction
 
         $rebateAgreement = resolve_static(RebateAgreement::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first(['id', 'settled_at']);
+            ->first(['id', 'rebate_order_id']);
 
-        if ($rebateAgreement->settled_at) {
+        if ($rebateAgreement->rebateOrder()->exists()) {
             throw ValidationException::withMessages([
                 'id' => ['A settled rebate agreement can no longer be deleted.'],
             ])

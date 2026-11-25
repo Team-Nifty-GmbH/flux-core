@@ -107,6 +107,13 @@ test('saving keeps tiers changed elsewhere that the form did not touch', functio
 test('calculating a settled agreement opens no preview', function (): void {
     $agreement = RebateAgreement::factory()->create([
         'contact_id' => $this->contact->getKey(),
+        'rebate_order_id' => Order::factory()->create([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'order_type_id' => OrderType::factory()->create(['order_type_enum' => OrderTypeEnum::Refund])->getKey(),
+            'currency_id' => Currency::factory()->create()->getKey(),
+            'price_list_id' => PriceList::factory()->create()->getKey(),
+            'address_invoice_id' => Address::factory()->create(['contact_id' => $this->contact->getKey()])->getKey(),
+        ])->getKey(),
         'settled_at' => now(),
     ]);
 
@@ -129,6 +136,13 @@ test('can delete an unsettled agreement', function (): void {
 test('a settled agreement cannot be deleted', function (): void {
     $agreement = RebateAgreement::factory()->create([
         'contact_id' => $this->contact->getKey(),
+        'rebate_order_id' => Order::factory()->create([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'order_type_id' => OrderType::factory()->create(['order_type_enum' => OrderTypeEnum::Refund])->getKey(),
+            'currency_id' => Currency::factory()->create()->getKey(),
+            'price_list_id' => PriceList::factory()->create()->getKey(),
+            'address_invoice_id' => Address::factory()->create(['contact_id' => $this->contact->getKey()])->getKey(),
+        ])->getKey(),
         'settled_at' => now(),
     ]);
 
