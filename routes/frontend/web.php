@@ -79,6 +79,7 @@ use FluxErp\Livewire\Settings\Countries;
 use FluxErp\Livewire\Settings\CountryRegions;
 use FluxErp\Livewire\Settings\Currencies;
 use FluxErp\Livewire\Settings\DiscountGroups;
+use FluxErp\Livewire\Settings\DocumentTypes;
 use FluxErp\Livewire\Settings\EmailTemplates;
 use FluxErp\Livewire\Settings\EmployeeDepartments;
 use FluxErp\Livewire\Settings\FailedJobs;
@@ -344,6 +345,7 @@ Route::middleware('web')
                         Route::get('/country-regions', CountryRegions::class)->name('country-regions');
                         Route::get('/currencies', Currencies::class)->name('currencies');
                         Route::get('/discount-groups', DiscountGroups::class)->name('discount-groups');
+                        Route::get('/document-types', DocumentTypes::class)->name('document-types');
                         Route::get('/email-templates', EmailTemplates::class)->name('email-templates');
                         Route::get('/employee-departments', EmployeeDepartments::class)->name('employee-departments');
                         Route::get('/failed-jobs', FailedJobs::class)->name('failed-jobs');

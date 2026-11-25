@@ -54,6 +54,10 @@ class MyEmployeeProfile extends Employee
                 ->text(__('Attachments'))
                 ->isLivewireComponent()
                 ->wireModel('employee.id'),
+            TabButton::make('my-employee-profile.documents')
+                ->text(__('Personnel file'))
+                ->isLivewireComponent()
+                ->wireModel('employee.id'),
             TabButton::make('employee.comments')
                 ->text(__('Comments'))
                 ->isLivewireComponent()

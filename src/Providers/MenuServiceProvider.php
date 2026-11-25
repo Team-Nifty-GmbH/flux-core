@@ -190,6 +190,7 @@ class MenuServiceProvider extends ServiceProvider
                 Menu::group(path: 'settings.children.human-resources', label: 'Human Resources');
                 Menu::register(route: 'settings.absence-policies', path: 'settings.children.human-resources.children.absence-policies');
                 Menu::register(route: 'settings.absence-types', path: 'settings.children.human-resources.children.absence-types');
+                Menu::register(route: 'settings.document-types', path: 'settings.children.human-resources.children.document-types');
                 Menu::register(route: 'settings.employee-departments', path: 'settings.children.human-resources.children.employee-departments');
                 Menu::register(route: 'settings.holidays', path: 'settings.children.human-resources.children.holidays');
                 Menu::register(route: 'settings.locations', path: 'settings.children.human-resources.children.locations');

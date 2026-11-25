@@ -2,14 +2,17 @@
 
 namespace FluxErp\Livewire\HumanResources;
 
+use FluxErp\Actions\Document\DownloadDocuments;
 use FluxErp\Actions\EmployeeDay\BulkCloseEmployeeDay;
 use FluxErp\Livewire\DataTables\EmployeeList as BaseEmployeeList;
 use FluxErp\Livewire\Forms\EmployeeForm;
+use FluxErp\Models\Employee;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Employees extends BaseEmployeeList
@@ -39,6 +42,11 @@ class Employees extends BaseEmployeeList
                     $wire.timeframe = [];
                     $tsui.open.modal('close-employee-day-modal');
                 JS),
+            DataTableButton::make()
+                ->text(__('Download documents'))
+                ->icon('arrow-down-tray')
+                ->when(fn () => resolve_static(DownloadDocuments::class, 'canPerformAction', [false]))
+                ->wireClick('downloadDocuments()'),
         ];
     }
 
@@ -68,6 +76,25 @@ class Employees extends BaseEmployeeList
         }
 
         return $result;
+    }
+
+    #[Renderless]
+    public function downloadDocuments(): ?StreamedResponse
+    {
+        try {
+            return DownloadDocuments::make([
+                'model_type' => morph_alias(Employee::class),
+                'model_ids' => $this->getSelectedModelsQuery()->pluck($this->modelKeyName)->all(),
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute()
+                ->toResponse(request());
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return null;
+        }
     }
 
     public function closeEmployeeDay(): bool
