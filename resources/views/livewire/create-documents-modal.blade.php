@@ -38,15 +38,21 @@
     </div>
 @endif
 
+@php
+    $gridColumns = match ((int) $supportsDocumentPreview + (int) resolve_static(\FluxErp\Actions\MailMessage\SendMail::class, 'canPerformAction', [false])) {
+        0 => 'grid-cols-3',
+        1 => 'grid-cols-4',
+        default => 'grid-cols-5',
+    };
+@endphp
+
 <x-modal
     id="create-documents-{{ strtolower($this->getId()) }}"
     :title="__('Create Documents')"
     size="7xl"
 >
     <div class="w-full overflow-hidden overflow-x-auto">
-        <div
-            class="{{ $supportsDocumentPreview ? 'grid-cols-5' : 'grid-cols-4' }} grid w-full gap-4 text-left text-sm"
-        >
+        <div class="{{ $gridColumns }} grid w-full gap-4 text-left text-sm">
             @canAction(\FluxErp\Actions\PrintJob\CreatePrintJob::class)
                 @if ($printers ?? false)
                     <div
@@ -57,11 +63,13 @@
                 @endif
             @endcanAction
 
-            <div
-                class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
-            >
-                {{ __('Email') }}
-            </div>
+            @canAction(\FluxErp\Actions\MailMessage\SendMail::class)
+                <div
+                    class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
+                >
+                    {{ __('Email') }}
+                </div>
+            @endcanAction
             <div
                 class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
             >
@@ -83,9 +91,7 @@
         </div>
         <div class="w-full divide-y divide-slate-300 dark:divide-slate-700">
             <template x-for="printLayout in $wire.printLayouts">
-                <div
-                    class="{{ $supportsDocumentPreview ? 'grid-cols-5' : 'grid-cols-4' }} grid w-full gap-4 py-2"
-                >
+                <div class="{{ $gridColumns }} grid w-full gap-4 py-2">
                     @canAction(\FluxErp\Actions\PrintJob\CreatePrintJob::class)
                         @if ($printers ?? false)
                             <div
@@ -117,28 +123,30 @@
                         @endif
                     @endcanAction
 
-                    <div
-                        class="flex items-center gap-1.5 overflow-hidden text-ellipsis whitespace-nowrap"
-                    >
-                        <x-checkbox
-                            wire:model="selectedPrintLayouts.email"
-                            x-bind:value="printLayout.layout"
-                            x-bind:checked="
-                                $wire.forcedPrintLayouts.email.includes(
-                                    printLayout.layout,
-                                )
-                            "
-                            x-bind:disabled="
-                                $wire.forcedPrintLayouts.email.includes(
-                                    printLayout.layout,
-                                )
-                            "
-                        />
-                        <span
-                            class="truncate"
-                            x-text="printLayout.label"
-                        ></span>
-                    </div>
+                    @canAction(\FluxErp\Actions\MailMessage\SendMail::class)
+                        <div
+                            class="flex items-center gap-1.5 overflow-hidden text-ellipsis whitespace-nowrap"
+                        >
+                            <x-checkbox
+                                wire:model="selectedPrintLayouts.email"
+                                x-bind:value="printLayout.layout"
+                                x-bind:checked="
+                                    $wire.forcedPrintLayouts.email.includes(
+                                        printLayout.layout,
+                                    )
+                                "
+                                x-bind:disabled="
+                                    $wire.forcedPrintLayouts.email.includes(
+                                        printLayout.layout,
+                                    )
+                                "
+                            />
+                            <span
+                                class="truncate"
+                                x-text="printLayout.label"
+                            ></span>
+                        </div>
+                    @endcanAction
                     <div
                         class="flex items-center gap-1.5 overflow-hidden text-ellipsis whitespace-nowrap"
                     >
