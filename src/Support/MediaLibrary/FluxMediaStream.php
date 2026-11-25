@@ -2,6 +2,7 @@
 
 namespace FluxErp\Support\MediaLibrary;
 
+use Closure;
 use FluxErp\Models\Media;
 use FluxErp\Models\MediaFolder;
 use FluxErp\Traits\Makeable;
@@ -13,6 +14,8 @@ use ZipStream\ZipStream;
 class FluxMediaStream extends MediaStream
 {
     use Conditionable, Makeable;
+
+    protected array $files = [];
 
     protected Collection $mediaFolders;
 
@@ -28,6 +31,13 @@ class FluxMediaStream extends MediaStream
     public static function create(string $zipName): static
     {
         return static::make($zipName);
+    }
+
+    public function addFile(string $fileNameInZip, Closure|string $contents): static
+    {
+        $this->files[$fileNameInZip] = $contents;
+
+        return $this;
     }
 
     public function addMediaFolder(...$mediaFolders): static
@@ -68,7 +78,8 @@ class FluxMediaStream extends MediaStream
             $this->addFilesToZipStream($zip, $mediaFolder, $createRootFolders ? $mediaFolderName : null);
         }
 
-        $this->getZipStreamContents()->each(function (array $mediaInZip) use ($zip): void {
+        $zipStreamContents = $this->getZipStreamContents();
+        $zipStreamContents->each(function (array $mediaInZip) use ($zip): void {
             $stream = $mediaInZip['media']->stream();
 
             $zip->addFileFromStream($mediaInZip['fileNameInZip'], $stream);
@@ -77,6 +88,10 @@ class FluxMediaStream extends MediaStream
                 fclose($stream);
             }
         });
+
+        foreach ($this->files as $fileNameInZip => $contents) {
+            $zip->addFile($fileNameInZip, value($contents, $zipStreamContents));
+        }
 
         if ($finish) {
             $zip->finish();
