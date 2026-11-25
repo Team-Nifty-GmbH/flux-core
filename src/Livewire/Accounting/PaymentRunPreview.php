@@ -186,10 +186,6 @@ class PaymentRunPreview extends Component
 
         $positions = $groups
             ->map(fn (array $group) => [
-                'contact_id' => data_get($group, 'contact_id'),
-                'iban' => data_get($group, 'iban'),
-                'bic' => data_get($group, 'bic'),
-                'account_holder' => data_get($group, 'account_holder'),
                 'type' => data_get($group, 'type', '__NO_TYPE__'),
                 'orders' => collect(data_get($group, 'orders', []))
                     ->reject(fn (array $row) => bccomp(bcround(data_get($row, 'amount'), 2), '0', 2) === 0)

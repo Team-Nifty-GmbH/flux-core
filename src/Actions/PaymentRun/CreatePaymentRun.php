@@ -190,29 +190,31 @@ class CreatePaymentRun extends FluxAction
     protected function prepareForValidation(): void
     {
         if (! data_get($this->data, 'positions') && data_get($this->data, 'orders')) {
-            $flatOrders = Arr::pull($this->data, 'orders');
-
-            $models = resolve_static(Order::class, 'query')
-                ->with('contactBankConnection:id,iban,bic,account_holder')
-                ->whereIntegerInRaw('id', array_column($flatOrders, 'order_id'))
-                ->get()
-                ->keyBy(fn (Order $order) => $order->getKey());
-
             $this->data['positions'] = array_map(
-                function (array $order) use ($models): array {
-                    $model = $models->get(data_get($order, 'order_id'));
-
-                    return [
-                        'contact_id' => $model?->contact_id,
-                        'iban' => $model?->iban ?: $model?->contactBankConnection?->iban,
-                        'bic' => $model?->bic ?: $model?->contactBankConnection?->bic,
-                        'account_holder' => $model?->account_holder
-                            ?: $model?->contactBankConnection?->account_holder,
-                        'orders' => [$order],
-                    ];
-                },
-                $flatOrders
+                fn (array $order): array => ['orders' => [$order]],
+                Arr::pull($this->data, 'orders')
             );
+        }
+
+        $positions = array_filter((array) data_get($this->data, 'positions'), 'is_array');
+
+        $models = resolve_static(Order::class, 'query')
+            ->with(['contactBankConnection:id,iban,bic,account_holder', 'addressInvoice'])
+            ->whereIntegerInRaw('id', array_filter(data_get($positions, '*.orders.0.order_id', [])))
+            ->get()
+            ->keyBy(fn (Order $order) => $order->getKey());
+
+        foreach ($positions as $index => $position) {
+            $model = $models->get(data_get($position, 'orders.0.order_id'));
+
+            $this->data['positions'][$index] = $position + [
+                'contact_id' => $model?->contact_id,
+                'iban' => $model?->iban ?: $model?->contactBankConnection?->iban,
+                'bic' => $model?->bic ?: $model?->contactBankConnection?->bic,
+                'account_holder' => $model?->account_holder
+                    ?: $model?->contactBankConnection?->account_holder
+                        ?: $model?->addressInvoice?->name,
+            ];
         }
     }
 }

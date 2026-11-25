@@ -794,3 +794,24 @@ test('a second credit note beyond the payable does not block the run', function 
         ->toEqualCanonicalizing([$invoice->getKey(), $firstCreditNote->getKey()])
         ->and($secondCreditNote->fresh()->payment_state)->toBeInstanceOf(Open::class);
 });
+
+test('the recipient of a position comes from its orders, not from the component state', function (): void {
+    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-1000.00');
+    $invoice->update(['iban' => 'DE89370400440532013000', 'account_holder' => 'Muster GmbH']);
+
+    session(['payment_run_preview_orders' => [$invoice->getKey()]]);
+    session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
+
+    Livewire::test(PaymentRunPreview::class)
+        ->set('groups.0.iban', 'DE02120300000000202051')
+        ->set('groups.0.account_holder', 'Someone Else')
+        ->set('groups.0.contact_id', $this->contact->getKey())
+        ->call('createPaymentRun')
+        ->assertRedirect();
+
+    $position = PaymentRunPosition::query()->sole();
+
+    expect($position->iban)->toBe('DE89370400440532013000')
+        ->and($position->account_holder)->toBe('Muster GmbH')
+        ->and($position->contact_id)->toBe($invoice->contact_id);
+});
