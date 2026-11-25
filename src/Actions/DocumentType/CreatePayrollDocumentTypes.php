@@ -5,6 +5,7 @@ namespace FluxErp\Actions\DocumentType;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\DocumentType;
 use FluxErp\Models\Employee;
+use FluxErp\Models\Language;
 use Illuminate\Support\Collection;
 
 class CreatePayrollDocumentTypes extends FluxAction
@@ -17,13 +18,19 @@ class CreatePayrollDocumentTypes extends FluxAction
     public function performAction(): Collection
     {
         $existing = resolve_static(DocumentType::class, 'query')->pluck('name');
+        $locales = resolve_static(Language::class, 'query')->pluck('language_code');
 
         return collect($this->documentTypes())
+            ->reject(fn (array $documentType): bool => $locales
+                ->map(fn (string $locale): string => __(data_get($documentType, 'name'), locale: $locale))
+                ->push(data_get($documentType, 'name'))
+                ->intersect($existing)
+                ->isNotEmpty()
+            )
             ->map(fn (array $documentType): array => array_merge(
                 $documentType,
                 ['name' => __(data_get($documentType, 'name'))]
             ))
-            ->reject(fn (array $documentType): bool => $existing->contains(data_get($documentType, 'name')))
             ->map(fn (array $documentType): DocumentType => CreateDocumentType::make(array_merge(
                 [
                     'model_types' => [morph_alias(Employee::class)],

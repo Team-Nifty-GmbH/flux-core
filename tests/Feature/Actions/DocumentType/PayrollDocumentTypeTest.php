@@ -3,7 +3,11 @@
 use FluxErp\Actions\DocumentType\CreateDocumentType;
 use FluxErp\Actions\DocumentType\CreatePayrollDocumentTypes;
 use FluxErp\Actions\DocumentType\UpdateDocumentType;
+use FluxErp\Enums\DocumentReviewStateEnum;
 use FluxErp\Models\DocumentType;
+use FluxErp\Models\Employee;
+use FluxErp\Models\Language;
+use FluxErp\Models\Media;
 
 test('create payroll document types adds the payroll records for employees', function (): void {
     CreatePayrollDocumentTypes::make()->validate()->execute();
@@ -36,6 +40,19 @@ test('create payroll document types keeps existing types untouched', function ()
     expect(DocumentType::query()->count())->toBe(11)
         ->and(DocumentType::query()->where('name', 'Employment contract')->sole()->retention_years)->toBe(10)
         ->and($existing->fresh()->retention_years)->toBe(10);
+});
+
+test('create payroll document types does not duplicate the types when run in another locale', function (): void {
+    Language::factory()->create(['language_code' => 'de']);
+
+    app()->setLocale('de');
+    CreatePayrollDocumentTypes::make()->validate()->execute();
+
+    app()->setLocale('en');
+    CreatePayrollDocumentTypes::make()->validate()->execute();
+
+    expect(DocumentType::query()->count())->toBe(11)
+        ->and(DocumentType::query()->where('name', 'Arbeitsvertrag')->exists())->toBeTrue();
 });
 
 test('create document type refuses a payroll record without retention', function (): void {
@@ -78,4 +95,33 @@ test('update document type refuses to mark a type without retention as payroll r
     );
 
     expect($documentType->fresh()->is_payroll_record)->toBeFalse();
+});
+
+test('update document type locks the approved documents once the type gets a retention period', function (): void {
+    $documentType = DocumentType::factory()->create(['model_types' => ['employee'], 'retention_years' => null]);
+    $employee = app(Employee::class)->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'firstname' => 'Test',
+        'lastname' => 'Employee',
+        'is_active' => true,
+    ]);
+    $document = Media::factory()->create([
+        'model_type' => morph_alias(Employee::class),
+        'model_id' => $employee->getKey(),
+        'collection_name' => 'documents',
+        'document_type_id' => $documentType->getKey(),
+        'document_date' => '2025-03-10',
+        'review_state' => DocumentReviewStateEnum::Approved,
+    ]);
+
+    UpdateDocumentType::make([
+        'id' => $documentType->getKey(),
+        'is_payroll_record' => true,
+        'retention_years' => 6,
+    ])->validate()->execute();
+
+    $document = Media::query()->documents()->whereKey($document->getKey())->sole();
+
+    expect($document->retain_until->toDateString())->toBe('2031-12-31')
+        ->and($document->isLocked())->toBeTrue();
 });
