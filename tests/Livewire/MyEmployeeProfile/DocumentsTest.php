@@ -103,3 +103,18 @@ test('offers only document types the employee may upload', function (): void {
     Livewire::test(Documents::class)
         ->assertViewHas('documentTypes', [['label' => 'Certificate', 'value' => $this->documentType->getKey()]]);
 });
+
+test('shows the review note of a rejected document to the employee', function (): void {
+    $document = myProfileDocument($this->employee, $this->documentType);
+    $document->forceFill([
+        'review_state' => DocumentReviewStateEnum::Rejected,
+        'review_note' => 'The scan is unreadable.',
+    ])->save();
+
+    $data = Livewire::test(Documents::class)
+        ->call('loadData')
+        ->instance()
+        ->getDataForTesting();
+
+    expect(data_get($data, 'data.0.review_note'))->toBe('The scan is unreadable.');
+});

@@ -34,6 +34,7 @@ class DocumentList extends BaseDataTable
         'document_type.name',
         'document_date',
         'review_state',
+        'review_note',
         'retain_until',
         'created_at',
     ];
