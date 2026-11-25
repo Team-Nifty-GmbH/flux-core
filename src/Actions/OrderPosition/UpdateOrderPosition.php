@@ -15,7 +15,6 @@ use FluxErp\Models\Product;
 use FluxErp\Models\Tag;
 use FluxErp\Rulesets\OrderPosition\UpdateOrderPositionRuleset;
 use FluxErp\Support\ProductConfiguration\ConfigurationPositions;
-use FluxErp\Support\ProductConfiguration\ConfigurationValidator;
 use FluxErp\View\Printing\Order\FinalInvoice;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -113,7 +112,10 @@ class UpdateOrderPosition extends FluxAction
         unset($orderPosition->discounts, $orderPosition->unit_price);
         $orderPosition->save();
 
-        if ($orderPosition->wasChanged('amount') && bccomp($orderPosition->amount ?? 0, 0) === 1) {
+        if (is_null($configuration)
+            && $orderPosition->wasChanged('amount')
+            && bccomp($orderPosition->amount ?? 0, 0) === 1
+        ) {
             $children = resolve_static(OrderPosition::class, 'query')
                 ->where('parent_id', $orderPosition->getKey())
                 ->whereNotNull('amount')
@@ -142,11 +144,11 @@ class UpdateOrderPosition extends FluxAction
         if (! is_null($configuration)) {
             $orderPosition->children()->get()->each(fn (OrderPosition $child) => $child->delete());
 
-            resolve_static(ConfigurationPositions::class, 'forOrderPosition', ['parent' => $orderPosition])
-                ->makeChildren(
-                    $orderPosition,
-                    ConfigurationValidator::make($orderPosition->product)->selection($configuration)
-                )
+            resolve_static(
+                ConfigurationPositions::class,
+                'childrenFor',
+                ['parent' => $orderPosition, 'configuration' => $configuration]
+            )
                 ->each(fn (OrderPosition $child) => $child->save());
         }
 
@@ -206,7 +208,7 @@ class UpdateOrderPosition extends FluxAction
                 ->whereKey($this->data['id'])
                 ->with([
                     'product:id,is_configurable',
-                    'order:id,contact_id,order_type_id,is_locked,price_list_id',
+                    'order:id,contact_id,order_type_id,is_locked,price_list_id,vat_rate_id',
                     'order.orderType:id,order_type_enum',
                     'origin:id,order_id,amount',
                     'origin.order:id,order_type_id',
@@ -325,14 +327,30 @@ class UpdateOrderPosition extends FluxAction
             }
 
             $isConfigured = (bool) $orderPosition->product?->is_configurable;
+            $productId = (int) data_get($this->data, 'product_id', $orderPosition->product_id);
+            $isFreeText = (bool) data_get($this->data, 'is_free_text', $orderPosition->is_free_text);
 
-            if ($isConfigured
-                && array_key_exists('product_id', $this->data)
-                && (int) $this->data['product_id'] !== (int) $orderPosition->product_id
-            ) {
+            if ($isConfigured && $productId !== (int) $orderPosition->product_id) {
                 $errors += [
                     'product_id' => [__('The product of a configured position cannot be changed.')],
                 ];
+            }
+
+            if ($isConfigured && $isFreeText !== (bool) $orderPosition->is_free_text) {
+                $errors += [
+                    'is_free_text' => [__('The free text flag of a configured position cannot be changed.')],
+                ];
+            }
+
+            if (! $isFreeText
+                && $productId !== (int) $orderPosition->product_id
+                && resolve_static(Product::class, 'query')
+                    ->whereKey($productId)
+                    ->where('is_configurable', true)
+                    ->exists()
+            ) {
+                $isConfigured = true;
+                $this->data['configuration'] ??= [];
             }
 
             if (! is_null($this->getData('configuration'))) {
@@ -349,12 +367,15 @@ class UpdateOrderPosition extends FluxAction
                     ];
                 } elseif (! $errors) {
                     $this->data['configuration'] = CalculateProductConfigurationPrice::make([
-                        'product_id' => $orderPosition->product_id,
+                        'product_id' => $productId,
                         'configuration' => $this->getData('configuration'),
                         'price_list_id' => $this->getData('price_list_id')
                             ?? $orderPosition->price_list_id
                             ?? $orderPosition->order->price_list_id,
                         'contact_id' => $orderPosition->order->contact_id,
+                        'vat_rate_id' => $orderPosition->order->vat_rate_id,
+                        'is_net' => data_get($this->data, 'is_net', $orderPosition->is_net),
+                        'unit_price' => $this->getData('unit_price'),
                     ])
                         ->validate()
                         ->execute()['configuration'];

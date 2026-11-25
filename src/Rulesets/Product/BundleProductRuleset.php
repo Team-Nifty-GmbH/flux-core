@@ -15,7 +15,8 @@ class BundleProductRuleset extends FluxRuleset
             'bundle_products.*.id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Product::class]),
+                app(ModelExists::class, ['model' => Product::class])
+                    ->where('is_configurable', false),
             ],
             'bundle_products.*.count' => 'required|numeric|min:0',
         ];

@@ -12,6 +12,7 @@ use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Helpers\Helper;
 use FluxErp\Models\Media;
 use FluxErp\Models\Product;
+use FluxErp\Models\ProductConfigurationGroupItem;
 use FluxErp\Models\Tag;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\Product\UpdateProductRuleset;
@@ -256,6 +257,19 @@ class UpdateProduct extends DispatchableFluxAction implements SupportsBulkExecut
         ) {
             throw ValidationException::withMessages([
                 'parent_id' => [__('A configurable product cannot be a bundle or a variant.')],
+            ])
+                ->errorBag('updateProduct');
+        }
+
+        $flag = Arr::first(['is_configurable', 'is_bundle', 'is_variant_parent'], fn (string $flag) => $this->getData($flag));
+
+        if ($flag
+            && resolve_static(ProductConfigurationGroupItem::class, 'query')
+                ->where('product_id', $this->getData('id'))
+                ->exists()
+        ) {
+            throw ValidationException::withMessages([
+                $flag => [__('A product used as a configuration option must stay a plain product.')],
             ])
                 ->errorBag('updateProduct');
         }

@@ -1,8 +1,10 @@
 <?php
 
 use FluxErp\Actions\OrderPosition\FillOrderPositions;
+use FluxErp\Actions\StockPosting\CreateStockPostingsFromOrder;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\StockPosting;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 use Illuminate\Validation\ValidationException;
@@ -100,4 +102,55 @@ test('fill rejects a negative configuration total and configuration on free text
             'configuration' => [['product_configuration_group_item_id' => $this->ssd->getKey(), 'amount' => 1]],
         ]))->toContain('A free text position cannot carry a configuration.')
         ->and(OrderPosition::query()->where('order_id', $this->order->getKey())->count())->toBe(0);
+});
+
+test('fill without a configuration keeps the children and their stock postings', function (): void {
+    StockPosting::factory()->create([
+        'warehouse_id' => Warehouse::default()->getKey(),
+        'product_id' => $this->ssd->product_id,
+        'posting' => 10,
+        'remaining_stock' => 10,
+        'reserved_stock' => 0,
+        'purchase_price' => 5,
+    ]);
+    ($this->fill)(['configuration' => [['product_configuration_group_item_id' => $this->ssd->getKey(), 'amount' => 1]]]);
+    CreateStockPostingsFromOrder::make(['id' => $this->order->getKey()])->validate()->execute();
+    $parent = OrderPosition::query()->whereNull('parent_id')->where('order_id', $this->order->getKey())->sole();
+
+    ($this->fill)(['id' => $parent->getKey(), 'amount' => 3]);
+    CreateStockPostingsFromOrder::make(['id' => $this->order->getKey()])->validate()->execute();
+
+    $child = OrderPosition::query()->where('parent_id', $parent->getKey())->sole();
+
+    expect(bccomp($child->amount, '3', 2))->toBe(0)
+        ->and(bccomp($child->total_net_price, '30', 2))->toBe(0)
+        ->and((float) StockPosting::query()
+            ->where('product_id', $this->ssd->product_id)
+            ->where('posting', '<', 0)
+            ->sum('posting'))->toEqual(-3.0);
+});
+
+test('fill rejects a new configuration once a child posted stock', function (): void {
+    ($this->fill)(['configuration' => [['product_configuration_group_item_id' => $this->ssd->getKey(), 'amount' => 1]]]);
+    $parent = OrderPosition::query()->whereNull('parent_id')->where('order_id', $this->order->getKey())->sole();
+    StockPosting::factory()->create([
+        'warehouse_id' => Warehouse::default()->getKey(),
+        'product_id' => $this->ssd->product_id,
+        'order_position_id' => OrderPosition::query()->where('parent_id', $parent->getKey())->value('id'),
+        'posting' => -2,
+        'remaining_stock' => 0,
+        'reserved_stock' => 0,
+    ]);
+
+    $errors = rescue(fn () => ($this->fill)([
+        'id' => $parent->getKey(),
+        'configuration' => [['product_configuration_group_item_id' => $this->hdd->getKey(), 'amount' => 1]],
+    ]), fn (ValidationException $e) => $e->errors(), false);
+
+    expect(json_encode($errors))->toContain('The configuration cannot be changed after stock was posted.');
+});
+
+test('fill reports malformed configuration entries as validation errors', function (): void {
+    expect(fn () => ($this->fill)(['configuration' => [['amount' => 1]]]))
+        ->toThrow(ValidationException::class);
 });

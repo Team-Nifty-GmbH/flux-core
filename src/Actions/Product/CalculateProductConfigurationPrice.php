@@ -36,16 +36,18 @@ class CalculateProductConfigurationPrice extends FluxAction
             $priceList,
             resolve_static(Contact::class, 'query')
                 ->whereKey($this->getData('contact_id'))
-                ->first()
+                ->first(),
+            $this->getData('is_net')
         );
 
-        $unitPrice = $pricing->productUnitPrice($product);
+        $vatRateId = $this->getData('vat_rate_id');
+        $unitPrice = $this->getData('unit_price') ?? $pricing->productUnitPrice($product, $vatRateId);
         $positions = ConfigurationValidator::make($product)
             ->selection($this->getData('configuration'))
             ->map(fn (array $entry) => [
                 'product_configuration_group_item_id' => $entry['item']->getKey(),
                 'amount' => $entry['amount'],
-                'unit_price' => $pricing->itemUnitPrice($entry['item']),
+                'unit_price' => $pricing->itemUnitPrice($entry['item'], $vatRateId),
             ])
             ->all();
 
@@ -63,7 +65,7 @@ class CalculateProductConfigurationPrice extends FluxAction
         }
 
         return [
-            'is_net' => (bool) $priceList->is_net,
+            'is_net' => $this->getData('is_net') ?? (bool) $priceList->is_net,
             'unit_price' => $unitPrice,
             'positions' => $positions,
             'total_price' => bcmul($piecePrice, $this->getData('amount') ?? 1),

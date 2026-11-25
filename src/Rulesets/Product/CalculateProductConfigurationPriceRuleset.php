@@ -5,6 +5,7 @@ namespace FluxErp\Rulesets\Product;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\VatRate;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
@@ -43,6 +44,16 @@ class CalculateProductConfigurationPriceRuleset extends FluxRuleset
                 'nullable',
                 app(Numeric::class),
             ],
+            'unit_price' => [
+                'nullable',
+                app(Numeric::class),
+            ],
+            'vat_rate_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => VatRate::class]),
+            ],
+            'is_net' => 'nullable|boolean',
         ];
     }
 }

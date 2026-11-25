@@ -17,7 +17,6 @@ use FluxErp\Models\Warehouse;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\OrderPosition\CreateOrderPositionRuleset;
 use FluxErp\Support\ProductConfiguration\ConfigurationPositions;
-use FluxErp\Support\ProductConfiguration\ConfigurationValidator;
 use FluxErp\Traits\CalculatesPositionAvailability;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -165,8 +164,11 @@ class CreateOrderPosition extends FluxAction
         }
 
         if (! is_null($configuration) && $product?->is_configurable) {
-            resolve_static(ConfigurationPositions::class, 'forOrderPosition', ['parent' => $orderPosition])
-                ->makeChildren($orderPosition, ConfigurationValidator::make($product)->selection($configuration))
+            resolve_static(
+                ConfigurationPositions::class,
+                'childrenFor',
+                ['parent' => $orderPosition, 'configuration' => $configuration]
+            )
                 ->each(fn (OrderPosition $child) => $child->save());
         }
 
@@ -323,6 +325,9 @@ class CreateOrderPosition extends FluxAction
                     'configuration' => $this->getData('configuration'),
                     'price_list_id' => $this->getData('price_list_id') ?? $order->price_list_id,
                     'contact_id' => $order->contact_id,
+                    'vat_rate_id' => $order->vat_rate_id,
+                    'is_net' => $this->getData('is_net'),
+                    'unit_price' => $this->getData('unit_price'),
                 ])
                     ->validate()
                     ->execute()['configuration'];

@@ -30,10 +30,19 @@ class CreateStockPostingsFromOrder extends FluxAction
             ->where('id', $this->data['id'])
             ->with([
                 'orderPositions' => fn ($query) => $query->where('is_free_text', false)
-                    ->select(['id', 'order_id', 'product_id', 'warehouse_id', 'amount', 'unit_net_price']),
+                    ->select([
+                        'id',
+                        'order_id',
+                        'parent_id',
+                        'product_id',
+                        'product_configuration_group_item_id',
+                        'warehouse_id',
+                        'amount',
+                        'unit_net_price',
+                    ]),
                 'orderPositions.reservedStock',
                 'orderPositions.stockPostings',
-                'orderPositions.product:id,name,is_nos,is_configurable',
+                'orderPositions.product:id,name,is_nos',
                 'orderType:id,order_type_enum',
             ])
             ->first(['id', 'order_type_id', 'order_number']);
@@ -47,7 +56,11 @@ class CreateStockPostingsFromOrder extends FluxAction
         $description = __(Str::headline($order->orderType->order_type_enum->value)) . ' ' . $order->order_number;
 
         foreach ($order->orderPositions as $orderPosition) {
-            if ($orderPosition->product?->is_configurable) {
+            if ($order->orderPositions
+                ->where('parent_id', $orderPosition->getKey())
+                ->whereNotNull('product_configuration_group_item_id')
+                ->isNotEmpty()
+            ) {
                 continue;
             }
 

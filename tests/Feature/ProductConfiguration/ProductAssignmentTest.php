@@ -36,6 +36,40 @@ test('a configurable product cannot be a variant on create', function (): void {
     ], 'is_configurable');
 });
 
+test('a configurable product cannot be part of a bundle', function (): void {
+    $server = configurationProduct(['is_configurable' => true]);
+
+    CreateProduct::assertValidationErrors([
+        'name' => 'Bundle',
+        'is_bundle' => true,
+        'bundle_type_enum' => 'standard',
+        'bundle_products' => [['id' => $server->getKey(), 'count' => 1]],
+    ], 'bundle_products.0.id');
+
+    CreateProductBundleProduct::assertValidationErrors([
+        'product_id' => configurationProduct()->getKey(),
+        'bundle_product_id' => $server->getKey(),
+        'count' => 1,
+    ], 'bundle_product_id');
+});
+
+test('a product used as an option cannot become configurable, a bundle or a variant parent', function (array $attributes): void {
+    $option = configurationItem(configurationGroup())->product;
+
+    UpdateProduct::assertValidationErrors(
+        array_merge(['id' => $option->getKey()], $attributes),
+        array_key_first($attributes)
+    );
+})->with([
+    'configurable' => [['is_configurable' => true]],
+    'bundle' => [fn () => [
+        'is_bundle' => true,
+        'bundle_type_enum' => 'standard',
+        'bundle_products' => [['id' => configurationProduct()->getKey(), 'count' => 1]],
+    ]],
+    'variant parent' => [['is_variant_parent' => true]],
+]);
+
 test('a configurable product cannot get variants', function (): void {
     $parent = configurationProduct(['is_configurable' => true]);
 

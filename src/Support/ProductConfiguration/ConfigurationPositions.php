@@ -20,6 +20,8 @@ class ConfigurationPositions
 
     protected bool $isNet;
 
+    protected array $vatRatePercentages = [];
+
     public function __construct(
         protected PriceList $priceList,
         protected ?Contact $contact = null,
@@ -28,9 +30,15 @@ class ConfigurationPositions
         $this->isNet = $isNet ?? (bool) $priceList->is_net;
     }
 
+    public static function childrenFor(OrderPosition $parent, array $configuration): Collection
+    {
+        return static::forOrderPosition($parent)
+            ->makeChildren($parent, ConfigurationValidator::make($parent->product)->selection($configuration));
+    }
+
     public static function forOrderPosition(OrderPosition $parent): static
     {
-        $parent->loadMissing('order:id,contact_id,price_list_id');
+        $parent->loadMissing('order:id,contact_id,price_list_id,language_id,vat_rate_id');
 
         return static::make(
             resolve_static(PriceList::class, 'query')
@@ -59,8 +67,6 @@ class ConfigurationPositions
 
     public function makeChildren(OrderPosition $parent, Collection $selection): Collection
     {
-        $parent->loadMissing('order:id,language_id,vat_rate_id');
-
         return $selection
             ->map(function (array $entry) use ($parent): OrderPosition {
                 $item = $entry['item'];
@@ -122,7 +128,7 @@ class ConfigurationPositions
 
     protected function vatRatePercentage(?int $vatRateId): ?string
     {
-        return resolve_static(VatRate::class, 'query')
+        return $this->vatRatePercentages[(int) $vatRateId] ??= resolve_static(VatRate::class, 'query')
             ->whereKey($vatRateId)
             ->value('rate_percentage');
     }

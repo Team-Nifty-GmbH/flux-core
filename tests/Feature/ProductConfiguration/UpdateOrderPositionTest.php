@@ -8,6 +8,8 @@ use FluxErp\Models\OrderPosition;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\VatRate;
+use FluxErp\Support\ProductConfiguration\ConfigurationPositions;
+use Illuminate\Validation\ValidationException;
 
 require_once __DIR__ . '/Helpers.php';
 
@@ -150,4 +152,49 @@ test('editing a configured position after one of its options was deleted', funct
 
     expect(OrderPosition::query()->where('parent_id', $this->parent->getKey())->pluck('product_id')->all())
         ->toBe([$this->hdd->product_id]);
+});
+
+test('switching a normal position to a configurable product validates the new configuration', function (): void {
+    $ram = configurationGroup(['name' => 'RAM']);
+    $ram16 = configurationItem($ram, configurationProduct(['name' => '16 GB']), ['surcharge' => 20]);
+    attachConfigurationGroup($this->server, $ram, true, 1);
+    $normal = CreateOrderPosition::make([
+        'order_id' => $this->order->getKey(),
+        'product_id' => $this->ssdProduct->getKey(),
+        'amount' => 1,
+    ])->validate()->execute();
+
+    expect(fn () => UpdateOrderPosition::make([
+        'id' => $normal->getKey(),
+        'product_id' => $this->server->getKey(),
+    ])->validate())->toThrow(ValidationException::class, 'RAM requires a selection.');
+
+    UpdateOrderPosition::make([
+        'id' => $normal->getKey(),
+        'product_id' => $this->server->getKey(),
+        'configuration' => [['product_configuration_group_item_id' => $ram16->getKey(), 'amount' => 1]],
+    ])->validate()->execute();
+
+    expect(bccomp(OrderPosition::query()->where('parent_id', $normal->getKey())->sum('total_net_price'), '20', 2))
+        ->toBe(0);
+});
+
+test('configuration children use the vat rate of the order', function (): void {
+    $reduced = VatRate::factory()->create(['rate_percentage' => 0.07]);
+    $this->order->update(['vat_rate_id' => $reduced->getKey()]);
+
+    $child = ConfigurationPositions::childrenFor(
+        OrderPosition::query()->whereKey($this->parent->getKey())->first(),
+        [['product_configuration_group_item_id' => $this->hdd->getKey(), 'amount' => 1]]
+    )->sole();
+
+    expect(bccomp($child->vat_rate_percentage, '0.07', 2))->toBe(0)
+        ->and(bccomp($child->vat_price, '0.35', 2))->toBe(0);
+});
+
+test('a configured position cannot be toggled to free text', function (): void {
+    UpdateOrderPosition::assertValidationErrors([
+        'id' => $this->parent->getKey(),
+        'is_free_text' => true,
+    ], 'is_free_text');
 });
