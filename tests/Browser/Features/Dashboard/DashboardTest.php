@@ -117,9 +117,9 @@ test('resetting a group to the default asks before deleting the own widgets', fu
     $page->script(<<<'JS'
         () => document.querySelector('button[x-on\\:click="editGridMode(true)"]').click()
     JS);
-    $page->script("() => {$dashboard}.selectWidget(Object.keys({$dashboard}.\$wire.availableWidgets)[0])");
+    $page->script("() => { {$dashboard}.selectWidget(Object.keys({$dashboard}.\$wire.availableWidgets)[0]); }");
     waitForCondition($page, "() => {$count} === 1 && ! {$dashboard}.isLoading", 12000);
-    $page->script("() => {$dashboard}.save()");
+    $page->script("() => { {$dashboard}.save(); }");
     waitForCondition($page, "() => ! {$dashboard}.editGrid && ! {$dashboard}.isLoading", 12000);
 
     expect($ownWidgets())->toBe(1);
@@ -166,9 +166,9 @@ test('applying a preset asks before replacing the own widgets', function (): voi
     $page->script(<<<'JS'
         () => document.querySelector('button[x-on\\:click="editGridMode(true)"]').click()
     JS);
-    $page->script("() => {$dashboard}.selectWidget(Object.keys({$dashboard}.\$wire.availableWidgets)[0])");
+    $page->script("() => { {$dashboard}.selectWidget(Object.keys({$dashboard}.\$wire.availableWidgets)[0]); }");
     waitForCondition($page, "() => {$count} === 1 && ! {$dashboard}.isLoading", 12000);
-    $page->script("() => {$dashboard}.save()");
+    $page->script("() => { {$dashboard}.save(); }");
     waitForCondition($page, "() => ! {$dashboard}.editGrid && ! {$dashboard}.isLoading", 12000);
 
     $before = $ownWidgetIds();
