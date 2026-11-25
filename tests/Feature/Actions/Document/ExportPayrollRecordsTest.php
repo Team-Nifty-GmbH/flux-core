@@ -190,3 +190,13 @@ test('export keeps dot segments out of the zip paths', function (): void {
 
     expect(zipFileNames($zip))->toBe(['2025/-/-/contract.pdf', 'index.csv']);
 });
+
+test('export writes spreadsheet formulas in the index as text', function (): void {
+    $this->employee->update(['employee_number' => '=1+1', 'firstname' => '@SUM(A1)', 'lastname' => '']);
+    payrollRecord($this->employee, $this->contract);
+
+    $row = exportIndexRows(exportPayrollRecordsZip(['from' => '2025-01-01', 'to' => '2025-12-31']))[1];
+
+    expect($row[1])->toBe("'=1+1")
+        ->and($row[2])->toStartWith("'");
+});

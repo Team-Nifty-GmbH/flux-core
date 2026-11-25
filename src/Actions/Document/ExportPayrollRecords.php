@@ -96,7 +96,7 @@ class ExportPayrollRecords extends FluxAction
 
             fputcsv(
                 $handle,
-                [
+                array_map(fn (mixed $value): string => preg_replace('/^[=+\-@\t\r]/', "'$0", (string) $value), [
                     $media->getKey(),
                     $this->personnelNumber($media->model),
                     $media->model->getLabel(),
@@ -106,7 +106,7 @@ class ExportPayrollRecords extends FluxAction
                     $media->checksum,
                     $media->hasIntactFile() ? __('yes') : __('no'),
                     $media->nextVersion?->getKey(),
-                ],
+                ]),
                 ';'
             );
         });
