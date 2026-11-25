@@ -34,6 +34,7 @@ class ExportPayrollRecords extends FluxAction
         $documents = resolve_static(Media::class, 'query')
             ->withoutGlobalScope(ExcludeDocumentsScope::class)
             ->where('model_type', morph_alias(Employee::class))
+            ->whereIn('model_id', resolve_static(Employee::class, 'query')->withTrashed()->select('id'))
             ->whereHas('documentType', fn (Builder $query) => $query->where('is_payroll_record', true))
             ->where('document_date', '>=', $this->getData('from'))
             ->where('document_date', '<=', $this->getData('to'))
@@ -77,6 +78,7 @@ class ExportPayrollRecords extends FluxAction
         fputcsv(
             $handle,
             [
+                'ID',
                 __('Personnel number'),
                 __('Employee'),
                 __('Document Type'),
@@ -95,6 +97,7 @@ class ExportPayrollRecords extends FluxAction
             fputcsv(
                 $handle,
                 [
+                    $media->getKey(),
                     $this->personnelNumber($media->model),
                     $media->model->getLabel(),
                     $media->documentType->name,

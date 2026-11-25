@@ -7,7 +7,10 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\DocumentType;
 use FluxErp\Models\Employee;
 use FluxErp\Models\Media;
+use FluxErp\Models\Tenant;
+use FluxErp\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 
@@ -85,6 +88,7 @@ test('export files payroll records by year, document type and personnel number',
 
     expect(zipFileNames($zip))->toBe(['2025/Employment contract/P-17/contract.pdf', 'index.csv'])
         ->and(exportIndexRows($zip)[1])->toBe([
+            (string) $media->getKey(),
             'P-17',
             $this->employee->getLabel(),
             'Employment contract',
@@ -124,7 +128,7 @@ test('export includes former employees and previous versions', function (): void
 
     $rows = exportIndexRows(exportPayrollRecordsZip(['from' => '2025-01-01', 'to' => '2025-12-31']));
 
-    expect(array_column(array_slice($rows, 1), 7, 4))->toBe([
+    expect(array_column(array_slice($rows, 1), 8, 5))->toBe([
         '2025/Employment contract/P-17/contract.pdf' => (string) $version->getKey(),
         '2025/Employment contract/P-17/contract-corrected.pdf' => '',
     ]);
@@ -136,9 +140,43 @@ test('export marks a changed file as not intact', function (): void {
 
     $rows = exportIndexRows(exportPayrollRecordsZip(['from' => '2025-01-01', 'to' => '2025-12-31']));
 
-    expect($rows[1][6])->toBe('no');
+    expect($rows[1][7])->toBe('no');
 });
 
 test('export refuses a period that ends before it starts', function (): void {
     ExportPayrollRecords::assertValidationErrors(['from' => '2025-12-31', 'to' => '2025-01-01'], ['to']);
+});
+
+test('export does not show a rejected version as replacement', function (): void {
+    $previous = payrollRecord($this->employee, $this->contract);
+    payrollRecord($this->employee, $this->contract, ['previous_version_id' => $previous->getKey()])
+        ->forceFill(['review_state' => DocumentReviewStateEnum::Rejected])
+        ->save();
+
+    $rows = exportIndexRows(exportPayrollRecordsZip(['from' => '2025-01-01', 'to' => '2025-12-31']));
+
+    expect(array_column(array_slice($rows, 1), 8, 0))->toBe([(string) $previous->getKey() => '']);
+});
+
+test('export leaves out payroll records of employees in tenants the user cannot see', function (): void {
+    $otherEmployee = app(Employee::class)->create([
+        'tenant_id' => Tenant::factory()->create()->getKey(),
+        'firstname' => 'Other',
+        'lastname' => 'Tenant',
+        'is_active' => true,
+    ]);
+    payrollRecord($this->employee, $this->contract);
+    payrollRecord($this->employee, $this->contract, [
+        'media' => UploadedFile::fake()->createWithContent('foreign.pdf', "%PDF-1.4\n%%EOF\n"),
+    ])
+        ->forceFill(['model_id' => $otherEmployee->getKey()])
+        ->save();
+    $user = User::factory()->create(['is_active' => true]);
+    $user->tenants()->attach($this->dbTenant->getKey());
+    $this->actingAs($user, 'web');
+    Context::flush();
+
+    $zip = exportPayrollRecordsZip(['from' => '2025-01-01', 'to' => '2025-12-31']);
+
+    expect(zipFileNames($zip))->toBe(['2025/Employment contract/P-17/contract.pdf', 'index.csv']);
 });

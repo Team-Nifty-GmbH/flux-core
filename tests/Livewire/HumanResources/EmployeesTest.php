@@ -1,9 +1,14 @@
 <?php
 
+use FluxErp\Actions\Document\UploadDocument;
 use FluxErp\Enums\OvertimeCompensationEnum;
 use FluxErp\Livewire\HumanResources\Employees;
+use FluxErp\Models\DocumentType;
 use FluxErp\Models\Employee;
 use FluxErp\Models\WorkTimeModel;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
@@ -94,11 +99,46 @@ test('downloads the documents of the selected employees as zip', function (): vo
 });
 
 test('export payroll records streams a zip for the period', function (): void {
-    Livewire::test(Employees::class)
+    config(['filesystems.disks.private' => ['driver' => 'local', 'root' => storage_path('app/private')]]);
+    Storage::fake('private');
+    Queue::fake();
+    $employee = app(Employee::class)->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'employee_number' => 'P-17',
+        'firstname' => 'Anna',
+        'lastname' => 'Muster',
+        'is_active' => true,
+    ]);
+    $contract = DocumentType::factory()->create([
+        'name' => 'Contract',
+        'model_types' => ['employee'],
+        'is_payroll_record' => true,
+    ]);
+    foreach (['inside.pdf' => '2025-03-10', 'outside.pdf' => '2024-12-31'] as $fileName => $documentDate) {
+        UploadDocument::make([
+            'model_type' => morph_alias(Employee::class),
+            'model_id' => $employee->getKey(),
+            'document_type_id' => $contract->getKey(),
+            'document_date' => $documentDate,
+            'media' => UploadedFile::fake()->createWithContent($fileName, "%PDF-1.4\n%%EOF\n"),
+        ])
+            ->validate()
+            ->execute();
+    }
+
+    $component = Livewire::test(Employees::class)
         ->set('payrollRecordsPeriod', ['2025-01-01', '2025-12-31'])
         ->call('exportPayrollRecords')
         ->assertHasNoErrors()
         ->assertFileDownloaded('payroll-records.zip');
+
+    $path = tempnam(sys_get_temp_dir(), 'payroll');
+    file_put_contents($path, base64_decode(data_get($component->effects, 'download.content')));
+    $zip = new ZipArchive();
+    $zip->open($path);
+
+    expect($zip->locateName('2025/Contract/P-17/inside.pdf'))->not->toBeFalse()
+        ->and($zip->numFiles)->toBe(2);
 });
 
 test('export payroll records refuses a period without an end', function (): void {
