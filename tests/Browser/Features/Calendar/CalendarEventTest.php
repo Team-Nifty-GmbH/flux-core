@@ -539,6 +539,11 @@ test('unchecking a calendar group stores the active calendars in a single call',
 
     $page = visitCalendar();
 
+    waitForCondition(
+        $page,
+        "() => Alpine.\$data(document.querySelector('[calendar-root]')).calendar.getEventSourceById('{$other->getKey()}')"
+    );
+
     $page->script(<<<JS
         () => {
             if (window.groupProbe) {
