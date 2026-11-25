@@ -129,4 +129,26 @@
             />
         </x-slot:footer>
     </x-modal>
+    <x-modal
+        id="export-payroll-records-modal"
+        :title="__('Export payroll records')"
+    >
+        <x-date
+            :label="__('Document date')"
+            range
+            wire:model="payrollRecordsPeriod"
+        />
+        <x-slot:footer>
+            <x-button
+                :text="__('Cancel')"
+                color="secondary"
+                x-on:click="$tsui.close.modal('export-payroll-records-modal')"
+            />
+            <x-button
+                :text="__('Export')"
+                color="primary"
+                wire:click="exportPayrollRecords()"
+            />
+        </x-slot:footer>
+    </x-modal>
 </div>

@@ -92,3 +92,18 @@ test('downloads the documents of the selected employees as zip', function (): vo
         ->call('downloadDocuments')
         ->assertFileDownloaded('documents.zip');
 });
+
+test('export payroll records streams a zip for the period', function (): void {
+    Livewire::test(Employees::class)
+        ->set('payrollRecordsPeriod', ['2025-01-01', '2025-12-31'])
+        ->call('exportPayrollRecords')
+        ->assertHasNoErrors()
+        ->assertFileDownloaded('payroll-records.zip');
+});
+
+test('export payroll records refuses a period without an end', function (): void {
+    Livewire::test(Employees::class)
+        ->set('payrollRecordsPeriod', ['2025-01-01'])
+        ->call('exportPayrollRecords')
+        ->assertNoFileDownloaded();
+});
