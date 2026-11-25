@@ -46,14 +46,14 @@ trait RendersWidgets
     #[Locked]
     public array $widgets = [];
 
-    public static function getPresets(): array
-    {
-        return static::$registeredPresets[static::class] ?? [];
-    }
-
     public static function registerPreset(string $name, array $widgets): void
     {
         static::$registeredPresets[static::class][$name] = $widgets;
+    }
+
+    protected static function getPresets(): array
+    {
+        return static::$registeredPresets[static::class] ?? [];
     }
 
     public function applyPreset(string $name): void
@@ -85,6 +85,12 @@ trait RendersWidgets
     public function availableWidgets(): array
     {
         return $this->filterWidgets(Widget::all());
+    }
+
+    #[Computed]
+    public function canEditRoleDashboards(): bool
+    {
+        return PermissionSet::make()->allows(route_to_permission('settings.permissions', false));
     }
 
     #[Js]
@@ -180,7 +186,7 @@ trait RendersWidgets
     #[Renderless]
     public function saveAsRoleDashboard(?int $roleId): void
     {
-        abort_unless($this->canEditRoleDashboards(), 403);
+        abort_unless($this->canEditRoleDashboards, 403);
 
         $role = resolve_static(Role::class, 'query')
             ->whereKey($roleId)
@@ -203,7 +209,7 @@ trait RendersWidgets
         });
 
         $this->toast()
-            ->success(__('The dashboard was saved as default for the role :role.', ['role' => $role->name]))
+            ->success(__("The dashboard was saved as default for the role ':role'.", ['role' => $role->name]))
             ->send();
     }
 
@@ -235,7 +241,8 @@ trait RendersWidgets
         $roleWidgets = $this->roleWidgets();
         $defaultWidgets = collect(static::getDefaultWidgets() ?? [])
             ->groupBy(fn (array $widget): ?string => data_get($widget, 'group'));
-        $groups = $defaultWidgets->keys()
+        $groups = $defaultWidgets
+            ->keys()
             ->merge($roleWidgets->keys())
             ->merge($userWidgets?->keys() ?? [])
             ->unique();
@@ -292,11 +299,6 @@ trait RendersWidgets
         return $categorized->merge($uncategorized)->all();
     }
 
-    protected function canEditRoleDashboards(): bool
-    {
-        return PermissionSet::make()->allows(route_to_permission('settings.permissions', false));
-    }
-
     protected function copyableWidgetAttributes(array $widget): array
     {
         return Arr::only(
@@ -313,6 +315,29 @@ trait RendersWidgets
                 'order_row',
             ]
         );
+    }
+
+    protected function filterWidgets(array $widgets): array
+    {
+        $permissions = PermissionSet::make();
+
+        $widgets = array_filter(
+            $widgets,
+            function (mixed $widget) use ($permissions): bool {
+                $componentName = data_get($widget, 'component_name');
+                $registeredWidget = is_string($componentName) ? Widget::get($componentName) : null;
+
+                return data_get($registeredWidget, 'component_name') === $componentName
+                    && collect(Arr::wrap(data_get($registeredWidget, 'dashboard_component')))
+                        ->map(fn (string $dashboardClass): string => resolve_static($dashboardClass, 'class'))
+                        ->contains(static::class)
+                    && $permissions->allows('widget.' . $componentName);
+            }
+        );
+
+        ksort($widgets);
+
+        return $widgets;
     }
 
     protected function roleWidgets(): Collection
@@ -341,28 +366,5 @@ trait RendersWidgets
                 ))
                 ->values()
             );
-    }
-
-    protected function filterWidgets(array $widgets): array
-    {
-        $permissions = PermissionSet::make();
-
-        $widgets = array_filter(
-            $widgets,
-            function (mixed $widget) use ($permissions): bool {
-                $componentName = data_get($widget, 'component_name');
-                $registeredWidget = is_string($componentName) ? Widget::get($componentName) : null;
-
-                return data_get($registeredWidget, 'component_name') === $componentName
-                    && collect(Arr::wrap(data_get($registeredWidget, 'dashboard_component')))
-                        ->map(fn (string $dashboardClass): string => resolve_static($dashboardClass, 'class'))
-                        ->contains(static::class)
-                    && $permissions->allows('widget.' . $componentName);
-            }
-        );
-
-        ksort($widgets);
-
-        return $widgets;
     }
 }

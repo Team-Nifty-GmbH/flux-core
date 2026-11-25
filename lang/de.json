@@ -2968,7 +2968,7 @@
     "The contact of this order no longer exists": "Der Kontakt dieses Auftrags existiert nicht mehr",
     "The contact would be left without an address.": "Der Kontakt bliebe ohne Adresse zurück.",
     "The credit line of the contact is exceeded": "Die Kreditlinie des Kontakts wurde überschritten",
-    "The dashboard was saved as default for the role :role.": "Das Dashboard wurde als Standard für die Rolle :role gespeichert.",
+    "The dashboard was saved as default for the role ':role'.": "Das Dashboard wurde als Standard für die Rolle ':role' gespeichert.",
     "The debit and credit account must differ.": "Sollkonto und Habenkonto müssen sich unterscheiden.",
     "The default mail account must be one of the selected mail accounts.": "Das Standard-Mailkonto muss eines der ausgewählten Mailkonten sein.",
     "The employee is already assigned to this work time model": "Der Mitarbeiter ist bereits diesem Arbeitszeitmodell zugewiesen",

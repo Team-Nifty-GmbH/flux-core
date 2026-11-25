@@ -6,6 +6,7 @@ use FluxErp\Models\User;
 use FluxErp\Models\Widget;
 use Illuminate\Support\Str;
 use Livewire\Component;
+use Livewire\Features\SupportComputed\CannotCallComputedDirectlyException;
 use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Livewire;
 
@@ -257,7 +258,10 @@ test('saving a group bound to a role creates an own copy and leaves the role unt
         ->test(Dashboard::class)
         ->set('group', 'Sales');
 
-    $widgets = collect($component->get('widgets'))->where('group', 'Sales')->values()->all();
+    $widgets = collect($component->get('widgets'))
+        ->where('group', 'Sales')
+        ->values()
+        ->all();
     $widgets[0]['width'] = 4;
 
     $component->call('saveWidgets', $widgets)->assertOk();
@@ -292,7 +296,11 @@ test('groups of several roles are merged and the role with the lowest id wins a 
     createRoleWidget($second, 'sample-component-2', 'Shared', 3);
     createRoleWidget($second, 'sample-component-2', 'Finance');
 
-    $widgets = collect(Livewire::withoutLazyLoading()->test(Dashboard::class)->get('widgets'));
+    $widgets = collect(
+        Livewire::withoutLazyLoading()
+            ->test(Dashboard::class)
+            ->get('widgets')
+    );
 
     expect($widgets->where('group', 'Shared'))->toHaveCount(1)
         ->and($widgets->where('group', 'Shared')->first()['width'])->toBe(2)
@@ -335,6 +343,12 @@ test('saving the dashboard as role default needs the permission to manage roles'
         'widgetable_type' => morph_alias(FluxErp\Models\Role::class),
     ]);
 });
+
+test('the role dashboard permission check cannot be called from the client', function (): void {
+    Livewire::withoutLazyLoading()
+        ->test(Dashboard::class)
+        ->call('canEditRoleDashboards');
+})->throws(CannotCallComputedDirectlyException::class);
 
 test('resetting a group brings back the widgets of the role', function (): void {
     $role = FluxErp\Models\Role::findOrCreate('Sales', 'web');

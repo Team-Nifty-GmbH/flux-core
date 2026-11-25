@@ -25,7 +25,8 @@ class Role extends SpatieRole implements InteractsWithDataTables
     protected static function booted(): void
     {
         static::deleted(function (Role $role): void {
-            $role->widgets()->delete();
+            $role->widgets()
+                ->delete();
         });
     }
 
