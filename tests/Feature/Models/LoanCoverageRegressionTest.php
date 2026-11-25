@@ -57,6 +57,40 @@ test('a chargeback alone never settles an installment', function (): void {
         ->and($this->loan->refresh()->remaining)->toEqual(12000);
 });
 
+test('a partial repayment lowers the remaining principal after the interest', function (): void {
+    LoanInstallmentTransaction::create([
+        'loan_installment_id' => $this->first->getKey(),
+        'transaction_id' => tx(-3060)->getKey(),
+        'amount' => -3060,
+        'is_accepted' => true,
+    ]);
+
+    expect($this->loan->refresh()->remaining)->toEqual(9000)
+        ->and($this->loan->progress)->toEqual(0.25);
+});
+
+test('a partial repayment smaller than the interest leaves the principal open', function (): void {
+    LoanInstallmentTransaction::create([
+        'loan_installment_id' => $this->first->getKey(),
+        'transaction_id' => tx(-40)->getKey(),
+        'amount' => -40,
+        'is_accepted' => true,
+    ]);
+
+    expect($this->loan->refresh()->remaining)->toEqual(12000);
+});
+
+test('a suggested partial repayment does not lower the remaining principal', function (): void {
+    LoanInstallmentTransaction::create([
+        'loan_installment_id' => $this->first->getKey(),
+        'transaction_id' => tx(-3060)->getKey(),
+        'amount' => -3060,
+        'is_accepted' => false,
+    ]);
+
+    expect($this->loan->refresh()->remaining)->toEqual(12000);
+});
+
 test('un-accepting an assignment restores the transaction balance', function (): void {
     $transaction = tx(-6060);
     $pivot = LoanInstallmentTransaction::create([

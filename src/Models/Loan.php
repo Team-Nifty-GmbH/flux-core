@@ -15,6 +15,7 @@ use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
@@ -90,10 +91,15 @@ class Loan extends FluxModel implements HasMedia, InteractsWithDataTables
 
     public function calculateRemaining(): static
     {
+        // A partial repayment covers the interest of its installment first, the rest lowers the principal.
         $this->remaining = bcround(
             (string) $this->installments()
                 ->unsettled()
-                ->sum('principal_amount'),
+                ->sum(DB::raw(
+                    'GREATEST(principal_amount - GREATEST('
+                    . LoanInstallment::coverageSql()
+                    . ' - interest_amount, 0), 0)'
+                )),
             2
         );
 
