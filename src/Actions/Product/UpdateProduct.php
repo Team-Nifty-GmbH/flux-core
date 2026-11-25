@@ -12,6 +12,7 @@ use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Helpers\Helper;
 use FluxErp\Models\Media;
 use FluxErp\Models\Product;
+use FluxErp\Models\ProductConfigurationGroupItem;
 use FluxErp\Models\Tag;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\Product\UpdateProductRuleset;
@@ -59,6 +60,10 @@ class UpdateProduct extends DispatchableFluxAction implements SupportsBulkExecut
 
         if ($product->isDirty('is_bundle') && ! $product->is_bundle) {
             $product->bundleProducts()->detach();
+        }
+
+        if ($product->isDirty('is_configurable') && ! $product->is_configurable) {
+            $product->productConfigurationGroups()->detach();
         }
 
         $product->save();
@@ -222,6 +227,51 @@ class UpdateProduct extends DispatchableFluxAction implements SupportsBulkExecut
                 ])
                     ->errorBag('updateProduct');
             }
+        }
+
+        $stored = resolve_static(Product::class, 'query')
+            ->whereKey($this->getData('id'))
+            ->withCount('children')
+            ->first(['id', 'parent_id', 'is_bundle', 'is_configurable', 'is_variant_parent']);
+        $parentId = array_key_exists('parent_id', $this->data) ? $this->data['parent_id'] : $stored->parent_id;
+
+        if (data_get($this->data, 'is_configurable', $stored->is_configurable)
+            && (
+                data_get($this->data, 'is_bundle', $stored->is_bundle)
+                || data_get($this->data, 'is_variant_parent', $stored->is_variant_parent)
+                || $stored->children_count > 0
+                || $parentId
+            )
+        ) {
+            throw ValidationException::withMessages([
+                'is_configurable' => [__('A configurable product cannot be a bundle or a variant.')],
+            ])
+                ->errorBag('updateProduct');
+        }
+
+        if ($parentId
+            && resolve_static(Product::class, 'query')
+                ->whereKey($parentId)
+                ->where('is_configurable', true)
+                ->exists()
+        ) {
+            throw ValidationException::withMessages([
+                'parent_id' => [__('A configurable product cannot be a bundle or a variant.')],
+            ])
+                ->errorBag('updateProduct');
+        }
+
+        $flag = Arr::first(['is_configurable', 'is_bundle', 'is_variant_parent'], fn (string $flag) => $this->getData($flag));
+
+        if ($flag
+            && resolve_static(ProductConfigurationGroupItem::class, 'query')
+                ->where('product_id', $this->getData('id'))
+                ->exists()
+        ) {
+            throw ValidationException::withMessages([
+                $flag => [__('Configuration options must stay plain products.')],
+            ])
+                ->errorBag('updateProduct');
         }
     }
 }

@@ -22,7 +22,8 @@ class CreateProductBundleProductRuleset extends FluxRuleset
             'bundle_product_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Product::class]),
+                app(ModelExists::class, ['model' => Product::class])
+                    ->where('is_configurable', false),
             ],
             'count' => 'required|numeric|gt:0',
         ];
