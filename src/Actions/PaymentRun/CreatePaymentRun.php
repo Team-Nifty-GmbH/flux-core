@@ -65,11 +65,7 @@ class CreatePaymentRun extends FluxAction
             );
 
             if (bccomp($amount, '0', 2) !== 0) {
-                $pointsAgainstRunDirection = $paymentRunTypeEnum === PaymentRunTypeEnum::DirectDebit
-                    ? bccomp($amount, '0', 2) < 0
-                    : bccomp($amount, '0', 2) > 0;
-
-                if ($pointsAgainstRunDirection) {
+                if (bccomp($amount, '0', 2) !== $paymentRunTypeEnum->expectedSign()) {
                     $errors['positions.' . $index . '.orders'] = [
                         'A payment run position must not point against the direction of the run.',
                     ];

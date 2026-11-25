@@ -42,6 +42,10 @@ class MoneyTransfer extends DirectDebit
             ->filter(fn (OrderType $orderType) => $orderType->order_type_enum === OrderTypeEnum::PurchaseRefund)
             ->pluck('id');
 
+        $requiresManualTransfer = fn (Builder $query) => $query
+            ->where('is_direct_debit', false)
+            ->where('requires_manual_transfer', true);
+
         return $builder
             ->whereNotNull('invoice_number')
             ->where(fn (Builder $query) => $query
@@ -49,10 +53,7 @@ class MoneyTransfer extends DirectDebit
                     ->whereIntegerInRaw('order_type_id', $outgoingOrderTypes)
                     ->where('balance', '<', 0)
                     ->whereState('payment_state', Open::class)
-                    ->whereHas('paymentType', function (Builder $query): void {
-                        $query->where('is_direct_debit', false)
-                            ->where('requires_manual_transfer', true);
-                    })
+                    ->whereHas('paymentType', $requiresManualTransfer)
                 )
                 ->orWhere(fn (Builder $query) => $query
                     ->whereIntegerInRaw('order_type_id', $incomingOrderTypes)
@@ -63,10 +64,7 @@ class MoneyTransfer extends DirectDebit
                     ->whereIntegerInRaw('order_type_id', $refundOrderTypes)
                     ->where('balance', '>', 0)
                     ->whereState('payment_state', Open::class)
-                    ->whereHas('paymentType', function (Builder $query): void {
-                        $query->where('is_direct_debit', false)
-                            ->where('requires_manual_transfer', true);
-                    })
+                    ->whereHas('paymentType', $requiresManualTransfer)
                 )
             );
     }

@@ -89,59 +89,25 @@ class PaymentRunPreview extends Component
     #[Renderless]
     public function applyAmount(string $groupKey, int $orderId, string $amount): void
     {
-        [$groupIndex, $rowIndex] = $this->locate($groupKey, $orderId);
-
-        if ($groupIndex === null || $rowIndex === null) {
-            return;
-        }
-
-        data_set(
-            $this->groups,
-            $groupIndex . '.orders.' . $rowIndex . '.amount',
-            bcround($amount ?: 0, 2)
-        );
-
-        $this->recapAndRecalculate($groupIndex);
+        $this->setRowAmount($groupKey, $orderId, fn (): string => bcround($amount ?: 0, 2));
     }
 
     #[Renderless]
     public function applyBalance(string $groupKey, int $orderId): void
     {
-        [$groupIndex, $rowIndex] = $this->locate($groupKey, $orderId);
-
-        if ($groupIndex === null || $rowIndex === null) {
-            return;
-        }
-
-        data_set(
-            $this->groups,
-            $groupIndex . '.orders.' . $rowIndex . '.amount',
-            bcabs(bcround(data_get($this->groups, $groupIndex . '.orders.' . $rowIndex . '.balance') ?? 0, 2))
-        );
-
-        $this->recapAndRecalculate($groupIndex);
+        $this->setRowAmount($groupKey, $orderId, fn (array $row): string => bcabs(bcround(data_get($row, 'balance') ?? 0, 2)));
     }
 
     #[Renderless]
     public function applyDiscount(string $groupKey, int $orderId): void
     {
-        [$groupIndex, $rowIndex] = $this->locate($groupKey, $orderId);
-
-        if ($groupIndex === null
-            || $rowIndex === null
-            || ! data_get($this->groups, $groupIndex . '.orders.' . $rowIndex . '.balance_due_discount')
-            || ! data_get($this->groups, $groupIndex . '.orders.' . $rowIndex . '.payment_discount_percent')
-        ) {
-            return;
-        }
-
-        data_set(
-            $this->groups,
-            $groupIndex . '.orders.' . $rowIndex . '.amount',
-            bcabs(bcround(data_get($this->groups, $groupIndex . '.orders.' . $rowIndex . '.balance_due_discount'), 2))
+        $this->setRowAmount(
+            $groupKey,
+            $orderId,
+            fn (array $row): ?string => data_get($row, 'balance_due_discount') && data_get($row, 'payment_discount_percent')
+                ? bcabs(bcround(data_get($row, 'balance_due_discount'), 2))
+                : null
         );
-
-        $this->recapAndRecalculate($groupIndex);
     }
 
     #[Renderless]
@@ -345,5 +311,17 @@ class PaymentRunPreview extends Component
 
         $this->groups[$groupIndex]['orders'] = $builder->recap($this->groups[$groupIndex]['orders']);
         $this->groups[$groupIndex]['amount'] = $builder->total($this->groups[$groupIndex]['orders']);
+    }
+
+    private function setRowAmount(string $groupKey, int $orderId, callable $amount): void
+    {
+        [$groupIndex, $rowIndex] = $this->locate($groupKey, $orderId);
+
+        if ($rowIndex === null || ($value = $amount($this->groups[$groupIndex]['orders'][$rowIndex])) === null) {
+            return;
+        }
+
+        $this->groups[$groupIndex]['orders'][$rowIndex]['amount'] = $value;
+        $this->recapAndRecalculate($groupIndex);
     }
 }
