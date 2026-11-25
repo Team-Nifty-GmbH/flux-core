@@ -419,3 +419,48 @@ test('create commission credit notes with nested id array structure', function (
         expect($commission->credit_note_order_position_id)->not->toBeNull();
     }
 });
+
+test('create commission credit notes twice creates no empty credit note', function (): void {
+    $paymentType = PaymentType::factory()->create(['is_default' => true]);
+    $paymentType->tenants()->attach($this->order->tenant_id);
+
+    $agentContact = Contact::factory()
+        ->hasAttached(factory: $this->order->tenant, relationship: 'tenants')
+        ->create([
+            'payment_type_id' => $paymentType->id,
+        ]);
+    $agentAddress = Address::factory()->create([
+        'contact_id' => $agentContact->id,
+        'is_main_address' => true,
+    ]);
+    $agentContact->update(['invoice_address_id' => $agentAddress->id]);
+    $this->agent->update(['contact_id' => $agentContact->id]);
+
+    $refundOrderType = OrderType::factory()
+        ->hasAttached(factory: $this->order->tenant, relationship: 'tenants')
+        ->create([
+            'order_type_enum' => OrderTypeEnum::Refund,
+        ]);
+
+    $this->order->update([
+        'invoice_date' => now(),
+        'invoice_number' => 'INV-TEST-002',
+    ]);
+
+    foreach ($this->commissions as $commission) {
+        $commission->update(['order_id' => $this->order->id]);
+    }
+
+    $commissionIds = $this->commissions->map(fn ($commission) => ['id' => $commission->id])->toArray();
+
+    FluxErp\Actions\Commission\CreateCommissionCreditNotes::make(['commissions' => $commissionIds])
+        ->validate()
+        ->execute();
+
+    $result = FluxErp\Actions\Commission\CreateCommissionCreditNotes::make(['commissions' => $commissionIds])
+        ->validate()
+        ->execute();
+
+    expect($result)->toBeEmpty()
+        ->and(Order::query()->where('order_type_id', $refundOrderType->id)->count())->toBe(1);
+});

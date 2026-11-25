@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Actions\StockPosting\TransferStock;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
@@ -35,7 +36,9 @@ test('transfer stock', function (): void {
         'amount' => 4,
     ]);
 
-    $response->assertNoContent();
+    $response->assertCreated()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.storage_area_id', $this->to->getKey());
 
     expect(bccomp((string) StockPosting::query()
         ->where('storage_area_id', $this->to->getKey())
@@ -84,4 +87,23 @@ test('transfer stock fails when amount exceeds available stock', function (): vo
         '10',
         10
     ))->toBe(0);
+});
+
+test('transfer stock is forbidden without the transfer action permission', function (): void {
+    $this->user->givePermissionTo($this->permission);
+    Permission::findOrCreate('action.' . TransferStock::name(), 'sanctum');
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->post('/api/stock-postings/transfer', [
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'from_storage_area_id' => $this->from->getKey(),
+        'to_storage_area_id' => $this->to->getKey(),
+        'amount' => 4,
+    ]);
+
+    $response->assertForbidden();
+
+    expect(StockPosting::query()->where('storage_area_id', $this->to->getKey())->exists())->toBeFalse()
+        ->and(bccomp((string) $this->sourcePosting->refresh()->remaining_stock, '10', 10))->toBe(0);
 });

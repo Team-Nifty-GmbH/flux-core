@@ -86,11 +86,11 @@ test('a moved widget is saved with its new position', function (): void {
     $page->script(<<<'JS'
         () => document.querySelector('button[x-on\\:click="editGridMode(true)"]').click()
     JS);
-    $page->script("() => {$dashboard}.selectWidget(Object.keys({$dashboard}.\$wire.availableWidgets)[0])");
+    $page->script("() => { {$dashboard}.selectWidget(Object.keys({$dashboard}.\$wire.availableWidgets)[0]); }");
     waitForCondition($page, "() => {$count} === 1 && ! {$dashboard}.isLoading", 12000);
 
     $page->script("() => {$dashboard}.grid.update({$dashboard}.grid.getGridItems()[0], { y: 2 })");
-    $page->script("() => {$dashboard}.save()");
+    $page->script("() => { {$dashboard}.save(); }");
     waitForCondition($page, "() => ! {$dashboard}.editGrid && ! {$dashboard}.isLoading", 12000);
 
     expect(
@@ -197,4 +197,40 @@ test('applying a preset asks before replacing the own widgets', function (): voi
     expect($ownWidgetIds())
         ->toHaveCount(1)
         ->not->toBe($before);
+});
+
+test('cancelling the edit mode asks before discarding the changes', function (): void {
+    $page = visit(route('dashboard'))
+        ->assertRoute('dashboard')
+        ->assertNoSmoke();
+
+    $dashboard = "Alpine.\$data(document.querySelector('[x-data=\"dashboard()\"]'))";
+    $count = "document.querySelectorAll('.grid-stack > .grid-stack-item').length";
+
+    $page->script(<<<'JS'
+        () => document.querySelector('button[x-on\\:click="editGridMode(true)"]').click()
+    JS);
+    $page->script("() => { {$dashboard}.selectWidget(Object.keys({$dashboard}.\$wire.availableWidgets)[0]); }");
+    waitForCondition($page, "() => {$count} === 1 && ! {$dashboard}.isLoading", 12000);
+
+    $page->script(<<<'JS'
+        () => [...document.querySelectorAll('button')]
+            .find((button) => button.offsetParent !== null
+                && button.hasAttribute('wire:flux-confirm.type.error')
+                && button.innerText.trim() === 'Cancel')
+            .click()
+    JS);
+
+    $page->assertSee('Do you really want to discard the changes?');
+    $page->wait(1);
+
+    expect($page->script("() => {$count}"))->toBe(1);
+
+    $page->script(<<<'JS'
+        () => [...document.querySelectorAll('button')]
+            .filter((button) => button.offsetParent !== null && button.innerText.trim() === 'Discard')
+            .pop()
+            .click()
+    JS);
+    waitForCondition($page, "() => {$count} === 0 && ! {$dashboard}.editGrid && ! {$dashboard}.isLoading", 12000);
 });

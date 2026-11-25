@@ -20,7 +20,9 @@
         @show
         @section('content.form')
             <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-                <div class="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
+                <div
+                    class="dark:bg-dark-800 bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10"
+                >
                     <div class="flex flex-col gap-4">
                         <p class="font-semibold">
                             {{ __('Logged out successfully.') }}

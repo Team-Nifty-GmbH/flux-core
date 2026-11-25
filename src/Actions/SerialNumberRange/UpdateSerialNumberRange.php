@@ -11,6 +11,11 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateSerialNumberRange extends FluxAction
 {
+    protected array $dontTrim = [
+        'prefix',
+        'suffix',
+    ];
+
     public static function models(): array
     {
         return [SerialNumberRange::class];

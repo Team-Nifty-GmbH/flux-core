@@ -6,6 +6,8 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\OrderType;
 
 test('can create new order', function (): void {
+    grantModelPermissions($this->user);
+
     OrderType::query()->delete();
 
     $orderType = OrderType::factory()

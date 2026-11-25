@@ -302,3 +302,11 @@ test('chunk init does not require the auto-derived permission', function (): voi
 
     $response->assertOk();
 });
+
+test('chunk requests do not use up the livewire upload rate limit', function (): void {
+    foreach (range(1, 60) as $ignored) {
+        chunkInit()->assertOk();
+    }
+
+    $this->post(route('livewire.upload-file'))->assertUnauthorized();
+});

@@ -10,6 +10,7 @@ use FluxErp\View\Components\Icon;
 use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use ReflectionClass;
@@ -85,7 +86,16 @@ class ViewServiceProvider extends ServiceProvider
     {
         TallStackUi::customize()
             ->avatar()
-            ->block('wrapper.class', 'inline-flex shrink-0 items-center justify-center overflow-hidden bg-secondary-200!');
+            ->block('wrapper.class', 'inline-flex shrink-0 items-center justify-center overflow-hidden bg-secondary-200! dark:bg-secondary-600!');
+
+        TallStackUi::customize()
+            ->form('range')
+            ->block('input.base', 'dark:bg-dark-600 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 transition')
+            ->block('dual.track.base', 'dark:bg-dark-600 absolute inset-x-0 top-1/2 -translate-y-1/2 rounded-lg bg-gray-200');
+
+        TallStackUi::customize()
+            ->form('toggle')
+            ->block('background.class', 'bg-gray-200 dark:bg-dark-600 block cursor-pointer rounded-full group-focus:ring-0 group-focus:ring-offset-0 peer-focus:ring-0 peer-focus:ring-offset-0');
 
         TallStackUi::customize()
             ->dropdown()
@@ -158,6 +168,9 @@ class ViewServiceProvider extends ServiceProvider
 
     protected function registerViews(): void
     {
+        config(['view.paths' => array_merge(config('view.paths', []), [__DIR__ . '/../../resources/error-views'])]);
+        View::prependNamespace('passkeys', __DIR__ . '/../../resources/views/vendor/passkeys');
+
         $this->app->booted(function (): void {
             Blade::component(Icon::class, app(ComponentPrefix::class)->add('icon'));
 

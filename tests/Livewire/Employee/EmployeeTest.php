@@ -2,6 +2,7 @@
 
 use FluxErp\Livewire\Employee\Employee;
 use FluxErp\Models\Employee as EmployeeModel;
+use FluxErp\Models\User;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
@@ -91,3 +92,79 @@ test('resetForm reloads employee data from database', function (): void {
         ->assertSet('employee.firstname', 'Original')
         ->assertSet('employee.lastname', 'Employee');
 });
+
+test('can link a user to the employee via the general form', function (): void {
+    $employee = app(EmployeeModel::class)->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'firstname' => 'Link',
+        'lastname' => 'Form',
+        'employment_date' => now()->subYear()->format('Y-m-d'),
+        'is_active' => true,
+    ]);
+
+    $user = User::factory()->create(['is_active' => true]);
+    $user->tenants()->attach($this->dbTenant->getKey());
+
+    Livewire::test(Employee::class, ['id' => $employee->getKey()])
+        ->set('employee.user_id', $user->getKey())
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect($employee->refresh()->user_id)->toBe($user->getKey());
+});
+
+test('saving a stale general form keeps a user linked meanwhile', function (): void {
+    $employee = app(EmployeeModel::class)->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'firstname' => 'Keep',
+        'lastname' => 'Link',
+        'employment_date' => now()->subYear()->format('Y-m-d'),
+        'is_active' => true,
+    ]);
+
+    $component = Livewire::test(Employee::class, ['id' => $employee->getKey()]);
+
+    $user = User::factory()->create(['is_active' => true]);
+    $employee->update(['user_id' => $user->getKey()]);
+
+    $component
+        ->set('employee.firstname', 'Renamed')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect($employee->refresh())
+        ->user_id->toBe($user->getKey())
+        ->firstname->toBe('Renamed');
+});
+
+test('saving a stale general form keeps a link changed or removed meanwhile', function (bool $relink): void {
+    $loadedUser = User::factory()->create(['is_active' => true]);
+    $loadedUser->tenants()->attach($this->dbTenant->getKey());
+
+    $employee = app(EmployeeModel::class)->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'user_id' => $loadedUser->getKey(),
+        'firstname' => 'Loaded',
+        'lastname' => 'Link',
+        'employment_date' => now()->subYear()->format('Y-m-d'),
+        'is_active' => true,
+    ]);
+
+    $component = Livewire::test(Employee::class, ['id' => $employee->getKey()])
+        ->assertSet('employee.user_id', $loadedUser->getKey());
+
+    $newUserId = $relink ? User::factory()->create(['is_active' => true])->getKey() : null;
+    $employee->update(['user_id' => $newUserId]);
+
+    $component
+        ->set('employee.firstname', 'Renamed')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect($employee->refresh())
+        ->user_id->toBe($newUserId)
+        ->firstname->toBe('Renamed');
+})->with([
+    'changed' => true,
+    'removed' => false,
+]);

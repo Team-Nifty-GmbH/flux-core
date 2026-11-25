@@ -8,6 +8,11 @@ use FluxErp\Rulesets\MailAccount\CreateMailAccountRuleset;
 
 class CreateMailAccount extends FluxAction
 {
+    protected array $dontTrim = [
+        'password',
+        'smtp_password',
+    ];
+
     public static function models(): array
     {
         return [MailAccount::class];

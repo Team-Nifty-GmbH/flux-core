@@ -78,7 +78,7 @@ trait RendersWidgets
 
         $this->widgets();
         $this->dispatch('gridstack-reinit');
-        $this->dispatch('dashboard-reset');
+        $this->dispatch('dashboard-reset')->self();
     }
 
     #[Computed]
@@ -114,13 +114,14 @@ trait RendersWidgets
             ->delete();
 
         $this->widgets();
-        $this->dispatch('dashboard-reset');
+        $this->dispatch('dashboard-reset')->self();
     }
 
     #[Renderless]
     public function resetWidgets(): void
     {
         $this->widgets();
+        $this->dispatch('dashboard-reset')->self();
     }
 
     #[Renderless]

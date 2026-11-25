@@ -1,6 +1,6 @@
 <x-modal
     id="edit-mail-folders"
-    class="bg-gray-50"
+    class="bg-gray-50 dark:bg-dark-800"
     :title="__('Mail Folder')"
     persistent
 >

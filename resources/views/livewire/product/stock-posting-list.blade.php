@@ -13,21 +13,24 @@
             });
         },
         setTransferStorageAreaSearch() {
-            const where = [
-                ['warehouse_id', '=', $wire.stockTransfer.warehouse_id],
-                ['is_active', '=', true],
-            ];
             $tallstackuiSelect(
                 'transfer-from-storage-area-id',
             ).mergeRequestParams({
                 searchFields: ['code', 'name'],
-                where,
+                where: [
+                    ['warehouse_id', '=', $wire.stockTransfer.warehouse_id],
+                    ['is_active', '=', true],
+                ],
             });
             $tallstackuiSelect(
                 'transfer-to-storage-area-id',
             ).mergeRequestParams({
                 searchFields: ['code', 'name'],
-                where: [...where, ['is_storage_location', '=', true]],
+                where: [
+                    ['warehouse_id', '=', $wire.stockTransfer.to_warehouse_id],
+                    ['is_active', '=', true],
+                    ['is_storage_location', '=', true],
+                ],
             });
         },
     }"
@@ -155,11 +158,22 @@
                     required
                 />
             </div>
+            <x-select.styled
+                wire:model="stockTransfer.to_warehouse_id"
+                :label="__('Target Warehouse')"
+                required
+                select="label:name|value:id"
+                x-on:select="
+                    $tallstackuiSelect('transfer-to-storage-area-id').clear();
+                    setTransferStorageAreaSearch();
+                "
+                :options="$warehouses"
+            />
             <div id="transfer-to-storage-area-id">
                 <x-flux::warehouse.storage-area-select
                     model="stockTransfer.to_storage_area_id"
                     :label="__('Target Storage Area')"
-                    :warehouse-id="$stockTransfer->warehouse_id"
+                    :warehouse-id="$stockTransfer->to_warehouse_id"
                     storage-location-only
                     required
                     :hint="__('Only storage areas marked as storage location can hold stock')"

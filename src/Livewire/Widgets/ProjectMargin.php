@@ -34,7 +34,7 @@ class ProjectMargin extends ValueBox implements HasWidgetOptions
     #[Renderless]
     public function calculateSum(): void
     {
-        $this->sum = Number::format($this->getOrderQuery()->sum('margin'), 2)
+        $this->sum = Number::format($this->getOrderQuery()->sum($this->sumColumn()), 2)
             . ' ' . resolve_static(Currency::class, 'default')->symbol;
     }
 
@@ -84,11 +84,16 @@ class ProjectMargin extends ValueBox implements HasWidgetOptions
         return 'banknotes';
     }
 
+    protected function sumColumn(): string
+    {
+        return 'margin';
+    }
+
     protected function liveUpdates(): array
     {
         return [
             $this->modelChannel(Order::class) => [
-                Order::class => ['updated', 'deleted'],
+                Order::class => ['created', 'updated', 'deleted'],
             ],
         ];
     }

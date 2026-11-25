@@ -118,7 +118,7 @@
                                 ></span>
                                 <template x-if="assignment.is_current">
                                     <span
-                                        class="ml-2 inline-flex items-center rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800"
+                                        class="ml-2 inline-flex items-center rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200"
                                     >
                                         {{ __('Current') }}
                                     </span>

@@ -3,6 +3,8 @@
 use FluxErp\Actions\StockPosting\CreateStockPosting;
 use FluxErp\Actions\StockPosting\DeleteStockPosting;
 use FluxErp\Actions\StockPosting\UpdateStockPosting;
+use FluxErp\Models\Address;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Lot;
 use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumber;
@@ -158,4 +160,25 @@ test('create stock posting accepts a supplier serial number without a serial num
     expect($posting->serial_number_id)->not->toBeNull()
         ->and(SerialNumber::query()->whereKey($posting->serial_number_id)->value('serial_number'))
         ->toBe('SUP-4711');
+});
+
+test('create stock posting attaches a newly created serial number to the given address', function (): void {
+    $address = Address::factory()->create([
+        'contact_id' => Contact::factory()->create()->getKey(),
+    ]);
+
+    $posting = CreateStockPosting::make([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'posting' => 1,
+        'serial_number' => [
+            'serial_number' => 'SN-4711',
+        ],
+        'address' => [
+            'id' => $address->getKey(),
+        ],
+    ])->validate()->execute();
+
+    expect(SerialNumber::query()->whereKey($posting->serial_number_id)->first()->addresses()->pluck('addresses.id')->all())
+        ->toBe([$address->getKey()]);
 });
