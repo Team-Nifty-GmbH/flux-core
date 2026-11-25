@@ -51,3 +51,15 @@ test('shows a warning for requires rules on groups that are not attached', funct
     Livewire::test(ConfigurationGroups::class, ['product' => $this->productForm])
         ->assertSet('warnings', ['SSD requires an option from a group that is not attached to this product.']);
 });
+
+test('shows a warning when the stored defaults no longer validate', function (): void {
+    attachConfigurationGroup($this->product, $this->group);
+    $this->product->productConfigurationDefaults()->create([
+        'product_configuration_group_item_id' => $this->ssd->getKey(),
+        'amount' => 2,
+    ]);
+    $this->ssd->update(['max_amount' => 1]);
+
+    Livewire::test(ConfigurationGroups::class, ['product' => $this->productForm])
+        ->assertSet('warnings', ['SSD needs an amount between 1 and 1.']);
+});

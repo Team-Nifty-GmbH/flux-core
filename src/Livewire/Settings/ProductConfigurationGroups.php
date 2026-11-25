@@ -292,7 +292,7 @@ class ProductConfigurationGroups extends ProductConfigurationGroupList
                 'rules' => $item->productConfigurationRules
                     ->map(fn (ProductConfigurationRule $rule) => [
                         'id' => $rule->getKey(),
-                        'rule_type' => __(str($rule->rule_type_enum->value)->headline()->toString()),
+                        'rule_type' => ConfigurationRuleTypeEnum::toArray()[$rule->rule_type_enum->value],
                         'target' => $rule->targetGroup?->name
                             ?? $rule->targetItems->map(fn ($target) => $target->product?->name)->implode(', '),
                     ])

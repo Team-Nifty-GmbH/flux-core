@@ -44,7 +44,10 @@ class CreateProductConfigurationRule extends FluxAction
             ->first(['id', 'product_configuration_group_id']);
 
         if ((int) $this->getData('target_group_id') === (int) $item->product_configuration_group_id
-            || in_array((int) $item->getKey(), array_map('intval', $this->getData('target_items') ?? []), true)
+            || resolve_static(ProductConfigurationGroupItem::class, 'query')
+                ->whereKey($this->getData('target_items') ?? [])
+                ->where('product_configuration_group_id', $item->product_configuration_group_id)
+                ->exists()
         ) {
             throw ValidationException::withMessages([
                 'target_group_id' => [__('An option cannot point at itself or its own group.')],

@@ -153,6 +153,18 @@ test('fill rejects new children on an existing configured position sent without 
         ->and(OrderPosition::query()->where('parent_id', $parent->getKey())->count())->toBe(1);
 });
 
+test('fill keeps an empty configuration empty instead of applying the defaults', function (): void {
+    ($this->fill)(['configuration' => []]);
+    $parent = OrderPosition::query()->whereNull('parent_id')->where('order_id', $this->order->getKey())->sole();
+
+    expect($parent->currentConfiguration())->toBe([]);
+
+    ($this->fill)(['id' => $parent->getKey(), 'amount' => 3]);
+
+    expect($parent->refresh()->currentConfiguration())->toBe([])
+        ->and(OrderPosition::query()->where('order_id', $this->order->getKey())->count())->toBe(1);
+});
+
 test('simulate returns children without saving', function (): void {
     $result = ($this->fill)(
         ['configuration' => [['product_configuration_group_item_id' => $this->ssd->getKey(), 'amount' => 1]]],

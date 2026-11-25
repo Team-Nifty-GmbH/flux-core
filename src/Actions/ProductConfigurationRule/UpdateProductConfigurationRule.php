@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\ProductConfigurationRule;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Models\ProductConfigurationGroupItem;
 use FluxErp\Models\ProductConfigurationRule;
 use FluxErp\Rulesets\ProductConfigurationRule\UpdateProductConfigurationRuleRuleset;
 use Illuminate\Database\Eloquent\Model;
@@ -58,10 +59,25 @@ class UpdateProductConfigurationRule extends FluxAction
 
         if ((array_key_exists('target_group_id', $this->data)
                 && (int) $this->getData('target_group_id') === (int) $item->product_configuration_group_id)
-            || in_array((int) $item->getKey(), array_map('intval', $this->getData('target_items') ?? []), true)
+            || resolve_static(ProductConfigurationGroupItem::class, 'query')
+                ->whereKey($this->getData('target_items') ?? [])
+                ->where('product_configuration_group_id', $item->product_configuration_group_id)
+                ->exists()
         ) {
             throw ValidationException::withMessages([
                 'target_group_id' => [__('An option cannot point at itself or its own group.')],
+            ])
+                ->errorBag('updateProductConfigurationRule');
+        }
+
+        $targetItems = $this->getData('target_items');
+        $targetGroupId = array_key_exists('target_group_id', $this->data)
+            ? $this->getData('target_group_id')
+            : $rule->target_group_id;
+
+        if (is_null($targetItems) ? ! $targetGroupId && ! $rule->targetItems()->exists() : ! $targetItems) {
+            throw ValidationException::withMessages([
+                'target_group_id' => [__('A rule needs a target group or target options.')],
             ])
                 ->errorBag('updateProductConfigurationRule');
         }

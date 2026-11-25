@@ -13,6 +13,7 @@ use FluxErp\Models\ProductConfigurationGroup;
 use FluxErp\Models\ProductConfigurationGroupItem;
 use FluxErp\Support\ProductConfiguration\ConfigurationValidator;
 use FluxErp\Traits\Livewire\Actions;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Modelable;
@@ -163,6 +164,13 @@ class ConfigurationGroups extends Component
             ])
             ->all();
 
-        $this->warnings = ConfigurationValidator::make($product)->unsatisfiableRules();
+        $validator = ConfigurationValidator::make($product);
+        $this->warnings = $validator->unsatisfiableRules();
+
+        try {
+            $validator->validate($product->defaultConfiguration(), isDefault: true);
+        } catch (ValidationException $e) {
+            $this->warnings = array_merge($this->warnings, Arr::flatten($e->errors()));
+        }
     }
 }
