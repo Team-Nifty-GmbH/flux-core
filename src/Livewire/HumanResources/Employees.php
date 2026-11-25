@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\HumanResources;
 
 use FluxErp\Actions\Document\DownloadDocuments;
+use FluxErp\Actions\Document\ExportPayrollRecords;
 use FluxErp\Actions\EmployeeDay\BulkCloseEmployeeDay;
 use FluxErp\Livewire\DataTables\EmployeeList as BaseEmployeeList;
 use FluxErp\Livewire\Forms\EmployeeForm;
@@ -25,11 +26,27 @@ class Employees extends BaseEmployeeList
     #[DataTableForm]
     public EmployeeForm $employeeForm;
 
+    public array $payrollRecordsPeriod = [];
+
     public array $timeframe = [];
 
     public bool $isSelectable = true;
 
     protected ?string $includeBefore = 'flux::livewire.human-resources.employees';
+
+    protected function getTableActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->text(__('Export payroll records'))
+                ->icon('archive-box-arrow-down')
+                ->when(fn () => resolve_static(ExportPayrollRecords::class, 'canPerformAction', [false]))
+                ->xOnClick(<<<'JS'
+                    $wire.payrollRecordsPeriod = [];
+                    $tsui.open.modal('export-payroll-records-modal');
+                JS),
+        ];
+    }
 
     protected function getSelectedActions(): array
     {
@@ -85,6 +102,25 @@ class Employees extends BaseEmployeeList
             return DownloadDocuments::make([
                 'model_type' => morph_alias(Employee::class),
                 'model_ids' => $this->getSelectedModelsQuery()->pluck($this->modelKeyName)->all(),
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute()
+                ->toResponse(request());
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return null;
+        }
+    }
+
+    #[Renderless]
+    public function exportPayrollRecords(): ?StreamedResponse
+    {
+        try {
+            return ExportPayrollRecords::make([
+                'from' => data_get($this->payrollRecordsPeriod, 0),
+                'to' => data_get($this->payrollRecordsPeriod, 1),
             ])
                 ->checkPermission()
                 ->validate()
