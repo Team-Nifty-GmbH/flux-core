@@ -14,7 +14,6 @@
         "laragear/two-factor": "^4.0",
         "laravel-notification-channels/webpush": "^13.0",
         "laravel/framework": "^13.23",
-        "laravel/reverb": "^1.11",
         "laravel/sanctum": "^4.3",
         "laravel/scout": "^11.4",
         "livewire/livewire": "^4.4.6",

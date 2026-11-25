@@ -11,7 +11,6 @@
     name="user-authenticated"
     content="{{ auth()->check() ? 'true' : 'false' }}"
 />
-<meta name="ws-key" content="{{ config('flux.vite.reverb_app_key') }}" />
 <meta
     name="ws-broadcaster"
     content="{{ resolve_static(\FluxErp\Support\Broadcasting\BrowserBroadcaster::class, 'name') }}"
@@ -20,9 +19,6 @@
     name="ws-mercure-hub"
     content="{{ config('broadcasting.connections.mercure.public_url') }}"
 />
-<meta name="ws-host" content="{{ config('flux.vite.reverb_host') }}" />
-<meta name="ws-port" content="{{ config('flux.vite.reverb_port') }}" />
-<meta name="ws-protocol" content="{{ config('flux.vite.reverb_protocol') }}" />
 <meta name="webpush-key" content="{{ config('webpush.vapid.public_key') }}" />
 <meta
     name="currency-code"

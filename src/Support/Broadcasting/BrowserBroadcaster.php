@@ -13,7 +13,7 @@ class BrowserBroadcaster
      */
     public static function name(): string
     {
-        $connection = config('broadcasting.default') ?? 'reverb';
+        $connection = config('broadcasting.default') ?? 'null';
 
         if (config('broadcasting.connections.' . $connection . '.driver') === 'combined') {
             $connection = resolve_static(MercureHubConfig::class, 'usesMercure') && static::servesHubHost()

@@ -50,3 +50,11 @@ test('a combined instance served under another domain listens on the other conne
     'combined with only mercure' => ['combined', ['mercure'], 'null'],
     'only mercure' => ['mercure', [], 'mercure'],
 ]);
+
+test('the default combined connection gives a browser off the hub host no reverb', function (): void {
+    config(['broadcasting.default' => 'combined']);
+    $this->app->instance('request', Request::create('https://connect.example.com/'));
+
+    expect(Blade::render('<x-flux::layouts.head.head />'))
+        ->toMatch('/name="ws-broadcaster"\\s+content="null"/');
+});

@@ -69,27 +69,20 @@ The `@fluxStyles` and `@fluxScripts` Blade directives inject them — add these 
 `<head>` and before `</body>` only if you use a custom layout instead of the shipped
 one. Nothing to build or publish.
 
-## Realtime (Laravel Reverb)
+## Realtime (Mercure)
 
-Flux uses [Laravel Reverb](https://reverb.laravel.com/) for realtime features.
-Broadcasting credentials are read from `.env` at runtime, so no rebuild is required
-when they change.
-
-```bash
-php artisan reverb:start
-```
+Flux broadcasts realtime events through a [Mercure](https://mercure.rocks/) hub.
+The settings are read from `.env` at runtime, so no rebuild is required when they change.
 
 ```dotenv
-REVERB_APP_ID=local
-REVERB_APP_KEY=local
-REVERB_APP_SECRET=local
-REVERB_HOST=your.domain.com
-REVERB_SCHEME=https
-REVERB_PORT=443
+BROADCAST_CONNECTION=mercure
+MERCURE_URL=http://127.0.0.1:3000/.well-known/mercure
+MERCURE_PUBLIC_URL=https://your.domain.com/.well-known/mercure
+MERCURE_JWT_SECRET=change-me
 ```
 
-In production run Reverb behind your web server as a reverse proxy so websocket
-traffic reaches it on port 443.
+`MERCURE_URL` is where Flux publishes, `MERCURE_PUBLIC_URL` is what the browser subscribes to.
+Serve the hub on the same host as the app so the subscriber cookie reaches it.
 
 ## Publishing package resources (optional)
 

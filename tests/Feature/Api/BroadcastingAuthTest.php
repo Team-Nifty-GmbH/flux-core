@@ -36,20 +36,7 @@ test('the user model has no generic existence channel', function (): void {
         ->and($channels)->not->toContain('user.');
 });
 
-test('the broadcasting connection endpoint exposes the public reverb values', function (): void {
-    config([
-        'flux.vite.reverb_app_key' => 'app-key',
-        'flux.vite.reverb_host' => 'ws.example.test',
-        'flux.vite.reverb_port' => 443,
-        'flux.vite.reverb_protocol' => 'https',
-    ]);
-
+test('the reverb connection endpoint is gone', function (): void {
     $this->getJson('/api/broadcasting/connection')
-        ->assertOk()
-        ->assertExactJson([
-            'key' => 'app-key',
-            'host' => 'ws.example.test',
-            'port' => 443,
-            'scheme' => 'https',
-        ]);
+        ->assertNotFound();
 });

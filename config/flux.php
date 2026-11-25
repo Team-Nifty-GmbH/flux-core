@@ -45,19 +45,9 @@ return [
         'sync_time_budget' => (int) env('FLUX_MAIL_SYNC_TIME_BUDGET', 300),
     ],
 
-    'vite' => [
-        'reverb_app_key' => env('VITE_REVERB_APP_KEY', env('REVERB_APP_KEY')),
-        'reverb_host' => env(
-            'VITE_REVERB_HOST',
-            'ws.' . str_replace(['https://', 'http://'], '', env('APP_URL'))
-        ),
-        'reverb_port' => env('VITE_REVERB_PORT', 443),
-        'reverb_protocol' => env('VITE_REVERB_SCHEME', 'https'),
-    ],
-
     'broadcasting' => [
         // The connections the "combined" broadcast connection sends every event to.
-        'combined_connections' => explode(',', env('BROADCAST_COMBINED_CONNECTIONS', 'mercure,reverb')),
+        'combined_connections' => explode(',', env('BROADCAST_COMBINED_CONNECTIONS', 'mercure')),
 
         // Events the Mercure hub keeps, so a client that slept can replay what it missed.
         'mercure_history_size' => (int) env('MERCURE_HISTORY_SIZE', 10000),

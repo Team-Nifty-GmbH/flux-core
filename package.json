@@ -42,7 +42,6 @@
         "prettier": "^3.10.1",
         "prettier-plugin-blade": "^3.3.3",
         "prettier-plugin-tailwindcss": "^0.8.1",
-        "pusher-js": "^8.6.0",
         "qs": "^6.17.1",
         "signature_pad": "^5.1.6",
         "tailwindcss": "^4.3.5",
