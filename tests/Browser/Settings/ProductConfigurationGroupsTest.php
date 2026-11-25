@@ -2,6 +2,7 @@
 
 use FluxErp\Models\ProductConfigurationGroup;
 use FluxErp\Models\ProductConfigurationGroupItem;
+use FluxErp\Models\ProductConfigurationRule;
 
 require_once __DIR__ . '/../../Feature/ProductConfiguration/Helpers.php';
 
@@ -27,7 +28,13 @@ function itemModal(string $suffix = ''): string
     return '#edit-product-configuration-group-item-modal' . $suffix;
 }
 
-test('groups and options created in the teleported modals are shown again when reopened', function (): void {
+function ruleModal(string $suffix = ''): string
+{
+    return '#edit-product-configuration-rule-modal' . $suffix;
+}
+
+test('groups, options and rules created in the teleported modals are shown again when reopened', function (): void {
+    $other = configurationGroup(['name' => 'Other Group']);
     $product = configurationProduct(['name' => 'Browser Option Product']);
 
     $page = visit(route('settings.product-configuration-groups'))->assertNoSmoke();
@@ -55,6 +62,18 @@ test('groups and options created in the teleported modals are shown again when r
     $item = ProductConfigurationGroupItem::query()->where('product_configuration_group_id', $group->getKey())->sole();
     expect($item->product_id)->toBe($product->getKey());
 
+    $page->script(configurationGroupsComponent('$wire.editItem(' . $item->getKey() . ')'));
+    $page->wait(1);
+    $page->click(itemModal(' button:has-text("Add rule")'));
+    waitForElement($page, ruleModal());
+    $page->click(ruleModal(' label:has-text("Other Group")'));
+    $page->click(ruleModal(' button:has-text("Save")'));
+    $page->wait(1);
+
+    $rule = ProductConfigurationRule::query()->where('product_configuration_group_item_id', $item->getKey())->sole();
+    expect($rule->target_group_id)->toBe($other->getKey());
+
+    $page->click(itemModal(' button:has-text("Cancel")'));
     $page->click(groupModal(' button:has-text("Cancel")'));
 
     $page->click('New');
@@ -79,9 +98,16 @@ test('groups and options created in the teleported modals are shown again when r
     $page->script(configurationGroupsComponent('$wire.edit(' . $group->getKey() . ')'));
     $page->wait(1);
     $page->assertValue(groupModal(' input[wire\\:model="productConfigurationGroupForm.name"]'), 'Browser Group')
-        ->assertSee('Browser Option Product');
+        ->assertSee('Browser Option Product')
+        ->assertSee('Other Group');
 
     $page->script(configurationGroupsComponent('$wire.editItem(' . $item->getKey() . ')'));
     $page->wait(1);
     $page->assertValue(itemModal(' input[wire\\:model="productConfigurationGroupItemForm.surcharge"]'), '12.5');
+
+    $page->script(configurationGroupsComponent('$wire.editRule(' . $item->getKey() . ', ' . $rule->getKey() . ')'));
+    $page->wait(1);
+    $page->assertScript(
+        "document.querySelector('" . ruleModal(' input[name=\"rule-target-group\"]:checked') . "')?.value === '" . $other->getKey() . "'"
+    );
 });

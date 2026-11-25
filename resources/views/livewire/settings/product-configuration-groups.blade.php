@@ -64,10 +64,25 @@
                     <div
                         class="flex items-center justify-between gap-4 border-b py-2"
                     >
-                        <span
-                            class="font-semibold"
-                            x-text="item.product_name"
-                        ></span>
+                        <div class="flex flex-col">
+                            <span
+                                class="font-semibold"
+                                x-text="item.product_name"
+                            ></span>
+                            <span
+                                class="text-sm text-gray-500"
+                                x-text="
+                                    item.rules
+                                        .map(
+                                            (rule) =>
+                                                rule.rule_type +
+                                                ' ' +
+                                                rule.target,
+                                        )
+                                        .join(', ')
+                                "
+                            ></span>
+                        </div>
                         <div class="flex items-center gap-2">
                             <span x-text="item.surcharge"></span>
                             <x-button
@@ -162,6 +177,61 @@
                 :label="__('Sort')"
                 min="0"
             />
+            <div
+                class="flex flex-col gap-2"
+                x-cloak
+                x-show="$wire.productConfigurationGroupItemForm.id"
+            >
+                <div class="flex items-center justify-between">
+                    <x-label :label="__('Rules')" />
+                    <x-button
+                        color="indigo"
+                        icon="plus"
+                        :text="__('Add rule')"
+                        x-on:click="
+                            $wire.editRule(
+                                $wire.productConfigurationGroupItemForm.id,
+                            )
+                        "
+                    />
+                </div>
+                <template
+                    x-for="
+                        rule in
+                        ($wire.items.find(
+                            (item) =>
+                                item.id ===
+                                $wire.productConfigurationGroupItemForm.id,
+                        )?.rules ?? [])
+                    "
+                    x-bind:key="rule.id"
+                >
+                    <div class="flex items-center justify-between gap-2">
+                        <span
+                            x-text="rule.rule_type + ' ' + rule.target"
+                        ></span>
+                        <div class="flex gap-2">
+                            <x-button
+                                color="indigo"
+                                icon="pencil"
+                                x-on:click="
+                                    $wire.editRule(
+                                        $wire.productConfigurationGroupItemForm
+                                            .id,
+                                        rule.id,
+                                    )
+                                "
+                            />
+                            <x-button
+                                color="red"
+                                icon="trash"
+                                wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Rule')]) }}"
+                                wire:click="deleteRule(rule.id)"
+                            />
+                        </div>
+                    </div>
+                </template>
+            </div>
         </div>
         <x-slot:footer>
             <x-button
@@ -184,6 +254,96 @@
                         if (success)
                             $tsui.close.modal(
                                 'edit-product-configuration-group-item-modal',
+                            );
+                    })
+                "
+            />
+        </x-slot:footer>
+    </x-modal>
+    <x-modal id="edit-product-configuration-rule-modal" :title="__('Rule')">
+        <div
+            class="flex flex-col gap-4"
+            x-data="{ wholeGroup: true }"
+            x-init="
+                $watch('$wire.ruleModalOpens', () => {
+                    wholeGroup =
+                        $wire.productConfigurationRuleForm.target_items
+                            .length === 0;
+                })
+            "
+        >
+            <x-select.native
+                wire:model="productConfigurationRuleForm.rule_type_enum"
+                :label="__('Rule Type Enum')"
+                select="label:label|value:value"
+                :options="$ruleTypes"
+            />
+            <x-toggle
+                x-model="wholeGroup"
+                :label="__('Whole group')"
+                x-on:change="
+                    wholeGroup
+                        ? ($wire.productConfigurationRuleForm.target_items = [])
+                        : ($wire.productConfigurationRuleForm.target_group_id =
+                              null)
+                "
+            />
+            <div class="flex flex-col gap-2" x-cloak x-show="wholeGroup">
+                <x-label :label="__('Target group')" />
+                <template
+                    x-for="group in $wire.ruleOptions.groups"
+                    x-bind:key="group.id"
+                >
+                    <label class="flex items-center gap-2">
+                        <x-radio
+                            name="rule-target-group"
+                            x-bind:value="group.id"
+                            x-model.number="
+                                $wire.productConfigurationRuleForm
+                                    .target_group_id
+                            "
+                        />
+                        <span x-text="group.name"></span>
+                    </label>
+                </template>
+            </div>
+            <div class="flex flex-col gap-2" x-cloak x-show="!wholeGroup">
+                <x-label :label="__('Target options')" />
+                <template
+                    x-for="option in $wire.ruleOptions.items"
+                    x-bind:key="option.id"
+                >
+                    <label class="flex items-center gap-2">
+                        <x-checkbox
+                            x-bind:value="option.id"
+                            x-model.number="
+                                $wire.productConfigurationRuleForm.target_items
+                            "
+                        />
+                        <span x-text="option.name"></span>
+                    </label>
+                </template>
+            </div>
+        </div>
+        <x-slot:footer>
+            <x-button
+                color="secondary"
+                light
+                flat
+                :text="__('Cancel')"
+                x-on:click="
+                    $tsui.close.modal('edit-product-configuration-rule-modal')
+                "
+            />
+            <x-button
+                color="indigo"
+                loading="saveRule"
+                :text="__('Save')"
+                x-on:click="
+                    $wire.saveRule().then((success) => {
+                        if (success)
+                            $tsui.close.modal(
+                                'edit-product-configuration-rule-modal',
                             );
                     })
                 "

@@ -2,11 +2,14 @@
 
 namespace FluxErp\Support\ProductConfiguration;
 
+use FluxErp\Enums\ConfigurationRuleTypeEnum;
 use FluxErp\Enums\ConfigurationSelectionTypeEnum;
 use FluxErp\Models\Product;
 use FluxErp\Models\ProductConfigurationGroup;
 use FluxErp\Models\ProductConfigurationGroupItem;
+use FluxErp\Models\ProductConfigurationRule;
 use FluxErp\Traits\Makeable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
@@ -26,6 +29,8 @@ class ConfigurationValidator
             ->with([
                 'product' => fn (Relation $query) => $query->withTrashed(),
                 'productConfigurationGroup' => fn (Relation $query) => $query->withTrashed(),
+                'productConfigurationRules.targetGroup' => fn (Relation $query) => $query->withTrashed(),
+                'productConfigurationRules.targetItems.product:id,name',
             ])
             ->get()
             ->keyBy(fn (ProductConfigurationGroupItem $item) => $item->getKey());
@@ -38,7 +43,35 @@ class ConfigurationValidator
             ->values();
     }
 
-    public function validate(array $configuration): array
+    public function unsatisfiableRules(): array
+    {
+        $groups = $this->groups();
+
+        return resolve_static(ProductConfigurationRule::class, 'query')
+            ->where('rule_type_enum', ConfigurationRuleTypeEnum::Requires->value)
+            ->whereHas(
+                'productConfigurationGroupItem',
+                fn (Builder $query) => $query->whereIntegerInRaw('product_configuration_group_id', $groups->keys()->all())
+            )
+            ->with([
+                'productConfigurationGroupItem.product:id,name',
+                'targetItems:id,product_configuration_group_id',
+            ])
+            ->get()
+            ->filter(fn (ProductConfigurationRule $rule) => $rule->target_group_id
+                ? ! $groups->has($rule->target_group_id)
+                : $rule->targetItems->doesntContain(
+                    fn (ProductConfigurationGroupItem $target) => $groups->has($target->product_configuration_group_id)
+                ))
+            ->map(fn (ProductConfigurationRule $rule) => __(
+                ':item requires an option from a group that is not attached to this product.',
+                ['item' => $rule->productConfigurationGroupItem->product?->name]
+            ))
+            ->values()
+            ->all();
+    }
+
+    public function validate(array $configuration, bool $isDefault = false): array
     {
         $selection = $this->selection($configuration);
         $groups = $this->groups();
@@ -79,12 +112,25 @@ class ConfigurationValidator
         $this->throwIfAny($messages);
 
         $selectedByGroup = $selection->groupBy(fn (array $entry) => $entry['item']->product_configuration_group_id);
+        $selectedIds = $selection->map(fn (array $entry) => $entry['item']->getKey());
 
         foreach ($groups as $group) {
             $messages = array_merge(
                 $messages,
-                $this->groupViolations($group, $selectedByGroup->get($group->getKey(), collect())->count())
+                $this->groupViolations(
+                    $group,
+                    $selectedByGroup->get($group->getKey(), collect())->count(),
+                    $isDefault
+                )
             );
+        }
+
+        foreach ($selection as $entry) {
+            foreach ($entry['item']->productConfigurationRules as $rule) {
+                if ($message = $this->ruleViolation($entry['item'], $rule, $selectedByGroup, $selectedIds)) {
+                    $messages[] = $message;
+                }
+            }
         }
 
         $this->throwIfAny($messages);
@@ -97,7 +143,7 @@ class ConfigurationValidator
             ->all();
     }
 
-    protected function groupViolations(ProductConfigurationGroup $group, int $count): array
+    protected function groupViolations(ProductConfigurationGroup $group, int $count, bool $isDefault): array
     {
         $messages = [];
         $isRequired = (bool) $group->pivot->is_required;
@@ -107,7 +153,8 @@ class ConfigurationValidator
         }
 
         if ($group->selection_type_enum === ConfigurationSelectionTypeEnum::Multiple) {
-            if (($count > 0 || $isRequired)
+            if (! $isDefault
+                && ($count > 0 || $isRequired)
                 && ! is_null($group->min_selections)
                 && $count < $group->min_selections
             ) {
@@ -125,7 +172,7 @@ class ConfigurationValidator
             }
         }
 
-        if ($isRequired && $count === 0) {
+        if (! $isDefault && $isRequired && $count === 0) {
             $messages[] = __(':group requires a selection.', ['group' => $group->name]);
         }
 
@@ -138,6 +185,43 @@ class ConfigurationValidator
             ->productConfigurationGroups()
             ->get()
             ->keyBy(fn (ProductConfigurationGroup $group) => $group->getKey());
+    }
+
+    protected function ruleViolation(
+        ProductConfigurationGroupItem $item,
+        ProductConfigurationRule $rule,
+        Collection $selectedByGroup,
+        Collection $selectedIds
+    ): ?string {
+        $requires = $rule->rule_type_enum === ConfigurationRuleTypeEnum::Requires;
+        $name = $item->product?->name;
+
+        if ($rule->target_group_id) {
+            $hasSelection = $selectedByGroup->get($rule->target_group_id, collect())->isNotEmpty();
+            $replace = ['item' => $name, 'group' => $rule->targetGroup?->name];
+
+            return match (true) {
+                $requires && ! $hasSelection => __(':item requires a selection in :group.', $replace),
+                ! $requires && $hasSelection => __(':item cannot be combined with a selection in :group.', $replace),
+                default => null,
+            };
+        }
+
+        $hasSelection = $rule->targetItems->contains(
+            fn (ProductConfigurationGroupItem $target) => $selectedIds->contains($target->getKey())
+        );
+        $replace = [
+            'item' => $name,
+            'items' => $rule->targetItems
+                ->map(fn (ProductConfigurationGroupItem $target) => $target->product?->name)
+                ->implode(', '),
+        ];
+
+        return match (true) {
+            $requires && ! $hasSelection => __(':item requires one of :items.', $replace),
+            ! $requires && $hasSelection => __(':item cannot be combined with :items.', $replace),
+            default => null,
+        };
     }
 
     protected function throwIfAny(array $messages): void

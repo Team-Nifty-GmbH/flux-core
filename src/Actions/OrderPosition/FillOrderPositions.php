@@ -538,7 +538,7 @@ class FillOrderPositions extends FluxAction
 
                         $validated['configuration'] = CalculateProductConfigurationPrice::make([
                             'product_id' => $configurableProduct->getKey(),
-                            'configuration' => $orderPosition['configuration'] ?? [],
+                            'configuration' => $orderPosition['configuration'] ?? $configurableProduct->defaultConfiguration(),
                             'price_list_id' => $validated['price_list_id'] ?? $order->price_list_id,
                             'contact_id' => $order->contact_id,
                             'vat_rate_id' => $order->vat_rate_id,

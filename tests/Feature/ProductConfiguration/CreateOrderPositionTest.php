@@ -31,6 +31,10 @@ beforeEach(function (): void {
         ['surcharge' => 0]
     );
     attachConfigurationGroup($this->server, $this->storage, isRequired: true);
+    $this->server->productConfigurationDefaults()->create([
+        'product_configuration_group_item_id' => $this->hdd->getKey(),
+        'amount' => 1,
+    ]);
 
     $this->create = fn (array $data = []) => CreateOrderPosition::make(array_merge([
         'order_id' => $this->order->getKey(),
@@ -58,7 +62,16 @@ test('a configuration creates priced children under the parent', function (): vo
         ->and($child->is_bundle_position)->toBeFalse();
 });
 
-test('without configuration a required group blocks the position', function (): void {
+test('without configuration the defaults are used', function (): void {
+    $parent = ($this->create)();
+
+    expect($parent->currentConfiguration())
+        ->toBe([['product_configuration_group_item_id' => $this->hdd->getKey(), 'amount' => 1]]);
+});
+
+test('without configuration and without defaults a required group blocks the position', function (): void {
+    $this->server->productConfigurationDefaults()->delete();
+
     CreateOrderPosition::assertValidationErrors([
         'order_id' => $this->order->getKey(),
         'product_id' => $this->server->getKey(),
@@ -96,6 +109,20 @@ test('configuration is forbidden for a normal product', function (): void {
     ], 'configuration');
 });
 
+test('defaults with a deleted product block the position instead of creating a child for it', function (): void {
+    $this->hdd->product->delete();
+
+    CreateOrderPosition::assertValidationErrors([
+        'order_id' => $this->order->getKey(),
+        'product_id' => $this->server->getKey(),
+        'amount' => 3,
+    ], 'configuration');
+
+    expect(fn () => ($this->create)())
+        ->toThrow(Illuminate\Validation\ValidationException::class, 'HDD is no longer available.');
+    expect(OrderPosition::query()->where('order_id', $this->order->getKey())->count())->toBe(0);
+});
+
 test('a free text position cannot carry a configuration', function (): void {
     CreateOrderPosition::assertValidationErrors([
         'order_id' => $this->order->getKey(),
@@ -115,9 +142,7 @@ test('creating a position whose configuration total is negative fails', function
 });
 
 test('a child cannot be added to a configured position by hand', function (): void {
-    $parent = ($this->create)([
-        'configuration' => [['product_configuration_group_item_id' => $this->hdd->getKey(), 'amount' => 1]],
-    ]);
+    $parent = ($this->create)();
 
     CreateOrderPosition::assertValidationErrors([
         'order_id' => $this->order->getKey(),

@@ -37,4 +37,9 @@ class ProductConfigurationGroupItem extends FluxModel
     {
         return $this->belongsTo(ProductConfigurationGroup::class);
     }
+
+    public function productConfigurationRules(): HasMany
+    {
+        return $this->hasMany(ProductConfigurationRule::class);
+    }
 }

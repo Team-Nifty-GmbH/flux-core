@@ -82,6 +82,6 @@ class CalculateProductConfigurationPrice extends FluxAction
             ->first();
 
         $this->data['configuration'] = ConfigurationValidator::make($product)
-            ->validate($this->getData('configuration') ?? []);
+            ->validate($this->getData('configuration') ?? $product->defaultConfiguration());
     }
 }
