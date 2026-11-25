@@ -117,6 +117,19 @@ test('running twice settles an agreement only once', function (): void {
         ->toBeFalse();
 });
 
+test('settles an agreement again after its refund order was deleted', function (): void {
+    $agreement = rebateAgreementWithVolume('2025-12-31');
+
+    (new ProcessRebateAgreements())();
+    $deletedOrderId = $agreement->refresh()->rebate_order_id;
+    Order::destroy($deletedOrderId);
+
+    (new ProcessRebateAgreements())();
+
+    expect($agreement->refresh()->rebate_order_id)->not->toBeNull()
+        ->not->toBe($deletedOrderId);
+});
+
 test('a failing agreement does not stop the remaining ones', function (): void {
     $failing = rebateAgreementWithVolume('2025-12-31');
     $failing->update(['tiers' => []]);

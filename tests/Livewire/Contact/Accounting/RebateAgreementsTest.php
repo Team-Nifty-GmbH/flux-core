@@ -123,6 +123,36 @@ test('calculating a settled agreement opens no preview', function (): void {
         ->assertToastNotification(type: 'error');
 });
 
+test('rows report whether the refund order still exists', function (): void {
+    $settledAgreement = fn () => RebateAgreement::factory()->create([
+        'contact_id' => $this->contact->getKey(),
+        'rebate_order_id' => Order::factory()->create([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'order_type_id' => OrderType::factory()->create(['order_type_enum' => OrderTypeEnum::Refund])->getKey(),
+            'currency_id' => Currency::factory()->create()->getKey(),
+            'price_list_id' => PriceList::factory()->create()->getKey(),
+            'address_invoice_id' => Address::factory()->create(['contact_id' => $this->contact->getKey()])->getKey(),
+        ])->getKey(),
+        'settled_at' => now(),
+    ]);
+    $settled = $settledAgreement();
+    $reopened = $settledAgreement();
+    $reopened->rebateOrder->delete();
+
+    $rows = collect(
+        data_get(
+            Livewire::test(RebateAgreements::class, ['contactId' => $this->contact->getKey()])
+                ->call('loadData')
+                ->instance()
+                ->getDataForTesting(),
+            'data'
+        )
+    )->pluck('rebate_order_exists', 'id');
+
+    expect($rows->get($settled->getKey()))->toBeTrue()
+        ->and($rows->get($reopened->getKey()))->toBeFalse();
+});
+
 test('can delete an unsettled agreement', function (): void {
     $agreement = RebateAgreement::factory()->create(['contact_id' => $this->contact->getKey()]);
 

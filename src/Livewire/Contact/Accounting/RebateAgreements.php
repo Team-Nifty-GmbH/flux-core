@@ -43,7 +43,7 @@ class RebateAgreements extends RebateAgreementList
                 ->color('indigo')
                 ->when(fn () => resolve_static(SettleRebateAgreement::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'x-bind:disabled' => 'record.settled_at',
+                    'x-bind:disabled' => 'record.rebate_order_exists',
                     'wire:click' => 'calculate(record.id)',
                 ]),
             DataTableButton::make()
@@ -52,7 +52,7 @@ class RebateAgreements extends RebateAgreementList
                 ->color('indigo')
                 ->when(fn () => resolve_static(UpdateRebateAgreement::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'x-bind:disabled' => 'record.settled_at',
+                    'x-bind:disabled' => 'record.rebate_order_exists',
                     'wire:click' => 'edit(record.id)',
                 ]),
             DataTableButton::make()
@@ -61,7 +61,7 @@ class RebateAgreements extends RebateAgreementList
                 ->color('red')
                 ->when(fn () => resolve_static(DeleteRebateAgreement::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'x-bind:disabled' => 'record.settled_at',
+                    'x-bind:disabled' => 'record.rebate_order_exists',
                     'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Rebate Agreement')]),
                     'wire:click' => 'delete(record.id)',
                 ]),
@@ -114,6 +114,12 @@ class RebateAgreements extends RebateAgreementList
     protected function getBuilder(Builder $builder): Builder
     {
         return parent::getBuilder($builder)
-            ->where('contact_id', $this->contactId);
+            ->where('contact_id', $this->contactId)
+            ->withExists('rebateOrder');
+    }
+
+    protected function getReturnKeys(): array
+    {
+        return array_merge(parent::getReturnKeys(), ['rebate_order_exists']);
     }
 }
