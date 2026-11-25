@@ -269,7 +269,7 @@ class UpdateProduct extends DispatchableFluxAction implements SupportsBulkExecut
                 ->exists()
         ) {
             throw ValidationException::withMessages([
-                $flag => [__('A product used as a configuration option must stay a plain product.')],
+                $flag => [__('Configuration options must stay plain products.')],
             ])
                 ->errorBag('updateProduct');
         }
