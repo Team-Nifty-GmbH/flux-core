@@ -314,6 +314,39 @@ test('flux:optimize-clear tolerates a cache file deleted by another process', fu
     }
 });
 
+test('flux:optimize-clear fails when a cache file cannot be deleted', function (): void {
+    stream_wrapper_register('flux-optimize-locked', FluxOptimizeLockedStream::class);
+
+    try {
+        app()->useBootstrapPath('flux-optimize-locked://bootstrap');
+
+        expect(fn () => $this->artisan('flux:optimize-clear')->run())
+            ->toThrow(
+                RuntimeException::class,
+                'Could not delete flux-optimize-locked://bootstrap/cache/flux-livewire-components.php'
+            );
+    } finally {
+        stream_wrapper_unregister('flux-optimize-locked');
+    }
+});
+
+class FluxOptimizeLockedStream
+{
+    public $context;
+
+    public function unlink(string $path): bool
+    {
+        trigger_error('unlink(' . $path . '): Permission denied', E_USER_WARNING);
+
+        return false;
+    }
+
+    public function url_stat(string $path, int $flags): array|false
+    {
+        return stat(__FILE__);
+    }
+}
+
 class FluxOptimizeRaceStream
 {
     public static array $gone = [];
