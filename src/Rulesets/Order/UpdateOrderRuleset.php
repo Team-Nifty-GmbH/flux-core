@@ -177,6 +177,7 @@ class UpdateOrderRuleset extends FluxRuleset
                 app(UniqueInFieldDependence::class, ['model' => Order::class, 'dependingField' => 'tenant_id']),
             ],
             'commission' => 'string|max:255|nullable',
+            'host_name' => 'string|max:255|nullable',
             'payment_purpose_pattern' => 'nullable|string|max:255',
             'header' => 'string|nullable',
             'footer' => 'string|nullable',
