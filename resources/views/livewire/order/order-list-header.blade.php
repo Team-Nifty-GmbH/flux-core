@@ -627,6 +627,21 @@
                         :text="__('Cancel')"
                         x-on:click="$tsui.close.modal('edit-order-position')"
                     />
+                    <div
+                        x-cloak
+                        x-show="
+                            $wire.orderPosition.id &&
+                            $wire.orderPosition.is_configurable &&
+                            !$wire.order.is_locked
+                        "
+                    >
+                        <x-button
+                            color="indigo"
+                            light
+                            :text="__('Change configuration')"
+                            x-on:click="$wire.editConfiguration()"
+                        />
+                    </div>
                     @stack('order-edit-position-modal-footer')
                     <x-button
                         color="indigo"
@@ -645,4 +660,5 @@
             </div>
         </x-slot:footer>
     </x-modal>
+    @include('flux::livewire.order.product-configurator')
 </div>
