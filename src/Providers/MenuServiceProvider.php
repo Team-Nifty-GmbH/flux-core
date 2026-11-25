@@ -79,7 +79,8 @@ class MenuServiceProvider extends ServiceProvider
             label: 'Accounting',
             closure: function (): void {
                 Menu::register(route: 'accounting.commissions');
-                Menu::register(route: 'accounting.payment-reminders');
+                Menu::register(route: 'accounting.ledger-bookings');
+                Menu::register(route: 'accounting.loans');
                 Menu::register(route: 'accounting.payment-reminder-run');
                 Menu::register(route: 'accounting.purchase-invoices');
                 Menu::register(route: 'accounting.transactions');
@@ -95,10 +96,13 @@ class MenuServiceProvider extends ServiceProvider
             icon: 'square-3-stack-3d',
             label: 'Products',
             closure: function (): void {
+                Menu::register(route: 'products.expiring-stock');
                 Menu::register(route: 'products.products');
                 Menu::register(route: 'products.serial-numbers');
             }
         );
+
+        Menu::register(route: 'resources.resources', icon: 'cube', label: 'Resources', path: 'resources');
 
         Menu::group(
             path: 'human-resources',
@@ -132,6 +136,7 @@ class MenuServiceProvider extends ServiceProvider
             closure: function (): void {
                 // General
                 Menu::group(path: 'settings.children.general', label: 'General');
+                Menu::register(route: 'settings.blocked-files', path: 'settings.children.general.children.blocked-files');
                 Menu::register(route: 'settings.categories', path: 'settings.children.general.children.categories');
                 Menu::register(route: 'settings.countries', path: 'settings.children.general.children.countries');
                 Menu::register(route: 'settings.country-regions', path: 'settings.children.general.children.country-regions');
@@ -162,6 +167,7 @@ class MenuServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.price-lists', path: 'settings.children.products.children.price-lists');
                 Menu::register(route: 'settings.product-option-groups', path: 'settings.children.products.children.product-option-groups');
                 Menu::register(route: 'settings.product-properties', path: 'settings.children.products.children.product-properties');
+                Menu::register(route: 'settings.storage-areas', path: 'settings.children.products.children.storage-areas');
                 Menu::register(route: 'settings.units', path: 'settings.children.products.children.units');
                 Menu::register(route: 'settings.warehouses', path: 'settings.children.products.children.warehouses');
 
@@ -215,6 +221,7 @@ class MenuServiceProvider extends ServiceProvider
 
                 // System
                 Menu::group(path: 'settings.children.system', label: 'System');
+                Menu::register(route: 'settings.activity-log-settings', path: 'settings.children.system.children.activity-log-settings');
                 Menu::register(route: 'settings.activity-logs', path: 'settings.children.system.children.activity-logs');
                 Menu::register(route: 'settings.core-settings', path: 'settings.children.system.children.core-settings');
                 Menu::register(route: 'settings.failed-jobs', path: 'settings.children.system.children.failed-jobs');

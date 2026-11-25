@@ -5,6 +5,7 @@ namespace FluxErp\Rulesets\Discount;
 use FluxErp\Models\Discount;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
+use FluxErp\Rules\NotZero;
 use FluxErp\Rulesets\FluxRuleset;
 
 class CreateDiscountRuleset extends FluxRuleset
@@ -27,7 +28,11 @@ class CreateDiscountRuleset extends FluxRuleset
                 app(MorphExists::class),
             ],
             'name' => 'nullable|string|max:255',
-            'discount' => 'required|numeric|not_in:0',
+            'discount' => [
+                'required',
+                'numeric',
+                app(NotZero::class),
+            ],
             'from' => 'nullable|date_format:Y-m-d H:i:s',
             'till' => 'nullable|date_format:Y-m-d H:i:s',
             'order_column' => 'nullable|integer|min:1',

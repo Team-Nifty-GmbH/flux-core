@@ -46,6 +46,15 @@
             <p style="font-weight: 600; margin: 0; padding: 0">
                 {{ render_editor_blade($position->name, ['position' => $position]) }}
             </p>
+            @if ($position->system_delivery_date)
+                <p style="font-size: 12px; margin: 0; padding: 0">
+                    {{ __('Performance Date') }}: {{ $position->system_delivery_date->locale(app()->getLocale())->isoFormat('L') }}
+                    @if ($position->system_delivery_date_end && $position->system_delivery_date_end->format('Y-m-d') !== $position->system_delivery_date->format('Y-m-d'))
+                        {{ __('to') }}
+                        {{ $position->system_delivery_date_end->locale(app()->getLocale())->isoFormat('L') }}
+                    @endif
+                </p>
+            @endif
         </td>
         <td
             style="

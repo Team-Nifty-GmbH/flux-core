@@ -49,9 +49,14 @@ class BroadcastableActionEventOccurred implements ShouldBroadcast
         $this->event = $event;
     }
 
+    public function shouldBroadcastNow(): bool
+    {
+        return true;
+    }
+
     public function broadcastAs(): string
     {
-        $default = class_basename($this->action) . ucfirst($this->event);
+        $default = $this->action::getBroadcastEventName($this->event);
 
         return method_exists($this->action, 'broadcastAs')
             ? ($this->action->broadcastAs($this->event) ?: $default)

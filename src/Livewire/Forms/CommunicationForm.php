@@ -38,6 +38,9 @@ class CommunicationForm extends FluxForm
 
     public ?int $mail_folder_id = null;
 
+    #[Locked]
+    public ?string $send_error = null;
+
     public ?string $slug = null;
 
     public ?string $subject = null;
@@ -62,6 +65,8 @@ class CommunicationForm extends FluxForm
         if (is_null($values)) {
             return;
         }
+
+        $model = $values instanceof Communication ? $values : null;
 
         if ($values instanceof Communication) {
             $values->loadMissing(['tags:id', 'communicatables']);
@@ -104,6 +109,10 @@ class CommunicationForm extends FluxForm
 
             $this->slug = $message->mailAccount ?
                 $message->mailAccount->email . ' -> ' . $message->mailFolder?->slug : null;
+        }
+
+        if ($model) {
+            $this->rememberLoadedData($model);
         }
     }
 

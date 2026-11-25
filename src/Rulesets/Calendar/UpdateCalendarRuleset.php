@@ -34,7 +34,7 @@ class UpdateCalendarRuleset extends FluxRuleset
             'parent_id' => [
                 'nullable',
                 'integer',
-                (app(ModelExists::class, ['model' => Calendar::class]))
+                (app(ModelExists::class, ['model' => Calendar::class, 'subject' => Calendar::class]))
                     ->where('is_group', true),
             ],
             'name' => 'sometimes|required|string|max:255',

@@ -2,12 +2,14 @@
 
 namespace FluxErp\Traits\Model;
 
+use FluxErp\Events\BroadcastableModelEventOccurred;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\PendingBroadcast;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Database\Eloquent\BroadcastableModelEventOccurred;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents as BaseBroadcastsEvents;
+use function Illuminate\Support\defer;
 
 trait BroadcastsEvents
 {
@@ -39,9 +41,19 @@ trait BroadcastsEvents
         return ['created'];
     }
 
+    public static function getModelChannelEvents(): array
+    {
+        return ['updated', 'deleted', 'trashed', 'restored'];
+    }
+
     public static function getWithoutBroadcasting(): bool
     {
         return static::$withoutBroadcasting;
+    }
+
+    public static function recordBroadcastChannel(int|string $key): string
+    {
+        return static::getBroadcastChannel() . $key;
     }
 
     public function broadcastChannel(): string
@@ -66,12 +78,15 @@ trait BroadcastsEvents
     public function broadcastOn(string $event): array|Channel
     {
         $channel = $this->broadcastChannel();
+        $modelChannel = Str::beforeLast($channel, '.') . '.';
 
-        return new PrivateChannel(
-            in_array($event, static::getGenericChannelEvents())
-                ? Str::beforeLast($channel, '.') . '.'
-                : $channel
-        );
+        if (in_array($event, static::getGenericChannelEvents())) {
+            return new PrivateChannel($modelChannel);
+        }
+
+        return in_array($event, static::getModelChannelEvents())
+            ? [new PrivateChannel($channel), new PrivateChannel($modelChannel)]
+            : new PrivateChannel($channel);
     }
 
     public function broadcastWith(): array
@@ -79,6 +94,33 @@ trait BroadcastsEvents
         return static::getBroadcastOnlyKey() && method_exists($this, 'getKey')
             ? ['model' => [$this->getKeyName() => $this->getKey()]]
             : $this->baseBroadcastWith();
+    }
+
+    protected function broadcastIfBroadcastChannelsExistForEvent(
+        $instance,
+        $event,
+        $channels = null
+    ): ?PendingBroadcast {
+        if (! static::$isBroadcasting) {
+            return null;
+        }
+
+        if ($instance instanceof BroadcastableModelEventOccurred) {
+            $instance->broadcastNow();
+        }
+
+        $channels = Arr::wrap($channels ?? $this->broadcastOn($event));
+
+        defer(
+            function () use ($instance, $channels): void {
+                if ($channels) {
+                    broadcast($instance->onChannels($channels));
+                }
+            },
+            always: true
+        );
+
+        return null;
     }
 
     protected function broadcastToEveryone(): bool
@@ -97,5 +139,15 @@ trait BroadcastsEvents
         }
 
         return $event;
+    }
+
+    protected function recordBroadcastChannels(string $model, array $keys): array
+    {
+        return array_map(
+            fn (int|string $key): PrivateChannel => new PrivateChannel(
+                resolve_static($model, 'recordBroadcastChannel', ['key' => $key])
+            ),
+            array_values(array_unique(array_filter($keys)))
+        );
     }
 }

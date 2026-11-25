@@ -243,7 +243,7 @@ class AddressList extends BaseDataTable
         try {
             $this->createContactForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->createContactForm);
 
             return false;
         }
@@ -296,7 +296,7 @@ class AddressList extends BaseDataTable
         );
     }
 
-    protected function getPreferredLanguageId(OffersPrinting $item): int
+    protected function getPreferredLanguageId(OffersPrinting $item): ?int
     {
         return $item->language_id;
     }

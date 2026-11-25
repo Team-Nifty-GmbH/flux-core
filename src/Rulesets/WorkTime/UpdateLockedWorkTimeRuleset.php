@@ -30,7 +30,7 @@ class UpdateLockedWorkTimeRuleset extends FluxRuleset
                 'required_without:employee_id',
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => User::class])
+                app(ModelExists::class, ['model' => User::class, 'subject' => WorkTime::class])
                     ->where('is_active', true),
             ],
             'employee_id' => [
@@ -38,23 +38,23 @@ class UpdateLockedWorkTimeRuleset extends FluxRuleset
                 'required_without:user_id',
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => User::class])
+                app(ModelExists::class, ['model' => User::class, 'subject' => WorkTime::class])
                     ->where('is_active', true),
             ],
             'contact_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Contact::class]),
+                app(ModelExists::class, ['model' => Contact::class, 'subject' => WorkTime::class]),
             ],
             'order_position_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => OrderPosition::class]),
+                app(ModelExists::class, ['model' => OrderPosition::class, 'subject' => WorkTime::class]),
             ],
             'work_time_type_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => WorkTimeType::class]),
+                app(ModelExists::class, ['model' => WorkTimeType::class, 'subject' => WorkTime::class]),
             ],
             'trackable_type' => [
                 'required_with:trackable_id',

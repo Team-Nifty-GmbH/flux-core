@@ -3,6 +3,7 @@
 use FluxErp\Livewire\Widgets\SearchBar;
 use FluxErp\Models\Order;
 use FluxErp\Models\Permission;
+use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
@@ -27,3 +28,8 @@ test('renderSearchBarWidget does not show a widget for a model that no longer ex
         ->assertSet('show', false)
         ->assertSet('widgetComponent', null);
 });
+
+test('does not accept a component from the client', function (): void {
+    Livewire::test(SearchBar::class)
+        ->set('widgetComponent', 'settings.users');
+})->throws(CannotUpdateLockedPropertyException::class);

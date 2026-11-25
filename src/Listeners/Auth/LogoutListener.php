@@ -13,6 +13,6 @@ class LogoutListener
                 'user_agent' => request()->userAgent(),
             ])
             ->event('logged_out')
-            ->log(trim(($event->user->name ?? '') . ' logged out'));
+            ->log(trim(__(':name logged out', ['name' => $event->user->name ?? ''])));
     }
 }

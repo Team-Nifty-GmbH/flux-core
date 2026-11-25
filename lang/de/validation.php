@@ -134,6 +134,7 @@ return [
     'required_with_all' => ':Attribute muss ausgefüllt werden, wenn :values ausgefüllt wurde.',
     'required_without' => ':Attribute muss ausgefüllt werden, wenn :values nicht ausgefüllt wurde.',
     'required_without_all' => ':Attribute muss ausgefüllt werden, wenn keines der Felder :values ausgefüllt wurde.',
+    'resource_unavailable' => 'Die ausgewählte Ressource ist im gewählten Zeitraum nicht verfügbar.',
     'same' => ':Attribute und :other müssen übereinstimmen.',
     'size' => [
         'array' => ':Attribute muss genau :size Elemente haben.',
@@ -514,6 +515,7 @@ return [
         'packages' => 'Pakete',
         'packages.*' => 'Paket',
         'parameters' => 'Parameter',
+        'parent_collection' => 'Übergeordneter Ordner',
         'parent_id' => 'Eltern-ID',
         'password' => 'Passwort',
         'paused_time_ms' => 'Pausenzeit in ms',
@@ -637,7 +639,6 @@ return [
         'serial_number_range_id' => 'Seriennummernbereich-ID',
         'session_id' => 'Sitzungs-ID',
         'settings' => 'Einstellungen',
-        'shipping_costs_net_price' => 'Versandkosten Nettopreis',
         'signed_date' => 'Unterschriftsdatum',
         'simulate' => 'Simulieren',
         'slug' => 'Slug',

@@ -1,7 +1,23 @@
 <?php
 
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Jobs\CreateDocumentsJob;
+use FluxErp\Models\Address;
+use FluxErp\Models\Contact;
+use FluxErp\Models\Currency;
+use FluxErp\Models\Order;
+use FluxErp\Models\OrderType;
+use FluxErp\Models\PaymentType;
+use FluxErp\Models\PriceList;
+use FluxErp\Models\Printer;
+use FluxErp\Models\PrintJob;
+use FluxErp\View\Printing\PrintableView;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 test('deduplicates preview filenames in zip', function (): void {
     Storage::fake();
@@ -42,6 +58,27 @@ test('deduplicates preview filenames in zip', function (): void {
     unlink($tmpZip);
 });
 
+test('keeps the extension of a single stored file', function (): void {
+    Storage::fake();
+
+    $contact = Contact::factory()->create();
+    $media = $contact
+        ->addMediaFromString('<xml />')
+        ->usingFileName('invoice.xml')
+        ->toMediaCollection('test');
+
+    $job = app(CreateDocumentsJob::class, [
+        'items' => [],
+        'selectedPrintLayouts' => ['download' => ['test']],
+        'userMorph' => 'user:' . $this->user->getKey(),
+    ]);
+
+    $filePath = (new ReflectionMethod($job, 'storeFiles'))->invoke($job, [], [$media]);
+
+    expect($filePath)->toEndWith('/invoice.xml')
+        ->and(Storage::get($filePath))->toBe('<xml />');
+});
+
 test('keeps unique filenames unchanged in zip', function (): void {
     Storage::fake();
 
@@ -74,4 +111,132 @@ test('keeps unique filenames unchanged in zip', function (): void {
 
     $zip->close();
     unlink($tmpZip);
+});
+
+test('invoice of an order whose contact was deleted fails validation and assigns no number', function (): void {
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
+
+    $order = Order::factory()
+        ->for(Currency::factory())
+        ->create([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'language_id' => $this->defaultLanguage->getKey(),
+            'order_type_id' => OrderType::factory()
+                ->create([
+                    'order_type_enum' => OrderTypeEnum::Order,
+                    'print_layouts' => ['invoice'],
+                ])
+                ->getKey(),
+            'payment_type_id' => PaymentType::factory()
+                ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
+                ->create()
+                ->getKey(),
+            'price_list_id' => PriceList::factory()->create()->getKey(),
+            'contact_id' => $contact->getKey(),
+            'address_invoice_id' => $address->getKey(),
+            'address_delivery_id' => $address->getKey(),
+            'invoice_number' => null,
+            'is_locked' => false,
+        ]);
+
+    $contact->delete();
+
+    $job = app(CreateDocumentsJob::class, [
+        'items' => [
+            [
+                'model_type' => $order->getMorphClass(),
+                'model_id' => $order->getKey(),
+                'layouts' => ['invoice'],
+            ],
+        ],
+        'selectedPrintLayouts' => ['download' => ['invoice']],
+        'userMorph' => 'user:' . $this->user->getKey(),
+    ]);
+
+    try {
+        $job->throwException()->handle();
+        $this->fail('Expected a validation error for the deleted contact.');
+    } catch (ValidationException $e) {
+        expect($e->errors())->toHaveKey('contact_id');
+    }
+
+    expect($order->refresh()->invoice_number)->toBeNull();
+});
+
+class NotPrintableTestView extends PrintableView
+{
+    public function __construct(public Contact $contact) {}
+
+    public static function isPrintable(): bool
+    {
+        return false;
+    }
+
+    public function render(): View
+    {
+        return view('flux::printing.order.invoice');
+    }
+
+    public function getFileName(): string
+    {
+        return 'not-printable';
+    }
+
+    public function getModel(): ?Model
+    {
+        return $this->contact;
+    }
+
+    public function getSubject(): string
+    {
+        return 'Not printable';
+    }
+
+    public function print(): static
+    {
+        return $this;
+    }
+
+    public function attachToModel(?Model $model = null): ?Media
+    {
+        return $this->contact
+            ->addMediaFromString('<xml />')
+            ->usingFileName('not-printable.xml')
+            ->toMediaCollection('not-printable');
+    }
+}
+
+test('sends no print job for a view that is not printable', function (): void {
+    Contact::registerPrintView('not-printable', NotPrintableTestView::class);
+    Notification::fake();
+
+    $contact = Contact::factory()->create();
+    $printer = Printer::query()->create([
+        'name' => 'Printer',
+        'spooler_name' => 'spooler',
+        'media_sizes' => ['A4'],
+    ]);
+
+    try {
+        app(CreateDocumentsJob::class, [
+            'items' => [
+                [
+                    'model_type' => $contact->getMorphClass(),
+                    'model_id' => $contact->getKey(),
+                    'layouts' => ['not-printable'],
+                ],
+            ],
+            'selectedPrintLayouts' => ['print' => ['not-printable']],
+            'userMorph' => 'user:' . $this->user->getKey(),
+            'printerId' => $printer->getKey(),
+            'printerSize' => 'A4',
+        ])
+            ->throwException()
+            ->handle();
+    } finally {
+        Contact::$registeredPrintViews = [];
+    }
+
+    expect(PrintJob::query()->count())->toBe(0);
 });

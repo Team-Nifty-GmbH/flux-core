@@ -6,7 +6,9 @@ use FluxErp\Livewire\Forms\CommentForm;
 use FluxErp\Models\Comment;
 use FluxErp\Models\Scopes\FamilyTreeScope;
 use FluxErp\Models\User;
+use FluxErp\Support\Mentions\MentionPillRefresher;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\BindsModelRecord;
 use FluxErp\Traits\Livewire\WithFilePond;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -14,6 +16,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
@@ -24,7 +27,7 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 abstract class Comments extends Component
 {
-    use Actions, WithFilePond, WithPagination;
+    use Actions, BindsModelRecord, WithFilePond, WithPagination;
 
     public CommentForm $commentForm;
 
@@ -71,7 +74,7 @@ abstract class Comments extends Component
         try {
             $this->commentForm->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->commentForm);
 
             return false;
         }
@@ -114,9 +117,13 @@ abstract class Comments extends Component
                 )
                 ->paginate(page: $this->commentPage);
 
-            $data = $comments->getCollection()->map(function ($comment) {
+            $refresher = app(MentionPillRefresher::class);
+
+            $data = $comments->getCollection()->map(function ($comment) use ($refresher): Comment {
                 $comment->is_current_user = $comment->getRawOriginal('created_by')
                     === auth()->user()?->getMorphClass() . ':' . auth()->id();
+
+                $this->refreshMentionPills($comment, $refresher);
 
                 return $comment;
             });
@@ -160,7 +167,7 @@ abstract class Comments extends Component
             return [];
         }
 
-        return resolve_static(Comment::class, 'withTemporaryGlobalScopes', [
+        $comments = resolve_static(Comment::class, 'withTemporaryGlobalScopes', [
             'scopes' => [
                 'media' => fn (Builder $query) => $query->with('media:id,name,model_type,model_id,disk'),
                 'ordered' => fn (Builder $query) => $query->orderBy('id', 'desc'),
@@ -173,10 +180,16 @@ abstract class Comments extends Component
                 fn (Builder $query) => $query->where('is_internal', false)
             )
             ->where('is_sticky', true)
-            ->get()
-            ->map(function (Comment $comment) {
+            ->get();
+
+        $refresher = app(MentionPillRefresher::class);
+
+        return $comments
+            ->map(function (Comment $comment) use ($refresher): Comment {
                 $comment->is_current_user = $comment->getRawOriginal('created_by')
                     === auth()->user()?->getMorphClass() . ':' . auth()->id();
+
+                $this->refreshMentionPills($comment, $refresher);
 
                 return $comment;
             })
@@ -204,15 +217,17 @@ abstract class Comments extends Component
         }
 
         try {
-            $this->commentForm->save();
-            $this->submitFiles(
-                'default',
-                $files,
-                morph_alias(Comment::class),
-                $this->commentForm->id
-            );
+            DB::transaction(function () use ($files): void {
+                $this->commentForm->save();
+                $this->submitFiles(
+                    'default',
+                    $files,
+                    morph_alias(Comment::class),
+                    $this->commentForm->id
+                );
+            });
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->commentForm);
 
             return null;
         }
@@ -238,7 +253,47 @@ abstract class Comments extends Component
         try {
             $this->commentForm->save();
         } catch (ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->commentForm);
+        }
+    }
+
+    #[Renderless]
+    public function updateComment(int $id, string $comment): ?array
+    {
+        $this->commentForm->reset();
+        $this->commentForm->fill([
+            'id' => $id,
+            'comment' => $comment,
+        ]);
+
+        try {
+            $this->commentForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this, form: $this->commentForm);
+
+            return null;
+        }
+
+        $comment = $this->commentForm->getActionResult();
+        $this->refreshMentionPills($comment, app(MentionPillRefresher::class));
+
+        return [
+            'id' => $comment->getKey(),
+            'comment' => $comment->comment,
+            'edited_at' => $comment->edited_at,
+        ];
+    }
+
+    protected function refreshMentionPills(Comment $comment, MentionPillRefresher $refresher): void
+    {
+        if (is_string($comment->comment)) {
+            $comment->comment = $refresher->refresh($comment->comment);
+        }
+
+        if ($comment->relationLoaded('children')) {
+            $comment->children->each(function (Comment $child) use ($refresher): void {
+                $this->refreshMentionPills($child, $refresher);
+            });
         }
     }
 }

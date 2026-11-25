@@ -22,11 +22,18 @@ class VatRate extends FluxModel
     {
         return [
             'is_default' => 'boolean',
+            'is_purchase' => 'boolean',
+            'is_sales' => 'boolean',
             'is_tax_exemption' => 'boolean',
         ];
     }
 
     // Relations
+    public function countries(): HasMany
+    {
+        return $this->hasMany(Country::class, 'tax_exemption_id');
+    }
+
     public function orderPositions(): HasMany
     {
         return $this->hasMany(OrderPosition::class);

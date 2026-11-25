@@ -25,12 +25,12 @@ class UpdateTransactionRuleset extends FluxRuleset
             'parent_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Transaction::class]),
+                app(ModelExists::class, ['model' => Transaction::class, 'subject' => Transaction::class]),
             ],
             'currency_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Currency::class]),
+                app(ModelExists::class, ['model' => Currency::class, 'subject' => Transaction::class]),
             ],
             'value_date' => 'sometimes|required|date',
             'booking_date' => 'sometimes|required|date',
@@ -40,6 +40,7 @@ class UpdateTransactionRuleset extends FluxRuleset
                 app(Numeric::class),
             ],
             'purpose' => 'string|nullable',
+            'end_to_end_reference' => 'nullable|string|max:255',
             'type' => 'string|max:255|nullable',
             'counterpart_name' => 'string|max:255|nullable',
             'counterpart_account_number' => 'string|max:255|nullable',

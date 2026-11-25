@@ -52,6 +52,12 @@ class DeleteCountry extends FluxAction
             ];
         }
 
+        if ($country->lots()->exists()) {
+            $errors += [
+                'lot' => ['Country referenced by a lot'],
+            ];
+        }
+
         if ($country->tenants()->exists()) {
             $errors += [
                 'tenant' => ['Country referenced by a tenant'],

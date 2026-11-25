@@ -18,7 +18,7 @@ class UpdateEventSubscriptionRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => EventSubscription::class])
                     ->where('subscribable_id', auth()->id())
-                    ->where('subscribable_type', auth()->user()->getMorphClass()),
+                    ->where('subscribable_type', auth()->user()?->getMorphClass()),
             ],
             'channel' => 'sometimes|required|string',
             'event' => 'sometimes|required|string',

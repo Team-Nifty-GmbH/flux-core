@@ -10,7 +10,7 @@
         <div class="flex items-center space-x-5">
             @section('lead.title')
                 @section('lead.title.avatar')
-                    <x-avatar xl :image="$leadForm->avatar" />
+                    <x-avatar :image="$leadForm->avatar" />
                 @show
                 @section('lead.title.name')
                     <div>

@@ -8,12 +8,15 @@ use FluxErp\Models\Country;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDepartment;
 use FluxErp\Models\Location;
+use FluxErp\Models\Scopes\UserTenantScope;
+use FluxErp\Models\User;
 use FluxErp\Models\VacationCarryoverRule;
 use FluxErp\Rules\EnumRule;
 use FluxErp\Rules\Iban;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Database\Eloquent\Builder;
 
 class UpdateEmployeeRuleset extends FluxRuleset
 {
@@ -28,27 +31,37 @@ class UpdateEmployeeRuleset extends FluxRuleset
             'country_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Country::class]),
+                app(ModelExists::class, ['model' => Country::class, 'subject' => Employee::class]),
             ],
             'employee_department_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => EmployeeDepartment::class]),
+                app(ModelExists::class, ['model' => EmployeeDepartment::class, 'subject' => Employee::class]),
             ],
             'location_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Location::class]),
+                app(ModelExists::class, ['model' => Location::class, 'subject' => Employee::class]),
             ],
             'supervisor_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Employee::class]),
+                app(ModelExists::class, ['model' => Employee::class, 'subject' => Employee::class]),
+            ],
+            'user_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => User::class, 'subject' => Employee::class])
+                    ->withoutGlobalScope(UserTenantScope::class)
+                    ->where('is_active', true)
+                    ->whereDoesntHave('employee', fn (Builder $query) => $query
+                        ->withoutGlobalScope(UserTenantScope::class)
+                    ),
             ],
             'vacation_carryover_rule_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => VacationCarryoverRule::class]),
+                app(ModelExists::class, ['model' => VacationCarryoverRule::class, 'subject' => Employee::class]),
             ],
             'salutation' => [
                 'nullable',

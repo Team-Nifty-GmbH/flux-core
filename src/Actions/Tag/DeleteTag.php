@@ -2,11 +2,12 @@
 
 namespace FluxErp\Actions\Tag;
 
-use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\DispatchableFluxAction;
+use FluxErp\Contracts\SupportsBulkExecution;
 use FluxErp\Models\Tag;
 use FluxErp\Rulesets\Tag\DeleteTagRuleset;
 
-class DeleteTag extends FluxAction
+class DeleteTag extends DispatchableFluxAction implements SupportsBulkExecution
 {
     public static function models(): array
     {

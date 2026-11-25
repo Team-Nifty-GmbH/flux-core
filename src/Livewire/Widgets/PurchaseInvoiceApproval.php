@@ -3,6 +3,8 @@
 namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Models\Order;
+use FluxErp\Models\User;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -37,7 +39,7 @@ class PurchaseInvoiceApproval extends Component
         return view(
             'flux::livewire.widgets.purchase-invoice-approval',
             [
-                'invoices' => resolve_static(\FluxErp\Models\Order::class, 'query')
+                'invoices' => resolve_static(Order::class, 'query')
                     ->where('approval_user_id', auth()->id())
                     ->where('is_confirmed', false)
                     ->with([
@@ -63,5 +65,14 @@ class PurchaseInvoiceApproval extends Component
     public function placeholder(): View|Factory
     {
         return view('flux::livewire.placeholders.horizontal-bar');
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(User::class, auth()->id()) => [
+                Order::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
     }
 }

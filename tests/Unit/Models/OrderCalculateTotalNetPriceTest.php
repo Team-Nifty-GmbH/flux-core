@@ -9,6 +9,7 @@ use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use Illuminate\Support\Facades\Schema;
 
 test('excludes free text positions from total net price calculation', function (): void {
     $contact = Contact::factory()->create();
@@ -30,7 +31,6 @@ test('excludes free text positions from total net price calculation', function (
         'price_list_id' => PriceList::default()->getKey(),
         'payment_type_id' => PaymentType::default()->getKey(),
         'currency_id' => Currency::default()->getKey(),
-        'shipping_costs_net_price' => 0,
         'is_locked' => false,
     ]);
 
@@ -80,4 +80,11 @@ test('excludes free text positions from total net price calculation', function (
     // 300 + 200 + 100 = 600 (free text parent's DB value of 500 must NOT be counted)
     expect((string) $order->total_net_price)->toBe('600')
         ->and((string) $order->total_base_net_price)->toBe('600');
+});
+
+test('an order total no longer carries shipping costs of its own', function (): void {
+    expect(Schema::hasColumn('orders', 'shipping_costs_net_price'))->toBeFalse()
+        ->and(Schema::hasColumn('orders', 'shipping_costs_gross_price'))->toBeFalse()
+        ->and(Schema::hasColumn('orders', 'shipping_costs_vat_price'))->toBeFalse()
+        ->and(Schema::hasColumn('orders', 'shipping_costs_vat_rate_percentage'))->toBeFalse();
 });

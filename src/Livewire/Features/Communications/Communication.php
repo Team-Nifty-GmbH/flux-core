@@ -25,6 +25,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Scout\Searchable;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -38,7 +39,7 @@ abstract class Communication extends CommunicationList
 
     public CommunicationForm $communication;
 
-    #[Modelable]
+    #[Locked, Modelable]
     public ?int $modelId = null;
 
     protected ?string $includeBefore = 'flux::livewire.features.communications.communication';
@@ -189,7 +190,7 @@ abstract class Communication extends CommunicationList
         try {
             $this->communication->delete();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->communication);
 
             return;
         }
@@ -259,7 +260,7 @@ abstract class Communication extends CommunicationList
         try {
             $this->communication->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->communication);
 
             return false;
         }
@@ -271,7 +272,7 @@ abstract class Communication extends CommunicationList
         try {
             $this->attachments->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->attachments);
 
             return false;
         }
@@ -292,21 +293,33 @@ abstract class Communication extends CommunicationList
             return false;
         }
 
-        $this->communication->loadAttachments(resolve_static(CommunicationModel::class, 'query')
+        $communication = resolve_static(CommunicationModel::class, 'query')
             ->whereKey($this->communication->id)
-            ->first('id')
-        );
+            ->first('id');
+
+        $this->communication->loadAttachments($communication);
 
         $this->communication->communicatable_type = morph_alias($this->modelType);
         $this->communication->communicatable_id = $this->modelId;
 
         try {
-            SendMail::make($this->communication->toArray())
+            $result = SendMail::make($this->communication->toArray())
+                ->forCommunication($communication)
                 ->checkPermission()
                 ->validate()
                 ->execute();
         } catch (Exception $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->communication);
+
+            return false;
+        }
+
+        if (! data_get($result, 'success')) {
+            $this->toast()
+                ->error(__('Failed to send email!'), e(data_get($result, 'error')))
+                ->send();
+
+            $this->loadData();
 
             return false;
         }

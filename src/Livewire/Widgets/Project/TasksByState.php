@@ -7,6 +7,7 @@ use FluxErp\Livewire\Support\Widgets\Charts\CircleChart;
 use FluxErp\Models\Task;
 use FluxErp\Support\Metrics\Charts\Donut;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 
 class TasksByState extends CircleChart
@@ -17,6 +18,7 @@ class TasksByState extends CircleChart
         'type' => 'donut',
     ];
 
+    #[Locked]
     public ?int $projectId = null;
 
     public bool $showTotals = false;
@@ -71,5 +73,14 @@ class TasksByState extends CircleChart
     public function showTitle(): bool
     {
         return true;
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Task::class) => [
+                Task::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
     }
 }

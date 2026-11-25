@@ -64,6 +64,21 @@
         persistent
     >
         <div class="flex flex-col gap-1.5">
+            <div
+                x-cloak
+                x-show="$wire.communication.send_error"
+                class="flex items-center gap-1.5"
+            >
+                <x-badge
+                    color="red"
+                    icon="exclamation-triangle"
+                    :text="__('Sending failed')"
+                />
+                <span
+                    class="text-sm text-red-600"
+                    x-text="$wire.communication.send_error"
+                ></span>
+            </div>
             <div>
                 <x-select.styled
                     required

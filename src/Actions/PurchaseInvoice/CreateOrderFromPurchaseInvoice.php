@@ -6,7 +6,9 @@ use Carbon\Carbon;
 use FluxErp\Actions\ContactBankConnection\CreateContactBankConnection;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Order\CreateOrder;
+use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
+use FluxErp\Actions\OrderPosition\DeleteOrderPosition;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentType;
@@ -66,10 +68,17 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
                 ->diffInDays(Carbon::parse($paymentDiscountTargetDate));
         }
 
-        $order = CreateOrder::make($this->data)->validate()->execute();
+        $order = $this->getData('order_id')
+            ? $this->takeOverOrder()
+            : CreateOrder::make($this->data)->validate()->execute();
 
         foreach (data_get($this->data, 'purchase_invoice_positions', []) as $position) {
             data_forget($position, 'uuid');
+
+            if (! is_null(data_get($position, 'total_price')) && bccomp(data_get($position, 'amount') ?? 0, 0) !== 0) {
+                $position['unit_price'] = bcdiv($position['total_price'], $position['amount']);
+            }
+
             CreateOrderPosition::make(
                 array_merge(
                     $position,
@@ -105,6 +114,62 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
             ->first();
         $this->data = array_merge($this->purchaseInvoice?->toArray() ?? [], $this->data);
         $this->data['invoice_date'] ??= now()->toDateString();
+
+        // the invoice states the cash discount, without one on it the order must not take
+        // the defaults of contact or payment type, which may even exceed the payment target
+        $this->data['payment_discount_target'] ??= 0;
+        $this->data['payment_discount_percent'] ??= 0;
+    }
+
+    protected function takeOverOrder(): Order
+    {
+        $order = UpdateOrder::make(
+            array_merge(
+                Arr::only($this->data, [
+                    'currency_id',
+                    'invoice_date',
+                    'invoice_number',
+                    'payment_discount_percent',
+                    'payment_discount_target',
+                    'payment_target',
+                    'payment_type_id',
+                ]),
+                ['id' => $this->getData('order_id')]
+            )
+        )
+            ->validate()
+            ->execute();
+
+        foreach ($order->orderPositions()->pluck('id') as $orderPositionId) {
+            DeleteOrderPosition::make(['id' => $orderPositionId])
+                ->validate()
+                ->execute();
+        }
+
+        return $order;
+    }
+
+    protected function validateChosenOrder(int $orderId): array
+    {
+        $order = resolve_static(Order::class, 'query')
+            ->whereKey($orderId)
+            ->first(['id', 'tenant_id', 'contact_id', 'invoice_number', 'is_locked']);
+
+        if ($order->tenant_id !== $this->getData('tenant_id')
+            || $order->contact_id !== $this->getData('contact_id')
+        ) {
+            return ['order_id' => ['The order must belong to the supplier of the purchase invoice.']];
+        }
+
+        if (! blank($order->invoice_number)) {
+            return ['order_id' => ['The order is already invoiced.']];
+        }
+
+        if ($order->is_locked) {
+            return ['order_id' => ['The order is locked.']];
+        }
+
+        return [];
     }
 
     protected function validateData(): void
@@ -127,6 +192,10 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
 
         if (! $this->purchaseInvoice?->getFirstMedia('purchase_invoice')) {
             $errors += ['purchase_invoice' => ['The purchase invoice has no attached document.']];
+        }
+
+        if ($orderId = $this->getData('order_id')) {
+            $errors += $this->validateChosenOrder($orderId);
         }
 
         /** @var PurchaseInvoice $purchaseInvoice */

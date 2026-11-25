@@ -128,4 +128,13 @@ class LeadsByRecordOrigin extends CircleChart implements HasWidgetOptions
             ],
         ];
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Lead::class) => [
+                Lead::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

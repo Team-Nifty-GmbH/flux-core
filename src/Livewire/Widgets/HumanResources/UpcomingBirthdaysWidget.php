@@ -100,4 +100,18 @@ class UpcomingBirthdaysWidget extends Component
             ->sortBy('date_sort')
             ->toArray();
     }
+
+    protected function isDateDependent(): bool
+    {
+        return true;
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Employee::class) => [
+                Employee::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

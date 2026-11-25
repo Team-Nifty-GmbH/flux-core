@@ -1,7 +1,7 @@
 <div>
     <x-modal id="new-task-modal" x-on:open="$tsui.focus('task-name')">
         <div
-            class="space-y-8 divide-y divide-gray-200"
+            class="dark:divide-dark-600 space-y-8 divide-y divide-gray-200"
             x-data="{
                 formatter: @js(resolve_static(\FluxErp\Models\Task::class, 'typeScriptAttributes')),
             }"
@@ -47,6 +47,23 @@
                             :label="__('Start Time')"
                             wire:model="task.start_time"
                         />
+                        <div
+                            class="flex flex-col gap-y-2"
+                            x-cloak
+                            x-show="$wire.task.start_date"
+                        >
+                            <x-toggle
+                                :label="__('Start Reminder')"
+                                wire:model="task.has_start_reminder"
+                            />
+                            <div x-cloak x-show="$wire.task.has_start_reminder">
+                                <x-number
+                                    :label="__('Remind Minutes Before')"
+                                    wire:model="task.start_reminder_minutes_before"
+                                    min="0"
+                                />
+                            </div>
+                        </div>
                     </div>
                     <div class="flex flex-col gap-y-2">
                         <x-date
@@ -58,6 +75,23 @@
                             :label="__('Due Time')"
                             wire:model="task.due_time"
                         />
+                        <div
+                            class="flex flex-col gap-y-2"
+                            x-cloak
+                            x-show="$wire.task.due_date"
+                        >
+                            <x-toggle
+                                :label="__('Due Reminder')"
+                                wire:model="task.has_due_reminder"
+                            />
+                            <div x-cloak x-show="$wire.task.has_due_reminder">
+                                <x-number
+                                    :label="__('Remind Minutes Before')"
+                                    wire:model="task.due_reminder_minutes_before"
+                                    min="0"
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <x-flux::state

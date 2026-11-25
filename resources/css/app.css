@@ -9,6 +9,10 @@
 @import 'gridstack/dist/gridstack.min.css' layer(base);
 @import './components/grid-stack.css' layer(base);
 @import './components/apex-charts.css' layer(base);
+
+@import 'fullcalendar/skeleton.css' layer(base);
+@import 'fullcalendar/themes/classic/theme.css' layer(base);
+@import 'fullcalendar/themes/classic/palette.css' layer(base);
 @import './components/full-calendar.css' layer(base);
 
 @import '../../node_modules/@phosphor-icons/web/src/regular/style.css'
@@ -23,6 +27,9 @@
 @import '../../vendor/tallstackui/tallstackui/css/plugins/soft-scrollbar.css';
 @import '../../vendor/tallstackui/tallstackui/css/plugins/command-palette-scrollbar.css';
 @import '../../vendor/tallstackui/tallstackui/css/plugins/number-appearance-none.css';
+@import '../../vendor/tallstackui/tallstackui/css/plugins/tooltip.css';
+@import '../../vendor/tallstackui/tallstackui/css/plugins/popover.css';
+@import '../../vendor/tallstackui/tallstackui/css/plugins/scrollbar-bleed.css';
 
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
@@ -98,9 +105,21 @@
     --color-dark-900: #0f172a;
     --color-dark-950: #020617;
 
+    --ease-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+    --ease-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+
     --animate-progress: progress 2s linear forwards;
     --animate-indeterminate: indeterminate 1.5s cubic-bezier(0.4, 0, 0.2, 1)
         infinite;
+
+    --animate-spinner-dots: ts-spinner-dots 0.7s ease-in-out infinite backwards;
+    --animate-spinner-pulse: ts-spinner-pulse 1s ease-in-out infinite;
+    --animate-spinner-typing: ts-spinner-typing 1.2s ease-in-out infinite
+        backwards;
+    --animate-spinner-bars: ts-spinner-bars 1s ease-in-out infinite backwards;
+    --animate-spinner-wave: ts-spinner-wave 1s ease-in-out infinite backwards;
+    --animate-spinner-shimmer: ts-spinner-shimmer 1.5s linear infinite;
+    --animate-spinner-caret: ts-spinner-caret 1s steps(1, end) infinite;
 
     @keyframes progress {
         0% {
@@ -117,6 +136,82 @@
         }
         100% {
             transform: translateX(400%);
+        }
+    }
+
+    @keyframes ts-spinner-dots {
+        0%,
+        60%,
+        100% {
+            transform: translateY(0);
+        }
+        30% {
+            transform: translateY(-60%);
+        }
+    }
+
+    @keyframes ts-spinner-pulse {
+        0%,
+        100% {
+            transform: scale(0.7);
+            opacity: 0.45;
+        }
+        50% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    @keyframes ts-spinner-typing {
+        0%,
+        60%,
+        100% {
+            transform: scale(0.65);
+            opacity: 0.4;
+        }
+        30% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    @keyframes ts-spinner-bars {
+        0%,
+        100% {
+            transform: scaleY(0.4);
+        }
+        50% {
+            transform: scaleY(1);
+        }
+    }
+
+    @keyframes ts-spinner-wave {
+        0%,
+        100% {
+            transform: scaleY(0.35);
+        }
+        50% {
+            transform: scaleY(1);
+        }
+    }
+
+    @keyframes ts-spinner-shimmer {
+        0% {
+            background-position: 200% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    @keyframes ts-spinner-caret {
+        0%,
+        49% {
+            opacity: 1;
+        }
+        50%,
+        100% {
+            opacity: 0;
         }
     }
 }
@@ -138,6 +233,15 @@
     ::backdrop,
     ::file-selector-button {
         border-color: var(--color-gray-200, currentcolor);
+    }
+
+    .dark,
+    .dark *,
+    .dark ::after,
+    .dark ::before,
+    .dark ::backdrop,
+    .dark ::file-selector-button {
+        border-color: var(--color-dark-600, currentcolor);
     }
 }
 
@@ -191,7 +295,52 @@
 }
 
 @utility mention {
-    @apply rounded-md bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300;
+    @apply inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium no-underline;
+    @apply bg-primary-50 text-primary-700 dark:bg-primary-900 dark:text-primary-200;
+}
+
+/* Per-type mention pill colors (rendered via MentionRenderer as
+   `mention mention--<type>`). Unlayered so they override the `mention`
+   utility's default color. */
+.mention--user {
+    @apply bg-primary-50 text-primary-700 dark:bg-primary-900 dark:text-primary-200;
+}
+
+.mention--ticket {
+    @apply bg-indigo-50 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200;
+}
+
+.mention--order {
+    @apply bg-emerald-50 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200;
+}
+
+.mention--task {
+    @apply bg-sky-50 text-sky-700 dark:bg-sky-900 dark:text-sky-200;
+}
+
+.mention--project {
+    @apply bg-violet-50 text-violet-700 dark:bg-violet-900 dark:text-violet-200;
+}
+
+.mention--address {
+    @apply bg-amber-50 text-amber-700 dark:bg-amber-900 dark:text-amber-200;
+}
+
+.mention--missing {
+    @apply bg-secondary-100 text-secondary-500 dark:bg-secondary-800 dark:text-secondary-400 italic;
+}
+
+.mention[data-mention-state]::before {
+    content: '';
+    @apply inline-block size-1.5 rounded-full;
+    background: var(--mention-state-color, currentColor);
+    order: -2;
+}
+
+.mention[data-mention-type]::after {
+    content: attr(data-mention-type);
+    @apply rounded bg-black/5 px-1 text-[0.625rem] font-semibold tracking-wide uppercase opacity-70 dark:bg-white/15;
+    order: -1;
 }
 
 @utility blade-variable-pill {
@@ -321,6 +470,111 @@
     #map {
         @apply z-0 h-96;
     }
+}
+
+:root:has(> body.dark) {
+    color-scheme: dark;
+}
+
+:root:has(> body.dark)::-webkit-scrollbar-track,
+.dark ::-webkit-scrollbar-track {
+    @apply bg-dark-800;
+}
+
+:root:has(> body.dark)::-webkit-scrollbar-thumb,
+.dark ::-webkit-scrollbar-thumb,
+.dark .soft-scrollbar::-webkit-scrollbar-thumb,
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-dark-500;
+}
+
+:root:has(> body.dark)::-webkit-scrollbar-thumb:hover,
+.dark ::-webkit-scrollbar-thumb:hover {
+    @apply bg-dark-400;
+}
+
+.dark [x-data^='tallstackui_alert'].bg-primary-50 {
+    @apply bg-primary-500/15;
+
+    .text-primary-600 {
+        @apply text-primary-300;
+    }
+}
+
+.dark [x-data^='tallstackui_alert'].bg-secondary-50 {
+    @apply bg-secondary-500/15;
+
+    .text-secondary-600 {
+        @apply text-secondary-300;
+    }
+}
+
+.dark [x-data^='tallstackui_alert'].bg-red-50 {
+    @apply bg-red-500/15;
+
+    .text-red-600 {
+        @apply text-red-300;
+    }
+}
+
+.dark [x-data^='tallstackui_alert'].bg-amber-50 {
+    @apply bg-amber-500/15;
+
+    .text-amber-600 {
+        @apply text-amber-300;
+    }
+}
+
+.dark .filepond--panel-root {
+    @apply bg-dark-700;
+}
+
+.dark .filepond--drop-label {
+    @apply text-dark-300;
+}
+
+.dark .apexcharts-toolbar {
+    @apply bg-transparent;
+}
+
+.dark .apexcharts-menu {
+    @apply border-dark-600 bg-dark-700 text-dark-200;
+}
+
+.dark .apexcharts-menu-item:hover {
+    @apply bg-dark-600;
+}
+
+.dark
+    :is(
+        .apexcharts-xaxis-annotations,
+        .apexcharts-yaxis-annotations,
+        .apexcharts-point-annotations
+    )
+    rect:not(.apexcharts-annotation-rect) {
+    fill: var(--color-dark-700);
+}
+
+.dark
+    :is(
+        .apexcharts-xaxis-annotation-label,
+        .apexcharts-yaxis-annotation-label,
+        .apexcharts-point-annotation-label
+    ) {
+    fill: var(--color-dark-200);
+}
+
+.dark .leaflet-bar a,
+.dark .leaflet-control-attribution {
+    @apply border-dark-600 bg-dark-700 text-dark-200;
+}
+
+.dark .leaflet-bar a:hover {
+    @apply bg-dark-600;
+}
+
+.dark .leaflet-control-attribution a {
+    @apply text-primary-400;
 }
 
 .sortable-ghost {

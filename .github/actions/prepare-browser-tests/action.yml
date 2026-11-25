@@ -1,0 +1,56 @@
+name: Prepare browser tests
+description: Installs dependencies, builds the assets, creates the schema and fetches Chromium.
+
+inputs:
+  laravel-version:
+    description: 'Laravel version constraint to install'
+    required: true
+  testbench-version:
+    description: 'Testbench version constraint to install'
+    required: true
+  github-token:
+    description: 'Token used for Composer authentication'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Fix git ownership
+      shell: bash
+      run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
+    - name: Configure Composer GitHub auth
+      shell: bash
+      run: composer config --global github-oauth.github.com ${{ inputs.github-token }}
+
+    - name: Change Laravel Version Dependencies
+      shell: bash
+      run: composer require "laravel/framework:${{ inputs.laravel-version }}" "orchestra/testbench:${{ inputs.testbench-version }}" --no-interaction --no-update
+
+    - name: Install Composer dependencies
+      shell: bash
+      run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+    - name: Install npm dependencies
+      shell: bash
+      run: npm i
+
+    - name: Build frontend assets
+      shell: bash
+      run: npm run build
+
+    - name: Clear Orchestra Testbench Cache
+      shell: bash
+      run: ./vendor/bin/testbench view:clear
+
+    - name: Create schema
+      shell: bash
+      run: |
+        ./vendor/bin/testbench migrate --force
+        ./vendor/bin/testbench schema:dump
+
+    - name: Install Playwright Browsers
+      shell: bash
+      run: npx playwright install chromium
+      env:
+        PLAYWRIGHT_BROWSERS_PATH: /tmp/pw-browsers

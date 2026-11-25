@@ -4,18 +4,35 @@ namespace FluxErp\Actions\MailMessage;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Media\UploadMedia;
+use FluxErp\Models\BlockedFile;
 use FluxErp\Models\Communication;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\Tag;
 use FluxErp\Rulesets\Communication\CreateCommunicationRuleset;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\FileNameNotAllowed;
 
 class CreateMailMessage extends FluxAction
 {
+    protected array $dontTrim = [
+        'html_body',
+        'text_body',
+    ];
+
     public static function models(): array
     {
         return [Communication::class];
+    }
+
+    protected static function decodeMimeHeader(mixed $value): mixed
+    {
+        if (! is_string($value) || ! preg_match('/=\\?[^?]*\\?[BbQq]\\?[^?]*\\?=/', $value)) {
+            return $value;
+        }
+
+        return mb_decode_mimeheader($value);
     }
 
     protected function getRulesets(): string|array
@@ -27,12 +44,8 @@ class CreateMailMessage extends FluxAction
     {
         $tags = Arr::pull($this->data, 'tags');
         $attachments = Arr::pull($this->data, 'attachments', []);
-        $this->data['html_body'] = is_string(data_get($this->data, 'html_body'))
-            ? iconv_mime_decode(data_get($this->data, 'html_body'), 2, 'UTF-8')
-            : data_get($this->data, 'html_body');
-        $this->data['subject'] = is_string(data_get($this->data, 'subject'))
-            ? iconv_mime_decode(data_get($this->data, 'subject'), 2, 'UTF-8')
-            : data_get($this->data, 'subject');
+        $this->data['html_body'] = static::decodeMimeHeader(data_get($this->data, 'html_body'));
+        $this->data['subject'] = static::decodeMimeHeader(data_get($this->data, 'subject'));
         $this->data['from'] = Str::replace('"', '', data_get($this->data, 'from'));
 
         $mailMessage = app(Communication::class, ['attributes' => $this->data]);
@@ -59,9 +72,20 @@ class CreateMailMessage extends FluxAction
                     ? null
                     : 'string';
 
-                UploadMedia::make($attachment)
-                    ->validate()
-                    ->execute();
+                if ($this->isBlocked(data_get($attachment, 'media'))) {
+                    continue;
+                }
+
+                try {
+                    UploadMedia::make($attachment)
+                        ->validate()
+                        ->execute();
+                } catch (FileNameNotAllowed $exception) {
+                    Log::warning('Skipped mail attachment: ' . $exception->getMessage(), [
+                        'communication_id' => $mailMessage->getKey(),
+                        'file_name' => data_get($attachment, 'file_name'),
+                    ]);
+                }
             }
         } finally {
             config(['media-library.max_file_size' => $maxFileSize]);
@@ -80,6 +104,19 @@ class CreateMailMessage extends FluxAction
         }
 
         return $mailMessage->withoutRelations()->fresh();
+    }
+
+    protected function isBlocked(mixed $media): bool
+    {
+        if (! is_string($media)) {
+            return false;
+        }
+
+        return resolve_static(
+            BlockedFile::class,
+            'isBlocked',
+            ['hash' => is_file($media) ? md5_file($media) : md5($media)]
+        );
     }
 
     protected function prepareForValidation(): void

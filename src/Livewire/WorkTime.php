@@ -159,7 +159,7 @@ class WorkTime extends Component
 
             $this->workTime->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->workTime);
 
             return false;
         }
@@ -233,7 +233,14 @@ class WorkTime extends Component
             $this->dailyWorkTimePause->is_locked = true;
         }
 
-        $this->dailyWorkTimePause->save();
+        try {
+            $this->dailyWorkTimePause->save();
+        } catch (ValidationException $e) {
+            exception_to_notifications($e, $this);
+            $this->loadWorkTimes();
+
+            return;
+        }
 
         if (! $start) {
             $this->dailyWorkTimePause->reset();
@@ -261,7 +268,7 @@ class WorkTime extends Component
         try {
             $this->dailyWorkTime->save();
         } catch (ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->dailyWorkTime);
         }
 
         if (! $start) {

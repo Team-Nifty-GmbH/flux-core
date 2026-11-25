@@ -17,7 +17,7 @@ class BaseController extends Controller
     public function index(Request $request, string $model): JsonResponse
     {
         $model = app($model);
-        if ($request->filled('search') && ! in_array(Searchable::class, class_uses($model))) {
+        if ($request->filled('search') && ! in_array(Searchable::class, class_uses_recursive($model))) {
             return ResponseHelper::createResponseFromBase(
                 statusCode: 400,
                 data: ['search' => 'Search not allowed on given model.']
@@ -41,7 +41,9 @@ class BaseController extends Controller
             $query = in_array(Filterable::class, class_uses_recursive($model)) ?
                 QueryBuilder::filterModel($model, $request) :
                 $model::query();
-            $data = $query->paginate($perPage)->appends($request->query());
+            $data = $query->scopes($request->route('scope') ?? [])
+                ->paginate($perPage)
+                ->appends($request->query());
         }
 
         return ResponseHelper::createResponseFromBase(
@@ -88,6 +90,7 @@ class BaseController extends Controller
 
         $instance = $model::query()
             ->whereKey($id)
+            ->scopes($request->route('scope') ?? [])
             ->when($validated['include'] ?? false, function ($query) use ($includes) {
                 return $query->with($includes);
             })

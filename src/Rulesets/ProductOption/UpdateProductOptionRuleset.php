@@ -21,7 +21,7 @@ class UpdateProductOptionRuleset extends FluxRuleset
             ],
             'product_option_group_id' => [
                 'integer',
-                app(ModelExists::class, ['model' => ProductOptionGroup::class]),
+                app(ModelExists::class, ['model' => ProductOptionGroup::class, 'subject' => ProductOption::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
         ];

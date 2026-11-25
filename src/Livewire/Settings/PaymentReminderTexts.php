@@ -68,7 +68,7 @@ class PaymentReminderTexts extends PaymentReminderTextList
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->paymentReminderTextForm);
 
             return false;
         }
@@ -92,7 +92,7 @@ class PaymentReminderTexts extends PaymentReminderTextList
         try {
             $this->paymentReminderTextForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->paymentReminderTextForm);
 
             return false;
         }

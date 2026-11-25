@@ -80,6 +80,7 @@ class MyTargetProgresses extends RadialBarChart
     public function updatedTargetId(): void
     {
         $this->calculateByTimeFrame();
+        $this->subscribeLiveUpdates();
     }
 
     protected function calculateProgress(Target $target): string
@@ -90,6 +91,32 @@ class MyTargetProgresses extends RadialBarChart
                 100
             )
             : 0;
+    }
+
+    protected function liveUpdates(): array
+    {
+        $model = $this->targetId
+            ? morphed_model(
+                resolve_static(Target::class, 'query')
+                    ->whereKey($this->targetId)
+                    ->value('model_type') ?? ''
+            )
+            : null;
+
+        return array_merge(
+            [
+                $this->modelChannel(Target::class) => [
+                    Target::class => ['created', 'updated', 'deleted'],
+                ],
+            ],
+            $model
+                ? [
+                    $this->modelChannel($model) => [
+                        $model => ['created', 'updated', 'deleted'],
+                    ],
+                ]
+                : []
+        );
     }
 
     protected function resetData(): void

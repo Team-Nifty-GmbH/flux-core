@@ -180,7 +180,15 @@ test('redirect to orders', function (): void {
 test('redirect to over due', function (): void {
     Livewire::test(Outstanding::class)
         ->call('showOverdue')
-        ->assertRedirect(route('accounting.payment-reminders'))
+        ->assertRedirect(route('orders.orders'))
+        ->assertHasNoErrors()
+        ->assertOk();
+});
+
+test('redirect to payment reminders', function (): void {
+    Livewire::test(Outstanding::class)
+        ->call('showPaymentReminders')
+        ->assertRedirect(route('accounting.payment-reminder-run'))
         ->assertHasNoErrors()
         ->assertOk();
 });

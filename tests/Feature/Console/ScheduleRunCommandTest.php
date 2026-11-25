@@ -5,10 +5,13 @@ use FluxErp\Facades\Repeatable as RepeatableFacade;
 use FluxErp\Models\Schedule;
 use FluxErp\Tests\Feature\Console\ScheduleRunTestDefaultCronInvokable;
 use FluxErp\Tests\Feature\Console\ScheduleRunTestFailingInvokable;
+use FluxErp\Tests\Feature\Console\ScheduleRunTestFalseInvokable;
 use FluxErp\Tests\Feature\Console\ScheduleRunTestInvokable;
 use FluxErp\Tests\Feature\Console\ScheduleRunTestJob;
 use FluxErp\Tests\Feature\Console\ScheduleRunTestSuccessJob;
+use Illuminate\Console\Events\ScheduledTaskFailed;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 
 test('does not set last_success when a scheduled job fails', function (): void {
@@ -327,6 +330,42 @@ test('does not skip the next intra-day occurrence for multi-per-day cron when ov
     expect($schedule->due_at->toDateTimeString())->toBe('2026-04-01 07:00:00');
 });
 
+test('does not skip the next tick of a cron running several times a day when due_at is off tick', function (): void {
+    ScheduleRunTestInvokable::$invocationCount = 0;
+
+    // Every two hours, due_at 13:17 is not a cron tick. The catch-up runs once and
+    // 14:00 is a new occurrence, so due_at must advance to it, not to 16:00.
+    $this->travelTo(Carbon::create(2026, 4, 1, 13, 30, 10));
+
+    $schedule = resolve_static(Schedule::class, 'query')->create([
+        'name' => 'Two Hourly Off Tick Schedule',
+        'class' => ScheduleRunTestInvokable::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'everyTwoHours',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => [],
+                'dayConstraint' => [],
+                'timeConstraint' => [null, null],
+            ],
+        ],
+        'is_active' => true,
+        'due_at' => Carbon::create(2026, 4, 1, 13, 17, 0),
+    ]);
+
+    $this->artisan('schedule:run');
+
+    expect(ScheduleRunTestInvokable::$invocationCount)->toBe(1);
+
+    $schedule->refresh();
+
+    expect($schedule->due_at->toDateTimeString())->toBe('2026-04-01 14:00:00');
+});
+
 test('runs a repeatable with defaultCron without a db entry', function (): void {
     ScheduleRunTestDefaultCronInvokable::$wasInvoked = false;
 
@@ -340,6 +379,42 @@ test('runs a repeatable with defaultCron without a db entry', function (): void 
     $this->artisan('schedule:run');
 
     expect(ScheduleRunTestDefaultCronInvokable::$wasInvoked)->toBeTrue();
+});
+
+test('a deactivated db entry stops the defaultCron', function (): void {
+    ScheduleRunTestDefaultCronInvokable::$wasInvoked = false;
+
+    RepeatableFacade::register(
+        ScheduleRunTestDefaultCronInvokable::name(),
+        ScheduleRunTestDefaultCronInvokable::class
+    );
+
+    $this->travelTo(Carbon::create(2025, 6, 15, 10, 0, 0));
+
+    resolve_static(Schedule::class, 'query')
+        ->create([
+            'name' => 'Deactivated Default Cron',
+            'class' => ScheduleRunTestDefaultCronInvokable::class,
+            'type' => RepeatableTypeEnum::Invokable,
+            'cron' => [
+                'methods' => [
+                    'basic' => 'everyMinute',
+                    'dayConstraint' => null,
+                    'timeConstraint' => null,
+                ],
+                'parameters' => [
+                    'basic' => [],
+                    'dayConstraint' => [],
+                    'timeConstraint' => [null, null],
+                ],
+            ],
+            'is_active' => false,
+            'due_at' => now()->subMinute(),
+        ]);
+
+    $this->artisan('schedule:run');
+
+    expect(ScheduleRunTestDefaultCronInvokable::$wasInvoked)->toBeFalse();
 });
 
 test('uses db entry over defaultCron when both exist', function (): void {
@@ -414,4 +489,175 @@ test('advances due_at when an invokable schedule fails', function (): void {
         ->and($schedule->last_run)->not->toBeNull()
         ->and($schedule->last_success)->toBeNull()
         ->and($schedule->due_at->greaterThan(now()))->toBeTrue();
+});
+
+test('reports a failed invokable schedule with its name', function (): void {
+    $this->travelTo(Carbon::create(2025, 6, 15, 10, 0, 0));
+
+    $schedule = resolve_static(Schedule::class, 'query')->create([
+        'name' => 'False Invokable Schedule',
+        'class' => ScheduleRunTestFalseInvokable::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'everyMinute',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => [],
+                'dayConstraint' => [],
+                'timeConstraint' => [null, null],
+            ],
+        ],
+        'is_active' => true,
+        'due_at' => now()->subMinute(),
+    ]);
+
+    $messages = [];
+    Event::listen(ScheduledTaskFailed::class, function (ScheduledTaskFailed $event) use (&$messages): void {
+        $messages[] = $event->exception->getMessage();
+    });
+
+    $this->artisan('schedule:run');
+
+    expect($messages)->toBe([
+        'Scheduled command [' . ScheduleRunTestFalseInvokable::class . ':' . $schedule->getKey()
+            . '] failed with exit code [1].',
+    ]);
+});
+
+function createDailyScheduleAtSix(?string $timezone, array $attributes = []): Schedule
+{
+    return resolve_static(Schedule::class, 'query')->create(array_merge([
+        'name' => 'Timezone Schedule',
+        'class' => ScheduleRunTestInvokable::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'dailyAt',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => ['06:00'],
+                'dayConstraint' => [],
+                'timeConstraint' => [],
+            ],
+        ],
+        'timezone' => $timezone,
+        'is_active' => true,
+    ], $attributes));
+}
+
+test('runs a schedule with timezone at its local time in winter', function (): void {
+    ScheduleRunTestInvokable::$invocationCount = 0;
+    $this->travelTo(Carbon::create(2026, 1, 15, 5, 0, 0, 'UTC'));
+
+    $schedule = createDailyScheduleAtSix('Europe/Berlin');
+
+    $this->artisan('schedule:run');
+
+    expect(ScheduleRunTestInvokable::$invocationCount)->toBe(1)
+        ->and($schedule->refresh()->due_at->toDateTimeString())->toBe('2026-01-16 05:00:00');
+});
+
+test('runs a schedule with timezone at its local time in summer', function (): void {
+    ScheduleRunTestInvokable::$invocationCount = 0;
+    $this->travelTo(Carbon::create(2026, 7, 15, 4, 0, 0, 'UTC'));
+
+    $schedule = createDailyScheduleAtSix('Europe/Berlin');
+
+    $this->artisan('schedule:run');
+
+    expect(ScheduleRunTestInvokable::$invocationCount)->toBe(1)
+        ->and($schedule->refresh()->due_at->toDateTimeString())->toBe('2026-07-16 04:00:00');
+});
+
+test('does not run a schedule with timezone at the same wall clock time in app timezone', function (): void {
+    ScheduleRunTestInvokable::$invocationCount = 0;
+    $this->travelTo(Carbon::create(2026, 7, 15, 6, 0, 0, 'UTC'));
+
+    $schedule = createDailyScheduleAtSix('Europe/Berlin');
+
+    $this->artisan('schedule:run');
+
+    expect(ScheduleRunTestInvokable::$invocationCount)->toBe(0)
+        ->and($schedule->refresh()->last_run)->toBeNull();
+});
+
+test('moves due_at across the switch to summer time on the last sunday of march', function (): void {
+    ScheduleRunTestInvokable::$invocationCount = 0;
+    $this->travelTo(Carbon::create(2026, 3, 28, 5, 0, 0, 'UTC'));
+
+    $schedule = createDailyScheduleAtSix('Europe/Berlin', ['due_at' => now()]);
+
+    $this->artisan('schedule:run');
+
+    expect(ScheduleRunTestInvokable::$invocationCount)->toBe(1)
+        ->and($schedule->refresh()->due_at->toDateTimeString())->toBe('2026-03-29 04:00:00');
+
+    $this->app->forgetInstance(Illuminate\Console\Scheduling\Schedule::class);
+    $this->travelTo(Carbon::create(2026, 3, 29, 4, 0, 0, 'UTC'));
+
+    $this->artisan('schedule:run');
+
+    expect(ScheduleRunTestInvokable::$invocationCount)->toBe(2)
+        ->and($schedule->refresh()->due_at->toDateTimeString())->toBe('2026-03-30 04:00:00');
+});
+
+test('moves due_at across the switch to winter time on the last sunday of october', function (): void {
+    ScheduleRunTestInvokable::$invocationCount = 0;
+    $this->travelTo(Carbon::create(2026, 10, 24, 4, 0, 0, 'UTC'));
+
+    $schedule = createDailyScheduleAtSix('Europe/Berlin', ['due_at' => now()]);
+
+    $this->artisan('schedule:run');
+
+    expect(ScheduleRunTestInvokable::$invocationCount)->toBe(1)
+        ->and($schedule->refresh()->due_at->toDateTimeString())->toBe('2026-10-25 05:00:00');
+
+    $this->app->forgetInstance(Illuminate\Console\Scheduling\Schedule::class);
+    $this->travelTo(Carbon::create(2026, 10, 25, 5, 0, 0, 'UTC'));
+
+    $this->artisan('schedule:run');
+
+    expect(ScheduleRunTestInvokable::$invocationCount)->toBe(2)
+        ->and($schedule->refresh()->due_at->toDateTimeString())->toBe('2026-10-26 05:00:00');
+});
+
+test('checks last_run against the previous occurrence in the schedule timezone', function (): void {
+    ScheduleRunTestInvokable::$invocationCount = 0;
+    $this->travelTo(Carbon::create(2026, 7, 15, 4, 0, 0, 'UTC'));
+
+    // After yesterday's 06:00 UTC tick, but before today's 06:00 Berlin tick.
+    $schedule = createDailyScheduleAtSix('Europe/Berlin', [
+        'last_run' => Carbon::create(2026, 7, 14, 6, 30, 0, 'UTC'),
+    ]);
+
+    $this->artisan('schedule:run');
+
+    expect(ScheduleRunTestInvokable::$invocationCount)->toBe(1)
+        ->and($schedule->refresh()->last_run->toDateTimeString())->toBe('2026-07-15 04:00:00');
+});
+
+test('runs a schedule without timezone in app timezone as before', function (): void {
+    ScheduleRunTestInvokable::$invocationCount = 0;
+    $this->travelTo(Carbon::create(2026, 7, 15, 4, 0, 0, 'UTC'));
+
+    $schedule = createDailyScheduleAtSix(null);
+
+    $this->artisan('schedule:run');
+
+    expect(ScheduleRunTestInvokable::$invocationCount)->toBe(0)
+        ->and($schedule->refresh()->last_run)->toBeNull();
+
+    $this->app->forgetInstance(Illuminate\Console\Scheduling\Schedule::class);
+    $this->travelTo(Carbon::create(2026, 7, 15, 6, 0, 0, 'UTC'));
+
+    $this->artisan('schedule:run');
+
+    expect(ScheduleRunTestInvokable::$invocationCount)->toBe(1)
+        ->and($schedule->refresh()->due_at->toDateTimeString())->toBe('2026-07-16 06:00:00')
+        ->and($schedule->timezone)->toBeNull();
 });

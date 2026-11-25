@@ -45,7 +45,10 @@
     >
         <table>
             <tbody id="detail-container">
-                <tr id="detail" class="border-b border-slate-200">
+                <tr
+                    id="detail"
+                    class="dark:border-dark-600 border-b border-slate-200"
+                >
                     <td colspan="100%">
                         <div class="p-4" x-collapse x-cloak x-show="showDetail">
                             <x-card>

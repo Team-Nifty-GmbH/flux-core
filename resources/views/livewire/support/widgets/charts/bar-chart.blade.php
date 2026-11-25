@@ -26,7 +26,7 @@
     @section('chart')
         <div class="px-2">
             <div
-                class="soft-scrollbar h-20 w-full gap-8 overflow-x-auto rounded md:flex"
+                class="soft-scrollbar flex h-20 w-full gap-8 overflow-x-auto rounded"
             >
                 <template
                     x-for="
@@ -70,7 +70,11 @@
                                 color="emerald"
                             >
                                 <span
-                                    x-text="seriesData.growthRate + '%'"
+                                    x-text="
+                                        $nuxbe.format.percentage(
+                                            seriesData.growthRate / 100,
+                                        )
+                                    "
                                 ></span>
                             </x-badge>
                             <x-badge
@@ -83,7 +87,11 @@
                                 color="red"
                             >
                                 <span
-                                    x-text="seriesData.growthRate + '%'"
+                                    x-text="
+                                        $nuxbe.format.percentage(
+                                            seriesData.growthRate / 100,
+                                        )
+                                    "
                                 ></span>
                             </x-badge>
                             <x-badge
@@ -96,7 +104,11 @@
                                 color="gray"
                             >
                                 <span
-                                    x-text="seriesData.growthRate + '%'"
+                                    x-text="
+                                        $nuxbe.format.percentage(
+                                            seriesData.growthRate / 100,
+                                        )
+                                    "
                                 ></span>
                             </x-badge>
                         </div>

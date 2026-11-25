@@ -22,7 +22,14 @@ function apexCharts($wire) {
             }
 
             this.height = this.$el.querySelector('.chart').clientHeight;
+            const themeObserver = new MutationObserver(() =>
+                this.chart.updateOptions(this.options),
+            );
+            themeObserver.observe(document.body, {
+                attributeFilter: ['class'],
+            });
             document.addEventListener('livewire:navigating', () => {
+                themeObserver.disconnect();
                 this.chart.destroy();
             });
 
@@ -306,7 +313,7 @@ function apexCharts($wire) {
             return options;
         },
         get defaultOptions() {
-            const isDark = document.documentElement.classList.contains('dark');
+            const isDark = document.body.classList.contains('dark');
 
             return {
                 noData: {
@@ -342,6 +349,7 @@ function apexCharts($wire) {
                     type: null,
                     height: this.height,
                     fontFamily: 'inherit',
+                    foreColor: isDark ? '#d1d5db' : '#373d3f',
                     toolbar: {
                         show: true,
                         tools: {
@@ -432,6 +440,12 @@ function apexCharts($wire) {
                     bar: {
                         borderRadius: 4,
                         borderRadiusApplication: 'end',
+                        // 'all' also rounds the base of a stack by mirroring that segment
+                        // with a CSS transform (transform-box: fill-box). WebKit keeps the
+                        // box of the first animation frame, so in an iOS WKWebView the base
+                        // segments animate below the axis. Rounding only the far end needs
+                        // no mirror.
+                        borderRadiusWhenStacked: 'last',
                         columnWidth: '60%',
                     },
                     pie: {

@@ -732,7 +732,6 @@ test('takeOrderPositions marks alternative positions in payload', function (): v
 test('saved retoure keeps alternative flag and excludes it from totals', function (): void {
     $this->parentOrder->update([
         'invoice_number' => Str::random(),
-        'shipping_costs_net_price' => 0,
     ]);
 
     $orderPosition = createChildOrderTestPosition(

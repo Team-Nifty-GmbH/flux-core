@@ -48,3 +48,25 @@ test('delete mail folder', function (): void {
     expect(DeleteMailFolder::make(['id' => $folder->getKey()])
         ->validate()->execute())->toBeTrue();
 });
+
+test('a mail account has at most one sent folder', function (): void {
+    $otherAccount = MailAccount::factory()->create();
+    [$sent, $outbox] = collect(['Sent', 'Postausgang'])->map(fn (string $name) => CreateMailFolder::make([
+        'mail_account_id' => $this->mailAccount->getKey(),
+        'name' => $name,
+        'slug' => $name,
+        'is_sent' => $name === 'Sent',
+    ])->validate()->execute());
+    $otherSent = CreateMailFolder::make([
+        'mail_account_id' => $otherAccount->getKey(),
+        'name' => 'Sent',
+        'slug' => 'Sent',
+        'is_sent' => true,
+    ])->validate()->execute();
+
+    UpdateMailFolder::make(['id' => $outbox->getKey(), 'is_sent' => true])->validate()->execute();
+
+    expect($outbox->refresh()->is_sent)->toBeTrue()
+        ->and($sent->refresh()->is_sent)->toBeFalse()
+        ->and($otherSent->refresh()->is_sent)->toBeTrue();
+});

@@ -6,9 +6,12 @@ use Carbon\Carbon;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Rulesets\CalendarEvent\DeleteCalendarEventRuleset;
+use FluxErp\Traits\Action\ChecksCalendarEventAccess;
 
 class DeleteCalendarEvent extends FluxAction
 {
+    use ChecksCalendarEventAccess;
+
     public static function models(): array
     {
         return [CalendarEvent::class];

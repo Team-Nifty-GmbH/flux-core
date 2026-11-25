@@ -2,12 +2,13 @@
 
 namespace FluxErp\Livewire\Widgets;
 
-use Cron\CronExpression;
 use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
+use FluxErp\Models\Order;
 use FluxErp\Models\Pivots\OrderSchedule;
+use FluxErp\Models\Schedule;
 use FluxErp\Traits\Livewire\Widget\HasTemporalXAxisFormatter;
 use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
 use FluxErp\Traits\Livewire\Widget\MoneyChartFormattingTrait;
@@ -60,7 +61,7 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
     public function calculateChart(): void
     {
         $orderSchedules = resolve_static(OrderSchedule::class, 'query')
-            ->whereHas('order')
+            ->whereHas('order', fn (Builder $query) => $this->scopeOrders($query))
             ->whereHas('schedule', function (Builder $query): void {
                 $query
                     ->where(fn (Builder $query) => $query
@@ -76,7 +77,7 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
             ->with([
                 'order:id,tenant_id,total_net_price',
                 'order.tenant:id,name',
-                'schedule:id,cron_expression,ends_at,recurrences,current_recurrence',
+                'schedule:id,cron,cron_expression,due_at,ends_at,recurrences,current_recurrence',
             ])
             ->get();
 
@@ -87,9 +88,15 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
                 continue;
             }
 
-            $cron = new CronExpression($orderSchedule->schedule->cron_expression);
+            $cron = resolve_static(
+                Schedule::class,
+                'runCron',
+                [$orderSchedule->schedule->cron, $orderSchedule->schedule->cron_expression]
+            );
             try {
-                $nextRun = $cron->getNextRunDate();
+                $nextRun = $orderSchedule->schedule->due_at?->isFuture()
+                    ? $orderSchedule->schedule->due_at
+                    : $cron->getNextRunDate(now());
             } catch (Throwable) {
                 continue;
             }
@@ -101,7 +108,7 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
                 && $nextRun >= $this->getStart()
                 && (
                     is_null($orderSchedule->schedule->ends_at)
-                    || $nextRun <= $orderSchedule->schedule->ends_at
+                    || $nextRun < $orderSchedule->schedule->ends_at
                 )
                 && (
                     is_null($orderSchedule->schedule->recurrences)
@@ -126,7 +133,7 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
                     )
                 );
 
-                $nextRun = $cron->getNextRunDate($nextRun);
+                $nextRun = resolve_static(Schedule::class, 'nextRunAfter', [$cron, $nextRun]);
                 if (! is_null($orderSchedule->schedule->recurrences)) {
                     $currentRecurrence++;
                 }
@@ -181,5 +188,25 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
     public function showTitle(): bool
     {
         return true;
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Order::class) => [
+                Order::class => ['updated', 'deleted'],
+            ],
+            $this->modelChannel(Schedule::class) => [
+                Schedule::class => ['created', 'updated', 'deleted'],
+            ],
+            $this->modelChannel(OrderSchedule::class) => [
+                OrderSchedule::class => ['created', 'deleted'],
+            ],
+        ];
+    }
+
+    protected function scopeOrders(Builder $query): Builder
+    {
+        return $query->revenue();
     }
 }

@@ -4,7 +4,9 @@ namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Contracts\HasApiResponse;
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Models\Pivots\TicketUser;
 use FluxErp\Models\Ticket;
+use FluxErp\Models\User;
 use FluxErp\States\Ticket\TicketState;
 use FluxErp\Traits\Livewire\Widget\RespondsToApiRequests;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
@@ -50,14 +52,6 @@ class MyTickets extends Component implements HasApiResponse
                 'hasMore' => $tickets->count() > $this->limit,
             ]
         );
-    }
-
-    public function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Ticket::class, 'getBroadcastChannel') . ',.TicketUpdated' => '$refresh',
-            'echo-private:' . resolve_static(Ticket::class, 'getBroadcastChannel') . ',.TicketCreated' => '$refresh',
-        ];
     }
 
     public function loadMore(): void
@@ -112,5 +106,15 @@ class MyTickets extends Component implements HasApiResponse
                 'authenticatable_type',
                 'authenticatable_id',
             ]);
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(User::class, auth()->id()) => [
+                Ticket::class => ['updated', 'deleted'],
+                TicketUser::class => ['created', 'deleted'],
+            ],
+        ];
     }
 }

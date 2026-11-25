@@ -86,7 +86,7 @@ class Scheduling extends ScheduleList
         try {
             $this->schedule->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->schedule);
 
             return false;
         }
@@ -102,6 +102,11 @@ class Scheduling extends ScheduleList
         $this->schedule->reset();
         $this->schedule->fill($schedule);
 
+        // Existing schedules without a timezone keep running in app.timezone.
+        if (! $schedule->exists) {
+            $this->schedule->timezone = config('flux.display_timezone');
+        }
+
         $this->js(<<<'JS'
             $tsui.open.modal('edit-schedule-modal');
         JS);
@@ -113,7 +118,7 @@ class Scheduling extends ScheduleList
         try {
             $this->schedule->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->schedule);
 
             return false;
         }
@@ -128,6 +133,15 @@ class Scheduling extends ScheduleList
     {
         $this->schedule->description = $this->repeatable[$this->schedule->name]['description'];
         $this->schedule->parameters = $this->repeatable[$this->schedule->name]['parameters'];
+    }
+
+    public function updatingScheduleCronMethodsBasic(?string $value): void
+    {
+        if ($value === data_get($this->schedule->cron, 'methods.basic')) {
+            return;
+        }
+
+        $this->schedule->cron['parameters']['basic'] = [null, null, null];
     }
 
     protected function getViewData(): array

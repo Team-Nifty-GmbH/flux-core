@@ -7,6 +7,8 @@ return [
 
     'license_key' => env('FLUX_LICENSE_KEY'),
 
+    'composer_auth' => env('COMPOSER_AUTH'),
+
     'formal_salutation' => env('FLUX_FORMAL_SALUTATION', true),
 
     'flux_url' => env('FLUX_URL'),
@@ -15,9 +17,18 @@ return [
 
     'display_timezone' => env('FLUX_DISPLAY_TIMEZONE'),
 
+    'meilisearch' => [
+        'timeout' => (int) env('MEILISEARCH_TIMEOUT', 3),
+    ],
+
+    'scout' => [
+        'queue' => env('SCOUT_QUEUE', true),
+    ],
+
     'media' => [
         'conversion' => env('MEDIA_CONVERSIONS_DISK', 'public'),
         'disk' => env('MEDIA_DISK', 'local'),
+        'max_image_pixels' => (int) env('FLUX_MEDIA_MAX_IMAGE_PIXELS', 50_000_000),
     ],
 
     'file_uploads' => [
@@ -27,6 +38,11 @@ return [
         // Validation rules applied to the assembled file at finalize time.
         // Falls back to `livewire.temporary_file_upload.rules` when null.
         'chunk_rules' => null,
+    ],
+
+    'mail' => [
+        'max_message_size' => (int) env('FLUX_MAIL_MAX_MESSAGE_SIZE', 25 * 1024 * 1024),
+        'sync_time_budget' => (int) env('FLUX_MAIL_SYNC_TIME_BUDGET', 300),
     ],
 
     'vite' => [
@@ -39,7 +55,20 @@ return [
         'reverb_protocol' => env('VITE_REVERB_SCHEME', 'https'),
     ],
 
+    'broadcasting' => [
+        // The connections the "combined" broadcast connection sends every event to.
+        'combined_connections' => explode(',', env('BROADCAST_COMBINED_CONNECTIONS', 'mercure,reverb')),
+
+        // Events the Mercure hub keeps, so a client that slept can replay what it missed.
+        'mercure_history_size' => (int) env('MERCURE_HISTORY_SIZE', 10000),
+    ],
+
     'fcm' => [
         'credentials' => env('FCM_CREDENTIALS_PATH'),
+    ],
+
+    'settings' => [
+        'cache' => env('SETTINGS_CACHE_ENABLED', true),
+        'memo' => env('SETTINGS_CACHE_MEMO', true),
     ],
 ];

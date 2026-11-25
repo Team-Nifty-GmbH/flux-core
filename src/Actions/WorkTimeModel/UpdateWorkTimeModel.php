@@ -45,6 +45,7 @@ class UpdateWorkTimeModel extends FluxAction
                             $day,
                             [
                                 'week_number' => data_get($week, 'week_number') ?? 1,
+                                'break_minutes' => data_get($day, 'break_minutes') ?? 0,
                             ]
                         )
                     );
@@ -53,5 +54,17 @@ class UpdateWorkTimeModel extends FluxAction
         }
 
         return $workTimeModel->fresh('schedules');
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if (data_get($this->data, 'has_fixed_hours') === false) {
+            $this->data = array_merge($this->data, [
+                'weekly_hours' => 0,
+                'cycle_weeks' => 1,
+                'work_days_per_week' => null,
+                'max_overtime_hours' => null,
+            ]);
+        }
     }
 }

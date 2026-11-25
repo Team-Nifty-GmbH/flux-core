@@ -101,7 +101,7 @@ class Calendar extends Component
         try {
             $this->calendar->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->calendar);
 
             return false;
         }
@@ -130,7 +130,6 @@ class Calendar extends Component
 
         if ($trigger === 'event-change' && ! $isEditable) {
             $this->skipRender();
-            CalendarEventEdit::$skipNextRender = true;
 
             return;
         }
@@ -170,7 +169,6 @@ class Calendar extends Component
 
         if ($trigger === 'event-change') {
             $this->skipRender();
-            CalendarEventEdit::$skipNextRender = true;
 
             if ($this->event->was_repeatable) {
                 $this->js(<<<'JS'
@@ -194,13 +192,12 @@ class Calendar extends Component
                     ->success(__(':model saved', ['model' => __(Str::headline(morph_alias($model)))]))
                     ->send();
             } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+                exception_to_notifications($e, $this, form: $this->event);
 
                 return;
             }
         } elseif ($previousEditComponent === $this->event->edit_component) {
             $this->skipRender();
-            CalendarEventEdit::$skipNextRender = true;
 
             $this->js(<<<'JS'
                 window.dispatchEvent(new CustomEvent('sync-calendar-event', {
@@ -320,11 +317,11 @@ class Calendar extends Component
                         ],
                         'nowIndicator' => true,
                         'calendarWeekAbbreviation' => __('CW'),
-                        'buttonText' => [
-                            'today' => __('Today'),
-                            'month' => __('Month'),
-                            'week' => __('Week'),
-                            'day' => __('Day'),
+                        'buttons' => [
+                            'today' => ['text' => __('Today')],
+                            'dayGridMonth' => ['text' => __('Month')],
+                            'timeGridWeek' => ['text' => __('Week')],
+                            'timeGridDay' => ['text' => __('Day')],
                         ],
                     ]
                 ),
@@ -341,7 +338,7 @@ class Calendar extends Component
     #[Renderless]
     public function getEvents(array $info, array $calendarAttributes): array
     {
-        if (data_get($calendarAttributes, 'hasNoEvents')) {
+        if (data_get($calendarAttributes, 'hasNoEvents') || ! $this->isListedCalendar($calendarAttributes)) {
             return [];
         }
 
@@ -398,7 +395,7 @@ class Calendar extends Component
         try {
             $this->calendar->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->calendar);
 
             return false;
         }
@@ -555,6 +552,19 @@ class Calendar extends Component
     ): Builder {
         return resolve_static(morphed_model($modelType), 'query')
             ->inTimeframe($start, $end, $calendarAttributes);
+    }
+
+    protected function isListedCalendar(array $calendarAttributes): bool
+    {
+        $calendars = collect(to_flat_tree($this->getCalendars()));
+
+        return data_get($calendarAttributes, 'isVirtual') ?? false
+            ? $calendars
+                ->where('isVirtual', true)
+                ->contains('modelType', data_get($calendarAttributes, 'modelType'))
+            : $calendars
+                ->reject(fn (array $calendar): bool => (bool) data_get($calendar, 'hasNoEvents'))
+                ->contains('id', data_get($calendarAttributes, 'id'));
     }
 
     protected function getViews(): array

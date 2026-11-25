@@ -13,6 +13,9 @@ class Projects extends ProjectList
 
     protected function getBuilder(Builder $builder): Builder
     {
-        return $builder->where('order_id', $this->orderId);
+        return $builder->where(fn (Builder $query) => $query
+            ->where('order_id', $this->orderId)
+            ->orWhereRelation('supplementaryOrders', 'orders.id', $this->orderId)
+        );
     }
 }

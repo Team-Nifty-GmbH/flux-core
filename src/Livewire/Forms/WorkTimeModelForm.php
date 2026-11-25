@@ -17,6 +17,8 @@ class WorkTimeModelForm extends FluxForm
 
     public ?int $cycle_weeks = 1;
 
+    public bool $has_fixed_hours = true;
+
     #[Locked]
     public ?int $id = null;
 
@@ -79,7 +81,7 @@ class WorkTimeModelForm extends FluxForm
 
                 // Initialize all 7 days
                 for ($day = 1; $day <= 7; $day++) {
-                    $schedule = $weekSchedules->firstWhere('weekday', $day);
+                    $schedule = $weekSchedules->firstWhere('weekday', $day % 7);
                     $weekData['days'][$day] = [
                         'weekday' => $day % 7,
                         'start_time' => $schedule?->start_time ?? null,

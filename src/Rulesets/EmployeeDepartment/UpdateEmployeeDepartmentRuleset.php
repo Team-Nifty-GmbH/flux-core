@@ -21,17 +21,17 @@ class UpdateEmployeeDepartmentRuleset extends FluxRuleset
             'location_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Location::class]),
+                app(ModelExists::class, ['model' => Location::class, 'subject' => EmployeeDepartment::class]),
             ],
             'manager_employee_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Employee::class]),
+                app(ModelExists::class, ['model' => Employee::class, 'subject' => EmployeeDepartment::class]),
             ],
             'parent_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => EmployeeDepartment::class]),
+                app(ModelExists::class, ['model' => EmployeeDepartment::class, 'subject' => EmployeeDepartment::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
             'code' => 'sometimes|nullable|string|max:50',

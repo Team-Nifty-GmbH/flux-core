@@ -112,6 +112,7 @@ trait EditorButtonTrait
         $attributes = new ComponentAttributeBag([
             'flat' => true,
             'color' => 'secondary',
+            'class' => 'dark:text-secondary-400 dark:[&_svg]:text-secondary-400',
         ]);
 
         if ($command = $this->command()) {

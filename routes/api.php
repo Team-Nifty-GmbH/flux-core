@@ -127,6 +127,9 @@ use FluxErp\Actions\LedgerAccountTransaction\UpdateLedgerAccountTransaction;
 use FluxErp\Actions\Location\CreateLocation;
 use FluxErp\Actions\Location\DeleteLocation;
 use FluxErp\Actions\Location\UpdateLocation;
+use FluxErp\Actions\Lot\CreateLot;
+use FluxErp\Actions\Lot\DeleteLot;
+use FluxErp\Actions\Lot\UpdateLot;
 use FluxErp\Actions\MailAccount\CreateMailAccount;
 use FluxErp\Actions\MailAccount\DeleteMailAccount;
 use FluxErp\Actions\MailAccount\UpdateMailAccount;
@@ -196,6 +199,8 @@ use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\CreateProductBundleProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\DeleteProductBundleProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\UpdateProductBundleProduct;
+use FluxErp\Actions\Product\ResetProductFields;
+use FluxErp\Actions\Product\ResetProductRelations;
 use FluxErp\Actions\Product\RestoreProduct;
 use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
@@ -227,6 +232,12 @@ use FluxErp\Actions\PurchaseInvoicePosition\UpdatePurchaseInvoicePosition;
 use FluxErp\Actions\RecordOrigin\CreateRecordOrigin;
 use FluxErp\Actions\RecordOrigin\DeleteRecordOrigin;
 use FluxErp\Actions\RecordOrigin\UpdateRecordOrigin;
+use FluxErp\Actions\Resource\CreateResource;
+use FluxErp\Actions\Resource\DeleteResource;
+use FluxErp\Actions\Resource\UpdateResource;
+use FluxErp\Actions\ResourceBooking\CreateResourceBooking;
+use FluxErp\Actions\ResourceBooking\DeleteResourceBooking;
+use FluxErp\Actions\ResourceBooking\UpdateResourceBooking;
 use FluxErp\Actions\Role\CreateRole;
 use FluxErp\Actions\Role\DeleteRole;
 use FluxErp\Actions\Role\UpdateRole;
@@ -248,7 +259,11 @@ use FluxErp\Actions\SerialNumberRange\UpdateSerialNumberRange;
 use FluxErp\Actions\Setting\UpdateSetting;
 use FluxErp\Actions\StockPosting\CreateStockPosting;
 use FluxErp\Actions\StockPosting\DeleteStockPosting;
+use FluxErp\Actions\StockPosting\TransferStock;
 use FluxErp\Actions\StockPosting\UpdateStockPosting;
+use FluxErp\Actions\StorageArea\CreateStorageArea;
+use FluxErp\Actions\StorageArea\DeleteStorageArea;
+use FluxErp\Actions\StorageArea\UpdateStorageArea;
 use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Actions\Tag\DeleteTag;
 use FluxErp\Actions\Tag\UpdateTag;
@@ -313,6 +328,7 @@ use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\RoleController;
 use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Controllers\SettingController;
+use FluxErp\Http\Middleware\SearchModelPermission;
 use FluxErp\Http\Middleware\SetAcceptHeaders;
 use FluxErp\Livewire\Widgets\Employee\CurrentWorkTimeModel;
 use FluxErp\Livewire\Widgets\Employee\OvertimeBalanceBox;
@@ -355,6 +371,7 @@ use FluxErp\Models\LeadLossReason;
 use FluxErp\Models\LeadState;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Location;
+use FluxErp\Models\Lot;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use FluxErp\Models\MediaFolder;
@@ -385,12 +402,15 @@ use FluxErp\Models\Project;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\PurchaseInvoicePosition;
 use FluxErp\Models\RecordOrigin;
+use FluxErp\Models\Resource;
+use FluxErp\Models\ResourceBooking;
 use FluxErp\Models\Role;
 use FluxErp\Models\Schedule;
 use FluxErp\Models\SepaMandate;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\SerialNumberRange;
 use FluxErp\Models\StockPosting;
+use FluxErp\Models\StorageArea;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Target;
 use FluxErp\Models\Task;
@@ -498,17 +518,23 @@ Route::prefix('api')
                 Route::delete('/bank-connections/{id}', DeleteBankConnection::class);
 
                 // Calendars
-                Route::get('/calendars/{id}', [BaseController::class, 'show'])->defaults('model', Calendar::class);
-                Route::get('/calendars', [BaseController::class, 'index'])->defaults('model', Calendar::class);
+                Route::get('/calendars/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', Calendar::class)
+                    ->defaults('scope', 'readable');
+                Route::get('/calendars', [BaseController::class, 'index'])
+                    ->defaults('model', Calendar::class)
+                    ->defaults('scope', 'readable');
                 Route::post('/calendars', CreateCalendar::class);
                 Route::put('/calendars', UpdateCalendar::class);
                 Route::delete('/calendars/{id}', DeleteCalendar::class);
 
                 // CalendarEvents
                 Route::get('/calendar-events/{id}', [BaseController::class, 'show'])
-                    ->defaults('model', CalendarEvent::class);
+                    ->defaults('model', CalendarEvent::class)
+                    ->defaults('scope', 'readable');
                 Route::get('/calendar-events', [BaseController::class, 'index'])
-                    ->defaults('model', CalendarEvent::class);
+                    ->defaults('model', CalendarEvent::class)
+                    ->defaults('scope', 'readable');
                 Route::post('/calendar-events', CreateCalendarEvent::class);
                 Route::put('/calendar-events', UpdateCalendarEvent::class);
                 Route::delete('/calendar-events/{id}', DeleteCalendarEvent::class);
@@ -777,6 +803,13 @@ Route::prefix('api')
                 Route::put('/locations', UpdateLocation::class);
                 Route::delete('/locations/{id}', DeleteLocation::class);
 
+                // Lots
+                Route::get('/lots/{id}', [BaseController::class, 'show'])->defaults('model', Lot::class);
+                Route::get('/lots', [BaseController::class, 'index'])->defaults('model', Lot::class);
+                Route::post('/lots', CreateLot::class);
+                Route::put('/lots', UpdateLot::class);
+                Route::delete('/lots/{id}', DeleteLot::class);
+
                 // MailAccounts
                 Route::get('/mail-accounts/{id}', [BaseController::class, 'show'])
                     ->defaults('model', MailAccount::class);
@@ -957,6 +990,8 @@ Route::prefix('api')
                 Route::put('/products', UpdateProduct::class);
                 Route::delete('/products/{id}', DeleteProduct::class);
                 Route::post('/products/{id}/restore', RestoreProduct::class);
+                Route::post('/products/variants/reset-fields', ResetProductFields::class);
+                Route::post('/products/variants/reset-relations', ResetProductRelations::class);
 
                 // Product bundle products
                 Route::get('/product-bundle-products/{id}', [BaseController::class, 'show'])
@@ -1039,6 +1074,23 @@ Route::prefix('api')
                 Route::put('/purchase-invoice-positions', UpdatePurchaseInvoicePosition::class);
                 Route::delete('/purchase-invoice-positions/{id}', DeletePurchaseInvoicePosition::class);
 
+                // ResourceBookings
+                Route::get('/resource-bookings/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', ResourceBooking::class);
+                Route::get('/resource-bookings', [BaseController::class, 'index'])
+                    ->defaults('model', ResourceBooking::class);
+                Route::post('/resource-bookings', CreateResourceBooking::class);
+                Route::put('/resource-bookings', UpdateResourceBooking::class);
+                Route::delete('/resource-bookings/{id}', DeleteResourceBooking::class);
+
+                // Resources
+                Route::get('/resources/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', Resource::class);
+                Route::get('/resources', [BaseController::class, 'index'])->defaults('model', Resource::class);
+                Route::post('/resources', CreateResource::class);
+                Route::put('/resources', UpdateResource::class);
+                Route::delete('/resources/{id}', DeleteResource::class);
+
                 // Roles
                 Route::get('/roles', [BaseController::class, 'index'])->defaults('model', Role::class);
                 Route::get('/roles/{id}', [BaseController::class, 'show'])->defaults('model', Role::class);
@@ -1063,7 +1115,8 @@ Route::prefix('api')
 
                 // Search
                 Route::get('/search/{model}', SearchController::class)
-                    ->where('model', '[A-Za-z0-9._-]+');
+                    ->where('model', '[A-Za-z0-9._-]+')
+                    ->middleware(SearchModelPermission::class);
 
                 // SepaMandates
                 Route::get('/sepa-mandates/{id}', [BaseController::class, 'show'])
@@ -1103,12 +1156,21 @@ Route::prefix('api')
                 Route::delete('/event-subscriptions/{id}', DeleteEventSubscription::class);
 
                 // StockPostings
+                Route::post('/stock-postings/transfer', TransferStock::class);
                 Route::get('/stock-postings/{id}', [BaseController::class, 'show'])
                     ->defaults('model', StockPosting::class);
                 Route::get('/stock-postings', [BaseController::class, 'index'])->defaults('model', StockPosting::class);
                 Route::post('/stock-postings', CreateStockPosting::class);
                 Route::put('/stock-postings', UpdateStockPosting::class);
                 Route::delete('/stock-postings/{id}', DeleteStockPosting::class);
+
+                // StorageAreas
+                Route::get('/storage-areas/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', StorageArea::class);
+                Route::get('/storage-areas', [BaseController::class, 'index'])->defaults('model', StorageArea::class);
+                Route::post('/storage-areas', CreateStorageArea::class);
+                Route::put('/storage-areas', UpdateStorageArea::class);
+                Route::delete('/storage-areas/{id}', DeleteStorageArea::class);
 
                 // Tag
                 Route::get('/tags/{id}', [BaseController::class, 'show'])->defaults('model', Tag::class);
@@ -1257,5 +1319,5 @@ Route::prefix('api')
             });
 
         Route::get('/media/{file_name}', DownloadMedia::class)->name('media.public');
-        Broadcast::routes(['middleware' => ['auth:sanctum']]);
+        Broadcast::routes(['middleware' => ['auth:sanctum,token', 'ability:user,interface']]);
     });

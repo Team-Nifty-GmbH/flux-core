@@ -185,4 +185,13 @@ class WorkTimeOverview extends LineChart
     {
         return $this->toolTipFormatter();
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(EmployeeDay::class) => [
+                EmployeeDay::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

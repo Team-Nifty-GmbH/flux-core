@@ -6,13 +6,17 @@ use FluxErp\Actions\PushSubscription\UpsertPushSubscription;
 use FluxErp\Http\Controllers\AuthController;
 use FluxErp\Http\Controllers\CalendarEventController;
 use FluxErp\Http\Controllers\CalendarSearchController;
+use FluxErp\Http\Controllers\MentionableSearchController;
 use FluxErp\Http\Controllers\PrivateMediaController;
 use FluxErp\Http\Controllers\SearchController;
+use FluxErp\Http\Middleware\SearchModelPermission;
 use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\AbsenceRequest\AbsenceRequest;
 use FluxErp\Livewire\Accounting\DirectDebit;
+use FluxErp\Livewire\Accounting\LedgerBookings;
+use FluxErp\Livewire\Accounting\Loan;
+use FluxErp\Livewire\Accounting\Loans;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
-use FluxErp\Livewire\Accounting\PaymentReminder;
 use FluxErp\Livewire\Accounting\PaymentReminderRun;
 use FluxErp\Livewire\Accounting\PaymentRunPreview;
 use FluxErp\Livewire\Accounting\TransactionAssignments;
@@ -53,18 +57,23 @@ use FluxErp\Livewire\Order\CreateChildOrder;
 use FluxErp\Livewire\Order\Order;
 use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Order\OrderListByOrderType;
+use FluxErp\Livewire\Product\ExpiringStockList;
 use FluxErp\Livewire\Product\Product;
 use FluxErp\Livewire\Product\ProductList;
 use FluxErp\Livewire\Product\SerialNumber\SerialNumber;
 use FluxErp\Livewire\Product\SerialNumber\SerialNumberList;
 use FluxErp\Livewire\Project\Project;
 use FluxErp\Livewire\Project\ProjectList;
+use FluxErp\Livewire\Resource\ResourceList;
+use FluxErp\Livewire\Resource\ResourceView;
 use FluxErp\Livewire\Settings\AbsencePolicies;
 use FluxErp\Livewire\Settings\AbsenceTypes;
 use FluxErp\Livewire\Settings\AccountingSettings;
 use FluxErp\Livewire\Settings\ActivityLogs;
+use FluxErp\Livewire\Settings\ActivityLogSettings;
 use FluxErp\Livewire\Settings\AddressTypes;
 use FluxErp\Livewire\Settings\BankConnections;
+use FluxErp\Livewire\Settings\BlockedFiles;
 use FluxErp\Livewire\Settings\Categories;
 use FluxErp\Livewire\Settings\CoreSettings;
 use FluxErp\Livewire\Settings\Countries;
@@ -104,6 +113,7 @@ use FluxErp\Livewire\Settings\SearchSettings;
 use FluxErp\Livewire\Settings\SecuritySettings;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\Settings;
+use FluxErp\Livewire\Settings\StorageAreas;
 use FluxErp\Livewire\Settings\SubscriptionSettings;
 use FluxErp\Livewire\Settings\System;
 use FluxErp\Livewire\Settings\Tags;
@@ -127,6 +137,7 @@ use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Livewire\Ticket\Ticket;
 use FluxErp\Models\Address;
 use FluxErp\Support\MediaLibrary\ContentDisposition;
+use FluxErp\Support\MediaLibrary\StreamedFile;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -171,7 +182,14 @@ Route::middleware('web')
 
             Route::get('/mobile/share-target', ShareTarget::class)->name('mobile.share-target');
 
-            Route::get('/private-storage/{path}', function (string $path) {
+            Route::get('/user/private-storage/{path}', function (string $path) {
+                $owner = private_storage_folder(auth()->user()->getMorphClass() . ':' . auth()->id());
+
+                abort_unless(
+                    preg_match('#^(exports|documents)/' . preg_quote($owner, '#') . '/(?!\.\.?$)[^/\\\\]+$#', $path),
+                    404
+                );
+
                 return response()
                     ->file(
                         Storage::path($path),
@@ -190,7 +208,8 @@ Route::middleware('web')
                 Route::name('contacts.')->prefix('contacts')
                     ->group(function (): void {
                         Route::get('/contacts', ContactList::class)->name('contacts');
-                        Route::get('/contacts/{id?}', Contact::class)->where('id', '[0-9]+')->name('id?');
+                        Route::get('/contacts/{id?}', Contact::class)->where('id', '[0-9]+')->name('id?')
+                            ->metadata(['model' => 'contact']);
                         Route::get('/addresses', AddressList::class)->name('addresses');
                         Route::get('/communications', CommunicationList::class)->name('communications');
                     });
@@ -211,40 +230,56 @@ Route::middleware('web')
                     ->prefix('sales')
                     ->group(function (): void {
                         Route::get('/leads', LeadList::class)->name('leads');
-                        Route::get('/leads/{id}', Lead::class)->name('lead.id');
+                        Route::get('/leads/{id}', Lead::class)->where('id', '[0-9]+')->name('lead.id')
+                            ->metadata(['model' => 'lead']);
                     });
 
                 Route::name('orders.')
                     ->prefix('orders')
                     ->group(function (): void {
                         Route::get('/list', OrderList::class)->name('orders');
-                        Route::get('/list/{orderType}', OrderListByOrderType::class)->name('order-type');
+                        Route::get('/list/{orderType}', OrderListByOrderType::class)->name('order-type')
+                            ->metadata(['title' => 'Orders', 'model' => 'order_type']);
                         Route::get('/order-positions/list', OrderPositionList::class)->name('order-positions');
                         Route::get('/create-child-order', CreateChildOrder::class)->name('create-child-order');
-                        Route::get('/{id}', Order::class)->where('id', '[0-9]+')->name('id');
+                        Route::get('/{id}', Order::class)->where('id', '[0-9]+')->name('id')
+                            ->metadata(['model' => 'order']);
                     });
 
                 Route::get('/tasks', TaskList::class)->name('tasks');
-                Route::get('/tasks/{id}', Task::class)->name('tasks.id');
+                Route::get('/tasks/{id}', Task::class)->where('id', '[0-9]+')->name('tasks.id')
+                    ->metadata(['model' => 'task']);
                 Route::get('/tickets', TicketList::class)->name('tickets');
-                Route::get('/tickets/{id}', Ticket::class)->name('tickets.id');
+                Route::get('/tickets/{id}', Ticket::class)->where('id', '[0-9]+')->name('tickets.id')
+                    ->metadata(['model' => 'ticket']);
                 Route::get('/projects', ProjectList::class)->name('projects');
-                Route::get('/projects/{id}', Project::class)->name('projects.id');
+                Route::get('/projects/{id}', Project::class)->where('id', '[0-9]+')->name('projects.id')
+                    ->metadata(['model' => 'project']);
 
                 Route::name('products.')->prefix('products')
                     ->group(function (): void {
+                        Route::get('/expiring-stock', ExpiringStockList::class)->name('expiring-stock');
                         Route::get('/list', ProductList::class)->name('products');
                         Route::get('/serial-numbers', SerialNumberList::class)->name('serial-numbers');
-                        Route::get('/serial-numbers/{id?}', SerialNumber::class)->name('serial-numbers.id?');
-                        Route::get('/{id}', Product::class)->where('id', '[0-9]+')->name('id');
+                        Route::get('/serial-numbers/{id?}', SerialNumber::class)->where('id', '[0-9]+')->name('serial-numbers.id?')
+                            ->metadata(['model' => 'serial_number']);
+                        Route::get('/{id}', Product::class)->where('id', '[0-9]+')->name('id')
+                            ->metadata(['model' => 'product']);
+                    });
+
+                Route::name('resources.')->prefix('resources')
+                    ->group(function (): void {
+                        Route::get('/', ResourceList::class)->name('resources');
+                        Route::get('/{id?}', ResourceView::class)->where('id', '[0-9]+')->name('id?');
                     });
 
                 Route::name('human-resources.')->prefix('human-resources')
                     ->group(function (): void {
                         Route::get('/absence-requests', AbsenceRequests::class)
                             ->name('absence-requests');
-                        Route::get('/absence-requests/{id}', AbsenceRequest::class)
-                            ->name('absence-requests.show');
+                        Route::get('/absence-requests/{id}', AbsenceRequest::class)->where('id', '[0-9]+')
+                            ->name('absence-requests.show')
+                            ->metadata(['model' => 'absence_request']);
 
                         Route::get('/attendance-overview', AttendanceOverview::class)
                             ->name('attendance-overview');
@@ -253,18 +288,22 @@ Route::middleware('web')
 
                         Route::get('/employee-days', EmployeeDays::class)
                             ->name('employee-days');
-                        Route::get('/employee-days/{id}', EmployeeDay::class)
-                            ->name('employee-days.show');
+                        Route::get('/employee-days/{id}', EmployeeDay::class)->where('id', '[0-9]+')
+                            ->name('employee-days.show')
+                            ->metadata(['model' => 'employee_day']);
 
                         Route::get('/employees', Employees::class)->name('employees');
-                        Route::get('/employees/{id}', Employee::class)->name('employees.id');
+                        Route::get('/employees/{id}', Employee::class)->where('id', '[0-9]+')->name('employees.id')
+                            ->metadata(['model' => 'employee']);
 
                         Route::get('/my-employee-profile', MyEmployeeProfile::class)
                             ->name('my-employee-profile');
-                        Route::get('/my-employee-profile/employee-day/{id}', MyEmployeeDay::class)
-                            ->name('my-employee-profile.my-employee-day');
-                        Route::get('/my-employee-profile/absence-request/{id}', MyAbsenceRequest::class)
-                            ->name('my-employee-profile.my-absence-request');
+                        Route::get('/my-employee-profile/employee-day/{id}', MyEmployeeDay::class)->where('id', '[0-9]+')
+                            ->name('my-employee-profile.my-employee-day')
+                            ->metadata(['model' => 'employee_day']);
+                        Route::get('/my-employee-profile/absence-request/{id}', MyAbsenceRequest::class)->where('id', '[0-9]+')
+                            ->name('my-employee-profile.my-absence-request')
+                            ->metadata(['model' => 'absence_request']);
 
                         Route::get('/work-times', WorkTimes::class)->name('work-times');
                     });
@@ -272,7 +311,10 @@ Route::middleware('web')
                 Route::name('accounting.')->prefix('accounting')
                     ->group(function (): void {
                         Route::get('/commissions', CommissionList::class)->name('commissions');
-                        Route::get('/payment-reminders', PaymentReminder::class)->name('payment-reminders');
+                        Route::get('/ledger-bookings', LedgerBookings::class)->name('ledger-bookings');
+                        Route::get('/loans', Loans::class)->name('loans');
+                        Route::get('/loans/{id}', Loan::class)->where('id', '[0-9]+')->name('loans.id')
+                            ->metadata(['model' => 'loan']);
                         Route::get('/payment-reminder-run', PaymentReminderRun::class)->name('payment-reminder-run');
                         Route::get('/purchase-invoices', PurchaseInvoiceList::class)->name('purchase-invoices');
                         Route::get('/transactions', TransactionList::class)->name('transactions');
@@ -292,9 +334,11 @@ Route::middleware('web')
                         Route::get('/absence-policies', AbsencePolicies::class)->name('absence-policies');
                         Route::get('/absence-types', AbsenceTypes::class)->name('absence-types');
                         Route::get('/accounting-settings', AccountingSettings::class)->name('accounting-settings');
+                        Route::get('/activity-log-settings', ActivityLogSettings::class)->name('activity-log-settings');
                         Route::get('/activity-logs', ActivityLogs::class)->name('activity-logs');
                         Route::get('/address-types', AddressTypes::class)->name('address-types');
                         Route::get('/bank-connections', BankConnections::class)->name('bank-connections');
+                        Route::get('/blocked-files', BlockedFiles::class)->name('blocked-files');
                         Route::get('/categories', Categories::class)->name('categories');
                         Route::get('/core-settings', CoreSettings::class)->name('core-settings');
                         Route::get('/countries', Countries::class)->name('countries');
@@ -332,6 +376,7 @@ Route::middleware('web')
                         Route::get('/search-settings', SearchSettings::class)->name('search-settings');
                         Route::get('/security-settings', SecuritySettings::class)->name('security-settings');
                         Route::get('/serial-number-ranges', SerialNumberRanges::class)->name('serial-number-ranges');
+                        Route::get('/storage-areas', StorageAreas::class)->name('storage-areas');
                         Route::get('/subscription-settings', SubscriptionSettings::class)->name('subscription-settings');
                         Route::get('/system', System::class)->name('system');
                         Route::get('/tags', Tags::class)->name('tags');
@@ -347,7 +392,8 @@ Route::middleware('web')
                         Route::get('/vacation-carryover-rules', VacationCarryoverRules::class)->name('vacation-carryover-rules');
                         Route::get('/vat-rates', VatRates::class)->name('vat-rates');
                         Route::get('/warehouses', Warehouses::class)->name('warehouses');
-                        Route::get('/work-time-model/{id}', WorkTimeModel::class)->name('work-time-model');
+                        Route::get('/work-time-model/{id}', WorkTimeModel::class)->where('id', '[0-9]+')->name('work-time-model')
+                            ->metadata(['model' => 'work_time_model']);
                         Route::get('/work-time-models', WorkTimeModels::class)->name('work-time-models');
                         Route::get('/work-time-types', WorkTimeTypes::class)->name('work-time-types');
                     });
@@ -367,8 +413,11 @@ Route::middleware('web')
         });
 
         Route::middleware('auth:web')->group(function (): void {
+            Route::post('/search/mentionable', MentionableSearchController::class)
+                ->name('search.mentionable');
             Route::any('/search/{model?}', SearchController::class)
                 ->where('model', '(.*)')
+                ->middleware(SearchModelPermission::class)
                 ->name('search');
             Route::any('/calendar-search', CalendarSearchController::class)
                 ->name('calendar-search');
@@ -397,6 +446,8 @@ Route::middleware('web')
                 $disk = Storage::disk($media->disk);
                 $path = $media->getPathRelativeToRoot();
 
+                abort_unless($disk->exists($path), 404);
+
                 if ($disk->providesTemporaryUrls()) {
                     return redirect()->away(
                         $disk->temporaryUrl(
@@ -407,7 +458,8 @@ Route::middleware('web')
                     );
                 }
 
-                return $disk->response(
+                return StreamedFile::response(
+                    $disk,
                     $path,
                     $media->file_name,
                     ['Content-Disposition' => $disposition],

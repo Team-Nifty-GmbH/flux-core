@@ -17,6 +17,7 @@ use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\LogsActivity;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -288,5 +289,10 @@ class CalendarEvent extends FluxModel implements HasMedia, Targetable
 
             return false;
         });
+    }
+
+    protected function scopeReadable(Builder $query): void
+    {
+        $query->whereHas('calendar', fn (Builder $query) => $query->readable());
     }
 }

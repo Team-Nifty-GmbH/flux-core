@@ -3,8 +3,10 @@
 namespace FluxErp\Actions\OrderTransaction;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Models\Order;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Rulesets\OrderTransaction\CreateOrderTransactionRuleset;
+use Illuminate\Validation\ValidationException;
 
 class CreateOrderTransaction extends FluxAction
 {
@@ -25,5 +27,23 @@ class CreateOrderTransaction extends FluxAction
         $orderTransaction->save();
 
         return $orderTransaction->refresh();
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        $orderTypeEnum = resolve_static(Order::class, 'query')
+            ->whereKey($this->getData('order_id'))
+            ->first(['id', 'order_type_id'])
+            ?->orderType
+            ?->order_type_enum;
+
+        if ($orderTypeEnum?->isSubscription()) {
+            throw ValidationException::withMessages([
+                'order_id' => ['Transactions cannot be assigned to subscription orders.'],
+            ])
+                ->errorBag('createOrderTransaction');
+        }
     }
 }

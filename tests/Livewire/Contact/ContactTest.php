@@ -20,12 +20,42 @@ test('can delete contact', function (): void {
     Livewire::test(Contact::class, ['id' => $this->contact->id])
         ->call('delete')
         ->assertHasNoErrors()
+        ->assertSet('contact.id', $this->contact->id)
+        ->assertRedirectToRoute('contacts.contacts');
+});
+
+test('handles the deleted broadcast after deleting the contact', function (): void {
+    $channel = $this->contact->broadcastChannel(false);
+
+    Livewire::test(Contact::class, ['id' => $this->contact->id])
+        ->call('delete')
+        ->dispatch('echo-private:' . $channel . ',.ContactDeleted')
         ->assertRedirectToRoute('contacts.contacts');
 });
 
 test('renders successfully', function (): void {
     Livewire::test(Contact::class, ['id' => $this->contact->id])
         ->assertOk();
+});
+
+test('renders a contact whose main address was deleted', function (): void {
+    $this->contact->refresh()->mainAddress()->first()->deleteQuietly();
+
+    Livewire::test(Contact::class, ['id' => $this->contact->id])
+        ->assertOk()
+        ->assertSet('contact.id', $this->contact->id)
+        ->assertSet('contact.main_address', []);
+});
+
+test('saving the contact keeps its main address in the form', function (): void {
+    $mainAddress = $this->contact->refresh()->mainAddress()->first();
+
+    Livewire::test(Contact::class, ['id' => $this->contact->id])
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true)
+        ->assertSet('contact.main_address.id', $mainAddress->getKey())
+        ->assertSet('contact.main_address.name', $mainAddress->name);
 });
 
 test('switch tabs', function (): void {

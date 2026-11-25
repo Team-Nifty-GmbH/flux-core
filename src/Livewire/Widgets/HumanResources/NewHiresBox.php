@@ -68,4 +68,13 @@ class NewHiresBox extends ValueBox
     {
         return 'user-plus';
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Employee::class) => [
+                Employee::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

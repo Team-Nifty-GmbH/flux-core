@@ -1,6 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { destroy } from 'filepond';
 
+// The tree is edited in place (nodes are pushed, removed and moved). A tree handed in
+// as a Livewire property is the live property, so editing it in place marks the property
+// dirty and a locked one then rejects the next request. Work on a copy instead.
+const detachTree = (tree) => JSON.parse(JSON.stringify(tree ?? []));
+
 // Filter out dangerous keys to prevent prototype pollution
 const sanitizeObject = (obj) => {
     if (typeof obj !== 'object' || obj === null) return obj;
@@ -43,14 +48,14 @@ export default function folders(
 
             if (typeof this.property === 'string') {
                 this.$watch(property, (newFolders) => {
-                    this.tree = newFolders;
+                    this.tree = detachTree(newFolders);
                 });
             }
         },
         async refresh() {
             this.tree = [];
             try {
-                this.tree = await getTreePromise;
+                this.tree = detachTree(await getTreePromise);
             } catch (error) {
                 console.error('Error fetching the tree structure:', error);
                 this.tree = [];
@@ -149,7 +154,13 @@ export default function folders(
             this.$dispatch('folder-tree-check-updated', this.checked);
         },
         unCheck(node) {
-            this.checked = this.checked.filter((id) => id !== node.id);
+            // the array is the bound Livewire property, replacing it drops the binding
+            const index = this.checked.indexOf(node.id);
+
+            if (index > -1) {
+                this.checked.splice(index, 1);
+            }
+
             this.$dispatch('folder-tree-uncheck', node, this.checked);
         },
         check(node) {

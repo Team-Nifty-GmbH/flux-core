@@ -4,10 +4,10 @@ namespace FluxErp\Http\Controllers;
 
 use FluxErp\Models\Media;
 use FluxErp\Support\MediaLibrary\ContentDisposition;
+use FluxErp\Support\MediaLibrary\StreamedFile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -16,10 +16,12 @@ class PrivateMediaController extends Controller
     public function __invoke(
         Request $request,
         Media $media,
-    ): Media|BinaryFileResponse|StreamedResponse|RedirectResponse {
+    ): Media|StreamedResponse|RedirectResponse {
         $conversion = (string) $request->query('conversion', '');
 
         if (blank($conversion)) {
+            abort_unless(Storage::disk($media->disk)->exists($media->getPathRelativeToRoot()), 404);
+
             return $media;
         }
 
@@ -47,7 +49,8 @@ class PrivateMediaController extends Controller
             );
         }
 
-        return $disk->response(
+        return StreamedFile::response(
+            $disk,
             $relativePath,
             $fileName,
             ['Content-Disposition' => $disposition],

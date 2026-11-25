@@ -8,7 +8,7 @@
                 @section('contact.title')
                     @section('contact.title.avatar')
                         <label for="avatar" class="cursor-pointer">
-                            <x-avatar xl :image="$avatar" />
+                            <x-avatar :image="$avatar" />
                         </label>
                         <input
                             type="file"

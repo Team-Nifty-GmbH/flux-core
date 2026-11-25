@@ -103,4 +103,13 @@ class ActiveLeadsByClosingProbability extends BarChart
             $this->xaxis['categories'][] = $label;
         }
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Lead::class) => [
+                Lead::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

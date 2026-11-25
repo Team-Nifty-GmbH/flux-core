@@ -26,7 +26,6 @@ class UpdateAddressTypeRuleset extends FluxRuleset
             ],
             'name' => 'sometimes|required|string|max:255',
             'is_locked' => 'boolean',
-            'is_unique' => 'boolean',
 
             'tenants' => 'array|nullable',
             'tenants.*' => [

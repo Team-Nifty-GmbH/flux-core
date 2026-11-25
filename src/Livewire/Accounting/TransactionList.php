@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Accounting;
 
 use FluxErp\Actions\Transaction\DeleteTransaction;
 use FluxErp\Livewire\DataTables\TransactionList as BaseTransactionList;
+use FluxErp\Support\Bus\BulkExecutor;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -30,18 +31,26 @@ class TransactionList extends BaseTransactionList
     #[Renderless]
     public function deleteSelected(): void
     {
-        try {
-            $this->getSelectedModelsQuery()->pluck('id')->each(function (int $id): void {
-                DeleteTransaction::make(['id' => $id])
-                    ->checkPermission()
-                    ->validate()
-                    ->execute();
-            });
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+        $transactionIds = $this->getSelectedModelsQuery()->pluck('id');
+
+        if ($transactionIds->isEmpty()) {
+            return;
         }
 
-        $this->loadData();
+        try {
+            BulkExecutor::make(
+                DeleteTransaction::class,
+                $transactionIds
+                    ->map(fn (int $id): array => ['id' => $id])
+                    ->all()
+            )
+                ->name(__('Deleting transactions'))
+                ->dispatch();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
 
         $this->reset('selected');
     }

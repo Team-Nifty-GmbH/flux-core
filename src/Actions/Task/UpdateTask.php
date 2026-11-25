@@ -82,16 +82,12 @@ class UpdateTask extends DispatchableFluxAction implements SupportsBulkExecution
 
     protected function prepareForValidation(): void
     {
-        if ($this->getData('start_date')) {
-            $this->data['start_time'] ??= null;
-        } else {
+        if (! $this->getData('start_date')) {
             $this->data['start_reminder_minutes_before'] = null;
             $this->data['has_start_reminder'] = false;
         }
 
-        if ($this->getData('due_date')) {
-            $this->data['due_time'] ??= null;
-        } else {
+        if (! $this->getData('due_date')) {
             $this->data['due_reminder_minutes_before'] = null;
             $this->data['has_due_reminder'] = false;
         }

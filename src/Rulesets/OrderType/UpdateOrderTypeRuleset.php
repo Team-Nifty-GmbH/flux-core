@@ -23,7 +23,7 @@ class UpdateOrderTypeRuleset extends FluxRuleset
             'email_template_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => EmailTemplate::class]),
+                app(ModelExists::class, ['model' => EmailTemplate::class, 'subject' => OrderType::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
             'description' => 'string|nullable',

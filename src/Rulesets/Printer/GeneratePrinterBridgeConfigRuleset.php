@@ -14,6 +14,7 @@ class GeneratePrinterBridgeConfigRuleset extends FluxRuleset
             'job_check_interval' => 'required|integer|min:1',
             'api_port' => 'required|integer|min:1|max:65535',
             'reverb_disabled' => 'required|boolean',
+            'mercure_enabled' => 'required|boolean',
             'force_regenerate' => 'required|boolean',
         ];
     }

@@ -3,12 +3,14 @@
 namespace FluxErp\Models;
 
 use Exception;
+use FluxErp\Enums\MentionTypeEnum;
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Pivots\TargetUser;
 use FluxErp\Models\Pivots\TaskUser;
 use FluxErp\Models\Pivots\TenantUser;
 use FluxErp\Models\Pivots\TicketUser;
+use FluxErp\Support\Collection\UserCollection;
 use FluxErp\Traits\Model\Calendar\HasCalendars;
 use FluxErp\Traits\Model\Calendar\HasCalendarUserSettings;
 use FluxErp\Traits\Model\Filterable;
@@ -22,6 +24,7 @@ use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\HasWidgets;
 use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\InteractsWithPasskeys;
+use FluxErp\Traits\Model\Mentionable;
 use FluxErp\Traits\Model\MonitorsQueue;
 use FluxErp\Traits\Model\Notifiable;
 use FluxErp\Traits\Model\SoftDeletes;
@@ -29,11 +32,14 @@ use FluxErp\Traits\Model\TwoFactorAuthentication;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Collection as BaseCollection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -52,7 +58,7 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
 {
     use Filterable, HasCalendars, HasCalendarUserSettings, HasCart, HasDatatableUserSettings, HasFrontendAttributes,
         HasPackageFactory, HasParentChildRelations, HasPushSubscriptions, HasRoles, HasUserModification, HasUuid,
-        HasWidgets, InteractsWithMedia, InteractsWithPasskeys, MonitorsQueue, Notifiable, SoftDeletes,
+        HasWidgets, InteractsWithMedia, InteractsWithPasskeys, Mentionable, MonitorsQueue, Notifiable, SoftDeletes,
         TwoFactorAuthentication;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
@@ -66,6 +72,7 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
 
     protected $hidden = [
         'password',
+        'remember_token',
     ];
 
     protected static function booted(): void
@@ -99,6 +106,16 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         return false;
     }
 
+    public static function mentionType(): string
+    {
+        return MentionTypeEnum::User;
+    }
+
+    public static function mentionTypeIcon(): string
+    {
+        return 'user';
+    }
+
     public static function scoutIndexSettings(): ?array
     {
         return static::baseScoutIndexSettings() ?? [
@@ -106,6 +123,19 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
                 'is_active',
             ],
         ];
+    }
+
+    public static function searchMentionCandidates(string $query, int $limit = 5): BaseCollection
+    {
+        $trimmed = trim($query);
+        if ($trimmed === '') {
+            return collect();
+        }
+
+        return static::search($trimmed)
+            ->query(fn ($builder) => $builder->where('is_active', true))
+            ->take($limit)
+            ->get();
     }
 
     protected function casts(): array
@@ -117,9 +147,9 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     }
 
     // Relations
-    public function absenceRequests(): HasMany
+    public function absenceRequests(): HasManyThrough
     {
-        return $this->hasMany(AbsenceRequest::class);
+        return $this->hasManyThrough(AbsenceRequest::class, Employee::class);
     }
 
     public function activities(): MorphMany
@@ -275,6 +305,11 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     public function guardName(): array
     {
         return static::guardNames();
+    }
+
+    public function newCollection(array $models = []): Collection
+    {
+        return app(UserCollection::class, ['items' => $models]);
     }
 
     /**

@@ -1,6 +1,6 @@
 <x-modal
     id="edit-mail-folders"
-    class="bg-gray-50"
+    class="bg-gray-50 dark:bg-dark-800"
     :title="__('Mail Folder')"
     persistent
 >
@@ -49,6 +49,10 @@
                         wire:model="mailFolder.is_active"
                         :label="__('Active')"
                     />
+                    <x-toggle
+                        wire:model="mailFolder.is_sent"
+                        :label="__('Sent Folder')"
+                    />
                 </div>
                 <x-slot:footer>
                     <x-button
@@ -77,6 +81,12 @@
     x-on:open="$tsui.focus('mailAccount.name')"
 >
     <div class="flex flex-col gap-1.5">
+        <div x-cloak x-show="$wire.isSyncPaused">
+            <x-alert
+                color="red"
+                :text="__('The login failed several times in a row, so the sync is paused. Check the credentials and save the account to resume it.')"
+            />
+        </div>
         <x-card>
             <div class="flex flex-col gap-1.5">
                 <x-input
@@ -95,11 +105,25 @@
                     wire:model="mailAccount.protocol"
                     :options="$this->protocolOptions"
                 />
-                <x-input
-                    x-bind:disabled="$wire.mailAccount.id"
-                    wire:model="mailAccount.email"
-                    :label="__('Email')"
-                />
+                <div class="flex items-end gap-1.5">
+                    <div class="grow">
+                        <x-input
+                            x-bind:disabled="$wire.mailAccount.id"
+                            x-on:blur="! $wire.mailAccount.id && $wire.discoverSettings(true)"
+                            wire:model="mailAccount.email"
+                            :label="__('Email')"
+                        />
+                    </div>
+                    <x-button
+                        loading="discoverSettings"
+                        color="secondary"
+                        light
+                        icon="magnifying-glass"
+                        :text="__('Discover settings')"
+                        x-on:mousedown.prevent
+                        x-on:click="$wire.discoverSettings(false)"
+                    />
+                </div>
                 <div
                     x-cloak
                     x-show="@js($this->imapProtocols).includes($wire.mailAccount.protocol)"
@@ -190,6 +214,10 @@
                         ['value' => 'tls', 'label' => __('TLS')],
                     ]"
                 />
+                <x-checkbox
+                    wire:model.boolean="mailAccount.smtp_has_valid_certificate"
+                    :label="__('Validate Certificate')"
+                />
                 @stack('mail-account-form-smtp-extra')
             </div>
             <x-slot:footer>
@@ -197,7 +225,7 @@
                 <x-button
                     color="secondary"
                     light
-                    spinner
+                    loading="sendTestMail"
                     :text="__('Send test mail')"
                     wire:flux-confirm.prompt="{{  __('Send test mail to') }}||{{  __('Cancel') }}|{{  __('Send') }}"
                     wire:click="sendTestMail($nuxbe.promptValue())"

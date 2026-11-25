@@ -637,6 +637,15 @@ function createMedia(array $attributes, Task $task, Illuminate\Http\Testing\File
 {
     $disk = data_get($attributes, 'disk', 'local');
 
+    // The factory names files via fake()->word(), whose small pool produced
+    // colliding file names across media rows and intermittently matched the
+    // wrong row in DownloadMedia's file_name lookup.
+    if (! array_key_exists('file_name', $attributes)) {
+        $fileName = Str::uuid()->toString() . '.png';
+        $attributes['name'] = $fileName;
+        $attributes['file_name'] = $fileName;
+    }
+
     Storage::fake($disk);
 
     /** @var Media $media */
@@ -655,3 +664,18 @@ function createMedia(array $attributes, Task $task, Illuminate\Http\Testing\File
 
     return $media;
 }
+
+test('download media returns 404 when the physical file is missing', function (): void {
+    $media = createMedia([
+        'disk' => 'public',
+    ],
+        $this->task,
+        $this->testFile
+    );
+    Storage::disk('public')->delete($media->getPathRelativeToRoot());
+    $queryParams = '?model_type=' . $this->task->getMorphClass() . '&model_id=' . $this->task->getKey();
+
+    $download = $this->get('/api/media/' . $media->file_name . $queryParams);
+
+    $download->assertNotFound();
+});

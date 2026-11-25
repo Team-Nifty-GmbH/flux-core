@@ -45,6 +45,8 @@ use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\SerializableClosure\SerializableClosure;
@@ -159,6 +161,7 @@ class Order extends Component
                     ->get(['id', 'contact_id', 'iban'])
                     ?->toArray() ?? [],
                 'vatRates' => resolve_static(VatRate::class, 'query')
+                    ->where($this->order->isPurchase ? 'is_purchase' : 'is_sales', true)
                     ->where('is_tax_exemption', true)
                     ->get(['id', 'name'])
                     ->toArray(),
@@ -223,7 +226,7 @@ class Order extends Component
 
             $this->redirect(route('orders.orders'), true);
         } catch (Exception $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
         }
     }
 
@@ -236,7 +239,7 @@ class Order extends Component
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->discount);
 
             return;
         }
@@ -267,7 +270,12 @@ class Order extends Component
 
         $address = resolve_static(Address::class, 'query')
             ->with('country:id,name')
-            ->whereKey($this->order->{$addressKey . '_id'})
+            ->whereKey(
+                resolve_static(Contact::class, 'query')
+                    ->whereKey($this->order->contact_id)
+                    ->value($type . '_address_id')
+                    ?? $this->order->{$addressKey . '_id'}
+            )
             ->first();
 
         if ($address) {
@@ -276,15 +284,17 @@ class Order extends Component
             try {
                 $updatedOrder = UpdateOrder::make([
                     'id' => $this->order->id,
+                    $addressKey . '_id' => $address->getKey(),
                     $addressKey => $addressArray,
                 ])
                     ->checkPermission()
                     ->validate()
                     ->execute();
 
+                $this->order->{$addressKey . '_id'} = $updatedOrder->{$addressKey . '_id'};
                 $this->order->{$addressKey} = $updatedOrder->{$addressKey};
             } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+                exception_to_notifications($e, $this, form: $this->order);
             }
         }
     }
@@ -407,11 +417,16 @@ class Order extends Component
         $this->{$orderFormName}->tenant_id = $contact?->getTenantId()
             ?? resolve_static(Tenant::class, 'default')->getKey();
         $this->{$orderFormName}->agent_id = $contact?->agent_id ?? $this->{$orderFormName}->agent_id;
-        $this->{$orderFormName}->contact_bank_connection_id = $contact?->contactBankConnections()
-            ->latest()
-            ->value('id');
         $this->{$orderFormName}->address_invoice_id = $contact?->invoice_address_id ?? $contact?->mainAddress?->id;
-        $this->{$orderFormName}->address_delivery_id = $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
+        $isPurchase = $replicate
+            ? resolve_static(OrderType::class, 'query')
+                ->whereKey($this->replicateOrder->order_type_id)
+                ->value('order_type_enum')
+                ?->isPurchase()
+            : $this->order->isPurchase;
+        $this->{$orderFormName}->address_delivery_id = $isPurchase
+            ? null
+            : $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
         $this->{$orderFormName}->language_id = $contact?->mainAddress?->language_id
             ?? resolve_static(Language::class, 'default')->getKey();
         $this->{$orderFormName}->price_list_id = $contact?->price_list_id
@@ -419,6 +434,9 @@ class Order extends Component
         $this->{$orderFormName}->payment_type_id = $contact?->payment_type_id;
 
         if (! $replicate) {
+            $this->order->contact_bank_connection_id = $contact?->contactBankConnections()
+                ->latest()
+                ->value('id');
             $this->order->address_invoice = resolve_static(Address::class, 'query')
                 ->whereKey($this->order->address_invoice_id)
                 ->select(['id', 'company', 'firstname', 'lastname', 'zip', 'city', 'street'])
@@ -619,28 +637,32 @@ class Order extends Component
     #[Renderless]
     public function recalculateOrderTotals(): void
     {
-        $this->order->total_net_price = 0;
-        $this->order->total_gross_price = 0;
-        $this->order->total_vats = [];
-        $this->order->total_base_net_price = 0;
+        $columns = [
+            'id',
+            'parent_id',
+            'created_from_id',
+            'contact_id',
+            'currency_id',
+            'order_type_id',
+            'price_list_id',
+            'payment_discount_percent',
+            'invoice_number',
+        ];
 
         $order = resolve_static(OrderModel::class, 'query')
             ->whereKey($this->order->id)
-            ->first([
-                'id',
-                'parent_id',
-                'created_from_id',
-                'contact_id',
-                'currency_id',
-                'order_type_id',
-                'price_list_id',
-                'payment_discount_percent',
-                'invoice_number',
-            ]);
+            ->first($columns);
 
         $order->calculatePrices()->save();
 
-        $this->order->fill($order);
+        foreach (Arr::except($order->attributesToArray(), $columns) as $key => $value) {
+            if (! property_exists($this->order, $key)) {
+                continue;
+            }
+
+            $this->order->{$key} = $value;
+            $this->order->loadedData[$key] = $this->order->{$key};
+        }
     }
 
     #[Renderless]
@@ -655,7 +677,7 @@ class Order extends Component
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->discount);
 
             return false;
         }
@@ -725,6 +747,7 @@ class Order extends Component
     #[Renderless]
     public function save(): bool
     {
+        $this->order->refreshUntouchedData();
         $this->order->address_delivery = $this->order->address_delivery ?: [];
         try {
             $action = (
@@ -734,15 +757,15 @@ class Order extends Component
             )
                 ->checkPermission()
                 ->validate();
-
-            $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
 
             return false;
         }
 
         $action->execute();
+        $this->fetchOrder($this->order->id);
+        $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         $this->toast()
             ->success(__(':model saved', ['model' => __('Order')]))
             ->send();
@@ -759,7 +782,7 @@ class Order extends Component
         try {
             $this->discount->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->discount);
 
             return false;
         }
@@ -777,12 +800,68 @@ class Order extends Component
         try {
             $this->replicateOrder->save();
         } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->replicateOrder);
 
             return;
         }
 
         $this->redirectRoute('orders.id', ['id' => $this->replicateOrder->id], navigate: true);
+    }
+
+    #[Renderless]
+    public function prefillContractTotal(): void
+    {
+        $schedule = resolve_static(Schedule::class, 'query')
+            ->whereRelation('orders', 'orders.id', $this->order->id)
+            ->where('class', ProcessSubscriptionOrder::class)
+            ->first();
+
+        if (is_null($schedule)) {
+            $this->toast()
+                ->warning(__('Create a schedule with an end date first.'))
+                ->send();
+
+            return;
+        }
+
+        if (! $schedule->ends_at || ! $schedule->cron_expression) {
+            $this->toast()
+                ->warning(__('Set an end date on the schedule first.'))
+                ->send();
+
+            return;
+        }
+
+        $cron = resolve_static(Schedule::class, 'runCron', [$schedule->cron, $schedule->cron_expression]);
+        $current = $schedule->due_at?->isFuture()
+            ? $schedule->due_at
+            : Carbon::instance($cron->getNextRunDate(now()));
+        $cycles = $current->lessThan($schedule->ends_at) ? 1 : 0;
+        $limit = 10000;
+
+        while ($cycles < $limit) {
+            $current = resolve_static(Schedule::class, 'nextRunAfter', [$cron, $current]);
+
+            if ($current->greaterThanOrEqualTo($schedule->ends_at)) {
+                break;
+            }
+
+            $cycles++;
+        }
+
+        if ($cycles >= $limit) {
+            $this->toast()
+                ->warning(__('Too many cycles until the end date, enter the total manually.'))
+                ->send();
+
+            return;
+        }
+
+        $this->order->contract_total_amount = bcmul(
+            $cycles,
+            str_replace('-', '', (string) $this->order->total_gross_price ?: '0'),
+            2
+        );
     }
 
     #[Renderless]
@@ -806,7 +885,7 @@ class Order extends Component
         try {
             $this->schedule->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->schedule);
 
             return false;
         }
@@ -818,6 +897,22 @@ class Order extends Component
     public function previewSchedule(): void
     {
         $this->schedule->nextExecutionDates = $this->schedule->getNextExecutionDates();
+    }
+
+    public function updatingScheduleCronMethodsBasic(?string $value): void
+    {
+        $defaults = [
+            FrequenciesEnum::WeeklyOn->value => [1, '00:00'],
+            FrequenciesEnum::MonthlyOn->value => [1, '00:00'],
+            FrequenciesEnum::QuarterlyOn->value => [1, '00:00'],
+            FrequenciesEnum::YearlyOn->value => [1, 1, '00:00'],
+        ];
+
+        if ($value === data_get($this->schedule->cron, 'methods.basic')) {
+            return;
+        }
+
+        $this->schedule->cron['parameters']['basic'] = $defaults[$value] ?? [null, null, null];
     }
 
     #[Renderless]
@@ -906,7 +1001,7 @@ class Order extends Component
 
             $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
         }
     }
 
@@ -918,7 +1013,7 @@ class Order extends Component
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
 
             return;
         }
@@ -964,12 +1059,26 @@ class Order extends Component
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->order);
         }
 
         $this->toast()
             ->success(__(':model saved', ['model' => __('Order')]))
             ->send();
+    }
+
+    public function updatedReplicateOrderOrderTypeId(): void
+    {
+        $this->skipRender();
+
+        $this->replicateOrder->address_delivery_id = resolve_static(OrderType::class, 'query')
+            ->whereKey($this->replicateOrder->order_type_id)
+            ->value('order_type_enum')
+            ?->isPurchase()
+                ? null
+                : $this->replicateOrder->address_delivery_id ?? resolve_static(Contact::class, 'query')
+                    ->whereKey($this->replicateOrder->contact_id)
+                    ->value('delivery_address_id');
     }
 
     public function updatedScheduleParametersOrderTypeId(): void
@@ -1014,18 +1123,14 @@ class Order extends Component
 
         $this->order->fill($order);
 
-        $this->order->users = $order->users->pluck('id')->toArray();
-
-        $this->printLayouts = array_map(
-            fn (string $layout) => ['layout' => $layout, 'label' => __($layout)],
-            array_keys($this->getPrintLayouts())
-        );
+        $this->printLayouts = $this->mapPrintLayouts();
 
         $invoice = $order->invoice();
         if ($invoice) {
             $this->order->invoice = [
                 'url' => $invoice->getUrl(),
                 'mime_type' => $invoice->mime_type,
+                'name' => $invoice->name,
             ];
         }
 
@@ -1114,7 +1219,7 @@ class Order extends Component
 
     protected function getTo(OffersPrinting $item, array $documents): array
     {
-        $printViews = $item->getPrintViews();
+        $printViews = $item->resolvePrintViews();
 
         $invoiceDocs = array_filter(
             $documents,

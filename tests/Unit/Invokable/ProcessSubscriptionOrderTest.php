@@ -308,6 +308,79 @@ test('process subscription order uses real month-end for lastDayOfMonth schedule
         ->and($newOrder->system_delivery_date_end->format('Y-m-d'))->toBe('2026-02-28');
 });
 
+test('process subscription order heals a drifted anchor for lastDayOfMonth schedule', function (): void {
+    // Periods created before the lastDayOfMonth fix ended a day short of the real month
+    // end, so the next period starts on the last day of a month. endOfMonth() would then
+    // return the start date itself and collapse the period to a single day.
+    $this->subscriptionOrder->update([
+        'order_date' => Carbon\Carbon::create(2026, 6, 1),
+        'system_delivery_date' => Carbon\Carbon::create(2026, 6, 1),
+        'system_delivery_date_end' => null,
+    ]);
+
+    $driftedChild = Order::factory()->create([
+        'tenant_id' => $this->tenant->getKey(),
+        'contact_id' => $this->contact->getKey(),
+        'address_invoice_id' => $this->address->getKey(),
+        'order_type_id' => $this->targetOrderType->getKey(),
+        'currency_id' => $this->currency->getKey(),
+        'language_id' => $this->language->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+        'payment_type_id' => $this->paymentType->getKey(),
+        'created_from_id' => $this->subscriptionOrder->getKey(),
+        'parent_id' => null,
+        'system_delivery_date' => Carbon\Carbon::create(2026, 5, 31),
+        'system_delivery_date_end' => Carbon\Carbon::create(2026, 6, 29),
+    ]);
+
+    $schedule = Schedule::create([
+        'uuid' => Illuminate\Support\Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'lastDayOfMonth',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => ['00:00'],
+                'dayConstraint' => [],
+                'timeConstraint' => [],
+            ],
+        ],
+        'cron_expression' => '0 0 30 * *',
+        'is_active' => true,
+        'parameters' => [
+            'orderId' => $this->subscriptionOrder->getKey(),
+            'orderTypeId' => $this->targetOrderType->getKey(),
+        ],
+    ]);
+
+    $this->subscriptionOrder->schedules()->attach($schedule->getKey());
+
+    $processor = new ProcessSubscriptionOrder();
+
+    $result = $processor(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    expect($result)->toBeTrue();
+
+    $newOrder = Order::query()
+        ->where('created_from_id', $this->subscriptionOrder->getKey())
+        ->whereKeyNot($driftedChild->getKey())
+        ->first();
+
+    // The period must span to the next real month end instead of collapsing, which
+    // puts the following period back on the first of a month.
+    expect($newOrder)->not->toBeNull()
+        ->and($newOrder->system_delivery_date->format('Y-m-d'))->toBe('2026-06-30')
+        ->and($newOrder->system_delivery_date_end->format('Y-m-d'))->toBe('2026-07-31');
+});
+
 test('process subscription order sets correct performance period for quarterly schedule', function (): void {
     $orderDate = now()->startOfQuarter();
 
@@ -597,3 +670,409 @@ test('schedule preview period matches the actual ProcessSubscriptionOrder output
         ->and($preview[0]['system_delivery_date_end'])->toBe($newOrder->system_delivery_date_end->toDateString())
         ->and($preview[0]['system_delivery_date_end'])->toBe('2026-02-28');
 });
+
+test('a position without an own period falls back to the period of the rate', function (): void {
+    $this->subscriptionOrder->update([
+        'system_delivery_date' => '2026-07-01',
+        'system_delivery_date_end' => '2026-07-31',
+    ]);
+
+    FluxErp\Models\OrderPosition::factory()->create([
+        'order_id' => $this->subscriptionOrder->getKey(),
+        'tenant_id' => $this->tenant->getKey(),
+        'vat_rate_id' => FluxErp\Models\VatRate::factory()->create()->getKey(),
+        'name' => 'Wartung',
+        'amount' => 1,
+        'unit_net_price' => '100.00',
+        'total_net_price' => '100.00',
+        'total_base_net_price' => '100.00',
+        'system_delivery_date' => null,
+        'system_delivery_date_end' => null,
+    ]);
+
+    (new ProcessSubscriptionOrder())(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    $newOrder = Order::query()
+        ->where('created_from_id', $this->subscriptionOrder->getKey())
+        ->with('orderPositions')
+        ->first();
+
+    $position = $newOrder->orderPositions->first();
+
+    expect($position->system_delivery_date)->toBeNull()
+        ->and($position->performance_period_start->toDateString())
+        ->toBe($newOrder->system_delivery_date->toDateString());
+});
+
+test('a position with an own period is carried forward like the order', function (): void {
+    $schedule = Schedule::create([
+        'uuid' => Illuminate\Support\Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'monthly',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => [],
+                'dayConstraint' => [],
+                'timeConstraint' => [],
+            ],
+        ],
+        'cron_expression' => '0 0 1 * *',
+        'is_active' => true,
+        'parameters' => [
+            'orderId' => $this->subscriptionOrder->getKey(),
+            'orderTypeId' => $this->targetOrderType->getKey(),
+        ],
+    ]);
+
+    $this->subscriptionOrder->schedules()->attach($schedule->getKey());
+
+    $this->subscriptionOrder->update([
+        'system_delivery_date' => '2026-07-01',
+        'system_delivery_date_end' => '2026-07-31',
+    ]);
+
+    $contractPosition = FluxErp\Models\OrderPosition::factory()->create([
+        'order_id' => $this->subscriptionOrder->getKey(),
+        'tenant_id' => $this->tenant->getKey(),
+        'vat_rate_id' => FluxErp\Models\VatRate::factory()->create()->getKey(),
+        'name' => 'Wartung',
+        'amount' => 1,
+        'unit_net_price' => '100.00',
+        'total_net_price' => '100.00',
+        'total_base_net_price' => '100.00',
+        'system_delivery_date' => '2026-07-01',
+        'system_delivery_date_end' => '2026-07-31',
+    ]);
+
+    (new ProcessSubscriptionOrder())(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    $firstRate = Order::query()
+        ->where('created_from_id', $this->subscriptionOrder->getKey())
+        ->with('orderPositions')
+        ->latest('id')
+        ->first();
+
+    expect($firstRate->orderPositions->first()->system_delivery_date->toDateString())->toBe('2026-07-01');
+
+    (new ProcessSubscriptionOrder())(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    $secondRate = Order::query()
+        ->where('created_from_id', $this->subscriptionOrder->getKey())
+        ->whereKeyNot($firstRate->getKey())
+        ->with('orderPositions')
+        ->latest('id')
+        ->first();
+
+    $secondPosition = $secondRate->orderPositions->first();
+
+    expect($secondPosition->created_from_id)->toBe($contractPosition->getKey())
+        ->and($secondPosition->system_delivery_date->toDateString())
+        ->toBe($firstRate->orderPositions->first()->system_delivery_date_end->addDay()->toDateString())
+        ->and($secondPosition->system_delivery_date->toDateString())
+        ->toBe($secondRate->system_delivery_date->toDateString());
+});
+
+test('a purchase subscription that gets an invoice leaves its child unnumbered', function (): void {
+    $purchaseSubscriptionType = OrderType::factory()
+        ->hasAttached(factory: $this->tenant, relationship: 'tenants')
+        ->create([
+            'order_type_enum' => OrderTypeEnum::PurchaseSubscription,
+            'is_active' => true,
+        ]);
+
+    $contract = Order::factory()->create([
+        'tenant_id' => $this->tenant->getKey(),
+        'contact_id' => $this->contact->getKey(),
+        'address_invoice_id' => $this->address->getKey(),
+        'order_type_id' => $purchaseSubscriptionType->getKey(),
+        'currency_id' => $this->currency->getKey(),
+        'language_id' => $this->language->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+        'payment_type_id' => $this->paymentType->getKey(),
+        'is_self_billed' => false,
+    ]);
+
+    (new ProcessSubscriptionOrder())(
+        orderId: $contract->getKey(),
+        orderTypeId: $purchaseSubscriptionType->getKey()
+    );
+
+    $child = Order::query()
+        ->where('created_from_id', $contract->getKey())
+        ->first();
+
+    expect($child)->not->toBeNull()
+        ->and($child->invoice_number)->toBeNull()
+        ->and($child->invoice_date)->toBeNull();
+});
+
+test('a self billed purchase subscription numbers its own child', function (): void {
+    $purchaseSubscriptionType = OrderType::factory()
+        ->hasAttached(factory: $this->tenant, relationship: 'tenants')
+        ->create([
+            'order_type_enum' => OrderTypeEnum::PurchaseSubscription,
+            'is_active' => true,
+        ]);
+
+    $contract = Order::factory()->create([
+        'tenant_id' => $this->tenant->getKey(),
+        'contact_id' => $this->contact->getKey(),
+        'address_invoice_id' => $this->address->getKey(),
+        'order_type_id' => $purchaseSubscriptionType->getKey(),
+        'currency_id' => $this->currency->getKey(),
+        'language_id' => $this->language->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+        'payment_type_id' => $this->paymentType->getKey(),
+        'is_self_billed' => true,
+    ]);
+
+    (new ProcessSubscriptionOrder())(
+        orderId: $contract->getKey(),
+        orderTypeId: $purchaseSubscriptionType->getKey()
+    );
+
+    $child = Order::query()
+        ->where('created_from_id', $contract->getKey())
+        ->first();
+
+    expect($child)->not->toBeNull()
+        ->and($child->invoice_number)->toBe(
+            $contract->order_number . '-' . $child->system_delivery_date?->format('Y-m')
+        )
+        ->and($child->invoice_date)->not->toBeNull();
+});
+
+test('a position not created from the subscription keeps its own period', function (): void {
+    $this->subscriptionOrder->update([
+        'system_delivery_date' => '2026-07-01',
+        'system_delivery_date_end' => '2026-07-31',
+    ]);
+
+    $vatRate = FluxErp\Models\VatRate::factory()->create();
+    $positionData = [
+        'tenant_id' => $this->tenant->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'amount' => 1,
+        'unit_net_price' => '100.00',
+        'total_net_price' => '100.00',
+        'total_base_net_price' => '100.00',
+    ];
+
+    FluxErp\Models\OrderPosition::factory()->create(array_merge($positionData, [
+        'order_id' => $this->subscriptionOrder->getKey(),
+        'name' => 'Wartung',
+        'system_delivery_date' => '2026-07-01',
+        'system_delivery_date_end' => '2026-07-31',
+    ]));
+
+    Order::created(function (Order $order) use ($positionData): void {
+        if ($order->created_from_id !== $this->subscriptionOrder->getKey()) {
+            return;
+        }
+
+        FluxErp\Models\OrderPosition::factory()->create(array_merge($positionData, [
+            'order_id' => $order->getKey(),
+            'created_from_id' => null,
+            'name' => 'Added on replication',
+            'system_delivery_date' => '2026-07-15',
+            'system_delivery_date_end' => '2026-07-20',
+        ]));
+    });
+
+    (new ProcessSubscriptionOrder())(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    $addedPosition = FluxErp\Models\OrderPosition::query()
+        ->where('name', 'Added on replication')
+        ->first();
+
+    expect($addedPosition->system_delivery_date?->toDateString())->toBe('2026-07-15')
+        ->and($addedPosition->system_delivery_date_end?->toDateString())->toBe('2026-07-20');
+});
+
+function createSubscriptionSchedule(Order $order, int|string $orderTypeId, bool $attach = true): Schedule
+{
+    $schedule = Schedule::create([
+        'uuid' => Illuminate\Support\Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'monthly',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => [],
+                'dayConstraint' => [],
+                'timeConstraint' => [],
+            ],
+        ],
+        'is_active' => true,
+        'parameters' => [
+            'orderId' => $order->getKey(),
+            'orderTypeId' => $orderTypeId,
+        ],
+    ]);
+
+    if ($attach) {
+        $order->schedules()->attach($schedule->getKey());
+    }
+
+    return $schedule;
+}
+
+test('deleting a subscription order deletes its schedule', function (): void {
+    $schedule = createSubscriptionSchedule($this->subscriptionOrder, $this->targetOrderType->getKey());
+
+    $this->subscriptionOrder->delete();
+
+    expect($schedule->refresh()->trashed())->toBeTrue();
+});
+
+test('deleting an order keeps a schedule that is shared with another order', function (): void {
+    $schedule = createSubscriptionSchedule($this->subscriptionOrder, $this->targetOrderType->getKey());
+
+    $otherOrder = $this->subscriptionOrder->replicate(['uuid', 'order_number']);
+    $otherOrder->save();
+    $otherOrder->schedules()->attach($schedule->getKey());
+
+    $this->subscriptionOrder->delete();
+
+    expect($schedule->refresh()->trashed())->toBeFalse();
+});
+
+test('schedule preview follows the due date like the scheduler', function (
+    array $parameters,
+    string $dueAt,
+    array $expected
+): void {
+    $this->travelTo('2026-11-01 01:00:00');
+
+    $dates = Livewire::test(Scheduling::class)
+        ->set('schedule.cron.methods.basic', 'monthlyOn')
+        ->set('schedule.cron.parameters.basic', $parameters)
+        ->set('schedule.due_at', $dueAt)
+        ->instance()->schedule->getNextExecutionDates(2);
+
+    expect(array_column($dates, 'date'))->toBe($expected);
+})->with([
+    'due date in the future' => [
+        [15, '00:00'],
+        '2027-02-15 00:00:00',
+        ['2027-02-15 00:00:00', '2027-03-15 00:00:00', '2027-04-15 00:00:00'],
+    ],
+    'due date has passed' => [
+        [15, '00:00'],
+        '2026-10-15 00:00:00',
+        ['2026-11-15 00:00:00', '2026-12-15 00:00:00'],
+    ],
+    'cron matches later on the due date' => [
+        [15, '06:00'],
+        '2026-11-15 00:00:00',
+        ['2026-11-15 00:00:00', '2026-12-15 06:00:00', '2027-01-15 06:00:00'],
+    ],
+]);
+
+test('schedule preview follows the due date of a lastDayOfMonth schedule like the scheduler', function (
+    string $dueAt,
+    array $expected
+): void {
+    $this->travelTo('2026-11-01 01:00:00');
+
+    $dates = Livewire::test(Scheduling::class)
+        ->set('schedule.cron.methods.basic', 'lastDayOfMonth')
+        ->set('schedule.cron.parameters.basic', ['06:00'])
+        ->set('schedule.due_at', $dueAt)
+        ->instance()->schedule->getNextExecutionDates(2);
+
+    expect(array_column($dates, 'date'))->toBe($expected);
+})->with([
+    'due date on the month end' => [
+        '2026-11-30 06:00:00',
+        ['2026-11-30 06:00:00', '2026-12-31 06:00:00', '2027-01-31 06:00:00'],
+    ],
+    'due date earlier on the month end' => [
+        '2026-11-30 00:00:00',
+        ['2026-11-30 00:00:00', '2026-12-31 06:00:00', '2027-01-31 06:00:00'],
+    ],
+    'due date within the month' => [
+        '2026-11-15 00:00:00',
+        ['2026-11-15 00:00:00', '2026-12-31 06:00:00', '2027-01-31 06:00:00'],
+    ],
+]);
+
+test('process subscription order deactivates the schedule of a deleted order instead of failing', function (): void {
+    // Orders deleted before the fix lost their pivot but kept an active schedule
+    $schedule = createSubscriptionSchedule($this->subscriptionOrder, $this->targetOrderType->getKey(), false);
+    $this->subscriptionOrder->delete();
+
+    $result = (new ProcessSubscriptionOrder())(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    expect($result)->toBeTrue()
+        ->and($schedule->refresh()->is_active)->toBeFalse();
+});
+
+test('schedule preview leaves out a run that falls exactly on the end of the schedule', function (
+    string $method,
+    array $parameters,
+    ?string $dueAt,
+    string $endsAt,
+    array $expected
+): void {
+    $this->travelTo('2026-11-01 01:00:00');
+
+    $dates = Livewire::test(Scheduling::class)
+        ->set('schedule.cron.methods.basic', $method)
+        ->set('schedule.cron.parameters.basic', $parameters)
+        ->set('schedule.due_at', $dueAt)
+        ->set('schedule.end_radio', 'ends_at')
+        ->set('schedule.ends_at', $endsAt)
+        ->instance()->schedule->getNextExecutionDates(5);
+
+    expect(array_column($dates, 'date'))->toBe($expected);
+})->with([
+    'due at equals end' => ['monthlyOn', [15, '00:00'], '2026-11-15 00:00:00', '2026-11-15 00:00:00', []],
+    'later run equals end' => [
+        'monthlyOn',
+        [15, '00:00'],
+        '2026-11-15 00:00:00',
+        '2027-01-15 00:00:00',
+        ['2026-11-15 00:00:00', '2026-12-15 00:00:00'],
+    ],
+    'last day of month equals end' => [
+        'lastDayOfMonth',
+        ['00:00'],
+        null,
+        '2026-12-31 00:00:00',
+        ['2026-11-30 00:00:00'],
+    ],
+    'run before end stays' => [
+        'monthlyOn',
+        [15, '00:00'],
+        '2026-11-15 00:00:00',
+        '2026-11-15 00:01:00',
+        ['2026-11-15 00:00:00'],
+    ],
+]);

@@ -1,8 +1,10 @@
 <?php
 
 use FluxErp\Actions\ContactBankConnection\CalculateContactBankConnectionBalance;
+use FluxErp\Actions\Printing;
 use FluxErp\Enums\CreditAccountPostingEnum;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Enums\RepeatableTypeEnum;
 use FluxErp\Invokable\ProcessSubscriptionOrder;
 use FluxErp\Livewire\Order\Order as OrderView;
 use FluxErp\Models\Address;
@@ -166,7 +168,7 @@ test('create documents', function (): void {
         ->call('openCreateDocumentsModal')
         ->assertExecutesJs("\$tsui.open.modal('create-documents-$componentId')")
         ->assertSet('printLayouts', [
-            ['layout' => 'invoice', 'label' => 'Invoice'],
+            ['layout' => 'invoice', 'label' => 'Invoice', 'is_printable' => true],
         ])
         ->set([
             'selectedPrintLayouts' => [
@@ -180,6 +182,91 @@ test('create documents', function (): void {
 
     $invoice = $this->order->invoice();
     expect($invoice?->getPath())->not->toBeNull();
+});
+
+test('saving keeps the invoice state booked while the order was open', function (): void {
+    Storage::fake();
+
+    $this->order->update(['is_locked' => false, 'invoice_number' => null]);
+
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertSet('order.invoice_number', null);
+
+    Printing::make([
+        'model_type' => morph_alias(Order::class),
+        'model_id' => $this->order->getKey(),
+        'view' => 'invoice',
+    ])
+        ->validate()
+        ->execute();
+
+    $invoiced = $this->order->refresh();
+    $state = (string) $invoiced->state;
+    $nextReminderDate = $invoiced->payment_reminder_next_date?->toDateString();
+
+    expect($invoiced->invoice_number)->not->toBeNull()
+        ->and($state)->toBe(Open::$name)
+        ->and($nextReminderDate)->not->toBeNull();
+
+    $component
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    $saved = $this->order->refresh();
+    expect((string) $saved->state)->toBe($state)
+        ->and($saved->payment_reminder_next_date?->toDateString())->toBe($nextReminderDate);
+});
+
+test('saving a locked order still writes what the user changed', function (): void {
+    $this->order->update(['is_locked' => true, 'payment_reminder_next_date' => now()->addDays(3)]);
+    $nextReminderDate = now()->addDays(10)->toDateString();
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('order.payment_reminder_next_date', $nextReminderDate)
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($this->order->refresh()->payment_reminder_next_date?->toDateString())->toBe($nextReminderDate);
+});
+
+test('saving keeps users assigned while the order was open', function (): void {
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
+
+    $this->order->users()->sync([$this->user->getKey()]);
+
+    $component
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($this->order->users()->pluck('users.id')->all())->toBe([$this->user->getKey()]);
+});
+
+test('the invoice preview carries what the lightbox needs', function (): void {
+    Storage::fake();
+
+    $this->order->update(['is_locked' => false, 'invoice_number' => null]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('openCreateDocumentsModal')
+        ->set([
+            'selectedPrintLayouts' => [
+                'download' => ['invoice'],
+            ],
+        ])
+        ->call('createDocuments')
+        ->assertHasNoErrors();
+
+    $invoice = $this->order->invoice();
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertSet('order.invoice', [
+            'url' => $invoice->getUrl(),
+            'mime_type' => $invoice->mime_type,
+            'name' => $invoice->name,
+        ]);
 });
 
 test('create documents with delivery lock fails', function (): void {
@@ -197,7 +284,7 @@ test('create documents with delivery lock fails', function (): void {
         ->call('createDocuments')
         ->assertOk()
         ->assertReturned(null)
-        ->assertHasErrors(['has_contact_delivery_lock', 'order.balance'])
+        ->assertHasErrors(['has_contact_delivery_lock', 'balance'])
         ->assertSet('order.invoice_number', null);
 
     expect($this->order->refresh()->invoice_number)->toBeNull();
@@ -244,6 +331,89 @@ test('fetch contact data', function (): void {
         ->assertSet('order.tenant_id', $newContact->getTenantId())
         ->assertSet('order.address_invoice_id', $newContact->invoice_address_id)
         ->assertSet('order.address_delivery_id', $newContact->delivery_address_id);
+});
+
+test('a purchase order is delivered to the tenant, not to the supplier', function (): void {
+    $supplier = Contact::factory()->create();
+
+    $supplierAddress = Address::factory()->create([
+        'contact_id' => $supplier->id,
+    ]);
+
+    $supplier->update([
+        'delivery_address_id' => $supplierAddress->id,
+        'invoice_address_id' => $supplierAddress->id,
+        'main_address_id' => $supplierAddress->id,
+    ]);
+
+    $this->order->update([
+        'order_type_id' => OrderType::factory()->create([
+            'order_type_enum' => OrderTypeEnum::Purchase,
+            'is_active' => true,
+        ])->getKey(),
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('order.contact_id', $supplier->id)
+        ->call('fetchContactData')
+        ->assertOk()
+        ->assertSet('order.address_invoice_id', $supplier->invoice_address_id)
+        ->assertSet('order.address_delivery_id', null);
+});
+
+test('changing the contact in the replicate dialog fills the replicate form', function (): void {
+    $newContact = Contact::factory()->create();
+
+    $invoiceAddress = Address::factory()->create([
+        'contact_id' => $newContact->getKey(),
+    ]);
+
+    $deliveryAddress = Address::factory()->create([
+        'contact_id' => $newContact->getKey(),
+    ]);
+
+    $newContact->update([
+        'delivery_address_id' => $deliveryAddress->getKey(),
+        'invoice_address_id' => $invoiceAddress->getKey(),
+        'main_address_id' => $invoiceAddress->getKey(),
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->getKey()])
+        ->call('replicate')
+        ->set('replicateOrder.contact_id', $newContact->getKey())
+        ->call('fetchContactData', true)
+        ->assertOk()
+        ->assertSet('replicateOrder.address_invoice_id', $invoiceAddress->getKey())
+        ->assertSet('replicateOrder.address_delivery_id', $deliveryAddress->getKey())
+        ->assertSet('order.contact_id', $this->order->contact_id);
+});
+
+test('replicating into a purchase order type clears the delivery address on contact change', function (): void {
+    $supplier = Contact::factory()->create();
+
+    $supplierAddress = Address::factory()->create([
+        'contact_id' => $supplier->getKey(),
+    ]);
+
+    $supplier->update([
+        'delivery_address_id' => $supplierAddress->getKey(),
+        'invoice_address_id' => $supplierAddress->getKey(),
+        'main_address_id' => $supplierAddress->getKey(),
+    ]);
+
+    $purchaseOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Purchase,
+        'is_active' => true,
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->getKey()])
+        ->call('replicate')
+        ->set('replicateOrder.order_type_id', $purchaseOrderType->getKey())
+        ->set('replicateOrder.contact_id', $supplier->getKey())
+        ->call('fetchContactData', true)
+        ->assertOk()
+        ->assertSet('replicateOrder.address_invoice_id', $supplier->invoice_address_id)
+        ->assertSet('replicateOrder.address_delivery_id', null);
 });
 
 test('get additional model actions', function (): void {
@@ -541,6 +711,48 @@ test('recalculate order totals', function (): void {
         ->assertNotSet('order.total_gross_price', 0);
 });
 
+test('recalculating the totals keeps unsaved header changes', function (): void {
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('order.header', 'Changed header');
+
+    $this->order->orderPositions()->first()->update([
+        'amount' => 2,
+        'total_net_price' => 200,
+        'total_base_net_price' => 200,
+        'total_gross_price' => 238,
+        'total_base_gross_price' => 238,
+    ]);
+
+    $component
+        ->call('recalculateOrderTotals')
+        ->assertSet('order.header', 'Changed header')
+        ->assertSet('order.total_net_price', $this->order->refresh()->total_net_price)
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($this->order->refresh()->header)->toBe('Changed header')
+        ->and(bccomp($this->order->total_net_price, 200))->toBe(0);
+});
+
+test('recalculating the totals shows totals another session already stored', function (): void {
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
+
+    $this->order->orderPositions()->first()->update([
+        'amount' => 2,
+        'total_net_price' => 200,
+        'total_base_net_price' => 200,
+        'total_gross_price' => 238,
+        'total_base_gross_price' => 238,
+    ]);
+    $this->order->refresh()->calculatePrices()->save();
+
+    $component
+        ->call('recalculateOrderTotals')
+        ->assertSet('order.total_net_price', $this->order->refresh()->total_net_price)
+        ->assertSet('order.total_gross_price', $this->order->total_gross_price);
+});
+
 test('render view data', function (): void {
     $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
     $viewData = $component->instance()->render()->getData();
@@ -655,6 +867,55 @@ test('replicate order', function (): void {
     $this->assertNotEquals($replicatedOrder->order_number, $this->order->order_number);
 });
 
+test('replicate dialog clears the delivery address when switching to a purchase', function (): void {
+    $purchaseType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Purchase,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('replicate')
+        ->assertSet('replicateOrder.address_delivery_id', $this->order->address_delivery_id)
+        ->set('replicateOrder.order_type_id', $purchaseType->getKey())
+        ->assertSet('replicateOrder.address_delivery_id', null)
+        ->call('saveReplicate')
+        ->assertHasNoErrors();
+
+    expect(Order::query()->whereKey($component->get('replicateOrder.id'))->value('address_delivery_id'))->toBeNull();
+});
+
+test('replicate dialog fills the delivery address when switching away from a purchase', function (): void {
+    $deliveryAddress = Address::factory()->create(['contact_id' => $this->contact->getKey()]);
+    $this->contact->update(['delivery_address_id' => $deliveryAddress->getKey()]);
+    $this->order->update([
+        'address_delivery_id' => null,
+        'order_type_id' => OrderType::factory()
+            ->create(['order_type_enum' => OrderTypeEnum::Purchase, 'is_active' => true])
+            ->getKey(),
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('replicate')
+        ->assertSet('replicateOrder.address_delivery_id', null)
+        ->set('replicateOrder.order_type_id', OrderType::factory()
+            ->create(['order_type_enum' => OrderTypeEnum::Order, 'is_active' => true])
+            ->getKey())
+        ->assertSet('replicateOrder.address_delivery_id', $deliveryAddress->getKey());
+});
+
+test('replicate dialog keeps a chosen delivery address between sales types', function (): void {
+    $chosenAddress = Address::factory()->create(['contact_id' => $this->contact->getKey()]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('replicate')
+        ->set('replicateOrder.address_delivery_id', $chosenAddress->getKey())
+        ->set('replicateOrder.order_type_id', OrderType::factory()
+            ->create(['order_type_enum' => OrderTypeEnum::Offer, 'is_active' => true])
+            ->getKey())
+        ->assertSet('replicateOrder.address_delivery_id', $chosenAddress->getKey());
+});
+
 test('save locked order uses update locked action', function (): void {
     $newCommission = 'Updated commission for locked order';
     $originalInvoiceNumber = 'INVOICE-123';
@@ -734,6 +995,35 @@ test('subscription schedule functionality', function (): void {
         'parameters->orderTypeId' => $targetOrderType->id,
         'is_active' => 1,
     ]);
+});
+
+test('reselecting the same frequency keeps month and day', function (): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Subscription,
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    $schedule = Schedule::query()->create([
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => 'invokable',
+        'cron' => [
+            'methods' => ['basic' => 'yearlyOn', 'dayConstraint' => null, 'timeConstraint' => null],
+            'parameters' => ['basic' => [1, 24, '06:00'], 'dayConstraint' => [], 'timeConstraint' => []],
+        ],
+        'parameters' => ['orderId' => $this->order->id],
+        'is_active' => true,
+    ]);
+
+    $schedule->orders()->attach($this->order->id);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertSet('schedule.cron.parameters.basic', [1, 24, '06:00'])
+        ->set('schedule.cron.methods.basic', 'yearlyOn')
+        ->assertSet('schedule.cron.parameters.basic', [1, 24, '06:00'])
+        ->set('schedule.cron.methods.basic', 'monthlyOn')
+        ->assertSet('schedule.cron.parameters.basic', [1, '00:00']);
 });
 
 test('cancel subscription immediately deactivates schedule', function (): void {
@@ -940,9 +1230,6 @@ test('vat calculation prevents negative amounts', function (): void {
             'address_invoice_id' => Address::factory()->create(['contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
-            'shipping_costs_net_price' => 0,
-            'shipping_costs_gross_price' => 0,
-            'shipping_costs_vat_price' => 0,
         ]);
 
     // Add flat discount larger than order total
@@ -1004,9 +1291,6 @@ test('vat calculation with combined discounts', function (): void {
             'address_invoice_id' => Address::factory()->create(['contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
-            'shipping_costs_net_price' => 0,
-            'shipping_costs_gross_price' => 0,
-            'shipping_costs_vat_price' => 0,
         ]);
 
     // Add 50% header discount first
@@ -1083,9 +1367,6 @@ test('vat calculation with flat header discount', function (): void {
             'address_invoice_id' => Address::factory()->create(['contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
-            'shipping_costs_net_price' => 0,
-            'shipping_costs_gross_price' => 0,
-            'shipping_costs_vat_price' => 0,
         ]);
 
     // Add 37.50 flat header discount (25% of 150)
@@ -1166,9 +1447,6 @@ test('vat calculation with floating point precision', function (): void {
             'address_invoice_id' => Address::factory()->create(['contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
-            'shipping_costs_net_price' => 0,
-            'shipping_costs_gross_price' => 0,
-            'shipping_costs_vat_price' => 0,
         ]);
 
     // Add a flat discount that would cause rounding issues
@@ -1244,9 +1522,6 @@ test('vat calculation with percentage header discount', function (): void {
             'address_invoice_id' => Address::factory()->create(['contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
-            'shipping_costs_net_price' => 0,
-            'shipping_costs_gross_price' => 0,
-            'shipping_costs_vat_price' => 0,
         ]);
 
     // Add 50% header discount
@@ -1314,9 +1589,6 @@ test('vat calculation with position discounts', function (): void {
             'address_invoice_id' => Address::factory()->create(['contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
-            'shipping_costs_net_price' => 0,
-            'shipping_costs_gross_price' => 0,
-            'shipping_costs_vat_price' => 0,
         ]);
 
     $order->calculatePrices()->save();
@@ -1403,9 +1675,6 @@ test('order discount with mixed vat rates and position discounts', function (): 
             'address_invoice_id' => Address::factory()->create(['contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
-            'shipping_costs_net_price' => 0,
-            'shipping_costs_gross_price' => 0,
-            'shipping_costs_vat_price' => 0,
         ]);
 
     $order->discounts()->create([
@@ -1461,9 +1730,6 @@ test('vat calculation with repeating decimals', function (): void {
             'address_invoice_id' => Address::factory()->create(['contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
-            'shipping_costs_net_price' => 0,
-            'shipping_costs_gross_price' => 0,
-            'shipping_costs_vat_price' => 0,
         ]);
 
     // Add percentage discount that creates repeating decimal (1/3)
@@ -1527,6 +1793,50 @@ test('refresh delivery address updates address from address model', function ():
     expect($refreshedOrder->address_delivery['city'])->toEqual('Delivery City');
 });
 
+test('refresh invoice address switches to the contacts invoice address', function (): void {
+    $newInvoiceAddress = Address::factory()->create([
+        'contact_id' => $this->contact->id,
+        'company' => 'New Invoice Company',
+        'street' => 'Invoice Street 1',
+        'city' => 'Invoice City',
+        'is_invoice_address' => true,
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('refreshAddress', 'invoice')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertSet('order.address_invoice_id', $newInvoiceAddress->id);
+
+    $refreshedOrder = $this->order->fresh();
+    expect($refreshedOrder->address_invoice_id)->toEqual($newInvoiceAddress->id);
+    expect($refreshedOrder->address_invoice['company'])->toEqual('New Invoice Company');
+    expect($refreshedOrder->address_invoice['street'])->toEqual('Invoice Street 1');
+    expect($refreshedOrder->address_invoice['city'])->toEqual('Invoice City');
+});
+
+test('refresh delivery address switches to the contacts delivery address', function (): void {
+    $newDeliveryAddress = Address::factory()->create([
+        'contact_id' => $this->contact->id,
+        'company' => 'New Delivery Company',
+        'street' => 'Delivery Street 1',
+        'city' => 'Delivery City',
+        'is_delivery_address' => true,
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('refreshAddress', 'delivery')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertSet('order.address_delivery_id', $newDeliveryAddress->id);
+
+    $refreshedOrder = $this->order->fresh();
+    expect($refreshedOrder->address_delivery_id)->toEqual($newDeliveryAddress->id);
+    expect($refreshedOrder->address_delivery['company'])->toEqual('New Delivery Company');
+    expect($refreshedOrder->address_delivery['street'])->toEqual('Delivery Street 1');
+    expect($refreshedOrder->address_delivery['city'])->toEqual('Delivery City');
+});
+
 test('refresh invoice address on locked order fails', function (): void {
     $this->order->update(['is_locked' => true]);
 
@@ -1543,4 +1853,255 @@ test('refresh delivery address on locked order fails', function (): void {
         ->call('refreshAddress', 'delivery')
         ->assertOk()
         ->assertHasErrors();
+});
+
+test('renders purchase subscription schedule parameters that do not fit the inputs of the other repeat methods', function (string $method, array $parameters): void {
+    $purchaseSubscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::PurchaseSubscription,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $purchaseSubscriptionOrderType->id]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertViewIs('flux::livewire.order.purchase-subscription')
+        ->set('schedule.cron.methods.basic', $method)
+        ->set('schedule.cron.parameters.basic', $parameters)
+        ->assertOk()
+        ->assertSet('schedule.cron.parameters.basic', $parameters);
+})->with([
+    'a day of month above the highest hour' => ['monthlyOn', [31, '15:00', null]],
+    'an hour where another method keeps a time' => ['twiceDaily', [1, 13, null]],
+]);
+
+test('switching the purchase subscription repeat method clears the parameters of the previous one', function (): void {
+    $purchaseSubscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::PurchaseSubscription,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $purchaseSubscriptionOrderType->id]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('schedule.cron.methods.basic', 'monthlyOn')
+        ->set('schedule.cron.parameters.basic', [28, '15:00', null])
+        ->set('schedule.cron.methods.basic', 'dailyAt')
+        ->assertOk()
+        ->assertSet('schedule.cron.parameters.basic', [null, null, null])
+        ->set('schedule.cron.methods.basic', 'weeklyOn')
+        ->assertOk()
+        ->assertSet('schedule.cron.parameters.basic', [1, '00:00']);
+});
+
+test('renders subscription schedule parameters that do not fit the inputs of the other repeat methods', function (string $method, array $parameters): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Subscription,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertViewIs('flux::livewire.order.subscription')
+        ->set('schedule.cron.methods.basic', $method)
+        ->set('schedule.cron.parameters.basic', $parameters)
+        ->assertOk()
+        ->assertSet('schedule.cron.parameters.basic', $parameters);
+})->with([
+    'a day of month where another method keeps a time' => ['monthlyOn', [31, '15:00', null]],
+    'a time where another method keeps a day' => ['dailyAt', ['15:00', null, null]],
+]);
+
+test('switching the subscription repeat method applies the parameters of the new one', function (): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Subscription,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('schedule.cron.methods.basic', 'monthlyOn')
+        ->set('schedule.cron.parameters.basic', [28, '15:00', null])
+        ->set('schedule.cron.methods.basic', 'dailyAt')
+        ->assertOk()
+        ->assertSet('schedule.cron.parameters.basic', [null, null, null]);
+});
+
+test('contract total prefill starts at the first run the scheduler will do', function (
+    string $cronExpression,
+    ?string $dueAt,
+    int $cycles
+): void {
+    $this->travelTo('2026-12-01 01:00:00');
+
+    $schedule = Schedule::create([
+        'uuid' => Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => ['basic' => 'monthlyOn', 'dayConstraint' => null, 'timeConstraint' => null],
+            'parameters' => ['basic' => [1, '00:00'], 'dayConstraint' => [], 'timeConstraint' => []],
+        ],
+        'cron_expression' => $cronExpression,
+        'due_at' => $dueAt,
+        'ends_at' => '2027-03-01 00:01:00',
+        'is_active' => true,
+        'parameters' => ['orderId' => $this->order->getKey()],
+    ]);
+    $this->order->schedules()->attach($schedule->getKey());
+
+    $gross = $this->order->refresh()->total_gross_price;
+
+    Livewire::test(OrderView::class, ['id' => $this->order->getKey()])
+        ->call('prefillContractTotal')
+        ->assertSet('order.contract_total_amount', bcmul($cycles, $gross, 2));
+})->with([
+    'no due date' => ['0 0 1 * *', null, 3],
+    'due date has passed' => ['0 0 1 * *', '2026-10-01 00:00:00', 3],
+    'due date in the future' => ['0 0 1 * *', '2027-02-01 00:00:00', 2],
+    'cron matches later on the due date' => ['0 6 1 * *', '2027-01-01 00:00:00', 2],
+]);
+
+test('contract total prefill counts every month end of a lastDayOfMonth schedule', function (): void {
+    $this->travelTo('2026-11-04 01:00:00');
+
+    $schedule = Schedule::create([
+        'uuid' => Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => ['basic' => 'lastDayOfMonth', 'dayConstraint' => null, 'timeConstraint' => null],
+            'parameters' => ['basic' => ['06:00'], 'dayConstraint' => [], 'timeConstraint' => []],
+        ],
+        'cron_expression' => '0 6 30 * *',
+        'due_at' => '2026-11-30 06:00:00',
+        'ends_at' => '2027-03-01 00:00:00',
+        'is_active' => true,
+        'parameters' => ['orderId' => $this->order->getKey()],
+    ]);
+    $this->order->schedules()->attach($schedule->getKey());
+
+    $gross = $this->order->refresh()->total_gross_price;
+
+    Livewire::test(OrderView::class, ['id' => $this->order->getKey()])
+        ->call('prefillContractTotal')
+        ->assertSet('order.contract_total_amount', bcmul(4, $gross, 2));
+});
+
+test('the subscription time picker previews the schedule when it changes', function (): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Subscription,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    $html = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('schedule.cron.methods.basic', 'dailyAt')
+        ->html();
+
+    expect($html)
+        ->not->toContain('<x-')
+        ->and(Str::of($html)->after('tallstackui_formTime(')->before('<')->toString())
+        ->toContain('previewSchedule');
+});
+
+test('contract total prefill does not count a run that falls exactly on the end of the schedule', function (
+    string $dueAt,
+    string $endsAt,
+    int $cycles
+): void {
+    $this->travelTo('2026-12-01 01:00:00');
+
+    $schedule = Schedule::create([
+        'uuid' => Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => ['basic' => 'monthlyOn', 'dayConstraint' => null, 'timeConstraint' => null],
+            'parameters' => ['basic' => [1, '00:00'], 'dayConstraint' => [], 'timeConstraint' => []],
+        ],
+        'cron_expression' => '0 0 1 * *',
+        'due_at' => $dueAt,
+        'ends_at' => $endsAt,
+        'is_active' => true,
+        'parameters' => ['orderId' => $this->order->getKey()],
+    ]);
+    $this->order->schedules()->attach($schedule->getKey());
+
+    $gross = $this->order->refresh()->total_gross_price;
+
+    Livewire::test(OrderView::class, ['id' => $this->order->getKey()])
+        ->call('prefillContractTotal')
+        ->assertSet('order.contract_total_amount', bcmul($cycles, $gross, 2));
+})->with([
+    'due at equals end' => ['2027-01-01 00:00:00', '2027-01-01 00:00:00', 0],
+    'later run equals end' => ['2027-01-01 00:00:00', '2027-04-01 00:00:00', 3],
+    'end after the last run' => ['2027-01-01 00:00:00', '2027-04-01 00:01:00', 4],
+]);
+
+test('loading a schedule saved without newer parameters keeps their defaults', function (): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Subscription,
+    ]);
+
+    $targetOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    $scheduleId = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set([
+            'schedule.parameters.orderTypeId' => $targetOrderType->id,
+            'schedule.parameters.orderId' => $this->order->id,
+            'schedule.cron.methods.basic' => 'monthlyOn',
+            'schedule.cron.parameters.basic' => ['1', '00:00', null],
+        ])
+        ->call('saveSchedule')
+        ->assertReturned(true)
+        ->get('schedule.id');
+
+    Schedule::query()->whereKey($scheduleId)->update([
+        'parameters' => json_encode([
+            'orderId' => $this->order->id,
+            'orderTypeId' => $targetOrderType->id,
+        ]),
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertSet('schedule.id', $scheduleId)
+        ->assertSet('schedule.parameters.orderTypeId', $targetOrderType->id)
+        ->assertSet(
+            'schedule.parameters',
+            fn (array $parameters): bool => array_key_exists('minimumDurationValue', $parameters)
+                && array_key_exists('minimumDurationUnit', $parameters)
+                && array_key_exists('cancellationNoticeValue', $parameters)
+                && array_key_exists('cancellationNoticeUnit', $parameters)
+                && $parameters['autoPrint'] === false
+                && $parameters['printLayouts'] === []
+        )
+        ->set([
+            'schedule.parameters.minimumDurationValue' => 12,
+            'schedule.parameters.minimumDurationUnit' => 'months',
+        ])
+        ->call('saveSchedule')
+        ->assertReturned(true)
+        ->assertHasNoErrors();
+
+    expect(Schedule::query()->whereKey($scheduleId)->value('parameters'))
+        ->minimumDurationValue->toBe(12)
+        ->minimumDurationUnit->toBe('months')
+        ->orderTypeId->toBe($targetOrderType->id);
 });

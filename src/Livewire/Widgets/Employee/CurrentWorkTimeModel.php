@@ -6,6 +6,7 @@ use FluxErp\Contracts\HasApiResponse;
 use FluxErp\Livewire\Employee\Dashboard;
 use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\Employee;
+use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
 use FluxErp\Models\WorkTimeModel;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Traits\Livewire\Widget\RespondsToApiRequests;
@@ -51,12 +52,23 @@ class CurrentWorkTimeModel extends ValueBox implements HasApiResponse
             ->first()
             ->getWorkTimeModel();
 
+        if (! $workTimeModel) {
+            $this->sum = '-';
+            $this->subValue = __('No work time model');
+            $this->dailyTarget = null;
+            $this->weeklyTarget = null;
+
+            return;
+        }
+
         $dailyWorkHours = $workTimeModel->getDailyWorkHours();
 
         $this->sum = Number::format($dailyWorkHours, 2) . 'h';
-        $this->subValue = __(':days days per week', ['days' => $workTimeModel->work_days_per_week]);
+        $this->subValue = $workTimeModel->has_fixed_hours
+            ? __(':days days per week', ['days' => $workTimeModel->work_days_per_week])
+            : __('No fixed hours');
         $this->dailyTarget = (float) $dailyWorkHours;
-        $this->weeklyTarget = (float) $workTimeModel->weekly_hours;
+        $this->weeklyTarget = $workTimeModel->has_fixed_hours ? (float) $workTimeModel->weekly_hours : 0.0;
     }
 
     protected function apiResponseProperties(): array
@@ -83,5 +95,17 @@ class CurrentWorkTimeModel extends ValueBox implements HasApiResponse
     protected function icon(): string
     {
         return 'wrench';
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(EmployeeWorkTimeModel::class) => [
+                EmployeeWorkTimeModel::class => ['created', 'updated', 'deleted'],
+            ],
+            $this->modelChannel(WorkTimeModel::class) => [
+                WorkTimeModel::class => ['updated'],
+            ],
+        ];
     }
 }

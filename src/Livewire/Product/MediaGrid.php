@@ -93,7 +93,7 @@ class MediaGrid extends BaseMediaGrid
                     ->validate()
                     ->execute();
             } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+                exception_to_notifications($e, $this, form: $this->product);
             }
         }
 
@@ -125,9 +125,12 @@ class MediaGrid extends BaseMediaGrid
                     $this->product->cover_media_id = $media->id;
                 }
             } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+                exception_to_notifications($e, $this, form: $this->product);
             }
         }
+
+        // Livewire appends the next upload to this array, so stored files must not stay in it
+        $this->uploads = [];
 
         $this->loadData();
     }

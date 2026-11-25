@@ -4,7 +4,7 @@
     {{ __('We received your order dated :order_date.', ['order_date' => $order->order_date->isoFormat('L')]) }}
 
     <x-mail::table>
-        |  | {{ __('Product number') }} | {{ __('Name') }}       | {{ __('Amount') }}         | {{ __('Total') }}  |
+        |  | {{ __('Product number') }} | {{ __('Name') }}       | {{ __('Quantity') }}         | {{ __('Total') }}  |
         | :-------------  | :------------- | :------------- |:-------------:| --------:|
         @foreach($order->orderPositions as $orderPosition)
             | <img src="{{ ($orderPosition->product?->cover_image ?? $orderPosition->product?->parent?->cover_image)?->getUrl('thumb') ?? route('icons', ['name' => 'photo']) }}" style="width: 100px; height: 100px;" alt="Product Image"> | {{ $orderPosition->product_number }} | {{ $orderPosition->name }}| {{ $orderPosition->amount ? bcround($orderPosition->amount, 2) : '' }}| {{ $orderPosition->total_net_price ? Number::currency($orderPosition->total_net_price, $orderPosition->currency->iso, app()->getLocale()) : '' }} |

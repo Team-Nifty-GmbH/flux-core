@@ -3,11 +3,13 @@
 namespace FluxErp\Notifications\QueueMonitor\Job;
 
 use FluxErp\Contracts\HasToastNotification;
+use FluxErp\Enums\ToastType;
 use FluxErp\Models\QueueMonitor;
 use FluxErp\Notifications\Notification;
+use FluxErp\States\QueueMonitor\Failed;
 use FluxErp\Support\Notification\BroadcastNowChannel;
+use FluxErp\Support\Notification\DatabaseChannel;
 use FluxErp\Support\Notification\ToastNotification\ToastNotification;
-use Illuminate\Notifications\Channels\DatabaseChannel;
 use Illuminate\Notifications\Channels\MailChannel;
 use Illuminate\Notifications\Messages\MailMessage;
 use NotificationChannels\WebPush\WebPushMessage;
@@ -33,8 +35,8 @@ class JobFinishedNotification extends Notification implements HasToastNotificati
 
     public function toToastNotification(object $notifiable): ToastNotification
     {
-        $accept = unserialize($this->model->accept) ?: null;
-        $reject = unserialize($this->model->reject) ?: null;
+        $accept = ($this->model->accept ? unserialize($this->model->accept) : null) ?: null;
+        $reject = ($this->model->reject ? unserialize($this->model->reject) : null) ?: null;
 
         $persistentOverride = data_get($this->model->data, 'toast_persistent');
         $timeoutOverride = data_get($this->model->data, 'toast_timeout');
@@ -45,11 +47,24 @@ class JobFinishedNotification extends Notification implements HasToastNotificati
             default => ! is_null($accept) || ! is_null($reject),
         };
 
+        $failed = $this->model->state instanceof Failed;
+
         return ToastNotification::make()
             ->id($this->id)
             ->notifiable($notifiable)
-            ->title(__(':job_name is finished', ['job_name' => __($this->model->getJobName())]))
-            ->description($this->model->message)
+            ->when(
+                $failed,
+                fn (ToastNotification $toast): ToastNotification => $toast->type(ToastType::ERROR)
+            )
+            ->title(
+                $failed
+                    ? __(':job_name failed', ['job_name' => __($this->model->getJobName())])
+                    : __(':job_name is finished', ['job_name' => __($this->model->getJobName())])
+            )
+            ->description(
+                $this->model->message
+                    ?? (is_null($this->model->exception_message) ? null : e($this->model->exception_message))
+            )
             ->when(
                 $persistent,
                 fn (ToastNotification $toast): ToastNotification => $toast->persistent(),

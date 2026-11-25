@@ -131,4 +131,13 @@ class ConversionRateByLeadOrigin extends BarChart
             return opts.w.config.series[opts.seriesIndex].name + ': ' + val + '%';
         JS;
     }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(Lead::class) => [
+                Lead::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
+    }
 }

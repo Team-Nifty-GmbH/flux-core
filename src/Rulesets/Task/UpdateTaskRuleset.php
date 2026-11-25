@@ -39,17 +39,17 @@ class UpdateTaskRuleset extends FluxRuleset
             'project_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Project::class]),
+                app(ModelExists::class, ['model' => Project::class, 'subject' => Task::class]),
             ],
             'responsible_user_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => User::class]),
+                app(ModelExists::class, ['model' => User::class, 'subject' => Task::class]),
             ],
             'order_position_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => OrderPosition::class]),
+                app(ModelExists::class, ['model' => OrderPosition::class, 'subject' => Task::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
             'description' => 'string|nullable',
@@ -64,6 +64,7 @@ class UpdateTaskRuleset extends FluxRuleset
                 'exclude_if:has_start_reminder,false',
                 'integer',
                 'min:0',
+                'max:4294967295',
             ],
             'due_date' => 'present|date|nullable|after_or_equal:start_date',
             'due_time' => [
@@ -76,6 +77,7 @@ class UpdateTaskRuleset extends FluxRuleset
                 'exclude_if:has_due_reminder,false',
                 'integer',
                 'min:0',
+                'max:4294967295',
             ],
             'priority' => 'sometimes|required|integer|min:0',
             'state' => [

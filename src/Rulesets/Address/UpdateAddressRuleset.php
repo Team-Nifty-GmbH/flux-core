@@ -37,17 +37,17 @@ class UpdateAddressRuleset extends FluxRuleset
             ],
             'contact_id' => [
                 'integer',
-                app(ModelExists::class, ['model' => Contact::class]),
+                app(ModelExists::class, ['model' => Contact::class, 'subject' => Address::class]),
             ],
             'country_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Country::class]),
+                app(ModelExists::class, ['model' => Country::class, 'subject' => Address::class]),
             ],
             'language_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Language::class]),
+                app(ModelExists::class, ['model' => Language::class, 'subject' => Address::class]),
             ],
             'advertising_state' => [
                 'string',

@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Actions\Printer\DeletePrinter;
+use FluxErp\Actions\Printer\GeneratePrinterBridgeConfig;
 use FluxErp\Actions\Printer\UpdatePrinter;
 use FluxErp\Livewire\DataTables\PrinterList;
 use FluxErp\Livewire\Forms\PrinterBridgeConfigForm;
@@ -23,6 +24,13 @@ class Printers extends PrinterList
     public ?string $deleteSpoolerName = null;
 
     protected ?string $includeBefore = 'flux::livewire.settings.printers';
+
+    public function mount(): void
+    {
+        parent::mount();
+
+        $this->configForm->fill(resolve_static(GeneratePrinterBridgeConfig::class, 'defaults'));
+    }
 
     protected function getTableActions(): array
     {
@@ -50,7 +58,35 @@ class Printers extends PrinterList
                 ->color('indigo')
                 ->when(resolve_static(UpdatePrinter::class, 'canPerformAction', [false]))
                 ->wireClick('edit(record.id)'),
+            DataTableButton::make()
+                ->text(__('Delete'))
+                ->color('red')
+                ->icon('trash')
+                ->when(resolve_static(DeletePrinter::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'delete(record.id)',
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Printer')]),
+                ]),
         ];
+    }
+
+    #[Renderless]
+    public function delete(Printer $printer): bool
+    {
+        $this->printerForm->reset();
+        $this->printerForm->fill($printer);
+
+        try {
+            $this->printerForm->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this, form: $this->printerForm);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 
     #[Renderless]
@@ -67,7 +103,7 @@ class Printers extends PrinterList
         try {
             $this->printerForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->printerForm);
 
             return false;
         }
@@ -99,7 +135,7 @@ class Printers extends PrinterList
         try {
             $this->configForm->create();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->configForm);
 
             return;
         }
@@ -118,6 +154,15 @@ class Printers extends PrinterList
     {
         $this->configForm->force_regenerate = true;
         $this->generateBridgeConfig();
+    }
+
+    public function updatedConfigFormMercureEnabled(bool $mercureEnabled): void
+    {
+        $this->configForm->reverb_disabled = resolve_static(
+            GeneratePrinterBridgeConfig::class,
+            'defaults',
+            [$mercureEnabled]
+        )['reverb_disabled'];
     }
 
     public function deleteSpooler(): bool

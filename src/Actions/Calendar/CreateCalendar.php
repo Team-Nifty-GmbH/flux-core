@@ -5,10 +5,13 @@ namespace FluxErp\Actions\Calendar;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Calendar;
 use FluxErp\Rulesets\Calendar\CreateCalendarRuleset;
+use FluxErp\Traits\Action\ChecksCalendarAccess;
 use Illuminate\Support\Arr;
 
 class CreateCalendar extends FluxAction
 {
+    use ChecksCalendarAccess;
+
     public static function models(): array
     {
         return [Calendar::class];

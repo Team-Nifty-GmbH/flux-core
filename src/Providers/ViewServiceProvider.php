@@ -6,13 +6,16 @@ use Composer\Autoload\ClassLoader;
 use Composer\InstalledVersions;
 use FluxErp\Mechanisms\FrontendAssets\FrontendAssets;
 use FluxErp\Mechanisms\FrontendAssets\SupportAutoInjectedAssets;
+use FluxErp\View\Components\Icon;
 use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use ReflectionClass;
 use TallStackUi\Facades\TallStackUi;
+use TallStackUi\Support\Blade\ComponentPrefix;
 
 class ViewServiceProvider extends ServiceProvider
 {
@@ -83,7 +86,16 @@ class ViewServiceProvider extends ServiceProvider
     {
         TallStackUi::customize()
             ->avatar()
-            ->block('wrapper.class', 'inline-flex shrink-0 items-center justify-center overflow-hidden bg-secondary-200!');
+            ->block('wrapper.class', 'inline-flex shrink-0 items-center justify-center overflow-hidden bg-secondary-200! dark:bg-secondary-600!');
+
+        TallStackUi::customize()
+            ->form('range')
+            ->block('input.base', 'dark:bg-dark-600 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 transition')
+            ->block('dual.track.base', 'dark:bg-dark-600 absolute inset-x-0 top-1/2 -translate-y-1/2 rounded-lg bg-gray-200');
+
+        TallStackUi::customize()
+            ->form('toggle')
+            ->block('background.class', 'bg-gray-200 dark:bg-dark-600 block cursor-pointer rounded-full group-focus:ring-0 group-focus:ring-offset-0 peer-focus:ring-0 peer-focus:ring-offset-0');
 
         TallStackUi::customize()
             ->dropdown()
@@ -142,7 +154,7 @@ class ViewServiceProvider extends ServiceProvider
 
         TallStackUi::customize()
             ->layout('header')
-            ->block('wrapper', 'dark:bg-dark-700 dark:border-dark-600 sticky top-0 z-10 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-xs sm:gap-x-6 sm:px-6 lg:px-8');
+            ->block('wrapper.base', 'dark:bg-dark-700 dark:border-dark-600 sticky top-0 z-10 flex shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-xs sm:gap-x-6 sm:px-6 lg:px-8 tsui-scrollbar-bleed');
 
         TallStackUi::customize()
             ->modal('fullscreen')
@@ -156,11 +168,24 @@ class ViewServiceProvider extends ServiceProvider
 
     protected function registerViews(): void
     {
+        config(['view.paths' => array_merge(config('view.paths', []), [__DIR__ . '/../../resources/error-views'])]);
+        View::prependNamespace('passkeys', __DIR__ . '/../../resources/views/vendor/passkeys');
+
+        $this->app->booted(function (): void {
+            Blade::component(Icon::class, app(ComponentPrefix::class)->add('icon'));
+
+            Blade::directive('persist', fn (string $expression): string => '<?php app("livewire")->forceAssetInjection(); ?>'
+                . '<div x-persist="<?php echo e(' . $expression . '); ?>">'
+                . '<?php if (! in_array(' . $expression . ", explode(',', request()->header('X-Flux-Persisted', '')), true)): ?>");
+
+            Blade::directive('endpersist', fn (): string => '<?php endif; ?></div>');
+        });
+
         Blade::component(App::class, 'flux::layouts.app');
         Blade::component(Printing::class, 'flux::layouts.print');
         config([
-            'livewire.layout' => 'flux::layouts.app',
-            'livewire.component_layout' => 'flux::layouts.app',
+            'livewire.layout' => App::class,
+            'livewire.component_layout' => App::class,
         ]);
 
         // Register Printing views as blade components

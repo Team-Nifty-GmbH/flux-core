@@ -60,7 +60,7 @@ class ContactBankConnection extends FluxModel implements InteractsWithDataTables
 
     public function getDescription(): ?string
     {
-        return Number::currency($this->balance);
+        return is_null($this->balance) ? null : Number::currency($this->balance);
     }
 
     public function getLabel(): ?string

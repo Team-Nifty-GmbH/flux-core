@@ -6,6 +6,7 @@ use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Country;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
@@ -54,6 +55,86 @@ test('create order requires contact and address', function (): void {
     CreateOrder::assertValidationErrors([
         'order_type_id' => $this->orderType->getKey(),
     ], ['contact_id', 'address_invoice_id']);
+});
+
+test('create purchase order keeps the delivery address empty', function (OrderTypeEnum $orderTypeEnum): void {
+    $deliveryAddress = Address::factory()->create(['contact_id' => $this->contact->getKey()]);
+    $this->contact->update(['delivery_address_id' => $deliveryAddress->getKey()]);
+
+    $order = CreateOrder::make([
+        'contact_id' => $this->contact->getKey(),
+        'address_invoice_id' => $this->address->getKey(),
+        'order_type_id' => OrderType::factory()
+            ->create(['order_type_enum' => $orderTypeEnum, 'is_active' => true])
+            ->getKey(),
+        'payment_type_id' => $this->paymentType->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+        'currency_id' => $this->currency->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+    ])->validate()->execute();
+
+    expect($order->address_delivery_id)->toBeNull()
+        ->and($order->address_delivery)->toBeNull();
+})->with([
+    OrderTypeEnum::Purchase,
+    OrderTypeEnum::PurchaseRefund,
+    OrderTypeEnum::PurchaseSubscription,
+]);
+
+test('create purchase order keeps a delivery address given explicitly', function (): void {
+    $deliveryAddress = Address::factory()->create(['contact_id' => $this->contact->getKey()]);
+
+    $order = CreateOrder::make([
+        'contact_id' => $this->contact->getKey(),
+        'address_invoice_id' => $this->address->getKey(),
+        'address_delivery_id' => $deliveryAddress->getKey(),
+        'order_type_id' => OrderType::factory()
+            ->create(['order_type_enum' => OrderTypeEnum::Purchase, 'is_active' => true])
+            ->getKey(),
+        'payment_type_id' => $this->paymentType->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+        'currency_id' => $this->currency->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+    ])->validate()->execute();
+
+    expect($order->address_delivery_id)->toBe($deliveryAddress->getKey());
+});
+
+test('create sales order falls back to the delivery address of the contact', function (): void {
+    $deliveryAddress = Address::factory()->create(['contact_id' => $this->contact->getKey()]);
+    $this->contact->update(['delivery_address_id' => $deliveryAddress->getKey()]);
+
+    $order = CreateOrder::make([
+        'contact_id' => $this->contact->getKey(),
+        'address_invoice_id' => $this->address->getKey(),
+        'order_type_id' => $this->orderType->getKey(),
+        'payment_type_id' => $this->paymentType->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+        'currency_id' => $this->currency->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+    ])->validate()->execute();
+
+    expect($order->address_delivery_id)->toBe($deliveryAddress->getKey());
+});
+
+test('create sales order without contact delivery address falls back to the invoice address', function (): void {
+    $this->contact->update(['delivery_address_id' => null]);
+
+    $order = CreateOrder::make([
+        'contact_id' => $this->contact->getKey(),
+        'address_invoice_id' => $this->address->getKey(),
+        'order_type_id' => $this->orderType->getKey(),
+        'payment_type_id' => $this->paymentType->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+        'currency_id' => $this->currency->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+    ])->validate()->execute();
+
+    expect($order->address_delivery_id)->toBe($this->address->getKey());
 });
 
 test('update order', function (): void {
@@ -131,4 +212,51 @@ test('delete locked order fails', function (): void {
     DeleteOrder::assertValidationErrors([
         'id' => $order->getKey(),
     ], 'is_locked');
+});
+
+test('update order keeps the country in the invoice address snapshot', function (): void {
+    $country = Country::factory()->create([
+        'currency_id' => $this->currency->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+    ]);
+    $this->address->update(['country_id' => $country->getKey()]);
+
+    $order = CreateOrder::make([
+        'contact_id' => $this->contact->getKey(),
+        'address_invoice_id' => $this->address->getKey(),
+        'order_type_id' => $this->orderType->getKey(),
+        'payment_type_id' => $this->paymentType->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+        'currency_id' => $this->currency->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+    ])->validate()->execute();
+
+    expect($order->address_invoice)->toHaveKey('country_id', $country->getKey());
+
+    $updated = UpdateOrder::make([
+        'id' => $order->getKey(),
+        'address_invoice' => $order->address_invoice,
+    ])->validate()->execute();
+
+    expect($updated->address_invoice)->toHaveKey('country_id', $country->getKey());
+});
+
+test('update order rejects a payment discount above 100 percent', function (): void {
+    $order = Order::factory()->create([
+        'order_type_id' => $this->orderType->getKey(),
+        'address_invoice_id' => $this->address->getKey(),
+        'contact_id' => $this->contact->getKey(),
+        'payment_type_id' => $this->paymentType->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'currency_id' => $this->currency->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'is_locked' => false,
+    ]);
+
+    UpdateOrder::assertValidationErrors([
+        'id' => $order->getKey(),
+        'payment_discount_percent' => 3,
+    ], 'payment_discount_percent');
 });

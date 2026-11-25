@@ -6,6 +6,8 @@ use FluxErp\Contracts\HasApiResponse;
 use FluxErp\Livewire\Employee\Dashboard;
 use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\Employee;
+use FluxErp\Models\EmployeeBalanceAdjustment;
+use FluxErp\Models\EmployeeDay;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Traits\Livewire\Widget\RespondsToApiRequests;
 use Illuminate\Support\Number;
@@ -79,5 +81,17 @@ class OvertimeBalanceBox extends ValueBox implements HasApiResponse
     protected function icon(): string
     {
         return 'clock';
+    }
+
+    protected function liveUpdates(): array
+    {
+        return [
+            $this->modelChannel(EmployeeBalanceAdjustment::class) => [
+                EmployeeBalanceAdjustment::class => ['created', 'updated', 'deleted'],
+            ],
+            $this->modelChannel(EmployeeDay::class) => [
+                EmployeeDay::class => ['created', 'updated', 'deleted'],
+            ],
+        ];
     }
 }

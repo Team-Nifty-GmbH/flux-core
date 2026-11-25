@@ -4,11 +4,14 @@ namespace FluxErp\Actions\OrderPosition;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
+use FluxErp\Helpers\PriceHelper;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Price;
+use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\Tag;
 use FluxErp\Rulesets\OrderPosition\UpdateOrderPositionRuleset;
 use FluxErp\View\Printing\Order\FinalInvoice;
 use Illuminate\Database\Eloquent\Model;
@@ -30,7 +33,8 @@ class UpdateOrderPosition extends FluxAction
 
     public function performAction(): Model
     {
-        $tags = Arr::pull($this->data, 'tags', []);
+        $tags = Arr::pull($this->data, 'tags');
+        $recalculateOrder = Arr::pull($this->data, 'recalculate_order', false);
 
         $orderPosition = resolve_static(OrderPosition::class, 'query')
             ->whereKey($this->data['id'] ?? null)
@@ -67,6 +71,21 @@ class UpdateOrderPosition extends FluxAction
                 $orderPosition->ean_code : $product->ean_code;
             $orderPosition->unit_gram_weight = $orderPosition->isDirty('unit_gram_weight') ?
                 $orderPosition->unit_gram_weight : $product->unit_gram_weight;
+        }
+
+        if ($orderPosition->isDirty(['product_id', 'price_list_id'])
+            && $orderPosition->product_id
+            && ! array_key_exists('unit_price', $this->data)
+            && PriceHelper::make($product ?? $orderPosition->product)
+                ->setPriceList(
+                    resolve_static(PriceList::class, 'query')
+                        ->whereKey($orderPosition->price_list_id)
+                        ->first()
+                )
+                ->price()
+        ) {
+            $orderPosition->unit_net_price = null;
+            $orderPosition->unit_gross_price = null;
         }
 
         $priceRelevantFields = [
@@ -148,7 +167,15 @@ class UpdateOrderPosition extends FluxAction
                 });
         }
 
-        $orderPosition->syncTags($tags);
+        if (! is_null($tags)) {
+            $orderPosition->syncTags(resolve_static(Tag::class, 'query')->whereKey($tags)->get());
+        }
+
+        if ($recalculateOrder) {
+            $orderPosition->order
+                ->calculatePrices()
+                ->save();
+        }
 
         return $orderPosition->withoutRelations()->fresh();
     }

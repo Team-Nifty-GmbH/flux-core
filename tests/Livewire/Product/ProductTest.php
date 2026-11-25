@@ -1,13 +1,18 @@
 <?php
 
+use FluxErp\Enums\PropertyTypeEnum;
+use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Livewire\Product\Product;
+use FluxErp\Models\Address;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
 use FluxErp\Models\ProductCrossSelling;
+use FluxErp\Models\ProductProperty;
+use FluxErp\Models\Tag;
 use FluxErp\Models\VatRate;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Session;
 use Livewire\Livewire;
 
@@ -24,7 +29,7 @@ beforeEach(function (): void {
         ->for($this->vatRate)
         ->has(
             Price::factory()->state(['price_list_id' => $this->priceList->id]),
-            'prices'
+            'ownPrices'
         )
         ->create([
             'is_bundle' => false,
@@ -110,9 +115,8 @@ test('mount initializes component', function (): void {
 });
 
 test('mount with invalid id fails', function (): void {
-    $this->expectException(ModelNotFoundException::class);
-
-    Livewire::test(Product::class, ['id' => 999999]);
+    Livewire::test(Product::class, ['id' => 999999])
+        ->assertNotFound();
 });
 
 test('renders successfully', function (): void {
@@ -154,10 +158,10 @@ test('save product successfully', function (): void {
 
 test('save product validation fails', function (): void {
     Livewire::test(Product::class, ['id' => $this->product->id])
-        ->set('product.name', '') // Required field
+        ->set('product.name', '')
         ->call('save')
         ->assertOk()
-        ->assertHasErrors()
+        ->assertHasErrors('product.name')
         ->assertReturned(false);
 });
 
@@ -232,12 +236,31 @@ test('tab visibility for variant product', function (): void {
     expect($variantTab)->not->toBeNull();
 });
 
+test('tab visibility for lot tracked product', function (): void {
+    $lotTrackedProduct = ProductModel::factory()->create([
+        'is_lot_tracked' => true,
+    ]);
+    $lotTrackedProduct->tenants()->attach($this->dbTenant->getKey());
+
+    $component = Livewire::test(Product::class, ['id' => $lotTrackedProduct->id]);
+    $tabs = $component->instance()->getTabs();
+
+    $lotListTab = collect($tabs)->first(fn ($tab) => $tab->component === 'product.lot-list');
+    expect($lotListTab)->not->toBeNull();
+});
+
 test('vat rates computed property', function (): void {
+    $purchaseOnlyVatRate = VatRate::factory()->create([
+        'is_purchase' => true,
+        'is_sales' => false,
+    ]);
+
     $component = Livewire::test(Product::class, ['id' => $this->product->id]);
 
     $vatRates = $component->instance()->vatRates();
     expect($vatRates)->toBeArray();
     expect($vatRates)->not->toBeEmpty();
+    expect(array_column($vatRates, 'id'))->not->toContain($purchaseOnlyVatRate->getKey());
 });
 
 test('view name computed property', function (): void {
@@ -246,4 +269,228 @@ test('view name computed property', function (): void {
     $viewName = $component->instance()->viewName();
     expect($viewName)->toBeString();
     $this->assertStringContainsString('product', $viewName);
+});
+
+test('can save lot tracking settings', function (): void {
+    Livewire::test(Product::class, ['id' => $this->product->id])
+        ->set('product.is_lot_tracked', true)
+        ->set('product.stock_removal_strategy_enum', StockRemovalStrategyEnum::Fefo->value)
+        ->set('product.min_shelf_life_days', 30)
+        ->call('save')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    $this->product->refresh();
+
+    expect($this->product->is_lot_tracked)->toBeTrue();
+    expect($this->product->stock_removal_strategy_enum)->toBe(StockRemovalStrategyEnum::Fefo);
+    expect($this->product->min_shelf_life_days)->toBe(30);
+});
+
+test('a tag that already exists does not fault the product name', function (): void {
+    $tag = Tag::findOrCreate('Kenia', morph_alias(ProductModel::class));
+
+    Livewire::test(Product::class, ['id' => $this->product->id])
+        ->call('addTag', $tag->name)
+        ->assertHasNoErrors('product.name')
+        ->assertHasErrors('name');
+});
+
+test('the product property group heading reaches the markup', function (): void {
+    Livewire::test(Product::class, ['id' => $this->product->id])
+        ->assertOk()
+        ->assertSeeHtml('x-text="group"');
+});
+
+test('the purchase fields reach the markup', function (): void {
+    Livewire::test(Product::class, ['id' => $this->product->id])
+        ->assertOk()
+        ->assertSeeHtml('product.purchase_unit_id')
+        ->assertSeeHtml('product.reference_unit_id')
+        ->assertSeeHtml('product.min_purchase')
+        ->assertSeeHtml('product.purchase_steps')
+        ->assertSeeHtml('product.packaging_ean');
+});
+
+test('the packaging ean field reaches the supplier block', function (): void {
+    Livewire::test(Product::class, ['id' => $this->product->id])
+        ->assertOk()
+        ->assertSeeHtml('supplier.packaging_ean');
+});
+
+test('the price per basic unit reaches the prices tab', function (): void {
+    Livewire::test(Product::class, ['id' => $this->product->id])
+        ->set('tab', 'product.prices')
+        ->assertOk()
+        ->assertSeeHtml('pricePerBasicUnit');
+});
+
+test('add supplier fills every column the pivot table carries', function (): void {
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
+    $contact->update(['main_address_id' => $address->getKey()]);
+
+    $component = Livewire::test(Product::class, ['id' => $this->product->id])
+        ->call('addSupplier', $contact->getKey())
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    $pivotFields = app(ProductModel::class)->suppliers()->getPivotColumns();
+
+    expect($pivotFields)
+        ->not->toBeEmpty()
+        ->and(data_get($component->get('product.suppliers'), '0'))
+        ->toHaveKeys(array_merge($pivotFields, ['customer_number', 'main_address']));
+});
+
+test('the form shows the suppliers and properties the product owns', function (): void {
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
+    $contact->update(['main_address_id' => $address->getKey()]);
+    $this->product->suppliers()->attach($contact->getKey(), ['purchase_price' => 16.32]);
+
+    $property = ProductProperty::factory()->create();
+    $this->product->productProperties()->attach($property->getKey(), ['value' => 'Assam']);
+
+    $component = Livewire::test(Product::class, ['id' => $this->product->id])
+        ->assertOk();
+
+    expect(array_column($component->get('product.suppliers'), 'id'))
+        ->toBe([$contact->getKey()])
+        ->and(array_column($component->get('product.product_properties'), 'id'))
+        ->toBe([$property->getKey()]);
+});
+
+test('saving a product without changing anything keeps its own properties', function (): void {
+    $property = ProductProperty::factory()->create();
+    $this->product->productProperties()->attach($property->getKey(), [
+        'value' => 'keep me',
+        'is_inherited' => false,
+    ]);
+
+    expect($this->product->productProperties()->count())->toBe(1);
+
+    Livewire::test(Product::class, ['id' => $this->product->getKey()])
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($this->product->productProperties()->count())->toBe(1)
+        ->and($this->product->productProperties()->first()->pivot->value)->toBe('keep me');
+});
+
+test('the form exposes the supplier pivot values', function (): void {
+    $contact = Contact::factory()->create();
+    $this->product->suppliers()->attach($contact->getKey(), [
+        'supplier_product_number' => 'SUP-1',
+        'purchase_price' => 16.32,
+        'note' => 'keep me',
+    ]);
+
+    $supplier = data_get(
+        Livewire::test(Product::class, ['id' => $this->product->getKey()])->get('product.suppliers'),
+        '0'
+    );
+
+    expect($supplier['contact_id'])->toBe($contact->getKey())
+        ->and($supplier['supplier_product_number'])->toBe('SUP-1')
+        ->and((float) $supplier['purchase_price'])->toBe(16.32)
+        ->and($supplier['note'])->toBe('keep me');
+});
+
+test('saving a product without changing anything keeps its supplier values', function (): void {
+    $contact = Contact::factory()->create();
+    $this->product->suppliers()->attach($contact->getKey(), [
+        'supplier_product_number' => 'SUP-1',
+        'note' => 'keep me',
+    ]);
+
+    Livewire::test(Product::class, ['id' => $this->product->getKey()])
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    $pivot = $this->product->suppliers()->first()?->pivot;
+
+    expect($pivot?->supplier_product_number)->toBe('SUP-1')
+        ->and($pivot?->note)->toBe('keep me');
+});
+
+test('adding a property after saving keeps the properties the product already has', function (): void {
+    $existing = ProductProperty::factory()->count(3)->create(['property_type_enum' => PropertyTypeEnum::Option]);
+    $this->product->productProperties()->sync($existing->modelKeys());
+    $added = ProductProperty::factory()->create(['property_type_enum' => PropertyTypeEnum::Option]);
+
+    $component = Livewire::test(Product::class, ['id' => $this->product->getKey()])
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true)
+        ->call('showProductPropertiesModal')
+        ->set('selectedProductProperties.' . $added->getKey(), true)
+        ->call('addProductProperties')
+        ->assertReturned(true)
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    $expected = array_merge($existing->modelKeys(), [$added->getKey()]);
+    sort($expected);
+
+    $displayed = array_column(
+        data_get($component->get('displayedProductProperties'), '*.option.*'),
+        'id'
+    );
+    sort($displayed);
+
+    expect($this->product->productProperties()->pluck('product_properties.id')->sort()->values()->all())
+        ->toBe($expected)
+        ->and($displayed)
+        ->toBe($expected);
+});
+
+test('saving twice keeps every property value', function (): void {
+    $text = ProductProperty::factory()->create(['property_type_enum' => PropertyTypeEnum::Text]);
+    $option = ProductProperty::factory()->create(['property_type_enum' => PropertyTypeEnum::Option]);
+    $this->product->productProperties()->attach([
+        $text->getKey() => ['value' => 'Nepal'],
+        $option->getKey() => ['value' => 'keep me'],
+    ]);
+
+    Livewire::test(Product::class, ['id' => $this->product->getKey()])
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true)
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($this->product->productProperties()->pluck('value', 'product_properties.id')->all())
+        ->toEqual([
+            $text->getKey() => 'Nepal',
+            $option->getKey() => 'keep me',
+        ]);
+});
+
+test('adding a property keeps the existing ones when the form holds them as a plain list', function (): void {
+    $existing = ProductProperty::factory()->count(3)->create(['property_type_enum' => PropertyTypeEnum::Option]);
+    $this->product->productProperties()->sync($existing->modelKeys());
+    $added = ProductProperty::factory()->create(['property_type_enum' => PropertyTypeEnum::Option]);
+
+    $component = Livewire::test(Product::class, ['id' => $this->product->getKey()]);
+
+    $expected = array_merge($existing->modelKeys(), [$added->getKey()]);
+    sort($expected);
+
+    $component
+        ->set('product.product_properties', array_values($component->get('product.product_properties')))
+        ->call('showProductPropertiesModal')
+        ->set('selectedProductProperties.' . $added->getKey(), true)
+        ->call('addProductProperties')
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($this->product->productProperties()->pluck('product_properties.id')->sort()->values()->all())
+        ->toBe($expected);
 });

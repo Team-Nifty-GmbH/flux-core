@@ -17,7 +17,7 @@
             name-attribute="label"
             :with-search="true"
             :hide-icon="true"
-            x-on:folder-tree-select="
+            x-on:folder-tree-select-toggle="
                 if (!$event.detail.children) {
                     isLoading
                         ? null

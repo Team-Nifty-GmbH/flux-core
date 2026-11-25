@@ -2,10 +2,12 @@
 
 namespace FluxErp\Rulesets\Warehouse;
 
+use FluxErp\Enums\StockRemovalStrategyEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Validation\Rule;
 
 class CreateWarehouseRuleset extends FluxRuleset
 {
@@ -21,7 +23,12 @@ class CreateWarehouseRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Address::class]),
             ],
             'name' => 'required|string|max:255',
+            'stock_removal_strategy_enum' => [
+                'required',
+                Rule::enum(StockRemovalStrategyEnum::class),
+            ],
             'is_default' => 'boolean',
+            'requires_storage_area' => 'boolean',
         ];
     }
 }

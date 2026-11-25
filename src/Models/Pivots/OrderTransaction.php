@@ -31,21 +31,30 @@ class OrderTransaction extends FluxPivot
                     ->save();
             }
 
-            if ($orderTransaction->order_id && $orderTransaction->is_accepted) {
+            if (
+                $orderTransaction->order_id
+                && ($orderTransaction->is_accepted || $orderTransaction->wasChanged('is_accepted'))
+            ) {
                 $orderTransaction->order->calculatePaymentState()->save();
             }
 
-            if ($orderTransaction->transaction_id && $orderTransaction->is_accepted) {
-                $orderTransaction->transaction->is_ignored = false;
-                $orderTransaction->transaction->calculateBalance()->save();
+            $transaction = $orderTransaction->transaction()->withTrashed()->first();
+
+            if ($transaction) {
+                if ($orderTransaction->is_accepted) {
+                    $transaction->is_ignored = false;
+                }
+
+                $transaction->calculateBalance()->save();
             }
         });
 
         static::deleted(function (OrderTransaction $orderTransaction): void {
             if ($orderTransaction->is_accepted) {
                 $orderTransaction->order->calculatePaymentState()->save();
-                $orderTransaction->transaction->calculateBalance()->save();
             }
+
+            $orderTransaction->transaction()->withTrashed()->first()?->calculateBalance()->save();
         });
     }
 

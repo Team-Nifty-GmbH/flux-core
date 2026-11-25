@@ -31,7 +31,7 @@ class UpdateCalendarEventRuleset extends FluxRuleset
                 'sometimes',
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Calendar::class]),
+                app(ModelExists::class, ['model' => Calendar::class, 'subject' => CalendarEvent::class]),
             ],
             'title' => 'sometimes|required|string',
             'description' => 'string|nullable',

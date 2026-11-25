@@ -11,7 +11,25 @@
                 required
             />
 
-            <div class="grid grid-cols-2 gap-4">
+            <x-number
+                wire:model="workTimeModelForm.annual_vacation_days"
+                :label="__('Annual Vacation Days')"
+                min="0"
+                max="365"
+                :hint="__('Default vacation days per year')"
+            />
+
+            <x-toggle
+                wire:model="workTimeModelForm.has_fixed_hours"
+                :label="__('Fixed Hours')"
+                :hint="__('Turn off for staff paid by the hour without fixed hours. They get no target hours and no overtime.')"
+            />
+
+            <div
+                x-show="$wire.workTimeModelForm.has_fixed_hours"
+                x-cloak
+                class="grid grid-cols-2 gap-4"
+            >
                 <x-number
                     wire:model="workTimeModelForm.weekly_hours"
                     :label="__('Weekly Hours')"
@@ -23,15 +41,13 @@
                 />
 
                 <x-number
-                    wire:model="workTimeModelForm.annual_vacation_days"
-                    :label="__('Annual Vacation Days')"
-                    min="0"
-                    max="365"
-                    :hint="__('Default vacation days per year')"
+                    wire:model="workTimeModelForm.cycle_weeks"
+                    :label="__('Cycle Weeks')"
+                    :hint="__('Number of weeks before the schedule repeats')"
+                    min="1"
+                    max="52"
                 />
-            </div>
 
-            <div class="grid grid-cols-2 gap-4">
                 <x-number
                     wire:model="workTimeModelForm.max_overtime_hours"
                     :label="__('Max Overtime Hours')"
@@ -48,14 +64,6 @@
                     :options="\FluxErp\Enums\OvertimeCompensationEnum::valuesLocalized()"
                 />
             </div>
-
-            <x-number
-                wire:model="workTimeModelForm.cycle_weeks"
-                :label="__('Cycle Weeks')"
-                :hint="__('Number of weeks before the schedule repeats')"
-                min="1"
-                max="52"
-            />
 
             <x-toggle
                 wire:model="workTimeModelForm.is_active"

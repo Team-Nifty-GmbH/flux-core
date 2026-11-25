@@ -72,6 +72,34 @@ test('create address strips email angle brackets', function (): void {
     expect($address->email)->toBe('john@example.com');
 });
 
+test('create address accepts emails with pasted surrounding whitespace', function (): void {
+    $address = CreateAddress::make([
+        'contact_id' => $this->contact->getKey(),
+        'email_primary' => "\u{200B} john@example.com\u{00A0}",
+        'email' => "\u{FEFF}login@example.com ",
+    ])->validate()->execute();
+
+    expect($address)
+        ->email_primary->toBe('john@example.com')
+        ->email->toBe('login@example.com');
+});
+
+test('update address accepts emails with pasted surrounding whitespace', function (): void {
+    $address = Address::factory()->create([
+        'contact_id' => $this->contact->getKey(),
+    ]);
+
+    $updated = UpdateAddress::make([
+        'id' => $address->getKey(),
+        'email_primary' => ' john@example.com ',
+        'email' => "login@example.com\u{200B}",
+    ])->validate()->execute();
+
+    expect($updated)
+        ->email_primary->toBe('john@example.com')
+        ->email->toBe('login@example.com');
+});
+
 test('update address', function (): void {
     $address = Address::factory()->create([
         'contact_id' => $this->contact->getKey(),
@@ -161,4 +189,128 @@ test('delete address', function (): void {
         ->validate()->execute();
 
     expect($result)->toBeTrue();
+});
+
+test('create address attaches address types', function (): void {
+    $addressType = FluxErp\Models\AddressType::factory()
+        ->hasAttached($this->dbTenant, relationship: 'tenants')
+        ->create();
+
+    $address = CreateAddress::make([
+        'contact_id' => $this->contact->getKey(),
+        'company' => 'Typed',
+        'address_types' => [$addressType->getKey()],
+    ])
+        ->validate()
+        ->execute();
+
+    expect($address->addressTypes()->pluck('address_types.id')->all())->toBe([$addressType->getKey()]);
+});
+
+test('update address syncs address types without contact_id', function (): void {
+    $kept = FluxErp\Models\AddressType::factory()
+        ->hasAttached($this->dbTenant, relationship: 'tenants')
+        ->create();
+    $removed = FluxErp\Models\AddressType::factory()
+        ->hasAttached($this->dbTenant, relationship: 'tenants')
+        ->create();
+    $address = Address::factory()->create(['contact_id' => $this->contact->getKey()]);
+    $address->addressTypes()->attach([$kept->getKey(), $removed->getKey()]);
+
+    UpdateAddress::make([
+        'id' => $address->getKey(),
+        'address_types' => [$kept->getKey()],
+    ])
+        ->validate()
+        ->execute();
+
+    expect($address->addressTypes()->pluck('address_types.id')->all())->toBe([$kept->getKey()]);
+});
+
+test('update address with empty address types removes all of them', function (): void {
+    $addressType = FluxErp\Models\AddressType::factory()
+        ->hasAttached($this->dbTenant, relationship: 'tenants')
+        ->create();
+    $address = Address::factory()->create(['contact_id' => $this->contact->getKey()]);
+    $address->addressTypes()->attach($addressType->getKey());
+
+    UpdateAddress::make([
+        'id' => $address->getKey(),
+        'address_types' => [],
+    ])
+        ->validate()
+        ->execute();
+
+    expect($address->addressTypes()->exists())->toBeFalse();
+});
+
+test('update address without has_formal_salutation keeps the stored value', function (): void {
+    $address = Address::factory()->create([
+        'contact_id' => $this->contact->getKey(),
+        'has_formal_salutation' => ! app(FluxErp\Settings\CoreSettings::class)->formal_salutation,
+    ]);
+
+    UpdateAddress::make([
+        'id' => $address->getKey(),
+        'company' => 'Renamed',
+    ])
+        ->validate()
+        ->execute();
+
+    expect($address->refresh()->has_formal_salutation)
+        ->toBe(! app(FluxErp\Settings\CoreSettings::class)->formal_salutation);
+});
+
+test('update address keeps contact options it may not update', function (): void {
+    $address = Address::factory()->create(['contact_id' => $this->contact->getKey()]);
+    $option = FluxErp\Actions\ContactOption\CreateContactOption::make([
+        'address_id' => $address->getKey(),
+        'type' => 'phone',
+        'label' => 'Mobile',
+        'value' => '+49 123',
+    ])
+        ->validate()
+        ->execute();
+    FluxErp\Models\Permission::findOrCreate(
+        'action.' . FluxErp\Actions\ContactOption\UpdateContactOption::name()
+    );
+
+    UpdateAddress::make([
+        'id' => $address->getKey(),
+        'contact_options' => [
+            ['id' => $option->getKey(), 'type' => 'phone', 'label' => 'Mobile', 'value' => '+49 999'],
+        ],
+    ])
+        ->validate()
+        ->execute();
+
+    expect(FluxErp\Models\ContactOption::query()->whereKey($option->getKey())->value('value'))
+        ->toBe('+49 123');
+});
+
+test('update address does not touch contact options of another address', function (): void {
+    $address = Address::factory()->create(['contact_id' => $this->contact->getKey()]);
+    $other = Address::factory()->create(['contact_id' => Contact::factory()->create()->getKey()]);
+    $foreign = FluxErp\Actions\ContactOption\CreateContactOption::make([
+        'address_id' => $other->getKey(),
+        'type' => 'phone',
+        'label' => 'Foreign',
+        'value' => '+49 123',
+    ])
+        ->validate()
+        ->execute();
+
+    UpdateAddress::make([
+        'id' => $address->getKey(),
+        'contact_options' => [
+            ['id' => $foreign->getKey(), 'type' => 'phone', 'label' => 'Hijacked', 'value' => '+49 999'],
+        ],
+    ])
+        ->validate()
+        ->execute();
+
+    expect($foreign->refresh())
+        ->address_id->toBe($other->getKey())
+        ->label->toBe('Foreign')
+        ->value->toBe('+49 123');
 });

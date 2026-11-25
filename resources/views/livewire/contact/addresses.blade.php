@@ -2,7 +2,7 @@
     <div class="flex flex-col gap-6" wire:ignore>
         @section('left-side-bar')
             <div
-                class="max-h-56 min-w-96 overflow-auto md:max-h-none"
+                class="max-h-56 overflow-auto md:max-h-none md:min-w-96"
                 x-data="{ addressSearch: '' }"
             >
                 <x-card>
@@ -130,18 +130,18 @@
                             select="label:name|value:id"
                             unfiltered
                             :request="[
-                        'url' => route('search', \FluxErp\Models\Tenant::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'where' => [
-                                [
-                                    'is_active',
-                                    '=',
-                                    true,
+                                'url' => route('search', \FluxErp\Models\Tenant::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'where' => [
+                                        [
+                                            'is_active',
+                                            '=',
+                                            true,
+                                        ],
+                                    ],
                                 ],
-                            ],
-                        ],
-                    ]"
+                            ]"
                         />
                         <x-select.styled
                             multiple
@@ -151,18 +151,18 @@
                             select="label:label|value:id"
                             unfiltered
                             :request="[
-                        'url' => route('search', \FluxErp\Models\Category::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'where' => [
-                                [
-                                    'model_type',
-                                    '=',
-                                    morph_alias(\FluxErp\Models\Contact::class),
+                                'url' => route('search', \FluxErp\Models\Category::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'where' => [
+                                        [
+                                            'model_type',
+                                            '=',
+                                            morph_alias(\FluxErp\Models\Contact::class),
+                                        ],
+                                    ],
                                 ],
-                            ],
-                        ],
-                    ]"
+                            ]"
                         />
                         <x-select.styled
                             multiple
@@ -172,12 +172,12 @@
                             select="label:name|value:id"
                             unfiltered
                             :request="[
-                        'url' => route('search', \FluxErp\Models\Industry::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'searchFields' => ['name'],
-                        ],
-                    ]"
+                                'url' => route('search', \FluxErp\Models\Industry::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'searchFields' => ['name'],
+                                ],
+                            ]"
                         />
                         <x-select.styled
                             searchable
@@ -186,26 +186,26 @@
                             :label="__('Contact Origin')"
                             select="label:name|value:id"
                             :request="[
-                        'url' => route('search', \FluxErp\Models\RecordOrigin::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'searchFields' => [
-                                'name',
-                            ],
-                            'where' => [
-                                [
-                                    'model_type',
-                                    '=',
-                                    morph_alias(\FluxErp\Models\Contact::class),
+                                'url' => route('search', \FluxErp\Models\RecordOrigin::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'searchFields' => [
+                                        'name',
+                                    ],
+                                    'where' => [
+                                        [
+                                            'model_type',
+                                            '=',
+                                            morph_alias(\FluxErp\Models\Contact::class),
+                                        ],
+                                        [
+                                            'is_active',
+                                            '=',
+                                            true,
+                                        ],
+                                    ],
                                 ],
-                                [
-                                    'is_active',
-                                    '=',
-                                    true,
-                                ],
-                            ],
-                        ],
-                    ]"
+                            ]"
                         />
                         <x-rating
                             x-bind:disabled="!$wire.$parent.edit"
@@ -287,6 +287,32 @@
                                 </div>
                             @endcanAction
 
+                            @canAction(\FluxErp\Actions\Address\MoveAddress::class)
+                                <div x-cloak x-show="!$wire.edit">
+                                    <x-button
+                                        color="secondary"
+                                        light
+                                        x-on:click="
+                                            $tsui.open.modal('move-address')
+                                        "
+                                        :text="__('Move To Contact')"
+                                    />
+                                </div>
+                            @endcanAction
+
+                            @canAction(\FluxErp\Actions\Address\DetachAddress::class)
+                                <div x-cloak x-show="!$wire.edit">
+                                    <x-button
+                                        wire:flux-confirm.type.warning="{{ __('wire:confirm.detach_address') }}"
+                                        wire:click="detach()"
+                                        loading="detach()"
+                                        color="secondary"
+                                        light
+                                        :text="__('Move To New Contact')"
+                                    />
+                                </div>
+                            @endcanAction
+
                             @canAction(\FluxErp\Actions\Address\DeleteAddress::class)
                                 <div
                                     x-cloak
@@ -308,4 +334,36 @@
             <x-flux::tabs wire:model.live="tab" :$tabs wire:ignore />
         </x-card>
     </div>
+
+    @canAction(\FluxErp\Actions\Address\MoveAddress::class)
+        <x-modal id="move-address" :title="__('Move To Contact')">
+            <x-select.styled
+                wire:model="moveToContactId"
+                :label="__('Contact')"
+                select="label:label|value:id"
+                required
+                unfiltered
+                :request="[
+                    'url' => route('search', \FluxErp\Models\Contact::class),
+                    'method' => 'POST',
+                ]"
+            />
+            <x-slot:footer>
+                <div class="flex justify-end gap-1.5">
+                    <x-button
+                        color="secondary"
+                        flat
+                        :text="__('Cancel')"
+                        x-on:click="$tsui.close.modal('move-address')"
+                    />
+                    <x-button
+                        color="indigo"
+                        :text="__('Move')"
+                        wire:click="move()"
+                        loading="move()"
+                    />
+                </div>
+            </x-slot:footer>
+        </x-modal>
+    @endcanAction
 </div>

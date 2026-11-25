@@ -2,21 +2,29 @@
 
 namespace FluxErp\Livewire\Accounting;
 
+use FluxErp\Actions\LoanInstallmentTransaction\UpdateLoanInstallmentTransaction;
+use FluxErp\Actions\Order\AdjustOrderTotal;
 use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Actions\OrderTransaction\UpdateOrderTransaction;
 use FluxErp\Livewire\Forms\LedgerAccountTransactionForm;
+use FluxErp\Livewire\Forms\LoanInstallmentTransactionForm;
+use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Livewire\Forms\OrderTransactionForm;
 use FluxErp\Livewire\Forms\TransactionForm;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
 use FluxErp\Models\Pivots\LedgerAccountTransaction;
+use FluxErp\Models\Pivots\LoanInstallmentTransaction;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Transaction;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
@@ -26,11 +34,15 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class TransactionAssignments extends Component
 {
-    use Actions, WithPagination;
+    use Actions, WithFileUploads, WithPagination;
+
+    public MediaUploadForm $attachment;
 
     public ?array $bankAccounts = null;
 
     public LedgerAccountTransactionForm $ledgerAccountTransactionForm;
+
+    public LoanInstallmentTransactionForm $loanInstallmentTransactionForm;
 
     public OrderTransactionForm $orderTransactionForm;
 
@@ -75,8 +87,15 @@ class TransactionAssignments extends Component
                 ->whereHas('transaction')
                 ->where('is_accepted', false)
                 ->get();
+            $loanSuggestions = resolve_static(LoanInstallmentTransaction::class, 'query')
+                ->whereHas('transaction')
+                ->where('is_accepted', false)
+                ->get();
         } else {
             $suggestions = $transaction->orderTransactions()
+                ->where('is_accepted', false)
+                ->get();
+            $loanSuggestions = $transaction->loanInstallmentTransactions()
                 ->where('is_accepted', false)
                 ->get();
         }
@@ -93,10 +112,57 @@ class TransactionAssignments extends Component
                 }
             });
 
+        $loanSuggestions
+            ->map(fn (LoanInstallmentTransaction $pivot) => $pivot->setAttribute('is_accepted', true))
+            ->each(function (LoanInstallmentTransaction $suggestion): void {
+                try {
+                    UpdateLoanInstallmentTransaction::make($suggestion->toArray())
+                        ->validate()
+                        ->execute();
+                } catch (ValidationException|UnauthorizedException $e) {
+                    exception_to_notifications($e, $this);
+                }
+            });
+
         $this->toast()
-            ->success(__('Accepted :count assignments', ['count' => $suggestions->count()]))
+            ->success(__('Accepted :count assignments', [
+                'count' => $suggestions->count() + $loanSuggestions->count(),
+            ]))
             ->send();
         $this->refreshTransactions();
+    }
+
+    #[Renderless]
+    public function adjustOrderToPayment(): void
+    {
+        $this->resetErrorBag();
+
+        $amount = $this->orderTransactionForm->amount;
+
+        if (blank($amount)) {
+            return;
+        }
+
+        try {
+            AdjustOrderTotal::make([
+                'id' => $this->orderTransactionForm->order_id,
+                'total_gross_price' => bcabs((string) $amount),
+            ])
+                ->validate()
+                ->execute();
+
+            $this->orderTransactionForm->is_accepted = true;
+            $this->orderTransactionForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this, form: $this->orderTransactionForm);
+
+            return;
+        }
+
+        $this->refreshTransactions();
+        $this->js(<<<'JS'
+            $tsui.close.modal('order-transaction-modal');
+        JS);
     }
 
     #[Renderless]
@@ -116,35 +182,19 @@ class TransactionAssignments extends Component
     {
         $transactionCurrencyId = $this->transactionForm->currency_id;
 
-        resolve_static(Order::class, 'query')
+        [$foreignCurrencyOrders, $orders] = resolve_static(Order::class, 'query')
             ->whereKey($this->selectedOrders)
             ->get(['id', 'currency_id', 'balance'])
-            ->each(function (Order $order) use ($transactionCurrencyId): void {
-                $data = [
-                    'transaction_id' => $this->transactionForm->id,
-                    'order_id' => $order->getKey(),
-                ];
+            ->partition(fn (Order $order) => $order->currency_id !== $transactionCurrencyId);
 
-                if ($order->currency_id !== $transactionCurrencyId) {
-                    $data['order_currency_amount'] = $order->balance;
-                    $data['amount'] = $this->transactionForm->amount;
-                    $data['exchange_rate'] = bccomp($this->transactionForm->amount ?? 0, 0, 9) !== 0
-                        ? bcdiv($order->balance, $this->transactionForm->amount, 9)
-                        : null;
-                    $data['is_accepted'] = false;
-                } else {
-                    $data['amount'] = $order->balance;
-                    $data['is_accepted'] = true;
-                }
+        $orders->each(fn (Order $order) => $this->createOrderTransaction([
+            'transaction_id' => $this->transactionForm->id,
+            'order_id' => $order->getKey(),
+            'amount' => $order->balance,
+            'is_accepted' => true,
+        ]));
 
-                try {
-                    CreateOrderTransaction::make($data)
-                        ->validate()
-                        ->execute();
-                } catch (ValidationException|UnauthorizedException $e) {
-                    exception_to_notifications($e, $this);
-                }
-            });
+        $this->assignForeignCurrencyOrders($foreignCurrencyOrders);
 
         $this->selectedOrders = [];
         $this->refreshTransactions();
@@ -180,6 +230,35 @@ class TransactionAssignments extends Component
     }
 
     #[Renderless]
+    public function assignLoanInstallmentModal(Transaction $transaction): void
+    {
+        $this->resetErrorBag();
+        $this->loanInstallmentTransactionForm->reset();
+        $this->loanInstallmentTransactionForm->transaction_id = $transaction->getKey();
+        $this->loanInstallmentTransactionForm->transactionBalance = (float) $transaction->balance;
+        $this->loanInstallmentTransactionForm->amount = (float) $transaction->balance;
+
+        $this->js(<<<'JS'
+            $tsui.open.modal('loan-installment-transaction-modal');
+        JS);
+    }
+
+    #[Renderless]
+    public function attachmentModal(Transaction $transaction): void
+    {
+        $this->resetErrorBag();
+        $this->attachment->reset();
+        $this->attachment->fill($transaction->getFirstMedia('attachment') ?? []);
+        $this->attachment->model_type = $transaction->getMorphClass();
+        $this->attachment->model_id = $transaction->getKey();
+        $this->attachment->collection_name = 'attachment';
+
+        $this->js(<<<'JS'
+            $tsui.open.modal('transaction-attachment-modal');
+        JS);
+    }
+
+    #[Renderless]
     public function deleteLedgerAccountTransaction(LedgerAccountTransaction $ledgerAccountTransaction): void
     {
         $this->ledgerAccountTransactionForm->reset();
@@ -188,7 +267,24 @@ class TransactionAssignments extends Component
         try {
             $this->ledgerAccountTransactionForm->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->ledgerAccountTransactionForm);
+
+            return;
+        }
+
+        $this->refreshTransactions();
+    }
+
+    #[Renderless]
+    public function deleteLoanInstallmentTransaction(LoanInstallmentTransaction $loanInstallmentTransaction): void
+    {
+        $this->loanInstallmentTransactionForm->reset();
+        $this->loanInstallmentTransactionForm->fill($loanInstallmentTransaction);
+
+        try {
+            $this->loanInstallmentTransactionForm->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this, form: $this->loanInstallmentTransactionForm);
 
             return;
         }
@@ -205,7 +301,7 @@ class TransactionAssignments extends Component
         try {
             $this->orderTransactionForm->delete();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->orderTransactionForm);
 
             return;
         }
@@ -220,8 +316,6 @@ class TransactionAssignments extends Component
         $this->ledgerAccountTransactionForm->reset();
         $this->ledgerAccountTransactionForm->fill($ledgerAccountTransaction);
 
-        // Remaining balance the transaction would have without this assignment,
-        // so "apply transaction amount" targets the full open amount again.
         $this->ledgerAccountTransactionForm->transactionBalance = bcadd(
             $ledgerAccountTransaction->transaction->balance,
             $ledgerAccountTransaction->is_accepted ? $ledgerAccountTransaction->amount : '0',
@@ -230,6 +324,24 @@ class TransactionAssignments extends Component
 
         $this->js(<<<'JS'
             $tsui.open.modal('ledger-account-transaction-modal');
+        JS);
+    }
+
+    #[Renderless]
+    public function editLoanInstallmentTransaction(LoanInstallmentTransaction $loanInstallmentTransaction): void
+    {
+        $this->resetErrorBag();
+        $this->loanInstallmentTransactionForm->reset();
+        $this->loanInstallmentTransactionForm->fill($loanInstallmentTransaction);
+
+        $this->loanInstallmentTransactionForm->transactionBalance = bcadd(
+            $loanInstallmentTransaction->transaction->balance,
+            $loanInstallmentTransaction->is_accepted ? $loanInstallmentTransaction->amount : '0',
+            2
+        );
+
+        $this->js(<<<'JS'
+            $tsui.open.modal('loan-installment-transaction-modal');
         JS);
     }
 
@@ -260,10 +372,16 @@ class TransactionAssignments extends Component
             ->whereNull('contact_bank_connection_id')
             ->when(
                 $this->tab === __('Assignment suggestions'),
-                fn (Builder $query) => $query->whereHas(
-                    'orders',
-                    fn (Builder $query) => $query->where('order_transaction.is_accepted', false)
-                )
+                fn (Builder $query) => $query->where(function (Builder $query): void {
+                    $query->whereHas(
+                        'orders',
+                        fn (Builder $query) => $query->where('order_transaction.is_accepted', false)
+                    )
+                        ->orWhereHas(
+                            'loanInstallments',
+                            fn (Builder $query) => $query->where('loan_installment_transaction.is_accepted', false)
+                        );
+                })
                     ->where('is_ignored', false)
             )
             ->when(
@@ -280,8 +398,10 @@ class TransactionAssignments extends Component
             ->withCount([
                 'orderTransactions',
                 'ledgerAccountTransactions',
+                'loanInstallmentTransactions',
                 'comments',
                 'orderTransactions as suggestions' => fn ($query) => $query->where('is_accepted', false),
+                'loanInstallmentTransactions as loan_suggestions' => fn ($query) => $query->where('is_accepted', false),
             ])
             ->when($this->range, function (Builder $query): void {
                 $query->whereBetween('booking_date', $this->range);
@@ -306,6 +426,9 @@ class TransactionAssignments extends Component
                         ->withPivot(['pivot_id', 'amount', 'exchange_rate', 'order_currency_amount', 'is_accepted']);
                 },
                 'ledgerAccountTransactions.ledgerAccount:id,name,number',
+                'loanInstallmentTransactions.loanInstallment:id,loan_id,sequence,due_date',
+                'loanInstallmentTransactions.loanInstallment.loan:id,name,number',
+                'media' => fn (MorphMany $query) => $query->where('collection_name', 'attachment'),
                 'orders.addressInvoice:id,name',
                 'orders.currency:id,iso,symbol',
                 'bankConnection:id,name,bank_name,iban',
@@ -327,6 +450,24 @@ class TransactionAssignments extends Component
     }
 
     #[Renderless]
+    public function saveAttachment(): bool
+    {
+        $this->resetErrorBag();
+
+        try {
+            $this->attachment->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this, form: $this->attachment);
+
+            return false;
+        }
+
+        $this->refreshTransactions();
+
+        return true;
+    }
+
+    #[Renderless]
     public function saveLedgerAccountTransaction(): void
     {
         $this->resetErrorBag();
@@ -334,7 +475,7 @@ class TransactionAssignments extends Component
         try {
             $this->ledgerAccountTransactionForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->ledgerAccountTransactionForm);
 
             return;
         }
@@ -346,6 +487,25 @@ class TransactionAssignments extends Component
     }
 
     #[Renderless]
+    public function saveLoanInstallmentTransaction(): void
+    {
+        $this->resetErrorBag();
+
+        try {
+            $this->loanInstallmentTransactionForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this, form: $this->loanInstallmentTransactionForm);
+
+            return;
+        }
+
+        $this->refreshTransactions();
+        $this->js(<<<'JS'
+            $tsui.close.modal('loan-installment-transaction-modal');
+        JS);
+    }
+
+    #[Renderless]
     public function saveOrderTransaction(): void
     {
         $this->resetErrorBag();
@@ -353,7 +513,7 @@ class TransactionAssignments extends Component
         try {
             $this->orderTransactionForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->orderTransactionForm);
 
             return;
         }
@@ -398,7 +558,7 @@ class TransactionAssignments extends Component
         try {
             $this->transactionForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            exception_to_notifications($e, $this, form: $this->transactionForm);
 
             return;
         }
@@ -436,6 +596,74 @@ class TransactionAssignments extends Component
         $this->refreshTransactions();
     }
 
+    protected function assignForeignCurrencyOrders(Collection $orders): void
+    {
+        if ($orders->isEmpty()) {
+            return;
+        }
+
+        $transaction = resolve_static(Transaction::class, 'query')
+            ->whereKey($this->transactionForm->id)
+            ->first(['id', 'amount', 'balance']);
+        $remainingAmount = bcsub(
+            $transaction->balance,
+            bcadd(
+                bcadd(
+                    $transaction->orderTransactions()->where('is_accepted', false)->sum('amount'),
+                    $transaction->ledgerAccountTransactions()->where('is_accepted', false)->sum('amount'),
+                    9
+                ),
+                $transaction->loanInstallmentTransactions()->where('is_accepted', false)->sum('amount'),
+                9
+            ),
+            2
+        );
+
+        if (bccomp(bcmul($remainingAmount, $transaction->amount, 9), 0, 9) !== 1) {
+            return;
+        }
+
+        $remainingOrderBalance = $orders->reduce(
+            fn (string $carry, Order $order) => bcadd($carry, $order->balance, 9),
+            '0'
+        );
+
+        foreach ($orders as $order) {
+            $amount = bccomp($remainingOrderBalance, 0, 9) !== 0
+                ? bcround(
+                    bcdiv(bcmul($remainingAmount, $order->balance, 9), $remainingOrderBalance, 9),
+                    2
+                )
+                : '0';
+            $remainingAmount = bcsub($remainingAmount, $amount, 2);
+            $remainingOrderBalance = bcsub($remainingOrderBalance, $order->balance, 9);
+
+            if (bccomp($amount, 0, 2) === 0) {
+                continue;
+            }
+
+            $this->createOrderTransaction([
+                'transaction_id' => $this->transactionForm->id,
+                'order_id' => $order->getKey(),
+                'amount' => $amount,
+                'order_currency_amount' => $order->balance,
+                'exchange_rate' => bcdiv($order->balance, $amount, 9),
+                'is_accepted' => false,
+            ]);
+        }
+    }
+
+    protected function createOrderTransaction(array $data): void
+    {
+        try {
+            CreateOrderTransaction::make($data)
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this, form: $this->orderTransactionForm);
+        }
+    }
+
     protected function refreshTransactions(bool $renderless = true): void
     {
         $this->updateCounts();
@@ -460,7 +688,13 @@ class TransactionAssignments extends Component
 
         $this->suggestionCount = $baseQuery
             ->clone()
-            ->whereHas('orders', fn (Builder $query) => $query->where('order_transaction.is_accepted', false))
+            ->where(function (Builder $query): void {
+                $query->whereHas('orders', fn (Builder $query) => $query->where('order_transaction.is_accepted', false))
+                    ->orWhereHas(
+                        'loanInstallments',
+                        fn (Builder $query) => $query->where('loan_installment_transaction.is_accepted', false)
+                    );
+            })
             ->count();
 
         $this->unassignedCount = $baseQuery
