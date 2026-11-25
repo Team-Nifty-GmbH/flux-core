@@ -14,43 +14,7 @@ use FluxErp\Models\PriceList;
 use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
 use FluxErp\States\Order\PaymentState\Overpaid;
 use FluxErp\States\Order\PaymentState\PartialPaid;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
-
-function createPayableOrder(TestCase $test, OrderType $orderType, string $balance, ?int $contactId = null): Order
-{
-    $contact = $contactId
-        ? resolve_static(Contact::class, 'query')->findOrFail($contactId)
-        : Contact::factory()->create();
-
-    $address = Address::factory()->create([
-        'contact_id' => $contact->getKey(),
-        'is_main_address' => true,
-    ]);
-
-    $paymentType = PaymentType::factory()->create([
-        'is_direct_debit' => false,
-        'requires_manual_transfer' => true,
-    ]);
-
-    $order = Order::factory()->create([
-        'tenant_id' => $test->dbTenant->id,
-        'contact_id' => $contact->getKey(),
-        'order_type_id' => $orderType->getKey(),
-        'payment_type_id' => $paymentType->getKey(),
-        'address_invoice_id' => $address->getKey(),
-        'price_list_id' => PriceList::factory()->create()->getKey(),
-        'currency_id' => Currency::factory()->create()->getKey(),
-    ]);
-
-    $order->update([
-        'invoice_number' => 'INV-' . $order->getKey(),
-        'balance' => $balance,
-        'total_gross_price' => $balance,
-    ]);
-
-    return $order->fresh();
-}
 
 beforeEach(function (): void {
     $contact = Contact::factory()
@@ -165,8 +129,8 @@ test('the money transfer list contains supplier credit notes', function (): void
         'is_hidden' => false,
     ]);
 
-    $invoice = createPayableOrder($this, $purchaseType, '-500.00');
-    $creditNote = createPayableOrder($this, $refundType, '200.00');
+    $invoice = createPaymentRunOrder($purchaseType, '-500.00');
+    $creditNote = createPaymentRunOrder($refundType, '200.00');
 
     Livewire::test(MoneyTransfer::class)
         ->assertSee($invoice->invoice_number)
@@ -180,7 +144,7 @@ test('an order type that is not owed to a supplier does not appear in the list',
         'is_hidden' => false,
     ]);
 
-    $order = createPayableOrder($this, $orderType, $balance);
+    $order = createPaymentRunOrder($orderType, $balance);
 
     Livewire::test(MoneyTransfer::class)
         ->assertDontSee($order->invoice_number);

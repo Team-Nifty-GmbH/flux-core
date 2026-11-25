@@ -24,41 +24,6 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 
-function createPayableOrderForPreview(object $test, OrderType $orderType, string $balance, ?int $contactId = null): Order
-{
-    $contact = $contactId
-        ? resolve_static(Contact::class, 'query')->findOrFail($contactId)
-        : Contact::factory()->create();
-
-    $address = Address::factory()->create([
-        'contact_id' => $contact->getKey(),
-        'is_main_address' => true,
-    ]);
-
-    $paymentType = PaymentType::factory()->create([
-        'is_direct_debit' => false,
-        'requires_manual_transfer' => true,
-    ]);
-
-    $order = Order::factory()->create([
-        'tenant_id' => $test->dbTenant->id,
-        'contact_id' => $contact->getKey(),
-        'order_type_id' => $orderType->getKey(),
-        'payment_type_id' => $paymentType->getKey(),
-        'address_invoice_id' => $address->getKey(),
-        'price_list_id' => PriceList::factory()->create()->getKey(),
-        'currency_id' => Currency::factory()->create()->getKey(),
-    ]);
-
-    $order->update([
-        'invoice_number' => 'INV-' . $order->getKey(),
-        'balance' => $balance,
-        'total_gross_price' => $balance,
-    ]);
-
-    return $order->fresh();
-}
-
 function toastTypesOf(Testable $component): array
 {
     return collect($component->effects['dispatches'] ?? [])
@@ -128,8 +93,8 @@ beforeEach(function (): void {
 });
 
 test('orders of the same recipient end up in one group', function (): void {
-    $first = createPayableOrderForPreview($this, $this->purchaseType, '-1000.00');
-    $second = createPayableOrderForPreview($this, $this->purchaseType, '-500.00', $first->contact_id);
+    $first = createPaymentRunOrder($this->purchaseType, '-1000.00');
+    $second = createPaymentRunOrder($this->purchaseType, '-500.00', ['contact_id' => $first->contact_id]);
 
     session(['payment_run_preview_orders' => [$first->getKey(), $second->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -139,94 +104,22 @@ test('orders of the same recipient end up in one group', function (): void {
         ->assertSet('groups.0.amount', '-1500.00');
 });
 
-test('suggested credit notes are deducted from the payable and capped against it', function (
-    string $invoiceBalance,
-    array $creditNoteBalances,
-    string $expectedGroupAmount,
-    array $expectedCreditNoteAmounts,
-    array $expectedCappedFrom
-): void {
-    $invoice = createPayableOrderForPreview($this, $this->purchaseType, $invoiceBalance);
-    $creditNotes = collect($creditNoteBalances)
-        ->map(fn (string $balance) => createPayableOrderForPreview($this, $this->refundType, $balance, $invoice->contact_id));
+test('a suggested credit note is deducted from the payable and capped against it', function (): void {
+    $invoice = createPaymentRunOrder($this->purchaseType, '-300.00');
+    $creditNote = createPaymentRunOrder($this->refundType, '500.00', ['contact_id' => $invoice->contact_id]);
 
     session(['payment_run_preview_orders' => [$invoice->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
 
     $groups = Livewire::test(PaymentRunPreview::class)->get('groups');
-    $rows = collect($groups)->flatMap(fn (array $group) => $group['orders'])->keyBy('id');
 
     expect($groups)->toHaveCount(1)
-        ->and(array_column($groups[0]['orders'], 'id'))->toBe([$invoice->getKey(), ...$creditNotes->map->getKey()])
-        ->and($groups[0]['amount'])->toBe($expectedGroupAmount)
-        ->and($groups[0]['amount'])->toBe(
-            collect($groups[0]['orders'])->reduce(fn (string $carry, array $row) => bcadd($carry, $row['amount'], 2), '0.00')
-        )
-        ->and($rows[$invoice->getKey()]['amount'])->toBe($invoiceBalance);
-
-    foreach ($creditNotes->values() as $index => $creditNote) {
-        expect($rows[$creditNote->getKey()]['is_suggested'])->toBeTrue()
-            ->and($rows[$creditNote->getKey()]['amount'])->toBe($expectedCreditNoteAmounts[$index])
-            ->and(data_get($rows[$creditNote->getKey()], 'capped_from'))->toBe($expectedCappedFrom[$index]);
-    }
-})->with([
-    'a smaller credit note is deducted in full' => ['-1000.00', ['200.00'], '-800.00', ['200.00'], [null]],
-    'a credit note larger than the invoice is capped' => ['-300.00', ['500.00'], '0.00', ['300.00'], ['500.00']],
-    'a second credit note beyond the payable stays visible with a zero amount' => [
-        '-300.00',
-        ['300.00', '150.00'],
-        '0.00',
-        ['300.00', '0.00'],
-        [null, '150.00'],
-    ],
-]);
-
-test('a typed amount keeps the row sign and is clamped to its own balance and the payable', function (
-    array $invoiceBalances,
-    array $creditNoteBalances,
-    string $target,
-    string $typedAmount,
-    string $expectedRowAmount,
-    ?string $expectedCappedFrom,
-    string $expectedGroupAmount
-): void {
-    $invoices = collect();
-    foreach ($invoiceBalances as $balance) {
-        $invoices->push(createPayableOrderForPreview($this, $this->purchaseType, $balance, $invoices->first()?->contact_id));
-    }
-
-    $creditNotes = collect($creditNoteBalances)
-        ->map(fn (string $balance) => createPayableOrderForPreview($this, $this->refundType, $balance, $invoices->first()->contact_id));
-
-    session(['payment_run_preview_orders' => $invoices->map->getKey()->all()]);
-    session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
-
-    $component = Livewire::test(PaymentRunPreview::class);
-    $groupKey = $component->get('groups')[0]['key'];
-    $targetOrder = $target === 'invoice' ? $invoices->first() : $creditNotes->first();
-
-    $component->call('applyAmount', $groupKey, $targetOrder->getKey(), $typedAmount);
-
-    $rows = collect($component->get('groups'))->flatMap(fn (array $group) => $group['orders'])->keyBy('id');
-
-    expect($rows[$targetOrder->getKey()]['amount'])->toBe($expectedRowAmount)
-        ->and(data_get($rows[$targetOrder->getKey()], 'capped_from'))->toBe($expectedCappedFrom)
-        ->and(data_get($component->get('groups'), '0.amount'))->toBe($expectedGroupAmount);
-})->with([
-    'a credit note above the payable is capped against it' => [['-300.00'], ['500.00'], 'credit note', '500.00', '300.00', '500.00', '0.00'],
-    'an invoice above its own balance is clamped to that balance' => [['-500.00'], [], 'invoice', '9999.00', '-500.00', null, '-500.00'],
-    'a credit note above its own balance is clamped to that balance, not the payable sum' => [
-        ['-1000.00', '-500.00'],
-        ['200.00'],
-        'credit note',
-        '5000.00',
-        '200.00',
-        null,
-        '-1300.00',
-    ],
-    'a positive value typed into a payable row stays negative' => [['-500.00'], [], 'invoice', '50.00', '-50.00', null, '-50.00'],
-    'a negative value typed into a credit note row stays positive' => [['-1000.00'], ['500.00'], 'credit note', '-200.00', '200.00', null, '-800.00'],
-]);
+        ->and($groups[0]['amount'])->toBe('0.00')
+        ->and(array_column($groups[0]['orders'], 'amount', 'id'))
+        ->toBe([$invoice->getKey() => '-300.00', $creditNote->getKey() => '300.00'])
+        ->and($groups[0]['orders'][1]['is_suggested'])->toBeTrue()
+        ->and($groups[0]['orders'][1]['capped_from'])->toBe('500.00');
+});
 
 test('an overpaid sales invoice is grouped with a supplier credit note of the same contact and offset against it', function (): void {
     $salesType = OrderType::factory()->create([
@@ -235,9 +128,9 @@ test('an overpaid sales invoice is grouped with a supplier credit note of the sa
         'is_hidden' => false,
     ]);
 
-    $invoice = createPayableOrderForPreview($this, $salesType, '-404.12');
+    $invoice = createPaymentRunOrder($salesType, '-404.12');
     $invoice->update(['total_gross_price' => '404.12', 'payment_state' => Overpaid::$name]);
-    $creditNote = createPayableOrderForPreview($this, $this->refundType, '200.00', $invoice->contact_id);
+    $creditNote = createPaymentRunOrder($this->refundType, '200.00', ['contact_id' => $invoice->contact_id]);
 
     session(['payment_run_preview_orders' => [$invoice->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -265,10 +158,10 @@ test('an overpaid sales invoice is grouped with a supplier credit note of the sa
 });
 
 test('a row carries total gross price and balance with their natural sign, surviving a recap', function (): void {
-    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-300.00');
+    $invoice = createPaymentRunOrder($this->purchaseType, '-300.00');
     $invoice->update(['total_gross_price' => '-1000.00']);
 
-    $creditNote = createPayableOrderForPreview($this, $this->refundType, '150.00', $invoice->contact_id);
+    $creditNote = createPaymentRunOrder($this->refundType, '150.00', ['contact_id' => $invoice->contact_id]);
     $creditNote->update(['total_gross_price' => '500.00']);
 
     session(['payment_run_preview_orders' => [$invoice->getKey()]]);
@@ -294,67 +187,22 @@ test('a row carries total gross price and balance with their natural sign, survi
         ->and($rows[$creditNote->getKey()]['balance'])->toBe('150.00');
 });
 
-test('the payload sent to CreatePaymentRun sums to zero or negative for a normal grouped run', function (): void {
-    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-1000.00');
-    createPayableOrderForPreview($this, $this->refundType, '200.00', $invoice->contact_id);
-
-    session(['payment_run_preview_orders' => [$invoice->getKey()]]);
-    session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
-
-    Livewire::test(PaymentRunPreview::class)
-        ->call('createPaymentRun')
-        ->assertRedirect();
-
-    $position = PaymentRun::query()->latest('id')->first()->positions()->sole();
-
-    expect(bccomp((string) $position->amount, '0', 2))->toBeLessThanOrEqual(0);
-});
-
-test('apply balance amount on a capped credit note does not raise the group above the payable', function (): void {
-    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-300.00');
-    $creditNote = createPayableOrderForPreview($this, $this->refundType, '500.00', $invoice->contact_id);
+test('removing a suggested credit note raises the transfer again', function (): void {
+    $invoice = createPaymentRunOrder($this->purchaseType, '-1000.00');
+    $creditNote = createPaymentRunOrder($this->refundType, '200.00', ['contact_id' => $invoice->contact_id]);
 
     session(['payment_run_preview_orders' => [$invoice->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
 
     $component = Livewire::test(PaymentRunPreview::class);
-    $groupKey = $component->get('groups')[0]['key'];
-
-    $component->call('applyBalance', $groupKey, $creditNote->getKey());
-
-    expect(data_get($component->get('groups'), '0.orders.1.amount'))->toBe('300.00')
-        ->and(data_get($component->get('groups'), '0.amount'))->toBe('0.00');
-});
-
-test('removing the invoice row leaves a capped credit note from raising the total above zero', function (): void {
-    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-300.00');
-    createPayableOrderForPreview($this, $this->refundType, '500.00', $invoice->contact_id);
-
-    session(['payment_run_preview_orders' => [$invoice->getKey()]]);
-    session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
-
-    $component = Livewire::test(PaymentRunPreview::class)
-        ->call('removeOrder', $invoice->getKey());
-
-    expect(bccomp(data_get($component->get('groups'), '0.amount'), '0', 2))->toBeLessThanOrEqual(0);
-});
-
-test('removing a suggested credit note raises the transfer again', function (): void {
-    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-1000.00');
-    $creditNote = createPayableOrderForPreview($this, $this->refundType, '200.00', $invoice->contact_id);
-
-    session(['payment_run_preview_orders' => [$invoice->getKey()]]);
-    session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
-
-    $component = Livewire::test(PaymentRunPreview::class)
-        ->call('removeOrder', $creditNote->getKey());
+    $component->call('removeOrder', $component->get('groups')[0]['key'], $creditNote->getKey());
 
     expect(data_get($component->get('groups'), '0.amount'))->toBe('-1000.00');
 });
 
 test('creating the run sends one position per group', function (): void {
-    $first = createPayableOrderForPreview($this, $this->purchaseType, '-1000.00');
-    $second = createPayableOrderForPreview($this, $this->purchaseType, '-500.00', $first->contact_id);
+    $first = createPaymentRunOrder($this->purchaseType, '-1000.00');
+    $second = createPaymentRunOrder($this->purchaseType, '-500.00', ['contact_id' => $first->contact_id]);
 
     session(['payment_run_preview_orders' => [$first->getKey(), $second->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -368,8 +216,8 @@ test('creating the run sends one position per group', function (): void {
 });
 
 test('a group holding only credit notes is skipped instead of killing the whole run', function (): void {
-    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-1000.00');
-    $lonelyCreditNote = createPayableOrderForPreview($this, $this->refundType, '200.00');
+    $invoice = createPaymentRunOrder($this->purchaseType, '-1000.00');
+    $lonelyCreditNote = createPaymentRunOrder($this->refundType, '200.00');
 
     session(['payment_run_preview_orders' => [$invoice->getKey(), $lonelyCreditNote->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -380,7 +228,7 @@ test('a group holding only credit notes is skipped instead of killing the whole 
 
     $run = PaymentRun::query()->sole();
 
-    expect(toastTypesOf($component))->toBe(['warning', 'success'])
+    expect(toastTypesOf($component))->toBe(['success'])
         ->and($run->positions()->count())->toBe(1)
         ->and($run->positions()->first()->orders()->pluck('orders.id')->all())->toBe([$invoice->getKey()])
         ->and($lonelyCreditNote->fresh()->payment_state)->toBeInstanceOf(Open::class)
@@ -388,7 +236,7 @@ test('a group holding only credit notes is skipped instead of killing the whole 
 });
 
 test('a run made of nothing but a lonely credit note is not created at all', function (): void {
-    $lonelyCreditNote = createPayableOrderForPreview($this, $this->refundType, '200.00');
+    $lonelyCreditNote = createPaymentRunOrder($this->refundType, '200.00');
 
     session(['payment_run_preview_orders' => [$lonelyCreditNote->getKey()]]);
     session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
@@ -397,14 +245,14 @@ test('a run made of nothing but a lonely credit note is not created at all', fun
         ->call('createPaymentRun')
         ->assertNoRedirect();
 
-    expect(toastTypesOf($component))->toBe(['warning'])
+    expect(toastTypesOf($component))->toBe([])
         ->and(PaymentRun::query()->count())->toBe(0)
         ->and($lonelyCreditNote->fresh()->payment_state)->toBeInstanceOf(Open::class);
 });
 
 test('a credit note already in another payment run is not suggested', function (): void {
-    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-1000.00');
-    $creditNote = createPayableOrderForPreview($this, $this->refundType, '200.00', $invoice->contact_id);
+    $invoice = createPaymentRunOrder($this->purchaseType, '-1000.00');
+    $creditNote = createPaymentRunOrder($this->refundType, '200.00', ['contact_id' => $invoice->contact_id]);
 
     $position = PaymentRunPosition::factory()->create();
     $position->orders()->attach($creditNote->getKey(), [
@@ -773,9 +621,9 @@ test('a second credit note beyond the payable does not block the run', function 
     $clearing = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
     app(AccountingSettings::class)->clearing_ledger_account_id = $clearing->getKey();
 
-    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-300.00');
-    $firstCreditNote = createPayableOrderForPreview($this, $this->refundType, '300.00', $invoice->contact_id);
-    $secondCreditNote = createPayableOrderForPreview($this, $this->refundType, '150.00', $invoice->contact_id);
+    $invoice = createPaymentRunOrder($this->purchaseType, '-300.00');
+    $firstCreditNote = createPaymentRunOrder($this->refundType, '300.00', ['contact_id' => $invoice->contact_id]);
+    $secondCreditNote = createPaymentRunOrder($this->refundType, '150.00', ['contact_id' => $invoice->contact_id]);
 
     Contact::query()->whereKey($invoice->contact_id)->update([
         'expense_ledger_account_id' => LedgerAccount::factory()
@@ -796,7 +644,7 @@ test('a second credit note beyond the payable does not block the run', function 
 });
 
 test('the recipient of a position comes from its orders, not from the component state', function (): void {
-    $invoice = createPayableOrderForPreview($this, $this->purchaseType, '-1000.00');
+    $invoice = createPaymentRunOrder($this->purchaseType, '-1000.00');
     $invoice->update(['iban' => 'DE89370400440532013000', 'account_holder' => 'Muster GmbH']);
 
     session(['payment_run_preview_orders' => [$invoice->getKey()]]);

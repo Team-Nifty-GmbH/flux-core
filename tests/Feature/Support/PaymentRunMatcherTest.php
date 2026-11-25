@@ -3,57 +3,19 @@
 use FluxErp\Actions\PaymentRun\CreatePaymentRun;
 use FluxErp\Actions\PaymentRun\UpdatePaymentRun;
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
-use FluxErp\Models\Currency;
 use FluxErp\Models\LedgerAccount;
-use FluxErp\Models\Order;
-use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentRunPosition;
-use FluxErp\Models\PaymentType;
 use FluxErp\Models\Pivots\OrderTransaction;
-use FluxErp\Models\PriceList;
 use FluxErp\Models\Transaction;
 use FluxErp\Settings\AccountingSettings;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\Support\Matching\PaymentRunMatcher;
 
-function createOrderForPaymentRunMatcher(
-    object $testContext,
-    OrderTypeEnum $orderTypeEnum = OrderTypeEnum::Order,
-    ?string $grossPrice = null
-): Order {
-    $contact = Contact::factory()->create();
-    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
-    $orderType = OrderType::factory()->create([
-        'order_type_enum' => $orderTypeEnum,
-        'is_active' => true,
-        'is_hidden' => false,
-    ]);
-    $paymentType = PaymentType::factory()->hasAttached($testContext->dbTenant, relationship: 'tenants')->create();
-
-    $order = Order::factory()->create([
-        'order_type_id' => $orderType->getKey(),
-        'address_invoice_id' => $address->getKey(),
-        'contact_id' => $contact->getKey(),
-        'payment_type_id' => $paymentType->getKey(),
-        'price_list_id' => PriceList::factory()->create()->getKey(),
-        'tenant_id' => $testContext->dbTenant->getKey(),
-        'currency_id' => Currency::factory()->create()->getKey(),
-        'language_id' => $testContext->defaultLanguage->getKey(),
-    ]);
-
-    if ($grossPrice !== null) {
-        $order->update(['total_gross_price' => $grossPrice, 'balance' => $grossPrice]);
-    }
-
-    return $order;
-}
-
-function createNettedPosition(object $testContext): array
+function createNettedPosition(): array
 {
-    $invoice = createOrderForPaymentRunMatcher($testContext);
-    $creditNote = createOrderForPaymentRunMatcher($testContext);
+    $invoice = createPaymentRunOrder(OrderTypeEnum::Order);
+    $creditNote = createPaymentRunOrder(OrderTypeEnum::Order);
 
     $run = CreatePaymentRun::make([
         'payment_run_type_enum' => 'money_transfer',
@@ -83,7 +45,7 @@ function createNettedPosition(object $testContext): array
 }
 
 test('a transaction is split across the orders of its position', function (): void {
-    [$paymentRun, $position, $invoice, $creditNote] = createNettedPosition($this);
+    [$paymentRun, $position, $invoice, $creditNote] = createNettedPosition();
 
     $transaction = Transaction::factory()->create([
         'amount' => -800,
@@ -104,7 +66,7 @@ test('a transaction matches a money transfer position only on its direction, amo
     ?string $counterpartIban,
     bool $expectedMatch
 ): void {
-    [, $position] = createNettedPosition($this);
+    [, $position] = createNettedPosition();
 
     $transaction = Transaction::factory()->create([
         'amount' => $amount,
@@ -124,13 +86,13 @@ test('a transaction matches a money transfer position only on its direction, amo
 ]);
 
 test('a collective booking is split across all positions of the run', function (): void {
-    [$paymentRun, $position] = createNettedPosition($this);
+    [$paymentRun, $position] = createNettedPosition();
     $second = PaymentRunPosition::factory()->create([
         'payment_run_id' => $paymentRun->getKey(),
         'amount' => '-200.00',
         'iban' => 'DE02120300000000202051',
     ]);
-    $other = createOrderForPaymentRunMatcher($this);
+    $other = createPaymentRunOrder(OrderTypeEnum::Order);
     $second->orders()->attach($other->getKey(), [
         'payment_run_id' => $paymentRun->getKey(),
         'amount' => '-200.00',
@@ -150,7 +112,7 @@ test('a collective booking is split across all positions of the run', function (
 });
 
 test('a position that is already assigned is left alone', function (): void {
-    [$paymentRun, $position] = createNettedPosition($this);
+    [$paymentRun, $position] = createNettedPosition();
 
     $transaction = Transaction::factory()->create([
         'amount' => -800,
@@ -173,9 +135,9 @@ test('a collective booking leaves a netted position untouched', function (): voi
 
     app(AccountingSettings::class)->clearing_ledger_account_id = $clearing->getKey();
 
-    $payable = createOrderForPaymentRunMatcher($this, OrderTypeEnum::Purchase, '-800.00');
-    $invoice = createOrderForPaymentRunMatcher($this, OrderTypeEnum::Purchase, '-500.00');
-    $creditNote = createOrderForPaymentRunMatcher($this, OrderTypeEnum::PurchaseRefund, '500.00');
+    $payable = createPaymentRunOrder(OrderTypeEnum::Purchase, '-800.00');
+    $invoice = createPaymentRunOrder(OrderTypeEnum::Purchase, '-500.00');
+    $creditNote = createPaymentRunOrder(OrderTypeEnum::PurchaseRefund, '500.00');
 
     Contact::query()
         ->whereKey([$payable->contact_id, $invoice->contact_id, $creditNote->contact_id])
@@ -226,7 +188,7 @@ test('a collective booking leaves a netted position untouched', function (): voi
 });
 
 test('an outgoing payment is never booked onto a direct debit run', function (): void {
-    $order = createOrderForPaymentRunMatcher($this);
+    $order = createPaymentRunOrder(OrderTypeEnum::Order);
 
     $run = CreatePaymentRun::make([
         'payment_run_type_enum' => 'direct_debit',
@@ -259,7 +221,7 @@ test('an outgoing payment is never booked onto a direct debit run', function ():
 });
 
 test('a position with a pre-existing unrelated transaction stays matchable', function (): void {
-    [$paymentRun, $position, $invoice] = createNettedPosition($this);
+    [$paymentRun, $position, $invoice] = createNettedPosition();
 
     $olderTransaction = Transaction::factory()->create([
         'amount' => -1,
@@ -284,8 +246,8 @@ test('a position with a pre-existing unrelated transaction stays matchable', fun
 });
 
 test('a transfer refunding an overpaid sales invoice net of a supplier credit note settles both', function (): void {
-    $invoice = createOrderForPaymentRunMatcher($this, OrderTypeEnum::Order, '404.12');
-    $creditNote = createOrderForPaymentRunMatcher($this, OrderTypeEnum::PurchaseRefund, '200.00');
+    $invoice = createPaymentRunOrder(OrderTypeEnum::Order, '404.12');
+    $creditNote = createPaymentRunOrder(OrderTypeEnum::PurchaseRefund, '200.00');
     $creditNote->update(['contact_id' => $invoice->contact_id]);
 
     OrderTransaction::query()->create([
@@ -340,7 +302,7 @@ test('a transfer refunding an overpaid sales invoice net of a supplier credit no
 });
 
 test('a later payment of the same amount to the same recipient is not booked onto a reconciled position', function (): void {
-    [, $position] = createNettedPosition($this);
+    [, $position] = createNettedPosition();
 
     $first = Transaction::factory()->create([
         'amount' => -800,

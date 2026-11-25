@@ -5,54 +5,23 @@ use FluxErp\Actions\PaymentRun\UpdatePaymentRun;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Jobs\Accounting\SendPaymentAdviceJob;
 use FluxErp\Mail\GenericMail;
-use FluxErp\Models\Address;
-use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
-use FluxErp\Models\Currency;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Order;
-use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentRunPosition;
-use FluxErp\Models\PaymentType;
-use FluxErp\Models\PriceList;
 use FluxErp\Settings\AccountingSettings;
 use FluxErp\View\Printing\PaymentRun\PaymentAdvice;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
 use Spatie\Activitylog\Models\Activity;
 
-function createOrderWithContact(object $testContext, string $invoiceNumber, ?string $email): array
+function createOrderWithContact(string $invoiceNumber, ?string $email): Order
 {
-    $bankConnection = BankConnection::factory()->create();
-    $contact = Contact::factory()->create();
-    $address = Address::factory()->create([
-        'contact_id' => $contact->getKey(),
-        'email_primary' => $email,
-        'is_invoice_address' => true,
-    ]);
-    $contact->update(['invoice_address_id' => $address->getKey()]);
+    $order = createPaymentRunOrder(OrderTypeEnum::Purchase, '-100.00', ['invoice_number' => $invoiceNumber]);
+    $order->addressInvoice->update(['email_primary' => $email, 'is_invoice_address' => true]);
+    $order->contact->update(['invoice_address_id' => $order->address_invoice_id]);
 
-    $orderType = OrderType::factory()->create([
-        'order_type_enum' => OrderTypeEnum::Purchase,
-        'is_active' => true,
-        'is_hidden' => false,
-    ]);
-    $paymentType = PaymentType::factory()->hasAttached($testContext->dbTenant, relationship: 'tenants')->create();
-
-    $order = Order::factory()->create([
-        'order_type_id' => $orderType->getKey(),
-        'address_invoice_id' => $address->getKey(),
-        'contact_id' => $contact->getKey(),
-        'payment_type_id' => $paymentType->getKey(),
-        'price_list_id' => PriceList::factory()->create()->getKey(),
-        'tenant_id' => $testContext->dbTenant->getKey(),
-        'currency_id' => Currency::factory()->create()->getKey(),
-        'language_id' => $testContext->defaultLanguage->getKey(),
-        'invoice_number' => $invoiceNumber,
-    ]);
-    $order->update(['total_gross_price' => '-100.00', 'balance' => '-100.00']);
-
-    return [$bankConnection, $order];
+    return $order;
 }
 
 test('moving a run to pending sends no payment advice', function (bool $autoSend, string $paymentRunType, float $amount): void {
@@ -60,10 +29,9 @@ test('moving a run to pending sends no payment advice', function (bool $autoSend
 
     app(AccountingSettings::class)->auto_send_payment_advice = $autoSend;
 
-    [$bankConnection, $order] = createOrderWithContact($this, 'RE-1', 'supplier@example.com');
+    $order = createOrderWithContact('RE-1', 'supplier@example.com');
 
     $run = CreatePaymentRun::make([
-        'bank_connection_id' => $bankConnection->getKey(),
         'payment_run_type_enum' => $paymentRunType,
         'iban' => 'DE89370400440532013000',
         'orders' => [
@@ -88,11 +56,10 @@ test('with the setting on, it sends one advice per position and reports a positi
 
     app(AccountingSettings::class)->auto_send_payment_advice = true;
 
-    [$bankConnection, $orderWithEmail] = createOrderWithContact($this, 'RE-1', 'supplier@example.com');
-    [, $orderWithoutEmail] = createOrderWithContact($this, 'RE-2', null);
+    $orderWithEmail = createOrderWithContact('RE-1', 'supplier@example.com');
+    $orderWithoutEmail = createOrderWithContact('RE-2', null);
 
     $run = CreatePaymentRun::make([
-        'bank_connection_id' => $bankConnection->getKey(),
         'payment_run_type_enum' => 'money_transfer',
         'positions' => [
             [
@@ -139,15 +106,14 @@ test('a position netted to zero is skipped for the payment advice', function ():
     $creditor = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
     app(AccountingSettings::class)->clearing_ledger_account_id = $clearing->getKey();
 
-    [$bankConnection, $invoice] = createOrderWithContact($this, 'RE-1', 'supplier@example.com');
-    [, $creditNote] = createOrderWithContact($this, 'GS-1', 'supplier@example.com');
+    $invoice = createOrderWithContact('RE-1', 'supplier@example.com');
+    $creditNote = createOrderWithContact('GS-1', 'supplier@example.com');
 
     Contact::query()
         ->whereKey([$invoice->contact_id, $creditNote->contact_id])
         ->update(['expense_ledger_account_id' => $creditor->getKey()]);
 
     $run = CreatePaymentRun::make([
-        'bank_connection_id' => $bankConnection->getKey(),
         'payment_run_type_enum' => 'money_transfer',
         'positions' => [
             [
@@ -175,10 +141,9 @@ test('a second transition into pending does not resend the payment advice', func
 
     app(AccountingSettings::class)->auto_send_payment_advice = true;
 
-    [$bankConnection, $order] = createOrderWithContact($this, 'RE-1', 'supplier@example.com');
+    $order = createOrderWithContact('RE-1', 'supplier@example.com');
 
     $run = CreatePaymentRun::make([
-        'bank_connection_id' => $bankConnection->getKey(),
         'payment_run_type_enum' => 'money_transfer',
         'iban' => 'DE89370400440532013000',
         'orders' => [
@@ -194,10 +159,9 @@ test('a second transition into pending does not resend the payment advice', func
 });
 
 test('a failed send leaves no marker and a retry tries again', function (): void {
-    [$bankConnection, $order] = createOrderWithContact($this, 'RE-1', 'supplier@example.com');
+    $order = createOrderWithContact('RE-1', 'supplier@example.com');
 
     $run = CreatePaymentRun::make([
-        'bank_connection_id' => $bankConnection->getKey(),
         'payment_run_type_enum' => 'money_transfer',
         'iban' => 'DE89370400440532013000',
         'orders' => [

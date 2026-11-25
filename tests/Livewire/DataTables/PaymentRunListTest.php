@@ -22,38 +22,6 @@ use FluxErp\States\Order\PaymentState\Open;
 use FluxErp\States\Order\PaymentState\Paid;
 use Livewire\Livewire;
 
-function createOrderForPaymentRunList(
-    ?string $invoiceNumber = null,
-    OrderTypeEnum $orderTypeEnum = OrderTypeEnum::Purchase,
-    ?string $grossPrice = null
-): Order {
-    $contact = Contact::factory()->create();
-    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
-    $orderType = OrderType::factory()->create([
-        'order_type_enum' => $orderTypeEnum,
-        'is_active' => true,
-        'is_hidden' => false,
-    ]);
-
-    $order = Order::factory()->create([
-        'address_invoice_id' => $address->getKey(),
-        'contact_id' => $contact->getKey(),
-        'tenant_id' => Tenant::default()->getKey(),
-        'language_id' => Language::default()->getKey(),
-        'price_list_id' => PriceList::default()->getKey(),
-        'payment_type_id' => PaymentType::default()->getKey(),
-        'currency_id' => Currency::default()->getKey(),
-        'order_type_id' => $orderType->getKey(),
-        'invoice_number' => $invoiceNumber,
-    ]);
-
-    if ($grossPrice !== null) {
-        $order->update(['total_gross_price' => $grossPrice, 'balance' => $grossPrice]);
-    }
-
-    return $order;
-}
-
 test('renders successfully', function (): void {
     Livewire::test(PaymentRunList::class)
         ->assertOk();
@@ -112,22 +80,8 @@ test('removing an order recalculates its position', function (): void {
         'amount' => '-1500.00',
     ]);
 
-    $contact = Contact::factory()->create();
-    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
-    $orderType = OrderType::factory()->create(['is_active' => true, 'is_hidden' => false]);
-    $orderData = [
-        'address_invoice_id' => $address->getKey(),
-        'contact_id' => $contact->getKey(),
-        'tenant_id' => Tenant::default()->getKey(),
-        'language_id' => Language::default()->getKey(),
-        'price_list_id' => PriceList::default()->getKey(),
-        'payment_type_id' => PaymentType::default()->getKey(),
-        'currency_id' => Currency::default()->getKey(),
-        'order_type_id' => $orderType->getKey(),
-    ];
-
-    $first = Order::factory()->create($orderData);
-    $second = Order::factory()->create($orderData);
+    $first = createPaymentRunOrder();
+    $second = createPaymentRunOrder();
 
     $position->orders()->attach([
         $first->getKey() => ['payment_run_id' => $paymentRun->getKey(), 'amount' => '-1000.00'],
@@ -152,19 +106,7 @@ test('removing the last order of a position deletes it', function (): void {
         'amount' => '-1000.00',
     ]);
 
-    $contact = Contact::factory()->create();
-    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
-    $orderType = OrderType::factory()->create(['is_active' => true, 'is_hidden' => false]);
-    $order = Order::factory()->create([
-        'address_invoice_id' => $address->getKey(),
-        'contact_id' => $contact->getKey(),
-        'tenant_id' => Tenant::default()->getKey(),
-        'language_id' => Language::default()->getKey(),
-        'price_list_id' => PriceList::default()->getKey(),
-        'payment_type_id' => PaymentType::default()->getKey(),
-        'currency_id' => Currency::default()->getKey(),
-        'order_type_id' => $orderType->getKey(),
-    ]);
+    $order = createPaymentRunOrder();
 
     $position->orders()->attach($order->getKey(), [
         'payment_run_id' => $paymentRun->getKey(),
@@ -177,57 +119,6 @@ test('removing the last order of a position deletes it', function (): void {
 
     expect(PaymentRunPosition::query()->whereKey($position->getKey())->exists())->toBeFalse()
         ->and(PaymentRun::query()->whereKey($paymentRun->getKey())->exists())->toBeFalse();
-});
-
-test('emptying one position deletes only that position and keeps the run and its other position intact', function (): void {
-    $paymentRun = PaymentRun::query()->create([
-        'payment_run_type_enum' => 'money_transfer',
-        'state' => 'open',
-    ]);
-
-    $emptiedPosition = PaymentRunPosition::factory()->create([
-        'payment_run_id' => $paymentRun->getKey(),
-        'amount' => '-1000.00',
-    ]);
-    $survivingPosition = PaymentRunPosition::factory()->create([
-        'payment_run_id' => $paymentRun->getKey(),
-        'amount' => '-300.00',
-    ]);
-
-    $contact = Contact::factory()->create();
-    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
-    $orderType = OrderType::factory()->create(['is_active' => true, 'is_hidden' => false]);
-    $orderData = [
-        'address_invoice_id' => $address->getKey(),
-        'contact_id' => $contact->getKey(),
-        'tenant_id' => Tenant::default()->getKey(),
-        'language_id' => Language::default()->getKey(),
-        'price_list_id' => PriceList::default()->getKey(),
-        'payment_type_id' => PaymentType::default()->getKey(),
-        'currency_id' => Currency::default()->getKey(),
-        'order_type_id' => $orderType->getKey(),
-    ];
-
-    $orderToRemove = Order::factory()->create($orderData);
-    $survivingOrder = Order::factory()->create($orderData);
-
-    $emptiedPosition->orders()->attach($orderToRemove->getKey(), [
-        'payment_run_id' => $paymentRun->getKey(),
-        'amount' => '-1000.00',
-    ]);
-    $survivingPosition->orders()->attach($survivingOrder->getKey(), [
-        'payment_run_id' => $paymentRun->getKey(),
-        'amount' => '-300.00',
-    ]);
-
-    Livewire::test(PaymentRunList::class)
-        ->call('edit', $paymentRun)
-        ->call('removeOrder', $orderToRemove->getKey());
-
-    expect(PaymentRunPosition::query()->whereKey($emptiedPosition->getKey())->exists())->toBeFalse()
-        ->and(PaymentRun::query()->whereKey($paymentRun->getKey())->exists())->toBeTrue()
-        ->and($survivingPosition->fresh()->amount)->toEqual('-300.00')
-        ->and($survivingPosition->fresh()->orders()->count())->toBe(1);
 });
 
 test('edit is renderless so it does not trigger empty re-render', function (): void {
@@ -319,8 +210,8 @@ test('a position left at zero or pointing against the run is dropped entirely', 
 ): void {
     $droppedOrders = collect($droppedAmounts)
         ->keys()
-        ->map(fn (int $index) => createOrderForPaymentRunList('RE-1' . $index));
-    $untouched = createOrderForPaymentRunList('RE-2');
+        ->map(fn (int $index) => createPaymentRunOrder(attributes: ['invoice_number' => 'RE-1' . $index]));
+    $untouched = createPaymentRunOrder(attributes: ['invoice_number' => 'RE-2']);
 
     $run = CreatePaymentRun::make([
         'payment_run_type_enum' => $paymentRunType,
@@ -361,14 +252,15 @@ test('a position left at zero or pointing against the run is dropped entirely', 
         expect($remainingOrder->fresh()->payment_state)->toBeInstanceOf(Open::class);
     }
 })->with([
+    'emptied' => ['money_transfer', [-1000], '-300.00'],
     'pointing against a money transfer' => ['money_transfer', [-1000, 200], '-300.00'],
     'left at zero' => ['money_transfer', [-1000, -200, 200], '-300.00'],
     'pointing against a direct debit' => ['direct_debit', [1000, -200], '300.00'],
 ]);
 
 test('removing the credit note from a refund position of an overpaid sales invoice raises the transfer again', function (): void {
-    $invoice = createOrderForPaymentRunList('RE-1', OrderTypeEnum::Order, '-404.12');
-    $creditNote = createOrderForPaymentRunList('GS-1', OrderTypeEnum::PurchaseRefund, '200.00');
+    $invoice = createPaymentRunOrder(OrderTypeEnum::Order, '-404.12', ['invoice_number' => 'RE-1']);
+    $creditNote = createPaymentRunOrder(OrderTypeEnum::PurchaseRefund, '200.00', ['invoice_number' => 'GS-1']);
 
     $run = CreatePaymentRun::make([
         'payment_run_type_enum' => 'money_transfer',
@@ -397,8 +289,8 @@ test('removing the credit note from a refund position of an overpaid sales invoi
 });
 
 test('removing an order rebuilds the purpose but keeps the end to end id', function (): void {
-    $first = createOrderForPaymentRunList('RE-1');
-    $second = createOrderForPaymentRunList('RE-2');
+    $first = createPaymentRunOrder(attributes: ['invoice_number' => 'RE-1']);
+    $second = createPaymentRunOrder(attributes: ['invoice_number' => 'RE-2']);
 
     $run = CreatePaymentRun::make([
         'payment_run_type_enum' => 'money_transfer',
@@ -429,8 +321,8 @@ test('removing an order rebuilds the purpose but keeps the end to end id', funct
 });
 
 test('the run total matches the sum of its positions after creation', function (): void {
-    $first = createOrderForPaymentRunList('RE-1');
-    $second = createOrderForPaymentRunList('RE-2');
+    $first = createPaymentRunOrder(attributes: ['invoice_number' => 'RE-1']);
+    $second = createPaymentRunOrder(attributes: ['invoice_number' => 'RE-2']);
 
     $run = CreatePaymentRun::make([
         'payment_run_type_enum' => 'money_transfer',
@@ -460,8 +352,8 @@ test('an already offset position cannot be changed from the execute dialog', fun
 
     app(AccountingSettings::class)->clearing_ledger_account_id = $clearing->getKey();
 
-    $invoice = createOrderForPaymentRunList('RE-1', OrderTypeEnum::Purchase, '-500.00');
-    $creditNote = createOrderForPaymentRunList('GS-1', OrderTypeEnum::PurchaseRefund, '500.00');
+    $invoice = createPaymentRunOrder(OrderTypeEnum::Purchase, '-500.00', ['invoice_number' => 'RE-1']);
+    $creditNote = createPaymentRunOrder(OrderTypeEnum::PurchaseRefund, '500.00', ['invoice_number' => 'GS-1']);
 
     Contact::query()
         ->whereKey([$invoice->contact_id, $creditNote->contact_id])
@@ -509,7 +401,7 @@ test('opening the payment advice modal for a position queues the mail dialog', f
     ]);
     $contact->update(['invoice_address_id' => $address->getKey()]);
 
-    $order = createOrderForPaymentRunList('RE-1');
+    $order = createPaymentRunOrder(attributes: ['invoice_number' => 'RE-1']);
     Order::query()->whereKey($order->getKey())->update([
         'contact_id' => $contact->getKey(),
         'address_invoice_id' => $address->getKey(),

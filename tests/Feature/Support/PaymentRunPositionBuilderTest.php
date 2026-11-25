@@ -2,14 +2,8 @@
 
 use FluxErp\Actions\PaymentRun\CreatePaymentRun;
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Models\Address;
-use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
-use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
-use FluxErp\Models\OrderType;
-use FluxErp\Models\PaymentType;
-use FluxErp\Models\PriceList;
 use FluxErp\Support\PaymentRunPositionBuilder;
 
 test('a position with many documents never contains a partial document number and stays within 140 characters', function (): void {
@@ -66,29 +60,12 @@ test('a position with few documents produces the plain list with no tail', funct
 });
 
 test('the preview purpose lists the same documents as the stored one even though the real reference is shorter than the budget', function (): void {
-    $contact = Contact::factory()->create();
-    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
-    $orderType = OrderType::factory()->create([
-        'order_type_enum' => OrderTypeEnum::Purchase,
-        'is_active' => true,
-        'is_hidden' => false,
-    ]);
-    $paymentType = PaymentType::factory()->hasAttached($this->dbTenant, relationship: 'tenants')->create();
-    $bankConnection = BankConnection::factory()->create();
+    $contactId = Contact::factory()->create()->getKey();
 
-    $orders = collect(range(1, 30))->map(fn (int $i) => Order::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-        'contact_id' => $contact->getKey(),
-        'address_invoice_id' => $address->getKey(),
-        'order_type_id' => $orderType->getKey(),
-        'payment_type_id' => $paymentType->getKey(),
-        'price_list_id' => PriceList::factory()->create()->getKey(),
-        'currency_id' => Currency::factory()->create()->getKey(),
-        'language_id' => $this->defaultLanguage->getKey(),
+    $orders = collect(range(1, 30))->map(fn (int $i) => createPaymentRunOrder(OrderTypeEnum::Purchase, '-100.00', [
+        'contact_id' => $contactId,
         'iban' => 'DE89370400440532013000',
         'invoice_number' => sprintf('A%02d', $i),
-        'balance' => '-100.00',
-        'total_gross_price' => '100.00',
     ]));
 
     $builder = new PaymentRunPositionBuilder();
@@ -96,11 +73,10 @@ test('the preview purpose lists the same documents as the stored one even though
     [$previewList] = explode(' +', $groups[0]['purpose'], 2);
 
     $run = CreatePaymentRun::make([
-        'bank_connection_id' => $bankConnection->getKey(),
         'payment_run_type_enum' => 'money_transfer',
         'positions' => [
             [
-                'contact_id' => $contact->getKey(),
+                'contact_id' => $contactId,
                 'iban' => 'DE89370400440532013000',
                 'orders' => $orders
                     ->map(fn (Order $order) => ['order_id' => $order->getKey(), 'amount' => -100.00])
@@ -118,3 +94,59 @@ test('the preview purpose lists the same documents as the stored one even though
 
     expect($previewList)->toBe($finalList);
 });
+
+test('recap clamps every row to its own balance and caps credit notes against the payable', function (
+    array $rows,
+    array $expectedAmounts,
+    array $expectedCappedFrom
+): void {
+    $recapped = app(PaymentRunPositionBuilder::class)->recap(array_map(
+        fn (array $row) => [
+            'amount' => $row[0],
+            'max_amount' => $row[1],
+            'is_credit_note' => $row[2],
+            'multiplier' => $row[2] ? 1 : -1,
+            'capped_from' => null,
+        ],
+        $rows
+    ));
+
+    expect(array_column($recapped, 'amount'))->toBe($expectedAmounts)
+        ->and(array_column($recapped, 'capped_from'))->toBe($expectedCappedFrom);
+})->with([
+    'a smaller credit note is deducted in full' => [
+        [['-1000.00', '1000.00', false], ['200.00', '200.00', true]],
+        ['-1000.00', '200.00'],
+        [null, null],
+    ],
+    'a credit note larger than the invoice is capped' => [
+        [['-300.00', '300.00', false], ['500.00', '500.00', true]],
+        ['-300.00', '300.00'],
+        [null, '500.00'],
+    ],
+    'a second credit note beyond the payable drops to zero' => [
+        [['-300.00', '300.00', false], ['300.00', '300.00', true], ['150.00', '150.00', true]],
+        ['-300.00', '300.00', '0.00'],
+        [null, null, '150.00'],
+    ],
+    'an invoice above its own balance is clamped to that balance' => [
+        [['9999.00', '500.00', false]],
+        ['-500.00'],
+        [null],
+    ],
+    'a credit note above its own balance is clamped to that balance, not the payable sum' => [
+        [['-1000.00', '1000.00', false], ['-500.00', '500.00', false], ['5000.00', '200.00', true]],
+        ['-1000.00', '-500.00', '200.00'],
+        [null, null, null],
+    ],
+    'a positive value typed into a payable row stays negative' => [
+        [['50.00', '500.00', false]],
+        ['-50.00'],
+        [null],
+    ],
+    'a negative value typed into a credit note row stays positive' => [
+        [['-1000.00', '1000.00', false], ['-200.00', '500.00', true]],
+        ['-1000.00', '200.00'],
+        [null, null],
+    ],
+]);
