@@ -192,6 +192,7 @@ class PaymentRunPreview extends Component
                 'account_holder' => data_get($group, 'account_holder'),
                 'type' => data_get($group, 'type', '__NO_TYPE__'),
                 'orders' => collect(data_get($group, 'orders', []))
+                    ->reject(fn (array $row) => bccomp(bcround(data_get($row, 'amount'), 2), '0', 2) === 0)
                     ->map(fn (array $row) => [
                         'order_id' => data_get($row, 'id'),
                         'amount' => bcmul(
@@ -201,7 +202,9 @@ class PaymentRunPreview extends Component
                     ])
                     ->values()
                     ->toArray(),
-            ]);
+            ])
+            ->filter(fn (array $position) => $position['orders'])
+            ->values();
 
         $groupedPositions = $paymentRunTypeEnum === PaymentRunTypeEnum::DirectDebit
             ? $positions->groupBy('type')->toArray()
