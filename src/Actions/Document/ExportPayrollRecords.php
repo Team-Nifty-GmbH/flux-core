@@ -58,7 +58,7 @@ class ExportPayrollRecords extends FluxAction
                     $document->documentType->name,
                     $this->personnelNumber($document->model),
                 ])
-                    ->map(fn (mixed $segment): string => str_replace(['/', '\\'], '-', (string) $segment))
+                    ->map(fn (mixed $segment): string => preg_replace(['#[/\\\\]#', '/^\.{1,2}$/'], '-', (string) $segment))
                     ->implode('/') . '/'
             );
         });

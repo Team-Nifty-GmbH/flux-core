@@ -180,3 +180,13 @@ test('export leaves out payroll records of employees in tenants the user cannot 
 
     expect(zipFileNames($zip))->toBe(['2025/Employment contract/P-17/contract.pdf', 'index.csv']);
 });
+
+test('export keeps dot segments out of the zip paths', function (): void {
+    $this->employee->update(['employee_number' => '..']);
+    $this->contract->update(['name' => '.']);
+    payrollRecord($this->employee, $this->contract);
+
+    $zip = exportPayrollRecordsZip(['from' => '2025-01-01', 'to' => '2025-12-31']);
+
+    expect(zipFileNames($zip))->toBe(['2025/-/-/contract.pdf', 'index.csv']);
+});
