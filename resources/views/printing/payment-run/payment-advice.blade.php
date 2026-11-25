@@ -18,30 +18,26 @@
                     line-height: 1;
                 "
             >
-                <tr>
-                    <td style="padding: 0; text-align: left; font-weight: 600">
-                        {{ __('Iban') }}
-                    </td>
-                    <td style="padding: 0; text-align: right">
-                        {{ $model->iban }}
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 0; text-align: left; font-weight: 600">
-                        {{ __('Reference') }}
-                    </td>
-                    <td style="padding: 0; text-align: right">
-                        {{ $model->end_to_end_id }}
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 0; text-align: left; font-weight: 600">
-                        {{ __('Execution Date') }}
-                    </td>
-                    <td style="padding: 0; text-align: right">
-                        {{ ($paymentRun->instructed_execution_date ?: now())->locale(app()->getLocale())->isoFormat('L') }}
-                    </td>
-                </tr>
+                @foreach ([
+                    __('Iban') => $model->iban,
+                    __('Reference') => $model->end_to_end_id,
+                    __('Execution Date') => ($paymentRun->instructed_execution_date ?: now())->locale(app()->getLocale())->isoFormat('L'),
+                ] as $label => $value)
+                    <tr>
+                        <td
+                            style="
+                                padding: 0;
+                                text-align: left;
+                                font-weight: 600;
+                            "
+                        >
+                            {{ $label }}
+                        </td>
+                        <td style="padding: 0; text-align: right">
+                            {{ $value }}
+                        </td>
+                    </tr>
+                @endforeach
             </tbody>
         </table>
     </x-slot:right-block>
@@ -57,46 +53,18 @@
     >
         <thead>
             <tr>
-                <th
-                    style="
-                        padding: 8px 32px 8px 0;
-                        text-align: left;
-                        font-weight: 400;
-                        border-bottom: 2px solid black;
-                    "
-                >
-                    {{ __('Number') }}
-                </th>
-                <th
-                    style="
-                        padding: 8px 32px 8px 0;
-                        text-align: left;
-                        font-weight: 400;
-                        border-bottom: 2px solid black;
-                    "
-                >
-                    {{ __('Date') }}
-                </th>
-                <th
-                    style="
-                        padding: 8px 32px 8px 0;
-                        text-align: right;
-                        font-weight: 400;
-                        border-bottom: 2px solid black;
-                    "
-                >
-                    {{ __('Gross Amount') }}
-                </th>
-                <th
-                    style="
-                        padding: 8px 0;
-                        text-align: right;
-                        font-weight: 400;
-                        border-bottom: 2px solid black;
-                    "
-                >
-                    {{ __('Applied Amount') }}
-                </th>
+                @foreach (['Number' => 'left', 'Date' => 'left', 'Gross Amount' => 'right', 'Applied Amount' => 'right'] as $label => $align)
+                    <th
+                        style="
+                            padding: {{ $loop->last ? '8px 0' : '8px 32px 8px 0' }};
+                            text-align: {{ $align }};
+                            font-weight: 400;
+                            border-bottom: 2px solid black;
+                        "
+                    >
+                        {{ __($label) }}
+                    </th>
+                @endforeach
             </tr>
         </thead>
         <tbody>
