@@ -36,6 +36,11 @@ class RebateAgreement extends FluxModel
         return $this->belongsTo(Contact::class);
     }
 
+    public function orderType(): BelongsTo
+    {
+        return $this->belongsTo(OrderType::class);
+    }
+
     public function rebateOrder(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'rebate_order_id');

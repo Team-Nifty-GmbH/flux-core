@@ -46,19 +46,13 @@ test('editing a new agreement prefills the contact', function (): void {
         ->assertSet('rebateAgreementForm.contact_id', $this->contact->getKey());
 });
 
-test('tiers can be added and removed through the component', function (): void {
-    Livewire::test(RebateAgreements::class, ['contactId' => $this->contact->getKey()])
-        ->call('edit')
-        ->call('addTier')
-        ->call('addTier')
-        ->assertCount('rebateAgreementForm.tiers', 2)
-        ->call('removeTier', 0)
-        ->assertCount('rebateAgreementForm.tiers', 1);
-});
-
 test('can create an agreement with tiers', function (): void {
     Livewire::test(RebateAgreements::class, ['contactId' => $this->contact->getKey()])
         ->call('edit')
+        ->set('rebateAgreementForm.order_type_id', OrderType::factory()->create([
+            'order_type_enum' => OrderTypeEnum::Refund,
+            'is_active' => true,
+        ])->getKey())
         ->set('rebateAgreementForm.name', 'Annual Bonus')
         ->set('rebateAgreementForm.period_start', '2025-01-01')
         ->set('rebateAgreementForm.period_end', '2025-12-31')
@@ -85,6 +79,41 @@ test('save fails without tiers', function (): void {
         ->call('save')
         ->assertOk()
         ->assertReturned(false);
+});
+
+test('saving keeps tiers changed elsewhere that the form did not touch', function (): void {
+    $agreement = RebateAgreement::factory()->create([
+        'contact_id' => $this->contact->getKey(),
+        'tiers' => [['from_volume' => 50000, 'percentage' => 0.02]],
+    ]);
+
+    $component = Livewire::test(RebateAgreements::class, ['contactId' => $this->contact->getKey()])
+        ->call('edit', $agreement->getKey())
+        ->assertSet('rebateAgreementForm.tiers.0.percentage', '2.00');
+
+    $agreement->update(['tiers' => [['from_volume' => 80000, 'percentage' => 0.04]]]);
+
+    $component->set('rebateAgreementForm.name', 'Renamed')
+        ->call('save')
+        ->assertReturned(true);
+
+    $agreement->refresh();
+
+    expect($agreement->name)->toBe('Renamed')
+        ->and(data_get($agreement->tiers, '0.from_volume'))->toEqual(80000)
+        ->and(bcround(data_get($agreement->tiers, '0.percentage'), 2))->toBe('0.04');
+});
+
+test('calculating a settled agreement opens no preview', function (): void {
+    $agreement = RebateAgreement::factory()->create([
+        'contact_id' => $this->contact->getKey(),
+        'settled_at' => now(),
+    ]);
+
+    Livewire::test(RebateAgreements::class, ['contactId' => $this->contact->getKey()])
+        ->call('calculate', $agreement->getKey())
+        ->assertSet('calculation', null)
+        ->assertToastNotification(type: 'error');
 });
 
 test('can delete an unsettled agreement', function (): void {
@@ -139,7 +168,6 @@ test('calculating shows the volume and settling redirects to the created refund 
         'address_delivery_id' => $address->getKey(),
         'invoice_number' => 'RE-LW-1',
         'invoice_date' => '2025-06-01',
-        'shipping_costs_net_price' => 0,
     ]);
     $order->orderPositions()->create([
         'tenant_id' => $this->dbTenant->getKey(),
@@ -158,6 +186,7 @@ test('calculating shows the volume and settling redirects to the created refund 
 
     $agreement = RebateAgreement::factory()->create([
         'contact_id' => $this->contact->getKey(),
+        'order_type_id' => $refundOrderType->getKey(),
         'period_start' => '2025-01-01',
         'period_end' => '2025-12-31',
         'tiers' => [['from_volume' => 100000, 'percentage' => 0.03]],
@@ -168,7 +197,6 @@ test('calculating shows the volume and settling redirects to the created refund 
         ->assertHasNoErrors()
         ->assertSet('calculation.volume', '120000.00')
         ->assertSet('calculation.total_net_price', '3600.00')
-        ->assertSet('orderTypeId', $refundOrderType->getKey())
         ->call('settle');
 
     $agreement->refresh();

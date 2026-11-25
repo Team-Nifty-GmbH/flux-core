@@ -20,9 +20,9 @@ class CreateRebateAgreement extends FluxAction
 
     public function performAction(): RebateAgreement
     {
-        $rebateAgreement = app(RebateAgreement::class, ['attributes' => $this->data]);
+        $rebateAgreement = app(RebateAgreement::class, ['attributes' => $this->getData()]);
         $rebateAgreement->save();
 
-        return $rebateAgreement->fresh();
+        return $rebateAgreement->refresh();
     }
 }

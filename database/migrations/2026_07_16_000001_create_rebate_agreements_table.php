@@ -10,10 +10,12 @@ return new class() extends Migration
     {
         Schema::create('rebate_agreements', function (Blueprint $table): void {
             $table->id();
-            $table->char('uuid', 36);
+            $table->char('uuid', 36)->unique();
             $table->foreignId('contact_id')
                 ->constrained('contacts')
                 ->cascadeOnDelete();
+            $table->foreignId('order_type_id')
+                ->constrained('order_types');
             $table->foreignId('rebate_order_id')
                 ->nullable()
                 ->constrained('orders')

@@ -23,10 +23,10 @@ class UpdateRebateAgreement extends FluxAction
     public function performAction(): Model
     {
         $rebateAgreement = resolve_static(RebateAgreement::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
 
-        $rebateAgreement->fill($this->data);
+        $rebateAgreement->fill($this->getData());
         $rebateAgreement->save();
 
         return $rebateAgreement->withoutRelations()->fresh();
@@ -38,12 +38,13 @@ class UpdateRebateAgreement extends FluxAction
 
         $rebateAgreement = resolve_static(RebateAgreement::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first();
+            ->first(['id', 'settled_at']);
 
         if ($rebateAgreement->settled_at) {
             throw ValidationException::withMessages([
-                'id' => [__('A settled rebate agreement can no longer be changed.')],
-            ])->errorBag('updateRebateAgreement');
+                'id' => ['A settled rebate agreement can no longer be changed.'],
+            ])
+                ->errorBag('updateRebateAgreement');
         }
     }
 }

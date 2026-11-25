@@ -22,7 +22,7 @@ class DeleteRebateAgreement extends FluxAction
     public function performAction(): ?bool
     {
         return resolve_static(RebateAgreement::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first()
             ->delete();
     }
@@ -33,12 +33,13 @@ class DeleteRebateAgreement extends FluxAction
 
         $rebateAgreement = resolve_static(RebateAgreement::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first();
+            ->first(['id', 'settled_at']);
 
         if ($rebateAgreement->settled_at) {
             throw ValidationException::withMessages([
-                'id' => [__('A settled rebate agreement can no longer be deleted.')],
-            ])->errorBag('deleteRebateAgreement');
+                'id' => ['A settled rebate agreement can no longer be deleted.'],
+            ])
+                ->errorBag('deleteRebateAgreement');
         }
     }
 }

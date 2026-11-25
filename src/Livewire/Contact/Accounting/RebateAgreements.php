@@ -2,14 +2,11 @@
 
 namespace FluxErp\Livewire\Contact\Accounting;
 
-use FluxErp\Actions\RebateAgreement\CalculateRebateAgreement;
 use FluxErp\Actions\RebateAgreement\DeleteRebateAgreement;
 use FluxErp\Actions\RebateAgreement\SettleRebateAgreement;
 use FluxErp\Actions\RebateAgreement\UpdateRebateAgreement;
-use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\DataTables\RebateAgreementList;
 use FluxErp\Livewire\Forms\RebateAgreementForm;
-use FluxErp\Models\OrderType;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,11 +26,8 @@ class RebateAgreements extends RebateAgreementList
     #[Locked]
     public ?array $calculation = null;
 
-    #[Modelable]
+    #[Locked, Modelable]
     public int $contactId;
-
-    #[Locked]
-    public ?int $orderTypeId = null;
 
     #[DataTableForm]
     public RebateAgreementForm $rebateAgreementForm;
@@ -44,7 +38,7 @@ class RebateAgreements extends RebateAgreementList
     {
         return [
             DataTableButton::make()
-                ->text(__('Calculate Rebate'))
+                ->text(__('Settle'))
                 ->icon('calculator')
                 ->color('indigo')
                 ->when(fn () => resolve_static(SettleRebateAgreement::class, 'canPerformAction', [false]))
@@ -74,30 +68,19 @@ class RebateAgreements extends RebateAgreementList
         ];
     }
 
-    public function addTier(): void
-    {
-        $this->rebateAgreementForm->addTier();
-    }
-
     public function calculate(string|int $id): void
     {
+        $action = SettleRebateAgreement::make(['id' => $id]);
+
         try {
-            $calculation = CalculateRebateAgreement::make(['id' => $id])
-                ->checkPermission()
-                ->validate()
-                ->execute();
+            $action->checkPermission()->validate();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
             return;
         }
 
-        $this->calculation = $calculation->toArray();
-        $this->orderTypeId = resolve_static(OrderType::class, 'query')
-            ->where('order_type_enum', OrderTypeEnum::Refund)
-            ->where('is_active', true)
-            ->orderBy('id')
-            ->value('id');
+        $this->calculation = $action->getCalculation();
 
         $this->js(<<<'JS'
             $tsui.open.modal('settle-rebate-agreement-modal');
@@ -111,19 +94,11 @@ class RebateAgreements extends RebateAgreementList
         $this->rebateAgreementForm->contact_id = $this->contactId;
     }
 
-    public function removeTier(int $index): void
-    {
-        $this->rebateAgreementForm->removeTier($index);
-    }
-
     #[Renderless]
     public function settle(): void
     {
         try {
-            $order = SettleRebateAgreement::make([
-                'id' => data_get($this->calculation, 'rebate_agreement_id'),
-                'order_type_id' => $this->orderTypeId,
-            ])
+            $order = SettleRebateAgreement::make(['id' => data_get($this->calculation, 'rebate_agreement_id')])
                 ->checkPermission()
                 ->validate()
                 ->execute();

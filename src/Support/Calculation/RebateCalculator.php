@@ -1,47 +1,24 @@
 <?php
 
-namespace FluxErp\Actions\RebateAgreement;
+namespace FluxErp\Support\Calculation;
 
-use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\RebateAgreement;
-use FluxErp\Rulesets\RebateAgreement\CalculateRebateAgreementRuleset;
 use FluxErp\States\Order\Canceled;
+use FluxErp\Traits\Makeable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Fluent;
-use Illuminate\Validation\ValidationException;
 
-class CalculateRebateAgreement extends FluxAction
+class RebateCalculator
 {
-    public static function models(): array
+    use Makeable;
+
+    public function __construct(protected RebateAgreement $rebateAgreement) {}
+
+    public function calculate(): array
     {
-        return [RebateAgreement::class];
-    }
-
-    protected function getRulesets(): string|array
-    {
-        return CalculateRebateAgreementRuleset::class;
-    }
-
-    public function performAction(): Fluent
-    {
-        $rebateAgreement = resolve_static(RebateAgreement::class, 'query')
-            ->whereKey($this->getData('id'))
-            ->first();
-
-        $currencyIds = $this->getOrdersQuery($rebateAgreement)
-            ->distinct()
-            ->pluck('currency_id');
-
-        if ($currencyIds->count() > 1) {
-            throw ValidationException::withMessages([
-                'id' => [__('The orders within the period use different currencies.')],
-            ])->errorBag('calculateRebateAgreement');
-        }
-
-        $volumeByVatRate = $this->getVolumeByVatRate($rebateAgreement);
+        $volumeByVatRate = $this->getVolumeByVatRate();
         $volume = bcround(
             $volumeByVatRate->reduce(
                 fn (string $carry, OrderPosition $item) => bcadd($carry, $item->total_net_price ?? 0, 9),
@@ -50,49 +27,54 @@ class CalculateRebateAgreement extends FluxAction
             2
         );
 
-        $percentage = $rebateAgreement->resolvePercentage($volume);
+        $percentage = $this->rebateAgreement->resolvePercentage($volume);
 
         if (is_null($percentage)) {
-            return new Fluent([
-                'rebate_agreement_id' => $rebateAgreement->getKey(),
-                'currency_id' => $currencyIds->first(),
+            return [
+                'rebate_agreement_id' => $this->rebateAgreement->getKey(),
                 'volume' => $volume,
                 'percentage' => null,
                 'total_net_price' => '0.00',
                 'positions' => [],
-            ]);
+            ];
         }
 
         $totalNetPrice = bcround(bcmul($volume, $percentage, 9), 2);
 
-        return new Fluent([
-            'rebate_agreement_id' => $rebateAgreement->getKey(),
-            'currency_id' => $currencyIds->first(),
+        return [
+            'rebate_agreement_id' => $this->rebateAgreement->getKey(),
             'volume' => $volume,
             'percentage' => $percentage,
             'total_net_price' => $totalNetPrice,
             'positions' => $this->splitByVatRate($volumeByVatRate, $totalNetPrice),
-        ]);
+        ];
     }
 
-    protected function getOrdersQuery(RebateAgreement $rebateAgreement): Builder
+    public function getCurrencyIds(): Collection
+    {
+        return $this->getOrdersQuery()
+            ->distinct()
+            ->pluck('currency_id');
+    }
+
+    protected function getOrdersQuery(): Builder
     {
         return resolve_static(Order::class, 'query')
             ->revenue()
-            ->where('contact_id', $rebateAgreement->contact_id)
+            ->where('contact_id', $this->rebateAgreement->contact_id)
             ->whereNotNull('invoice_number')
             ->whereBetween(
                 'invoice_date',
-                [$rebateAgreement->period_start, $rebateAgreement->period_end]
+                [$this->rebateAgreement->period_start, $this->rebateAgreement->period_end]
             )
             ->whereNotState('state', Canceled::class)
             ->whereDoesntHave('rebateAgreement');
     }
 
-    protected function getVolumeByVatRate(RebateAgreement $rebateAgreement): Collection
+    protected function getVolumeByVatRate(): Collection
     {
         return resolve_static(OrderPosition::class, 'query')
-            ->whereIn('order_id', $this->getOrdersQuery($rebateAgreement)->select('orders.id'))
+            ->whereIn('order_id', $this->getOrdersQuery()->select('orders.id'))
             ->where('is_alternative', false)
             ->where(
                 fn (Builder $query) => $query

@@ -2,6 +2,8 @@
 
 namespace FluxErp\Database\Factories;
 
+use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Models\OrderType;
 use FluxErp\Models\RebateAgreement;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -12,6 +14,10 @@ class RebateAgreementFactory extends Factory
     public function definition(): array
     {
         return [
+            'order_type_id' => OrderType::factory()->state([
+                'order_type_enum' => OrderTypeEnum::Refund,
+                'is_active' => true,
+            ]),
             'name' => fake()->words(2, true),
             'period_start' => now()->subYear()->startOfYear(),
             'period_end' => now()->subYear()->endOfYear(),

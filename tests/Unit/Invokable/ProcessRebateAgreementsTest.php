@@ -35,7 +35,6 @@ function rebateAgreementWithVolume(string $periodEnd, float $net = 120000): Reba
         'address_delivery_id' => $address->getKey(),
         'invoice_number' => 'RE-' . fake()->unique()->numberBetween(1, 999999),
         'invoice_date' => '2025-06-01',
-        'shipping_costs_net_price' => 0,
     ]);
 
     $order->orderPositions()->create([
@@ -56,6 +55,7 @@ function rebateAgreementWithVolume(string $periodEnd, float $net = 120000): Reba
 
     return RebateAgreement::factory()->create([
         'contact_id' => $contact->getKey(),
+        'order_type_id' => test()->refundOrderType->getKey(),
         'period_start' => '2025-01-01',
         'period_end' => $periodEnd,
         'tiers' => [['from_volume' => 50000, 'percentage' => 0.02]],
@@ -80,7 +80,7 @@ beforeEach(function (): void {
 test('settles a due agreement', function (): void {
     $agreement = rebateAgreementWithVolume('2025-12-31');
 
-    expect((new ProcessRebateAgreements())(orderTypeId: $this->refundOrderType->getKey()))->toBeTrue();
+    expect((new ProcessRebateAgreements())())->toBeTrue();
 
     expect($agreement->refresh()->settled_at)->not->toBeNull()
         ->and($agreement->rebate_order_id)->not->toBeNull();
@@ -89,7 +89,7 @@ test('settles a due agreement', function (): void {
 test('does not settle an agreement whose period has not ended', function (): void {
     $agreement = rebateAgreementWithVolume(now()->addMonth()->toDateString());
 
-    (new ProcessRebateAgreements())(orderTypeId: $this->refundOrderType->getKey());
+    (new ProcessRebateAgreements())();
 
     expect($agreement->refresh()->settled_at)->toBeNull();
 });
@@ -98,7 +98,7 @@ test('does not settle an inactive agreement', function (): void {
     $agreement = rebateAgreementWithVolume('2025-12-31');
     $agreement->update(['is_active' => false]);
 
-    (new ProcessRebateAgreements())(orderTypeId: $this->refundOrderType->getKey());
+    (new ProcessRebateAgreements())();
 
     expect($agreement->refresh()->settled_at)->toBeNull();
 });
@@ -106,10 +106,10 @@ test('does not settle an inactive agreement', function (): void {
 test('running twice settles an agreement only once', function (): void {
     $agreement = rebateAgreementWithVolume('2025-12-31');
 
-    (new ProcessRebateAgreements())(orderTypeId: $this->refundOrderType->getKey());
+    (new ProcessRebateAgreements())();
     $rebateOrderId = $agreement->refresh()->rebate_order_id;
 
-    (new ProcessRebateAgreements())(orderTypeId: $this->refundOrderType->getKey());
+    (new ProcessRebateAgreements())();
 
     expect($agreement->refresh()->rebate_order_id)->toBe($rebateOrderId)
         ->and(Order::query()->whereKeyNot($rebateOrderId)->where('order_type_id', $this->refundOrderType->getKey())
@@ -122,7 +122,7 @@ test('a failing agreement does not stop the remaining ones', function (): void {
     $failing->update(['tiers' => []]);
     $succeeding = rebateAgreementWithVolume('2025-12-31');
 
-    expect((new ProcessRebateAgreements())(orderTypeId: $this->refundOrderType->getKey()))->toBeTrue();
+    expect((new ProcessRebateAgreements())())->toBeTrue();
 
     expect($succeeding->refresh()->settled_at)->not->toBeNull();
 });

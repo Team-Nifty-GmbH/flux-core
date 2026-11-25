@@ -3,12 +3,22 @@
 use FluxErp\Actions\RebateAgreement\CreateRebateAgreement;
 use FluxErp\Actions\RebateAgreement\DeleteRebateAgreement;
 use FluxErp\Actions\RebateAgreement\UpdateRebateAgreement;
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Contact;
+use FluxErp\Models\OrderType;
 use FluxErp\Models\RebateAgreement;
+
+function refundOrderTypeId(): int
+{
+    return OrderType::factory()
+        ->create(['order_type_enum' => OrderTypeEnum::Refund, 'is_active' => true])
+        ->getKey();
+}
 
 test('create rebate agreement', function (): void {
     $rebateAgreement = CreateRebateAgreement::make([
         'contact_id' => Contact::factory()->create()->getKey(),
+        'order_type_id' => refundOrderTypeId(),
         'name' => 'Annual Bonus',
         'period_start' => '2025-01-01',
         'period_end' => '2025-12-31',
@@ -23,7 +33,10 @@ test('create rebate agreement', function (): void {
 });
 
 test('create rebate agreement requires a contact, a period and tiers', function (): void {
-    CreateRebateAgreement::assertValidationErrors([], ['contact_id', 'period_start', 'period_end', 'tiers']);
+    CreateRebateAgreement::assertValidationErrors(
+        [],
+        ['contact_id', 'order_type_id', 'period_start', 'period_end', 'tiers']
+    );
 });
 
 test('the period must end after it starts', function (): void {
@@ -98,4 +111,34 @@ test('delete rebate agreement', function (): void {
     expect(DeleteRebateAgreement::make(['id' => $rebateAgreement->getKey()])->validate()->execute())->toBeTrue();
 
     $this->assertSoftDeleted('rebate_agreements', ['id' => $rebateAgreement->getKey()]);
+});
+
+test('the order type must be an active refund order type', function (OrderTypeEnum $orderTypeEnum, bool $isActive): void {
+    CreateRebateAgreement::assertValidationErrors([
+        'contact_id' => Contact::factory()->create()->getKey(),
+        'order_type_id' => OrderType::factory()
+            ->create(['order_type_enum' => $orderTypeEnum, 'is_active' => $isActive])
+            ->getKey(),
+        'period_start' => '2025-01-01',
+        'period_end' => '2025-12-31',
+        'tiers' => [['from_volume' => 50000, 'percentage' => 0.02]],
+    ], 'order_type_id');
+})->with([
+    'an order' => [OrderTypeEnum::Order, true],
+    'an inactive refund' => [OrderTypeEnum::Refund, false],
+]);
+
+test('an update cannot move the period end before its start', function (): void {
+    $rebateAgreement = RebateAgreement::factory()->create([
+        'contact_id' => Contact::factory()->create()->getKey(),
+        'period_start' => '2025-06-01',
+        'period_end' => '2025-12-31',
+    ]);
+
+    UpdateRebateAgreement::assertValidationErrors([
+        'id' => $rebateAgreement->getKey(),
+        'period_end' => '2025-01-01',
+    ], 'period_start');
+
+    expect($rebateAgreement->refresh()->period_end->toDateString())->toBe('2025-12-31');
 });

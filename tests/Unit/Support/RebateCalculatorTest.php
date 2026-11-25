@@ -1,6 +1,5 @@
 <?php
 
-use FluxErp\Actions\RebateAgreement\CalculateRebateAgreement;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -13,8 +12,8 @@ use FluxErp\Models\Product;
 use FluxErp\Models\RebateAgreement;
 use FluxErp\Models\VatRate;
 use FluxErp\States\Order\Canceled;
+use FluxErp\Support\Calculation\RebateCalculator;
 use Illuminate\Support\Arr;
-use Illuminate\Validation\ValidationException;
 
 function rebateOrder(array $positions, array $attributes = []): Order
 {
@@ -32,7 +31,6 @@ function rebateOrder(array $positions, array $attributes = []): Order
         'address_delivery_id' => test()->address->getKey(),
         'invoice_number' => 'RE-' . fake()->unique()->numberBetween(1, 999999),
         'invoice_date' => '2025-06-01',
-        'shipping_costs_net_price' => 0,
     ], Arr::except($attributes, ['order_type'])));
 
     // PriceCalculation signs the totals with the order type multiplier, which creating the
@@ -92,9 +90,7 @@ beforeEach(function (): void {
 test('calculates the volume and the reached tier', function (): void {
     rebateOrder([['net' => 120000, 'rate' => 0.19, 'vat_rate_id' => $this->vatFull->getKey()]]);
 
-    $result = CalculateRebateAgreement::make(['id' => $this->agreement->getKey()])
-        ->validate()
-        ->execute();
+    $result = RebateCalculator::make($this->agreement)->calculate();
 
     expect($result)
         ->volume->toBe('120000.00')
@@ -108,20 +104,18 @@ test('splits the rebate across the vat rates by their share of the volume', func
         ['net' => 20000, 'rate' => 0.07, 'vat_rate_id' => $this->vatReduced->getKey()],
     ]);
 
-    $result = CalculateRebateAgreement::make(['id' => $this->agreement->getKey()])
-        ->validate()
-        ->execute();
+    $result = RebateCalculator::make($this->agreement)->calculate();
 
-    expect($result->volume)->toBe('120000.00')
-        ->and($result->total_net_price)->toBe('3600.00');
+    expect($result['volume'])->toBe('120000.00')
+        ->and($result['total_net_price'])->toBe('3600.00');
 
-    expect(collect($result->positions)->map(fn (array $position) => [
+    expect(collect($result['positions'])->map(fn (array $position) => [
         (float) data_get($position, 'vat_rate_percentage'),
         data_get($position, 'total_net_price'),
     ])->all())
         ->toBe([[0.19, '3000.00'], [0.07, '600.00']]);
 
-    expect(collect($result->positions)->pluck('vat_rate_id')->all())
+    expect(collect($result['positions'])->pluck('vat_rate_id')->all())
         ->toBe([$this->vatFull->getKey(), $this->vatReduced->getKey()]);
 });
 
@@ -132,16 +126,14 @@ test('the split reconciles to the total rebate when the shares do not divide eve
         ['net' => 33333.34, 'rate' => 0, 'vat_rate_id' => null],
     ]);
 
-    $result = CalculateRebateAgreement::make(['id' => $this->agreement->getKey()])
-        ->validate()
-        ->execute();
+    $result = RebateCalculator::make($this->agreement)->calculate();
 
-    $sum = collect($result->positions)->reduce(
+    $sum = collect($result['positions'])->reduce(
         fn (string $carry, array $position) => bcadd($carry, data_get($position, 'total_net_price'), 2),
         '0'
     );
 
-    expect($sum)->toBe($result->total_net_price);
+    expect($sum)->toBe($result['total_net_price']);
 });
 
 test('retoures and refunds reduce the volume', function (): void {
@@ -151,12 +143,10 @@ test('retoures and refunds reduce the volume', function (): void {
         ['order_type' => OrderType::factory()->create(['order_type_enum' => OrderTypeEnum::Retoure])]
     );
 
-    $result = CalculateRebateAgreement::make(['id' => $this->agreement->getKey()])
-        ->validate()
-        ->execute();
+    $result = RebateCalculator::make($this->agreement)->calculate();
 
-    expect($result->volume)->toBe('90000.00')
-        ->and($result->percentage)->toBe('0.02');
+    expect($result['volume'])->toBe('90000.00')
+        ->and($result['percentage'])->toBe('0.02');
 });
 
 test('orders outside the period do not count', function (): void {
@@ -166,7 +156,7 @@ test('orders outside the period do not count', function (): void {
         ['invoice_date' => '2024-12-31']
     );
 
-    expect(CalculateRebateAgreement::make(['id' => $this->agreement->getKey()])->validate()->execute()->volume)
+    expect(RebateCalculator::make($this->agreement)->calculate()['volume'])
         ->toBe('120000.00');
 });
 
@@ -177,7 +167,7 @@ test('orders without an invoice number do not count', function (): void {
         ['invoice_number' => null, 'invoice_date' => null]
     );
 
-    expect(CalculateRebateAgreement::make(['id' => $this->agreement->getKey()])->validate()->execute()->volume)
+    expect(RebateCalculator::make($this->agreement)->calculate()['volume'])
         ->toBe('120000.00');
 });
 
@@ -187,7 +177,7 @@ test('cancelled orders do not count even when they carry an invoice number', fun
     $cancelled->state = Canceled::class;
     $cancelled->save();
 
-    expect(CalculateRebateAgreement::make(['id' => $this->agreement->getKey()])->validate()->execute()->volume)
+    expect(RebateCalculator::make($this->agreement)->calculate()['volume'])
         ->toBe('120000.00');
 });
 
@@ -205,7 +195,7 @@ test('a previously settled rebate does not reduce the volume of a later one', fu
         'settled_at' => now(),
     ]);
 
-    expect(CalculateRebateAgreement::make(['id' => $this->agreement->getKey()])->validate()->execute()->volume)
+    expect(RebateCalculator::make($this->agreement)->calculate()['volume'])
         ->toBe('120000.00');
 });
 
@@ -226,40 +216,31 @@ test('a free text parent aggregating its children does not double the volume', f
     ]);
     $child->update(['parent_id' => $parent->getKey()]);
 
-    expect(CalculateRebateAgreement::make(['id' => $this->agreement->getKey()])->validate()->execute()->volume)
+    expect(RebateCalculator::make($this->agreement)->calculate()['volume'])
         ->toBe('120000.00');
 });
 
 test('no rebate below the lowest tier', function (): void {
     rebateOrder([['net' => 40000, 'rate' => 0.19, 'vat_rate_id' => $this->vatFull->getKey()]]);
 
-    $result = CalculateRebateAgreement::make(['id' => $this->agreement->getKey()])
-        ->validate()
-        ->execute();
+    $result = RebateCalculator::make($this->agreement)->calculate();
 
-    expect($result->volume)->toBe('40000.00')
-        ->and($result->percentage)->toBeNull()
-        ->and($result->total_net_price)->toBe('0.00')
-        ->and($result->positions)->toBeEmpty();
+    expect($result['volume'])->toBe('40000.00')
+        ->and($result['percentage'])->toBeNull()
+        ->and($result['total_net_price'])->toBe('0.00')
+        ->and($result['positions'])->toBeEmpty();
 });
 
-test('mixed currencies within the period fail loudly', function (): void {
+test('collects every currency used within the period', function (): void {
     rebateOrder([['net' => 120000, 'rate' => 0.19, 'vat_rate_id' => $this->vatFull->getKey()]]);
+    $chf = Currency::factory()->create(['iso' => 'CHF', 'is_default' => false]);
     rebateOrder(
         [['net' => 10000, 'rate' => 0.19, 'vat_rate_id' => $this->vatFull->getKey()]],
-        ['currency_id' => Currency::factory()->create(['iso' => 'CHF', 'is_default' => false])->getKey()]
+        ['currency_id' => $chf->getKey()]
     );
 
-    CalculateRebateAgreement::make(['id' => $this->agreement->getKey()])
-        ->validate()
-        ->execute();
-})->throws(ValidationException::class);
-
-test('the calculation carries the currency of the orders', function (): void {
-    rebateOrder([['net' => 120000, 'rate' => 0.19, 'vat_rate_id' => $this->vatFull->getKey()]]);
-
-    expect(CalculateRebateAgreement::make(['id' => $this->agreement->getKey()])->validate()->execute()->currency_id)
-        ->toBe($this->currency->getKey());
+    expect(RebateCalculator::make($this->agreement)->getCurrencyIds()->sort()->values()->all())
+        ->toBe(collect([$this->currency->getKey(), $chf->getKey()])->sort()->values()->all());
 });
 
 test('another contact does not contribute to the volume', function (): void {
@@ -276,6 +257,6 @@ test('another contact does not contribute to the volume', function (): void {
         ]
     );
 
-    expect(CalculateRebateAgreement::make(['id' => $this->agreement->getKey()])->validate()->execute()->volume)
+    expect(RebateCalculator::make($this->agreement)->calculate()['volume'])
         ->toBe('120000.00');
 });

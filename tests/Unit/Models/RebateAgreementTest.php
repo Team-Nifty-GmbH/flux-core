@@ -36,3 +36,9 @@ test('resolves the highest tier regardless of the order the tiers are stored in'
 test('resolves no percentage without tiers', function (): void {
     expect(agreementWithTiers([])->resolvePercentage('120000'))->toBeNull();
 });
+
+test('resolves a percentage stored as a float in scientific notation', function (): void {
+    $agreement = agreementWithTiers([['from_volume' => 50000, 'percentage' => 0.00001]]);
+
+    expect($agreement->resolvePercentage('120000'))->toBe('0.00001');
+});

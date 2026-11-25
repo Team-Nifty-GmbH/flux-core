@@ -6,17 +6,21 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Models\Currency;
+use FluxErp\Models\Language;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\RebateAgreement;
 use FluxErp\Rulesets\RebateAgreement\SettleRebateAgreementRuleset;
-use Illuminate\Support\Fluent;
+use FluxErp\Support\Calculation\RebateCalculator;
 use Illuminate\Support\Number;
 use Illuminate\Validation\ValidationException;
 
 class SettleRebateAgreement extends FluxAction
 {
+    protected ?array $calculation = null;
+
+    protected ?int $currencyId = null;
+
     public static function models(): array
     {
         return [RebateAgreement::class];
@@ -25,6 +29,11 @@ class SettleRebateAgreement extends FluxAction
     protected function getRulesets(): string|array
     {
         return SettleRebateAgreementRuleset::class;
+    }
+
+    public function getCalculation(): ?array
+    {
+        return $this->calculation;
     }
 
     public function performAction(): Order
@@ -36,24 +45,9 @@ class SettleRebateAgreement extends FluxAction
 
         if ($rebateAgreement->settled_at) {
             throw ValidationException::withMessages([
-                'id' => [__('The rebate agreement is already settled.')],
-            ])->errorBag('settleRebateAgreement');
-        }
-
-        $calculation = CalculateRebateAgreement::make(['id' => $rebateAgreement->getKey()])
-            ->validate()
-            ->execute();
-
-        if (! $calculation->positions) {
-            throw ValidationException::withMessages([
-                'id' => [__('The volume does not reach any tier of this rebate agreement.')],
-            ])->errorBag('settleRebateAgreement');
-        }
-
-        if (collect($calculation->positions)->whereNull('vat_rate_id')->isNotEmpty()) {
-            throw ValidationException::withMessages([
-                'id' => [__('Revenue without a vat rate cannot be settled automatically.')],
-            ])->errorBag('settleRebateAgreement');
+                'id' => ['The rebate agreement is already settled.'],
+            ])
+                ->errorBag('settleRebateAgreement');
         }
 
         $contact = $rebateAgreement->contact;
@@ -61,30 +55,30 @@ class SettleRebateAgreement extends FluxAction
         $order = CreateOrder::make([
             'tenant_id' => $contact->tenants()->value('tenants.id'),
             'contact_id' => $contact->getKey(),
-            'address_invoice_id' => $contact->main_address_id,
-            'currency_id' => $calculation->currency_id
-                ?? resolve_static(Currency::class, 'default')?->getKey(),
-            'order_type_id' => $this->getData('order_type_id'),
+            'currency_id' => $this->currencyId,
+            'order_type_id' => $rebateAgreement->order_type_id,
         ])
             ->validate()
             ->execute();
 
-        $name = $this->getPositionName($rebateAgreement, $calculation);
+        $name = $this->getPositionName($rebateAgreement, $order);
 
-        foreach ($calculation->positions as $position) {
+        foreach (data_get($this->calculation, 'positions') ?? [] as $position) {
             CreateOrderPosition::make([
                 'order_id' => $order->getKey(),
                 'vat_rate_id' => data_get($position, 'vat_rate_id'),
                 'amount' => 1,
-                'name' => $name,
                 'unit_price' => data_get($position, 'total_net_price'),
+                'name' => $name,
                 'is_net' => true,
             ])
                 ->validate()
                 ->execute();
         }
 
-        $order->refresh()->calculatePrices()->save();
+        $order->refresh()
+            ->calculatePrices()
+            ->save();
 
         $rebateAgreement->rebate_order_id = $order->getKey();
         $rebateAgreement->settled_at = now();
@@ -93,32 +87,70 @@ class SettleRebateAgreement extends FluxAction
         return $order->refresh();
     }
 
-    protected function getPositionName(RebateAgreement $rebateAgreement, Fluent $calculation): string
+    protected function getPositionName(RebateAgreement $rebateAgreement, Order $order): string
     {
-        return __('Volume rebate :percentage for :start until :end', [
-            'percentage' => Number::percentage(bcmul($calculation->percentage, 100), maxPrecision: 2),
-            'start' => $rebateAgreement->period_start->locale(app()->getLocale())->isoFormat('L'),
-            'end' => $rebateAgreement->period_end->locale(app()->getLocale())->isoFormat('L'),
-        ]);
+        $languageCode = $order->language?->language_code
+            ?? resolve_static(Language::class, 'default')?->language_code;
+
+        return __(
+            'Rebate :percentage for :start until :end',
+            [
+                'percentage' => Number::percentage(
+                    bcmul(data_get($this->calculation, 'percentage'), 100),
+                    maxPrecision: 2,
+                    locale: $languageCode
+                ),
+                'start' => $rebateAgreement->period_start->locale($languageCode)->isoFormat('L'),
+                'end' => $rebateAgreement->period_end->locale($languageCode)->isoFormat('L'),
+            ],
+            $languageCode
+        );
     }
 
     protected function validateData(): void
     {
         parent::validateData();
 
+        $rebateAgreement = resolve_static(RebateAgreement::class, 'query')
+            ->whereKey($this->getData('id'))
+            ->first();
         $errors = [];
 
-        $orderTypeEnum = resolve_static(OrderType::class, 'query')
-            ->whereKey($this->getData('order_type_id'))
-            ->where('is_active', true)
-            ->value('order_type_enum');
+        if ($rebateAgreement->settled_at) {
+            $errors['id'][] = 'The rebate agreement is already settled.';
+        }
 
-        if ($orderTypeEnum !== OrderTypeEnum::Refund) {
-            $errors['order_type_id'] = [__('The order type must be an active refund order type.')];
+        if (
+            ! resolve_static(OrderType::class, 'query')
+                ->whereKey($rebateAgreement->order_type_id)
+                ->where('order_type_enum', OrderTypeEnum::Refund)
+                ->where('is_active', true)
+                ->exists()
+        ) {
+            $errors['order_type_id'][] = 'The order type must be an active refund order type.';
+        }
+
+        $calculator = RebateCalculator::make($rebateAgreement);
+        $currencyIds = $calculator->getCurrencyIds();
+
+        if ($currencyIds->count() > 1) {
+            $errors['id'][] = 'The orders within the period use different currencies.';
+        } else {
+            $this->currencyId = $currencyIds->first();
+            $this->calculation = $calculator->calculate();
+
+            $positions = collect(data_get($this->calculation, 'positions'));
+
+            if ($positions->isEmpty()) {
+                $errors['id'][] = 'The volume does not reach any tier of this rebate agreement.';
+            } elseif ($positions->whereNull('vat_rate_id')->isNotEmpty()) {
+                $errors['id'][] = 'Revenue without a vat rate cannot be settled automatically.';
+            }
         }
 
         if ($errors) {
-            throw ValidationException::withMessages($errors)->errorBag('settleRebateAgreement');
+            throw ValidationException::withMessages($errors)
+                ->errorBag('settleRebateAgreement');
         }
     }
 }

@@ -7,6 +7,7 @@ use FluxErp\Actions\RebateAgreement\DeleteRebateAgreement;
 use FluxErp\Actions\RebateAgreement\UpdateRebateAgreement;
 use FluxErp\Models\RebateAgreement;
 use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
+use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
 
 class RebateAgreementForm extends FluxForm
@@ -21,6 +22,8 @@ class RebateAgreementForm extends FluxForm
     public bool $is_active = true;
 
     public ?string $name = null;
+
+    public ?int $order_type_id = null;
 
     public ?string $period_end = null;
 
@@ -47,6 +50,10 @@ class RebateAgreementForm extends FluxForm
             ],
             $this->tiers ?: []
         );
+
+        if ($values instanceof Model) {
+            $this->rememberLoadedData($values);
+        }
     }
 
     public function toActionData(): array
@@ -61,18 +68,6 @@ class RebateAgreementForm extends FluxForm
         );
 
         return $data;
-    }
-
-    public function addTier(): void
-    {
-        $this->tiers[] = ['from_volume' => null, 'percentage' => null];
-    }
-
-    public function removeTier(int $index): void
-    {
-        unset($this->tiers[$index]);
-
-        $this->tiers = array_values($this->tiers);
     }
 
     protected function getActions(): array

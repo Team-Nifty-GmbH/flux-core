@@ -7,6 +7,38 @@
 >
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
         <x-input :label="__('Name')" wire:model="rebateAgreementForm.name" />
+        <x-select.styled
+            :label="__('Order Type')"
+            wire:model="rebateAgreementForm.order_type_id"
+            required
+            select="label:name|value:id"
+            unfiltered
+            :request="[
+                'url' => route('search', \FluxErp\Models\OrderType::class),
+                'method' => 'POST',
+                'params' => [
+                    'searchFields' => [
+                        'name',
+                    ],
+                    'select' => [
+                        'name',
+                        'id',
+                    ],
+                    'where' => [
+                        [
+                            'order_type_enum',
+                            '=',
+                            \FluxErp\Enums\OrderTypeEnum::Refund->value,
+                        ],
+                        [
+                            'is_active',
+                            '=',
+                            true,
+                        ],
+                    ],
+                ],
+            ]"
+        />
         <div class="flex items-end">
             <x-toggle
                 :label="__('Is Active')"
@@ -30,23 +62,31 @@
                 icon="plus"
                 color="indigo"
                 flat
-                wire:click="addTier()"
+                x-on:click="
+                    $wire.rebateAgreementForm.tiers.push({
+                        from_volume: null,
+                        percentage: null,
+                    })
+                "
             />
         </div>
         <div class="flex flex-col gap-2">
-            @foreach ($rebateAgreementForm->tiers as $index => $tier)
+            <template
+                x-for="(tier, index) in $wire.rebateAgreementForm.tiers"
+                x-bind:key="index"
+            >
                 <div class="flex items-end gap-2">
                     <x-number
                         class="grow"
                         :label="__('From Volume')"
-                        wire:model="rebateAgreementForm.tiers.{{ $index }}.from_volume"
+                        x-model.number="tier.from_volume"
                         step="0.01"
                         min="0"
                     />
                     <x-number
                         class="grow"
                         :label="__('Percentage')"
-                        wire:model="rebateAgreementForm.tiers.{{ $index }}.percentage"
+                        x-model.number="tier.percentage"
                         step="0.01"
                         min="0"
                         max="100"
@@ -55,10 +95,12 @@
                         icon="trash"
                         color="red"
                         flat
-                        wire:click="removeTier({{ $index }})"
+                        x-on:click="
+                            $wire.rebateAgreementForm.tiers.splice(index, 1)
+                        "
                     />
                 </div>
-            @endforeach
+            </template>
         </div>
     </div>
     <x-slot:footer>
@@ -80,27 +122,25 @@
     </x-slot:footer>
 </x-modal>
 
-<x-modal id="settle-rebate-agreement-modal" :title="__('Calculate Rebate')">
+<x-modal id="settle-rebate-agreement-modal" :title="__('Settle Rebate')">
     <div class="flex flex-col gap-2 text-sm">
         <div class="flex justify-between">
             <span>{{ __('Volume') }}</span>
-            <span
-                >{{ Number::currency((float) data_get($calculation, 'volume', 0)) }}</span
-            >
+            <span>
+                {{ Number::currency(data_get($calculation, 'volume') ?? 0) }}
+            </span>
         </div>
         <div class="flex justify-between">
             <span>{{ __('Percentage') }}</span>
             <span>
-                {{ data_get($calculation, 'percentage')
-                    ? Number::percentage(bcmul(data_get($calculation, 'percentage'), 100), maxPrecision: 2)
-                    : '-' }}
+                {{ Number::percentage(bcmul(data_get($calculation, 'percentage') ?? 0, 100), maxPrecision: 2) }}
             </span>
         </div>
         <div class="flex justify-between font-semibold">
             <span>{{ __('Total value') }}</span>
-            <span
-                >{{ Number::currency((float) data_get($calculation, 'total_net_price', 0)) }}</span
-            >
+            <span>
+                {{ Number::currency(data_get($calculation, 'total_net_price') ?? 0) }}
+            </span>
         </div>
         @foreach (data_get($calculation, 'positions') ?? [] as $position)
             <div class="flex justify-between pl-4 text-xs">
@@ -108,16 +148,11 @@
                     {{ Number::percentage(bcmul(data_get($position, 'vat_rate_percentage') ?? 0, 100), maxPrecision: 2) }}
                 </span>
                 <span>
-                    {{ Number::currency((float) data_get($position, 'total_net_price')) }}
+                    {{ Number::currency(data_get($position, 'total_net_price') ?? 0) }}
                 </span>
             </div>
         @endforeach
     </div>
-    @if (! data_get($calculation, 'positions'))
-        <div class="pt-4 text-sm">
-            {{ __('The volume does not reach any tier of this rebate agreement.') }}
-        </div>
-    @endif
     <x-slot:footer>
         <x-button
             color="secondary"
@@ -125,13 +160,6 @@
             flat
             x-on:click="$tsui.close.modal('settle-rebate-agreement-modal')"
         />
-        <x-button
-            color="indigo"
-            :text="__('Create Refund')"
-            x-bind:disabled="
-                !$wire.orderTypeId || !$wire.calculation?.positions?.length
-            "
-            wire:click="settle()"
-        />
+        <x-button color="indigo" :text="__('Settle')" wire:click="settle()" />
     </x-slot:footer>
 </x-modal>

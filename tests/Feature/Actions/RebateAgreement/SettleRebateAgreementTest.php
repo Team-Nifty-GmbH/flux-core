@@ -5,6 +5,7 @@ use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
+use FluxErp\Models\Language;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
@@ -41,6 +42,7 @@ beforeEach(function (): void {
 
     $this->agreement = RebateAgreement::factory()->create([
         'contact_id' => $this->contact->getKey(),
+        'order_type_id' => $this->refundOrderType->getKey(),
         'period_start' => '2025-01-01',
         'period_end' => '2025-12-31',
         'tiers' => [
@@ -61,7 +63,6 @@ beforeEach(function (): void {
         'address_delivery_id' => $this->address->getKey(),
         'invoice_number' => 'RE-1',
         'invoice_date' => '2025-06-01',
-        'shipping_costs_net_price' => 0,
     ]);
 
     foreach ([
@@ -87,10 +88,7 @@ beforeEach(function (): void {
 });
 
 test('settling creates a refund order with one negative position per vat rate', function (): void {
-    $order = SettleRebateAgreement::make([
-        'id' => $this->agreement->getKey(),
-        'order_type_id' => $this->refundOrderType->getKey(),
-    ])
+    $order = SettleRebateAgreement::make(['id' => $this->agreement->getKey()])
         ->validate()
         ->execute();
 
@@ -110,10 +108,7 @@ test('settling creates a refund order with one negative position per vat rate', 
 });
 
 test('settling records the created order on the agreement', function (): void {
-    $order = SettleRebateAgreement::make([
-        'id' => $this->agreement->getKey(),
-        'order_type_id' => $this->refundOrderType->getKey(),
-    ])
+    $order = SettleRebateAgreement::make(['id' => $this->agreement->getKey()])
         ->validate()
         ->execute();
 
@@ -124,10 +119,7 @@ test('settling records the created order on the agreement', function (): void {
 });
 
 test('the position names carry the period and the granted percentage', function (): void {
-    $order = SettleRebateAgreement::make([
-        'id' => $this->agreement->getKey(),
-        'order_type_id' => $this->refundOrderType->getKey(),
-    ])
+    $order = SettleRebateAgreement::make(['id' => $this->agreement->getKey()])
         ->validate()
         ->execute();
 
@@ -154,10 +146,7 @@ test('revenue without a vat rate blocks the settlement', function (): void {
         ]);
 
     try {
-        SettleRebateAgreement::make([
-            'id' => $this->agreement->getKey(),
-            'order_type_id' => $this->refundOrderType->getKey(),
-        ])
+        SettleRebateAgreement::make(['id' => $this->agreement->getKey()])
             ->validate()
             ->execute();
 
@@ -169,17 +158,11 @@ test('revenue without a vat rate blocks the settlement', function (): void {
 });
 
 test('an already settled agreement cannot be settled twice', function (): void {
-    SettleRebateAgreement::make([
-        'id' => $this->agreement->getKey(),
-        'order_type_id' => $this->refundOrderType->getKey(),
-    ])
+    SettleRebateAgreement::make(['id' => $this->agreement->getKey()])
         ->validate()
         ->execute();
 
-    SettleRebateAgreement::make([
-        'id' => $this->agreement->getKey(),
-        'order_type_id' => $this->refundOrderType->getKey(),
-    ])
+    SettleRebateAgreement::make(['id' => $this->agreement->getKey()])
         ->validate()
         ->execute();
 })->throws(ValidationException::class);
@@ -190,10 +173,7 @@ test('settling an agreement whose volume reaches no tier fails without creating 
     $orderCount = Order::query()->count();
 
     try {
-        SettleRebateAgreement::make([
-            'id' => $this->agreement->getKey(),
-            'order_type_id' => $this->refundOrderType->getKey(),
-        ])
+        SettleRebateAgreement::make(['id' => $this->agreement->getKey()])
             ->validate()
             ->execute();
 
@@ -208,29 +188,72 @@ test('settling an agreement whose volume reaches no tier fails without creating 
 });
 
 test('the refund order is created in the currency of the settled orders', function (): void {
-    $order = SettleRebateAgreement::make([
-        'id' => $this->agreement->getKey(),
-        'order_type_id' => $this->refundOrderType->getKey(),
-    ])
+    $order = SettleRebateAgreement::make(['id' => $this->agreement->getKey()])
         ->validate()
         ->execute();
 
     expect($order->currency_id)->toBe($this->currency->getKey());
 });
 
-test('the order type must be a refund order type', function (): void {
-    SettleRebateAgreement::make([
-        'id' => $this->agreement->getKey(),
+test('the order type of the agreement must be a refund order type', function (): void {
+    $this->agreement->update([
         'order_type_id' => OrderType::factory()->create(['order_type_enum' => OrderTypeEnum::Order])->getKey(),
-    ])->validate();
-})->throws(ValidationException::class);
+    ]);
+
+    SettleRebateAgreement::assertValidationErrors(['id' => $this->agreement->getKey()], 'order_type_id');
+});
 
 test('an inactive refund order type is rejected', function (): void {
-    SettleRebateAgreement::make([
-        'id' => $this->agreement->getKey(),
-        'order_type_id' => OrderType::factory()->create([
-            'order_type_enum' => OrderTypeEnum::Refund,
-            'is_active' => false,
-        ])->getKey(),
-    ])->validate();
-})->throws(ValidationException::class);
+    $this->refundOrderType->update(['is_active' => false]);
+
+    SettleRebateAgreement::assertValidationErrors(['id' => $this->agreement->getKey()], 'order_type_id');
+});
+
+test('all reasons against settling are reported together', function (): void {
+    $this->refundOrderType->update(['is_active' => false]);
+    $this->agreement->update(['tiers' => [['from_volume' => 500000, 'percentage' => 0.02]]]);
+
+    try {
+        SettleRebateAgreement::make(['id' => $this->agreement->getKey()])->validate();
+
+        $this->fail('ValidationException expected.');
+    } catch (ValidationException $e) {
+        expect($e->errors())
+            ->toHaveKeys(['id', 'order_type_id'])
+            ->and($e->errors()['id'])->toBe(['The volume does not reach any tier of this rebate agreement.']);
+    }
+});
+
+test('mixed currencies within the period block the settlement', function (): void {
+    $order = Order::query()->where('contact_id', $this->contact->getKey())->first();
+    $chfOrder = $order->replicate(['uuid', 'order_number', 'invoice_number']);
+    $chfOrder->fill([
+        'currency_id' => Currency::factory()->create(['iso' => 'CHF', 'is_default' => false])->getKey(),
+        'invoice_number' => 'RE-CHF',
+    ]);
+    $chfOrder->save();
+
+    try {
+        SettleRebateAgreement::make(['id' => $this->agreement->getKey()])->validate();
+
+        $this->fail('ValidationException expected.');
+    } catch (ValidationException $e) {
+        expect($e->errors()['id'])->toBe(['The orders within the period use different currencies.']);
+    }
+});
+
+test('the position names follow the language of the invoice address, not the user', function (): void {
+    $german = Language::factory()->create(['language_code' => 'de']);
+    $this->address->update(['language_id' => $german->getKey()]);
+    $this->contact->update(['invoice_address_id' => $this->address->getKey()]);
+    app()->setLocale('en');
+
+    $order = SettleRebateAgreement::make(['id' => $this->agreement->getKey()])
+        ->validate()
+        ->execute();
+
+    expect($order->orderPositions()->value('name'))
+        ->toMatch('/^Bonus 3\s%/u')
+        ->toContain('01.01.2025')
+        ->toContain('31.12.2025');
+});
