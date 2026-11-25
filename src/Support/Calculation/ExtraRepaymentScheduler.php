@@ -10,6 +10,7 @@ use FluxErp\Models\Loan;
 use FluxErp\Models\LoanInstallment;
 use FluxErp\Traits\Makeable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class ExtraRepaymentScheduler
 {
@@ -162,13 +163,10 @@ class ExtraRepaymentScheduler
 
     protected function outstanding(Collection $open): string
     {
-        return $open->reduce(
-            fn (string $carry, LoanInstallment $installment): string => bcadd(
-                $carry,
-                $this->normalize($installment->principal_amount),
-                $this->scale
-            ),
-            '0'
+        return $this->normalize(
+            $this->loan->installments()
+                ->whereKey($open->modelKeys())
+                ->sum(DB::raw(LoanInstallment::openPrincipalSql()))
         );
     }
 

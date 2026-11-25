@@ -5,8 +5,11 @@ use FluxErp\Actions\LoanExtraRepayment\CreateLoanExtraRepayment;
 use FluxErp\Enums\InstallmentIntervalEnum;
 use FluxErp\Enums\RepaymentTypeEnum;
 use FluxErp\Enums\ScheduleAdjustmentTypeEnum;
+use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
 use FluxErp\Models\LedgerAccount;
+use FluxErp\Models\Pivots\LoanInstallmentTransaction;
+use FluxErp\Models\Transaction;
 use Illuminate\Validation\ValidationException;
 
 beforeEach(function (): void {
@@ -217,3 +220,26 @@ test('an allowance takes either a percentage or an amount, not both', function (
         'extra_repayment_allowance_amount' => 1000,
     ]);
 })->throws(ValidationException::class);
+
+test('an extra repayment of the remaining principal after a partial repayment ends the loan', function (): void {
+    $loan = loanFor(['number_of_installments' => 1]);
+    $transaction = Transaction::factory()->create([
+        'bank_connection_id' => BankConnection::factory()->create()->getKey(),
+        'amount' => -3060,
+        'balance' => -3060,
+        'is_ignored' => false,
+    ]);
+    LoanInstallmentTransaction::create([
+        'loan_installment_id' => $loan->installments()->first()->getKey(),
+        'transaction_id' => $transaction->getKey(),
+        'amount' => -3060,
+        'is_accepted' => true,
+    ]);
+
+    expect($loan->refresh()->remaining)->toEqual(9000);
+
+    extraRepaymentFor($loan, ['executed_at' => '2026-01-15', 'amount' => 9000]);
+
+    expect($loan->refresh()->remaining)->toEqual(0)
+        ->and($loan->installments()->sum('principal_amount'))->toEqual(0);
+});

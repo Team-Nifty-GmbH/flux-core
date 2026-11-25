@@ -91,15 +91,10 @@ class Loan extends FluxModel implements HasMedia, InteractsWithDataTables
 
     public function calculateRemaining(): static
     {
-        // A partial repayment covers the interest of its installment first, the rest lowers the principal.
         $this->remaining = bcround(
             (string) $this->installments()
                 ->unsettled()
-                ->sum(DB::raw(
-                    'GREATEST(principal_amount - GREATEST('
-                    . LoanInstallment::coverageSql()
-                    . ' - interest_amount, 0), 0)'
-                )),
+                ->sum(DB::raw(LoanInstallment::openPrincipalSql())),
             2
         );
 

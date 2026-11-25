@@ -7,10 +7,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        // Partial repayments now lower the remaining principal, loans stored before keep the old figure until recalculated.
-        Loan::query()
-            ->withoutGlobalScopes()
-            ->whereNull('deleted_at')
+        resolve_static(Loan::class, 'query')
             ->each(fn (Loan $loan) => $loan->calculateRemaining()->calculateProgress()->saveQuietly());
     }
 
