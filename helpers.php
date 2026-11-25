@@ -490,6 +490,19 @@ if (! function_exists('bcabs')) {
     }
 }
 
+if (! function_exists('bcsum')) {
+    function bcsum(iterable $numbers): string
+    {
+        $sum = '0';
+
+        foreach ($numbers as $number) {
+            $sum = bcadd($sum, (string) $number, 9);
+        }
+
+        return $sum;
+    }
+}
+
 if (! function_exists('bcceil')) {
     function bcceil(string $number): string
     {

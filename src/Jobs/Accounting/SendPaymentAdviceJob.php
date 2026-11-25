@@ -35,11 +35,7 @@ class SendPaymentAdviceJob implements ShouldQueue
             return;
         }
 
-        $address = filled($position->contact?->invoiceAddress?->email_primary)
-            ? $position->contact->invoiceAddress
-            : $position->contact?->mainAddress;
-
-        $to = $address?->email_primary;
+        $to = $position->resolveMailableAddress()?->email_primary;
 
         if (! $to) {
             $this->abort($position, __('No recipient address'));
@@ -51,7 +47,7 @@ class SendPaymentAdviceJob implements ShouldQueue
 
         $result = SendMail::make([
             'to' => [$to],
-            'subject' => __('Payment Advice') . ' ' . $position->end_to_end_id,
+            'subject' => $printed->getSubject(),
             'html_body' => __(
                 'Please find attached the payment advice for the transfer with reference :reference.',
                 ['reference' => $position->end_to_end_id]

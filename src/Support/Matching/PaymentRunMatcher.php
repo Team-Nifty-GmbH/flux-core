@@ -79,18 +79,9 @@ class PaymentRunMatcher
             ->get()
             ->groupBy('payment_run_id');
 
-        foreach ($runs as $positions) {
-            $sum = $positions->reduce(
-                fn (string $carry, PaymentRunPosition $position) => bcadd($carry, (string) $position->amount, 9),
-                '0'
-            );
-
-            if (bccomp(bcabs(bcround($sum, 2)), bcabs(bcround((string) $transaction->amount, 2)), 2) === 0) {
-                return $positions->values();
-            }
-        }
-
-        return null;
+        return $runs
+            ->first(fn (Collection $positions) => $this->sumsToTransactionAmount($positions, $transaction))
+            ?->values();
     }
 
     protected function openPositions(Transaction $transaction): Builder
@@ -101,7 +92,12 @@ class PaymentRunMatcher
                 'paymentRun',
                 fn (Builder $query) => $query
                     ->whereIn('state', [Pending::$name, Successful::$name])
-                    ->whereIn('payment_run_type_enum', $this->runTypesMatchingDirection($transaction))
+                    ->where(
+                        'payment_run_type_enum',
+                        bccomp((string) $transaction->amount, '0', 2) < 0
+                            ? PaymentRunTypeEnum::MoneyTransfer
+                            : PaymentRunTypeEnum::DirectDebit
+                    )
             )
             ->whereDoesntHave(
                 'orders.transactions',
@@ -113,19 +109,6 @@ class PaymentRunMatcher
                     ->where('order_payment_run.success', true)
                     ->orWhereState('payment_state', Paid::class)
             );
-    }
-
-    protected function runTypesMatchingDirection(Transaction $transaction): array
-    {
-        $sign = bccomp((string) $transaction->amount, '0', 2);
-
-        return array_column(
-            array_filter(
-                PaymentRunTypeEnum::cases(),
-                fn (PaymentRunTypeEnum $case): bool => $case->expectedSign() === $sign
-            ),
-            'value'
-        );
     }
 
     protected function isInWindow(PaymentRunPosition $position, Transaction $transaction): bool
@@ -141,15 +124,11 @@ class PaymentRunMatcher
 
     protected function sumsToTransactionAmount(Collection $positions, Transaction $transaction): bool
     {
-        $sum = $positions->reduce(
-            fn (string $carry, PaymentRunPosition $position) => bcadd($carry, $position->orders->reduce(
-                fn (string $innerCarry, $order) => bcadd($innerCarry, (string) $order->pivot->amount, 9),
-                '0'
-            ), 9),
-            '0'
-        );
-
-        return bccomp(bcabs(bcround($sum, 2)), bcabs(bcround((string) $transaction->amount, 2)), 2) === 0;
+        return bccomp(
+            bcabs(bcround(bcsum($positions->pluck('amount')), 2)),
+            bcabs(bcround((string) $transaction->amount, 2)),
+            2
+        ) === 0;
     }
 
     protected function assign(PaymentRunPosition $position, Transaction $transaction): void

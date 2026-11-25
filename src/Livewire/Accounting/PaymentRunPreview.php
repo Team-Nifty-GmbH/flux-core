@@ -47,10 +47,6 @@ class PaymentRunPreview extends Component
         $orders = resolve_static(Order::class, 'query')
             ->whereKey($orderIds)
             ->with([
-                'contact:id,expense_ledger_account_id',
-                'addressInvoice',
-                'orderType',
-                'contactBankConnection:id,contact_id,iban,bic,account_holder',
                 'contactBankConnection.sepaMandates' => function (HasMany $query): void {
                     $query->select(['id', 'contact_bank_connection_id', 'sepa_mandate_type_enum'])
                         ->whereNotNull('signed_date');
@@ -59,25 +55,21 @@ class PaymentRunPreview extends Component
             ->get();
 
         $creditNotes = $this->suggestedCreditNotes($orders);
-        $creditNoteIds = $creditNotes->pluck('id')->all();
+        $orders->merge($creditNotes)->loadMissing([
+            'contact:id,expense_ledger_account_id',
+            'addressInvoice',
+            'orderType',
+            'contactBankConnection:id,contact_id,iban,bic,account_holder',
+        ]);
 
-        $builder = new PaymentRunPositionBuilder();
-        $this->groups = $builder->build($orders, $creditNotes);
+        $this->groups = app(PaymentRunPositionBuilder::class)->build($orders, $creditNotes);
 
-        $sepaMandateTypes = $orders->merge($creditNotes)->mapWithKeys(
-            fn (Order $order) => [
-                $order->getKey() => $order->contactBankConnection?->sepaMandates->last()?->sepa_mandate_type_enum,
-            ]
-        );
+        $sepaMandateTypes = $orders->mapWithKeys(fn (Order $order) => [
+            $order->getKey() => $order->contactBankConnection?->sepaMandates->last()?->sepa_mandate_type_enum,
+        ]);
 
         foreach ($this->groups as $groupIndex => $group) {
             $this->groups[$groupIndex]['type'] = $sepaMandateTypes->get(data_get($group, 'orders.0.id'));
-
-            foreach ($group['orders'] as $rowIndex => $row) {
-                if (in_array($row['id'], $creditNoteIds, true)) {
-                    $this->groups[$groupIndex]['orders'][$rowIndex]['is_suggested'] = true;
-                }
-            }
         }
     }
 
@@ -121,38 +113,9 @@ class PaymentRunPreview extends Component
     {
         $paymentRunTypeEnum = PaymentRunTypeEnum::from($this->paymentRunTypeEnum);
 
-        $skipped = [];
-
-        $groups = collect($this->groups)
-            ->reject(function (array $group) use (&$skipped): bool {
-                $hasInvoice = collect(data_get($group, 'orders', []))
-                    ->contains(fn (array $row) => ! data_get($row, 'is_credit_note'));
-
-                if ($hasInvoice || bccomp((string) data_get($group, 'amount', '0'), '0', 2) !== 0) {
-                    return false;
-                }
-
-                $skipped[] = data_get($group, 'contact_name') ?: data_get($group, 'account_holder');
-
-                return true;
-            })
-            ->values();
-
-        if ($skipped) {
-            $this->toast()
-                ->warning(__('Skipped :recipients because their credit notes have nothing to offset.', [
-                    'recipients' => implode(', ', $skipped),
-                ]))
-                ->send();
-        }
-
-        if ($groups->isEmpty()) {
-            return;
-        }
-
-        $positions = $groups
+        $positions = collect($this->groups)
             ->map(fn (array $group) => [
-                'type' => data_get($group, 'type', '__NO_TYPE__'),
+                'type' => data_get($group, 'type'),
                 'orders' => collect(data_get($group, 'orders', []))
                     ->reject(fn (array $row) => bccomp(bcround(data_get($row, 'amount'), 2), '0', 2) === 0)
                     ->map(fn (array $row) => [
@@ -168,18 +131,16 @@ class PaymentRunPreview extends Component
             ->filter(fn (array $position) => $position['orders'])
             ->values();
 
+        if ($positions->isEmpty()) {
+            return;
+        }
+
         $groupedPositions = $paymentRunTypeEnum === PaymentRunTypeEnum::DirectDebit
             ? $positions->groupBy('type')->toArray()
             : [null => $positions->toArray()];
 
         $paymentRuns = [];
         foreach ($groupedPositions as $type => $positionsForType) {
-            $positionsForType = array_map(function (array $position) {
-                data_forget($position, 'type');
-
-                return $position;
-            }, $positionsForType);
-
             try {
                 $paymentRuns[] = CreatePaymentRun::make([
                     'state' => Open::$name,
@@ -217,26 +178,18 @@ class PaymentRunPreview extends Component
     }
 
     #[Renderless]
-    public function removeOrder(int $orderId): void
+    public function removeOrder(string $groupKey, int $orderId): void
     {
-        foreach ($this->groups as $groupIndex => $group) {
-            $rowIndex = $this->findRowIndex($group, $orderId);
+        [$groupIndex, $rowIndex] = $this->locate($groupKey, $orderId);
 
-            if ($rowIndex === null) {
-                continue;
-            }
+        if ($rowIndex !== false) {
+            array_splice($this->groups[$groupIndex]['orders'], $rowIndex, 1);
 
-            unset($this->groups[$groupIndex]['orders'][$rowIndex]);
-            $this->groups[$groupIndex]['orders'] = array_values($this->groups[$groupIndex]['orders']);
-
-            if (! $this->groups[$groupIndex]['orders']) {
-                unset($this->groups[$groupIndex]);
-                $this->groups = array_values($this->groups);
-            } else {
+            if ($this->groups[$groupIndex]['orders']) {
                 $this->recapAndRecalculate($groupIndex);
+            } else {
+                array_splice($this->groups, $groupIndex, 1);
             }
-
-            break;
         }
 
         if (! $this->groups) {
@@ -268,46 +221,24 @@ class PaymentRunPreview extends Component
             )
             ->whereKeyNot($orders->modelKeys())
             ->whereDoesntHave('paymentRuns')
-            ->with([
-                'contact:id,expense_ledger_account_id',
-                'addressInvoice',
-                'orderType',
-                'contactBankConnection:id,contact_id,iban,bic,account_holder',
-                'contactBankConnection.sepaMandates' => function (HasMany $query): void {
-                    $query->select(['id', 'contact_bank_connection_id', 'sepa_mandate_type_enum'])
-                        ->whereNotNull('signed_date');
-                },
-            ])
             ->get();
     }
 
     protected function locate(string $groupKey, int $orderId): array
     {
-        foreach ($this->groups as $groupIndex => $group) {
-            if ($group['key'] !== $groupKey) {
-                continue;
-            }
+        $groupIndex = array_search($groupKey, array_column($this->groups, 'key'), true);
 
-            return [$groupIndex, $this->findRowIndex($group, $orderId)];
-        }
-
-        return [null, null];
-    }
-
-    protected function findRowIndex(array $group, int $orderId): ?int
-    {
-        foreach ($group['orders'] as $rowIndex => $row) {
-            if ($row['id'] === $orderId) {
-                return $rowIndex;
-            }
-        }
-
-        return null;
+        return [
+            $groupIndex,
+            $groupIndex === false
+                ? false
+                : array_search($orderId, array_column($this->groups[$groupIndex]['orders'], 'id'), true),
+        ];
     }
 
     protected function recapAndRecalculate(int $groupIndex): void
     {
-        $builder = new PaymentRunPositionBuilder();
+        $builder = app(PaymentRunPositionBuilder::class);
 
         $this->groups[$groupIndex]['orders'] = $builder->recap($this->groups[$groupIndex]['orders']);
         $this->groups[$groupIndex]['amount'] = $builder->total($this->groups[$groupIndex]['orders']);
@@ -317,7 +248,7 @@ class PaymentRunPreview extends Component
     {
         [$groupIndex, $rowIndex] = $this->locate($groupKey, $orderId);
 
-        if ($rowIndex === null || ($value = $amount($this->groups[$groupIndex]['orders'][$rowIndex])) === null) {
+        if ($rowIndex === false || ($value = $amount($this->groups[$groupIndex]['orders'][$rowIndex])) === null) {
             return;
         }
 

@@ -11,10 +11,9 @@ use FluxErp\Models\PaymentRun;
 use FluxErp\Models\PaymentRunPosition;
 use FluxErp\Models\Pivots\OrderPaymentRun;
 use FluxErp\States\Order\PaymentState\Open;
-use FluxErp\Support\PaymentRunPositionBuilder;
 use FluxErp\Traits\Livewire\CreatesDocuments;
+use FluxErp\View\Printing\PaymentRun\PaymentAdvice;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
@@ -172,27 +171,11 @@ class PaymentRunList extends BaseDataTable
         }
 
         if ($position) {
-            $remaining = resolve_static(OrderPaymentRun::class, 'query')
-                ->where('payment_run_position_id', $positionId)
-                ->get(['order_id', 'amount']);
+            $position->refreshFromOrders();
 
-            $amount = $remaining->reduce(
-                fn (string $carry, OrderPaymentRun $row) => bcadd($carry, (string) $row->amount, 9),
-                '0'
-            );
-
-            if ($remaining->isEmpty()
-                || bccomp($amount, '0', 2) !== $paymentRun->payment_run_type_enum->expectedSign()
-            ) {
-                $paymentRun->orders()->detach($remaining->pluck('order_id')->all());
+            if (bccomp((string) $position->amount, '0', 2) !== $paymentRun->payment_run_type_enum->expectedSign()) {
+                $paymentRun->orders()->detach($position->orders()->pluck('orders.id')->all());
                 $position->delete();
-            } else {
-                $position->amount = $amount;
-                $position->purpose = app(PaymentRunPositionBuilder::class)->purpose(
-                    $position->orders()->pluck('orders.invoice_number')->all(),
-                    $position->end_to_end_id,
-                );
-                $position->save();
             }
         }
 
@@ -218,16 +201,12 @@ class PaymentRunList extends BaseDataTable
 
     protected function getSubject(OffersPrinting $item, array $documents): ?string
     {
-        return __('Payment Advice') . ' ' . $item->end_to_end_id;
+        return PaymentAdvice::make($item)->getSubject();
     }
 
     protected function getTo(OffersPrinting $item, array $documents): array
     {
-        $address = filled($item->contact?->invoiceAddress?->email_primary)
-            ? $item->contact->invoiceAddress
-            : $item->contact?->mainAddress;
-
-        return array_filter(Arr::wrap($address?->email_primary));
+        return array_filter([$item->resolveMailableAddress()?->email_primary]);
     }
 
     protected function loadPaymentRun(PaymentRun $paymentRun): void

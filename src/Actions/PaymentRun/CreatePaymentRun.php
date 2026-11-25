@@ -11,7 +11,6 @@ use FluxErp\Models\PaymentRunPosition;
 use FluxErp\Rulesets\PaymentRun\CreatePaymentRunRuleset;
 use FluxErp\Settings\AccountingSettings;
 use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
-use FluxErp\Support\PaymentRunPositionBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
@@ -39,30 +38,10 @@ class CreatePaymentRun extends FluxAction
             : PaymentRunTypeEnum::from($paymentRunTypeEnum);
 
         $errors = [];
-        $seenOrderIds = [];
 
         foreach ($this->getData('positions') ?? [] as $index => $position) {
             $orders = data_get($position, 'orders', []);
-
-            foreach ($orders as $orderIndex => $order) {
-                $orderId = data_get($order, 'order_id');
-
-                if (in_array($orderId, $seenOrderIds, true)) {
-                    $errors['positions.' . $index . '.orders.' . $orderIndex . '.order_id'] = [
-                        'An order must not appear twice in a payment run.',
-                    ];
-
-                    continue;
-                }
-
-                $seenOrderIds[] = $orderId;
-            }
-
-            $amount = array_reduce(
-                $orders,
-                fn (string $carry, array $order) => bcadd($carry, (string) data_get($order, 'amount'), 9),
-                '0'
-            );
+            $amount = bcsum(array_column($orders, 'amount'));
 
             if (bccomp($amount, '0', 2) !== 0) {
                 if (bccomp($amount, '0', 2) !== $paymentRunTypeEnum->expectedSign()) {
@@ -111,16 +90,11 @@ class CreatePaymentRun extends FluxAction
 
         foreach ($positions as $positionData) {
             $orders = Arr::pull($positionData, 'orders');
-            $amount = array_reduce(
-                $orders,
-                fn (string $carry, array $order) => bcadd($carry, (string) data_get($order, 'amount'), 9),
-                '0'
-            );
 
             $position = app(PaymentRunPosition::class, [
                 'attributes' => array_merge($positionData, [
                     'payment_run_id' => $paymentRun->getKey(),
-                    'amount' => $amount,
+                    'amount' => 0,
                 ]),
             ]);
             $position->save();
@@ -133,13 +107,9 @@ class CreatePaymentRun extends FluxAction
             }
 
             $position->end_to_end_id = 'PR' . $paymentRun->getKey() . '-' . $position->getKey();
-            $position->purpose = app(PaymentRunPositionBuilder::class)->purpose(
-                $position->orders()->pluck('orders.invoice_number')->all(),
-                $position->end_to_end_id,
-            );
-            $position->save();
+            $position->refreshFromOrders();
 
-            if (bccomp($amount, '0', 2) === 0) {
+            if (bccomp((string) $position->amount, '0', 2) === 0) {
                 $this->settleByClearingAccount($position);
 
                 continue;
@@ -203,14 +173,9 @@ class CreatePaymentRun extends FluxAction
         foreach ($positions as $index => $position) {
             $model = $models->get(data_get($position, 'orders.0.order_id'));
 
-            $this->data['positions'][$index] = $position + [
-                'contact_id' => $model?->contact_id,
-                'iban' => $model?->iban ?: $model?->contactBankConnection?->iban,
-                'bic' => $model?->bic ?: $model?->contactBankConnection?->bic,
-                'account_holder' => $model?->account_holder
-                    ?: $model?->contactBankConnection?->account_holder
-                        ?: $model?->addressInvoice?->name,
-            ];
+            $this->data['positions'][$index] = $position
+                + ['contact_id' => $model?->contact_id]
+                + ($model?->paymentRecipient() ?? []);
         }
     }
 }

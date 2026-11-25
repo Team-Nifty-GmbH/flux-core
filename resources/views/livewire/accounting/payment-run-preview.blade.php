@@ -117,7 +117,9 @@
                                     color="red"
                                     icon="trash"
                                     :text="__('Remove')"
-                                    x-on:click="$wire.removeOrder(row.id)"
+                                    x-on:click="
+                                        $wire.removeOrder(group.key, row.id)
+                                    "
                                 />
                             </div>
                         </div>
