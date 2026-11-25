@@ -7,6 +7,7 @@ use Laravel\Sanctum\Sanctum;
 beforeEach(function (): void {
     CoreSettings::fake([
         'install_done' => false,
+        'internal_comment_models' => [],
         'license_key' => null,
         'formal_salutation' => false,
     ]);
