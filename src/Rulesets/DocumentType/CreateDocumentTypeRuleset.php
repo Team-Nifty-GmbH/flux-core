@@ -23,8 +23,9 @@ class CreateDocumentTypeRuleset extends FluxRuleset
                 'distinct',
                 app(MorphClassExists::class, ['implements' => HasMedia::class]),
             ],
-            'retention_years' => 'nullable|integer|min:1|max:100',
+            'retention_years' => 'required_if_accepted:is_payroll_record|nullable|integer|min:1|max:100',
             'is_owner_uploadable' => 'boolean',
+            'is_payroll_record' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

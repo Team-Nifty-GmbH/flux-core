@@ -32,6 +32,11 @@
             :label="__('Owner may upload')"
         />
         <x-toggle
+            wire:model.boolean="documentTypeForm.is_payroll_record"
+            :label="__('Payroll record')"
+            :hint="__('Payroll records (§ 8 BVV) always need a retention period.')"
+        />
+        <x-toggle
             wire:model.boolean="documentTypeForm.is_active"
             :label="__('Is Active')"
         />
