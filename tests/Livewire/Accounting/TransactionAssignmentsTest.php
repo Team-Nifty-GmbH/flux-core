@@ -493,7 +493,7 @@ test('an order smaller than the transaction is assigned its full balance', funct
 
 test('a credit note is netted before the invoices are capped', function (): void {
     $transaction = createTransactionAssignmentsTransaction(100);
-    $invoice = createTransactionAssignmentsOrder(Currency::default()->getKey(), 150);
+    $invoice = createTransactionAssignmentsOrder(Currency::default()->getKey(), 200);
     $creditNote = createTransactionAssignmentsOrder(Currency::default()->getKey(), -50);
 
     Livewire::test(TransactionAssignments::class)
@@ -527,4 +527,47 @@ test('no order is assigned once the transaction amount is used up', function ():
         ->pluck('order_id')
         ->all()
     )->toEqual([$firstOrder->getKey()]);
+});
+
+test('an order that cannot be assigned leaves the remaining amount for the next order', function (): void {
+    $transaction = createTransactionAssignmentsTransaction(100);
+    $subscriptionOrder = createTransactionAssignmentsOrder(Currency::default()->getKey(), 100);
+    $subscriptionOrder->orderType->update(['order_type_enum' => OrderTypeEnum::Subscription]);
+    $order = createTransactionAssignmentsOrder(Currency::default()->getKey(), 100);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('assignOrdersModal', $transaction)
+        ->set('selectedOrders', [$subscriptionOrder->getKey(), $order->getKey()])
+        ->call('assignOrders')
+        ->assertOk();
+
+    expect(OrderTransaction::query()
+        ->where('transaction_id', $transaction->getKey())
+        ->pluck('amount', 'order_id')
+        ->map(fn (string $amount) => bcround($amount, 2))
+        ->all()
+    )->toEqual([$order->getKey() => '100.00']);
+});
+
+test('orders skipped because nothing is left show a warning', function (): void {
+    $transaction = createTransactionAssignmentsTransaction(100);
+    OrderTransaction::query()->create([
+        'transaction_id' => $transaction->getKey(),
+        'order_id' => createTransactionAssignmentsOrder(Currency::default()->getKey(), 100)->getKey(),
+        'amount' => 100,
+        'is_accepted' => false,
+    ]);
+    $order = createTransactionAssignmentsOrder(Currency::default()->getKey(), 50);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('assignOrdersModal', $transaction)
+        ->set('selectedOrders', [$order->getKey()])
+        ->call('assignOrders')
+        ->assertOk()
+        ->assertToastNotification(type: 'warning');
+
+    expect(OrderTransaction::query()
+        ->where('order_id', $order->getKey())
+        ->exists()
+    )->toBeFalse();
 });

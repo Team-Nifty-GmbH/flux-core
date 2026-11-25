@@ -13,6 +13,7 @@
     ":count leads created": ":count Leads erstellt",
     ":count new action permissions": ":count neue Aktionsberechtigungen",
     ":count of :total reminders were not sent": ":count von :total Mahnungen wurden nicht versendet",
+    ":count order(s) not assigned because the transaction amount is used up.": ":count Auftrag/Aufträge nicht zugeordnet, weil der Betrag der Transaktion bereits aufgebraucht ist.",
     ":count order(s) skipped due to missing email address.": ":count Auftrag/Aufträge übersprungen, da keine E-Mail-Adresse vorhanden.",
     ":count orders without coordinates": ":count Aufträge ohne Koordinaten",
     ":count PDF(s) could not be uploaded.": ":count PDF(s) konnten nicht hochgeladen werden.",

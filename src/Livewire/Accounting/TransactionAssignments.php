@@ -184,6 +184,7 @@ class TransactionAssignments extends Component
 
         [$foreignCurrencyOrders, $orders] = resolve_static(Order::class, 'query')
             ->whereKey($this->selectedOrders)
+            ->orderBy('id')
             ->get(['id', 'currency_id', 'balance'])
             ->partition(fn (Order $order) => $order->currency_id !== $transactionCurrencyId);
 
@@ -193,27 +194,37 @@ class TransactionAssignments extends Component
             fn (Order $order) => bccomp(bcmul($remainingAmount, $order->balance, 9), 0, 9) === -1 ? 0 : 1
         );
 
-        foreach ($sortedOrders as $order) {
-            $amount = match (bccomp(bcmul($remainingAmount, $order->balance, 9), 0, 9)) {
-                -1 => $order->balance,
-                1 => bccomp(bcabs($remainingAmount), bcabs($order->balance), 9) === -1
-                    ? $remainingAmount
-                    : $order->balance,
-                default => null,
-            };
+        $skippedOrders = 0;
 
-            if (is_null($amount)) {
+        foreach ($sortedOrders as $order) {
+            $sign = bccomp(bcmul($remainingAmount, $order->balance, 9), 0, 9);
+
+            if ($sign === 0) {
+                $skippedOrders++;
+
                 continue;
             }
 
-            $remainingAmount = bcsub($remainingAmount, $amount, 2);
+            $amount = $sign === 1 && bccomp(bcabs($remainingAmount), bcabs($order->balance), 9) === -1
+                ? $remainingAmount
+                : $order->balance;
 
-            $this->createOrderTransaction([
+            if ($this->createOrderTransaction([
                 'transaction_id' => $this->transactionForm->id,
                 'order_id' => $order->getKey(),
                 'amount' => $amount,
                 'is_accepted' => true,
-            ]);
+            ])) {
+                $remainingAmount = bcsub($remainingAmount, $amount, 2);
+            }
+        }
+
+        if ($skippedOrders > 0) {
+            $this->toast()
+                ->warning(__(':count order(s) not assigned because the transaction amount is used up.', [
+                    'count' => $skippedOrders,
+                ]))
+                ->send();
         }
 
         $this->assignForeignCurrencyOrders($foreignCurrencyOrders);
@@ -685,7 +696,7 @@ class TransactionAssignments extends Component
         );
     }
 
-    protected function createOrderTransaction(array $data): void
+    protected function createOrderTransaction(array $data): bool
     {
         try {
             CreateOrderTransaction::make($data)
@@ -693,7 +704,11 @@ class TransactionAssignments extends Component
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this, form: $this->orderTransactionForm);
+
+            return false;
         }
+
+        return true;
     }
 
     protected function refreshTransactions(bool $renderless = true): void
