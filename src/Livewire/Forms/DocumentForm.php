@@ -25,6 +25,9 @@ class DocumentForm extends FluxForm
 
     public ?string $name = null;
 
+    #[Locked]
+    public ?int $previous_version_id = null;
+
     protected function getActions(): array
     {
         return [

@@ -11,6 +11,7 @@ use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Validation\ValidationException;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as BaseMedia;
@@ -87,6 +88,18 @@ class Media extends BaseMedia
         return $this->belongsTo(DocumentType::class);
     }
 
+    public function nextVersion(): HasOne
+    {
+        return $this->hasOne(Media::class, 'previous_version_id')
+            ->withoutGlobalScope(ExcludeDocumentsScope::class);
+    }
+
+    public function previousVersion(): BelongsTo
+    {
+        return $this->belongsTo(Media::class, 'previous_version_id')
+            ->withoutGlobalScope(ExcludeDocumentsScope::class);
+    }
+
     public function printJobs(): HasMany
     {
         return $this->hasMany(PrintJob::class);
@@ -100,9 +113,24 @@ class Media extends BaseMedia
     }
 
     // Public methods
+    public function calculateChecksum(): string
+    {
+        $context = hash_init('sha256');
+        $stream = $this->stream();
+        hash_update_stream($context, $stream);
+        fclose($stream);
+
+        return hash_final($context);
+    }
+
     public function getCollection(): ?MediaCollection
     {
         return $this->model->getMediaCollection($this->collection_name);
+    }
+
+    public function hasIntactFile(): bool
+    {
+        return ! is_null($this->checksum) && hash_equals($this->checksum, $this->calculateChecksum());
     }
 
     public function isDocument(): bool

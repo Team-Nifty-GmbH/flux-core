@@ -91,6 +91,15 @@ class DocumentList extends BaseDataTable
                     'wire:click' => 'review(record.id)',
                 ]),
             DataTableButton::make()
+                ->text(__('New version'))
+                ->icon('document-duplicate')
+                ->when(fn () => resolve_static(UploadDocument::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'x-cloak' => true,
+                    'x-show' => 'record.is_approved && ! record.is_superseded',
+                    'wire:click' => 'newVersion(record.id)',
+                ]),
+            DataTableButton::make()
                 ->text(__('Extend retention'))
                 ->icon('calendar')
                 ->when(fn () => resolve_static(UpdateDocument::class, 'canPerformAction', [false]))
@@ -189,6 +198,21 @@ class DocumentList extends BaseDataTable
     }
 
     #[Renderless]
+    public function newVersion(int $id): void
+    {
+        $document = $this->ownDocument($id);
+
+        $this->documentForm->reset();
+        $this->documentForm->document_type_id = $document->document_type_id;
+        $this->documentForm->document_date = today()->toDateString();
+        $this->documentForm->previous_version_id = $document->getKey();
+
+        $this->js(<<<'JS'
+            $tsui.open.modal('upload-document-modal');
+        JS);
+    }
+
+    #[Renderless]
     public function review(int $id): void
     {
         $this->selectedDocumentId = $this->ownDocument($id)->getKey();
@@ -267,6 +291,7 @@ class DocumentList extends BaseDataTable
         $itemArray['is_pending'] = $item->review_state === DocumentReviewStateEnum::Pending;
         $itemArray['is_approved'] = $item->review_state === DocumentReviewStateEnum::Approved;
         $itemArray['is_locked'] = $item->isLocked();
+        $itemArray['is_superseded'] = (bool) $item->next_version_exists;
     }
 
     protected function documentTypeQuery(): Builder
@@ -281,7 +306,8 @@ class DocumentList extends BaseDataTable
             ->where('model_type', $this->modelType)
             ->where('model_id', $this->modelId)
             ->whereNotNull('document_type_id')
-            ->addSelect(['review_state', 'retain_until']);
+            ->addSelect(['review_state', 'retain_until'])
+            ->withExists('nextVersion');
     }
 
     protected function getDocumentTypes(): array
