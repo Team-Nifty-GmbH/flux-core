@@ -338,3 +338,24 @@ test('a transfer refunding an overpaid sales invoice net of a supplier credit no
         ->and($creditNote->fresh()->balance)->toEqual('0.00')
         ->and($creditNote->fresh()->payment_state)->toBeInstanceOf(Paid::class);
 });
+
+test('a later payment of the same amount to the same recipient is not booked onto a reconciled position', function (): void {
+    [, $position] = createNettedPosition($this);
+
+    $first = Transaction::factory()->create([
+        'amount' => -800,
+        'end_to_end_reference' => $position->end_to_end_id,
+        'counterpart_iban' => $position->iban,
+        'booking_date' => now(),
+    ]);
+    $second = Transaction::factory()->create([
+        'amount' => -800,
+        'end_to_end_reference' => null,
+        'counterpart_iban' => $position->iban,
+        'booking_date' => now()->addDay(),
+    ]);
+
+    expect(app(PaymentRunMatcher::class)->match($first))->toBeTrue()
+        ->and(app(PaymentRunMatcher::class)->match($second))->toBeFalse()
+        ->and(OrderTransaction::query()->where('transaction_id', $second->getKey())->exists())->toBeFalse();
+});

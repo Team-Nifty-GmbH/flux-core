@@ -6,6 +6,7 @@ use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Models\PaymentRunPosition;
 use FluxErp\Models\Transaction;
+use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\States\PaymentRun\Pending;
 use FluxErp\States\PaymentRun\Successful;
 use Illuminate\Database\Eloquent\Builder;
@@ -66,16 +67,19 @@ class PaymentRunMatcher
 
     protected function byCollectiveBooking(Transaction $transaction): ?Collection
     {
+        $from = $transaction->booking_date->copy()->subDays(static::DAYS_AFTER)->toDateString();
+        $to = $transaction->booking_date->copy()->addDays(static::DAYS_BEFORE)->toDateString();
+
         $runs = $this->openPositions($transaction)
+            ->whereHas('paymentRun', fn (Builder $query) => $query
+                ->where('is_single_booking', false)
+                ->whereRaw('DATE(COALESCE(instructed_execution_date, created_at)) BETWEEN ? AND ?', [$from, $to])
+            )
+            ->with(['paymentRun', 'orders'])
             ->get()
-            ->filter(fn (PaymentRunPosition $position) => $this->isInWindow($position, $transaction))
             ->groupBy('payment_run_id');
 
         foreach ($runs as $positions) {
-            if ($positions->first()->paymentRun->is_single_booking) {
-                continue;
-            }
-
             $sum = $positions->reduce(
                 fn (string $carry, PaymentRunPosition $position) => bcadd($carry, (string) $position->amount, 9),
                 '0'
@@ -102,6 +106,12 @@ class PaymentRunMatcher
             ->whereDoesntHave(
                 'orders.transactions',
                 fn (Builder $query) => $query->whereKey($transaction->getKey())
+            )
+            ->whereDoesntHave(
+                'orders',
+                fn (Builder $query) => $query
+                    ->where('order_payment_run.success', true)
+                    ->orWhereState('payment_state', Paid::class)
             );
     }
 
@@ -154,5 +164,7 @@ class PaymentRunMatcher
                 ->validate()
                 ->execute();
         }
+
+        $position->orders()->updateExistingPivot($position->orders->modelKeys(), ['success' => true]);
     }
 }
