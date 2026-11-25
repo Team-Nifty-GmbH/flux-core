@@ -42,9 +42,7 @@ class FluxOptimize extends Command
         $cachePath = $this->laravel->bootstrapPath('cache/flux-livewire-components.php');
 
         if ($this->forget) {
-            if (file_exists($cachePath)) {
-                unlink($cachePath);
-            }
+            $this->forgetCache($cachePath);
 
             return;
         }
@@ -96,9 +94,7 @@ class FluxOptimize extends Command
         $cachePath = $this->laravel->bootstrapPath('cache/flux-blade-components.php');
 
         if ($this->forget) {
-            if (file_exists($cachePath)) {
-                unlink($cachePath);
-            }
+            $this->forgetCache($cachePath);
 
             return;
         }
@@ -143,9 +139,7 @@ class FluxOptimize extends Command
         $cachePath = $this->laravel->bootstrapPath('cache/flux-view-classes.php');
 
         if ($this->forget) {
-            if (file_exists($cachePath)) {
-                unlink($cachePath);
-            }
+            $this->forgetCache($cachePath);
 
             return;
         }
@@ -207,9 +201,7 @@ class FluxOptimize extends Command
         $cachePath = $this->laravel->bootstrapPath('cache/flux-actions.php');
 
         if ($this->forget) {
-            if (file_exists($cachePath)) {
-                unlink($cachePath);
-            }
+            $this->forgetCache($cachePath);
 
             return;
         }
@@ -277,9 +269,7 @@ class FluxOptimize extends Command
         $cachePath = $this->laravel->bootstrapPath('cache/flux-repeatables.php');
 
         if ($this->forget) {
-            if (file_exists($cachePath)) {
-                unlink($cachePath);
-            }
+            $this->forgetCache($cachePath);
 
             return;
         }
@@ -346,9 +336,7 @@ class FluxOptimize extends Command
         $cachePath = $this->laravel->bootstrapPath('cache/flux-widgets.php');
 
         if ($this->forget) {
-            if (file_exists($cachePath)) {
-                unlink($cachePath);
-            }
+            $this->forgetCache($cachePath);
 
             return;
         }
@@ -409,6 +397,13 @@ class FluxOptimize extends Command
         return $allWidgets;
     }
 
+    protected function forgetCache(string $path): void
+    {
+        if (! @unlink($path) && file_exists($path)) {
+            unlink($path);
+        }
+    }
+
     protected function writeCache(string $path, string $content): void
     {
         $temporary = $path . '.' . getmypid();
@@ -427,9 +422,7 @@ class FluxOptimize extends Command
         $cachePath = $this->laravel->bootstrapPath('cache/flux-commands.php');
 
         if ($this->forget) {
-            if (file_exists($cachePath)) {
-                unlink($cachePath);
-            }
+            $this->forgetCache($cachePath);
 
             return;
         }
