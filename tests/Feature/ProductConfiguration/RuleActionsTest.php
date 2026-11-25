@@ -188,3 +188,45 @@ test('update switches a rule from a group to options and back', function (): voi
         'product_configuration_rule_id' => $rule->getKey(),
     ]);
 });
+
+test('a rule cannot point at a sibling option of its own group', function (): void {
+    $sibling = configurationItem($this->graphics);
+
+    CreateProductConfigurationRule::assertValidationErrors([
+        'product_configuration_group_item_id' => $this->gpu->getKey(),
+        'rule_type_enum' => 'excludes',
+        'target_items' => [$this->psu->getKey(), $sibling->getKey()],
+    ], 'target_group_id');
+
+    $rule = CreateProductConfigurationRule::make([
+        'product_configuration_group_item_id' => $this->gpu->getKey(),
+        'rule_type_enum' => 'requires',
+        'target_items' => [$this->psu->getKey()],
+    ])->validate()->execute();
+
+    UpdateProductConfigurationRule::assertValidationErrors([
+        'id' => $rule->getKey(),
+        'target_items' => [$sibling->getKey()],
+    ], 'target_group_id');
+});
+
+test('update rejects removing every target', function (): void {
+    $rule = CreateProductConfigurationRule::make([
+        'product_configuration_group_item_id' => $this->gpu->getKey(),
+        'rule_type_enum' => 'requires',
+        'target_group_id' => $this->power->getKey(),
+    ])->validate()->execute();
+
+    UpdateProductConfigurationRule::assertValidationErrors([
+        'id' => $rule->getKey(),
+        'target_group_id' => null,
+        'target_items' => [],
+    ], 'target_group_id');
+
+    UpdateProductConfigurationRule::assertValidationErrors([
+        'id' => $rule->getKey(),
+        'target_group_id' => null,
+    ], 'target_group_id');
+
+    expect($rule->refresh()->target_group_id)->toBe($this->power->getKey());
+});
