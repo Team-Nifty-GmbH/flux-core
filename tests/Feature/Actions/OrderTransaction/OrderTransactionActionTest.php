@@ -43,6 +43,35 @@ test('create order transaction', function (): void {
     expect($ot)->toBeInstanceOf(OrderTransaction::class);
 });
 
+test('create order transaction derives the exchange rate from both amounts', function (): void {
+    $ot = CreateOrderTransaction::make([
+        'transaction_id' => $this->transaction->getKey(),
+        'order_id' => $this->order->getKey(),
+        'amount' => -4.35,
+        'order_currency_amount' => -5.00,
+        'exchange_rate' => 0.87,
+    ])->validate()->execute();
+
+    expect(bccomp($ot->exchange_rate, '1.1494252873', 10))->toBe(0);
+});
+
+test('update order transaction derives the exchange rate when the amount changes', function (): void {
+    $ot = OrderTransaction::factory()->create([
+        'transaction_id' => $this->transaction->getKey(),
+        'order_id' => $this->order->getKey(),
+        'amount' => -4.35,
+        'order_currency_amount' => -5.00,
+        'exchange_rate' => 1.1494252874,
+    ]);
+
+    $updated = UpdateOrderTransaction::make([
+        'pivot_id' => $ot->getKey(),
+        'amount' => -4.00,
+    ])->validate()->execute();
+
+    expect(bccomp($updated->exchange_rate, '1.25', 10))->toBe(0);
+});
+
 test('create order transaction requires transaction_id order_id amount', function (): void {
     CreateOrderTransaction::assertValidationErrors([], ['transaction_id', 'order_id', 'amount']);
 });
