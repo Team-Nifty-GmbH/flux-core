@@ -47,14 +47,12 @@ test('choosing a configurable product loads its groups', function (): void {
 test('the preview prices the configuration and reports rule violations', function (): void {
     $component = Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->call('changedProductId', $this->server->getKey())
-        ->set('orderPosition.configuration', [
+        ->call('previewConfiguration', [
             ['product_configuration_group_item_id' => $this->ssd->getKey(), 'amount' => 1],
         ])
-        ->call('previewConfiguration')
         ->assertReturned(fn (array $result) => bccomp($result['total_price'], '120', 2) === 0);
 
-    $component->set('orderPosition.configuration', [])
-        ->call('previewConfiguration')
+    $component->call('previewConfiguration', [])
         ->assertReturned(['errors' => ['Storage requires a selection.']]);
 });
 
