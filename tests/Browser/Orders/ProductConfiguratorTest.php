@@ -60,3 +60,58 @@ test('configure a product in an order, see a violation and save', function (): v
             ['product_configuration_group_item_id' => $heater->getKey(), 'amount' => 1],
         ]);
 });
+
+test('cancelling the configurator keeps the children on a later save', function (): void {
+    $priceList = PriceList::factory()->create(['is_net' => true]);
+    $order = configurationOrder($priceList);
+    $server = configurationProduct(['name' => 'Browser Server', 'is_configurable' => true]);
+    configurationPrice($server, $priceList, '100');
+
+    $storage = configurationGroup(['name' => 'Storage']);
+    $hdd = configurationItem($storage, configurationProduct(['name' => 'Plain HDD']), ['surcharge' => 0]);
+    attachConfigurationGroup($server, $storage, isRequired: true);
+
+    $page = visit(route('orders.id', $order))->assertNoSmoke();
+    waitForDataTable($page);
+
+    $page->script(sprintf(<<<'JS'
+        () => {
+            const component = Livewire.all().find((item) => item.name === 'order.order-positions');
+
+            return component.$wire.editOrderPosition()
+                .then(() => component.$wire.changedProductId(%d));
+        }
+    JS, $server->getKey()));
+    waitForElement($page, '#configurator-item-' . $hdd->getKey());
+    $page->click('#configurator-item-' . $hdd->getKey());
+    $page->click('#configurator-save');
+    waitForDataTable($page);
+    $page->assertSee('Plain HDD');
+
+    $parent = OrderPosition::query()->where('product_id', $server->getKey())->sole();
+    $childIds = $parent->children()->pluck('id')->all();
+
+    $page->script(sprintf(<<<'JS'
+        () => {
+            const component = Livewire.all().find((item) => item.name === 'order.order-positions');
+
+            return component.$wire.editOrderPosition(%d)
+                .then(() => component.$wire.editConfiguration());
+        }
+    JS, $parent->getKey()));
+    waitForElement($page, '#configurator-cancel');
+    $page->click('#configurator-cancel');
+    $page->wait(1);
+
+    $page->script(<<<'JS'
+        () => {
+            const component = Livewire.all().find((item) => item.name === 'order.order-positions');
+            component.$wire.orderPosition.name = 'Renamed';
+
+            return component.$wire.addOrderPosition();
+        }
+    JS);
+
+    expect($parent->refresh()->name)->toBe('Renamed')
+        ->and($parent->children()->pluck('id')->all())->toBe($childIds);
+});

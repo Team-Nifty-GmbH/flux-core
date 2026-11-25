@@ -2,6 +2,7 @@
     id="order-position-configurator"
     :title="__('Configuration')"
     size="4xl"
+    x-on:close="$wire.orderPosition.configuration = null"
     persistent
 >
     <div
@@ -137,6 +138,7 @@
     </div>
     <x-slot:footer>
         <x-button
+            id="configurator-cancel"
             color="secondary"
             light
             flat

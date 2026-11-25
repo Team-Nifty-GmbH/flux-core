@@ -188,15 +188,13 @@ class ProductConfigurationGroups extends ProductConfigurationGroupList
 
         $this->items = resolve_static(ProductConfigurationGroupItem::class, 'query')
             ->where('product_configuration_group_id', $this->productConfigurationGroupForm->id)
-            ->with('product:id,name,product_number')
+            ->with('product:id,name')
             ->orderBy('sort')
             ->get()
             ->map(fn (ProductConfigurationGroupItem $item) => [
                 'id' => $item->getKey(),
                 'product_name' => $item->product?->name,
                 'surcharge' => $item->surcharge,
-                'max_amount' => $item->max_amount,
-                'sort' => $item->sort,
             ])
             ->all();
     }
