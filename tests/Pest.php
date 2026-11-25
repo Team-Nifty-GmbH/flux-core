@@ -37,6 +37,7 @@ pest()
 
         CoreSettings::fake([
             'install_done' => false,
+            'internal_comment_models' => [],
             'license_key' => null,
             'formal_salutation' => false,
         ]);

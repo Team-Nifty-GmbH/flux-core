@@ -15,7 +15,7 @@
                     x-text="comment.created_by ?? '{{ __('Unknown') }}'"
                     class="dark:text-dark-300 font-medium text-gray-500"
                 ></div>
-                @if ($this->isPublic === true)
+                @if (auth()->check())
                     <x-badge
                         flat
                         x-cloak

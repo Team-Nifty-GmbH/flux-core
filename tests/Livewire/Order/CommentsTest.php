@@ -1,6 +1,8 @@
 <?php
 
+use FluxErp\Actions\Comment\CreateComment;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Livewire\Forms\Settings\CoreSettingsForm;
 use FluxErp\Livewire\Order\Comments;
 use FluxErp\Models\Address;
 use FluxErp\Models\Comment;
@@ -10,7 +12,9 @@ use FluxErp\Models\Language;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
+use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
+use FluxErp\Settings\CoreSettings;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -142,7 +146,7 @@ test('comments of a model listed as internal only offer no answer to the custome
         ->assertSee(__('Answer to customer'))
         ->call('saveComment', ['comment' => 'to the customer', 'is_internal' => false]);
 
-    $settings = app(FluxErp\Settings\CoreSettings::class);
+    $settings = app(CoreSettings::class);
     $settings->internal_comment_models = [morph_alias(Order::class)];
     $settings->save();
 
@@ -157,7 +161,37 @@ test('comments of a model listed as internal only offer no answer to the custome
 });
 
 test('the core settings offer every commentable model', function (): void {
-    expect(collect(FluxErp\Livewire\Forms\Settings\CoreSettingsForm::commentModelOptions())->pluck('value'))
+    expect(collect(CoreSettingsForm::commentModelOptions())->pluck('value'))
         ->toContain(morph_alias(Order::class))
         ->not->toContain(morph_alias(Currency::class));
+});
+
+test('staff on an internal only model still need the permission to comment', function (): void {
+    Permission::findOrCreate('action.' . CreateComment::name(), 'web');
+
+    $inputs = fn (): int => substr_count(
+        Livewire::withoutLazyLoading()->test(Comments::class, ['modelId' => $this->order->id])->html(),
+        'class="comment-input"'
+    );
+    $withoutPermission = $inputs();
+
+    $settings = app(CoreSettings::class);
+    $settings->internal_comment_models = [morph_alias(Order::class)];
+    $settings->save();
+
+    expect($inputs())->toBe($withoutPermission);
+
+    $this->user->givePermissionTo('action.' . CreateComment::name());
+
+    expect($inputs())->toBeGreaterThan($withoutPermission);
+});
+
+test('staff on an internal only model still see which comments are internal', function (): void {
+    $settings = app(CoreSettings::class);
+    $settings->internal_comment_models = [morph_alias(Order::class)];
+    $settings->save();
+
+    Livewire::withoutLazyLoading()
+        ->test(Comments::class, ['modelId' => $this->order->id])
+        ->assertSee(__('Internal'));
 });
