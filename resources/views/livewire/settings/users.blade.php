@@ -36,29 +36,6 @@
                     @show
                 </div>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    @section('user-edit.employment')
-                        <x-date
-                            :without-time="true"
-                            :label="__('Date Of Birth')"
-                            wire:model="userForm.date_of_birth"
-                        />
-                        <x-input
-                            :label="__('Employee Number')"
-                            wire:model="userForm.employee_number"
-                        />
-                        <x-date
-                            :without-time="true"
-                            :label="__('Employment Date')"
-                            wire:model="userForm.employment_date"
-                        />
-                        <x-date
-                            :without-time="true"
-                            :label="__('Termination Date')"
-                            wire:model="userForm.termination_date"
-                        />
-                    @show
-                </div>
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     @section('user-edit.attributes')
                         <x-checkbox
                             :label="__('Active')"
