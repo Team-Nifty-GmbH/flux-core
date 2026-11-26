@@ -137,18 +137,8 @@ test('renders successfully', function (): void {
         });
 });
 
-test('comments of a model listed as internal only offer no answer to the customer', function (): void {
+test('only models enabled in the core settings offer an answer to the customer', function (): void {
     Comment::query()->where('model_id', $this->order->id)->delete();
-
-    Livewire::withoutLazyLoading()
-        ->test(Comments::class, ['modelId' => $this->order->id])
-        ->assertSet('isPublic', true)
-        ->assertSee(__('Answer to customer'))
-        ->call('saveComment', ['comment' => 'to the customer', 'is_internal' => false]);
-
-    $settings = app(CoreSettings::class);
-    $settings->internal_comment_models = [morph_alias(Order::class)];
-    $settings->save();
 
     Livewire::withoutLazyLoading()
         ->test(Comments::class, ['modelId' => $this->order->id])
@@ -156,8 +146,18 @@ test('comments of a model listed as internal only offer no answer to the custome
         ->assertDontSee(__('Answer to customer'))
         ->call('saveComment', ['comment' => 'kept internal', 'is_internal' => false]);
 
+    $settings = app(CoreSettings::class);
+    $settings->customer_comment_models = [morph_alias(Order::class)];
+    $settings->save();
+
+    Livewire::withoutLazyLoading()
+        ->test(Comments::class, ['modelId' => $this->order->id])
+        ->assertSet('isPublic', true)
+        ->assertSee(__('Answer to customer'))
+        ->call('saveComment', ['comment' => 'to the customer', 'is_internal' => false]);
+
     expect(Comment::query()->where('model_id', $this->order->id)->pluck('is_internal', 'comment')->all())
-        ->toEqual(['to the customer' => false, 'kept internal' => true]);
+        ->toEqual(['kept internal' => true, 'to the customer' => false]);
 });
 
 test('the core settings offer every commentable model', function (): void {
@@ -166,17 +166,20 @@ test('the core settings offer every commentable model', function (): void {
         ->not->toContain(morph_alias(Currency::class));
 });
 
-test('staff on an internal only model still need the permission to comment', function (): void {
+test('staff on a model without answer to the customer still need the permission to comment', function (): void {
     Permission::findOrCreate('action.' . CreateComment::name(), 'web');
 
     $inputs = fn (): int => substr_count(
         Livewire::withoutLazyLoading()->test(Comments::class, ['modelId' => $this->order->id])->html(),
         'class="comment-input"'
     );
-    $withoutPermission = $inputs();
 
     $settings = app(CoreSettings::class);
-    $settings->internal_comment_models = [morph_alias(Order::class)];
+    $settings->customer_comment_models = [morph_alias(Order::class)];
+    $settings->save();
+    $withoutPermission = $inputs();
+
+    $settings->customer_comment_models = [];
     $settings->save();
 
     expect($inputs())->toBe($withoutPermission);
@@ -186,12 +189,9 @@ test('staff on an internal only model still need the permission to comment', fun
     expect($inputs())->toBeGreaterThan($withoutPermission);
 });
 
-test('staff on an internal only model still see which comments are internal', function (): void {
-    $settings = app(CoreSettings::class);
-    $settings->internal_comment_models = [morph_alias(Order::class)];
-    $settings->save();
-
+test('staff on a model without answer to the customer still see which comments are internal', function (): void {
     Livewire::withoutLazyLoading()
         ->test(Comments::class, ['modelId' => $this->order->id])
+        ->assertSet('isPublic', false)
         ->assertSee(__('Internal'));
 });

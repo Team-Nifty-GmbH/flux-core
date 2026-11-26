@@ -52,7 +52,7 @@ abstract class Comments extends Component
 
     public function mount(): void
     {
-        if (in_array(morph_alias($this->modelType), app(CoreSettings::class)->internal_comment_models)) {
+        if (! in_array(morph_alias($this->modelType), app(CoreSettings::class)->customer_comment_models)) {
             $this->isPublic = false;
         }
 

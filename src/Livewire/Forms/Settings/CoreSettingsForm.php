@@ -21,9 +21,9 @@ class CoreSettingsForm extends SettingsForm
             'select' => 'label:label|value:value',
             ':options' => '\\FluxErp\\Livewire\\Forms\\Settings\\CoreSettingsForm::commentModelOptions()',
         ],
-        label: 'Comments without answer to customer',
+        label: 'Comments with answer to customer',
     )]
-    public array $internal_comment_models = [];
+    public array $customer_comment_models = [];
 
     public ?string $license_key = null;
 

@@ -6,6 +6,7 @@ use FluxErp\Models\Comment;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
+use FluxErp\Settings\CoreSettings;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Notifications\Events\NotificationSending;
 use Illuminate\Support\Facades\Event;
@@ -153,6 +154,10 @@ test('the notification of a comment is sent after its files are attached', funct
     ]);
     $address->subscribeNotificationChannel($ticket->broadcastChannel());
 
+    $settings = app(CoreSettings::class);
+    $settings->customer_comment_models = [morph_alias(Ticket::class)];
+    $settings->save();
+
     $mediaCounts = [];
     Event::listen(NotificationSending::class, function (NotificationSending $event) use (&$mediaCounts): bool {
         $mediaCounts[] = $event->notification->model->getMedia()->count();
@@ -173,4 +178,39 @@ test('the notification of a comment is sent after its files are attached', funct
 
     expect($mediaCounts)->not->toBeEmpty()
         ->and($mediaCounts)->each->toBe(1);
+});
+
+test('a ticket not enabled for answers to the customer sends no notification to the customer', function (): void {
+    $address = Address::factory()
+        ->for(Contact::factory()->create())
+        ->create([
+            'is_active' => true,
+            'is_main_address' => true,
+        ]);
+    $ticket = Ticket::factory()->create([
+        'authenticatable_type' => morph_alias(Address::class),
+        'authenticatable_id' => $address->getKey(),
+    ]);
+    $address->subscribeNotificationChannel($ticket->broadcastChannel());
+
+    $notified = [];
+    Event::listen(NotificationSending::class, function (NotificationSending $event) use (&$notified): bool {
+        $notified[] = $event->notifiable->getMorphClass();
+
+        return false;
+    });
+
+    Livewire::withoutLazyLoading()
+        ->actingAs($this->user)
+        ->test(Comments::class, ['modelId' => $ticket->getKey()])
+        ->assertSet('isPublic', false)
+        ->call('saveComment', ['comment' => 'not for the customer', 'is_internal' => false]);
+
+    expect($notified)->not->toContain(morph_alias(Address::class));
+    $this->assertDatabaseHas('comments', [
+        'model_type' => morph_alias(Ticket::class),
+        'model_id' => $ticket->getKey(),
+        'comment' => 'not for the customer',
+        'is_internal' => true,
+    ]);
 });
