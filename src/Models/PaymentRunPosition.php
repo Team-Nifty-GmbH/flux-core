@@ -51,4 +51,5 @@ class PaymentRunPosition extends FluxModel
         $this->save();
 
         return $this;
-    }}
+    }
+}
