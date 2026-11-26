@@ -69,6 +69,10 @@ class CreateMailExecutedSubscriber
 
         $created = [];
         foreach ($message->getMedia('attachments') as $attachment) {
+            if (! $this->isInvoiceFile($attachment)) {
+                continue;
+            }
+
             try {
                 $purchaseInvoice = CreatePurchaseInvoice::make([
                     'tenant_id' => $tenant?->getKey()
@@ -265,6 +269,16 @@ class CreateMailExecutedSubscriber
             ->withoutEagerLoads()
             ->get(['id', 'email', 'website'])
             ->first(fn (Tenant $tenant): bool => $this->matchesTenantDomain($tenant, $domain));
+    }
+
+    protected function isInvoiceFile(Media $attachment): bool
+    {
+        if (! str_starts_with($attachment->mime_type ?? '', 'image/')) {
+            return true;
+        }
+
+        return ! $attachment->getCustomProperty('is_inline')
+            && $attachment->size >= 100 * 1024;
     }
 
     protected function matchesTenantDomain(Tenant $tenant, string $domain): bool

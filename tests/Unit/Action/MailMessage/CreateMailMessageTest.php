@@ -10,6 +10,7 @@ use FluxErp\Models\MailFolder;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\Ticket;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
@@ -174,6 +175,62 @@ test('purchase invoice from mail message skips supplier on tenant domain', funct
     'domain suffix lookalike' => [['email' => 'buchhaltung@team-nifty.test'], 'notteam-nifty.test', true],
     'tenant website without a dot' => [['website' => 'test'], 'supplier.test', true],
 ]);
+
+test('purchase invoice from mail message only for invoice files', function (): void {
+    Event::fake('action.executed: ' . CreateMailMessage::class);
+
+    $mailFolder = MailFolder::factory()->create([
+        'mail_account_id' => $this->mailAccount->getKey(),
+        'can_create_purchase_invoice' => true,
+    ]);
+
+    $action = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->getKey(),
+        'mail_folder_id' => $mailFolder->getKey(),
+        'from' => 'Supplier <' . $this->address->email_primary . '>',
+        'to' => [$this->mailAccount->email],
+        'subject' => Str::uuid()->toString(),
+        'text_body' => faker()->text(),
+        'communication_type_enum' => 'mail',
+        'date' => now()->format('Y-m-d H:i:s'),
+        'tags' => [],
+    ]);
+    $message = $action->validate()->execute();
+
+    $png = fn (int $kiloBytes): string => UploadedFile::fake()->image('image.png', 120, 40)->getContent()
+        . random_bytes($kiloBytes * 1024);
+
+    $attachments = [
+        ['invoice.pdf', "%PDF-1.4\n" . random_bytes(2048), []],
+        ['xrechnung.xml', '<?xml version="1.0"?><Invoice>' . Str::uuid() . '</Invoice>', []],
+        ['image1.jpeg', UploadedFile::fake()->image('image1.jpeg', 200, 80)->getContent() . random_bytes(1024), []],
+        ['logo.png', $png(8), []],
+        ['ATT00001.png', $png(2), []],
+        ['banner.png', $png(200), ['is_inline' => true]],
+        ['receipt.png', $png(200), []],
+    ];
+
+    foreach ($attachments as [$fileName, $content, $customProperties]) {
+        $message->addMediaFromString($content)
+            ->usingFileName($fileName)
+            ->withCustomProperties($customProperties)
+            ->toMediaCollection('attachments');
+    }
+    $message->refresh();
+
+    (new CreateMailExecutedSubscriber())->handle($action);
+
+    $fileNames = PurchaseInvoice::query()
+        ->whereHas('communications', fn (Builder $query) => $query->whereKey($message->getKey()))
+        ->with('media')
+        ->get()
+        ->map(fn (PurchaseInvoice $purchaseInvoice) => $purchaseInvoice->getFirstMedia('purchase_invoice')?->file_name)
+        ->sort()
+        ->values()
+        ->all();
+
+    expect($fileNames)->toBe(['invoice.pdf', 'receipt.png', 'xrechnung.xml']);
+});
 
 test('create ticket from mail message', function (): void {
     Event::fake('action.executed: ' . CreateMailMessage::class);
