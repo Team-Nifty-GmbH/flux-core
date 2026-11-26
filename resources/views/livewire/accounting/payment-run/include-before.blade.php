@@ -22,27 +22,13 @@
                                     x-text="position.iban"
                                 ></div>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <div
-                                    x-html="
-                                        $nuxbe.format.money(position.amount, {
-                                            colored: true,
-                                        })
-                                    "
-                                ></div>
-                                <x-button
-                                    icon="paper-airplane"
-                                    color="secondary"
-                                    size="sm"
-                                    flat
-                                    :title="__('Send Payment Advice')"
-                                    x-on:click.stop="
-                                        $wire.openPaymentAdviceModal(
-                                            position.id,
-                                        )
-                                    "
-                                />
-                            </div>
+                            <div
+                                x-html="
+                                    $nuxbe.format.money(position.amount, {
+                                        colored: true,
+                                    })
+                                "
+                            ></div>
                         </div>
                         <template x-for="order in position.orders">
                             <x-flux::list-item
@@ -224,5 +210,3 @@
         </div>
     </x-slot:footer>
 </x-modal>
-
-{{ $this->renderCreateDocumentsModal() }}

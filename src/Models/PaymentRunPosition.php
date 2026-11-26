@@ -3,23 +3,17 @@
 namespace FluxErp\Models;
 
 use FluxErp\Casts\Money;
-use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Models\Pivots\OrderPaymentRun;
 use FluxErp\Support\PaymentRunPositionBuilder;
-use FluxErp\Traits\Model\Communicatable;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
-use FluxErp\Traits\Model\InteractsWithMedia;
-use FluxErp\Traits\Model\Printable;
-use FluxErp\View\Printing\PaymentRun\PaymentAdvice;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Spatie\MediaLibrary\HasMedia;
 
-class PaymentRunPosition extends FluxModel implements HasMedia, OffersPrinting
+class PaymentRunPosition extends FluxModel
 {
-    use Communicatable, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, Printable;
+    use HasPackageFactory, HasUserModification, HasUuid;
 
     protected function casts(): array
     {
@@ -57,24 +51,4 @@ class PaymentRunPosition extends FluxModel implements HasMedia, OffersPrinting
         $this->save();
 
         return $this;
-    }
-
-    public function resolveMailableAddress(): ?Address
-    {
-        return filled($this->contact?->invoiceAddress?->email_primary)
-            ? $this->contact->invoiceAddress
-            : $this->contact?->mainAddress;
-    }
-
-    public function getEmailTemplateModelType(): ?string
-    {
-        return morph_alias(static::class);
-    }
-
-    public function getPrintViews(): array
-    {
-        return [
-            'payment-advice' => PaymentAdvice::class,
-        ];
-    }
-}
+    }}
