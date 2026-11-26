@@ -123,7 +123,7 @@ class PaymentRunPositionBuilder
 
         return [
             'key' => $key,
-            'contact_name' => $first->contact?->name ?? $first->addressInvoice?->name,
+            'contact_name' => $first->addressInvoice?->name,
             'iban' => data_get($first->paymentRecipient(), 'iban'),
             'purpose' => $this->purpose(array_column($rows, 'invoice_number'), self::PLACEHOLDER_END_TO_END_ID),
             'amount' => $this->total($rows),

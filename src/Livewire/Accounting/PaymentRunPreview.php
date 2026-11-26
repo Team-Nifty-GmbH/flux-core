@@ -56,7 +56,6 @@ class PaymentRunPreview extends Component
 
         $creditNotes = $this->suggestedCreditNotes($orders);
         $orders->merge($creditNotes)->loadMissing([
-            'contact:id,expense_ledger_account_id',
             'addressInvoice',
             'orderType',
             'contactBankConnection:id,contact_id,iban,bic,account_holder',
