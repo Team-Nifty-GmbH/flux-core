@@ -3,13 +3,11 @@
 namespace FluxErp\Actions\PaymentRun;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Actions\LedgerBooking\CreateLedgerBooking;
 use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Models\PaymentRunPosition;
 use FluxErp\Rulesets\PaymentRun\CreatePaymentRunRuleset;
-use FluxErp\Settings\AccountingSettings;
 use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -31,7 +29,6 @@ class CreatePaymentRun extends FluxAction
     {
         parent::validateData();
 
-        $clearingLedgerAccountId = app(AccountingSettings::class)->clearing_ledger_account_id;
         $paymentRunTypeEnum = $this->getData('payment_run_type_enum');
         $paymentRunTypeEnum = $paymentRunTypeEnum instanceof PaymentRunTypeEnum
             ? $paymentRunTypeEnum
@@ -43,32 +40,9 @@ class CreatePaymentRun extends FluxAction
             $orders = data_get($position, 'orders', []);
             $amount = bcsum(array_column($orders, 'amount'));
 
-            if (bccomp($amount, '0', 2) !== 0) {
-                if (bccomp($amount, '0', 2) !== $paymentRunTypeEnum->expectedSign()) {
-                    $errors['positions.' . $index . '.orders'] = [
-                        'A payment run position must not point against the direction of the run.',
-                    ];
-                }
-
-                continue;
-            }
-
-            if (! $clearingLedgerAccountId) {
+            if (bccomp($amount, '0', 2) !== $paymentRunTypeEnum->expectedSign()) {
                 $errors['positions.' . $index . '.orders'] = [
-                    'Set a clearing ledger account before offsetting a credit note in full.',
-                ];
-
-                continue;
-            }
-
-            $hasMissingExpenseAccount = resolve_static(Order::class, 'query')
-                ->whereIntegerInRaw('id', array_column($orders, 'order_id'))
-                ->whereDoesntHave('contact', fn ($query) => $query->whereNotNull('expense_ledger_account_id'))
-                ->exists();
-
-            if ($hasMissingExpenseAccount) {
-                $errors['positions.' . $index . '.orders'] = [
-                    'Set an expense ledger account on every contact of a fully offset position.',
+                    'A payment run position must not point against the direction of the run.',
                 ];
             }
         }
@@ -109,12 +83,6 @@ class CreatePaymentRun extends FluxAction
             $position->end_to_end_id = 'PR' . $paymentRun->getKey() . '-' . $position->getKey();
             $position->refreshFromOrders();
 
-            if (bccomp((string) $position->amount, '0', 2) === 0) {
-                $this->settleByClearingAccount($position);
-
-                continue;
-            }
-
             $orderIds = array_merge($orderIds, array_column($orders, 'order_id'));
         }
 
@@ -127,30 +95,6 @@ class CreatePaymentRun extends FluxAction
             });
 
         return $paymentRun->fresh();
-    }
-
-    protected function settleByClearingAccount(PaymentRunPosition $position): void
-    {
-        $clearingLedgerAccountId = app(AccountingSettings::class)->clearing_ledger_account_id;
-
-        foreach ($position->orders as $order) {
-            $ledgerAccountId = $order->contact?->expense_ledger_account_id;
-
-            $isCredit = bccomp((string) $order->pivot->amount, '0', 2) > 0;
-
-            CreateLedgerBooking::make([
-                'credit_ledger_account_id' => $isCredit ? $ledgerAccountId : $clearingLedgerAccountId,
-                'debit_ledger_account_id' => $isCredit ? $clearingLedgerAccountId : $ledgerAccountId,
-                'tenant_id' => $order->tenant_id,
-                'source_type' => morph_alias(Order::class),
-                'source_id' => $order->getKey(),
-                'amount' => bcabs(bcround((string) $order->pivot->amount, 2)),
-                'booking_date' => now()->format('Y-m-d'),
-                'booking_text' => __('Offset within payment run :run', ['run' => $position->payment_run_id]),
-            ])
-                ->validate()
-                ->execute();
-        }
     }
 
     protected function prepareForValidation(): void

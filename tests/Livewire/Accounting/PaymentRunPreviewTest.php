@@ -8,7 +8,6 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Currency;
-use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentRun;
@@ -16,7 +15,6 @@ use FluxErp\Models\PaymentRunPosition;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\SepaMandate;
-use FluxErp\Settings\AccountingSettings;
 use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
 use FluxErp\States\Order\PaymentState\Open;
 use FluxErp\States\Order\PaymentState\Overpaid;
@@ -615,32 +613,6 @@ test('direct debit creates separate payment runs per sepa mandate type', functio
         ->assertRedirect();
 
     expect(PaymentRun::count())->toEqual(2);
-});
-
-test('a second credit note beyond the payable does not block the run', function (): void {
-    $clearing = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
-    app(AccountingSettings::class)->clearing_ledger_account_id = $clearing->getKey();
-
-    $invoice = createPaymentRunOrder($this->purchaseType, '-300.00');
-    $firstCreditNote = createPaymentRunOrder($this->refundType, '300.00', ['contact_id' => $invoice->contact_id]);
-    $secondCreditNote = createPaymentRunOrder($this->refundType, '150.00', ['contact_id' => $invoice->contact_id]);
-
-    Contact::query()->whereKey($invoice->contact_id)->update([
-        'expense_ledger_account_id' => LedgerAccount::factory()
-            ->create(['tenant_id' => $this->dbTenant->getKey()])
-            ->getKey(),
-    ]);
-
-    session(['payment_run_preview_orders' => [$invoice->getKey()]]);
-    session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
-
-    Livewire::test(PaymentRunPreview::class)
-        ->call('createPaymentRun')
-        ->assertRedirect();
-
-    expect(PaymentRun::query()->sole()->orders()->pluck('orders.id')->all())
-        ->toEqualCanonicalizing([$invoice->getKey(), $firstCreditNote->getKey()])
-        ->and($secondCreditNote->fresh()->payment_state)->toBeInstanceOf(Open::class);
 });
 
 test('the recipient of a position comes from its orders, not from the component state', function (): void {

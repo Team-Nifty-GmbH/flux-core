@@ -60,10 +60,10 @@ class UpdatePaymentRun extends FluxAction
 
         $paymentRun->orders()
             ->select(['orders.id', 'orders.payment_state'])
-            ->whereIntegerNotInRaw('orders.id', $paymentRun->settledPositionOrderIds())
             ->each(function (Order $order) use ($targetState): void {
                 if ($order->payment_state->canTransitionTo($targetState)) {
                     $order->payment_state->transitionTo($targetState);
                 }
             });
-    }}
+    }
+}

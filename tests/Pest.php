@@ -7,7 +7,6 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
-use FluxErp\Settings\AccountingSettings;
 use FluxErp\Settings\CoreSettings;
 use FluxErp\Settings\SecuritySettings;
 use FluxErp\Tests\BrowserTestCase;
@@ -40,12 +39,6 @@ pest()
             'install_done' => false,
             'license_key' => null,
             'formal_salutation' => false,
-        ]);
-
-        AccountingSettings::fake([
-            'auto_accept_secure_transaction_matches' => false,
-            'auto_send_reminders' => false,
-            'clearing_ledger_account_id' => null,
         ]);
 
         SecuritySettings::fake([

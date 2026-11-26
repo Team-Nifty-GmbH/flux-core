@@ -116,14 +116,6 @@ class PaymentRunList extends BaseDataTable
                 ->first()
             : null;
 
-        if ($position && bccomp((string) $position->amount, '0', 2) === 0) {
-            $this->toast()
-                ->error(__('This position was already offset and cannot be changed.'))
-                ->send();
-
-            return false;
-        }
-
         $paymentRun->orders()->detach($id);
 
         if ($order?->payment_state->canTransitionTo(Open::class)) {

@@ -7,19 +7,14 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
-use FluxErp\Models\LedgerAccount;
-use FluxErp\Models\LedgerBooking;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Models\PaymentRunPosition;
 use FluxErp\Models\PaymentType;
-use FluxErp\Models\Pivots\OrderPaymentRun;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Tenant;
-use FluxErp\Settings\AccountingSettings;
 use FluxErp\States\Order\PaymentState\Open;
-use FluxErp\States\Order\PaymentState\Paid;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
@@ -344,50 +339,4 @@ test('the run total matches the sum of its positions after creation', function (
 
     expect($run->fresh()->total_amount)
         ->toEqual(bcround((string) $run->positions()->sum('amount'), 2));
-});
-
-test('an already offset position cannot be changed from the execute dialog', function (): void {
-    $clearing = LedgerAccount::factory()->create(['tenant_id' => Tenant::default()->getKey()]);
-    $creditor = LedgerAccount::factory()->create(['tenant_id' => Tenant::default()->getKey()]);
-
-    app(AccountingSettings::class)->clearing_ledger_account_id = $clearing->getKey();
-
-    $invoice = createPaymentRunOrder(OrderTypeEnum::Purchase, '-500.00', ['invoice_number' => 'RE-1']);
-    $creditNote = createPaymentRunOrder(OrderTypeEnum::PurchaseRefund, '500.00', ['invoice_number' => 'GS-1']);
-
-    Contact::query()
-        ->whereKey([$invoice->contact_id, $creditNote->contact_id])
-        ->update(['expense_ledger_account_id' => $creditor->getKey()]);
-
-    $run = CreatePaymentRun::make([
-        'payment_run_type_enum' => 'money_transfer',
-        'positions' => [
-            [
-                'contact_id' => $invoice->contact_id,
-                'iban' => 'DE89370400440532013000',
-                'purpose' => 'RE-1, GS-1',
-                'orders' => [
-                    ['order_id' => $invoice->getKey(), 'amount' => -500],
-                    ['order_id' => $creditNote->getKey(), 'amount' => 500],
-                ],
-            ],
-        ],
-    ])->validate()->execute();
-
-    $position = $run->positions()->sole();
-
-    Livewire::test(PaymentRunList::class)
-        ->call('edit', $run)
-        ->call('removeOrder', $creditNote->getKey())
-        ->assertReturned(false);
-
-    expect($creditNote->fresh()->payment_state)->toBeInstanceOf(Paid::class)
-        ->and($invoice->fresh()->payment_state)->toBeInstanceOf(Paid::class)
-        ->and(OrderPaymentRun::query()
-            ->where('payment_run_position_id', $position->getKey())
-            ->where('order_id', $creditNote->getKey())
-            ->exists())->toBeTrue()
-        ->and($position->fresh()->amount)->toEqual('0.00')
-        ->and($position->fresh()->orders()->count())->toBe(2)
-        ->and(LedgerBooking::query()->count())->toBe(2);
 });
