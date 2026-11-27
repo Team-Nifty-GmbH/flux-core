@@ -604,3 +604,52 @@ test('an order without balance does not claim the transaction amount is used up'
             fn (string $eventName, array $params) => data_get($params, 'type') === 'warning'
         );
 });
+
+test('an invoice and a credit note that cancel out are assigned when nothing is left', function (): void {
+    $transaction = createTransactionAssignmentsTransaction(100);
+    OrderTransaction::query()->create([
+        'transaction_id' => $transaction->getKey(),
+        'order_id' => createTransactionAssignmentsOrder(Currency::default()->getKey(), 100)->getKey(),
+        'amount' => 100,
+        'is_accepted' => false,
+    ]);
+    $invoice = createTransactionAssignmentsOrder(Currency::default()->getKey(), 100);
+    $creditNote = createTransactionAssignmentsOrder(Currency::default()->getKey(), -100);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('assignOrdersModal', $transaction)
+        ->set('selectedOrders', [$invoice->getKey(), $creditNote->getKey()])
+        ->call('assignOrders')
+        ->assertOk();
+
+    $amounts = OrderTransaction::query()
+        ->where('transaction_id', $transaction->getKey())
+        ->pluck('amount', 'order_id');
+
+    expect(bcround($amounts[$invoice->getKey()], 2))->toEqual('100.00')
+        ->and(bcround($amounts[$creditNote->getKey()], 2))->toEqual('-100.00');
+});
+
+test('an invoice is not assigned when pending suggestions exceed the transaction amount', function (): void {
+    $transaction = createTransactionAssignmentsTransaction(100);
+
+    foreach ([1, 2] as $ignored) {
+        OrderTransaction::query()->create([
+            'transaction_id' => $transaction->getKey(),
+            'order_id' => createTransactionAssignmentsOrder(Currency::default()->getKey(), 100)->getKey(),
+            'amount' => 100,
+            'is_accepted' => false,
+        ]);
+    }
+
+    $invoice = createTransactionAssignmentsOrder(Currency::default()->getKey(), 200);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('assignOrdersModal', $transaction)
+        ->set('selectedOrders', [$invoice->getKey()])
+        ->call('assignOrders')
+        ->assertOk()
+        ->assertToastNotification(type: 'warning');
+
+    expect(OrderTransaction::query()->where('order_id', $invoice->getKey())->exists())->toBeFalse();
+});

@@ -206,16 +206,18 @@ class TransactionAssignments extends Component
 
         $remainingAmount = $this->remainingTransactionAmount($transaction);
 
+        $direction = $transaction->amount;
+
         $sortedOrders = $orders->sortBy(
-            fn (Order $order) => bccomp(bcmul($remainingAmount, $order->balance, 9), 0, 9) === -1 ? 0 : 1
+            fn (Order $order) => bccomp(bcmul($direction, $order->balance, 9), 0, 9) === -1 ? 0 : 1
         );
 
         $skippedOrders = 0;
 
         foreach ($sortedOrders as $order) {
-            $sign = bccomp(bcmul($remainingAmount, $order->balance, 9), 0, 9);
+            $sign = bccomp(bcmul($direction, $order->balance, 9), 0, 9);
 
-            if (bccomp($remainingAmount, 0, 2) === 0) {
+            if ($sign === 1 && bccomp(bcmul($remainingAmount, $direction, 9), 0, 9) !== 1) {
                 $skippedOrders++;
 
                 continue;
