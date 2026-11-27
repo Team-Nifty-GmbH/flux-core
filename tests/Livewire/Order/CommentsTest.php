@@ -1,6 +1,8 @@
 <?php
 
+use FluxErp\Actions\Comment\CreateComment;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Livewire\Forms\Settings\CoreSettingsForm;
 use FluxErp\Livewire\Order\Comments;
 use FluxErp\Models\Address;
 use FluxErp\Models\Comment;
@@ -10,7 +12,11 @@ use FluxErp\Models\Language;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
+use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
+use FluxErp\Settings\CoreSettings;
+use FluxErp\Traits\Model\Commentable;
+use FluxErp\Traits\Model\HasParentMorphClass;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -131,4 +137,76 @@ test('renders successfully', function (): void {
 
             return true;
         });
+});
+
+test('only models enabled in the core settings offer an answer to the customer', function (): void {
+    Comment::query()->where('model_id', $this->order->id)->delete();
+
+    Livewire::withoutLazyLoading()
+        ->test(Comments::class, ['modelId' => $this->order->id])
+        ->assertSet('canAnswerCustomer', false)
+        ->assertDontSee(__('Answer to customer'))
+        ->call('saveComment', ['comment' => 'kept internal', 'is_internal' => false]);
+
+    $settings = app(CoreSettings::class);
+    $settings->customer_comment_models = [morph_alias(Order::class)];
+    $settings->save();
+
+    Livewire::withoutLazyLoading()
+        ->test(Comments::class, ['modelId' => $this->order->id])
+        ->assertSet('canAnswerCustomer', true)
+        ->assertSee(__('Answer to customer'))
+        ->call('saveComment', ['comment' => 'to the customer', 'is_internal' => false]);
+
+    expect(Comment::query()->where('model_id', $this->order->id)->pluck('is_internal', 'comment')->all())
+        ->toEqual(['kept internal' => true, 'to the customer' => false]);
+});
+
+test('the core settings offer every commentable model', function (): void {
+    expect(collect(CoreSettingsForm::commentModelOptions())->pluck('value'))
+        ->toContain(morph_alias(Order::class))
+        ->not->toContain(morph_alias(Currency::class));
+});
+
+test('the core settings offer a model whose customization added comments', function (): void {
+    $customized = get_class(new class() extends Currency
+    {
+        use Commentable, HasParentMorphClass;
+
+        protected $table = 'currencies';
+    });
+    $this->app->bind(Currency::class, $customized);
+
+    expect(collect(CoreSettingsForm::commentModelOptions())->pluck('value'))
+        ->toContain(morph_alias(Currency::class));
+});
+
+test('staff on a model without answer to the customer still need the permission to comment', function (): void {
+    Permission::findOrCreate('action.' . CreateComment::name(), 'web');
+
+    $inputs = fn (): int => substr_count(
+        Livewire::withoutLazyLoading()->test(Comments::class, ['modelId' => $this->order->id])->html(),
+        'class="comment-input"'
+    );
+
+    $settings = app(CoreSettings::class);
+    $settings->customer_comment_models = [morph_alias(Order::class)];
+    $settings->save();
+    $withoutPermission = $inputs();
+
+    $settings->customer_comment_models = [];
+    $settings->save();
+
+    expect($inputs())->toBe($withoutPermission);
+
+    $this->user->givePermissionTo('action.' . CreateComment::name());
+
+    expect($inputs())->toBeGreaterThan($withoutPermission);
+});
+
+test('staff on a model without answer to the customer still see which comments are internal', function (): void {
+    Livewire::withoutLazyLoading()
+        ->test(Comments::class, ['modelId' => $this->order->id])
+        ->assertSet('canAnswerCustomer', false)
+        ->assertSee(__('Internal'));
 });

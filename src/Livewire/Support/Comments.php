@@ -6,6 +6,7 @@ use FluxErp\Livewire\Forms\CommentForm;
 use FluxErp\Models\Comment;
 use FluxErp\Models\Scopes\FamilyTreeScope;
 use FluxErp\Models\User;
+use FluxErp\Settings\CoreSettings;
 use FluxErp\Support\Mentions\MentionPillRefresher;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\BindsModelRecord;
@@ -29,6 +30,9 @@ abstract class Comments extends Component
 {
     use Actions, BindsModelRecord, WithFilePond, WithPagination;
 
+    #[Locked]
+    public bool $canAnswerCustomer = false;
+
     public CommentForm $commentForm;
 
     public int $commentPage = 1;
@@ -51,6 +55,8 @@ abstract class Comments extends Component
 
     public function mount(): void
     {
+        $this->canAnswerCustomer = $this->modelAnswersCustomer();
+
         if ($this->modelId < 1) {
             return;
         }
@@ -207,7 +213,7 @@ abstract class Comments extends Component
                 'model_id' => $this->modelId,
                 'is_internal' => auth()->user()?->getMorphClass() !== morph_alias(User::class)
                     ? false
-                    : data_get($comment, 'is_internal', true),
+                    : ! $this->modelAnswersCustomer() || data_get($comment, 'is_internal', true),
             ]
         )
         );
@@ -282,6 +288,14 @@ abstract class Comments extends Component
             'comment' => $comment->comment,
             'edited_at' => $comment->edited_at,
         ];
+    }
+
+    protected function modelAnswersCustomer(): bool
+    {
+        return in_array(
+            morph_alias($this->modelType),
+            app(CoreSettings::class)->customer_comment_models
+        );
     }
 
     protected function refreshMentionPills(Comment $comment, MentionPillRefresher $refresher): void
