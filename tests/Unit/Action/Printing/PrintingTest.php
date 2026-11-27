@@ -101,3 +101,23 @@ test('can render pdf preview', function (): void {
     $this->assertStringContainsString('/Contents', $pdf);
     expect(strlen($pdf))->toBeGreaterThan(1000);
 });
+
+test('prints the host of a business meal under its own label', function (): void {
+    $this->withoutVite();
+    $this->order->update(['host_name' => 'Jane Doe, Main Street 1, 12345 Town']);
+
+    $html = Printing::make([
+        'model_type' => $this->order->getMorphClass(),
+        'model_id' => $this->order->getKey(),
+        'view' => 'invoice',
+        'preview' => false,
+        'html' => true,
+    ])
+        ->validate()
+        ->execute()
+        ->toHtml();
+
+    expect($html)
+        ->toContain(__('Host of the meal'))
+        ->toContain('Jane Doe, Main Street 1, 12345 Town');
+});

@@ -2,6 +2,7 @@
 
 use FluxErp\Models\Lot;
 use FluxErp\Models\Product;
+use FluxErp\Models\SerialNumber;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\StorageArea;
 use FluxErp\Models\Warehouse;
@@ -67,4 +68,17 @@ test('a storage area lists the stock postings that sit in it', function (): void
     ]);
 
     expect($this->storageArea->stockPostings()->count())->toBe(1);
+});
+
+test('a stock posting resolves its serial number', function (): void {
+    $serialNumber = SerialNumber::factory()->create();
+
+    $posting = StockPosting::factory()->create([
+        'warehouse_id' => $this->warehouse->getKey(),
+        'product_id' => $this->product->getKey(),
+        'serial_number_id' => $serialNumber->getKey(),
+        'posting' => 1,
+    ]);
+
+    expect($posting->serialNumber?->getKey())->toBe($serialNumber->getKey());
 });

@@ -78,19 +78,10 @@ class UpdateUser extends FluxAction
 
     protected function validateData(): void
     {
-        if ($this->getData('termination_date')) {
-            $user = resolve_static(User::class, 'query')
-                ->whereKey($this->data['id'])
-                ->first();
-
-            $this->data['employment_date'] ??= $user->employment_date;
-            $this->data['termination_date'] ??= $user->termination_date;
-        }
-
         parent::validateData();
 
         if ($this->getData('parent_id')) {
-            $user ??= resolve_static(User::class, 'query')
+            $user = resolve_static(User::class, 'query')
                 ->whereKey($this->data['id'])
                 ->first();
 

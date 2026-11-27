@@ -22,7 +22,14 @@ function apexCharts($wire) {
             }
 
             this.height = this.$el.querySelector('.chart').clientHeight;
+            const themeObserver = new MutationObserver(() =>
+                this.chart.updateOptions(this.options),
+            );
+            themeObserver.observe(document.body, {
+                attributeFilter: ['class'],
+            });
             document.addEventListener('livewire:navigating', () => {
+                themeObserver.disconnect();
                 this.chart.destroy();
             });
 
@@ -306,7 +313,7 @@ function apexCharts($wire) {
             return options;
         },
         get defaultOptions() {
-            const isDark = document.documentElement.classList.contains('dark');
+            const isDark = document.body.classList.contains('dark');
 
             return {
                 noData: {
@@ -342,6 +349,7 @@ function apexCharts($wire) {
                     type: null,
                     height: this.height,
                     fontFamily: 'inherit',
+                    foreColor: isDark ? '#d1d5db' : '#373d3f',
                     toolbar: {
                         show: true,
                         tools: {

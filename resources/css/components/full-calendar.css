@@ -18,6 +18,7 @@ options in resources/js/components/calendar.js.
     [data-color-scheme='dark'] {
         --fc-classic-background: var(--color-slate-800);
         --fc-classic-faint: var(--color-slate-700);
+        --fc-classic-faint-foreground: var(--color-slate-400);
         --fc-classic-border: var(--color-slate-600);
         --fc-classic-strong-border: var(--color-slate-500);
         --fc-classic-today: --alpha(var(--color-indigo-400) / 18%);

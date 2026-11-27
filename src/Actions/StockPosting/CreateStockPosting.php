@@ -30,13 +30,10 @@ class CreateStockPosting extends FluxAction
     {
         $serialNumberData = Arr::pull($this->data, 'serial_number');
         $address = Arr::pull($this->data, 'address');
+        $serialNumber = null;
 
         if ($serialNumberData) {
-            $serialNumber = resolve_static(
-                CreateSerialNumber::class,
-                'make',
-                ['data' => $serialNumberData]
-            )
+            $serialNumber = CreateSerialNumber::make($serialNumberData)
                 ->checkPermission()
                 ->validate()
                 ->execute();
@@ -47,7 +44,6 @@ class CreateStockPosting extends FluxAction
         $stockPosting = app(StockPosting::class, ['attributes' => $this->getData()]);
         $stockPosting->save();
 
-        $serialNumber ??= $stockPosting->serialNumber;
         if ($serialNumber && $stockPosting->order_position_id && is_null($address)) {
             $address = [
                 'id' => resolve_static(Order::class, 'query')

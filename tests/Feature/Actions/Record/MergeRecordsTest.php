@@ -10,6 +10,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\RecordOrigin;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
@@ -334,4 +335,17 @@ test('merging records with save hooks does not hold every moved model in memory'
 
     expect(Order::query()->where('contact_id', $main->getKey())->count())->toBe(300)
         ->and($retained)->toBeLessThan(20 * 1024 * 1024);
+});
+
+test('merging contacts moves the purchase invoices of the merged contact', function (): void {
+    $main = Contact::factory()->create();
+    $merge = Contact::factory()->create();
+    $purchaseInvoice = PurchaseInvoice::factory()->create([
+        'contact_id' => $merge->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
+
+    runMerge(Contact::class, $main->getKey(), $merge->getKey());
+
+    expect($purchaseInvoice->refresh()->contact_id)->toBe($main->getKey());
 });

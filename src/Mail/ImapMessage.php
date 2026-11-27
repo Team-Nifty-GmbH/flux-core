@@ -49,6 +49,9 @@ readonly class ImapMessage
                     'mime_type' => $attachment->getMimeType(),
                     'name' => $attachment->getName(),
                     'media' => $tempPath,
+                    'custom_properties' => [
+                        'is_inline' => strtolower($attachment->getDisposition() ?? '') === 'inline',
+                    ],
                 ];
             }
         }

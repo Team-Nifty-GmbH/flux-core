@@ -138,6 +138,7 @@ class TicketResponseTime extends Component
         $tickets = resolve_static(Ticket::class, 'query')
             ->withTrashed()
             ->whereNotNull('resolved_at')
+            ->whereNotNull('resolved_by')
             ->whereBetween('resolved_at', [
                 $this->getStart()->toDateTimeString(),
                 $this->getEnd()->toDateTimeString(),
@@ -152,17 +153,12 @@ class TicketResponseTime extends Component
             return;
         }
 
-        $totalHours = 0;
-
-        foreach ($tickets as $ticket) {
-            $totalHours = bcadd(
-                $totalHours,
-                bcdiv($ticket->created_at->diffInMinutes($ticket->resolved_at), 60, 10),
-                10
-            );
-        }
-
-        $this->resolutionHours = bcround(bcdiv($totalHours, $tickets->count(), 10), 1);
+        $this->resolutionHours = bcround(
+            $tickets->map(
+                fn (Ticket $ticket) => bcdiv($ticket->created_at->diffInMinutes($ticket->resolved_at), 60, 10)
+            )->median(),
+            1
+        );
         $this->resolutionFormatted = $this->formatHours($this->resolutionHours);
         $this->resolutionColor = $this->colorForHours($this->resolutionHours, 48);
     }

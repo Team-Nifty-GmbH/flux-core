@@ -1,5 +1,5 @@
-<div class="space-y-8 divide-y divide-gray-200">
-    <div class="space-y-8 divide-y divide-gray-200">
+<div class="dark:divide-dark-600 space-y-8 divide-y divide-gray-200">
+    <div class="dark:divide-dark-600 space-y-8 divide-y divide-gray-200">
         <div>
             <div class="mt-6 grid grid-cols-2 gap-x-4 gap-y-2">
                 <x-input

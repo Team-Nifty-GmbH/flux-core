@@ -28,8 +28,12 @@ test('can be constructed with all properties', function (): void {
         ->and($message->attachments)->toBeEmpty();
 });
 
-function imapMessageFrom(string $senderFull, string $subject, string $recipientPersonal): ImapMessage
-{
+function imapMessageFrom(
+    string $senderFull,
+    string $subject,
+    string $recipientPersonal,
+    array $attachments = []
+): ImapMessage {
     $address = new Webklex\PHPIMAP\Address((object) [
         'personal' => $recipientPersonal,
         'mailbox' => 'recipient',
@@ -40,7 +44,7 @@ function imapMessageFrom(string $senderFull, string $subject, string $recipientP
 
     $message = Mockery::mock(Webklex\PHPIMAP\Message::class);
     $message->shouldReceive('parseBody')->andReturnSelf();
-    $message->shouldReceive('getAttachments')->andReturn(new Webklex\PHPIMAP\Support\AttachmentCollection());
+    $message->shouldReceive('getAttachments')->andReturn(new Webklex\PHPIMAP\Support\AttachmentCollection($attachments));
     $message->shouldReceive('getMessageId->toString')->andReturn('<broken@example.com>');
     $message->shouldReceive('getUid')->andReturn(7);
     $message->shouldReceive('getSubject->toString')->andReturn($subject);
@@ -111,4 +115,24 @@ test('keeps a message without a from header readable', function (): void {
     $message->shouldReceive('getFlags->toArray')->andReturn([]);
 
     expect(ImapMessage::fromImapMessage($message)->from)->toBe('');
+});
+
+test('marks inline attachments', function (): void {
+    $attachment = fn (string $name, ?string $disposition) => Mockery::mock(Webklex\PHPIMAP\Attachment::class)
+        ->shouldReceive('getContent')->andReturn('content')->getMock()
+        ->shouldReceive('getName')->andReturn($name)->getMock()
+        ->shouldReceive('getMimeType')->andReturn('image/png')->getMock()
+        ->shouldReceive('getDisposition')->andReturn($disposition)->getMock();
+
+    $message = imapMessageFrom('sender@example.com', 'Betreff', 'Empfänger', [
+        $attachment('image001.png', 'INLINE'),
+        $attachment('receipt.png', 'attachment'),
+        $attachment('ATT00001.png', null),
+    ]);
+
+    expect(array_column($message->attachments, 'custom_properties', 'name'))->toBe([
+        'image001.png' => ['is_inline' => true],
+        'receipt.png' => ['is_inline' => false],
+        'ATT00001.png' => ['is_inline' => false],
+    ]);
 });

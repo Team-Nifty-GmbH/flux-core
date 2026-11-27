@@ -22,7 +22,7 @@
                     {{ $resolutionFormatted }}
                 </span>
                 <span class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ __('Avg. Resolution') }}
+                    {{ __('Median Resolution') }}
                 </span>
             </div>
         @else

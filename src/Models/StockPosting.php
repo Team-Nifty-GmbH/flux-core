@@ -59,6 +59,11 @@ class StockPosting extends FluxModel
         return $this->belongsTo(Product::class, 'product_id');
     }
 
+    public function serialNumber(): BelongsTo
+    {
+        return $this->belongsTo(SerialNumber::class, 'serial_number_id');
+    }
+
     public function storageArea(): BelongsTo
     {
         return $this->belongsTo(StorageArea::class, 'storage_area_id');

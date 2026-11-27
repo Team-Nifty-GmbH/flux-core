@@ -1,0 +1,125 @@
+<?php
+
+namespace FluxErp\Livewire\Contact\Accounting;
+
+use FluxErp\Actions\RebateAgreement\DeleteRebateAgreement;
+use FluxErp\Actions\RebateAgreement\SettleRebateAgreement;
+use FluxErp\Actions\RebateAgreement\UpdateRebateAgreement;
+use FluxErp\Livewire\DataTables\RebateAgreementList;
+use FluxErp\Livewire\Forms\RebateAgreementForm;
+use FluxErp\Support\Livewire\Attributes\DataTableForm;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\Modelable;
+use Livewire\Attributes\Renderless;
+use Spatie\Permission\Exceptions\UnauthorizedException;
+use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
+
+class RebateAgreements extends RebateAgreementList
+{
+    use DataTableHasFormEdit {
+        edit as protected dataTableHasFormEditEdit;
+    }
+
+    #[Locked]
+    public ?array $calculation = null;
+
+    #[Locked, Modelable]
+    public int $contactId;
+
+    #[DataTableForm]
+    public RebateAgreementForm $rebateAgreementForm;
+
+    protected ?string $includeBefore = 'flux::livewire.contact.accounting.rebate-agreements';
+
+    protected function getRowActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->text(__('Settle'))
+                ->icon('calculator')
+                ->color('indigo')
+                ->when(fn () => resolve_static(SettleRebateAgreement::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'x-bind:disabled' => 'record.rebate_order_exists',
+                    'wire:click' => 'calculate(record.id)',
+                ]),
+            DataTableButton::make()
+                ->text(__('Edit'))
+                ->icon('pencil')
+                ->color('indigo')
+                ->when(fn () => resolve_static(UpdateRebateAgreement::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'x-bind:disabled' => 'record.rebate_order_exists',
+                    'wire:click' => 'edit(record.id)',
+                ]),
+            DataTableButton::make()
+                ->text(__('Delete'))
+                ->icon('trash')
+                ->color('red')
+                ->when(fn () => resolve_static(DeleteRebateAgreement::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'x-bind:disabled' => 'record.rebate_order_exists',
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Rebate Agreement')]),
+                    'wire:click' => 'delete(record.id)',
+                ]),
+        ];
+    }
+
+    public function calculate(string|int $id): void
+    {
+        $action = SettleRebateAgreement::make(['id' => $id]);
+
+        try {
+            $action->checkPermission()->validate();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->calculation = $action->getCalculation();
+
+        $this->js(<<<'JS'
+            $tsui.open.modal('settle-rebate-agreement-modal');
+        JS);
+    }
+
+    public function edit(string|int|null $id = null): void
+    {
+        $this->dataTableHasFormEditEdit($id);
+
+        $this->rebateAgreementForm->contact_id = $this->contactId;
+    }
+
+    #[Renderless]
+    public function settle(): void
+    {
+        try {
+            $order = SettleRebateAgreement::make(['id' => data_get($this->calculation, 'rebate_agreement_id')])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->redirectRoute('orders.id', ['id' => $order->getKey()], navigate: true);
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return parent::getBuilder($builder)
+            ->where('contact_id', $this->contactId)
+            ->withExists('rebateOrder');
+    }
+
+    protected function getReturnKeys(): array
+    {
+        return array_merge(parent::getReturnKeys(), ['rebate_order_exists']);
+    }
+}

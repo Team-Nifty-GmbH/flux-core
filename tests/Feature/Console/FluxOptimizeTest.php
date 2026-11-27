@@ -286,3 +286,84 @@ test('managers use cache when available and not in console', function (): void {
         ->and($widgetManager->all())->toBeArray()
         ->and(count($repeatableManager->all()))->toBeGreaterThan(0);
 });
+
+test('flux:optimize-clear deletes the cache files', function (): void {
+    $this->artisan('flux:optimize')
+        ->assertExitCode(0);
+
+    $this->artisan('flux:optimize-clear')
+        ->assertExitCode(0);
+
+    foreach (['flux-actions.php', 'flux-widgets.php', 'flux-livewire-components.php'] as $file) {
+        expect(file_exists(app()->bootstrapPath('cache/' . $file)))->toBeFalse();
+    }
+});
+
+test('flux:optimize-clear tolerates a cache file deleted by another process', function (): void {
+    stream_wrapper_register('flux-optimize-race', FluxOptimizeRaceStream::class);
+
+    try {
+        app()->useBootstrapPath('flux-optimize-race://bootstrap');
+
+        $this->artisan('flux:optimize-clear')
+            ->assertExitCode(0);
+
+        expect(FluxOptimizeRaceStream::$gone)->toContain('flux-optimize-race://bootstrap/cache/flux-actions.php');
+    } finally {
+        stream_wrapper_unregister('flux-optimize-race');
+    }
+});
+
+test('flux:optimize-clear fails when a cache file cannot be deleted', function (): void {
+    stream_wrapper_register('flux-optimize-locked', FluxOptimizeLockedStream::class);
+
+    try {
+        app()->useBootstrapPath('flux-optimize-locked://bootstrap');
+
+        expect(fn () => $this->artisan('flux:optimize-clear')->run())
+            ->toThrow(
+                RuntimeException::class,
+                'Could not delete flux-optimize-locked://bootstrap/cache/flux-livewire-components.php'
+            );
+    } finally {
+        stream_wrapper_unregister('flux-optimize-locked');
+    }
+});
+
+class FluxOptimizeLockedStream
+{
+    public $context;
+
+    public function unlink(string $path): bool
+    {
+        trigger_error('unlink(' . $path . '): Permission denied', E_USER_WARNING);
+
+        return false;
+    }
+
+    public function url_stat(string $path, int $flags): array|false
+    {
+        return stat(__FILE__);
+    }
+}
+
+class FluxOptimizeRaceStream
+{
+    public static array $gone = [];
+
+    public $context;
+
+    public function unlink(string $path): bool
+    {
+        static::$gone[] = $path;
+
+        trigger_error('unlink(' . $path . '): No such file or directory', E_USER_WARNING);
+
+        return false;
+    }
+
+    public function url_stat(string $path, int $flags): array|false
+    {
+        return in_array($path, static::$gone) ? false : stat(__FILE__);
+    }
+}

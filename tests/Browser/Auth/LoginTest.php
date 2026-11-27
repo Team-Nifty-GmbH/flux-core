@@ -26,3 +26,17 @@ test('login wrong credentials', function (): void {
         ->click('Login')
         ->assertSee('Login failed');
 });
+
+test('login card follows the dark theme', function (): void {
+    $this->actingAsGuest();
+
+    $page = visit('/');
+    $page->script("() => localStorage.setItem('dark-theme', 'true')");
+
+    $page->navigate('/')
+        ->assertRoute('login')
+        ->assertScript(
+            "getComputedStyle(document.querySelector('form').closest('.shadow')).backgroundColor",
+            'rgb(30, 41, 59)'
+        );
+});

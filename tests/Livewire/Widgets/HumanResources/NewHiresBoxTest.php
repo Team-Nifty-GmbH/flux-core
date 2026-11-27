@@ -30,7 +30,6 @@ test('counts new hires in current month', function (): void {
     for ($i = 0; $i < 2; $i++) {
         $employee = app(Employee::class)->create([
             'tenant_id' => $this->dbTenant->getKey(),
-            'user_id' => $this->user->getKey(),
             'firstname' => 'New',
             'lastname' => 'Hire' . $i,
             'is_active' => true,
@@ -48,7 +47,6 @@ test('counts new hires in current month', function (): void {
     // Old employee hired last year
     $oldEmployee = app(Employee::class)->create([
         'tenant_id' => $this->dbTenant->getKey(),
-        'user_id' => $this->user->getKey(),
         'firstname' => 'Old',
         'lastname' => 'Employee',
         'is_active' => true,

@@ -23,25 +23,6 @@
             <hr />
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 @section('user-edit.employment')
-                    <x-date
-                        :without-time="true"
-                        :label="__('Date Of Birth')"
-                        wire:model="userForm.date_of_birth"
-                    />
-                    <x-input
-                        :label="__('Employee Number')"
-                        wire:model="userForm.employee_number"
-                    />
-                    <x-date
-                        :without-time="true"
-                        :label="__('Employment Date')"
-                        wire:model="userForm.employment_date"
-                    />
-                    <x-date
-                        :without-time="true"
-                        :label="__('Termination Date')"
-                        wire:model="userForm.termination_date"
-                    />
                     <x-number
                         :prefix="resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol"
                         :label="__('Cost Per Hour')"
@@ -177,7 +158,10 @@
             @show
         </form>
     @show
-    <div class="border-b border-gray-200" x-data="{ active: 'roles' }">
+    <div
+        class="dark:border-dark-600 border-b border-gray-200"
+        x-data="{ active: 'roles' }"
+    >
         <nav class="mt-2 -mb-px flex space-x-8 pb-5" aria-label="Tabs">
             <div
                 x-on:click="active = 'roles'"
