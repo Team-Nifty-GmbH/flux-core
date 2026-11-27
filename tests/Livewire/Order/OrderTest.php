@@ -2105,3 +2105,19 @@ test('loading a schedule saved without newer parameters keeps their defaults', f
         ->minimumDurationUnit->toBe('months')
         ->orderTypeId->toBe($targetOrderType->id);
 });
+
+test('documents modal hides the email column without the send mail permission', function (): void {
+    $permission = FluxErp\Models\Permission::findOrCreate(
+        'action.' . FluxErp\Actions\MailMessage\SendMail::name(),
+        'web'
+    );
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertDontSeeHtml('selectedPrintLayouts.email')
+        ->assertSeeHtml('selectedPrintLayouts.download');
+
+    $this->user->givePermissionTo($permission);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertSeeHtml('selectedPrintLayouts.email');
+});

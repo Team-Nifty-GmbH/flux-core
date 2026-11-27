@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasWidgets;
 use FluxErp\Traits\Model\Notifiable;
 use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
 use FluxErp\Traits\Scout\Searchable;
@@ -13,13 +14,21 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Role extends SpatieRole implements InteractsWithDataTables
 {
-    use Filterable, HasPackageFactory, Notifiable, ResolvesRelationsThroughContainer, Searchable;
+    use Filterable, HasPackageFactory, HasWidgets, Notifiable, ResolvesRelationsThroughContainer, Searchable;
 
     protected $guarded = [
         'id',
     ];
 
     protected $hidden = ['pivot'];
+
+    protected static function booted(): void
+    {
+        static::deleted(function (Role $role): void {
+            $role->widgets()
+                ->delete();
+        });
+    }
 
     // Relations
     public function users(): BelongsToMany

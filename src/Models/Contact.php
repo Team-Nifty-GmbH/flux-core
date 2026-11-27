@@ -186,6 +186,11 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
             ->using(ProductSupplier::class);
     }
 
+    public function purchaseInvoices(): HasMany
+    {
+        return $this->hasMany(PurchaseInvoice::class);
+    }
+
     public function rebateAgreements(): HasMany
     {
         return $this->hasMany(RebateAgreement::class);

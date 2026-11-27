@@ -1,3 +1,4 @@
+@php($canEditRoleDashboards = $canEdit && $this->canEditRoleDashboards)
 <div class="flex items-center gap-4">
     @if (in_array(\FluxErp\Traits\Livewire\Dashboard\SupportsGrouping::class, class_uses_recursive($this)) && $canEdit)
         <template x-for="group in allGroups">
@@ -93,6 +94,17 @@
                     class="shrink-0"
                 />
             </div>
+            @if ($canEditRoleDashboards)
+                <div class="mt-4" x-cloak x-show="!editGrid">
+                    <x-button
+                        color="secondary"
+                        light
+                        x-on:click="$tsui.open.modal('save-role-dashboard-modal')"
+                        :text="__('Save as role default')"
+                        class="shrink-0"
+                    />
+                </div>
+            @endif
             <div x-cloak x-show="editGrid" class="flex gap-2">
                 <x-button
                     color="secondary"
@@ -101,6 +113,28 @@
                     class="shrink-0"
                     :text="__('Add')"
                 />
+                @if ($this->presets)
+                    <x-dropdown :text="__('Presets')" static>
+                        @foreach ($this->presets as $preset)
+                            <x-dropdown.items
+                                :text="__($preset)"
+                                wire:flux-confirm.type.warning="{{ __('wire:confirm.apply.dashboard-preset') }}"
+                                wire:click="applyPreset({{ \Illuminate\Support\Js::from($preset) }})"
+                            />
+                        @endforeach
+                    </x-dropdown>
+                @endif
+
+                <x-button
+                    color="secondary"
+                    light
+                    loading
+                    wire:flux-confirm.type.warning="{{ __('wire:confirm.reset.dashboard-group') }}"
+                    wire:click="resetToRoleDashboard"
+                    :text="__('Reset to default')"
+                    class="shrink-0"
+                />
+
                 <x-button
                     color="indigo"
                     loading
@@ -151,3 +185,44 @@
         />
     </x-slot>
 </x-modal>
+
+@if ($canEditRoleDashboards)
+    <x-modal
+        id="save-role-dashboard-modal"
+        :title="__('Save as role default')"
+    >
+        <x-select.styled
+            wire:model="dashboardRoleId"
+            :label="__('Role')"
+            select="value:id"
+            unfiltered
+            :request="[
+                'url' => route('search', \FluxErp\Models\Role::class),
+                'method' => 'POST',
+                'params' => [
+                    'where' => [
+                        [
+                            'guard_name',
+                            '=',
+                            'web',
+                        ],
+                    ],
+                ],
+            ]"
+        />
+
+        <x-slot:footer>
+            <x-button
+                color="secondary"
+                x-on:click="$tsui.close.modal('save-role-dashboard-modal')"
+                :text="__('Cancel')"
+            />
+            <x-button
+                loading
+                x-bind:disabled="! $wire.dashboardRoleId"
+                x-on:click="$wire.saveAsRoleDashboard($wire.dashboardRoleId).then(() => $tsui.close.modal('save-role-dashboard-modal'))"
+                :text="__('Save')"
+            />
+        </x-slot>
+    </x-modal>
+@endif

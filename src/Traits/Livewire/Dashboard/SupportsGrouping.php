@@ -28,14 +28,7 @@ trait SupportsGrouping
 
     public function mountSupportsGrouping(): void
     {
-        if (
-            auth()
-                ->user()
-                ->widgets()
-                ->where('dashboard_component', static::class)
-                ->where('group', $this->group)
-                ->doesntExist()
-        ) {
+        if (! in_array($this->group, array_column($this->widgets, 'group'), true)) {
             $this->group = null;
         }
     }
