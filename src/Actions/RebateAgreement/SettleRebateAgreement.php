@@ -129,14 +129,13 @@ class SettleRebateAgreement extends FluxAction
 
         $calculator = RebateCalculator::make($rebateAgreement);
         $currencyIds = $calculator->getCurrencyIds();
+        $calculation = null;
 
         if ($currencyIds->count() > 1) {
             $errors['id'][] = 'The orders within the period use different currencies.';
         } else {
-            $this->currencyId = $currencyIds->first();
-            $this->calculation = $calculator->calculate();
-
-            $positions = collect(data_get($this->calculation, 'positions'));
+            $calculation = $calculator->calculate();
+            $positions = collect(data_get($calculation, 'positions'));
 
             if ($positions->isEmpty()) {
                 $errors['id'][] = 'The volume does not reach any tier of this rebate agreement.';
@@ -149,5 +148,8 @@ class SettleRebateAgreement extends FluxAction
             throw ValidationException::withMessages($errors)
                 ->errorBag('settleRebateAgreement');
         }
+
+        $this->currencyId = $currencyIds->first();
+        $this->calculation = $calculation;
     }
 }

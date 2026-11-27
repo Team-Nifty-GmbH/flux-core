@@ -15,7 +15,9 @@ return new class() extends Migration
                 ->constrained('contacts')
                 ->cascadeOnDelete();
             $table->foreignId('order_type_id')
-                ->constrained('order_types');
+                ->nullable()
+                ->constrained('order_types')
+                ->nullOnDelete();
             $table->foreignId('rebate_order_id')
                 ->nullable()
                 ->constrained('orders')

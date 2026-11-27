@@ -14,8 +14,8 @@ class ProcessRebateAgreements implements Repeatable
     {
         $rebateAgreements = resolve_static(RebateAgreement::class, 'query')
             ->whereDate('period_end', '<', now())
-            ->whereDoesntHave('rebateOrder')
             ->where('is_active', true)
+            ->whereDoesntHave('rebateOrder')
             ->get(['id']);
 
         foreach ($rebateAgreements as $rebateAgreement) {

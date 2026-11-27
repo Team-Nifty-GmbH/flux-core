@@ -291,3 +291,26 @@ test('the position names follow the language of the invoice address, not the use
         ->toContain('01.01.2025')
         ->toContain('31.12.2025');
 });
+
+test('a failed validation leaves no calculation behind', function (): void {
+    $this->agreement->update(['tiers' => [['from_volume' => 500000, 'percentage' => 0.02]]]);
+
+    $action = SettleRebateAgreement::make(['id' => $this->agreement->getKey()]);
+
+    try {
+        $action->validate();
+
+        $this->fail('ValidationException expected.');
+    } catch (ValidationException) {
+    }
+
+    expect($action->getCalculation())->toBeNull();
+});
+
+test('an agreement whose order type was deleted keeps existing but cannot be settled', function (): void {
+    $this->agreement->update(['order_type_id' => null]);
+
+    expect($this->agreement->refresh()->exists)->toBeTrue();
+
+    SettleRebateAgreement::assertValidationErrors(['id' => $this->agreement->getKey()], 'order_type_id');
+});
