@@ -69,7 +69,7 @@ class PaymentRunPosition extends FluxModel implements HasMedia, OffersPrinting
 
     public function getEmailTemplateModelType(): ?string
     {
-        return morph_alias(static::class);
+        return $this->getMorphClass();
     }
 
     public function getPrintViews(): array
