@@ -73,6 +73,25 @@ test('update order transaction derives the exchange rate when the amount changes
     expect(bccomp($updated->exchange_rate, '1.25', 10))->toBe(0);
 });
 
+test('update order transaction keeps the exchange rate when neither amount changes', function (): void {
+    $ot = OrderTransaction::factory()->create([
+        'transaction_id' => $this->transaction->getKey(),
+        'order_id' => $this->order->getKey(),
+        'amount' => -4.35,
+        'order_currency_amount' => -5.00,
+        'is_accepted' => false,
+    ]);
+    DB::table('order_transaction')->where('pivot_id', $ot->getKey())->update(['exchange_rate' => 1.15]);
+
+    $updated = UpdateOrderTransaction::make([
+        'pivot_id' => $ot->getKey(),
+        'is_accepted' => true,
+    ])->validate()->execute();
+
+    expect($updated->is_accepted)->toBeTrue()
+        ->and(bccomp($updated->exchange_rate, '1.15', 10))->toBe(0);
+});
+
 test('create order transaction drops a rate that has no order currency amount', function (): void {
     $ot = CreateOrderTransaction::make([
         'transaction_id' => $this->transaction->getKey(),
