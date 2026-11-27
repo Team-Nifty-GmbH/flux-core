@@ -18,7 +18,6 @@ class CoreSettingsForm extends SettingsForm
         type: RenderAs::SELECT,
         options: [
             'multiple' => true,
-            'select' => 'label:label|value:value',
             ':options' => '\\FluxErp\\Livewire\\Forms\\Settings\\CoreSettingsForm::commentModelOptions()',
         ],
         label: 'Comments with answer to customer',
@@ -30,7 +29,10 @@ class CoreSettingsForm extends SettingsForm
     public static function commentModelOptions(): array
     {
         return collect(Relation::morphMap())
-            ->filter(fn (string $class): bool => in_array(Commentable::class, class_uses_recursive($class)))
+            ->filter(fn (string $class): bool => in_array(
+                Commentable::class,
+                class_uses_recursive(resolve_static($class, 'class'))
+            ))
             ->keys()
             ->map(fn (string $alias): array => ['label' => __(Str::headline($alias)), 'value' => $alias])
             ->sortBy('label')

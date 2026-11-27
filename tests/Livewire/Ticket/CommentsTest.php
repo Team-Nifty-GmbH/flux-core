@@ -181,6 +181,8 @@ test('the notification of a comment is sent after its files are attached', funct
 });
 
 test('a ticket not enabled for answers to the customer sends no notification to the customer', function (): void {
+    config(['queue.default' => 'sync']);
+
     $address = Address::factory()
         ->for(Contact::factory()->create())
         ->create([
@@ -203,7 +205,7 @@ test('a ticket not enabled for answers to the customer sends no notification to 
     Livewire::withoutLazyLoading()
         ->actingAs($this->user)
         ->test(Comments::class, ['modelId' => $ticket->getKey()])
-        ->assertSet('isPublic', false)
+        ->assertSet('canAnswerCustomer', false)
         ->call('saveComment', ['comment' => 'not for the customer', 'is_internal' => false]);
 
     expect($notified)->not->toContain(morph_alias(Address::class));
@@ -211,6 +213,28 @@ test('a ticket not enabled for answers to the customer sends no notification to 
         'model_type' => morph_alias(Ticket::class),
         'model_id' => $ticket->getKey(),
         'comment' => 'not for the customer',
+        'is_internal' => true,
+    ]);
+});
+
+test('a comment is kept internal once its model is no longer enabled for answers to the customer', function (): void {
+    $settings = app(CoreSettings::class);
+    $settings->customer_comment_models = [morph_alias(Ticket::class)];
+    $settings->save();
+
+    $component = Livewire::withoutLazyLoading()
+        ->test(Comments::class, ['modelId' => $this->ticket->getKey()])
+        ->assertSet('canAnswerCustomer', true);
+
+    $settings->customer_comment_models = [];
+    $settings->save();
+
+    $component->call('saveComment', ['comment' => 'after the switch', 'is_internal' => false]);
+
+    $this->assertDatabaseHas('comments', [
+        'model_type' => morph_alias(Ticket::class),
+        'model_id' => $this->ticket->getKey(),
+        'comment' => 'after the switch',
         'is_internal' => true,
     ]);
 });

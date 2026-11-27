@@ -14,7 +14,7 @@
                 <template x-ref="textarea">
                     <x-flux::features.comments.input />
                 </template>
-                @if (resolve_static(\FluxErp\Actions\Comment\CreateComment::class, 'canPerformAction', [false]) || ! auth()->check())
+                @if (resolve_static(\FluxErp\Actions\Comment\CreateComment::class, 'canPerformAction', [false]) || $this->isPublic === false)
                     <x-flux::features.comments.input />
                 @endcan
 

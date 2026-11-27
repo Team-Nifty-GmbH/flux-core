@@ -30,6 +30,9 @@ abstract class Comments extends Component
 {
     use Actions, BindsModelRecord, WithFilePond, WithPagination;
 
+    #[Locked]
+    public bool $canAnswerCustomer = false;
+
     public CommentForm $commentForm;
 
     public int $commentPage = 1;
@@ -52,9 +55,7 @@ abstract class Comments extends Component
 
     public function mount(): void
     {
-        if (! in_array(morph_alias($this->modelType), app(CoreSettings::class)->customer_comment_models)) {
-            $this->isPublic = false;
-        }
+        $this->canAnswerCustomer = $this->modelAnswersCustomer();
 
         if ($this->modelId < 1) {
             return;
@@ -212,7 +213,7 @@ abstract class Comments extends Component
                 'model_id' => $this->modelId,
                 'is_internal' => auth()->user()?->getMorphClass() !== morph_alias(User::class)
                     ? false
-                    : ! $this->isPublic || data_get($comment, 'is_internal', true),
+                    : ! $this->modelAnswersCustomer() || data_get($comment, 'is_internal', true),
             ]
         )
         );
@@ -287,6 +288,14 @@ abstract class Comments extends Component
             'comment' => $comment->comment,
             'edited_at' => $comment->edited_at,
         ];
+    }
+
+    protected function modelAnswersCustomer(): bool
+    {
+        return in_array(
+            morph_alias($this->modelType),
+            app(CoreSettings::class)->customer_comment_models
+        );
     }
 
     protected function refreshMentionPills(Comment $comment, MentionPillRefresher $refresher): void

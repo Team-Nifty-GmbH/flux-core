@@ -15,6 +15,8 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
 use FluxErp\Settings\CoreSettings;
+use FluxErp\Traits\Model\Commentable;
+use FluxErp\Traits\Model\HasParentMorphClass;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -142,7 +144,7 @@ test('only models enabled in the core settings offer an answer to the customer',
 
     Livewire::withoutLazyLoading()
         ->test(Comments::class, ['modelId' => $this->order->id])
-        ->assertSet('isPublic', false)
+        ->assertSet('canAnswerCustomer', false)
         ->assertDontSee(__('Answer to customer'))
         ->call('saveComment', ['comment' => 'kept internal', 'is_internal' => false]);
 
@@ -152,7 +154,7 @@ test('only models enabled in the core settings offer an answer to the customer',
 
     Livewire::withoutLazyLoading()
         ->test(Comments::class, ['modelId' => $this->order->id])
-        ->assertSet('isPublic', true)
+        ->assertSet('canAnswerCustomer', true)
         ->assertSee(__('Answer to customer'))
         ->call('saveComment', ['comment' => 'to the customer', 'is_internal' => false]);
 
@@ -164,6 +166,19 @@ test('the core settings offer every commentable model', function (): void {
     expect(collect(CoreSettingsForm::commentModelOptions())->pluck('value'))
         ->toContain(morph_alias(Order::class))
         ->not->toContain(morph_alias(Currency::class));
+});
+
+test('the core settings offer a model whose customization added comments', function (): void {
+    $customized = get_class(new class() extends Currency
+    {
+        use Commentable, HasParentMorphClass;
+
+        protected $table = 'currencies';
+    });
+    $this->app->bind(Currency::class, $customized);
+
+    expect(collect(CoreSettingsForm::commentModelOptions())->pluck('value'))
+        ->toContain(morph_alias(Currency::class));
 });
 
 test('staff on a model without answer to the customer still need the permission to comment', function (): void {
@@ -192,6 +207,6 @@ test('staff on a model without answer to the customer still need the permission 
 test('staff on a model without answer to the customer still see which comments are internal', function (): void {
     Livewire::withoutLazyLoading()
         ->test(Comments::class, ['modelId' => $this->order->id])
-        ->assertSet('isPublic', false)
+        ->assertSet('canAnswerCustomer', false)
         ->assertSee(__('Internal'));
 });
