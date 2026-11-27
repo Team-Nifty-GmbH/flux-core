@@ -94,7 +94,7 @@ class PaymentRunMatcher
                     ->whereIn('state', [Pending::$name, Successful::$name])
                     ->where(
                         'payment_run_type_enum',
-                        bccomp((string) $transaction->amount, '0', 2) < 0
+                        bccomp((string) $transaction->amount, '0', 2) === -1
                             ? PaymentRunTypeEnum::MoneyTransfer
                             : PaymentRunTypeEnum::DirectDebit
                     )
