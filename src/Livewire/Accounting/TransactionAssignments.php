@@ -184,15 +184,66 @@ class TransactionAssignments extends Component
 
         [$foreignCurrencyOrders, $orders] = resolve_static(Order::class, 'query')
             ->whereKey($this->selectedOrders)
+            ->orderBy('id')
             ->get(['id', 'currency_id', 'balance'])
             ->partition(fn (Order $order) => $order->currency_id !== $transactionCurrencyId);
 
-        $orders->each(fn (Order $order) => $this->createOrderTransaction([
-            'transaction_id' => $this->transactionForm->id,
-            'order_id' => $order->getKey(),
-            'amount' => $order->balance,
-            'is_accepted' => true,
-        ]));
+        $transaction = $this->assignedTransaction();
+
+        if (! $transaction) {
+            $this->toast()
+                ->error(__('The transaction no longer exists.'))
+                ->send();
+
+            $this->selectedOrders = [];
+            $this->refreshTransactions();
+            $this->js(<<<'JS'
+                $tsui.close.modal('transaction-assign-orders-modal');
+            JS);
+
+            return;
+        }
+
+        $remainingAmount = $this->remainingTransactionAmount($transaction);
+
+        $direction = $transaction->amount;
+
+        $sortedOrders = $orders->sortBy(
+            fn (Order $order) => bccomp(bcmul($direction, $order->balance, 9), 0, 9) === -1 ? 0 : 1
+        );
+
+        $skippedOrders = 0;
+
+        foreach ($sortedOrders as $order) {
+            $sign = bccomp(bcmul($direction, $order->balance, 9), 0, 9);
+
+            if ($sign === 1 && bccomp(bcmul($remainingAmount, $direction, 9), 0, 9) !== 1) {
+                $skippedOrders++;
+
+                continue;
+            }
+
+            $amount = $sign === 1 && bccomp(bcabs($remainingAmount), bcabs($order->balance), 9) === -1
+                ? $remainingAmount
+                : $order->balance;
+
+            if ($this->createOrderTransaction([
+                'transaction_id' => $this->transactionForm->id,
+                'order_id' => $order->getKey(),
+                'amount' => $amount,
+                'is_accepted' => true,
+            ])) {
+                $remainingAmount = bcsub($remainingAmount, $amount, 2);
+            }
+        }
+
+        if ($skippedOrders > 0) {
+            $this->toast()
+                ->warning(__(':count order(s) not assigned because the transaction amount is used up.', [
+                    'count' => $skippedOrders,
+                ]))
+                ->send();
+        }
 
         $this->assignForeignCurrencyOrders($foreignCurrencyOrders);
 
@@ -602,22 +653,13 @@ class TransactionAssignments extends Component
             return;
         }
 
-        $transaction = resolve_static(Transaction::class, 'query')
-            ->whereKey($this->transactionForm->id)
-            ->first(['id', 'amount', 'balance']);
-        $remainingAmount = bcsub(
-            $transaction->balance,
-            bcadd(
-                bcadd(
-                    $transaction->orderTransactions()->where('is_accepted', false)->sum('amount'),
-                    $transaction->ledgerAccountTransactions()->where('is_accepted', false)->sum('amount'),
-                    9
-                ),
-                $transaction->loanInstallmentTransactions()->where('is_accepted', false)->sum('amount'),
-                9
-            ),
-            2
-        );
+        $transaction = $this->assignedTransaction();
+
+        if (! $transaction) {
+            return;
+        }
+
+        $remainingAmount = $this->remainingTransactionAmount($transaction);
 
         if (bccomp(bcmul($remainingAmount, $transaction->amount, 9), 0, 9) !== 1) {
             return;
@@ -653,7 +695,31 @@ class TransactionAssignments extends Component
         }
     }
 
-    protected function createOrderTransaction(array $data): void
+    protected function assignedTransaction(): ?Transaction
+    {
+        return resolve_static(Transaction::class, 'query')
+            ->whereKey($this->transactionForm->id)
+            ->first(['id', 'amount', 'balance']);
+    }
+
+    protected function remainingTransactionAmount(Transaction $transaction): string
+    {
+        return bcsub(
+            $transaction->balance,
+            bcadd(
+                bcadd(
+                    $transaction->orderTransactions()->where('is_accepted', false)->sum('amount'),
+                    $transaction->ledgerAccountTransactions()->where('is_accepted', false)->sum('amount'),
+                    9
+                ),
+                $transaction->loanInstallmentTransactions()->where('is_accepted', false)->sum('amount'),
+                9
+            ),
+            2
+        );
+    }
+
+    protected function createOrderTransaction(array $data): bool
     {
         try {
             CreateOrderTransaction::make($data)
@@ -661,7 +727,11 @@ class TransactionAssignments extends Component
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this, form: $this->orderTransactionForm);
+
+            return false;
         }
+
+        return true;
     }
 
     protected function refreshTransactions(bool $renderless = true): void
