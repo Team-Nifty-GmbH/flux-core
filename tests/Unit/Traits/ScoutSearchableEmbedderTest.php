@@ -137,8 +137,11 @@ function unsafeTemplatePaths(string $class, Model $model): array
     SearchSettings::fake([
         'semantic_search_enabled' => true,
         'embedder_url' => 'https://litellm.test/v1/embeddings',
+        'embedder_api_key' => 'sk-test',
         'embedder_model' => 'text-embedding-3-small',
         'embedder_dimensions' => 1536,
+        'semantic_ratio' => 0.5,
+        'semantic_score_threshold' => 0,
     ]);
 
     $embedder = data_get($class::scoutEmbedders(), 'default');
@@ -179,6 +182,11 @@ test('a model without a template keeps the Meilisearch default', function (): vo
     SearchSettings::fake([
         'semantic_search_enabled' => true,
         'embedder_url' => 'https://litellm.test/v1/embeddings',
+        'embedder_api_key' => 'sk-test',
+        'embedder_model' => 'text-embedding-3-small',
+        'embedder_dimensions' => 1536,
+        'semantic_ratio' => 0.5,
+        'semantic_score_threshold' => 0,
     ]);
 
     expect(data_get(Country::scoutEmbedders(), 'default'))->not->toHaveKeys(['documentTemplate', 'documentTemplateMaxBytes']);
