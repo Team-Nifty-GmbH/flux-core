@@ -59,7 +59,7 @@ test('an assignment covering the full amount settles the installment', function 
 test('a partial assignment does not settle the installment', function (): void {
     assignToInstallment($this->installment->getKey(), '-3000');
 
-    expect($this->loan->refresh()->remaining)->toEqual(12000)
+    expect($this->loan->refresh()->remaining)->toEqual(9060)
         ->and($this->loan->installments()->settled()->count())->toBe(0);
 });
 

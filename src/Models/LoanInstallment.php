@@ -53,6 +53,11 @@ class LoanInstallment extends FluxModel implements InteractsWithDataTables
               AND lit.is_accepted = 1)';
     }
 
+    public static function openPrincipalSql(): string
+    {
+        return 'GREATEST(principal_amount - GREATEST(' . static::coverageSql() . ' - interest_amount, 0), 0)';
+    }
+
     protected function casts(): array
     {
         return [

@@ -15,6 +15,7 @@ use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
@@ -93,7 +94,7 @@ class Loan extends FluxModel implements HasMedia, InteractsWithDataTables
         $this->remaining = bcround(
             (string) $this->installments()
                 ->unsettled()
-                ->sum('principal_amount'),
+                ->sum(DB::raw(LoanInstallment::openPrincipalSql())),
             2
         );
 
