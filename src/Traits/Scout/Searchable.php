@@ -14,6 +14,9 @@ trait Searchable
         BaseSearchable::search as protected baseScoutSearch;
     }
 
+    // The most a document template renders into the embedded text, about a page; Meilisearch cuts the rest.
+    public const int EMBEDDER_DOCUMENT_TEMPLATE_MAX_BYTES = 4000;
+
     /**
      * The Meilisearch embedders derived from SearchSettings, or null when semantic search is off.
      */
@@ -77,9 +80,19 @@ trait Searchable
         return $search;
     }
 
+    /**
+     * What the embedder reads of a document, as a Meilisearch liquid template over its fields (doc.<field>). Null
+     * keeps Meilisearch's default: every searchable field, cut after 400 bytes, which on a model with ids, numbers
+     * and dates up front leaves little of the text that carries the meaning.
+     */
+    protected static function embedderDocumentTemplate(): ?string
+    {
+        return null;
+    }
+
     protected static function embedderDefinition(SearchSettings $search): array
     {
-        return [
+        $definition = [
             'source' => 'rest',
             'url' => $search->embedder_url,
             'apiKey' => $search->embedder_api_key,
@@ -96,6 +109,13 @@ trait Searchable
                 'data' => [['embedding' => '{{embedding}}'], '{{..}}'],
             ],
         ];
+
+        if ($template = static::embedderDocumentTemplate()) {
+            $definition['documentTemplate'] = $template;
+            $definition['documentTemplateMaxBytes'] = static::EMBEDDER_DOCUMENT_TEMPLATE_MAX_BYTES;
+        }
+
+        return $definition;
     }
 
     public function toSearchableArray(): array

@@ -1,7 +1,16 @@
 <?php
 
+use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Models\Communication;
 use FluxErp\Models\Country;
+use FluxErp\Models\Order;
+use FluxErp\Models\Ticket;
+use FluxErp\Models\TicketType;
+use FluxErp\Models\User;
 use FluxErp\Settings\SearchSettings;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 test('provides meilisearch embedders when semantic search enabled', function (): void {
     config(['scout.driver' => 'meilisearch']);
@@ -115,4 +124,62 @@ test('omits the ranking score threshold when it is zero', function (): void {
     ]);
 
     expect(data_get(Country::search('berlin')->options, 'rankingScoreThreshold'))->toBeNull();
+});
+
+/**
+ * The fields a model's template reads that would make Meilisearch fail the whole batch: a doc.<path> the document
+ * Scout really indexes does not have, or a nested path whose parent is not guarded by {% if doc.<parent> %}, which
+ * fails with "Unknown index" as soon as that parent is null on one record.
+ */
+function unsafeTemplatePaths(string $class, Model $model): array
+{
+    config(['scout.driver' => 'meilisearch']);
+    SearchSettings::fake([
+        'semantic_search_enabled' => true,
+        'embedder_url' => 'https://litellm.test/v1/embeddings',
+        'embedder_model' => 'text-embedding-3-small',
+        'embedder_dimensions' => 1536,
+    ]);
+
+    $embedder = data_get($class::scoutEmbedders(), 'default');
+    $template = (string) data_get($embedder, 'documentTemplate');
+    preg_match_all('/doc\.([\w.]+)/', $template, $matches);
+    $document = $model->toSearchableArray();
+
+    expect($matches[1])->not->toBeEmpty()
+        ->and(data_get($embedder, 'documentTemplateMaxBytes'))->toBe($class::EMBEDDER_DOCUMENT_TEMPLATE_MAX_BYTES);
+
+    return array_values(array_filter(
+        array_unique($matches[1]),
+        fn (string $path): bool => ! Arr::has($document, $path)
+            || (str_contains($path, '.') && ! str_contains($template, '{% if doc.' . Str::beforeLast($path, '.') . ' %}'))
+    ));
+}
+
+test('the ticket template reads only fields the ticket document has, the type guarded', function (): void {
+    $ticket = Ticket::factory()->create([
+        'authenticatable_type' => morph_alias(User::class),
+        'authenticatable_id' => User::factory()->create()->getKey(),
+        'ticket_type_id' => TicketType::factory()->create()->getKey(),
+    ]);
+
+    expect(unsafeTemplatePaths(Ticket::class, $ticket))->toBe([]);
+});
+
+test('the order template reads only fields the order document has', function (): void {
+    expect(unsafeTemplatePaths(Order::class, makeForecastOrder(OrderTypeEnum::Order, '10.00')))->toBe([]);
+});
+
+test('the communication template reads only fields the communication document has', function (): void {
+    expect(unsafeTemplatePaths(Communication::class, Communication::factory()->create()))->toBe([]);
+});
+
+test('a model without a template keeps the Meilisearch default', function (): void {
+    config(['scout.driver' => 'meilisearch']);
+    SearchSettings::fake([
+        'semantic_search_enabled' => true,
+        'embedder_url' => 'https://litellm.test/v1/embeddings',
+    ]);
+
+    expect(data_get(Country::scoutEmbedders(), 'default'))->not->toHaveKeys(['documentTemplate', 'documentTemplateMaxBytes']);
 });
