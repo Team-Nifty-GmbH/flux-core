@@ -17,6 +17,17 @@ class OrderTransaction extends FluxPivot
 
     protected static function booted(): void
     {
+        static::saving(function (OrderTransaction $orderTransaction): void {
+            if (! $orderTransaction->isDirty(['amount', 'order_currency_amount'])) {
+                return;
+            }
+
+            $orderTransaction->exchange_rate = ! is_null($orderTransaction->order_currency_amount)
+                && bccomp($orderTransaction->amount, 0, 10) !== 0
+                    ? bcdiv($orderTransaction->order_currency_amount, $orderTransaction->amount, 10)
+                    : null;
+        });
+
         static::saved(function (OrderTransaction $orderTransaction): void {
             $originalOrderId = data_get($orderTransaction->getPrevious(), 'order_id', $orderTransaction->order_id);
             if (
