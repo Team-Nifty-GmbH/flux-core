@@ -63,6 +63,16 @@ class Communication extends FluxModel implements HasMedia, OffersPrinting, Targe
         ];
     }
 
+    // Subject and sender first, then the plain text body.
+    protected static function embedderDocumentTemplate(): ?string
+    {
+        return implode("\n", [
+            '{{ doc.subject }}',
+            '{{ doc.from }}',
+            '{{ doc.text_body }}',
+        ]);
+    }
+
     protected function casts(): array
     {
         return [

@@ -82,6 +82,17 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
         ];
     }
 
+    // Number and title first, then the type and the description. A nested path needs its parent guarded: Meilisearch
+    // fails the whole batch on a path through null ("Unknown index").
+    protected static function embedderDocumentTemplate(): ?string
+    {
+        return implode("\n", [
+            '{{ doc.ticket_number }} {{ doc.title }}',
+            '{% if doc.ticket_type %}{{ doc.ticket_type.name }}{% endif %}',
+            '{{ doc.description | strip_html }}',
+        ]);
+    }
+
     protected function casts(): array
     {
         return [

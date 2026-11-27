@@ -481,6 +481,18 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return 'document-text';
     }
 
+    // Number and commission first, then the texts written on the order. The invoice address is left out: Meilisearch
+    // fails the whole batch on a key missing from a json column, and the snapshot does not always carry every key.
+    protected static function embedderDocumentTemplate(): ?string
+    {
+        return implode("\n", [
+            '{{ doc.order_number }} {{ doc.invoice_number }} {{ doc.commission }}',
+            '{{ doc.header | strip_html }}',
+            '{{ doc.footer | strip_html }}',
+            '{{ doc.logistic_note }}',
+        ]);
+    }
+
     protected function casts(): array
     {
         return [
