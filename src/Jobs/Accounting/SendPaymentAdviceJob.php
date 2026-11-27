@@ -11,12 +11,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Mail\Attachment;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use RuntimeException;
 
 class SendPaymentAdviceJob implements ShouldQueue
 {
-    use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Batchable, Dispatchable, InteractsWithQueue, Queueable;
 
     public function __construct(public int $positionId) {}
 
@@ -31,7 +30,9 @@ class SendPaymentAdviceJob implements ShouldQueue
             return;
         }
 
-        if ($position->getMedia(PaymentAdvice::MEDIA_COLLECTION)->isNotEmpty()) {
+        $paymentAdvice = PaymentAdvice::make($position);
+
+        if ($position->getMedia($paymentAdvice::MEDIA_COLLECTION)->isNotEmpty()) {
             return;
         }
 
@@ -43,7 +44,7 @@ class SendPaymentAdviceJob implements ShouldQueue
             return;
         }
 
-        $printed = PaymentAdvice::make($position)->print();
+        $printed = $paymentAdvice->print();
 
         $result = SendMail::make([
             'to' => [$to],
@@ -65,7 +66,7 @@ class SendPaymentAdviceJob implements ShouldQueue
             ->validate()
             ->execute();
 
-        if (! data_get($result, 'success', false)) {
+        if (! data_get($result, 'success')) {
             $this->abort($position, data_get($result, 'error') ?? data_get($result, 'message'), [$to]);
 
             return;

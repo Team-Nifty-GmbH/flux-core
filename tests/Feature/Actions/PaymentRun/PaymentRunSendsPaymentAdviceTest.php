@@ -174,3 +174,32 @@ test('a failed send leaves no marker and a retry tries again', function (): void
 
     expect($position->fresh()->getMedia(PaymentAdvice::MEDIA_COLLECTION))->toBeEmpty();
 });
+
+test('a customized payment advice with its own media collection is not sent twice', function (): void {
+    config(['queue.default' => 'sync']);
+    Mail::fake();
+
+    $customAdvice = new class(new PaymentRunPosition()) extends PaymentAdvice
+    {
+        public const string MEDIA_COLLECTION = 'custom-payment-advice';
+    };
+    app()->bind(PaymentAdvice::class, $customAdvice::class);
+
+    $order = createOrderWithContact('RE-1', 'supplier@example.com');
+
+    $run = CreatePaymentRun::make([
+        'payment_run_type_enum' => 'money_transfer',
+        'iban' => 'DE89370400440532013000',
+        'orders' => [
+            ['order_id' => $order->getKey(), 'amount' => -100.00],
+        ],
+    ])->validate()->execute();
+
+    $position = $run->positions()->sole();
+
+    (new SendPaymentAdviceJob($position->getKey()))->handle();
+    (new SendPaymentAdviceJob($position->getKey()))->handle();
+
+    Mail::assertSentTimes(GenericMail::class, 1);
+    expect($position->fresh()->getMedia('custom-payment-advice'))->toHaveCount(1);
+});

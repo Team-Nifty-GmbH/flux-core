@@ -9,7 +9,7 @@ use Illuminate\Contracts\View\View;
 
 class PaymentAdvice extends PrintableView
 {
-    public const MEDIA_COLLECTION = 'payment-advice';
+    public const string MEDIA_COLLECTION = 'payment-advice';
 
     public PaymentRunPosition $model;
 
@@ -42,6 +42,6 @@ class PaymentAdvice extends PrintableView
 
     protected function getCollectionName(): string
     {
-        return self::MEDIA_COLLECTION;
+        return static::MEDIA_COLLECTION;
     }
 }

@@ -71,7 +71,7 @@
             @foreach ($model->orders as $order)
                 @php
                     $applied = bcmul((string) $order->pivot->amount, (string) $sign, 2);
-                    $isCredit = bccomp($applied, '0', 2) < 0;
+                    $isCredit = bccomp($applied, '0', 2) === -1;
                 @endphp
                 <tr>
                     <td style="padding: 4px 32px 4px 0">
