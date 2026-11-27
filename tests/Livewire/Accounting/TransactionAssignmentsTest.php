@@ -571,3 +571,36 @@ test('orders skipped because nothing is left show a warning', function (): void 
         ->exists()
     )->toBeFalse();
 });
+
+test('assigning orders to a deleted transaction shows an error and assigns nothing', function (): void {
+    $transaction = createTransactionAssignmentsTransaction(80);
+    $order = createTransactionAssignmentsOrder(Currency::default()->getKey(), 100);
+
+    $component = Livewire::test(TransactionAssignments::class)
+        ->call('assignOrdersModal', $transaction)
+        ->set('selectedOrders', [$order->getKey()]);
+
+    $transaction->delete();
+
+    $component->call('assignOrders')
+        ->assertOk()
+        ->assertToastNotification(type: 'error')
+        ->assertSet('selectedOrders', []);
+
+    expect(OrderTransaction::query()->where('order_id', $order->getKey())->exists())->toBeFalse();
+});
+
+test('an order without balance does not claim the transaction amount is used up', function (): void {
+    $transaction = createTransactionAssignmentsTransaction(100);
+    $order = createTransactionAssignmentsOrder(Currency::default()->getKey(), 0);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('assignOrdersModal', $transaction)
+        ->set('selectedOrders', [$order->getKey()])
+        ->call('assignOrders')
+        ->assertOk()
+        ->assertNotDispatched(
+            'ts-ui:toast',
+            fn (string $eventName, array $params) => data_get($params, 'type') === 'warning'
+        );
+});

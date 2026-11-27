@@ -188,7 +188,23 @@ class TransactionAssignments extends Component
             ->get(['id', 'currency_id', 'balance'])
             ->partition(fn (Order $order) => $order->currency_id !== $transactionCurrencyId);
 
-        $remainingAmount = $this->remainingTransactionAmount($this->assignedTransaction());
+        $transaction = $this->assignedTransaction();
+
+        if (! $transaction) {
+            $this->toast()
+                ->error(__('The transaction no longer exists.'))
+                ->send();
+
+            $this->selectedOrders = [];
+            $this->refreshTransactions();
+            $this->js(<<<'JS'
+                $tsui.close.modal('transaction-assign-orders-modal');
+            JS);
+
+            return;
+        }
+
+        $remainingAmount = $this->remainingTransactionAmount($transaction);
 
         $sortedOrders = $orders->sortBy(
             fn (Order $order) => bccomp(bcmul($remainingAmount, $order->balance, 9), 0, 9) === -1 ? 0 : 1
@@ -199,7 +215,7 @@ class TransactionAssignments extends Component
         foreach ($sortedOrders as $order) {
             $sign = bccomp(bcmul($remainingAmount, $order->balance, 9), 0, 9);
 
-            if ($sign === 0) {
+            if (bccomp($remainingAmount, 0, 2) === 0) {
                 $skippedOrders++;
 
                 continue;
@@ -636,6 +652,11 @@ class TransactionAssignments extends Component
         }
 
         $transaction = $this->assignedTransaction();
+
+        if (! $transaction) {
+            return;
+        }
+
         $remainingAmount = $this->remainingTransactionAmount($transaction);
 
         if (bccomp(bcmul($remainingAmount, $transaction->amount, 9), 0, 9) !== 1) {
@@ -672,7 +693,7 @@ class TransactionAssignments extends Component
         }
     }
 
-    protected function assignedTransaction(): Transaction
+    protected function assignedTransaction(): ?Transaction
     {
         return resolve_static(Transaction::class, 'query')
             ->whereKey($this->transactionForm->id)
