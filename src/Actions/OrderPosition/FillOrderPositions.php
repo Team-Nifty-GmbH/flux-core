@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\OrderPosition\CreateOrderPositionRuleset;
 use FluxErp\Rulesets\OrderPosition\FillOrderPositionsRuleset;
@@ -92,7 +93,19 @@ class FillOrderPositions extends FluxAction
         ];
 
         $createRules = array_merge(resolve_static(CreateOrderPositionRuleset::class, 'getRules'), $rules);
-        $updateRules = array_merge(resolve_static(UpdateOrderPositionRuleset::class, 'getRules'), $rules);
+        $updateRules = array_merge(
+            resolve_static(UpdateOrderPositionRuleset::class, 'getRules'),
+            $rules,
+            [
+                'id' => [
+                    'sometimes',
+                    'required',
+                    'integer',
+                    app(ModelExists::class, ['model' => OrderPosition::class])
+                        ->where('order_id', $this->data['order_id']),
+                ],
+            ]
+        );
         unset($createRules['parent_id'], $updateRules['parent_id']);
 
         $errors = [];
