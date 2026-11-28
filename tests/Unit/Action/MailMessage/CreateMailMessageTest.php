@@ -10,6 +10,7 @@ use FluxErp\Models\MailFolder;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\Ticket;
+use FluxErp\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
@@ -22,6 +23,7 @@ beforeEach(function (): void {
 
     $this->address = Address::factory()->create([
         'contact_id' => $contact->id,
+        'is_active' => true,
     ]);
 
     $this->mailAccount = MailAccount::factory()
@@ -35,6 +37,7 @@ test('add comment to ticket from mail message', function (): void {
         'authenticatable_type' => $this->address->getMorphClass(),
         'authenticatable_id' => $this->address->getKey(),
     ]);
+    $this->address->subscribeNotificationChannel($ticket->broadcastChannel());
 
     $action = CreateMailMessage::make([
         'mail_account_id' => $this->mailAccount->id,
@@ -74,6 +77,7 @@ test('strips quoted conversation from comment created from mail reply', function
         'authenticatable_type' => $this->address->getMorphClass(),
         'authenticatable_id' => $this->address->getKey(),
     ]);
+    $this->address->subscribeNotificationChannel($ticket->broadcastChannel());
 
     $reply = 'habs freigegeben.' . PHP_EOL . 'Nächstes mal schreib ich den Mandanten dazu.';
     $token = '[flux:comment:' . $ticket->getMorphClass() . ':' . $ticket->getKey() . ']';
@@ -297,6 +301,166 @@ test('create ticket from mail message without text body', function (?string $tex
     'null bodies' => [null, null, '{subject}'],
     'too short body' => ['Hi', null, '{subject}'],
 ]);
+
+test('comment from mail keeps only safe html', function (?string $textBody, ?string $htmlBody, string $expected): void {
+    Event::fake('action.executed: ' . CreateMailMessage::class);
+    $ticket = Ticket::factory()->create([
+        'authenticatable_type' => $this->address->getMorphClass(),
+        'authenticatable_id' => $this->address->getKey(),
+    ]);
+    $this->address->subscribeNotificationChannel($ticket->broadcastChannel());
+
+    $action = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'from' => 'Tester McTestFace <' . $this->address->email_primary . '>',
+        'to' => [$this->mailAccount->email],
+        'subject' => '[flux:comment:' . $ticket->getMorphClass() . ':' . $ticket->getKey() . ']',
+        'text_body' => $textBody,
+        'html_body' => $htmlBody,
+        'communication_type_enum' => 'mail',
+        'date' => now()->format('Y-m-d H:i:s'),
+        'tags' => [],
+    ]);
+    $action->validate()->execute();
+
+    (new CreateMailExecutedSubscriber())->handle($action);
+
+    $comment = Comment::query()
+        ->where('model_type', $ticket->getMorphClass())
+        ->where('model_id', $ticket->getKey())
+        ->first();
+
+    expect($comment?->comment)->toBe($expected);
+})->with([
+    'html body only' => [
+        '',
+        '<p>Danke</p><img src="x" onerror="alert(1)"><script>alert(2)</script><a href="javascript:alert(3)">Link</a>',
+        '<p>Danke</p><img /><a>Link</a>',
+    ],
+    'text body with markup characters' => [
+        "Danke &amp; Grüße\n5 > 3 &lt;b&gt;",
+        null,
+        "Danke &amp; Grüße<br />\n5 &gt; 3 &lt;b&gt;",
+    ],
+    'long html body' => [
+        '',
+        '<p>' . str_repeat('a', 30000) . '</p><p>Ende</p>',
+        '<p>' . str_repeat('a', 30000) . '</p><p>Ende</p>',
+    ],
+]);
+
+test('comment from mail only by a recipient of the comment mails', function (string $sender, string $expected): void {
+    Event::fake('action.executed: ' . CreateMailMessage::class);
+    $ticket = Ticket::factory()->create([
+        'authenticatable_type' => $this->address->getMorphClass(),
+        'authenticatable_id' => $this->address->getKey(),
+    ]);
+    $this->address->subscribeNotificationChannel($ticket->broadcastChannel());
+
+    $user = User::factory()->create(['is_active' => true]);
+    $user->subscribeNotificationChannel(
+        $ticket->broadcastChannel(),
+        'eloquent.created: ' . resolve_static(Comment::class, 'class')
+    );
+
+    $otherAddress = Address::factory()->create([
+        'contact_id' => Contact::factory()->create()->getKey(),
+        'is_active' => true,
+    ]);
+    $otherAddress->subscribeNotificationChannel(
+        Ticket::factory()
+            ->create([
+                'authenticatable_type' => $otherAddress->getMorphClass(),
+                'authenticatable_id' => $otherAddress->getKey(),
+            ])
+            ->broadcastChannel()
+    );
+
+    $inactiveAddress = Address::factory()->create([
+        'contact_id' => Contact::factory()->create()->getKey(),
+        'is_active' => true,
+    ]);
+    $inactiveAddress->subscribeNotificationChannel($ticket->broadcastChannel());
+    $inactiveAddress->update(['is_active' => false]);
+
+    $action = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'from' => 'Tester <' . match ($sender) {
+            'subscribed address' => $this->address->email_primary,
+            'subscribed address login' => $this->address->email,
+            'subscribed user' => $user->email,
+            'other address' => $otherAddress->email_primary,
+            'inactive address' => $inactiveAddress->email_primary,
+            'unknown' => 'unknown@example.org',
+        } . '>',
+        'to' => [$this->mailAccount->email],
+        'subject' => $subject = 'Re: [flux:comment:' . $ticket->getMorphClass() . ':' . $ticket->getKey() . ']',
+        'text_body' => 'Danke',
+        'html_body' => '<p>Danke</p>',
+        'communication_type_enum' => 'mail',
+        'date' => now()->format('Y-m-d H:i:s'),
+        'tags' => [],
+    ]);
+    $action->validate()->execute();
+
+    (new CreateMailExecutedSubscriber())->handle($action);
+
+    $comment = Comment::query()
+        ->where('model_type', $ticket->getMorphClass())
+        ->where('model_id', $ticket->getKey())
+        ->first();
+    $newTicket = Ticket::query()->where('title', $subject)->first();
+
+    expect($comment?->getRawOriginal('created_by'))->toBe(match ($expected) {
+        'address comment' => $this->address->getMorphClass() . ':' . $this->address->getKey(),
+        'internal user comment' => $user->getMorphClass() . ':' . $user->getKey(),
+        default => null,
+    })
+        ->and($comment?->is_internal)->toBe(match ($expected) {
+            'address comment' => false,
+            'internal user comment' => true,
+            default => null,
+        })
+        ->and($newTicket?->getRawOriginal('created_by'))->toBe(match ($sender) {
+            'other address' => $otherAddress->getMorphClass() . ':' . $otherAddress->getKey(),
+            'inactive address' => $inactiveAddress->getMorphClass() . ':' . $inactiveAddress->getKey(),
+            default => null,
+        });
+})->with([
+    'subscribed address' => ['subscribed address', 'address comment'],
+    'subscribed address by login email' => ['subscribed address login', 'address comment'],
+    'subscribed user' => ['subscribed user', 'internal user comment'],
+    'address subscribed to another ticket' => ['other address', 'ticket'],
+    'inactive subscribed address' => ['inactive address', 'ticket'],
+    'unknown sender' => ['unknown', 'nothing'],
+]);
+
+test('ticket from mail keeps only safe html', function (): void {
+    Event::fake('action.executed: ' . CreateMailMessage::class);
+
+    $action = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'from' => 'Tester McTestFace <' . $this->address->email_primary . '>',
+        'to' => [$this->mailAccount->email],
+        'subject' => $subject = Str::uuid()->toString(),
+        'text_body' => '',
+        'html_body' => '<p>Danke für die Hilfe</p><img src="x" onerror="alert(1)"><script>alert(2)</script>',
+        'communication_type_enum' => 'mail',
+        'date' => now()->format('Y-m-d H:i:s'),
+        'tags' => [],
+    ]);
+    $action->validate()->execute();
+
+    (new CreateMailExecutedSubscriber())->handle($action);
+
+    $ticket = Ticket::query()->where('title', $subject)->first();
+
+    expect($ticket)->not->toBeNull()
+        ->and($ticket->description)->toBe('<p>Danke für die Hilfe</p><img />');
+});
 
 test('keeps special characters in the subject', function (string $subject, string $expected): void {
     $result = CreateMailMessage::make([

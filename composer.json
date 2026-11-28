@@ -31,6 +31,7 @@
         "spatie/laravel-settings": "^3.9",
         "spatie/laravel-tags": "^4.12",
         "spatie/pdf-to-image": "^3.3",
+        "symfony/html-sanitizer": "^7.3|^8.0",
         "symfony/mercure": "^0.10",
         "tallstackui/tallstackui": "^4.2",
         "team-nifty-gmbh/tall-datatables": "^3.2",
