@@ -10,6 +10,7 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Scopes\UserTenantScope;
 use FluxErp\Rulesets\Contact\CreateContactRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
@@ -33,12 +34,23 @@ class CreateContact extends FluxAction
         $mainAddress = Arr::pull($this->data, 'main_address');
         $industries = Arr::pull($this->data, 'industries');
         $tenants = Arr::pull($this->data, 'tenants');
+        $expenseLedgerAccounts = array_column(
+            Arr::pull($this->data, 'expense_ledger_accounts') ?? [],
+            'expense_ledger_account_id',
+            'tenant_id'
+        );
 
         $contact = app(Contact::class, ['attributes' => $this->data]);
         $contact->save();
 
         if ($tenants) {
-            $contact->tenants()->attach($tenants);
+            $contact->tenants()->attach(
+                collect($tenants)
+                    ->mapWithKeys(fn (int $tenantId): array => [
+                        $tenantId => ['expense_ledger_account_id' => data_get($expenseLedgerAccounts, $tenantId)],
+                    ])
+                    ->all()
+            );
         }
 
         if ($discounts) {
@@ -130,6 +142,36 @@ class CreateContact extends FluxAction
                 'expense_ledger_account_id' => ['The expense ledger account must belong to a tenant of the contact.'],
             ])
                 ->errorBag('createContact');
+        }
+
+        $errors = [];
+        $tenants = $this->getData('tenants') ?? [];
+        foreach ($this->getData('expense_ledger_accounts') ?? [] as $index => $entry) {
+            $tenantId = data_get($entry, 'tenant_id');
+
+            if (! in_array($tenantId, $tenants)) {
+                $errors['expense_ledger_accounts.' . $index . '.tenant_id'] = [
+                    'The tenant is not assigned to the contact.',
+                ];
+
+                continue;
+            }
+
+            if (($ledgerAccountId = data_get($entry, 'expense_ledger_account_id'))
+                && resolve_static(LedgerAccount::class, 'query')
+                    ->withoutGlobalScope(UserTenantScope::class)
+                    ->whereKey($ledgerAccountId)
+                    ->where('tenant_id', $tenantId)
+                    ->doesntExist()
+            ) {
+                $errors['expense_ledger_accounts.' . $index . '.expense_ledger_account_id'] = [
+                    'The expense ledger account must belong to this tenant.',
+                ];
+            }
+        }
+
+        if ($errors) {
+            throw ValidationException::withMessages($errors)->errorBag('createContact');
         }
     }
 }

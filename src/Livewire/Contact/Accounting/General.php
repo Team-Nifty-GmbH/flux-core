@@ -6,6 +6,7 @@ use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Currency;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -43,6 +44,12 @@ class General extends Component
                     ->orderByDesc('is_default')
                     ->get(['id', 'name'])
                     ->toArray(),
+                'tenants' => count($this->contact->tenants) > 1 || array_filter($this->contact->expense_ledger_accounts)
+                    ? resolve_static(Tenant::class, 'query')
+                        ->whereKey($this->contact->tenants)
+                        ->get(['id', 'name'])
+                        ->toArray()
+                    : [],
                 'vatRates' => resolve_static(VatRate::class, 'query')
                     ->where('is_tax_exemption', true)
                     ->get(['id', 'name'])

@@ -117,6 +117,19 @@ class UpdateContactRuleset extends FluxRuleset
             'has_sensitive_reminder' => 'sometimes|boolean',
             'has_delivery_lock' => 'sometimes|boolean',
 
+            'expense_ledger_accounts' => 'array|nullable',
+            'expense_ledger_accounts.*.tenant_id' => [
+                'required',
+                'integer',
+                'distinct',
+                app(ModelExists::class, ['model' => Tenant::class]),
+            ],
+            'expense_ledger_accounts.*.expense_ledger_account_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => LedgerAccount::class])
+                    ->where('ledger_account_type_enum', LedgerAccountTypeEnum::Expense),
+            ],
             'tenants' => 'array|nullable',
             'tenants.*' => [
                 'required',

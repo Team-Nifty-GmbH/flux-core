@@ -293,3 +293,105 @@ test('update contact keeps saving a contact whose stored expense account belongs
 
     expect($contact->refresh()->customer_number)->toBe('K-LEGACY');
 });
+
+test('update contact sets an expense ledger account per tenant', function (): void {
+    $otherTenant = Tenant::factory()->create();
+    $contact = Contact::factory()
+        ->hasAttached([$this->dbTenant, $otherTenant], relationship: 'tenants')
+        ->create();
+    $ledgerAccount = LedgerAccount::factory()->create([
+        'tenant_id' => $otherTenant->getKey(),
+        'ledger_account_type_enum' => LedgerAccountTypeEnum::Expense,
+    ]);
+
+    UpdateContact::make([
+        'id' => $contact->getKey(),
+        'expense_ledger_accounts' => [
+            ['tenant_id' => $otherTenant->getKey(), 'expense_ledger_account_id' => $ledgerAccount->getKey()],
+        ],
+    ])->validate()->execute();
+
+    expect($contact->expenseLedgerAccountIdFor($otherTenant->getKey()))->toBe($ledgerAccount->getKey())
+        ->and($contact->expenseLedgerAccountIdFor($this->dbTenant->getKey()))->toBeNull();
+});
+
+test('update contact rejects a per tenant expense account of a different tenant', function (): void {
+    $otherTenant = Tenant::factory()->create();
+    $contact = Contact::factory()
+        ->hasAttached([$this->dbTenant, $otherTenant], relationship: 'tenants')
+        ->create();
+    $ledgerAccount = LedgerAccount::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'ledger_account_type_enum' => LedgerAccountTypeEnum::Expense,
+    ]);
+
+    UpdateContact::assertValidationErrors([
+        'id' => $contact->getKey(),
+        'expense_ledger_accounts' => [
+            ['tenant_id' => $otherTenant->getKey(), 'expense_ledger_account_id' => $ledgerAccount->getKey()],
+        ],
+    ], 'expense_ledger_accounts.0.expense_ledger_account_id');
+
+    expect($contact->expenseLedgerAccountIdFor($otherTenant->getKey()))->toBeNull();
+});
+
+test('update contact rejects a per tenant expense account for a tenant the contact does not belong to', function (): void {
+    $otherTenant = Tenant::factory()->create();
+    $contact = Contact::factory()->hasAttached($this->dbTenant, relationship: 'tenants')->create();
+    $ledgerAccount = LedgerAccount::factory()->create([
+        'tenant_id' => $otherTenant->getKey(),
+        'ledger_account_type_enum' => LedgerAccountTypeEnum::Expense,
+    ]);
+
+    UpdateContact::assertValidationErrors([
+        'id' => $contact->getKey(),
+        'expense_ledger_accounts' => [
+            ['tenant_id' => $otherTenant->getKey(), 'expense_ledger_account_id' => $ledgerAccount->getKey()],
+        ],
+    ], 'expense_ledger_accounts.0.tenant_id');
+});
+
+test('update contact rejects a per tenant ledger account that is no expense account', function (): void {
+    $contact = Contact::factory()->hasAttached($this->dbTenant, relationship: 'tenants')->create();
+    $ledgerAccount = LedgerAccount::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'ledger_account_type_enum' => LedgerAccountTypeEnum::Revenue,
+    ]);
+
+    UpdateContact::assertValidationErrors([
+        'id' => $contact->getKey(),
+        'expense_ledger_accounts' => [
+            ['tenant_id' => $this->dbTenant->getKey(), 'expense_ledger_account_id' => $ledgerAccount->getKey()],
+        ],
+    ], 'expense_ledger_accounts.0.expense_ledger_account_id');
+});
+
+test('the expense ledger account of a tenant falls back to the default account of the contact on that tenant', function (): void {
+    $otherTenant = Tenant::factory()->create();
+    $ledgerAccount = LedgerAccount::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'ledger_account_type_enum' => LedgerAccountTypeEnum::Expense,
+    ]);
+    $contact = Contact::factory()
+        ->hasAttached([$this->dbTenant, $otherTenant], relationship: 'tenants')
+        ->create(['expense_ledger_account_id' => $ledgerAccount->getKey()]);
+
+    expect($contact->expenseLedgerAccountIdFor($this->dbTenant->getKey()))->toBe($ledgerAccount->getKey())
+        ->and($contact->expenseLedgerAccountIdFor($otherTenant->getKey()))->toBeNull();
+});
+
+test('create contact sets an expense ledger account per tenant', function (): void {
+    $ledgerAccount = LedgerAccount::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'ledger_account_type_enum' => LedgerAccountTypeEnum::Expense,
+    ]);
+
+    $contact = CreateContact::make([
+        'tenants' => [$this->dbTenant->getKey()],
+        'expense_ledger_accounts' => [
+            ['tenant_id' => $this->dbTenant->getKey(), 'expense_ledger_account_id' => $ledgerAccount->getKey()],
+        ],
+    ])->validate()->execute();
+
+    expect($contact->expenseLedgerAccountIdFor($this->dbTenant->getKey()))->toBe($ledgerAccount->getKey());
+});

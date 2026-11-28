@@ -15,6 +15,8 @@ class TenantForm extends FluxForm
 
     public ?string $city = null;
 
+    public ?int $clearing_ledger_account_id = null;
+
     public ?string $tenant_code = null;
 
     public ?int $commission_credit_note_order_type_id = null;
