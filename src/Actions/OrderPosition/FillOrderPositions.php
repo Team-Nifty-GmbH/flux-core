@@ -187,7 +187,7 @@ class FillOrderPositions extends FluxAction
         // Create Children
         $children = app(OrderPosition::class)->newCollection();
         foreach ($originalChildren as $child) {
-            if ($child['is_bundle_position']) {
+            if ($child['is_bundle_position'] ?? false) {
                 $child['amount'] = bcmul($child['amount_bundle'], $orderPosition->amount);
             }
 
@@ -230,8 +230,6 @@ class FillOrderPositions extends FluxAction
                 $children->push($position->withoutRelations());
             }
         }
-
-        $orderPosition->setRelation('children', $children);
 
         $loadedRelations = $orderPosition->getRelations();
         $orderPosition = $orderPosition->toArray();
