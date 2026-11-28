@@ -18,8 +18,12 @@ test('menu labels of core are translated in headline case', function (string $pa
     ['orders.children.orders', 'de', 'Alle Aufträge'],
     ['settings.children.general.children.search-settings', 'de', 'Sucheinstellungen'],
     ['settings.children.accounting.children.vat-rates', 'en', 'VAT Rates'],
+    ['settings.children.general.children.mail-settings', 'de', 'E-Mail-Einstellungen'],
 ]);
 
 test('menu labels are registered untranslated so they follow the user locale', function (): void {
+    // The menu resolves lazily, in the locale of the first request that reads it.
+    app()->setLocale('de');
+
     expect(data_get(Menu::all(), 'orders.children.orders.label'))->toBe('All orders');
 });
