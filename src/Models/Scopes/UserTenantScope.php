@@ -16,22 +16,22 @@ class UserTenantScope implements Scope
 {
     public function apply(Builder $builder, Model $model): void
     {
-        // Don't apply scope if no user is authenticated
-        if (! Auth::hasUser()) {
+        if (! Auth::hasUser() || ! ($user = Auth::user()) instanceof User) {
             return;
         }
 
-        // Cache tenant IDs in request-scoped Context to avoid multiple queries
-        if (! Context::has('user_tenant_ids')) {
-            Context::add('user_tenant_ids', ($user = Auth::user()) instanceof User
-                ? $user->tenants()
-                    ->withoutGlobalScope(UserTenantScope::class)
-                    ->pluck('id')
-                    ->toArray()
-                : []);
+        $tenantIds = Context::get('user_tenant_ids', []);
+
+        if (! array_key_exists($user->getKey(), $tenantIds)) {
+            $tenantIds[$user->getKey()] = $user->tenants()
+                ->withoutGlobalScope(UserTenantScope::class)
+                ->pluck('id')
+                ->toArray();
+
+            Context::add('user_tenant_ids', $tenantIds);
         }
 
-        $tenants = Context::get('user_tenant_ids');
+        $tenants = $tenantIds[$user->getKey()];
 
         if (! $tenants) {
             return;
