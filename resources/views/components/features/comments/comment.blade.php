@@ -159,6 +159,7 @@
                 </template>
             </div>
         </div>
+        @stack('support-comments-comment-actions')
         <div class="mt-2 text-sm font-medium text-gray-700 dark:text-gray-50">
             <span
                 x-text="
