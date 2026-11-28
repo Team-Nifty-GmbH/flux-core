@@ -340,3 +340,43 @@ test('the run total matches the sum of its positions after creation', function (
     expect($run->fresh()->total_amount)
         ->toEqual(bcround((string) $run->positions()->sum('amount'), 2));
 });
+
+test('opening the payment advice modal for a position queues the mail dialog', function (): void {
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'email_primary' => 'supplier@example.com',
+        'is_invoice_address' => true,
+    ]);
+    $contact->update(['invoice_address_id' => $address->getKey()]);
+
+    $order = createPaymentRunOrder(attributes: ['invoice_number' => 'RE-1']);
+    Order::query()->whereKey($order->getKey())->update([
+        'contact_id' => $contact->getKey(),
+        'address_invoice_id' => $address->getKey(),
+    ]);
+
+    $paymentRun = PaymentRun::query()->create([
+        'payment_run_type_enum' => 'money_transfer',
+        'state' => 'open',
+    ]);
+
+    $position = PaymentRunPosition::factory()->create([
+        'payment_run_id' => $paymentRun->getKey(),
+        'contact_id' => $contact->getKey(),
+        'amount' => '-100.00',
+        'end_to_end_id' => 'PR' . $paymentRun->getKey() . '-TEST',
+    ]);
+    $position->orders()->attach($order->getKey(), [
+        'payment_run_id' => $paymentRun->getKey(),
+        'amount' => '-100.00',
+    ]);
+
+    Livewire::test(PaymentRunList::class)
+        ->call('openPaymentAdviceModal', $position->getKey())
+        ->assertSet('documentPositionId', $position->getKey())
+        ->set('selectedPrintLayouts.email', ['payment-advice'])
+        ->call('createDocuments')
+        ->assertHasNoErrors()
+        ->assertDispatched('createFromSession');
+});
