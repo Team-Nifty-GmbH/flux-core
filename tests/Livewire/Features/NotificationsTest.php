@@ -248,3 +248,21 @@ test('shows the toast when the user is already on the accept url', function (): 
             fn (string $event, array $params): bool => str_contains(data_get($params, 'title', ''), 'Import finished')
         );
 });
+
+test('notification toasts render title and description as safe html', function (): void {
+    createNotification($this->user, [
+        'title' => 'Task <img src="x" onerror="alert(1)"> & more is due soon',
+        'description' => 'Line one<br onmouseover="alert(2)">Line <script>alert(3)</script>two',
+    ]);
+
+    $component = Livewire::actingAs($this->user)
+        ->test(Notifications::class)
+        ->call('showNotifications');
+
+    $toast = collect(data_get($component->effects, 'dispatches'))
+        ->firstWhere('name', 'ts-ui:toast-list');
+
+    expect(data_get($toast, 'params.title'))
+        ->toContain('Task &lt;img src=&quot;x&quot; onerror=&quot;alert(1)&quot;&gt; &amp; more is due soon')
+        ->and(data_get($toast, 'params.description'))->toBe('Line one<br />Line two');
+});
