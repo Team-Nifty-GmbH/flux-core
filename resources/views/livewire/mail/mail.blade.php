@@ -2,20 +2,9 @@
     class="flex flex-col-reverse gap-6 sm:flex-row"
     x-data="{
         writeHtml() {
-            const host = document.getElementById('mail-body')
-            let shadow = host.shadowRoot
-            if (! shadow) {
-                shadow = host.attachShadow({ mode: 'open' })
-            }
-            document.createElement('div')
-            shadow.innerHTML = $wire.mailMessage.html_body
-
-            if (
-                shadow.innerHTML !== $wire.mailMessage.html_body &&
-                $wire.mailMessage.text_body
-            ) {
-                shadow.innerHTML = $wire.mailMessage.text_body
-            }
+            document.getElementById('mail-body').srcdoc =
+                '<base href=&quot;https://invalid.invalid/&quot; target=&quot;_blank&quot;>' +
+                ($wire.mailMessage.html_body || $wire.mailMessage.text_body || '')
         },
     }"
 >
@@ -145,10 +134,13 @@
                     </x-button>
                 </template>
             </div>
-            <div
-                class="overflow-auto rounded-md border p-4"
+            <iframe
+                class="w-full rounded-md border bg-white"
+                style="height: 70vh"
                 id="mail-body"
-            ></div>
+                wire:ignore
+                sandbox="allow-popups allow-popups-to-escape-sandbox"
+            ></iframe>
         </div>
     </x-modal>
     <section class="flex max-w-384 flex-col gap-4">

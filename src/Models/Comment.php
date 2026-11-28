@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Contracts\MentionsContent;
+use FluxErp\Support\Html\RichTextSanitizer;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
 use FluxErp\Traits\Model\HasUserModification;
@@ -33,6 +34,12 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable, MentionsCon
 
     protected static function booted(): void
     {
+        static::saving(function (Comment $comment): void {
+            if ($comment->isDirty('comment')) {
+                $comment->comment = resolve_static(RichTextSanitizer::class, 'sanitize', ['html' => $comment->comment]);
+            }
+        });
+
         static::updating(function (Comment $comment): void {
             if ($comment->isDirty('comment')) {
                 $comment->edited_at = now();
