@@ -313,17 +313,42 @@ class UpdateOrderPosition extends FluxAction
                 }
             }
 
-            if (resolve_static(OrderPosition::class, 'hasConfiguredParent', ['parentId' => $orderPosition->parent_id])
-                && (
-                    (array_key_exists('product_id', $this->data)
+            if (resolve_static(OrderPosition::class, 'hasConfiguredParent', ['parentId' => $orderPosition->parent_id])) {
+                if ((array_key_exists('product_id', $this->data)
                         && (int) $this->data['product_id'] !== (int) $orderPosition->product_id)
                     || (array_key_exists('parent_id', $this->data)
                         && (int) $this->data['parent_id'] !== (int) $orderPosition->parent_id)
-                )
-            ) {
-                $errors += [
-                    'parent_id' => [__('Configuration positions can only be changed through the configuration.')],
-                ];
+                ) {
+                    $errors += [
+                        'parent_id' => [__('Configuration positions can only be changed through the configuration.')],
+                    ];
+                }
+
+                if (array_key_exists('amount_bundle', $this->data)
+                    && bccomp($this->data['amount_bundle'] ?? 0, $orderPosition->amount_bundle ?? 0) !== 0
+                ) {
+                    $errors += [
+                        'amount_bundle' => [__('Configuration positions can only be changed through the configuration.')],
+                    ];
+                }
+
+                if (array_key_exists('amount', $this->data)
+                    && ! is_null($orderPosition->amount_bundle)
+                    && bccomp($this->data['amount'] ?? 0, $orderPosition->amount ?? 0) !== 0
+                    && bccomp(
+                        $this->data['amount'] ?? 0,
+                        bcmul(
+                            $orderPosition->amount_bundle,
+                            resolve_static(OrderPosition::class, 'query')
+                                ->whereKey($orderPosition->parent_id)
+                                ->value('amount') ?? 0
+                        )
+                    ) !== 0
+                ) {
+                    $errors += [
+                        'amount' => [__('Configuration positions can only be changed through the configuration.')],
+                    ];
+                }
             }
 
             $isConfigured = (bool) $orderPosition->product?->is_configurable;

@@ -97,6 +97,37 @@ test('children cannot be deleted, moved or swapped on their own', function (): v
         'id' => $this->child->getKey(),
         'product_id' => $this->hdd->product_id,
     ], 'parent_id');
+
+    UpdateOrderPosition::assertValidationErrors([
+        'id' => $this->child->getKey(),
+        'amount' => 10,
+    ], 'amount');
+
+    UpdateOrderPosition::assertValidationErrors([
+        'id' => $this->child->getKey(),
+        'amount_bundle' => 100,
+    ], 'amount_bundle');
+
+    expect(bccomp($this->child->refresh()->amount, '2', 2))->toBe(0)
+        ->and(bccomp($this->child->amount_bundle, '2', 2))->toBe(0);
+});
+
+test('a child without amount bundle still scales with its configured parent', function (): void {
+    OrderPosition::query()->whereKey($this->child->getKey())->update(['amount_bundle' => null]);
+
+    UpdateOrderPosition::make(['id' => $this->parent->getKey(), 'amount' => 3])->validate()->execute();
+
+    expect(bccomp($this->child->refresh()->amount, '6', 2))->toBe(0);
+});
+
+test('a configured child can be edited when its amount is sent unchanged', function (): void {
+    UpdateOrderPosition::make([
+        'id' => $this->child->getKey(),
+        'amount' => $this->child->amount,
+        'description' => 'Rack mounted',
+    ])->validate()->execute();
+
+    expect($this->child->refresh()->description)->toBe('Rack mounted');
 });
 
 test('the product of a configured position cannot change', function (): void {
