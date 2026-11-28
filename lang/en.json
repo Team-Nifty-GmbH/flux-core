@@ -307,6 +307,7 @@
     "validation.uploaded": "The :attribute failed to upload.",
     "validation.url": "The :attribute must be a valid URL.",
     "validation.uuid": "The :attribute must be a valid UUID.",
+    "Vat Rates": "VAT Rates",
     "wire:confirm.apply.dashboard-preset": "Apply preset|Do you really want to apply this preset? Your own widgets in its groups will be replaced.|Cancel|Apply",
     "wire:confirm.cancel.dashboard-edit": "Discard Changes|Do you really want to discard the changes?|Cancel|Discard",
     "wire:confirm.clear.queue": "Clear Queue|Do you really want to clear the queue?|Cancel|Clear",
