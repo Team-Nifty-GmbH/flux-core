@@ -76,6 +76,7 @@ pest()
             ]);
 
         Currency::default() ?? Currency::factory()->create([
+            'iso' => 'XXX',
             'is_default' => true,
         ]);
 
