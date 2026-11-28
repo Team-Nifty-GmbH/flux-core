@@ -5,6 +5,8 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Scopes\UserTenantScope;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Context;
 
 test('does not cause ambiguous column when filtering by unqualified shared column', function (): void {
     $tenant = Tenant::factory()->create();
@@ -23,7 +25,7 @@ test('does not cause ambiguous column when filtering by unqualified shared colum
     $this->be($user, 'web');
 
     // Flush the context cache so the scope re-evaluates tenant IDs
-    Illuminate\Support\Facades\Context::flush();
+    Context::flush();
 
     // This reproduces the production error: unqualified 'contact_id' in
     // a where clause is ambiguous when the scope joins contact_tenant
@@ -52,7 +54,7 @@ test('does not cause ambiguous column when plucking shared column', function ():
 
     $this->be($user, 'web');
 
-    Illuminate\Support\Facades\Context::flush();
+    Context::flush();
 
     $contactIds = Address::query()->pluck('contact_id');
 
@@ -76,7 +78,7 @@ test('returns addresses for authenticated user tenant', function (): void {
 
     $this->be($user, 'web');
 
-    Illuminate\Support\Facades\Context::flush();
+    Context::flush();
 
     $addresses = Address::query()->get();
 
@@ -98,7 +100,7 @@ test('includes addresses without tenant assignment', function (): void {
 
     $this->be($user, 'web');
 
-    Illuminate\Support\Facades\Context::flush();
+    Context::flush();
 
     $addresses = Address::query()->get();
 
@@ -119,4 +121,70 @@ test('does not apply scope when user is not authenticated', function (): void {
     $addresses = Address::withoutGlobalScope(UserTenantScope::class)->get();
 
     expect($addresses)->toHaveCount(3);
+});
+
+test('filters by the tenants of the user set later in the same request', function (): void {
+    $tenantA = Tenant::factory()->create();
+    $tenantB = Tenant::factory()->create();
+
+    $userA = User::factory()->create();
+    $userA->tenants()->attach($tenantA->getKey());
+    $userB = User::factory()->create();
+    $userB->tenants()->attach($tenantB->getKey());
+
+    $contactA = Contact::factory()->hasAttached($tenantA, relationship: 'tenants')->create();
+    $contactB = Contact::factory()->hasAttached($tenantB, relationship: 'tenants')->create();
+
+    Context::flush();
+
+    $this->be($userA, 'web');
+    expect(Contact::query()->pluck('id')->all())->toBe([$contactA->getKey()]);
+
+    Auth::setUser($userB);
+    expect(Contact::query()->pluck('id')->all())->toBe([$contactB->getKey()]);
+});
+
+test('filters by the tenants of a later user when the first user has no tenants', function (): void {
+    $tenantA = Tenant::factory()->create();
+    $tenantB = Tenant::factory()->create();
+
+    $userA = User::factory()->create();
+    $userB = User::factory()->create();
+    $userB->tenants()->attach($tenantB->getKey());
+
+    Contact::factory()->hasAttached($tenantA, relationship: 'tenants')->create();
+    $contactB = Contact::factory()->hasAttached($tenantB, relationship: 'tenants')->create();
+
+    Context::flush();
+
+    $this->be($userA, 'web');
+    expect(Contact::query()->count())->toBe(2);
+
+    Auth::setUser($userB);
+    expect(Contact::query()->pluck('id')->all())->toBe([$contactB->getKey()]);
+});
+
+test('a queued job running as another user does not reuse the tenants of the dispatching user', function (): void {
+    $tenantA = Tenant::factory()->create();
+    $tenantB = Tenant::factory()->create();
+
+    $userA = User::factory()->create();
+    $userA->tenants()->attach($tenantA->getKey());
+    $userB = User::factory()->create();
+    $userB->tenants()->attach($tenantB->getKey());
+
+    Contact::factory()->hasAttached($tenantA, relationship: 'tenants')->create();
+    $contactB = Contact::factory()->hasAttached($tenantB, relationship: 'tenants')->create();
+
+    Context::flush();
+
+    $this->be($userA, 'web');
+    Contact::query()->get();
+
+    $payload = Context::dehydrate();
+    Context::flush();
+    Context::hydrate($payload);
+
+    Auth::setUser($userB);
+    expect(Contact::query()->pluck('id')->all())->toBe([$contactB->getKey()]);
 });
