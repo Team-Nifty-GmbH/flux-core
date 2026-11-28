@@ -439,7 +439,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
                     'image/png',
                 ]);
             })
-            ->useDisk('private');
+            ->useDisk('local');
     }
 
     public function syncWorkTimes(): void
