@@ -1329,6 +1329,17 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return app(OrderCollection::class, ['items' => $models]);
     }
 
+    public function paymentRecipient(): array
+    {
+        return [
+            'iban' => $this->iban ?: $this->contactBankConnection?->iban,
+            'bic' => $this->bic ?: $this->contactBankConnection?->bic,
+            'account_holder' => $this->account_holder
+                ?: $this->contactBankConnection?->account_holder
+                    ?: $this->addressInvoice?->name,
+        ];
+    }
+
     public function recalculateOrderPositionSlugPositions(): static
     {
         DB::table('order_positions')
@@ -1478,17 +1489,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         }
 
         return array_intersect_key($printViews, array_flip($this->orderType?->print_layouts ?: []));
-    }
-
-    public function paymentRecipient(): array
-    {
-        return [
-            'iban' => $this->iban ?: $this->contactBankConnection?->iban,
-            'bic' => $this->bic ?: $this->contactBankConnection?->bic,
-            'account_holder' => $this->account_holder
-                ?: $this->contactBankConnection?->account_holder
-                    ?: $this->addressInvoice?->name,
-        ];
     }
 
     public function resolveMailableInvoiceAddress(): ?Address

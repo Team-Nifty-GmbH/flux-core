@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Models\PaymentRunPosition;
 use Illuminate\Support\Facades\DB;
@@ -64,4 +65,31 @@ test('the backfill covers every page, not just the first', function (): void {
 
     expect(DB::table('order_payment_run')->whereNull('payment_run_position_id')->count())->toBe(0)
         ->and(PaymentRunPosition::query()->count())->toBe(5);
+});
+
+test('a deleted bank connection is not copied into the position', function (): void {
+    $paymentRun = PaymentRun::factory()->create();
+    $order = createPaymentRunOrder();
+    $bankConnection = ContactBankConnection::factory()->create([
+        'contact_id' => $order->contact_id,
+        'iban' => 'DE02120300000000202051',
+    ]);
+    DB::table('orders')->where('id', $order->getKey())->update([
+        'contact_bank_connection_id' => $bankConnection->getKey(),
+        'iban' => null,
+        'bic' => null,
+        'account_holder' => null,
+    ]);
+    $bankConnection->delete();
+
+    DB::table('order_payment_run')->insert([
+        'order_id' => $order->getKey(),
+        'payment_run_id' => $paymentRun->getKey(),
+        'payment_run_position_id' => null,
+        'amount' => '-100.00',
+    ]);
+
+    $this->migration->backfill();
+
+    expect($paymentRun->positions()->sole()->iban)->toBeNull();
 });

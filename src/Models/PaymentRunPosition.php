@@ -41,7 +41,8 @@ class PaymentRunPosition extends FluxModel
 
     public function refreshFromOrders(): static
     {
-        $orders = $this->orders()->get(['orders.id', 'orders.invoice_number']);
+        $orders = $this->orders()
+            ->get(['orders.id', 'orders.invoice_number']);
 
         $this->amount = bcsum($orders->pluck('pivot.amount'));
         $this->purpose = app(PaymentRunPositionBuilder::class)->purpose(

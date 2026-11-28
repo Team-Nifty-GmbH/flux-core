@@ -14,9 +14,10 @@ class PaymentRunPositionFactory extends Factory
     {
         return [
             'payment_run_id' => PaymentRun::factory(),
-            'iban' => 'DE89370400440532013000',
+            'iban' => $this->faker->iban('DE'),
+            'bic' => $this->faker->swiftBicNumber(),
             'account_holder' => $this->faker->company(),
-            'amount' => '-100.00',
+            'amount' => $this->faker->randomFloat(2, -10000, -1),
             'purpose' => $this->faker->word(),
         ];
     }

@@ -490,19 +490,6 @@ if (! function_exists('bcabs')) {
     }
 }
 
-if (! function_exists('bcsum')) {
-    function bcsum(iterable $numbers): string
-    {
-        $sum = '0';
-
-        foreach ($numbers as $number) {
-            $sum = bcadd($sum, (string) $number, 9);
-        }
-
-        return $sum;
-    }
-}
-
 if (! function_exists('bcceil')) {
     function bcceil(string $number): string
     {
@@ -522,6 +509,19 @@ if (! function_exists('bcfloor')) {
         }
 
         return $number[0] != '-' ? bcadd($number, 0, 0) : bcsub($number, 1, 0);
+    }
+}
+
+if (! function_exists('bcsum')) {
+    function bcsum(iterable $numbers): string
+    {
+        $sum = '0';
+
+        foreach ($numbers as $number) {
+            $sum = bcadd($sum, (string) $number, 9);
+        }
+
+        return $sum;
     }
 }
 

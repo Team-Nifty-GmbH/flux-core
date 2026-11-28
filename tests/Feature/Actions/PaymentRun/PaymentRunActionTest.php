@@ -66,8 +66,8 @@ test('create payment run', function (): void {
     expect($run)->bank_connection_id->toBe($bankConnection->getKey());
 });
 
-test('create payment run requires orders and payment_run_type_enum', function (): void {
-    CreatePaymentRun::assertValidationErrors([], ['orders', 'payment_run_type_enum']);
+test('create payment run requires positions and payment_run_type_enum', function (): void {
+    CreatePaymentRun::assertValidationErrors([], ['positions', 'payment_run_type_enum']);
 });
 
 test('delete payment run', function (): void {

@@ -39,6 +39,17 @@ class PaymentRun extends FluxModel
         return $this->belongsTo(BankConnection::class);
     }
 
+    public function orders(): BelongsToMany
+    {
+        return $this->belongsToMany(Order::class, 'order_payment_run')
+            ->using(OrderPaymentRun::class);
+    }
+
+    public function positions(): HasMany
+    {
+        return $this->hasMany(PaymentRunPosition::class);
+    }
+
     public function recalculateTotalAmount(): static
     {
         static::query()
@@ -51,16 +62,5 @@ class PaymentRun extends FluxModel
             ]);
 
         return $this;
-    }
-
-    public function orders(): BelongsToMany
-    {
-        return $this->belongsToMany(Order::class, 'order_payment_run')
-            ->using(OrderPaymentRun::class);
-    }
-
-    public function positions(): HasMany
-    {
-        return $this->hasMany(PaymentRunPosition::class);
     }
 }

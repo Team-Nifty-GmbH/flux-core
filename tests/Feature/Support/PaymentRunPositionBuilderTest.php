@@ -16,7 +16,7 @@ test('a position with many documents never contains a partial document number an
 
     expect(mb_strlen($purpose))->toBeLessThanOrEqual(140);
 
-    [$list] = explode(' +', $purpose, 2);
+    [$list] = explode(' (+', $purpose, 2);
     $listedNumbers = array_filter(explode(', ', $list));
 
     foreach ($listedNumbers as $listedNumber) {
@@ -32,11 +32,11 @@ test('the count of omitted documents is stated when not all fit', function (): v
 
     $purpose = $builder->purpose($numbers);
 
-    [$list] = explode(' +', $purpose, 2);
+    [$list] = explode(' (+', $purpose, 2);
     $listedCount = count(array_filter(explode(', ', $list)));
     $omittedCount = count($numbers) - $listedCount;
 
-    expect($purpose)->toContain('+' . $omittedCount . ' more');
+    expect($purpose)->toContain('(+' . $omittedCount . ')');
 });
 
 test('the reference is included in the tail once it is known', function (): void {
@@ -47,8 +47,26 @@ test('the reference is included in the tail once it is known', function (): void
 
     $purpose = $builder->purpose($numbers, 'PR1-2');
 
-    expect($purpose)->toContain('advice PR1-2')
+    expect($purpose)->toEndWith(' PR1-2')
         ->and(mb_strlen($purpose))->toBeLessThanOrEqual(140);
+});
+
+test('the purpose stays within 140 characters with a three digit count and the longest possible reference', function (): void {
+    $numbers = collect(range(1, 250))
+        ->map(fn (int $i) => 'RE-2026-' . str_pad((string) $i, 6, '0', STR_PAD_LEFT))
+        ->all();
+    $endToEndId = str_repeat('9', PaymentRunPositionBuilder::END_TO_END_ID_MAX_LENGTH);
+
+    $purpose = (new PaymentRunPositionBuilder())->purpose($numbers, $endToEndId);
+
+    expect(mb_strlen($purpose))->toBeLessThanOrEqual(140)
+        ->and($purpose)->toEndWith(' ' . $endToEndId);
+});
+
+test('a document number listed twice appears once in the purpose', function (): void {
+    $purpose = (new PaymentRunPositionBuilder())->purpose(['RE-1', 'RE-2', 'RE-1']);
+
+    expect($purpose)->toBe('RE-1, RE-2');
 });
 
 test('a position with few documents produces the plain list with no tail', function (): void {
@@ -70,7 +88,7 @@ test('the preview purpose lists the same documents as the stored one even though
 
     $builder = new PaymentRunPositionBuilder();
     $groups = $builder->build($orders, collect());
-    [$previewList] = explode(' +', $groups[0]['purpose'], 2);
+    [$previewList] = explode(' (+', $groups[0]['purpose'], 2);
 
     $run = CreatePaymentRun::make([
         'payment_run_type_enum' => 'money_transfer',
@@ -90,7 +108,7 @@ test('the preview purpose lists the same documents as the stored one even though
     expect(mb_strlen($position->end_to_end_id))
         ->toBeLessThan(mb_strlen(PaymentRunPositionBuilder::PLACEHOLDER_END_TO_END_ID));
 
-    [$finalList] = explode(' +', $position->purpose, 2);
+    [$finalList] = explode(' (+', $position->purpose, 2);
 
     expect($previewList)->toBe($finalList);
 });

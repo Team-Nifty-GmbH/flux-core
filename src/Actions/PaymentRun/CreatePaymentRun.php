@@ -25,37 +25,9 @@ class CreatePaymentRun extends FluxAction
         return CreatePaymentRunRuleset::class;
     }
 
-    public function validateData(): void
-    {
-        parent::validateData();
-
-        $paymentRunTypeEnum = $this->getData('payment_run_type_enum');
-        $paymentRunTypeEnum = $paymentRunTypeEnum instanceof PaymentRunTypeEnum
-            ? $paymentRunTypeEnum
-            : PaymentRunTypeEnum::from($paymentRunTypeEnum);
-
-        $errors = [];
-
-        foreach ($this->getData('positions') ?? [] as $index => $position) {
-            $orders = data_get($position, 'orders', []);
-            $amount = bcsum(array_column($orders, 'amount'));
-
-            if (bccomp($amount, '0', 2) !== $paymentRunTypeEnum->expectedSign()) {
-                $errors['positions.' . $index . '.orders'] = [
-                    'A payment run position must not point against the direction of the run.',
-                ];
-            }
-        }
-
-        if ($errors) {
-            throw ValidationException::withMessages($errors);
-        }
-    }
-
     public function performAction(): Model
     {
         $positions = Arr::pull($this->data, 'positions');
-        Arr::pull($this->data, 'orders');
 
         $paymentRun = app(PaymentRun::class, ['attributes' => $this->data]);
         $paymentRun->save();
@@ -109,17 +81,46 @@ class CreatePaymentRun extends FluxAction
         $positions = array_filter((array) data_get($this->data, 'positions'), 'is_array');
 
         $models = resolve_static(Order::class, 'query')
+            ->whereKey(array_filter(data_get($positions, '*.orders.0.order_id') ?? []))
             ->with(['contactBankConnection:id,iban,bic,account_holder', 'addressInvoice'])
-            ->whereIntegerInRaw('id', array_filter(data_get($positions, '*.orders.0.order_id', [])))
             ->get()
             ->keyBy(fn (Order $order) => $order->getKey());
 
         foreach ($positions as $index => $position) {
             $model = $models->get(data_get($position, 'orders.0.order_id'));
 
-            $this->data['positions'][$index] = $position
-                + ['contact_id' => $model?->contact_id]
-                + ($model?->paymentRecipient() ?? []);
+            $this->data['positions'][$index] = array_merge(
+                ['contact_id' => $model?->contact_id],
+                $model?->paymentRecipient() ?? [],
+                $position
+            );
+        }
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        $paymentRunTypeEnum = $this->getData('payment_run_type_enum');
+        $paymentRunTypeEnum = $paymentRunTypeEnum instanceof PaymentRunTypeEnum
+            ? $paymentRunTypeEnum
+            : PaymentRunTypeEnum::from($paymentRunTypeEnum);
+
+        $errors = [];
+        foreach ($this->getData('positions') ?? [] as $index => $position) {
+            $orders = data_get($position, 'orders') ?? [];
+            $amount = bcsum(array_column($orders, 'amount'));
+
+            if (bccomp($amount, '0', 2) !== $paymentRunTypeEnum->expectedSign()) {
+                $errors['positions.' . $index . '.orders'] = [
+                    'A payment run position must not point against the direction of the run.',
+                ];
+            }
+        }
+
+        if ($errors) {
+            throw ValidationException::withMessages($errors)
+                ->errorBag('createPaymentRun');
         }
     }
 }

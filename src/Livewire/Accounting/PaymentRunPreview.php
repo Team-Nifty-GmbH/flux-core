@@ -63,9 +63,13 @@ class PaymentRunPreview extends Component
 
         $this->groups = app(PaymentRunPositionBuilder::class)->build($orders, $creditNotes);
 
-        $sepaMandateTypes = $orders->mapWithKeys(fn (Order $order) => [
-            $order->getKey() => $order->contactBankConnection?->sepaMandates->last()?->sepa_mandate_type_enum,
-        ]);
+        $sepaMandateTypes = $orders
+            ->mapWithKeys(fn (Order $order) => [
+                $order->getKey() => $order->contactBankConnection
+                    ?->sepaMandates
+                    ->last()
+                    ?->sepa_mandate_type_enum,
+            ]);
 
         foreach ($this->groups as $groupIndex => $group) {
             $this->groups[$groupIndex]['type'] = $sepaMandateTypes->get(data_get($group, 'orders.0.id'));
@@ -86,7 +90,11 @@ class PaymentRunPreview extends Component
     #[Renderless]
     public function applyBalance(string $groupKey, int $orderId): void
     {
-        $this->setRowAmount($groupKey, $orderId, fn (array $row): string => bcabs(bcround(data_get($row, 'balance') ?? 0, 2)));
+        $this->setRowAmount(
+            $groupKey,
+            $orderId,
+            fn (array $row): string => bcabs(bcround(data_get($row, 'balance') ?? '0', 2))
+        );
     }
 
     #[Renderless]
@@ -115,13 +123,17 @@ class PaymentRunPreview extends Component
         $positions = collect($this->groups)
             ->map(fn (array $group) => [
                 'type' => data_get($group, 'type'),
-                'orders' => collect(data_get($group, 'orders', []))
-                    ->reject(fn (array $row) => bccomp(bcround(data_get($row, 'amount'), 2), '0', 2) === 0)
+                'orders' => collect(data_get($group, 'orders') ?? [])
+                    ->reject(fn (array $row) => bccomp(
+                        bcround(data_get($row, 'amount') ?? '0', 2),
+                        '0',
+                        2
+                    ) === 0)
                     ->map(fn (array $row) => [
                         'order_id' => data_get($row, 'id'),
                         'amount' => bcmul(
-                            bcabs(bcround(data_get($row, 'amount'), 2)),
-                            (string) data_get($row, 'multiplier')
+                            bcabs(bcround(data_get($row, 'amount') ?? '0', 2)),
+                            (string) (data_get($row, 'multiplier') ?? '0')
                         ),
                     ])
                     ->values()
@@ -184,7 +196,7 @@ class PaymentRunPreview extends Component
         if ($rowIndex !== false) {
             array_splice($this->groups[$groupIndex]['orders'], $rowIndex, 1);
 
-            if ($this->groups[$groupIndex]['orders']) {
+            if (data_get($this->groups, $groupIndex . '.orders')) {
                 $this->recapAndRecalculate($groupIndex);
             } else {
                 array_splice($this->groups, $groupIndex, 1);
@@ -202,13 +214,17 @@ class PaymentRunPreview extends Component
             return collect();
         }
 
-        $contactIds = $orders->pluck('contact_id')->filter()->unique();
+        $contactIds = $orders
+            ->pluck('contact_id')
+            ->filter()
+            ->unique();
 
         if ($contactIds->isEmpty()) {
             return collect();
         }
 
         return resolve_static(Order::class, 'query')
+            ->whereKeyNot($orders->modelKeys())
             ->whereIntegerInRaw('contact_id', $contactIds->all())
             ->whereNotNull('invoice_number')
             ->where('balance', '>', 0)
@@ -218,7 +234,6 @@ class PaymentRunPreview extends Component
                 'order_type_enum',
                 OrderTypeEnum::PurchaseRefund->value
             )
-            ->whereKeyNot($orders->modelKeys())
             ->whereDoesntHave('paymentRuns')
             ->get();
     }
@@ -231,7 +246,11 @@ class PaymentRunPreview extends Component
             $groupIndex,
             $groupIndex === false
                 ? false
-                : array_search($orderId, array_column($this->groups[$groupIndex]['orders'], 'id'), true),
+                : array_search(
+                    $orderId,
+                    array_column(data_get($this->groups, $groupIndex . '.orders') ?? [], 'id'),
+                    true
+                ),
         ];
     }
 
@@ -247,7 +266,13 @@ class PaymentRunPreview extends Component
     {
         [$groupIndex, $rowIndex] = $this->locate($groupKey, $orderId);
 
-        if ($rowIndex === false || ($value = $amount($this->groups[$groupIndex]['orders'][$rowIndex])) === null) {
+        if ($rowIndex === false) {
+            return;
+        }
+
+        $value = $amount(data_get($this->groups, $groupIndex . '.orders.' . $rowIndex) ?? []);
+
+        if ($value === null) {
             return;
         }
 

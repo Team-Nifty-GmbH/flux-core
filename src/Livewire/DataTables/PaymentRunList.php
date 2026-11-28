@@ -134,7 +134,9 @@ class PaymentRunList extends BaseDataTable
         if ($position) {
             $position->refreshFromOrders();
 
-            if (bccomp((string) $position->amount, '0', 2) !== $paymentRun->payment_run_type_enum->expectedSign()) {
+            if (bccomp((string) $position->amount, '0', 2)
+                !== $paymentRun->payment_run_type_enum->expectedSign()
+            ) {
                 $paymentRun->orders()->detach($position->orders()->pluck('orders.id')->all());
                 $position->delete();
             }
