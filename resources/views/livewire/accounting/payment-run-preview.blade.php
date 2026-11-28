@@ -14,8 +14,8 @@
         },
         transfersLabel(count) {
             const template = count === 1
-                ? '{{ trans_choice('{1} :count Transfer|[2,*] :count Transfers', 1) }}'
-                : '{{ trans_choice('{1} :count Transfer|[2,*] :count Transfers', 2) }}'
+                ? '{{ trans_choice('{1} :count Transfer|[2,*] :count Transfers', 1, ['count' => ':count']) }}'
+                : '{{ trans_choice('{1} :count Transfer|[2,*] :count Transfers', 2, ['count' => ':count']) }}'
 
             return template.replace(':count', count)
         },
