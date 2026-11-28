@@ -53,7 +53,7 @@ class MenuServiceProvider extends ServiceProvider
                         path: 'orders.children.order-type-' . $orderType->id
                     );
                 }
-                Menu::register(route: 'orders.orders', label: __('All orders'));
+                Menu::register(route: 'orders.orders', label: 'All orders');
                 Menu::register(route: 'orders.order-positions');
             }
         );
