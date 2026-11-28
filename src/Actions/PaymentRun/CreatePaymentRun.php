@@ -6,9 +6,12 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\LedgerBooking\CreateLedgerBooking;
 use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Models\Language;
+use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Models\PaymentRunPosition;
+use FluxErp\Models\Scopes\UserTenantScope;
+use FluxErp\Models\Tenant;
 use FluxErp\Rulesets\PaymentRun\CreatePaymentRunRuleset;
 use FluxErp\Settings\AccountingSettings;
 use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
@@ -78,6 +81,18 @@ class CreatePaymentRun extends FluxAction
         return $paymentRun->fresh();
     }
 
+    protected function clearingLedgerAccountIdFor(int $tenantId): ?int
+    {
+        return resolve_static(Tenant::class, 'query')
+            ->whereKey($tenantId)
+            ->value('clearing_ledger_account_id')
+            ?? resolve_static(LedgerAccount::class, 'query')
+                ->withoutGlobalScope(UserTenantScope::class)
+                ->whereKey(app(AccountingSettings::class)->clearing_ledger_account_id)
+                ->where('tenant_id', $tenantId)
+                ->value('id');
+    }
+
     protected function prepareForValidation(): void
     {
         if (! data_get($this->data, 'positions') && data_get($this->data, 'orders')) {
@@ -108,10 +123,9 @@ class CreatePaymentRun extends FluxAction
 
     protected function settleByClearingAccount(PaymentRunPosition $position): void
     {
-        $clearingLedgerAccountId = app(AccountingSettings::class)->clearing_ledger_account_id;
-
         foreach ($position->orders()->with(['contact', 'language'])->get() as $order) {
-            $ledgerAccountId = $order->contact?->expense_ledger_account_id;
+            $clearingLedgerAccountId = $this->clearingLedgerAccountIdFor($order->tenant_id);
+            $ledgerAccountId = $order->contact?->expenseLedgerAccountIdFor($order->tenant_id);
 
             $isCredit = bccomp((string) $order->pivot->amount, '0', 2) === 1;
 
@@ -139,7 +153,6 @@ class CreatePaymentRun extends FluxAction
     {
         parent::validateData();
 
-        $clearingLedgerAccountId = app(AccountingSettings::class)->clearing_ledger_account_id;
         $paymentRunTypeEnum = $this->getData('payment_run_type_enum');
         $paymentRunTypeEnum = $paymentRunTypeEnum instanceof PaymentRunTypeEnum
             ? $paymentRunTypeEnum
@@ -160,23 +173,28 @@ class CreatePaymentRun extends FluxAction
                 continue;
             }
 
-            if (! $clearingLedgerAccountId) {
-                $errors['positions.' . $index . '.orders'] = [
-                    'Set a clearing ledger account before offsetting a credit note in full.',
-                ];
-
-                continue;
-            }
-
-            $hasMissingExpenseAccount = resolve_static(Order::class, 'query')
+            $missingAccounts = resolve_static(Order::class, 'query')
                 ->whereKey(array_column($orders, 'order_id'))
-                ->whereDoesntHave('contact', fn ($query) => $query->whereNotNull('expense_ledger_account_id'))
-                ->exists();
+                ->with(['contact', 'tenant:id,name'])
+                ->get(['id', 'contact_id', 'tenant_id'])
+                ->map(fn (Order $order): ?string => match (true) {
+                    ! $this->clearingLedgerAccountIdFor($order->tenant_id) => __(
+                        'Set a clearing ledger account for :tenant before offsetting a credit note in full.',
+                        ['tenant' => $order->tenant?->name]
+                    ),
+                    ! $order->contact?->expenseLedgerAccountIdFor($order->tenant_id) => __(
+                        'Set an expense ledger account for :tenant on every contact of a fully offset position.',
+                        ['tenant' => $order->tenant?->name]
+                    ),
+                    default => null,
+                })
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
 
-            if ($hasMissingExpenseAccount) {
-                $errors['positions.' . $index . '.orders'] = [
-                    'Set an expense ledger account on every contact of a fully offset position.',
-                ];
+            if ($missingAccounts) {
+                $errors['positions.' . $index . '.orders'] = $missingAccounts;
             }
         }
 

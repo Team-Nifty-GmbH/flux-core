@@ -7,6 +7,7 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Contact as ContactModel;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\PaymentType;
+use FluxErp\Models\Tenant;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -58,4 +59,32 @@ test('the expense ledger account of a contact can be set', function (): void {
         ->assertHasNoErrors();
 
     expect($this->contact->refresh()->expense_ledger_account_id)->toBe($ledgerAccount->getKey());
+});
+
+test('the expense ledger account per tenant is loaded and saved through the contact form', function (): void {
+    $otherTenant = Tenant::factory()->create();
+    $this->contact->tenants()->sync([$this->dbTenant->getKey(), $otherTenant->getKey()]);
+
+    $ledgerAccount = LedgerAccount::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'ledger_account_type_enum' => LedgerAccountTypeEnum::Expense,
+    ]);
+    $otherLedgerAccount = LedgerAccount::factory()->create([
+        'tenant_id' => $otherTenant->getKey(),
+        'ledger_account_type_enum' => LedgerAccountTypeEnum::Expense,
+    ]);
+    $this->contact->tenants()->updateExistingPivot(
+        $otherTenant->getKey(),
+        ['expense_ledger_account_id' => $otherLedgerAccount->getKey()]
+    );
+
+    Livewire::test(Contact::class, ['id' => $this->contact->id])
+        ->assertSet('contact.expense_ledger_accounts.' . $otherTenant->getKey(), $otherLedgerAccount->getKey())
+        ->set('edit', true)
+        ->set('contact.expense_ledger_accounts.' . $this->dbTenant->getKey(), $ledgerAccount->getKey())
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect($this->contact->expenseLedgerAccountIdFor($this->dbTenant->getKey()))->toBe($ledgerAccount->getKey())
+        ->and($this->contact->expenseLedgerAccountIdFor($otherTenant->getKey()))->toBe($otherLedgerAccount->getKey());
 });

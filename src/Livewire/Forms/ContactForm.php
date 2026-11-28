@@ -55,6 +55,8 @@ class ContactForm extends FluxForm
 
     public ?int $expense_ledger_account_id = null;
 
+    public array $expense_ledger_accounts = [];
+
     public ?string $footer = null;
 
     public bool $has_delivery_lock = false;
@@ -182,6 +184,17 @@ class ContactForm extends FluxForm
             $values = $values->toArray();
             $values['categories'] = array_column($values['categories'] ?? [], 'id');
             $values['industries'] = array_column($values['industries'] ?? [], 'id');
+            $values['expense_ledger_accounts'] = array_column(
+                array_map(
+                    fn (array $tenant): array => [
+                        'tenant_id' => $tenant['id'],
+                        'expense_ledger_account_id' => data_get($tenant, 'pivot.expense_ledger_account_id'),
+                    ],
+                    $values['tenants'] ?? []
+                ),
+                'expense_ledger_account_id',
+                'tenant_id'
+            );
             $values['tenants'] = array_column($values['tenants'] ?? [], 'id');
             $values['main_address'] ??= [];
         }
@@ -205,6 +218,15 @@ class ContactForm extends FluxForm
     public function toActionData(): array
     {
         $data = parent::toActionData();
+
+        $data['expense_ledger_accounts'] = collect($this->expense_ledger_accounts)
+            ->only($this->tenants)
+            ->map(fn (mixed $ledgerAccountId, int|string $tenantId): array => [
+                'tenant_id' => (int) $tenantId,
+                'expense_ledger_account_id' => $ledgerAccountId ? (int) $ledgerAccountId : null,
+            ])
+            ->values()
+            ->all();
 
         // Convert discount percent from percent to decimal for storage
         $data['discount_percent'] = ! is_null($this->discount_percent)

@@ -3,6 +3,7 @@
 use FluxErp\Actions\PaymentRun\CreatePaymentRun;
 use FluxErp\Actions\PaymentRun\DeletePaymentRun;
 use FluxErp\Actions\PaymentRun\UpdatePaymentRun;
+use FluxErp\Enums\LedgerAccountTypeEnum;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\BankConnection;
@@ -16,12 +17,14 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\Transaction;
 use FluxErp\Settings\AccountingSettings;
 use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
 use FluxErp\States\Order\PaymentState\InPayment;
 use FluxErp\States\Order\PaymentState\Open;
 use FluxErp\States\Order\PaymentState\Paid;
+use Illuminate\Support\Facades\DB;
 
 function createOrderForPaymentRun(object $testContext): array
 {
@@ -615,4 +618,128 @@ test('an overpaid sales invoice offset in full by a supplier credit note is sett
         ->and($invoice->fresh()->payment_state)->toBeInstanceOf(Paid::class)
         ->and($creditNote->fresh()->balance)->toEqual('0.00')
         ->and($creditNote->fresh()->payment_state)->toBeInstanceOf(Paid::class);
+});
+
+test('a netted position with orders of two tenants books each order on the accounts of its own tenant', function (): void {
+    $otherTenant = Tenant::factory()->create();
+
+    $clearing = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
+    $otherClearing = LedgerAccount::factory()->create(['tenant_id' => $otherTenant->getKey()]);
+    $creditor = LedgerAccount::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'ledger_account_type_enum' => LedgerAccountTypeEnum::Expense,
+    ]);
+    $otherCreditor = LedgerAccount::factory()->create([
+        'tenant_id' => $otherTenant->getKey(),
+        'ledger_account_type_enum' => LedgerAccountTypeEnum::Expense,
+    ]);
+
+    app(AccountingSettings::class)->clearing_ledger_account_id = $clearing->getKey();
+    $otherTenant->update(['clearing_ledger_account_id' => $otherClearing->getKey()]);
+
+    $contact = Contact::factory()
+        ->hasAttached([$this->dbTenant, $otherTenant], relationship: 'tenants')
+        ->create(['expense_ledger_account_id' => $creditor->getKey()]);
+    DB::table('contact_tenant')
+        ->where('contact_id', $contact->getKey())
+        ->where('tenant_id', $otherTenant->getKey())
+        ->update(['expense_ledger_account_id' => $otherCreditor->getKey()]);
+
+    $orders = [
+        'invoice' => createPaymentRunOrder(OrderTypeEnum::Purchase, '-500.00', ['contact_id' => $contact->getKey()]),
+        'creditNote' => createPaymentRunOrder(OrderTypeEnum::PurchaseRefund, '500.00', ['contact_id' => $contact->getKey()]),
+        'otherInvoice' => createPaymentRunOrder(OrderTypeEnum::Purchase, '-300.00', [
+            'contact_id' => $contact->getKey(),
+            'tenant_id' => $otherTenant->getKey(),
+        ]),
+        'otherCreditNote' => createPaymentRunOrder(OrderTypeEnum::PurchaseRefund, '300.00', [
+            'contact_id' => $contact->getKey(),
+            'tenant_id' => $otherTenant->getKey(),
+        ]),
+    ];
+
+    CreatePaymentRun::make([
+        'payment_run_type_enum' => 'money_transfer',
+        'positions' => [
+            [
+                'contact_id' => $contact->getKey(),
+                'iban' => 'DE89370400440532013000',
+                'orders' => [
+                    ['order_id' => $orders['invoice']->getKey(), 'amount' => -500],
+                    ['order_id' => $orders['creditNote']->getKey(), 'amount' => 500],
+                    ['order_id' => $orders['otherInvoice']->getKey(), 'amount' => -300],
+                    ['order_id' => $orders['otherCreditNote']->getKey(), 'amount' => 300],
+                ],
+            ],
+        ],
+    ])->validate()->execute();
+
+    $bookings = LedgerBooking::query()->get()->keyBy('source_id');
+
+    expect($bookings)->toHaveCount(4)
+        ->and($bookings[$orders['invoice']->getKey()]->only(['tenant_id', 'debit_ledger_account_id', 'credit_ledger_account_id']))
+        ->toEqual([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'debit_ledger_account_id' => $creditor->getKey(),
+            'credit_ledger_account_id' => $clearing->getKey(),
+        ])
+        ->and($bookings[$orders['otherInvoice']->getKey()]->only(['tenant_id', 'debit_ledger_account_id', 'credit_ledger_account_id']))
+        ->toEqual([
+            'tenant_id' => $otherTenant->getKey(),
+            'debit_ledger_account_id' => $otherCreditor->getKey(),
+            'credit_ledger_account_id' => $otherClearing->getKey(),
+        ])
+        ->and($bookings[$orders['otherCreditNote']->getKey()]->only(['tenant_id', 'debit_ledger_account_id', 'credit_ledger_account_id']))
+        ->toEqual([
+            'tenant_id' => $otherTenant->getKey(),
+            'debit_ledger_account_id' => $otherClearing->getKey(),
+            'credit_ledger_account_id' => $otherCreditor->getKey(),
+        ])
+        ->and($orders['otherInvoice']->fresh()->payment_state)->toBeInstanceOf(Paid::class);
+});
+
+test('a netted position is rejected when the tenant of an order has no clearing account', function (): void {
+    $otherTenant = Tenant::factory()->create(['name' => 'Second Tenant']);
+    $clearing = LedgerAccount::factory()->create(['tenant_id' => $this->dbTenant->getKey()]);
+    $otherCreditor = LedgerAccount::factory()->create([
+        'tenant_id' => $otherTenant->getKey(),
+        'ledger_account_type_enum' => LedgerAccountTypeEnum::Expense,
+    ]);
+
+    app(AccountingSettings::class)->clearing_ledger_account_id = $clearing->getKey();
+
+    $contact = Contact::factory()->hasAttached($otherTenant, relationship: 'tenants')->create();
+    DB::table('contact_tenant')
+        ->where('contact_id', $contact->getKey())
+        ->update(['expense_ledger_account_id' => $otherCreditor->getKey()]);
+
+    $invoice = createPaymentRunOrder(OrderTypeEnum::Purchase, '-300.00', [
+        'contact_id' => $contact->getKey(),
+        'tenant_id' => $otherTenant->getKey(),
+    ]);
+    $creditNote = createPaymentRunOrder(OrderTypeEnum::PurchaseRefund, '300.00', [
+        'contact_id' => $contact->getKey(),
+        'tenant_id' => $otherTenant->getKey(),
+    ]);
+
+    try {
+        CreatePaymentRun::make([
+            'payment_run_type_enum' => 'money_transfer',
+            'positions' => [
+                [
+                    'contact_id' => $contact->getKey(),
+                    'orders' => [
+                        ['order_id' => $invoice->getKey(), 'amount' => -300],
+                        ['order_id' => $creditNote->getKey(), 'amount' => 300],
+                    ],
+                ],
+            ],
+        ])->validate()->execute();
+
+        $this->fail('The payment run was created without a clearing account for the second tenant.');
+    } catch (Illuminate\Validation\ValidationException $e) {
+        expect($e->errors()['positions.0.orders'][0])->toContain('Second Tenant');
+    }
+
+    expect(LedgerBooking::query()->count())->toBe(0);
 });

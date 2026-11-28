@@ -3,10 +3,13 @@
 namespace FluxErp\Actions\Tenant;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Models\LedgerAccount;
+use FluxErp\Models\Scopes\UserTenantScope;
 use FluxErp\Models\Tenant;
 use FluxErp\Rulesets\Tenant\UpdateTenantRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 
 class UpdateTenant extends FluxAction
 {
@@ -48,6 +51,24 @@ class UpdateTenant extends FluxAction
                 ->exists()
         ) {
             $this->rules['is_default'] .= '|accepted';
+        }
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        if (($clearingLedgerAccountId = $this->getData('clearing_ledger_account_id'))
+            && resolve_static(LedgerAccount::class, 'query')
+                ->withoutGlobalScope(UserTenantScope::class)
+                ->whereKey($clearingLedgerAccountId)
+                ->where('tenant_id', $this->getData('id'))
+                ->doesntExist()
+        ) {
+            throw ValidationException::withMessages([
+                'clearing_ledger_account_id' => ['The clearing ledger account must belong to the tenant.'],
+            ])
+                ->errorBag('updateTenant');
         }
     }
 }

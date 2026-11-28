@@ -10,6 +10,7 @@ use FluxErp\Models\Pivots\ContactDiscountGroup;
 use FluxErp\Models\Pivots\ContactIndustry;
 use FluxErp\Models\Pivots\ContactTenant;
 use FluxErp\Models\Pivots\ProductSupplier;
+use FluxErp\Models\Scopes\UserTenantScope;
 use FluxErp\Support\Scout\ScoutCustomize;
 use FluxErp\Traits\Model\CascadeSoftDeletes;
 use FluxErp\Traits\Model\Categorizable;
@@ -194,7 +195,8 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
     public function tenants(): BelongsToMany
     {
         return $this->belongsToMany(Tenant::class, 'contact_tenant')
-            ->using(ContactTenant::class);
+            ->using(ContactTenant::class)
+            ->withPivot('expense_ledger_account_id');
     }
 
     public function vatRate(): BelongsTo
@@ -208,6 +210,19 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
     }
 
     // Public methods
+    public function expenseLedgerAccountIdFor(int $tenantId): ?int
+    {
+        return resolve_static(ContactTenant::class, 'query')
+            ->where('contact_id', $this->getKey())
+            ->where('tenant_id', $tenantId)
+            ->value('expense_ledger_account_id')
+            ?? resolve_static(LedgerAccount::class, 'query')
+                ->withoutGlobalScope(UserTenantScope::class)
+                ->whereKey($this->expense_ledger_account_id)
+                ->where('tenant_id', $tenantId)
+                ->value('id');
+    }
+
     public function getAllDiscounts(): Collection
     {
         return $this->getAllDiscountsQuery()

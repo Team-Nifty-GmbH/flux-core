@@ -124,6 +124,29 @@
                         ],
                     ]"
                 />
+                @foreach ($tenants as $tenant)
+                    <x-select.styled
+                        x-bind:disabled="!$wire.$parent.$parent.edit"
+                        wire:model="contact.expense_ledger_accounts.{{ $tenant['id'] }}"
+                        :label="__('Expense Ledger Account') . ' ' . $tenant['name']"
+                        select="label:name|value:id|description:number"
+                        unfiltered
+                        :request="[
+                            'url' => route('search', \FluxErp\Models\LedgerAccount::class),
+                            'method' => 'POST',
+                            'params' => [
+                                'where' => [
+                                    [
+                                        'ledger_account_type_enum',
+                                        '=',
+                                        \FluxErp\Enums\LedgerAccountTypeEnum::Expense,
+                                    ],
+                                    ['tenant_id', '=', $tenant['id']],
+                                ],
+                            ],
+                        ]"
+                    />
+                @endforeach
             </div>
         </x-card>
     @show

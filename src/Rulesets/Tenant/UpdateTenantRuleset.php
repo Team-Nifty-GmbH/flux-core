@@ -4,6 +4,7 @@ namespace FluxErp\Rulesets\Tenant;
 
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Country;
+use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\Tenant;
 use FluxErp\Rules\ModelExists;
@@ -40,6 +41,11 @@ class UpdateTenantRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => OrderType::class, 'subject' => Tenant::class])
                     ->where('order_type_enum', OrderTypeEnum::Refund)
                     ->where('is_active', true),
+            ],
+            'clearing_ledger_account_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => LedgerAccount::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
             'tenant_code' => 'sometimes|required|string|max:255|unique:tenants,tenant_code',

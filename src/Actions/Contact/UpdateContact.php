@@ -9,6 +9,7 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Pivots\ContactTenant;
+use FluxErp\Models\Scopes\UserTenantScope;
 use FluxErp\Models\Tenant;
 use FluxErp\Rulesets\Contact\UpdateContactRuleset;
 use Illuminate\Database\Eloquent\Model;
@@ -33,6 +34,7 @@ class UpdateContact extends DispatchableFluxAction implements SupportsBulkExecut
         $discounts = Arr::pull($this->data, 'discounts');
         $industries = Arr::pull($this->data, 'industries');
         $tenants = Arr::pull($this->data, 'tenants');
+        $expenseLedgerAccounts = Arr::pull($this->data, 'expense_ledger_accounts');
 
         $contact = resolve_static(Contact::class, 'query')
             ->whereKey($this->data['id'])
@@ -43,6 +45,13 @@ class UpdateContact extends DispatchableFluxAction implements SupportsBulkExecut
 
         if (! is_null($tenants)) {
             $contact->tenants()->sync($tenants);
+        }
+
+        foreach ($expenseLedgerAccounts ?? [] as $entry) {
+            $contact->tenants()->updateExistingPivot(
+                data_get($entry, 'tenant_id'),
+                ['expense_ledger_account_id' => data_get($entry, 'expense_ledger_account_id')]
+            );
         }
 
         if (! is_null($discounts)) {
@@ -176,6 +185,37 @@ class UpdateContact extends DispatchableFluxAction implements SupportsBulkExecut
                 $errors += [
                     'expense_ledger_account_id' => ['The expense ledger account must belong to a tenant of the contact.'],
                 ];
+            }
+        }
+
+        if ($this->getData('expense_ledger_accounts')) {
+            $tenants = $this->getData('tenants') ?? resolve_static(ContactTenant::class, 'query')
+                ->where('contact_id', $this->getData('id'))
+                ->pluck('tenant_id')
+                ->toArray();
+
+            foreach ($this->getData('expense_ledger_accounts') ?? [] as $index => $entry) {
+                $tenantId = data_get($entry, 'tenant_id');
+
+                if (! in_array($tenantId, $tenants)) {
+                    $errors['expense_ledger_accounts.' . $index . '.tenant_id'] = [
+                        'The tenant is not assigned to the contact.',
+                    ];
+
+                    continue;
+                }
+
+                if (($ledgerAccountId = data_get($entry, 'expense_ledger_account_id'))
+                    && resolve_static(LedgerAccount::class, 'query')
+                        ->withoutGlobalScope(UserTenantScope::class)
+                        ->whereKey($ledgerAccountId)
+                        ->where('tenant_id', $tenantId)
+                        ->doesntExist()
+                ) {
+                    $errors['expense_ledger_accounts.' . $index . '.expense_ledger_account_id'] = [
+                        'The expense ledger account must belong to this tenant.',
+                    ];
+                }
             }
         }
 
