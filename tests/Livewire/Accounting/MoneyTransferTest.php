@@ -116,3 +116,39 @@ test('an overpaid invoice moves into the payment run when the run is created', f
 
     expect($this->order->refresh()->payment_state)->toBeInstanceOf(InOpenPaymentRun::class);
 });
+
+test('the money transfer list contains supplier credit notes', function (): void {
+    $purchaseType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Purchase,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+    $refundType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::PurchaseRefund,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $invoice = createPaymentRunOrder($purchaseType, '-500.00');
+    $creditNote = createPaymentRunOrder($refundType, '200.00');
+
+    Livewire::test(MoneyTransfer::class)
+        ->assertSee($invoice->invoice_number)
+        ->assertSee($creditNote->invoice_number);
+});
+
+test('an order type that is not owed to a supplier does not appear in the list', function (OrderTypeEnum $orderTypeEnum, string $balance): void {
+    $orderType = OrderType::factory()->create([
+        'order_type_enum' => $orderTypeEnum,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $order = createPaymentRunOrder($orderType, $balance);
+
+    Livewire::test(MoneyTransfer::class)
+        ->assertDontSee($order->invoice_number);
+})->with([
+    'a purchase invoice with a positive balance' => [OrderTypeEnum::Purchase, '500.00'],
+    'a sales order with a positive balance' => [OrderTypeEnum::Order, '200.00'],
+]);

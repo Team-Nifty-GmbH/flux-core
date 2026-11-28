@@ -4,14 +4,17 @@ namespace FluxErp\Livewire\Accounting;
 
 use FluxErp\Actions\PaymentRun\CreatePaymentRun;
 use FluxErp\Actions\PaymentRun\DeletePaymentRun;
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Enums\SepaMandateTypeEnum;
-use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
+use FluxErp\States\Order\PaymentState\Open as OrderOpen;
 use FluxErp\States\PaymentRun\Open;
+use FluxErp\Support\PaymentRunPositionBuilder;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
@@ -22,7 +25,7 @@ class PaymentRunPreview extends Component
 {
     use Actions;
 
-    public array $orders = [];
+    public array $groups = [];
 
     #[Locked]
     public ?string $paymentRunTypeEnum = null;
@@ -41,38 +44,36 @@ class PaymentRunPreview extends Component
             return;
         }
 
-        $this->orders = resolve_static(Order::class, 'query')
+        $orders = resolve_static(Order::class, 'query')
             ->whereKey($orderIds)
             ->with([
-                'contact',
-                'addressInvoice',
-                'orderType',
-                'currency',
-                'contactBankConnection:id,contact_id',
                 'contactBankConnection.sepaMandates' => function (HasMany $query): void {
                     $query->select(['id', 'contact_bank_connection_id', 'sepa_mandate_type_enum'])
                         ->whereNotNull('signed_date');
                 },
             ])
-            ->get()
-            ->keyBy('id')
-            ->map(fn (Order $order) => [
-                'id' => $order->getKey(),
-                'invoice_number' => $order->invoice_number,
-                'contact_name' => $order->contact?->name,
-                'address_name' => $order->addressInvoice?->name,
-                'total_gross_price' => $order->total_gross_price,
-                'balance' => $order->balance,
-                'balance_due_discount' => $order->balance_due_discount,
-                'payment_discount_target_date' => $order->payment_discount_target_date?->format('Y-m-d'),
-                'payment_discount_percent' => $order->payment_discount_percent,
-                'currency_iso' => $order->currency?->iso
-                    ?? resolve_static(Currency::class, 'default')?->iso,
-                'amount' => $this->calculateAmount($order),
-                'multiplier' => bccomp($order->balance, 0),
-                'type' => $order->contactBankConnection?->sepaMandates->last()?->sepa_mandate_type_enum ?? null,
-            ])
-            ->toArray();
+            ->get();
+
+        $creditNotes = $this->suggestedCreditNotes($orders);
+        $orders->merge($creditNotes)->loadMissing([
+            'addressInvoice',
+            'orderType',
+            'contactBankConnection:id,contact_id,iban,bic,account_holder',
+        ]);
+
+        $this->groups = app(PaymentRunPositionBuilder::class)->build($orders, $creditNotes);
+
+        $sepaMandateTypes = $orders
+            ->mapWithKeys(fn (Order $order) => [
+                $order->getKey() => $order->contactBankConnection
+                    ?->sepaMandates
+                    ->last()
+                    ?->sepa_mandate_type_enum,
+            ]);
+
+        foreach ($this->groups as $groupIndex => $group) {
+            $this->groups[$groupIndex]['type'] = $sepaMandateTypes->get(data_get($group, 'orders.0.id'));
+        }
     }
 
     public function render(): View
@@ -81,46 +82,31 @@ class PaymentRunPreview extends Component
     }
 
     #[Renderless]
-    public function applyBalance(int $orderId): void
+    public function applyAmount(string $groupKey, int $orderId, string $amount): void
     {
-        if (! data_get($this->orders, $orderId)) {
-            return;
-        }
-
-        data_set(
-            $this->orders,
-            $orderId . '.amount',
-            bcabs(
-                bcround(
-                    data_get($this->orders, $orderId . '.balance') ?? 0,
-                    2
-                )
-            )
-        );
-        data_set($this->orders, $orderId . '.uses_discount', false);
+        $this->setRowAmount($groupKey, $orderId, fn (): string => bcround($amount ?: 0, 2));
     }
 
     #[Renderless]
-    public function applyDiscount(int $orderId): void
+    public function applyBalance(string $groupKey, int $orderId): void
     {
-        if (! data_get($this->orders, $orderId)
-            || ! data_get($this->orders, $orderId . '.balance_due_discount')
-            || ! data_get($this->orders, $orderId . '.payment_discount_percent')
-        ) {
-            return;
-        }
-
-        data_set(
-            $this->orders,
-            $orderId . '.amount',
-            bcabs(
-                bcround(
-                    data_get($this->orders, $orderId . '.balance_due_discount'),
-                    2
-                )
-            )
+        $this->setRowAmount(
+            $groupKey,
+            $orderId,
+            fn (array $row): string => bcabs(bcround(data_get($row, 'balance') ?? '0', 2))
         );
-        data_set($this->orders, $orderId . '.uses_discount', true);
+    }
+
+    #[Renderless]
+    public function applyDiscount(string $groupKey, int $orderId): void
+    {
+        $this->setRowAmount(
+            $groupKey,
+            $orderId,
+            fn (array $row): ?string => data_get($row, 'balance_due_discount') && data_get($row, 'payment_discount_percent')
+                ? bcabs(bcround(data_get($row, 'balance_due_discount'), 2))
+                : null
+        );
     }
 
     #[Renderless]
@@ -134,23 +120,38 @@ class PaymentRunPreview extends Component
     {
         $paymentRunTypeEnum = PaymentRunTypeEnum::from($this->paymentRunTypeEnum);
 
-        $orderPayments = collect($this->orders)
-            ->map(fn (array $order, int $orderId) => [
-                'order_id' => $orderId,
-                'amount' => bcmul(
-                    bcabs(bcround(data_get($order, 'amount'), 2)),
-                    data_get($order, 'multiplier')
-                ),
-                'type' => data_get($order, 'type', '__NO_TYPE__'),
+        $positions = collect($this->groups)
+            ->map(fn (array $group) => [
+                'type' => data_get($group, 'type'),
+                'orders' => collect(data_get($group, 'orders') ?? [])
+                    ->reject(fn (array $row) => bccomp(
+                        bcround(data_get($row, 'amount') ?? '0', 2),
+                        '0',
+                        2
+                    ) === 0)
+                    ->map(fn (array $row) => [
+                        'order_id' => data_get($row, 'id'),
+                        'amount' => bcmul(
+                            bcabs(bcround(data_get($row, 'amount') ?? '0', 2)),
+                            (string) (data_get($row, 'multiplier') ?? '0')
+                        ),
+                    ])
+                    ->values()
+                    ->toArray(),
             ])
+            ->filter(fn (array $position) => $position['orders'])
             ->values();
 
-        $groupedPayments = $paymentRunTypeEnum === PaymentRunTypeEnum::DirectDebit
-            ? $orderPayments->groupBy('type')->toArray()
-            : [null => $orderPayments->toArray()];
+        if ($positions->isEmpty()) {
+            return;
+        }
+
+        $groupedPositions = $paymentRunTypeEnum === PaymentRunTypeEnum::DirectDebit
+            ? $positions->groupBy('type')->toArray()
+            : [null => $positions->toArray()];
 
         $paymentRuns = [];
-        foreach ($groupedPayments as $type => $payments) {
+        foreach ($groupedPositions as $type => $positionsForType) {
             try {
                 $paymentRuns[] = CreatePaymentRun::make([
                     'state' => Open::$name,
@@ -158,7 +159,7 @@ class PaymentRunPreview extends Component
                     'sepa_mandate_type_enum' => $paymentRunTypeEnum === PaymentRunTypeEnum::DirectDebit
                         ? SepaMandateTypeEnum::tryFrom($type) ?? SepaMandateTypeEnum::BASIC
                         : null,
-                    'orders' => $payments,
+                    'positions' => $positionsForType,
                 ])
                     ->checkPermission()
                     ->validate()
@@ -188,26 +189,94 @@ class PaymentRunPreview extends Component
     }
 
     #[Renderless]
-    public function removeOrder(int $orderId): void
+    public function removeOrder(string $groupKey, int $orderId): void
     {
-        unset($this->orders[$orderId]);
+        [$groupIndex, $rowIndex] = $this->locate($groupKey, $orderId);
 
-        if (! $this->orders) {
+        if ($rowIndex !== false) {
+            array_splice($this->groups[$groupIndex]['orders'], $rowIndex, 1);
+
+            if (data_get($this->groups, $groupIndex . '.orders')) {
+                $this->recapAndRecalculate($groupIndex);
+            } else {
+                array_splice($this->groups, $groupIndex, 1);
+            }
+        }
+
+        if (! $this->groups) {
             $this->redirectRoute('accounting.money-transfer', navigate: true);
         }
     }
 
-    protected function calculateAmount(Order $order): string
+    protected function suggestedCreditNotes(Collection $orders): Collection
     {
-        $amount = $order->balance;
-
-        if ($order->payment_discount_target_date
-            && $order->payment_discount_target_date->greaterThanOrEqualTo(now()->endOfDay())
-            && $order->balance_due_discount
-        ) {
-            $amount = $order->balance_due_discount;
+        if (PaymentRunTypeEnum::from($this->paymentRunTypeEnum) !== PaymentRunTypeEnum::MoneyTransfer) {
+            return collect();
         }
 
-        return bcabs(bcround($amount, 2));
+        $contactIds = $orders
+            ->pluck('contact_id')
+            ->filter()
+            ->unique();
+
+        if ($contactIds->isEmpty()) {
+            return collect();
+        }
+
+        return resolve_static(Order::class, 'query')
+            ->whereKeyNot($orders->modelKeys())
+            ->whereIntegerInRaw('contact_id', $contactIds->all())
+            ->whereNotNull('invoice_number')
+            ->where('balance', '>', 0)
+            ->whereState('payment_state', OrderOpen::class)
+            ->whereRelation(
+                'orderType',
+                'order_type_enum',
+                OrderTypeEnum::PurchaseRefund->value
+            )
+            ->whereDoesntHave('paymentRuns')
+            ->get();
+    }
+
+    protected function locate(string $groupKey, int $orderId): array
+    {
+        $groupIndex = array_search($groupKey, array_column($this->groups, 'key'), true);
+
+        return [
+            $groupIndex,
+            $groupIndex === false
+                ? false
+                : array_search(
+                    $orderId,
+                    array_column(data_get($this->groups, $groupIndex . '.orders') ?? [], 'id'),
+                    true
+                ),
+        ];
+    }
+
+    protected function recapAndRecalculate(int $groupIndex): void
+    {
+        $builder = app(PaymentRunPositionBuilder::class);
+
+        $this->groups[$groupIndex]['orders'] = $builder->recap($this->groups[$groupIndex]['orders']);
+        $this->groups[$groupIndex]['amount'] = $builder->total($this->groups[$groupIndex]['orders']);
+    }
+
+    private function setRowAmount(string $groupKey, int $orderId, callable $amount): void
+    {
+        [$groupIndex, $rowIndex] = $this->locate($groupKey, $orderId);
+
+        if ($rowIndex === false) {
+            return;
+        }
+
+        $value = $amount(data_get($this->groups, $groupIndex . '.orders.' . $rowIndex) ?? []);
+
+        if ($value === null) {
+            return;
+        }
+
+        $this->groups[$groupIndex]['orders'][$rowIndex]['amount'] = $value;
+        $this->recapAndRecalculate($groupIndex);
     }
 }

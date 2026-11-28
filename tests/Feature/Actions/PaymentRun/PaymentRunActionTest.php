@@ -59,15 +59,15 @@ test('create payment run', function (): void {
         'payment_run_type_enum' => 'money_transfer',
         'iban' => 'DE89370400440532013000',
         'orders' => [
-            ['order_id' => $order->getKey(), 'amount' => 100.00],
+            ['order_id' => $order->getKey(), 'amount' => -100.00],
         ],
     ])->validate()->execute();
 
     expect($run)->bank_connection_id->toBe($bankConnection->getKey());
 });
 
-test('create payment run requires orders and payment_run_type_enum', function (): void {
-    CreatePaymentRun::assertValidationErrors([], ['orders', 'payment_run_type_enum']);
+test('create payment run requires positions and payment_run_type_enum', function (): void {
+    CreatePaymentRun::assertValidationErrors([], ['positions', 'payment_run_type_enum']);
 });
 
 test('delete payment run', function (): void {
@@ -108,7 +108,7 @@ test('create payment run transitions orders to InOpenPaymentRun', function (): v
         'payment_run_type_enum' => 'money_transfer',
         'iban' => 'DE89370400440532013000',
         'orders' => [
-            ['order_id' => $order->getKey(), 'amount' => 100.00],
+            ['order_id' => $order->getKey(), 'amount' => -100.00],
         ],
     ])->validate()->execute();
 
@@ -125,7 +125,7 @@ test('update payment run to pending transitions orders to InPayment', function (
         'payment_run_type_enum' => 'money_transfer',
         'iban' => 'DE89370400440532013000',
         'orders' => [
-            ['order_id' => $order->getKey(), 'amount' => 100.00],
+            ['order_id' => $order->getKey(), 'amount' => -100.00],
         ],
     ])->validate()->execute();
 
@@ -147,7 +147,7 @@ test('update payment run to successful transitions orders to InPayment', functio
         'payment_run_type_enum' => 'money_transfer',
         'iban' => 'DE89370400440532013000',
         'orders' => [
-            ['order_id' => $order->getKey(), 'amount' => 100.00],
+            ['order_id' => $order->getKey(), 'amount' => -100.00],
         ],
     ])->validate()->execute();
 
@@ -174,7 +174,7 @@ test('update payment run to not_successful transitions orders to Open', function
         'payment_run_type_enum' => 'money_transfer',
         'iban' => 'DE89370400440532013000',
         'orders' => [
-            ['order_id' => $order->getKey(), 'amount' => 100.00],
+            ['order_id' => $order->getKey(), 'amount' => -100.00],
         ],
     ])->validate()->execute();
 
@@ -201,7 +201,7 @@ test('update payment run to discarded transitions orders to Open', function (): 
         'payment_run_type_enum' => 'money_transfer',
         'iban' => 'DE89370400440532013000',
         'orders' => [
-            ['order_id' => $order->getKey(), 'amount' => 100.00],
+            ['order_id' => $order->getKey(), 'amount' => -100.00],
         ],
     ])->validate()->execute();
 
@@ -228,7 +228,7 @@ test('delete payment run transitions orders to Open', function (): void {
         'payment_run_type_enum' => 'money_transfer',
         'iban' => 'DE89370400440532013000',
         'orders' => [
-            ['order_id' => $order->getKey(), 'amount' => 100.00],
+            ['order_id' => $order->getKey(), 'amount' => -100.00],
         ],
     ])->validate()->execute();
 
@@ -251,7 +251,7 @@ test('delete payment run transitions InPayment orders to Open', function (): voi
         'payment_run_type_enum' => 'money_transfer',
         'iban' => 'DE89370400440532013000',
         'orders' => [
-            ['order_id' => $order->getKey(), 'amount' => 100.00],
+            ['order_id' => $order->getKey(), 'amount' => -100.00],
         ],
     ])->validate()->execute();
 
@@ -269,4 +269,122 @@ test('delete payment run transitions InPayment orders to Open', function (): voi
     $order->refresh();
 
     expect($order->payment_state)->toBeInstanceOf(Open::class);
+});
+
+test('create payment run with a netted position', function (): void {
+    $invoice = createPaymentRunOrder(OrderTypeEnum::Order);
+    $creditNote = createPaymentRunOrder(OrderTypeEnum::Order);
+
+    $run = CreatePaymentRun::make([
+        'payment_run_type_enum' => 'money_transfer',
+        'positions' => [
+            [
+                'contact_id' => $invoice->contact_id,
+                'iban' => 'DE89370400440532013000',
+                'account_holder' => 'Muster GmbH',
+                'purpose' => 'RE-1, GS-1',
+                'orders' => [
+                    ['order_id' => $invoice->getKey(), 'amount' => -1000],
+                    ['order_id' => $creditNote->getKey(), 'amount' => 200],
+                ],
+            ],
+        ],
+    ])->validate()->execute();
+
+    $position = $run->positions()->first();
+
+    expect($run->positions()->count())->toBe(1)
+        ->and($position->amount)->toEqual('-800.00')
+        ->and($position->end_to_end_id)->toBe('PR' . $run->getKey() . '-' . $position->getKey())
+        ->and($position->orders()->count())->toBe(2)
+        ->and($invoice->fresh()->payment_state)->toBeInstanceOf(InOpenPaymentRun::class)
+        ->and($creditNote->fresh()->payment_state)->toBeInstanceOf(InOpenPaymentRun::class);
+});
+
+test('the stored purpose of a created payment run contains the position end_to_end_id once the documents overflow the limit', function (): void {
+    $orders = collect(range(1, 30))->map(fn (int $i) => createPaymentRunOrder(
+        OrderTypeEnum::Purchase,
+        '-100.00',
+        ['invoice_number' => 'RE-2026-' . str_pad((string) $i, 6, '0', STR_PAD_LEFT)]
+    ));
+
+    $run = CreatePaymentRun::make([
+        'payment_run_type_enum' => 'money_transfer',
+        'positions' => [
+            [
+                'contact_id' => $orders->first()->contact_id,
+                'iban' => 'DE89370400440532013000',
+                'orders' => $orders
+                    ->map(fn (Order $order) => ['order_id' => $order->getKey(), 'amount' => -100.00])
+                    ->all(),
+            ],
+        ],
+    ])->validate()->execute();
+
+    $position = $run->positions()->sole();
+
+    expect($position->purpose)->toContain($position->end_to_end_id)
+        ->and(mb_strlen($position->purpose))->toBeLessThanOrEqual(140);
+});
+
+test('a money transfer position pointing the wrong way is rejected', function (): void {
+    $order = createPaymentRunOrder(OrderTypeEnum::Order);
+
+    CreatePaymentRun::assertValidationErrors([
+        'payment_run_type_enum' => 'money_transfer',
+        'positions' => [
+            [
+                'contact_id' => $order->contact_id,
+                'iban' => 'DE89370400440532013000',
+                'orders' => [
+                    ['order_id' => $order->getKey(), 'amount' => 100.00],
+                ],
+            ],
+        ],
+    ], ['positions.0.orders']);
+});
+
+test('create payment run still accepts the flat orders payload', function (): void {
+    $order = createPaymentRunOrder(OrderTypeEnum::Order, attributes: [
+        'iban' => 'DE89370400440532013000',
+        'invoice_number' => 'RE-2024-001',
+    ]);
+
+    $run = CreatePaymentRun::make([
+        'payment_run_type_enum' => 'money_transfer',
+        'orders' => [
+            ['order_id' => $order->getKey(), 'amount' => -100.00],
+        ],
+    ])->validate()->execute();
+
+    $position = $run->positions()->first();
+
+    expect($run->positions()->count())->toBe(1)
+        ->and($position->amount)->toEqual('-100.00')
+        ->and($position->iban)->toBe($order->iban)
+        ->and($position->purpose)->toBe($order->invoice_number);
+});
+
+test('an order must not appear twice in the same payment run', function (): void {
+    $order = createPaymentRunOrder(OrderTypeEnum::Order);
+
+    CreatePaymentRun::assertValidationErrors([
+        'payment_run_type_enum' => 'money_transfer',
+        'positions' => [
+            [
+                'contact_id' => $order->contact_id,
+                'iban' => 'DE89370400440532013000',
+                'orders' => [
+                    ['order_id' => $order->getKey(), 'amount' => -100],
+                ],
+            ],
+            [
+                'contact_id' => $order->contact_id,
+                'iban' => 'DE02120300000000202051',
+                'orders' => [
+                    ['order_id' => $order->getKey(), 'amount' => -200],
+                ],
+            ],
+        ],
+    ], ['positions.1.orders.0.order_id']);
 });

@@ -3,19 +3,27 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Actions\Order\UpdateLockedOrder;
+use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\Forms\PaymentRunForm;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentRun;
+use FluxErp\Models\PaymentRunPosition;
+use FluxErp\Models\Pivots\OrderPaymentRun;
 use FluxErp\States\Order\PaymentState\Open;
+use FluxErp\Traits\Livewire\CreatesDocuments;
+use FluxErp\View\Printing\PaymentRun\PaymentAdvice;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class PaymentRunList extends BaseDataTable
 {
+    use CreatesDocuments;
+
     public array $accounts = [];
 
     public array $enabledCols = [
@@ -28,6 +36,9 @@ class PaymentRunList extends BaseDataTable
     public ?string $includeBefore = 'flux::livewire.accounting.payment-run.include-before';
 
     public PaymentRunForm $paymentRunForm;
+
+    #[Locked]
+    public ?int $documentPositionId = null;
 
     protected string $model = PaymentRun::class;
 
@@ -92,6 +103,28 @@ class PaymentRunList extends BaseDataTable
         return true;
     }
 
+    #[Renderless]
+    public function openPaymentAdviceModal(int $positionId): void
+    {
+        $this->documentPositionId = $positionId;
+
+        $this->openCreateDocumentsModal();
+    }
+
+    public function createDocuments(): void
+    {
+        $position = resolve_static(PaymentRunPosition::class, 'query')
+            ->whereKey($this->documentPositionId)
+            ->with(['contact.invoiceAddress', 'contact.mainAddress'])
+            ->first();
+
+        if (! $position) {
+            return;
+        }
+
+        $this->createDocumentFromItems($position);
+    }
+
     public function removeOrder(int $id): bool
     {
         $paymentRunId = $this->paymentRunForm->id;
@@ -103,6 +136,16 @@ class PaymentRunList extends BaseDataTable
             ->select(['id', 'payment_state'])
             ->whereKey($id)
             ->first();
+        $positionId = resolve_static(OrderPaymentRun::class, 'query')
+            ->where('payment_run_id', $paymentRunId)
+            ->where('order_id', $id)
+            ->value('payment_run_position_id');
+
+        $position = $positionId
+            ? resolve_static(PaymentRunPosition::class, 'query')
+                ->whereKey($positionId)
+                ->first()
+            : null;
 
         $paymentRun->orders()->detach($id);
 
@@ -119,11 +162,22 @@ class PaymentRunList extends BaseDataTable
             }
         }
 
+        if ($position) {
+            $position->refreshFromOrders();
+
+            if (bccomp((string) $position->amount, '0', 2)
+                !== $paymentRun->payment_run_type_enum->expectedSign()
+            ) {
+                $paymentRun->orders()->detach($position->orders()->pluck('orders.id')->all());
+                $position->delete();
+            }
+        }
+
         $paymentRun = resolve_static(PaymentRun::class, 'query')
             ->whereKey($paymentRunId)
             ->first();
 
-        if ($paymentRun->orders()->doesntExist()) {
+        if ($paymentRun->positions()->doesntExist()) {
             $this->delete();
 
             return true;
@@ -134,11 +188,26 @@ class PaymentRunList extends BaseDataTable
         return false;
     }
 
+    protected function getPrintLayouts(): array
+    {
+        return app(PaymentRunPosition::class)->resolvePrintViews();
+    }
+
+    protected function getSubject(OffersPrinting $item, array $documents): ?string
+    {
+        return PaymentAdvice::make($item)->getSubject();
+    }
+
+    protected function getTo(OffersPrinting $item, array $documents): array
+    {
+        return array_filter([$item->resolveMailableAddress()?->email_primary]);
+    }
+
     protected function loadPaymentRun(PaymentRun $paymentRun): void
     {
         $paymentRun
             ->load([
-                'orders' => fn (BelongsToMany $query) => $query
+                'positions.orders' => fn (BelongsToMany $query) => $query
                     ->select([
                         'orders.id',
                         'orders.invoice_number',
@@ -146,11 +215,10 @@ class PaymentRunList extends BaseDataTable
                         'orders.address_invoice_id',
                         'orders.iban',
                     ])
-                    ->with(['contactBankConnection:id,iban', 'addressInvoice:id,name'])
-                    ->withPivot('amount'),
+                    ->with(['contactBankConnection:id,iban', 'addressInvoice:id,name']),
             ]);
 
         $this->paymentRunForm->fill($paymentRun);
-        $this->paymentRunForm->orders = $paymentRun->orders->toArray();
+        $this->paymentRunForm->positions = $paymentRun->positions->toArray();
     }
 }

@@ -11,10 +11,24 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentRun;
+use FluxErp\Models\PaymentRunPosition;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\SepaMandate;
+use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
+use FluxErp\States\Order\PaymentState\Open;
+use FluxErp\States\Order\PaymentState\Overpaid;
+use Illuminate\Support\Facades\DB;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+
+function toastTypesOf(Testable $component): array
+{
+    return collect($component->effects['dispatches'] ?? [])
+        ->where('name', 'ts-ui:toast')
+        ->pluck('params.type')
+        ->all();
+}
 
 beforeEach(function (): void {
     $this->contact = Contact::factory()->create();
@@ -38,6 +52,19 @@ beforeEach(function (): void {
         'order_type_enum' => collect(OrderTypeEnum::cases())
             ->first(fn ($case) => $case->multiplier() < 0),
         'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->purchaseType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Purchase,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->refundType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::PurchaseRefund,
+        'is_active' => true,
+        'is_hidden' => false,
     ]);
 
     $this->orders = Order::factory()->count(2)->create([
@@ -50,7 +77,6 @@ beforeEach(function (): void {
         'currency_id' => $this->currency->id,
     ]);
 
-    // Update specific order attributes for tests
     $this->orders[0]->update([
         'invoice_number' => 'INV-001',
         'balance' => -100.50,
@@ -64,6 +90,219 @@ beforeEach(function (): void {
     ]);
 });
 
+test('orders of the same recipient end up in one group', function (): void {
+    $first = createPaymentRunOrder($this->purchaseType, '-1000.00');
+    $second = createPaymentRunOrder($this->purchaseType, '-500.00', ['contact_id' => $first->contact_id]);
+
+    session(['payment_run_preview_orders' => [$first->getKey(), $second->getKey()]]);
+    session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
+
+    Livewire::test(PaymentRunPreview::class)
+        ->assertCount('groups', 1)
+        ->assertSet('groups.0.amount', '-1500.00');
+});
+
+test('a suggested credit note is deducted from the payable and capped against it', function (): void {
+    $invoice = createPaymentRunOrder($this->purchaseType, '-300.00');
+    $creditNote = createPaymentRunOrder($this->refundType, '500.00', ['contact_id' => $invoice->contact_id]);
+
+    session(['payment_run_preview_orders' => [$invoice->getKey()]]);
+    session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
+
+    $groups = Livewire::test(PaymentRunPreview::class)->get('groups');
+
+    expect($groups)->toHaveCount(1)
+        ->and($groups[0]['amount'])->toBe('0.00')
+        ->and(array_column($groups[0]['orders'], 'amount', 'id'))
+        ->toBe([$invoice->getKey() => '-300.00', $creditNote->getKey() => '300.00'])
+        ->and($groups[0]['orders'][1]['is_suggested'])->toBeTrue()
+        ->and($groups[0]['orders'][1]['capped_from'])->toBe('500.00');
+});
+
+test('an overpaid sales invoice is grouped with a supplier credit note of the same contact and offset against it', function (): void {
+    $salesType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $invoice = createPaymentRunOrder($salesType, '-404.12');
+    $invoice->update(['total_gross_price' => '404.12', 'payment_state' => Overpaid::$name]);
+    $creditNote = createPaymentRunOrder($this->refundType, '200.00', ['contact_id' => $invoice->contact_id]);
+
+    session(['payment_run_preview_orders' => [$invoice->getKey()]]);
+    session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
+
+    $component = Livewire::test(PaymentRunPreview::class);
+    $groups = $component->get('groups');
+
+    expect($groups)->toHaveCount(1)
+        ->and($groups[0]['amount'])->toBe('-204.12')
+        ->and(array_column($groups[0]['orders'], 'amount', 'id'))
+        ->toBe([$invoice->getKey() => '-404.12', $creditNote->getKey() => '200.00'])
+        ->and($groups[0]['orders'][1]['is_suggested'])->toBeTrue();
+
+    $component->call('createPaymentRun')->assertRedirect();
+
+    $position = PaymentRun::query()->sole()->positions()->sole();
+
+    expect($position->amount)->toEqual('-204.12')
+        ->and($position->orders()
+            ->pluck('order_payment_run.amount', 'orders.id')
+            ->map(fn ($amount) => bcround((string) $amount, 2))
+            ->all())->toEqual([$invoice->getKey() => '-404.12', $creditNote->getKey() => '200.00'])
+        ->and($invoice->fresh()->payment_state)->toBeInstanceOf(InOpenPaymentRun::class)
+        ->and($creditNote->fresh()->payment_state)->toBeInstanceOf(InOpenPaymentRun::class);
+});
+
+test('a row carries total gross price and balance with their natural sign, surviving a recap', function (): void {
+    $invoice = createPaymentRunOrder($this->purchaseType, '-300.00');
+    $invoice->update(['total_gross_price' => '-1000.00']);
+
+    $creditNote = createPaymentRunOrder($this->refundType, '150.00', ['contact_id' => $invoice->contact_id]);
+    $creditNote->update(['total_gross_price' => '500.00']);
+
+    session(['payment_run_preview_orders' => [$invoice->getKey()]]);
+    session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
+
+    $component = Livewire::test(PaymentRunPreview::class);
+    $groupKey = $component->get('groups')[0]['key'];
+
+    $rows = collect($component->get('groups'))->flatMap(fn (array $group) => $group['orders'])->keyBy('id');
+
+    expect($rows[$invoice->getKey()]['total_gross_price'])->toBe('-1000.00')
+        ->and($rows[$invoice->getKey()]['balance'])->toBe('-300.00')
+        ->and($rows[$creditNote->getKey()]['total_gross_price'])->toBe('500.00')
+        ->and($rows[$creditNote->getKey()]['balance'])->toBe('150.00');
+
+    $component->call('applyAmount', $groupKey, $invoice->getKey(), '250.00');
+
+    $rows = collect($component->get('groups'))->flatMap(fn (array $group) => $group['orders'])->keyBy('id');
+
+    expect($rows[$invoice->getKey()]['total_gross_price'])->toBe('-1000.00')
+        ->and($rows[$invoice->getKey()]['balance'])->toBe('-300.00')
+        ->and($rows[$creditNote->getKey()]['total_gross_price'])->toBe('500.00')
+        ->and($rows[$creditNote->getKey()]['balance'])->toBe('150.00');
+});
+
+test('removing a suggested credit note raises the transfer again', function (): void {
+    $invoice = createPaymentRunOrder($this->purchaseType, '-1000.00');
+    $creditNote = createPaymentRunOrder($this->refundType, '200.00', ['contact_id' => $invoice->contact_id]);
+
+    session(['payment_run_preview_orders' => [$invoice->getKey()]]);
+    session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
+
+    $component = Livewire::test(PaymentRunPreview::class);
+    $component->call('removeOrder', $component->get('groups')[0]['key'], $creditNote->getKey());
+
+    expect(data_get($component->get('groups'), '0.amount'))->toBe('-1000.00');
+});
+
+test('creating the run sends one position per group', function (): void {
+    $first = createPaymentRunOrder($this->purchaseType, '-1000.00');
+    $second = createPaymentRunOrder($this->purchaseType, '-500.00', ['contact_id' => $first->contact_id]);
+
+    session(['payment_run_preview_orders' => [$first->getKey(), $second->getKey()]]);
+    session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
+
+    Livewire::test(PaymentRunPreview::class)->call('createPaymentRun');
+
+    $run = PaymentRun::query()->latest('id')->first();
+
+    expect($run->positions()->count())->toBe(1)
+        ->and($run->positions()->first()->orders()->count())->toBe(2);
+});
+
+test('a group holding only credit notes is skipped instead of killing the whole run', function (): void {
+    $invoice = createPaymentRunOrder($this->purchaseType, '-1000.00');
+    $lonelyCreditNote = createPaymentRunOrder($this->refundType, '200.00');
+
+    session(['payment_run_preview_orders' => [$invoice->getKey(), $lonelyCreditNote->getKey()]]);
+    session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
+
+    $component = Livewire::test(PaymentRunPreview::class)
+        ->call('createPaymentRun')
+        ->assertRedirect();
+
+    $run = PaymentRun::query()->sole();
+
+    expect(toastTypesOf($component))->toBe(['success'])
+        ->and($run->positions()->count())->toBe(1)
+        ->and($run->positions()->first()->orders()->pluck('orders.id')->all())->toBe([$invoice->getKey()])
+        ->and($lonelyCreditNote->fresh()->payment_state)->toBeInstanceOf(Open::class)
+        ->and($invoice->fresh()->payment_state)->toBeInstanceOf(InOpenPaymentRun::class);
+});
+
+test('a run made of nothing but a lonely credit note is not created at all', function (): void {
+    $lonelyCreditNote = createPaymentRunOrder($this->refundType, '200.00');
+
+    session(['payment_run_preview_orders' => [$lonelyCreditNote->getKey()]]);
+    session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
+
+    $component = Livewire::test(PaymentRunPreview::class)
+        ->call('createPaymentRun')
+        ->assertNoRedirect();
+
+    expect(toastTypesOf($component))->toBe([])
+        ->and(PaymentRun::query()->count())->toBe(0)
+        ->and($lonelyCreditNote->fresh()->payment_state)->toBeInstanceOf(Open::class);
+});
+
+test('a credit note already in another payment run is not suggested', function (): void {
+    $invoice = createPaymentRunOrder($this->purchaseType, '-1000.00');
+    $creditNote = createPaymentRunOrder($this->refundType, '200.00', ['contact_id' => $invoice->contact_id]);
+
+    $position = PaymentRunPosition::factory()->create();
+    $position->orders()->attach($creditNote->getKey(), [
+        'payment_run_id' => $position->payment_run_id,
+        'amount' => '200.00',
+    ]);
+
+    session(['payment_run_preview_orders' => [$invoice->getKey()]]);
+    session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
+
+    $component = Livewire::test(PaymentRunPreview::class);
+
+    expect(data_get($component->get('groups'), '0.amount'))->toBe('-1000.00')
+        ->and(data_get($component->get('groups'), '0.orders'))->toHaveCount(1);
+});
+
+test('applying the balance amount updates the row and the group total', function (): void {
+    session([
+        'payment_run_preview_orders' => [$this->orders[0]->id],
+        'payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer,
+    ]);
+
+    $component = Livewire::test(PaymentRunPreview::class);
+    $groupKey = $component->get('groups')[0]['key'];
+
+    $component->set('groups.0.orders.0.amount', 1)
+        ->call('applyBalance', $groupKey, $this->orders[0]->id);
+
+    expect(data_get($component->get('groups'), '0.orders.0.amount'))->toBe('-100.50')
+        ->and(data_get($component->get('groups'), '0.amount'))->toBe('-100.50');
+});
+
+test('applying the discount amount updates the row and the group total', function (): void {
+    DB::table('orders')->where('id', $this->orders[0]->id)->update([
+        'balance_due_discount' => -95.48,
+        'payment_discount_percent' => 0.05,
+    ]);
+
+    session([
+        'payment_run_preview_orders' => [$this->orders[0]->id],
+        'payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer,
+    ]);
+
+    $component = Livewire::test(PaymentRunPreview::class);
+    $groupKey = $component->get('groups')[0]['key'];
+
+    $component->call('applyDiscount', $groupKey, $this->orders[0]->id);
+
+    expect(data_get($component->get('groups'), '0.orders.0.amount'))->toBe('-95.48')
+        ->and(data_get($component->get('groups'), '0.amount'))->toBe('-95.48');
+});
+
 test('calculates total amount', function (): void {
     session([
         'payment_run_preview_orders' => [$this->orders[0]->id, $this->orders[1]->id],
@@ -72,11 +311,12 @@ test('calculates total amount', function (): void {
 
     $component = Livewire::test(PaymentRunPreview::class);
 
-    $orders = $component->get('orders');
-    expect($orders[$this->orders[0]->id]['amount'])->toEqual(100.50);
-    expect($orders[$this->orders[1]->id]['amount'])->toEqual(250.75);
-    expect($orders[$this->orders[0]->id]['multiplier'])->toEqual(-1);
-    expect($orders[$this->orders[1]->id]['multiplier'])->toEqual(-1);
+    $rows = collect($component->get('groups'))->flatMap(fn (array $group) => $group['orders'])->keyBy('id');
+
+    expect($rows[$this->orders[0]->id]['amount'])->toBe('-100.50');
+    expect($rows[$this->orders[1]->id]['amount'])->toBe('-250.75');
+    expect($rows[$this->orders[0]->id]['multiplier'])->toEqual(-1);
+    expect($rows[$this->orders[1]->id]['multiplier'])->toEqual(-1);
 });
 
 test('can create payment run with multiplier', function (): void {
@@ -87,11 +327,8 @@ test('can create payment run with multiplier', function (): void {
 
     $component = Livewire::test(PaymentRunPreview::class);
 
-    // Verify the multiplier is set correctly for negative balance
-    $orders = $component->get('orders');
-    expect($orders[$this->orders[0]->id]['multiplier'])->toEqual(-1);
+    expect(data_get($component->get('groups'), '0.orders.0.multiplier'))->toEqual(-1);
 
-    // Test that we can create payment run successfully
     $component->call('createPaymentRun')
         ->assertRedirect();
 });
@@ -104,13 +341,11 @@ test('can set valid amounts', function (): void {
 
     $component = Livewire::test(PaymentRunPreview::class);
 
-    // Test setting a valid positive amount
-    $component->set('orders.' . $this->orders[0]->id . '.amount', 50.00);
-    $component->assertSet('orders.' . $this->orders[0]->id . '.amount', 50.00);
+    $component->set('groups.0.orders.0.amount', 50.00);
+    $component->assertSet('groups.0.orders.0.amount', 50.00);
 
-    // Test setting another valid amount
-    $component->set('orders.' . $this->orders[0]->id . '.amount', 75.25);
-    $component->assertSet('orders.' . $this->orders[0]->id . '.amount', 75.25);
+    $component->set('groups.0.orders.0.amount', 75.25);
+    $component->assertSet('groups.0.orders.0.amount', 75.25);
 });
 
 test('can update payment amounts', function (): void {
@@ -121,9 +356,9 @@ test('can update payment amounts', function (): void {
 
     $component = Livewire::test(PaymentRunPreview::class);
 
-    $component->set('orders.' . $this->orders[0]->id . '.amount', 80.00);
+    $component->set('groups.0.orders.0.amount', 80.00);
 
-    $component->assertSet('orders.' . $this->orders[0]->id . '.amount', 80.00);
+    $component->assertSet('groups.0.orders.0.amount', 80.00);
 });
 
 test('cancel redirects to money transfer', function (): void {
@@ -145,15 +380,15 @@ test('component initializes with order ids', function (): void {
 
     $component = Livewire::test(PaymentRunPreview::class);
 
-    expect($component->get('orders'))->toHaveCount(2);
+    $rows = collect($component->get('groups'))->flatMap(fn (array $group) => $group['orders'])->keyBy('id');
 
-    $orders = $component->get('orders');
-    expect($orders[$this->orders[0]->id]['id'])->toEqual($this->orders[0]->id);
-    expect($orders[$this->orders[1]->id]['id'])->toEqual($this->orders[1]->id);
-    expect($orders[$this->orders[0]->id]['amount'])->toEqual(100.50);
-    expect($orders[$this->orders[1]->id]['amount'])->toEqual(250.75);
-    expect($orders[$this->orders[0]->id]['multiplier'])->toEqual(-1);
-    expect($orders[$this->orders[1]->id]['multiplier'])->toEqual(-1);
+    expect($rows)->toHaveCount(2);
+    expect($rows[$this->orders[0]->id]['id'])->toEqual($this->orders[0]->id);
+    expect($rows[$this->orders[1]->id]['id'])->toEqual($this->orders[1]->id);
+    expect($rows[$this->orders[0]->id]['amount'])->toBe('-100.50');
+    expect($rows[$this->orders[1]->id]['amount'])->toBe('-250.75');
+    expect($rows[$this->orders[0]->id]['multiplier'])->toEqual(-1);
+    expect($rows[$this->orders[1]->id]['multiplier'])->toEqual(-1);
 });
 
 test('creates payment run successfully', function (): void {
@@ -178,14 +413,14 @@ test('creates payment run with custom amounts', function (): void {
     ]);
 
     Livewire::test(PaymentRunPreview::class)
-        ->set('orders.' . $this->orders[0]->id . '.amount', 75.25)
+        ->set('groups.0.orders.0.amount', 75.25)
         ->call('createPaymentRun')
         ->assertRedirect();
 
     expect(PaymentRun::count())->toBeGreaterThan(0);
 });
 
-test('displays orders in table', function (): void {
+test('displays orders in the preview', function (): void {
     session([
         'payment_run_preview_orders' => [$this->orders[0]->id, $this->orders[1]->id],
         'payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer,
@@ -193,14 +428,11 @@ test('displays orders in table', function (): void {
 
     $component = Livewire::test(PaymentRunPreview::class);
 
-    $orders = $component->get('orders');
-    expect($orders)->toHaveCount(2);
+    $rows = collect($component->get('groups'))->flatMap(fn (array $group) => $group['orders'])->keyBy('id');
 
-    $order1Data = $orders[$this->orders[0]->id];
-    $order2Data = $orders[$this->orders[1]->id];
-
-    expect($order1Data['invoice_number'])->toEqual('INV-001');
-    expect($order2Data['invoice_number'])->toEqual('INV-002');
+    expect($rows)->toHaveCount(2);
+    expect($rows[$this->orders[0]->id]['invoice_number'])->toEqual('INV-001');
+    expect($rows[$this->orders[1]->id]['invoice_number'])->toEqual('INV-002');
 
     $component->assertOk();
 });
@@ -223,10 +455,12 @@ test('ignores non existent order ids', function (): void {
 
     $component = Livewire::test(PaymentRunPreview::class);
 
-    expect(count($component->get('orders')))->toEqual(1);
+    $rows = collect($component->get('groups'))->flatMap(fn (array $group) => $group['orders']);
+
+    expect($rows)->toHaveCount(1);
 });
 
-test('preserves order data integrity', function (): void {
+test('preserves group and row data integrity', function (): void {
     session([
         'payment_run_preview_orders' => [$this->orders[0]->id],
         'payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer,
@@ -234,14 +468,13 @@ test('preserves order data integrity', function (): void {
 
     $component = Livewire::test(PaymentRunPreview::class);
 
-    $orders = $component->get('orders');
-    $order = $orders[$this->orders[0]->id];
+    $group = $component->get('groups')[0];
+    $row = $group['orders'][0];
 
-    expect($order['id'])->toEqual($this->orders[0]->id);
-    expect($order['invoice_number'])->toEqual('INV-001');
-    expect($order['balance'])->toEqual(-100.50);
-
-    expect(! empty($order['contact_name']) || ! empty($order['address_name']))->toBeTrue('Either contact_name or address_name should be present. Got contact_name: ' . ($order['contact_name'] ?? 'null') . ', address_name: ' . ($order['address_name'] ?? 'null'));
+    expect($row['id'])->toEqual($this->orders[0]->id);
+    expect($row['invoice_number'])->toEqual('INV-001');
+    expect($row['balance'])->toBe('-100.50');
+    expect($group['contact_name'])->not->toBeEmpty();
 });
 
 test('redirects when missing payment run type', function (): void {
@@ -268,14 +501,14 @@ test('renders successfully', function (): void {
 
 test('renders successfully with minimal session data', function (): void {
     session([
-        'payment_run_preview_orders' => [9999, 9998], // Non-existent IDs
+        'payment_run_preview_orders' => [9999, 9998],
         'payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer,
     ]);
 
     $component = Livewire::test(PaymentRunPreview::class);
 
     $component->assertOk();
-    expect($component->get('orders'))->toBeEmpty();
+    expect($component->get('groups'))->toBeEmpty();
 });
 
 test('shows notification on successful creation', function (): void {
@@ -362,10 +595,12 @@ test('direct debit creates separate payment runs per sepa mandate type', functio
     $this->orders[0]->update([
         'contact_bank_connection_id' => $bankConnection1->id,
         'payment_type_id' => $directDebitPaymentType->id,
+        'balance' => 100.50,
     ]);
     $this->orders[1]->update([
         'contact_bank_connection_id' => $bankConnection2->id,
         'payment_type_id' => $directDebitPaymentType->id,
+        'balance' => 250.75,
     ]);
 
     session([
@@ -378,4 +613,25 @@ test('direct debit creates separate payment runs per sepa mandate type', functio
         ->assertRedirect();
 
     expect(PaymentRun::count())->toEqual(2);
+});
+
+test('the recipient of a position comes from its orders, not from the component state', function (): void {
+    $invoice = createPaymentRunOrder($this->purchaseType, '-1000.00');
+    $invoice->update(['iban' => 'DE89370400440532013000', 'account_holder' => 'Muster GmbH']);
+
+    session(['payment_run_preview_orders' => [$invoice->getKey()]]);
+    session(['payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer]);
+
+    Livewire::test(PaymentRunPreview::class)
+        ->set('groups.0.iban', 'DE02120300000000202051')
+        ->set('groups.0.account_holder', 'Someone Else')
+        ->set('groups.0.contact_id', $this->contact->getKey())
+        ->call('createPaymentRun')
+        ->assertRedirect();
+
+    $position = PaymentRunPosition::query()->sole();
+
+    expect($position->iban)->toBe('DE89370400440532013000')
+        ->and($position->account_holder)->toBe('Muster GmbH')
+        ->and($position->contact_id)->toBe($invoice->contact_id);
 });

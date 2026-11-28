@@ -512,6 +512,19 @@ if (! function_exists('bcfloor')) {
     }
 }
 
+if (! function_exists('bcsum')) {
+    function bcsum(iterable $numbers): string
+    {
+        $sum = '0';
+
+        foreach ($numbers as $number) {
+            $sum = bcadd($sum, (string) $number, 9);
+        }
+
+        return $sum;
+    }
+}
+
 if (! function_exists('flux_path')) {
     function flux_path(string $path = ''): string
     {

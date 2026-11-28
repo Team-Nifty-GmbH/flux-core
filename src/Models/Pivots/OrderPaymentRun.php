@@ -4,6 +4,7 @@ namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentRun;
+use FluxErp\Models\PaymentRunPosition;
 use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
 use FluxErp\States\Order\PaymentState\InPayment;
 use FluxErp\States\Order\PaymentState\Open;
@@ -54,5 +55,10 @@ class OrderPaymentRun extends FluxPivot
     public function paymentRun(): BelongsTo
     {
         return $this->belongsTo(PaymentRun::class);
+    }
+
+    public function position(): BelongsTo
+    {
+        return $this->belongsTo(PaymentRunPosition::class, 'payment_run_position_id');
     }
 }

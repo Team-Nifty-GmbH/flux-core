@@ -7,6 +7,7 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
+use FluxErp\Settings\AccountingSettings;
 use FluxErp\Settings\CoreSettings;
 use FluxErp\Settings\SecuritySettings;
 use FluxErp\Tests\BrowserTestCase;
@@ -40,6 +41,12 @@ pest()
             'customer_comment_models' => [],
             'license_key' => null,
             'formal_salutation' => false,
+        ]);
+
+        AccountingSettings::fake([
+            'auto_accept_secure_transaction_matches' => false,
+            'auto_send_payment_advice' => false,
+            'auto_send_reminders' => false,
         ]);
 
         SecuritySettings::fake([
@@ -245,6 +252,41 @@ function waitForCondition(PendingAwaitablePage|AwaitableWebpage $page, string $c
     JS);
 
     return $page;
+}
+
+function createPaymentRunOrder(
+    FluxErp\Enums\OrderTypeEnum|FluxErp\Models\OrderType $orderType = FluxErp\Enums\OrderTypeEnum::Purchase,
+    ?string $balance = null,
+    array $attributes = []
+): FluxErp\Models\Order {
+    $contactId = data_get($attributes, 'contact_id') ?? FluxErp\Models\Contact::factory()->create()->getKey();
+
+    $order = FluxErp\Models\Order::factory()->create(array_merge([
+        'tenant_id' => Tenant::default()->getKey(),
+        'language_id' => Language::default()->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'address_invoice_id' => FluxErp\Models\Address::factory()
+            ->create(['contact_id' => $contactId, 'is_main_address' => true])
+            ->getKey(),
+        'payment_type_id' => PaymentType::factory()
+            ->hasAttached(Tenant::default(), relationship: 'tenants')
+            ->create(['is_direct_debit' => false, 'requires_manual_transfer' => true])
+            ->getKey(),
+        'order_type_id' => $orderType instanceof FluxErp\Models\OrderType
+            ? $orderType->getKey()
+            : FluxErp\Models\OrderType::factory()
+                ->create(['order_type_enum' => $orderType, 'is_active' => true, 'is_hidden' => false])
+                ->getKey(),
+    ], $attributes, ['contact_id' => $contactId]));
+
+    $order->update(array_filter([
+        'invoice_number' => data_get($attributes, 'invoice_number') ?? 'INV-' . $order->getKey(),
+        'balance' => $balance,
+        'total_gross_price' => $balance,
+    ], fn ($value) => $value !== null));
+
+    return $order->fresh();
 }
 
 /**
