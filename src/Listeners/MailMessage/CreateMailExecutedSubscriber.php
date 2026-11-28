@@ -9,19 +9,25 @@ use FluxErp\Actions\MailMessage\SendMail;
 use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
 use FluxErp\Actions\Ticket\CreateTicket;
 use FluxErp\Models\Address;
+use FluxErp\Models\Comment;
 use FluxErp\Models\Communication;
 use FluxErp\Models\Currency;
+use FluxErp\Models\EventSubscription;
 use FluxErp\Models\Lead;
 use FluxErp\Models\Media;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\Ticket;
+use FluxErp\Models\User;
 use FluxErp\Settings\TicketSettings;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Spatie\Activitylog\Support\CauserResolver;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 use Throwable;
 
 class CreateMailExecutedSubscriber
@@ -39,7 +45,7 @@ class CreateMailExecutedSubscriber
             $lead = CreateLead::make([
                 'address_id' => $this->address->getKey(),
                 'name' => $communication->subject,
-                'description' => $communication->text_body ?? $communication->html_body,
+                'description' => $communication->text_body ?: $this->sanitizeHtml($communication->html_body),
             ])
                 ->validate()
                 ->execute();
@@ -123,7 +129,7 @@ class CreateMailExecutedSubscriber
                 'authenticatable_id' => $this->address->getKey(),
                 'title' => $communication->subject,
                 'description' => array_find(
-                    [$communication->text_body, $communication->html_body],
+                    [$communication->text_body, $this->sanitizeHtml($communication->html_body)],
                     fn (?string $body): bool => mb_strlen(trim($body ?? '')) >= 12
                 ) ?? $communication->subject,
             ])
@@ -224,21 +230,26 @@ class CreateMailExecutedSubscriber
             $message->text_body . $message->html_body . $message->subject,
             $matches
         );
-        if (count($matches) === 3 && $message->mailFolder->can_create_ticket) {
-            $model = $matches[1];
-            $id = $matches[2];
+        $commenter = count($matches) === 3 && $message->mailFolder->can_create_ticket
+            ? $this->findCommenter($message, $matches[1], $matches[2])
+            : null;
 
+        if ($commenter) {
             $textBody = $this->stripQuotedReply($message->text_body);
             $htmlBody = $this->stripQuotedReply($message->html_body);
 
+            app(CauserResolver::class)->setCauser($commenter);
+
             try {
                 $comment = CreateComment::make([
-                    'model_type' => $model,
-                    'model_id' => $id,
-                    'comment' => nl2br($textBody ?? '') ?: $htmlBody ?? $message->subject,
-                    'is_internal' => false,
+                    'model_type' => $matches[1],
+                    'model_id' => $matches[2],
+                    'comment' => nl2br(e(html_entity_decode($textBody ?? '')))
+                        ?: $this->sanitizeHtml($htmlBody)
+                        ?: e($message->subject),
+                    'is_internal' => $commenter instanceof User,
                 ])
-                    ->actingAs($this->address)
+                    ->actingAs($commenter)
                     ->validate()
                     ->execute();
 
@@ -255,6 +266,36 @@ class CreateMailExecutedSubscriber
         return [
             'action.executed: ' . resolve_static(CreateMailMessage::class, 'class') => 'handle',
         ];
+    }
+
+    protected function findCommenter(Communication $message, string $modelType, string $modelId): Address|User|null
+    {
+        $email = $message->from_mail;
+
+        if (blank($email)) {
+            return null;
+        }
+
+        return resolve_static(EventSubscription::class, 'query')
+            ->where('channel', $modelType . '.' . $modelId)
+            ->whereIn('event', ['eloquent.created: ' . resolve_static(Comment::class, 'class'), '*'])
+            ->whereHasMorph(
+                'subscribable',
+                [resolve_static(Address::class, 'class'), resolve_static(User::class, 'class')],
+                fn (Builder $query, string $type) => $query
+                    ->where('is_active', true)
+                    ->where(fn (Builder $query) => $query
+                        ->where('email', $email)
+                        ->when(
+                            is_a($type, Address::class, true),
+                            fn (Builder $query) => $query->orWhere('email_primary', $email)
+                        )
+                    )
+            )
+            ->with('subscribable')
+            ->orderBy('subscribable_type')
+            ->first()
+            ?->subscribable;
     }
 
     protected function findTenantByDomain(?string $from): ?Tenant
@@ -316,6 +357,18 @@ class CreateMailExecutedSubscriber
             ->replaceMatches('#^www\.#', '')
             ->trim('.')
             ->value();
+    }
+
+    protected function sanitizeHtml(?string $html): ?string
+    {
+        return is_null($html)
+            ? null
+            : (new HtmlSanitizer(
+                (new HtmlSanitizerConfig())
+                    ->allowSafeElements()
+                    ->withMaxInputLength(-1)
+            ))
+                ->sanitize($html);
     }
 
     protected function stripQuotedReply(?string $body): ?string

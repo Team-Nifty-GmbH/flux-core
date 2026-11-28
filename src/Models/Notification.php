@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Str;
 use Livewire\Component;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 
 class Notification extends DatabaseNotification
 {
@@ -43,7 +45,7 @@ class Notification extends DatabaseNotification
 
     public function toast(?Component $component = null): Toast
     {
-        $title = data_get($this->data, 'title', '');
+        $title = e(data_get($this->data, 'title') ?? '', false);
         if ($this->created_at->isToday()) {
             $time = $this->created_at
                 ->timezone(auth()->user()?->timezone ?? config('app.timezone'))
@@ -59,7 +61,12 @@ class Notification extends DatabaseNotification
             </div>
         blade;
 
-        $description = strip_tags(data_get($this->data, 'description', ''), '<br>');
+        $description = (new HtmlSanitizer(
+            (new HtmlSanitizerConfig())
+                ->allowElement('br')
+                ->withMaxInputLength(-1)
+        ))
+            ->sanitize(data_get($this->data, 'description') ?? '');
 
         if (! is_null(data_get($this->data, 'progress'))) {
             $meta = strip_tags((string) data_get($this->data, 'progressMeta', ''));
