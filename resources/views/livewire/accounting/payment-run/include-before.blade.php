@@ -75,6 +75,8 @@
                                 </x-slot:sub-value>
                                 <x-slot:actions>
                                     <x-button
+                                        x-cloak
+                                        x-show="Number(position.amount) !== 0"
                                         color="red"
                                         :text="__('Delete')"
                                         x-on:click="
