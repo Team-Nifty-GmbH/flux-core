@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\OrderPosition;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\Product\CalculateProductConfigurationPrice;
 use FluxErp\Helpers\Helper;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Models\ContactBankConnection;
@@ -13,7 +14,9 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\Tag;
 use FluxErp\Rulesets\OrderPosition\UpdateOrderPositionRuleset;
+use FluxErp\Support\ProductConfiguration\ConfigurationPositions;
 use FluxErp\View\Printing\Order\FinalInvoice;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Arr;
@@ -33,6 +36,7 @@ class UpdateOrderPosition extends FluxAction
 
     public function performAction(): Model
     {
+        $configuration = Arr::pull($this->data, 'configuration');
         $tags = Arr::pull($this->data, 'tags');
         $recalculateOrder = Arr::pull($this->data, 'recalculate_order', false);
 
@@ -108,7 +112,10 @@ class UpdateOrderPosition extends FluxAction
         unset($orderPosition->discounts, $orderPosition->unit_price);
         $orderPosition->save();
 
-        if ($orderPosition->wasChanged('amount') && bccomp($orderPosition->amount ?? 0, 0) === 1) {
+        if (is_null($configuration)
+            && $orderPosition->wasChanged('amount')
+            && bccomp($orderPosition->amount ?? 0, 0) === 1
+        ) {
             $children = resolve_static(OrderPosition::class, 'query')
                 ->where('parent_id', $orderPosition->getKey())
                 ->whereNotNull('amount')
@@ -132,6 +139,17 @@ class UpdateOrderPosition extends FluxAction
                     ->validate()
                     ->execute();
             }
+        }
+
+        if (! is_null($configuration)) {
+            $orderPosition->children()->get()->each(fn (OrderPosition $child) => $child->delete());
+
+            resolve_static(
+                ConfigurationPositions::class,
+                'childrenFor',
+                ['parent' => $orderPosition, 'configuration' => $configuration]
+            )
+                ->each(fn (OrderPosition $child) => $child->save());
         }
 
         if ($product?->bundleProducts?->isNotEmpty()) {
@@ -189,7 +207,8 @@ class UpdateOrderPosition extends FluxAction
             $orderPosition = resolve_static(OrderPosition::class, 'query')
                 ->whereKey($this->data['id'])
                 ->with([
-                    'order:id,contact_id,order_type_id,is_locked',
+                    'product:id,is_configurable',
+                    'order:id,contact_id,order_type_id,is_locked,price_list_id,vat_rate_id',
                     'order.orderType:id,order_type_enum',
                     'origin:id,order_id,amount',
                     'origin.order:id,order_type_id',
@@ -291,6 +310,100 @@ class UpdateOrderPosition extends FluxAction
                             ],
                         ])->errorBag('updateOrderPosition');
                     }
+                }
+            }
+
+            if (resolve_static(OrderPosition::class, 'hasConfiguredParent', ['parentId' => $orderPosition->parent_id])) {
+                if ((array_key_exists('product_id', $this->data)
+                        && (int) $this->data['product_id'] !== (int) $orderPosition->product_id)
+                    || (array_key_exists('parent_id', $this->data)
+                        && (int) $this->data['parent_id'] !== (int) $orderPosition->parent_id)
+                ) {
+                    $errors += [
+                        'parent_id' => [__('Configuration positions can only be changed through the configuration.')],
+                    ];
+                }
+
+                if (array_key_exists('amount_bundle', $this->data)
+                    && bccomp($this->data['amount_bundle'] ?? 0, $orderPosition->amount_bundle ?? 0) !== 0
+                ) {
+                    $errors += [
+                        'amount_bundle' => [__('Configuration positions can only be changed through the configuration.')],
+                    ];
+                }
+
+                if (array_key_exists('amount', $this->data)
+                    && ! is_null($orderPosition->amount_bundle)
+                    && bccomp($this->data['amount'] ?? 0, $orderPosition->amount ?? 0) !== 0
+                    && bccomp(
+                        $this->data['amount'] ?? 0,
+                        bcmul(
+                            $orderPosition->amount_bundle,
+                            resolve_static(OrderPosition::class, 'query')
+                                ->whereKey($orderPosition->parent_id)
+                                ->value('amount') ?? 0
+                        )
+                    ) !== 0
+                ) {
+                    $errors += [
+                        'amount' => [__('Configuration positions can only be changed through the configuration.')],
+                    ];
+                }
+            }
+
+            $isConfigured = (bool) $orderPosition->product?->is_configurable;
+            $productId = (int) data_get($this->data, 'product_id', $orderPosition->product_id);
+            $isFreeText = (bool) data_get($this->data, 'is_free_text', $orderPosition->is_free_text);
+
+            if ($isConfigured && $productId !== (int) $orderPosition->product_id) {
+                $errors += [
+                    'product_id' => [__('The product of a configured position cannot be changed.')],
+                ];
+            }
+
+            if ($isConfigured && $isFreeText !== (bool) $orderPosition->is_free_text) {
+                $errors += [
+                    'is_free_text' => [__('The free text flag of a configured position cannot be changed.')],
+                ];
+            }
+
+            if (! $isFreeText
+                && $productId !== (int) $orderPosition->product_id
+                && resolve_static(Product::class, 'query')
+                    ->whereKey($productId)
+                    ->where('is_configurable', true)
+                    ->exists()
+            ) {
+                $isConfigured = true;
+                $this->data['configuration'] ??= [];
+            }
+
+            if (! is_null($this->getData('configuration'))) {
+                if (! $isConfigured) {
+                    $errors += [
+                        'configuration' => [__('Only configurable products accept a configuration.')],
+                    ];
+                } elseif ($orderPosition->children()
+                    ->where(fn (Builder $query) => $query->whereHas('stockPostings')->orWhereHas('descendants'))
+                    ->exists()
+                ) {
+                    $errors += [
+                        'configuration' => [__('The configuration cannot be changed after stock was posted.')],
+                    ];
+                } elseif (! $errors) {
+                    $this->data['configuration'] = CalculateProductConfigurationPrice::make([
+                        'product_id' => $productId,
+                        'configuration' => $this->getData('configuration'),
+                        'price_list_id' => $this->getData('price_list_id')
+                            ?? $orderPosition->price_list_id
+                            ?? $orderPosition->order->price_list_id,
+                        'contact_id' => $orderPosition->order->contact_id,
+                        'vat_rate_id' => $orderPosition->order->vat_rate_id,
+                        'is_net' => data_get($this->data, 'is_net', $orderPosition->is_net),
+                        'unit_price' => $this->getData('unit_price'),
+                    ])
+                        ->validate()
+                        ->execute()['configuration'];
                 }
             }
 
