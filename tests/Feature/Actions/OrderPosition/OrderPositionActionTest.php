@@ -845,3 +845,35 @@ test('create order position keeps a percentage differing from the vat rate of it
         ->and((float) $orderPosition->vat_rate_percentage)->toEqual(0.07)
         ->and((float) $orderPosition->total_gross_price)->toEqual(107.0);
 });
+
+test('fill order positions creates plain children', function (): void {
+    $result = FillOrderPositions::make([
+        'order_id' => $this->order->getKey(),
+        'order_positions' => [[
+            'order_id' => $this->order->getKey(),
+            'name' => 'Menu',
+            'vat_rate_id' => $this->vatRate->getKey(),
+            'amount' => 1,
+            'unit_price' => 4.90,
+            'children' => [[
+                'order_id' => $this->order->getKey(),
+                'name' => 'Dessert',
+                'vat_rate_id' => $this->vatRate->getKey(),
+                'amount' => 2,
+                'unit_price' => 2.50,
+            ]],
+        ]],
+    ])->validate()->execute();
+
+    $parent = OrderPosition::query()
+        ->where('order_id', $this->order->getKey())
+        ->whereNull('parent_id')
+        ->sole();
+    $child = OrderPosition::query()->where('parent_id', $parent->getKey())->sole();
+
+    expect($parent->name)->toBe('Menu')
+        ->and($child->name)->toBe('Dessert')
+        ->and(bccomp($child->amount, '2', 2))->toBe(0)
+        ->and($child->is_bundle_position)->toBeFalse()
+        ->and(data_get($result, '0.children.0.name'))->toBe('Dessert');
+});
