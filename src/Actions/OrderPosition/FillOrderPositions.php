@@ -332,6 +332,18 @@ class FillOrderPositions extends FluxAction
                 ->exists()
         ) {
             $validated['id'] = $orderPosition['id'];
+
+            if (resolve_static(
+                OrderPosition::class,
+                'hasConfiguredParent',
+                [
+                    'parentId' => resolve_static(OrderPosition::class, 'query')
+                        ->whereKey($validated['id'])
+                        ->value('parent_id'),
+                ]
+            )) {
+                $errors['parent_id'] = [__('Configuration positions can only be changed through the configuration.')];
+            }
         }
 
         // On root level there should be parent_id = null
@@ -500,9 +512,14 @@ class FillOrderPositions extends FluxAction
             }
         }
 
-        $configurableProduct = ($validated['product_id'] ?? false)
+        $productId = ($validated['product_id'] ?? false) ?: (($validated['id'] ?? false)
+            ? resolve_static(OrderPosition::class, 'query')
+                ->whereKey($validated['id'])
+                ->value('product_id')
+            : null);
+        $configurableProduct = $productId
             ? resolve_static(Product::class, 'query')
-                ->whereKey($validated['product_id'])
+                ->whereKey($productId)
                 ->where('is_configurable', true)
                 ->first()
             : null;
@@ -530,7 +547,7 @@ class FillOrderPositions extends FluxAction
                         ->exists()
                 ) {
                     $errors['configuration'] = [__('The configuration cannot be changed after stock was posted.')];
-                } elseif ($isSent || $existing?->product_id !== $configurableProduct->getKey()) {
+                } elseif ($isSent || (int) $existing?->product_id !== $configurableProduct->getKey()) {
                     try {
                         $order = resolve_static(Order::class, 'query')
                             ->whereKey($this->data['order_id'])

@@ -7,6 +7,7 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
 require_once __DIR__ . '/Helpers.php';
@@ -57,6 +58,89 @@ test('fill keeps the configuration of an existing position', function (): void {
     expect($parent->refresh()->currentConfiguration())
         ->toBe([['product_configuration_group_item_id' => $this->ssd->getKey(), 'amount' => 1]])
         ->and(OrderPosition::query()->where('order_id', $this->order->getKey())->count())->toBe(2);
+});
+
+test('fill keeps the children of an existing position sent without product', function (): void {
+    ($this->fill)(['configuration' => [['product_configuration_group_item_id' => $this->ssd->getKey(), 'amount' => 1]]]);
+    $parent = OrderPosition::query()->whereNull('parent_id')->where('order_id', $this->order->getKey())->sole();
+    $child = OrderPosition::query()->where('parent_id', $parent->getKey())->sole();
+
+    FillOrderPositions::make([
+        'order_id' => $this->order->getKey(),
+        'order_positions' => [[
+            'id' => $parent->getKey(),
+            'order_id' => $this->order->getKey(),
+            'price_list_id' => $this->priceList->getKey(),
+            'amount' => 3,
+        ]],
+    ])->validate()->execute();
+
+    expect(OrderPosition::query()->where('parent_id', $parent->getKey())->sole()->getKey())->toBe($child->getKey())
+        ->and(bccomp($child->refresh()->amount, '3', 2))->toBe(0)
+        ->and(bccomp($child->unit_net_price, '10', 2))->toBe(0);
+});
+
+test('fill rejects a configured child sent as its own position', function (): void {
+    ($this->fill)(['configuration' => [['product_configuration_group_item_id' => $this->ssd->getKey(), 'amount' => 1]]]);
+    $parent = OrderPosition::query()->whereNull('parent_id')->where('order_id', $this->order->getKey())->sole();
+    $child = OrderPosition::query()->whereNotNull('parent_id')->where('order_id', $this->order->getKey())->sole();
+
+    $entry = fn (array $position): array => array_merge([
+        'order_id' => $this->order->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'warehouse_id' => Warehouse::default()->getKey(),
+        'is_net' => true,
+        'is_free_text' => false,
+    ], $position);
+
+    $errors = rescue(
+        fn () => FillOrderPositions::make([
+            'order_id' => $this->order->getKey(),
+            'order_positions' => [
+                $entry(['id' => $parent->getKey(), 'product_id' => $this->server->getKey(), 'name' => 'Server', 'amount' => 2]),
+                $entry(['id' => $child->getKey(), 'product_id' => $child->product_id, 'name' => 'SSD', 'amount' => 10]),
+            ],
+        ])->validate()->execute(),
+        fn (ValidationException $e) => Arr::dot($e->errors()),
+        false
+    );
+
+    expect($errors)->toBe([$child->getKey() . '.0.0' => __('Configuration positions can only be changed through the configuration.')])
+        ->and($child->refresh()->parent_id)->toBe($parent->getKey())
+        ->and(bccomp($child->amount, '2', 2))->toBe(0);
+});
+
+test('fill rejects new children on an existing configured position sent without product', function (): void {
+    ($this->fill)(['configuration' => [['product_configuration_group_item_id' => $this->ssd->getKey(), 'amount' => 1]]]);
+    $parent = OrderPosition::query()->whereNull('parent_id')->where('order_id', $this->order->getKey())->sole();
+
+    $errors = rescue(
+        fn () => FillOrderPositions::make([
+            'order_id' => $this->order->getKey(),
+            'order_positions' => [[
+                'id' => $parent->getKey(),
+                'order_id' => $this->order->getKey(),
+                'amount' => 2,
+                'children' => [[
+                    'order_id' => $this->order->getKey(),
+                    'product_id' => $this->hdd->product_id,
+                    'price_list_id' => $this->priceList->getKey(),
+                    'vat_rate_id' => $this->vatRate->getKey(),
+                    'warehouse_id' => Warehouse::default()->getKey(),
+                    'is_net' => true,
+                    'is_free_text' => false,
+                    'name' => 'HDD',
+                    'amount' => 5,
+                ]],
+            ]],
+        ])->validate()->execute(),
+        fn (ValidationException $e) => json_encode($e->errors()),
+        false
+    );
+
+    expect($errors)->toContain('Configurable products take a configuration instead of children.')
+        ->and(OrderPosition::query()->where('parent_id', $parent->getKey())->count())->toBe(1);
 });
 
 test('simulate returns children without saving', function (): void {
