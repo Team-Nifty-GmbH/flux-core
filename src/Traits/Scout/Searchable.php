@@ -80,16 +80,6 @@ trait Searchable
         return $search;
     }
 
-    /**
-     * What the embedder reads of a document, as a Meilisearch liquid template over its fields (doc.<field>). Null
-     * keeps Meilisearch's default: every searchable field, cut after 400 bytes, which on a model with ids, numbers
-     * and dates up front leaves little of the text that carries the meaning.
-     */
-    protected static function embedderDocumentTemplate(): ?string
-    {
-        return null;
-    }
-
     protected static function embedderDefinition(SearchSettings $search): array
     {
         $definition = [
@@ -116,6 +106,16 @@ trait Searchable
         }
 
         return $definition;
+    }
+
+    /**
+     * What the embedder reads of a document, as a Meilisearch liquid template over its fields (doc.<field>). Null
+     * keeps Meilisearch's default: every searchable field, cut after 400 bytes, which on a model with ids, numbers
+     * and dates up front leaves little of the text that carries the meaning.
+     */
+    protected static function embedderDocumentTemplate(): ?string
+    {
+        return null;
     }
 
     public function toSearchableArray(): array
