@@ -19,6 +19,7 @@ use FluxErp\Models\Product;
 use FluxErp\Models\Tag;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
+use Illuminate\Validation\ValidationException;
 
 beforeEach(function (): void {
     Warehouse::factory()->create(['is_default' => true]);
@@ -844,4 +845,92 @@ test('create order position keeps a percentage differing from the vat rate of it
     expect($orderPosition->vat_rate_id)->toBeNull()
         ->and((float) $orderPosition->vat_rate_percentage)->toEqual(0.07)
         ->and((float) $orderPosition->total_gross_price)->toEqual(107.0);
+});
+
+test('fill order positions only takes position ids of its own order', function (): void {
+    $foreignOrder = Order::factory()->create($this->order->only([
+        'order_type_id',
+        'address_invoice_id',
+        'contact_id',
+        'payment_type_id',
+        'price_list_id',
+        'tenant_id',
+        'currency_id',
+        'language_id',
+        'is_locked',
+    ]));
+    $position = fn (Order $order): OrderPosition => CreateOrderPosition::make([
+        'order_id' => $order->getKey(),
+        'name' => 'Chili con Carne',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 1,
+        'unit_price' => 4.90,
+    ])->validate()->execute();
+    $own = $position($this->order);
+    $foreign = $position($foreignOrder);
+    $fill = fn (OrderPosition $orderPosition) => FillOrderPositions::make([
+        'order_id' => $this->order->getKey(),
+        'order_positions' => [[
+            'id' => $orderPosition->getKey(),
+            'order_id' => $this->order->getKey(),
+            'name' => 'Chili sin Carne',
+            'vat_rate_id' => $this->vatRate->getKey(),
+            'amount' => 3,
+            'unit_price' => 4.90,
+        ]],
+    ])->validate()->execute();
+
+    expect(fn () => $fill($foreign))->toThrow(ValidationException::class)
+        ->and($foreign->refresh()->order_id)->toBe($foreignOrder->getKey())
+        ->and($foreign->name)->toBe('Chili con Carne');
+
+    $fill($own);
+
+    expect($own->refresh()->name)->toBe('Chili sin Carne')
+        ->and(bccomp($own->amount, '3', 2))->toBe(0);
+});
+
+test('fill order positions rejects foreign ids among children', function (): void {
+    $foreignOrder = Order::factory()->create($this->order->only([
+        'order_type_id',
+        'address_invoice_id',
+        'contact_id',
+        'payment_type_id',
+        'price_list_id',
+        'tenant_id',
+        'currency_id',
+        'language_id',
+        'is_locked',
+    ]));
+    $position = fn (Order $order): OrderPosition => CreateOrderPosition::make([
+        'order_id' => $order->getKey(),
+        'name' => 'Menu',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 1,
+        'unit_price' => 4.90,
+    ])->validate()->execute();
+    $parent = $position($this->order);
+    $foreign = $position($foreignOrder);
+    $fill = fn (array $child) => FillOrderPositions::make([
+        'order_id' => $this->order->getKey(),
+        'order_positions' => [[
+            'id' => $parent->getKey(),
+            'order_id' => $this->order->getKey(),
+            'name' => 'Menu',
+            'vat_rate_id' => $this->vatRate->getKey(),
+            'amount' => 1,
+            'unit_price' => 4.90,
+            'children' => [array_merge([
+                'order_id' => $this->order->getKey(),
+                'name' => 'Dessert',
+                'vat_rate_id' => $this->vatRate->getKey(),
+                'amount' => 1,
+                'unit_price' => 2.50,
+            ], $child)],
+        ]],
+    ])->validate()->execute();
+
+    expect(fn () => $fill(['id' => $foreign->getKey()]))->toThrow(ValidationException::class)
+        ->and($foreign->refresh()->order_id)->toBe($foreignOrder->getKey())
+        ->and($foreign->parent_id)->toBeNull();
 });
