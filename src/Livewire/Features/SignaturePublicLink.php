@@ -61,17 +61,22 @@ class SignaturePublicLink extends Component
         ]);
         // This ensures livewire recognizes the content and wraps the view around it
         // override the x-layouts.print with an empty div
+        $layout = PrintableView::getLayout();
         PrintableView::setLayout(null);
 
-        return Blade::render(
-            '<div>{!! $view !!} @include(\'flux::livewire.features.signature-public-link\')</div>',
-            [
-                'view' => $this->getModel()->print()->renderView($this->getPrintClass()),
-                'modelInstance' => morphed_model($this->model)::query()
-                    ->where('uuid', $this->uuid)
-                    ->firstOrFail(),
-            ]
-        );
+        try {
+            return Blade::render(
+                '<div>{!! $view !!} @include(\'flux::livewire.features.signature-public-link\')</div>',
+                [
+                    'view' => $this->getModel()->print()->renderView($this->getPrintClass()),
+                    'modelInstance' => morphed_model($this->model)::query()
+                        ->where('uuid', $this->uuid)
+                        ->firstOrFail(),
+                ]
+            );
+        } finally {
+            PrintableView::setLayout($layout);
+        }
     }
 
     public function save(): bool
