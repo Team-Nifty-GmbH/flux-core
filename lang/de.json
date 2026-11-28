@@ -1250,6 +1250,7 @@
     "Expected Revenue": "Erwarteter Umsatz",
     "Expected Revenue By Lead State": "Erwarteter Umsatz nach Lead-Status",
     "Expense": "Aufwand",
+    "Expense Ledger Account": "Aufwandskonto",
     "Expense Ledger Account Id": "Kosten-Buchungskonto-ID",
     "Expired Carryover": "Verfallen",
     "Expires At": "Läuft ab am",

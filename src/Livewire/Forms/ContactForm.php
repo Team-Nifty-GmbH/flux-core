@@ -53,6 +53,8 @@ class ContactForm extends FluxForm
 
     public ?float $discount_percent = null;
 
+    public ?int $expense_ledger_account_id = null;
+
     public ?string $footer = null;
 
     public bool $has_delivery_lock = false;
