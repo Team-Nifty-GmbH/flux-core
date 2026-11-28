@@ -137,3 +137,14 @@ test('a packaging ean is an optional string', function (): void {
         ->and($errorsFor(['packaging_ean' => str_repeat('1', 256)]))->toContain('suppliers.0.packaging_ean')
         ->and($errorsFor(['packaging_ean' => ['4006381333931']]))->toContain('suppliers.0.packaging_ean');
 });
+
+test('columns a subclass still declares in pivotColumns are kept', function (): void {
+    $legacy = new class() extends ProductSupplier
+    {
+        protected static array $pivotColumns = ['legacy_column'];
+    };
+
+    expect($legacy::pivotColumns())
+        ->toContain('legacy_column')
+        ->toContain('purchase_price');
+});

@@ -605,61 +605,38 @@
                             </div>
                         </x-slot:sub-value>
                         <x-slot:actions>
-                            <x-input
-                                x-bind:disabled="!isEditing"
-                                x-model="supplier.supplier_product_number"
-                                :label="__('Supplier product number')"
-                            />
-                            <x-input
-                                x-bind:disabled="!isEditing"
-                                x-model="supplier.supplier_product_name"
-                                :label="__('Supplier product name')"
-                            />
-                            <x-input
-                                x-bind:disabled="!isEditing"
-                                x-model="supplier.manufacturer_product_number"
-                                :label="__('Manufacturer product number')"
-                            />
-                            <x-number
-                                x-bind:disabled="!isEditing"
-                                x-model="supplier.packaging_amount"
-                                :label="__('Amount per Packaging')"
-                                step="0.01"
-                            />
+                            @foreach (resolve_static(\FluxErp\Models\Pivots\ProductSupplier::class, 'formFields') as $field => $definition)
+                            @switch (data_get($definition, 'type'))
+                            @case ('unit')
                             <div
                                 x-bind:class="{
                                     'pointer-events-none': !isEditing,
                                 }"
                             >
                                 <x-select.styled
-                                    x-model.number="supplier.packaging_unit_id"
-                                    :label="__('Packaging Unit')"
+                                    x-model.number="supplier.{{ $field }}"
+                                    :label="__($definition['label'])"
                                     select="label:name|value:id"
                                     :options="$units"
                                 />
                             </div>
+                            @break
+                            @case ('number')
                             <x-number
                                 x-bind:disabled="!isEditing"
-                                x-model="supplier.items_per_packaging"
-                                :label="__('Items per Packaging')"
-                                step="1"
+                                x-model="supplier.{{ $field }}"
+                                :label="__($definition['label'])"
+                                :step="data_get($definition, 'step')"
                             />
+                            @break
+                            @default
                             <x-input
                                 x-bind:disabled="!isEditing"
-                                x-model="supplier.packaging_ean"
-                                :label="__('Packaging EAN')"
+                                x-model="supplier.{{ $field }}"
+                                :label="__($definition['label'])"
                             />
-                            <x-number
-                                x-bind:disabled="!isEditing"
-                                x-model="supplier.purchase_price"
-                                :label="__('Purchase Price')"
-                                step="0.01"
-                            />
-                            <x-input
-                                x-bind:disabled="!isEditing"
-                                x-model="supplier.note"
-                                :label="__('Note')"
-                            />
+                            @endswitch
+                            @endforeach
                             @stack('product-supplier-fields')
                             <div class="mt-6">
                                 <x-button
