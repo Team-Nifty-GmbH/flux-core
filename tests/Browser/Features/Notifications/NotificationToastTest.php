@@ -358,3 +358,17 @@ test('a tall window keeps loading until the list can be scrolled', function (): 
 
     $page->assertNoJavascriptErrors();
 });
+
+test('a notification toast shows record names as text', function (): void {
+    $page = visit(route('dashboard'))->assertNoSmoke();
+
+    sendNotify($page, [
+        'title' => 'Task <img src="x" onerror="window.toastRan = true"> is due soon',
+        'description' => 'Name <img src="x" onerror="window.toastRan = true">',
+    ]);
+
+    $page->wait(1);
+
+    expect($page->script('() => window.toastRan === true'))->toBeFalse()
+        ->and(visibleToastsContaining($page, 'is due soon'))->toBe(1);
+});

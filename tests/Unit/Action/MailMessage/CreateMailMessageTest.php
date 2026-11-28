@@ -336,7 +336,7 @@ test('comment from mail keeps only safe html', function (?string $textBody, ?str
     'html body only' => [
         '',
         '<p>Danke</p><img src="x" onerror="alert(1)"><script>alert(2)</script><a href="javascript:alert(3)">Link</a>',
-        '<p>Danke</p><img /><a>Link</a>',
+        '<p>Danke</p><img src="x" /><a>Link</a>',
     ],
     'text body with markup characters' => [
         "Danke &amp; Grüße\n5 > 3 &lt;b&gt;",

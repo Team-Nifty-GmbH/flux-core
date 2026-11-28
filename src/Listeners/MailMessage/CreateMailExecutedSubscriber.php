@@ -245,7 +245,7 @@ class CreateMailExecutedSubscriber
                     'model_type' => $matches[1],
                     'model_id' => $matches[2],
                     'comment' => nl2br(e(html_entity_decode($textBody ?? '')))
-                        ?: $this->sanitizeHtml($htmlBody)
+                        ?: $htmlBody
                         ?: e($message->subject),
                     'is_internal' => $commenter instanceof User,
                 ])

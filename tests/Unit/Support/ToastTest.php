@@ -22,3 +22,13 @@ test('a toast notification without an explicit timeout closes after the configur
 test('an explicit toast timeout wins over the configured one', function (): void {
     expect(ToastNotification::make()->timeout(10)->toArray()['timeout'])->toBe(10);
 });
+
+test('a toast notification mail keeps the description markup but drops active content', function (): void {
+    $mail = ToastNotification::make()
+        ->notifiable($this->user)
+        ->title('Task')
+        ->description('<p>Task <strong>Neu</strong><img src="x" onerror="alert(1)"></p>')
+        ->toMail();
+
+    expect((string) data_get($mail->introLines, 0))->toBe('<p>Task <strong>Neu</strong><img src="x" /></p>');
+});

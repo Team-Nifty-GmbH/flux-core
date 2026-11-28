@@ -3,6 +3,7 @@
 namespace FluxErp\Support\Notification\ToastNotification;
 
 use FluxErp\Enums\ToastType;
+use FluxErp\Support\Html\RichTextSanitizer;
 use FluxErp\Support\TallstackUI\Interactions\Toast;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -262,7 +263,7 @@ class ToastNotification extends Toast implements Arrayable
                 . (property_exists($this->notifiable, 'name') ? ' ' . $this->notifiable->name : '')
             ))
             ->subject($this->title ?? '')
-            ->line(new HtmlString($this->description));
+            ->line(new HtmlString(resolve_static(RichTextSanitizer::class, 'sanitize', ['html' => $this->description])));
 
         if ($this->accept) {
             $mailMessage->action($this->accept->label ?? '', $this->accept->url ?? '');
@@ -284,7 +285,7 @@ class ToastNotification extends Toast implements Arrayable
             ->title(strip_tags($this->title ?? ''))
             ->data($this->data)
             ->badge(url('/pwa-icons/icons-vector.svg'))
-            ->body(strip_tags($this->description ?? ''));
+            ->body(html_entity_decode(strip_tags($this->description ?? ''), ENT_QUOTES | ENT_HTML5));
 
         if ($this->accept) {
             $webPush->action(strip_tags($this->accept->label ?? ''), $this->accept->url ?? '');
