@@ -7,6 +7,7 @@ use FluxErp\Actions\Discount\CreateDiscount;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
+use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Rulesets\Contact\CreateContactRuleset;
@@ -116,6 +117,19 @@ class CreateContact extends FluxAction
                 ])
                     ->errorBag('createContact');
             }
+        }
+
+        if (($expenseLedgerAccountId = $this->getData('expense_ledger_account_id'))
+            && ($tenants = $this->getData('tenants'))
+            && resolve_static(LedgerAccount::class, 'query')
+                ->whereKey($expenseLedgerAccountId)
+                ->whereIntegerInRaw('tenant_id', $tenants)
+                ->doesntExist()
+        ) {
+            throw ValidationException::withMessages([
+                'expense_ledger_account_id' => ['The expense ledger account must belong to a tenant of the contact.'],
+            ])
+                ->errorBag('createContact');
         }
     }
 }

@@ -46,6 +46,7 @@ pest()
             'auto_accept_secure_transaction_matches' => false,
             'auto_send_payment_advice' => false,
             'auto_send_reminders' => false,
+            'clearing_ledger_account_id' => null,
         ]);
 
         SecuritySettings::fake([

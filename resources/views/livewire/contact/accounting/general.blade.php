@@ -104,6 +104,26 @@
                     wire:model="contact.customs_identifier"
                     :label="__('Customs Identifier')"
                 />
+                <x-select.styled
+                    x-bind:disabled="!$wire.$parent.$parent.edit"
+                    wire:model="contact.expense_ledger_account_id"
+                    :label="__('Expense Ledger Account')"
+                    select="label:name|value:id|description:number"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\LedgerAccount::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'where' => [
+                                [
+                                    'ledger_account_type_enum',
+                                    '=',
+                                    \FluxErp\Enums\LedgerAccountTypeEnum::Expense,
+                                ],
+                            ],
+                        ],
+                    ]"
+                />
             </div>
         </x-card>
     @show

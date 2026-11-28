@@ -12,7 +12,9 @@ use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
+use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Transaction;
 use FluxErp\Models\Warehouse;
 use FluxErp\States\Order\PaymentState\Open;
 use FluxErp\States\Order\PaymentState\Paid;
@@ -89,6 +91,28 @@ test('a ledger booking settles the purchase order it points at', function (): vo
 
 test('a ledger booking settles the sales order it points at', function (): void {
     $order = ($this->createOrder)(OrderTypeEnum::Order, 1190);
+
+    ($this->book)($order, 1190);
+
+    $order->refresh();
+
+    expect((float) $order->balance)->toBe(0.0)
+        ->and($order->payment_state)->toBeInstanceOf(Paid::class);
+});
+
+test('a ledger booking settles the refund of an overpaid sales order', function (): void {
+    $order = ($this->createOrder)(OrderTypeEnum::Order, 1190);
+
+    OrderTransaction::query()->create([
+        'order_id' => $order->getKey(),
+        'transaction_id' => Transaction::factory()
+            ->create(['amount' => 2380, 'contact_bank_connection_id' => null])
+            ->getKey(),
+        'amount' => 2380,
+        'is_accepted' => true,
+    ]);
+
+    expect((float) $order->refresh()->balance)->toBe(-1190.0);
 
     ($this->book)($order, 1190);
 
