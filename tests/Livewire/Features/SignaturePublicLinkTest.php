@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Actions\Printing;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Features\SignaturePublicLink;
 use FluxErp\Models\Address;
@@ -198,4 +199,30 @@ test('signing a delivery note keeps the order state', function (): void {
     signOrder($this->order->refresh(), 'delivery-note');
 
     expect($this->order->refresh()->state)->toBeInstanceOf(Draft::class);
+});
+
+test('showing the signature page keeps the print layout for later documents', function (): void {
+    $this->order->orderType->update(['print_layouts' => ['order-confirmation']]);
+
+    Livewire::test(
+        SignaturePublicLink::class,
+        [
+            'uuid' => $this->order->refresh()->uuid,
+            'model' => $this->order->getMorphClass(),
+            'printView' => 'order-confirmation',
+        ]
+    )
+        ->assertOk();
+
+    $html = Printing::make([
+        'model_type' => $this->order->getMorphClass(),
+        'model_id' => $this->order->getKey(),
+        'view' => 'order-confirmation',
+        'html' => true,
+    ])
+        ->validate()
+        ->execute()
+        ->toHtml();
+
+    expect($html)->toContain('<html');
 });
