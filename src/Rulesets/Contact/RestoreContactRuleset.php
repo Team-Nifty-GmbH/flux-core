@@ -2,6 +2,7 @@
 
 namespace FluxErp\Rulesets\Contact;
 
+use FluxErp\Enums\LedgerAccountTypeEnum;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\LedgerAccount;
@@ -73,7 +74,8 @@ class RestoreContactRuleset extends FluxRuleset
             'expense_ledger_account_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => LedgerAccount::class]),
+                app(ModelExists::class, ['model' => LedgerAccount::class])
+                    ->where('ledger_account_type_enum', LedgerAccountTypeEnum::Expense),
             ],
             'vat_rate_id' => [
                 'integer',

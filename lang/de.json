@@ -2984,6 +2984,7 @@
     "The debit and credit account must differ.": "Sollkonto und Habenkonto müssen sich unterscheiden.",
     "The default mail account must be one of the selected mail accounts.": "Das Standard-Mailkonto muss eines der ausgewählten Mailkonten sein.",
     "The employee is already assigned to this work time model": "Der Mitarbeiter ist bereits diesem Arbeitszeitmodell zugewiesen",
+    "The expense ledger account must belong to a tenant of the contact.": "Das Aufwandskonto muss zu einem Mandanten des Kontakts gehören.",
     "The extra repayment cannot be executed after the loan ends.": "Die Sondertilgung kann nicht nach dem Ende des Darlehens ausgeführt werden.",
     "The extra repayment cannot be executed before the loan starts.": "Die Sondertilgung kann nicht vor dem Beginn des Darlehens ausgeführt werden.",
     "The extra repayment exceeds the allowance of :amount left for :year.": "Die Sondertilgung übersteigt den für :year verbleibenden Freibetrag von :amount.",

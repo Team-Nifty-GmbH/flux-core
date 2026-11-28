@@ -6,6 +6,7 @@ use FluxErp\Actions\Discount\CreateDiscount;
 use FluxErp\Actions\DispatchableFluxAction;
 use FluxErp\Contracts\SupportsBulkExecution;
 use FluxErp\Models\Contact;
+use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Pivots\ContactTenant;
 use FluxErp\Models\Tenant;
@@ -149,6 +150,31 @@ class UpdateContact extends DispatchableFluxAction implements SupportsBulkExecut
                             ]
                         ),
                     ],
+                ];
+            }
+        }
+
+        if ($expenseLedgerAccountId = $this->getData('expense_ledger_account_id')) {
+            $storedTenants = resolve_static(ContactTenant::class, 'query')
+                ->where('contact_id', $this->getData('id'))
+                ->pluck('tenant_id')
+                ->toArray();
+            $tenants = $this->getData('tenants') ?? $storedTenants;
+            $isUnchanged = (int) $expenseLedgerAccountId === resolve_static(Contact::class, 'query')
+                ->whereKey($this->getData('id'))
+                ->value('expense_ledger_account_id')
+                && ! array_diff($tenants, $storedTenants)
+                && ! array_diff($storedTenants, $tenants);
+
+            if ($tenants
+                && ! $isUnchanged
+                && resolve_static(LedgerAccount::class, 'query')
+                    ->whereKey($expenseLedgerAccountId)
+                    ->whereIntegerInRaw('tenant_id', $tenants)
+                    ->doesntExist()
+            ) {
+                $errors += [
+                    'expense_ledger_account_id' => ['The expense ledger account must belong to a tenant of the contact.'],
                 ];
             }
         }

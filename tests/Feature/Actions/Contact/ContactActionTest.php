@@ -4,10 +4,13 @@ use FluxErp\Actions\Address\DeleteAddress;
 use FluxErp\Actions\Contact\CreateContact;
 use FluxErp\Actions\Contact\DeleteContact;
 use FluxErp\Actions\Contact\UpdateContact;
+use FluxErp\Enums\LedgerAccountTypeEnum;
 use FluxErp\Models\Activity;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
+use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\PaymentType;
+use FluxErp\Models\Tenant;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
@@ -46,7 +49,7 @@ test('create contact with tenant attachment', function (): void {
 });
 
 test('create contact validates payment_type for tenant', function (): void {
-    $otherTenant = FluxErp\Models\Tenant::factory()->create();
+    $otherTenant = Tenant::factory()->create();
     $paymentType = PaymentType::factory()
         ->hasAttached($otherTenant, relationship: 'tenants')
         ->create();
@@ -215,4 +218,78 @@ test('update contact keeps a new inline discount sent with a null id', function 
 
     expect($action->getData('discounts'))
         ->toBe([['id' => null, 'sort_number' => 0, 'is_percentage' => true, 'discount' => 0.1]]);
+});
+
+test('update contact sets an expense ledger account of its tenant', function (): void {
+    $contact = Contact::factory()->hasAttached($this->dbTenant, relationship: 'tenants')->create();
+    $ledgerAccount = LedgerAccount::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'ledger_account_type_enum' => LedgerAccountTypeEnum::Expense,
+    ]);
+
+    UpdateContact::make([
+        'id' => $contact->getKey(),
+        'expense_ledger_account_id' => $ledgerAccount->getKey(),
+    ])->validate()->execute();
+
+    expect($contact->refresh()->expense_ledger_account_id)->toBe($ledgerAccount->getKey());
+});
+
+test('update contact rejects a ledger account that is no expense account', function (): void {
+    $contact = Contact::factory()->hasAttached($this->dbTenant, relationship: 'tenants')->create();
+    $ledgerAccount = LedgerAccount::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'ledger_account_type_enum' => LedgerAccountTypeEnum::Revenue,
+    ]);
+
+    UpdateContact::assertValidationErrors([
+        'id' => $contact->getKey(),
+        'expense_ledger_account_id' => $ledgerAccount->getKey(),
+    ], 'expense_ledger_account_id');
+
+    expect($contact->refresh()->expense_ledger_account_id)->toBeNull();
+});
+
+test('update contact rejects an expense account of a tenant the contact does not belong to', function (): void {
+    $contact = Contact::factory()->hasAttached($this->dbTenant, relationship: 'tenants')->create();
+    $ledgerAccount = LedgerAccount::factory()->create([
+        'tenant_id' => Tenant::factory()->create()->getKey(),
+        'ledger_account_type_enum' => LedgerAccountTypeEnum::Expense,
+    ]);
+
+    UpdateContact::assertValidationErrors([
+        'id' => $contact->getKey(),
+        'expense_ledger_account_id' => $ledgerAccount->getKey(),
+    ], 'expense_ledger_account_id');
+
+    expect($contact->refresh()->expense_ledger_account_id)->toBeNull();
+});
+
+test('create contact rejects an expense account of another tenant', function (): void {
+    $ledgerAccount = LedgerAccount::factory()->create([
+        'tenant_id' => Tenant::factory()->create()->getKey(),
+        'ledger_account_type_enum' => LedgerAccountTypeEnum::Expense,
+    ]);
+
+    CreateContact::assertValidationErrors([
+        'tenants' => [$this->dbTenant->getKey()],
+        'expense_ledger_account_id' => $ledgerAccount->getKey(),
+    ], 'expense_ledger_account_id');
+});
+
+test('update contact keeps saving a contact whose stored expense account belongs to another tenant', function (): void {
+    $contact = Contact::factory()->hasAttached($this->dbTenant, relationship: 'tenants')->create();
+    $ledgerAccount = LedgerAccount::factory()->create([
+        'tenant_id' => Tenant::factory()->create()->getKey(),
+        'ledger_account_type_enum' => LedgerAccountTypeEnum::Expense,
+    ]);
+    Contact::query()->whereKey($contact->getKey())->update(['expense_ledger_account_id' => $ledgerAccount->getKey()]);
+
+    UpdateContact::make([
+        'id' => $contact->getKey(),
+        'expense_ledger_account_id' => $ledgerAccount->getKey(),
+        'customer_number' => 'K-LEGACY',
+    ])->validate()->execute();
+
+    expect($contact->refresh()->customer_number)->toBe('K-LEGACY');
 });
